@@ -24,11 +24,6 @@ use syntax::ast::{
 use rustc_plugin::Registry;
 use syntax::print::pprust;
 
-pub fn repr_c( cx : &mut ExtCtxt ) -> Attribute
-{
-    quote_attr!( cx, #[repr(C)] )
-}
-
 pub fn get_ret_types(
     cx: &mut ExtCtxt,
     ret_ty : &Ty
@@ -159,6 +154,7 @@ pub fn impl_add_ref_release(
     )
 }
 
+/// Implements the `com_visible` decorator.
 pub fn try_expand_com_visible(
     cx: &mut ExtCtxt,
     _sp: Span,
@@ -173,18 +169,20 @@ pub fn try_expand_com_visible(
         _ => return Err( "[com_visible(clsid : &str)] must be applied to impl" )
     };
 
-    // Get the trait information from the item.
+    // Get the impl information from the item.
     let ( struct_ty, impl_items ) = match impl_item.node {
         ItemKind::Impl( _, _, _, _, _, ref ty, ref items ) => ( ty, items ),
         _ => return Err( "[com_visible(clsid : &str)] must be applied to impl" )
     };
 
-    // Get the trait information from the item.
+    // Get the GUID information from the attribute.
+    //
+    // The actual GUID is stupidly far down the AST so we need to do quite a bit
+    // of matching to get it.
     let attr_params = match mi.node {
         MetaItemKind::List( ref v ) => v,
         _ => return Err( "[com_visible(clsid : &str) must have CLSID as a parameter." )
     };
-
     let clsid_item = attr_params.first()
             .ok_or( "[com_visible(clsid : &str) must have CLSID as a parameter." )?;
     let clsid_lit = match clsid_item.node {
@@ -196,8 +194,12 @@ pub fn try_expand_com_visible(
         _ => return Err( "[com_visible(clsid : &str) must have CLSID as a parameter." )
     };
 
+    // Turn the GUID string into a GUID struct. This makes it easier to handle.
     let clsid_guid = com_runtime::GUID::parse( &clsid_sym.as_str() )?;
 
+    // Get the struct and interface names. The interface name is automatically
+    // derived from the struct currently. Once we support multiple interfaces
+    // per struct we might need to do something about this.
     let struct_name = match struct_ty.node {
         TyKind::Path( _, ref p ) =>
                 p.segments.last().unwrap().identifier.clone(),
@@ -254,16 +256,25 @@ pub fn try_expand_com_visible(
                 let self_ptr : *mut $com_ptr_ident
                         = std::mem::transmute( self_void );
                 (*self_ptr).rc += 1;
+
+                // Set output and return OK.
                 *out = self_void;
                 com_runtime::S_OK
             } ).unwrap() ) );
 
+    // add_ref and release implementations.
     let ( add_ref_impl, release_impl ) = impl_add_ref_release(
             cx, com_ptr_ident, add_ref_impl_ident, release_impl_ident );
     push( Annotatable::Item( add_ref_impl ) );
     push( Annotatable::Item( release_impl ) );
 
-    // Process the impl items.
+    // Process the impl items. This gathers all COM-visible methods and defines
+    // delegating calls for them. These delegating calls are the ones that are
+    // invoked by the clients. The calls then convert everything to the RUST
+    // interface.
+    //
+    // The impl may have various kinds of items - we only support the ones that
+    // seem okay so there's a bit of continue'ing involved in the for-loop.
     for impl_item in impl_items {
 
         // Ensure we're processing a method item.
@@ -272,22 +283,20 @@ pub fn try_expand_com_visible(
             _ => continue
         };
 
+        // First argument should be self so split that.
         let ( self_arg, other_args ) = match method_sig.decl.inputs.split_first() {
             Some( split ) => split,
             _ => continue
         };
 
         // Resolve the self struct and pointer types.
-        let ( _ty, self_ptr_ty, self_void_ty ) = match self_arg.ty.node {
-            TyKind::Rptr( _, MutTy { ref ty, mutbl } ) =>
+        let self_void_ty = quote_ty!( cx, com_runtime::ComPtr );
+        let self_ptr_ty = match self_arg.ty.node {
+            TyKind::Rptr( _, MutTy { mutbl, .. } ) =>
                 if mutbl == Mutability::Mutable {
-                    ( ty,
-                        quote_ty!( cx, *mut $com_ptr_ident ),
-                        quote_ty!( cx, com_runtime::ComPtr ) )
+                    quote_ty!( cx, *mut $com_ptr_ident )
                 } else {
-                    ( ty,
-                        quote_ty!( cx, *const $com_ptr_ident ),
-                        quote_ty!( cx, com_runtime::ComPtr ) )
+                    quote_ty!( cx, *const $com_ptr_ident )
                 },
             _ => { continue }
         };
@@ -304,16 +313,20 @@ pub fn try_expand_com_visible(
             let arg = arg_ref.clone();
             args.push( quote_tokens!( cx, $arg, ) );
 
-            // We can't just clone the arg name into param name. This will cause
-            // errors. I suspect this is because Rust attempts to use the same
-            // tokens for two different purposes that are represented by
-            // different AST nodes.
+            // We can't just clone the arg name into param name. This will
+            // cause errors. I suspect this is because Rust attempts to use
+            // the same tokens for two different purposes that are represented
+            // by different AST nodes.
             let param_name = Ident::from_str(
                     &pprust::pat_to_string( &(*arg_ref.pat) ) );
             params.push( quote_tokens!( cx, $param_name, ) );
         }
 
-
+        // Resolve the return values. This includes both the COM [retval]
+        // argument and the actual method return value.
+        //
+        // The [retval] is in use only if the method uses a Result<..> return
+        // value in Rust.
         let output = &method_sig.decl.output;
         let ret_ty = match output {
             &FunctionRetTy::Ty( ref ty ) => ty,
@@ -321,6 +334,8 @@ pub fn try_expand_com_visible(
         };
         let ( out_val, ret_val ) = get_ret_types( cx, &ret_ty )?;
 
+        // Define how the return values are handled in code. This differs on
+        // whether we have an out_val defined (COM [retval]) or not.
         let rval_handling = match &out_val {
             &Some( ref t ) => {
                 args.push(
@@ -334,6 +349,7 @@ pub fn try_expand_com_visible(
             &None => quote_tokens!( cx, return result; )
         };
 
+        // Define the delegating method implementation.
         let method_name = impl_item.ident;
         let vtable_method_name = get_method_impl_ident(
             cx,
@@ -348,8 +364,13 @@ pub fn try_expand_com_visible(
             #[allow(dead_code)]
             pub unsafe extern "stdcall" fn $vtable_method_name( $args ) -> $ret_val {
 
+                // Acquire the Rust refernece from the c_void pointer.
                 let self_struct : $self_ptr_ty = std::mem::transmute( self_void );
+
+                // Invoke the method.
                 let result = (*self_struct).$method_name( $params );
+
+                // Handle return value.
                 $rval_handling
             }
         ).unwrap();
@@ -364,6 +385,7 @@ pub fn try_expand_com_visible(
         );
         fields.push( vtable_method_decl );
 
+        // Define the vtable entry for the method.
         let vtable_method_impl = quote_tokens!(
                 cx,
                 $vtable_method_ident : $vtable_method_name,
@@ -371,7 +393,8 @@ pub fn try_expand_com_visible(
         field_values.push( vtable_method_impl );
     }
 
-    // Create the vtable.
+    // Create the vtable. We've already gathered all the vtable method
+    // pointer fields so defining the struct is simple enough.
     let vtable_ident = Ident::from_str(
             format!( "__{}_vtable", itf_name ).as_str() );
     let vtable = quote_item!(
@@ -381,6 +404,8 @@ pub fn try_expand_com_visible(
     ).unwrap();
     push( Annotatable::Item( vtable ) );
 
+    // Create the vtable instance. This is the instance used for the vtable
+    // pointers on the actual COM objects.
     let vtable_instance_name = Ident::from_str(
             &format!( "__{}_{}_vtable_instance",
                      struct_name, itf_name ) );
@@ -394,6 +419,7 @@ pub fn try_expand_com_visible(
     ).unwrap();
     push( Annotatable::Item( vtable_instance ) );
 
+    // CLSID constant for the class.
     let clsid_ident = get_clsid_ident( cx, &struct_name );
     let clsid_guid_tokens = get_guid_tokens( cx, &clsid_guid );
     let clsid_const = quote_item!(
@@ -403,6 +429,8 @@ pub fn try_expand_com_visible(
     ).unwrap();
     push( Annotatable::Item( clsid_const ) );
 
+    // The COM pointer struct. This struct holds the vtable, reference count
+    // and the user specified data.
     let com_ptr = quote_item!(
         cx,
         #[repr(C)]
@@ -413,6 +441,11 @@ pub fn try_expand_com_visible(
         } ).unwrap();
     push( Annotatable::Item( com_ptr ) );
 
+    // Implementation for the COM pointer.
+    //
+    // new() and wrap() methods. Only new() is used currently by the module.
+    // wrap() will be needed for when we return existing pieces of data
+    // from COM methods.
     let com_ptr_impl = quote_item!(
         cx,
         impl $com_ptr_ident {
@@ -435,6 +468,9 @@ pub fn try_expand_com_visible(
         } ).unwrap();
     push( Annotatable::Item( com_ptr_impl ) );
 
+    // Deref the COM pointer into the actual struct.
+    //
+    // Both non-mutable and mutable Deref variants.
     let com_ptr_deref = quote_item!(
         cx,
         impl std::ops::Deref for $com_ptr_ident {
@@ -443,8 +479,6 @@ pub fn try_expand_com_visible(
                 &self.data
             }
         } ).unwrap();
-    push( Annotatable::Item( com_ptr_deref ) );
-
     let com_ptr_derefmut = quote_item!(
         cx,
         impl std::ops::DerefMut for $com_ptr_ident {
@@ -452,11 +486,15 @@ pub fn try_expand_com_visible(
                 &mut self.data
             }
         } ).unwrap();
+    push( Annotatable::Item( com_ptr_deref ) );
     push( Annotatable::Item( com_ptr_derefmut ) );
 
     Ok(())
 }
 
+/// `com_visible` MultiDecorator handler.
+///
+/// Delegates to a Result<>ful try_... variant.
 pub fn expand_com_visible(
     cx: &mut ExtCtxt,
     sp: Span,
@@ -469,6 +507,7 @@ pub fn expand_com_visible(
     }
 }
 
+/// Implements the `com_library` decorator.
 pub fn try_expand_com_library(
     cx: &mut ExtCtxt,
     _sp: Span,
@@ -477,32 +516,23 @@ pub fn try_expand_com_library(
     push: &mut FnMut( Annotatable )
 ) -> Result< (), &'static str >
 {
-    // Get the annotated item.
-    /*
-    let impl_item = match item {
-        &Annotatable::Item( ref itf ) => itf,
-        _ => return Err( "[com_library(...)] must be applied to the crate" )
-    };
-
-    let mod_item = match impl_item.node {
-        ItemKind::Mod( ref m ) => m,
-        _ => return Err( "[com_library(...)] must be applied to the crate" )
-    };
-    */
-
+    // Get the decorator parameters.
     let params = match mi.node {
         MetaItemKind::List( ref v ) => v,
         _ => return Err( "[com_library(...)] needs visible structs as parameters." )
     };
 
+    // Create the match-statmeent patterns for each supposedly visible COM class.
     let mut match_arms : Vec<Vec<TokenTree>> = vec![];
     for p in params {
 
+        // Extract the class name from the parameter item.
         let class_name = match p.node {
             NestedMetaItemKind::MetaItem( ref l ) => &l.name,
             _ => return Err( "[com_visible(clsid : &str) must have CLSID as a parameter." )
         };
 
+        // Construct the match pattern.
         let class_ident = Ident::from_str( &class_name.as_str() );
         let clsid_name = get_clsid_ident( cx, &class_ident );
         let coclass_ptr = get_com_ptr_ident( cx, &class_ident );
@@ -515,9 +545,44 @@ pub fn try_expand_com_library(
         ) );
     }
 
-
-    let vtable_instance_ident = Ident::from_str( "__ClassFactory_vtable_instance" );
+    // Define the ClassFactory create_instance function.
+    // 
+    // This function is responsible for constructing all of our COM coclasses.
     let create_instance_ident = Ident::from_str( "__ClassFactory_create_instance" );
+    let create_instance_def = quote_item!(
+        cx,
+        #[allow(non_snake_case)]
+        #[allow(dead_code)]
+        pub unsafe extern "stdcall" fn $create_instance_ident(
+            self_void: com_runtime::ComPtr,
+            _outer : com_runtime::ComPtr,
+            _iid : com_runtime::REFIID,
+            out : *mut com_runtime::ComPtr
+        ) -> u32
+        {
+            // Turn the *c_void to a ClassFactory pointer.
+            let self_ptr : *mut com_runtime::ClassFactory = std::mem::transmute( self_void );
+
+            // Match based on the clsid.
+            #[allow(non_upper_case_globals)]
+            let out_ptr = match *(*self_ptr).clsid {
+                $match_arms
+                _ => {
+                    return com_runtime::E_NOINTERFACE
+                }
+            };
+
+            // Return the created instance.
+            *out = out_ptr;
+            com_runtime::S_OK
+        } ).unwrap();
+    push( Annotatable::Item( create_instance_def ) );
+
+    // Create the ClassFactory vtable instance.
+    // 
+    // Most of the vtable is static, but the create_instance needs to be
+    // defined per library.
+    let vtable_instance_ident = Ident::from_str( "__ClassFactory_vtable_instance" );
     let vtable_instance = quote_item!(
         cx,
         #[allow(non_upper_case_globals)]
@@ -534,31 +599,12 @@ pub fn try_expand_com_library(
     ).unwrap();
     push( Annotatable::Item( vtable_instance ) );
 
-    let create_instance_def = quote_item!(
-        cx,
-        #[allow(non_snake_case)]
-        #[allow(dead_code)]
-        pub unsafe extern "stdcall" fn $create_instance_ident(
-            self_void: com_runtime::ComPtr,
-            _outer : com_runtime::ComPtr,
-            _iid : com_runtime::REFIID,
-            out : *mut com_runtime::ComPtr
-        ) -> u32
-        {
-            let self_ptr : *mut com_runtime::ClassFactory = std::mem::transmute( self_void );
-
-            #[allow(non_upper_case_globals)]
-            let out_ptr = match *(*self_ptr).clsid {
-                $match_arms
-                _ => {
-                    return com_runtime::E_NOINTERFACE
-                }
-            };
-            *out = out_ptr;
-            com_runtime::S_OK
-        } ).unwrap();
-    push( Annotatable::Item( create_instance_def ) );
-
+    // Implement DllGetClassObject.
+    //
+    // This is more or less the only symbolic entry point that the COM
+    // infrastructure uses. The COM client uses this method to acquire
+    // the IClassFactory interfaces that are then used to construct the
+    // actual coclasses.
     let dll_get_class_object = quote_item!(
         cx,
         #[no_mangle]
@@ -570,12 +616,20 @@ pub fn try_expand_com_library(
             pout : *mut com_runtime::ComPtr
         ) -> u32
         {
+            // Create a ClassFactory. Save an add_ref by defining the
+            // reference count as 1.
             let classFactory = Box::new( com_runtime::ClassFactory {
                 __vtable : &$vtable_instance_ident,
                 clsid : rclsid,
                 rc : 1
             } );
+
+            // Detach the class factory form the Box. This prevents it from
+            // being destroyed when the Box is dropped. We need to handle the
+            // destruction in release() manually.
             let ptrClassFactory = Box::into_raw( classFactory );
+
+            // Assign to output and return OK.
             *pout = ptrClassFactory as com_runtime::ComPtr;
             com_runtime::S_OK
         }
@@ -585,6 +639,9 @@ pub fn try_expand_com_library(
     Ok(())
 }
 
+/// `com_library` MultiDecorator handler.
+///
+/// Delegates to a Result<>ful try_... variant.
 pub fn expand_com_library(
     cx: &mut ExtCtxt,
     sp: Span,
@@ -597,6 +654,7 @@ pub fn expand_com_library(
     }
 }
 
+/// Registers the syntax extensions.
 #[plugin_registrar]
 pub fn registrar( reg: &mut Registry ) {
     reg.register_syntax_extension(
@@ -607,17 +665,12 @@ pub fn registrar( reg: &mut Registry ) {
             MultiDecorator( Box::new( expand_com_library ) ) );
 }
 
+/// Prints an item as code.
+/// 
+/// Not the prettiest output, but should allow some kind of inspection.
 #[allow(dead_code)]
 fn print_item( i : &P<Item> ) {
     if let Some( ref tt ) = i.tokens {
         println!( "{}", tt );
     };
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
 }
