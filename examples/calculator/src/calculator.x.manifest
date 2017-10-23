@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
+    <assemblyIdentity type="win32" name="Calculator.X" version="1.0.0.0" />
+    <file name="calculator.dll">
+        <typelib tlbid="{12341234-1234-1234-1234-12341234000A}"
+                version="1.0"
+                helpdir="" />
+        <comClass progid="Calculator.Calculator"
+                clsid="{12341234-1234-1234-1234-123412340002}"
+                description="Calculator Class" />
+    </file>
+
+    <comInterfaceExternalProxyStub
+            name="ICalculator"
+            iid="{12341234-1234-1234-1234-123412340001}"
+            proxyStubClsid32="{00020424-0000-0000-C000-000000000046}"
+            baseInterface="{00000000-0000-0000-C000-000000000046}"
+            tlbid = "{12341234-1234-1234-1234-12341234000A}" />
+
+</assembly>

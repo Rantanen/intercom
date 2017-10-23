@@ -1,0 +1,11 @@
+[package]
+name = "com_library"
+version = "0.1.0"
+authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
+
+[lib]
+name = "com_library"
+plugin = true
+
+[dependencies]
+com_runtime = { path = "../com_runtime" }

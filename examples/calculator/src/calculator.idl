@@ -1,0 +1,38 @@
+[
+    uuid(12341234-1234-1234-1234-12341234000A),
+    helpstring("RustCom Library"),
+    lcid(0x09),
+    version(1.0)
+]
+library Calculator
+{
+    [
+        object,
+        uuid(12341234-1234-1234-1234-123412340001),
+        nonextensible,
+        helpstring("ICalculator instance"),
+        pointer_default(unique)
+    ]
+    interface ICalculator : IUnknown
+    {
+        [id(1), helpstring( "Add value" )]
+        HRESULT Add([in] int value, [out, retval] int* result);
+
+        [id(2), helpstring( "Substract" )]
+        HRESULT Substract([in] int value, [out, retval] int* result);
+
+        [id(3), helpstring( "Multiply value" )]
+        HRESULT Multiply([in] int value, [out, retval] int* result);
+    };
+
+    importlib("stdole2.tlb");
+    [
+        uuid(12341234-1234-1234-1234-123412340002),
+        version(1.0),
+        helpstring( "Calculator class" )
+    ]
+    coclass Calculator
+    {
+        [default] interface ICalculator;
+    }
+}

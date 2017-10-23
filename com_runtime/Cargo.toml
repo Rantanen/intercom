@@ -1,0 +1,9 @@
+[package]
+name = "com_runtime"
+version = "0.1.0"
+authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
+
+[lib]
+name = "com_runtime"
+
+[dependencies]
