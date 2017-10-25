@@ -1,5 +1,11 @@
 #![crate_type="dylib"]
 #![feature(quote, plugin_registrar, rustc_private)]
+#![allow(unused_imports)]
+#![feature(catch_expr)]
+#![feature(type_ascription)]
+
+mod utils;
+mod idents;
 
 extern crate syntax;
 extern crate syntax_pos;
@@ -24,120 +30,292 @@ use syntax::ast::{
 use rustc_plugin::Registry;
 use syntax::print::pprust;
 
-pub fn get_ret_types(
+/// Implements the `com_impl` decorator.
+pub fn try_expand_com_impl(
     cx: &mut ExtCtxt,
-    ret_ty : &Ty
-) -> Result< ( Option<P<Ty>>, P<Ty> ), &'static str >
+    _sp: Span,
+    _mi: &MetaItem,
+    item: &Annotatable,
+    push: &mut FnMut( Annotatable )
+) -> Result< (), &'static str >
 {
-    // Get the path type on the return value.
-    let path = match &ret_ty.node {
-        &TyKind::Path( _, ref p ) => p,
-        _ => return Err( "Use Result as a return type" )
-    };
+    // Get the item info the attribute is bound to.
+    let ( itf_ident_opt, struct_ident, fns )
+            = utils::get_impl_data( item )
+                .ok_or( "[com_impl] must be applied to an impl" )?;
+    let itf_ident = itf_ident_opt.unwrap_or( struct_ident.clone() );
+    let vtable_struct_ident = idents::vtable_struct( &itf_ident );
+    let vtable_instance_ident = idents::vtable_instance( &struct_ident, &itf_ident );
+    let coclass_ident = idents::coclass( &struct_ident );
+    let vtable_offset = idents::vtable_offset(
+        &struct_ident,
+        &itf_ident );
 
-    // Find the last path segment.
-    let last_segment = path.segments.last().unwrap();
+    let query_interface_ident = idents::method_impl(
+            &struct_ident, &itf_ident, "query_interface" );
+    let add_ref_ident = idents::method_impl(
+            &struct_ident, &itf_ident, "add_ref" );
+    let release_ident = idents::method_impl(
+            &struct_ident, &itf_ident, "release" );
 
-    // Check the last segment has angle bracketed parameters.
-    if let &Some( ref p ) = &last_segment.parameters {
-        if let PathParameters::AngleBracketed( ref data ) = **p {
+    let iunk_ident = Ident::from_str( "IUnknown" );
+    let primary_query_interface_ident = idents::method_impl(
+            &struct_ident, &iunk_ident, "query_interface" );
+    let primary_add_ref_ident = idents::method_impl(
+            &struct_ident, &iunk_ident, "add_ref" );
+    let primary_release_ident = idents::method_impl(
+            &struct_ident, &iunk_ident, "release" );
 
-            // Angle bracketed parameters exist. We're assuming this is
-            // some kind of Result<ok> or Result<ok, err>. In either case
-            // we can take the first parameter as the 'ok' type.
+    /////////////////////
+    // $itf::QueryInterface, AddRef & Release
+    //
+    // The primary add_ref and release. As these are on the IUnknown interface
+    // the self_void here points to the start of the ComRef structure.
+    push( Annotatable::Item( quote_item!( cx,
+            #[allow(non_snake_case)]
+            pub unsafe extern "stdcall" fn $query_interface_ident(
+                self_void : com_runtime::ComPtr,
+                riid : com_runtime::REFIID,
+                out : *mut com_runtime::ComPtr
+            ) -> com_runtime::HRESULT
+            {
+                // Get the primary iunk interface by offsetting the current
+                // self_void with the vtable offset. Once we have the primary
+                // pointer we can delegate the call to the primary implementation.
+                let iunk_void = ( self_void as usize - $vtable_offset() ) as com_runtime::ComPtr;
+                $primary_query_interface_ident( iunk_void, riid, out )
+            }
+        ).unwrap() ) );
+    push( Annotatable::Item( quote_item!( cx,
+            #[allow(non_snake_case)]
+            #[allow(dead_code)]
+            pub unsafe extern "stdcall" fn $add_ref_ident(
+                self_void : com_runtime::ComPtr
+            ) -> u32 {
+                let iunk_void = ( self_void as usize - $vtable_offset() ) as com_runtime::ComPtr;
+                $primary_add_ref_ident( iunk_void )
+            }
+        ).unwrap() ) );
+    push( Annotatable::Item( quote_item!( cx,
+            #[allow(non_snake_case)]
+            #[allow(dead_code)]
+            pub unsafe extern "stdcall" fn $release_ident(
+                self_void : com_runtime::ComPtr
+            ) -> u32 {
+                let iunk_void = ( self_void as usize - $vtable_offset() ) as com_runtime::ComPtr;
+                $primary_release_ident( iunk_void )
+            }
+        ).unwrap() ) );
+
+    // Start the vtable with the IUnknown implementation.
+    //
+    // Note that the actual methods implementation for these bits differs from
+    // the primary IUnknown methods. When the methods are being called through
+    // this vtable, the self_void pointer will point to this vtable and not
+    // the start of the CoClass instance.
+    let mut vtable_fields = vec![
+        quote_tokens!( cx,
+            __base : com_runtime::IUnknownVtbl {
+                query_interface : $query_interface_ident,
+                add_ref : $add_ref_ident,
+                release : $release_ident,
+            },
+        ) ];
+
+
+    // Implement the delegating calls for the coclass.
+    for ( method_ident, method_sig ) in fns {
+        let _res : Result<(), ()> = do catch {
+
+            // Get the self argument and the remaining args.
+            let ( args, params ) =
+                    utils::get_method_args( cx, method_sig ).ok_or(())?;
+            let ( ret_ty, return_statement ) =
+                    utils::get_method_rvalues( cx, &method_sig ).ok_or(())?;
+
+            let method_impl_ident = idents::method_impl(
+                &struct_ident,
+                &itf_ident,
+                &method_ident.name.as_str() );
+
+            // Define the delegating method implementation.
             //
-            // TODO: Figure out whether we can ask the compiler whether
-            // the type matches Result<S,E> type.
-            return Ok( (
-                data.types.first().and_then( |x| Some( x.clone() ) ),
-                quote_ty!( cx, u32 )
-            ) )
-        }
+            // Note the self_void here will be a pointer to the start of the
+            // vtable for the current interface. To get the coclass and thus
+            // the actual 'data' struct, we'll need to offset the self_void
+            // with the vtable offset.
+            push( Annotatable::Item( quote_item!( cx,
+                #[allow(non_snake_case)]
+                #[allow(dead_code)]
+                pub unsafe extern "stdcall" fn $method_impl_ident( $args ) -> $ret_ty {
+                    // Acquire the reference to the CoClass. For this we need
+                    // to offset the current 'self_void' vtable pointer.
+                    let self_struct = ( self_void as usize - $vtable_offset() ) as *mut $coclass_ident;
+                    let result = (*self_struct).data.$method_ident( $params );
+                    $return_statement
+                }
+            ).unwrap() ) );
+            vtable_fields.push( quote_tokens!( cx,
+                    $method_ident : $method_impl_ident, ) );
+
+
+            Ok(())
+        };
     }
 
-    // Default value. We get here only if we didn't return a type from
-    // the if statements above.
-    Ok( ( None, quote_ty!( cx, $path ) ) )
+    push( Annotatable::Item( quote_item!( cx,
+            #[allow(non_upper_case_globals)]
+            const $vtable_instance_ident : $vtable_struct_ident
+                    = $vtable_struct_ident { $vtable_fields };
+        ).unwrap() ) );
+
+    Ok(())
 }
 
-pub fn get_com_ptr_ident(
-    _cx: &mut ExtCtxt,
-    struct_name: &Ident
-) -> Ident
-{
-    Ident::from_str( &format!( "__{}_ptr", struct_name ) )
-}
-
-pub fn get_clsid_ident(
-    _cx: &mut ExtCtxt,
-    struct_name: &Ident
-) -> Ident
-{
-    Ident::from_str( &format!( "CLSID_{}", struct_name ) )
-}
-
-pub fn get_method_impl_ident(
-    _cx: &mut ExtCtxt,
-    struct_name : &str,
-    itf_name : &str,
-    method_name: &str
-) -> Ident
-{
-    Ident::from_str( &format!( "__{}_{}_{}",
-            struct_name, itf_name, method_name ) )
-}
-
-pub fn get_guid_tokens(
-    cx : &mut ExtCtxt,
-    g : &com_runtime::GUID
-) -> Vec<TokenTree>
-{
-    let d1 = g.data1;
-    let d2 = g.data2;
-    let d3 = g.data3;
-    let d4_0 = g.data4[ 0 ];
-    let d4_1 = g.data4[ 1 ];
-    let d4_2 = g.data4[ 2 ];
-    let d4_3 = g.data4[ 3 ];
-    let d4_4 = g.data4[ 4 ];
-    let d4_5 = g.data4[ 5 ];
-    let d4_6 = g.data4[ 6 ];
-    let d4_7 = g.data4[ 7 ];
-    quote_tokens!( cx,
-        com_runtime::GUID {
-            data1: $d1, data2: $d2, data3: $d3,
-            data4: [ $d4_0, $d4_1, $d4_2, $d4_3, $d4_4, $d4_5, $d4_6, $d4_7 ]
-        }
-    )
-}
-
-pub fn impl_add_ref_release(
+pub fn try_expand_com_visible(
     cx: &mut ExtCtxt,
-    com_ptr_ident : Ident,
-    add_ref_impl_ident : Ident,
-    release_impl_ident : Ident,
-) -> ( P<Item>, P<Item> )
+    _sp: Span,
+    mi: &MetaItem,
+    item: &Annotatable,
+    push: &mut FnMut( Annotatable )
+) -> Result< (), &'static str >
 {
-    (
-        quote_item!( cx,
+    // Get the item info the attribute is bound to.
+    let struct_ident = utils::get_struct_ident_from_annotatable( item )
+            .ok_or( "[com_visible] must be applied to struct" )?;
+    let coclass_ident = idents::coclass( &struct_ident );
+    let iunk_ident = Ident::from_str( "IUnknown" );
+    let query_interface_ident = idents::method_impl(
+            &struct_ident, &iunk_ident, "query_interface" );
+    let add_ref_ident = idents::method_impl(
+            &struct_ident, &iunk_ident, "add_ref" );
+    let release_ident = idents::method_impl(
+            &struct_ident, &iunk_ident, "release" );
+
+    let ( clsid_guid, itfs ) = utils::get_metaitem_params( mi )
+            .as_ref()
+            .and_then( |ref params| params.split_first() )
+            .ok_or( "[com_visible(IID, itfs...)] must specify an IID" )
+            .and_then( |( f, itfs )|
+                Ok( (
+                    utils::parameter_to_guid( f )?,
+                    ( itfs.into_iter()
+                        .map( |i|
+                            utils::parameter_to_ident( i )
+                                .ok_or( "Invalid interface" ))
+                        .collect() : Result<Vec<Ident>, &'static str> )?
+                ) ) )?;
+
+    // IUnknown vtable match. As the primary query_interface is implemented
+    // on the root IUnknown interface, the self_void here should already be
+    // the IUnknown we need.
+    let mut match_arms = vec![
+        quote_tokens!(
+            cx, com_runtime::IID_IUnknown => self_void,
+        ) ];
+
+    // The vtable fields.
+    let iunk_vtable_instance_ident =
+            idents::vtable_instance( &struct_ident, &iunk_ident );
+    let mut vtable_list_fields = vec![
+        quote_tokens!(
+            cx, _IUnknown : &'static com_runtime::IUnknownVtbl,
+        ) ];
+    let mut vtable_list_field_values = vec![
+        quote_tokens!(
+            cx, _IUnknown : &$iunk_vtable_instance_ident,
+        ) ];
+
+    // Create the vtable data for the additional interfaces.
+    // The data should include the match-arms for the primary query_interface
+    // and the vtable offsets used for the delegating query_interface impls.
+    for itf in itfs {
+
+        // Various idents.
+        let offset_ident = idents::vtable_offset( &struct_ident, &itf );
+        let iid_ident = idents::iid( &itf );
+        let vtable_struct_ident = idents::vtable_struct( &itf );
+        let vtable_instance_ident = idents::vtable_instance( &struct_ident, &itf );
+
+        // Store the field offset globally. We need this offset when implementing
+        // the delegating query_interface methods. The only place where we know
+        // the actual layout of the vtable is here. Thus we need to store this
+        // offset somewhere where the com_impl's can access it.
+        //
+        // Rust doesn't allow pointer derefs or conversions in consts so we'll
+        // use an inline fn instead. LLVM should be able to reduce this into a
+        // constant expression during compilation.
+        push( Annotatable::Item( quote_item!( cx,
+                #[inline(always)]
+                #[allow(non_snake_case)]
+                fn $offset_ident() -> usize {
+                    unsafe { 
+                        let null_foo = std::ptr::null() as *const $coclass_ident;
+                        &(*null_foo).vtables.$itf as *const _ as usize - null_foo as usize
+                    }
+                };
+        ).unwrap() ) );
+
+        // The vtable pointer to for the coclass vtable list.
+        vtable_list_fields.push( quote_tokens!( cx,
+                $itf : &'static $vtable_struct_ident,) );
+        vtable_list_field_values.push( quote_tokens!( cx,
+                $itf : &$vtable_instance_ident,) );
+
+        // As this is the primary IUnknown query_interface, the self_void here
+        // points to the start of the ComRef structure. The return value should
+        // be the vtable corresponding to the given IID so we'll just offset
+        // the self_void by the vtable offset.
+        match_arms.push( quote_tokens!(
+            cx, self::$iid_ident =>
+                ( self_void as usize + $offset_ident() ) as com_runtime::ComPtr,
+        ) );
+    }
+
+    /////////////////////
+    // IUnknown::QueryInterface, AddRef & Release
+    //
+    // The primary add_ref and release. As these are on the IUnknown interface
+    // the self_void here points to the start of the ComRef structure.
+    push( Annotatable::Item( quote_item!( cx,
             #[allow(non_snake_case)]
             #[allow(dead_code)]
-            pub unsafe extern "stdcall" fn $add_ref_impl_ident(
+            pub unsafe extern "stdcall" fn $query_interface_ident(
+                self_void : com_runtime::ComPtr,
+                riid : com_runtime::REFIID,
+                out : *mut com_runtime::ComPtr
+            ) -> com_runtime::HRESULT
+            {
+                *out = match *riid {
+                    $match_arms
+                    _ => return com_runtime::E_NOINTERFACE
+                };
+
+                // We did *out assignment. Add reference count.
+                let self_ptr = self_void as *mut $coclass_ident;
+                (*self_ptr).rc += 1;
+
+                com_runtime::S_OK
+            }
+        ).unwrap() ) );
+    push( Annotatable::Item( quote_item!( cx,
+            #[allow(non_snake_case)]
+            #[allow(dead_code)]
+            pub unsafe extern "stdcall" fn $add_ref_ident(
                 self_void : com_runtime::ComPtr
             ) -> u32 {
-                let self_ptr : *mut $com_ptr_ident
-                        = std::mem::transmute( self_void );
+                let self_ptr = self_void as *mut $coclass_ident;
                 (*self_ptr).rc += 1;
                 (*self_ptr).rc
-            } ).unwrap(),
-        quote_item!( cx,
+            }
+        ).unwrap() ) );
+    push( Annotatable::Item( quote_item!( cx,
             #[allow(non_snake_case)]
             #[allow(dead_code)]
-            pub unsafe extern "stdcall" fn $release_impl_ident(
+            pub unsafe extern "stdcall" fn $release_ident(
                 self_void : com_runtime::ComPtr
             ) -> u32 {
-                let self_ptr : *mut $com_ptr_ident
-                        = std::mem::transmute( self_void );
+                let self_ptr = self_void as *mut $coclass_ident;
 
                 // We need a copy of the rc value in case we end up
                 // dropping the ptr. We can't reference it during
@@ -150,344 +328,66 @@ pub fn impl_add_ref_release(
                     Box::from_raw( self_ptr );
                 }
                 rc
-            } ).unwrap()
-    )
-}
+            }
+        ).unwrap() ) );
+    push( Annotatable::Item( quote_item!( cx,
+            #[allow(non_upper_case_globals)]
+            const $iunk_vtable_instance_ident : com_runtime::IUnknownVtbl
+                    = com_runtime::IUnknownVtbl {
+                        query_interface : $query_interface_ident,
+                        add_ref : $add_ref_ident,
+                        release : $release_ident,
+                    };
+        ).unwrap() ) );
 
-/// Implements the `com_visible` decorator.
-pub fn try_expand_com_visible(
-    cx: &mut ExtCtxt,
-    _sp: Span,
-    mi: &MetaItem,
-    item: &Annotatable,
-    push: &mut FnMut( Annotatable )
-) -> Result< (), &'static str >
-{
-    // Get the annotated item.
-    let impl_item = match item {
-        &Annotatable::Item( ref itf ) => itf,
-        _ => return Err( "[com_visible(clsid : &str)] must be applied to impl" )
-    };
-
-    // Get the impl information from the item.
-    let ( struct_ty, impl_items ) = match impl_item.node {
-        ItemKind::Impl( _, _, _, _, _, ref ty, ref items ) => ( ty, items ),
-        _ => return Err( "[com_visible(clsid : &str)] must be applied to impl" )
-    };
-
-    // Get the GUID information from the attribute.
-    //
-    // The actual GUID is stupidly far down the AST so we need to do quite a bit
-    // of matching to get it.
-    let attr_params = match mi.node {
-        MetaItemKind::List( ref v ) => v,
-        _ => return Err( "[com_visible(clsid : &str) must have CLSID as a parameter." )
-    };
-    let clsid_item = attr_params.first()
-            .ok_or( "[com_visible(clsid : &str) must have CLSID as a parameter." )?;
-    let clsid_lit = match clsid_item.node {
-        NestedMetaItemKind::Literal( ref l ) => &l.node,
-        _ => return Err( "[com_visible(clsid : &str) must have CLSID as a parameter." )
-    };
-    let clsid_sym = match clsid_lit {
-        &LitKind::Str( s, _ ) => s,
-        _ => return Err( "[com_visible(clsid : &str) must have CLSID as a parameter." )
-    };
-
-    // Turn the GUID string into a GUID struct. This makes it easier to handle.
-    let clsid_guid = com_runtime::GUID::parse( &clsid_sym.as_str() )?;
-
-    // Get the struct and interface names. The interface name is automatically
-    // derived from the struct currently. Once we support multiple interfaces
-    // per struct we might need to do something about this.
-    let struct_name = match struct_ty.node {
-        TyKind::Path( _, ref p ) =>
-                p.segments.last().unwrap().identifier.clone(),
-        _ => return Err( "Could not find the interface name" )
-    };
-    let itf_name = format!( "I{}", struct_name );
-    let com_ptr_ident = get_com_ptr_ident( cx, &struct_name );
-
-    // Create the base vtable field. This references IUnknown.
-    let mut fields = vec![
-        quote_tokens!( cx, __base : com_runtime::__IUnknown_vtable, )
-    ];
-
-    // Create the vtable instance fields for IUnknown.
-    let query_interface_impl_ident = get_method_impl_ident(
-            cx, &struct_name.name.as_str(), &itf_name, "query_interface" );
-    let add_ref_impl_ident = get_method_impl_ident(
-            cx, &struct_name.name.as_str(), &itf_name, "add_ref" );
-    let release_impl_ident = get_method_impl_ident(
-            cx, &struct_name.name.as_str(), &itf_name, "release" );
-    let mut field_values = vec![
-        quote_tokens!( cx, __base : com_runtime::__IUnknown_vtable {
-                query_interface : $query_interface_impl_ident,
-                add_ref : $add_ref_impl_ident,
-                release : $release_impl_ident
-            }, )
-    ];
-
-    // IUnknown implementation.
+    // The CoClass data.
+    // The vtable_list contains all the various vtbls that the coclass implements.
+    // The coclass itself aggregates vtables, reference count and the data.
+    let vtable_list_ident = idents::vtable_list( &struct_ident );
+    let vtable_list_instance_ident = idents::vtable_list_instance( &struct_ident );
     push( Annotatable::Item( quote_item!( cx,
             #[allow(non_snake_case)]
-            #[allow(dead_code)]
-            pub unsafe extern "stdcall" fn $query_interface_impl_ident(
-                self_void : com_runtime::ComPtr,
-                riid : com_runtime::REFIID,
-                out : *mut com_runtime::ComPtr
-            ) -> u32 {
-
-                // For now only accept our own GUIDs (starting with 12341234)
-                // and IUnknown (we'll use start of 00000000 to recognize this).
-                //
-                // Proper implementation would need
-                // - proper IIDs for our interfaces. Currently we have only
-                //   CLSIDs for our types.
-                // - Some kind of lookup table per type to figureo out which
-                //   interfaces it implements.
-                if (*riid).data1 != 0x12341234 &&
-                    (*riid).data1 != 0x00000000 {
-                    println!( "Nope!" );
-                    return com_runtime::E_NOINTERFACE
-                }
-
-                // Query interface needs to increment RC.
-                let self_ptr : *mut $com_ptr_ident
-                        = std::mem::transmute( self_void );
-                (*self_ptr).rc += 1;
-
-                // Set output and return OK.
-                *out = self_void;
-                com_runtime::S_OK
-            } ).unwrap() ) );
-
-    // add_ref and release implementations.
-    let ( add_ref_impl, release_impl ) = impl_add_ref_release(
-            cx, com_ptr_ident, add_ref_impl_ident, release_impl_ident );
-    push( Annotatable::Item( add_ref_impl ) );
-    push( Annotatable::Item( release_impl ) );
-
-    // Process the impl items. This gathers all COM-visible methods and defines
-    // delegating calls for them. These delegating calls are the ones that are
-    // invoked by the clients. The calls then convert everything to the RUST
-    // interface.
-    //
-    // The impl may have various kinds of items - we only support the ones that
-    // seem okay so there's a bit of continue'ing involved in the for-loop.
-    for impl_item in impl_items {
-
-        // Ensure we're processing a method item.
-        let method_sig = match impl_item.node {
-            ImplItemKind::Method( ref method_sig, _ ) => method_sig,
-            _ => continue
-        };
-
-        // First argument should be self so split that.
-        let ( self_arg, other_args ) = match method_sig.decl.inputs.split_first() {
-            Some( split ) => split,
-            _ => continue
-        };
-
-        // Resolve the self struct and pointer types.
-        let self_void_ty = quote_ty!( cx, com_runtime::ComPtr );
-        let self_ptr_ty = match self_arg.ty.node {
-            TyKind::Rptr( _, MutTy { mutbl, .. } ) =>
-                if mutbl == Mutability::Mutable {
-                    quote_ty!( cx, *mut $com_ptr_ident )
-                } else {
-                    quote_ty!( cx, *const $com_ptr_ident )
-                },
-            _ => { continue }
-        };
-
-        // Define the arg and params array.
-        // Args starts with the self arg. This is implicit for params.
-        let mut args = vec![ quote_tokens!( cx, self_void : $self_void_ty, ) ];
-        let mut params : Vec<Vec<TokenTree>> = vec![];
-        
-        // Process the remaining args into the args and params arrays.
-        for ref arg_ref in other_args {
-            
-            // Get the arg for the args.
-            let arg = arg_ref.clone();
-            args.push( quote_tokens!( cx, $arg, ) );
-
-            // We can't just clone the arg name into param name. This will
-            // cause errors. I suspect this is because Rust attempts to use
-            // the same tokens for two different purposes that are represented
-            // by different AST nodes.
-            let param_name = Ident::from_str(
-                    &pprust::pat_to_string( &(*arg_ref.pat) ) );
-            params.push( quote_tokens!( cx, $param_name, ) );
-        }
-
-        // Resolve the return values. This includes both the COM [retval]
-        // argument and the actual method return value.
-        //
-        // The [retval] is in use only if the method uses a Result<..> return
-        // value in Rust.
-        let output = &method_sig.decl.output;
-        let ret_ty = match output {
-            &FunctionRetTy::Ty( ref ty ) => ty,
-            _ => continue
-        };
-        let ( out_val, ret_val ) = get_ret_types( cx, &ret_ty )?;
-
-        // Define how the return values are handled in code. This differs on
-        // whether we have an out_val defined (COM [retval]) or not.
-        let rval_handling = match &out_val {
-            &Some( ref t ) => {
-                args.push(
-                        quote_tokens!( cx, __out_val : *mut $t ) );
-                quote_tokens!( cx,
-                    match result {
-                        Ok( r ) => { *__out_val = r; return 0; },
-                        Err( e ) => { return e; }
-                    }; )
-            },
-            &None => quote_tokens!( cx, return result; )
-        };
-
-        // Define the delegating method implementation.
-        let method_name = impl_item.ident;
-        let vtable_method_name = get_method_impl_ident(
-            cx,
-            &struct_name.name.as_str(),
-            &itf_name,
-            &method_name.name.as_str() );
-        let vtable_method_name_str
-                = format!( "Method: {}", vtable_method_name.name );
-        let method_impl = quote_item!(
-            cx,
-            #[allow(non_snake_case)]
-            #[allow(dead_code)]
-            pub unsafe extern "stdcall" fn $vtable_method_name( $args ) -> $ret_val {
-
-                // Acquire the Rust refernece from the c_void pointer.
-                let self_struct : $self_ptr_ty = std::mem::transmute( self_void );
-
-                // Invoke the method.
-                let result = (*self_struct).$method_name( $params );
-
-                // Handle return value.
-                $rval_handling
+            struct $vtable_list_ident {
+                $vtable_list_fields
             }
-        ).unwrap();
-        push( Annotatable::Item( method_impl ) );
-
-        // Create the struct field and add it to the fields vector.
-        let vtable_method_ident = impl_item.ident;
-        let vtable_method_decl = quote_tokens!(
-                cx,
+        ).unwrap() ) );
+    push( Annotatable::Item( quote_item!( cx,
+            struct $coclass_ident {
+                vtables : $vtable_list_ident,
+                rc : u32,
+                data : $struct_ident
+            }
+        ).unwrap() ) );
+    push( Annotatable::Item( quote_item!( cx,
+            #[allow(non_upper_case_globals)]
+            const $vtable_list_instance_ident : $vtable_list_ident = $vtable_list_ident {
+                $vtable_list_field_values
+            };
+        ).unwrap() ) );
+    push( Annotatable::Item( quote_item!( cx,
+            impl $coclass_ident {
                 #[allow(dead_code)]
-                $vtable_method_ident : unsafe extern "stdcall" fn( $args ) -> $ret_val,
-        );
-        fields.push( vtable_method_decl );
-
-        // Define the vtable entry for the method.
-        let vtable_method_impl = quote_tokens!(
-                cx,
-                $vtable_method_ident : $vtable_method_name,
-        );
-        field_values.push( vtable_method_impl );
-    }
-
-    // Create the vtable. We've already gathered all the vtable method
-    // pointer fields so defining the struct is simple enough.
-    let vtable_ident = Ident::from_str(
-            format!( "__{}_vtable", itf_name ).as_str() );
-    let vtable = quote_item!(
-        cx,
-        #[allow(non_camel_case_types)]
-        struct $vtable_ident { $fields }
-    ).unwrap();
-    push( Annotatable::Item( vtable ) );
-
-    // Create the vtable instance. This is the instance used for the vtable
-    // pointers on the actual COM objects.
-    let vtable_instance_name = Ident::from_str(
-            &format!( "__{}_{}_vtable_instance",
-                     struct_name, itf_name ) );
-    let vtable_instance = quote_item!(
-        cx,
-        #[allow(non_upper_case_globals)]
-        const $vtable_instance_name : $vtable_ident =
-                $vtable_ident {
-                    $field_values
-                };
-    ).unwrap();
-    push( Annotatable::Item( vtable_instance ) );
+                fn new() -> $coclass_ident {
+                    $coclass_ident {
+                        vtables: $vtable_list_ident {
+                            $vtable_list_field_values
+                        },
+                        rc: 0,
+                        data: $struct_ident::new()
+                    }
+                }
+            }
+        ).unwrap() ) );
 
     // CLSID constant for the class.
-    let clsid_ident = get_clsid_ident( cx, &struct_name );
-    let clsid_guid_tokens = get_guid_tokens( cx, &clsid_guid );
+    let clsid_ident = idents::clsid( &struct_ident );
+    let clsid_guid_tokens = utils::get_guid_tokens( cx, &clsid_guid );
     let clsid_const = quote_item!(
         cx,
         #[allow(non_upper_case_globals)]
         const $clsid_ident : com_runtime::GUID = $clsid_guid_tokens;
     ).unwrap();
     push( Annotatable::Item( clsid_const ) );
-
-    // The COM pointer struct. This struct holds the vtable, reference count
-    // and the user specified data.
-    let com_ptr = quote_item!(
-        cx,
-        #[repr(C)]
-        struct $com_ptr_ident {
-            __vtable : &'static $vtable_ident,
-            rc : u32,
-            data: $struct_name
-        } ).unwrap();
-    push( Annotatable::Item( com_ptr ) );
-
-    // Implementation for the COM pointer.
-    //
-    // new() and wrap() methods. Only new() is used currently by the module.
-    // wrap() will be needed for when we return existing pieces of data
-    // from COM methods.
-    let com_ptr_impl = quote_item!(
-        cx,
-        impl $com_ptr_ident {
-            #[allow(dead_code)]
-            fn new() -> $com_ptr_ident {
-                $com_ptr_ident {
-                    __vtable: &$vtable_instance_name,
-                    rc: 0,
-                    data: $struct_name::new()
-                }
-            }
-            #[allow(dead_code)]
-            fn wrap( data : $struct_name ) -> $com_ptr_ident {
-                $com_ptr_ident {
-                    __vtable: &$vtable_instance_name,
-                    rc: 0,
-                    data: data
-                }
-            }
-        } ).unwrap();
-    push( Annotatable::Item( com_ptr_impl ) );
-
-    // Deref the COM pointer into the actual struct.
-    //
-    // Both non-mutable and mutable Deref variants.
-    let com_ptr_deref = quote_item!(
-        cx,
-        impl std::ops::Deref for $com_ptr_ident {
-            type Target = $struct_name;
-            fn deref(&self) -> &$struct_name {
-                &self.data
-            }
-        } ).unwrap();
-    let com_ptr_derefmut = quote_item!(
-        cx,
-        impl std::ops::DerefMut for $com_ptr_ident {
-            fn deref_mut(&mut self) -> &mut $struct_name {
-                &mut self.data
-            }
-        } ).unwrap();
-    push( Annotatable::Item( com_ptr_deref ) );
-    push( Annotatable::Item( com_ptr_derefmut ) );
 
     Ok(())
 }
@@ -529,16 +429,16 @@ pub fn try_expand_com_library(
         // Extract the class name from the parameter item.
         let class_name = match p.node {
             NestedMetaItemKind::MetaItem( ref l ) => &l.name,
-            _ => return Err( "[com_visible(clsid : &str) must have CLSID as a parameter." )
+            _ => return Err( "[com_impl(clsid : &str) must have CLSID as a parameter." )
         };
 
         // Construct the match pattern.
         let class_ident = Ident::from_str( &class_name.as_str() );
-        let clsid_name = get_clsid_ident( cx, &class_ident );
-        let coclass_ptr = get_com_ptr_ident( cx, &class_ident );
+        let clsid_name = idents::clsid( &class_ident );
+        let coclass_ident = idents::coclass( &class_ident );
         match_arms.push( quote_tokens!( cx,
-            $clsid_name => {
-                let mut b = Box::new( $coclass_ptr::new() );
+            self::$clsid_name => {
+                let mut b = Box::new( $coclass_ident::new() );
                 b.rc += 1;
                 Box::into_raw( b ) as com_runtime::ComPtr
             },
@@ -558,7 +458,7 @@ pub fn try_expand_com_library(
             _outer : com_runtime::ComPtr,
             _iid : com_runtime::REFIID,
             out : *mut com_runtime::ComPtr
-        ) -> u32
+        ) -> com_runtime::HRESULT
         {
             // Turn the *c_void to a ClassFactory pointer.
             let self_ptr : *mut com_runtime::ClassFactory = std::mem::transmute( self_void );
@@ -588,7 +488,7 @@ pub fn try_expand_com_library(
         #[allow(non_upper_case_globals)]
         const $vtable_instance_ident : com_runtime::__ClassFactory_vtable =
                 com_runtime::__ClassFactory_vtable {
-                    __base : com_runtime::__IUnknown_vtable {
+                    __base : com_runtime::IUnknownVtbl {
                         query_interface : com_runtime::ClassFactory::query_interface,
                         add_ref : com_runtime::ClassFactory::add_ref,
                         release : com_runtime::ClassFactory::release,
@@ -614,7 +514,7 @@ pub fn try_expand_com_library(
             rclsid : com_runtime::REFCLSID,
             _riid : com_runtime::REFIID,
             pout : *mut com_runtime::ComPtr
-        ) -> u32
+        ) -> com_runtime::HRESULT
         {
             // Create a ClassFactory. Save an add_ref by defining the
             // reference count as 1.
@@ -654,15 +554,131 @@ pub fn expand_com_library(
     }
 }
 
+/// Implements the `com_interface` decorator.
+pub fn try_expand_com_interface(
+    cx: &mut ExtCtxt,
+    _sp: Span,
+    mi: &MetaItem,
+    item: &Annotatable,
+    push: &mut FnMut( Annotatable )
+) -> Result< (), &'static str >
+{
+    let ( itf_ident, fns )
+            = utils::get_ident_and_fns( item )
+                .ok_or( "[com_interface(IID:&str)] must be applied to trait or struct impl" )?;
+
+    let iid_guid = utils::get_metaitem_params( mi )
+            .as_ref()
+            .and_then( |ref params| params.first() )
+            .ok_or( "[com_interface(IID:&str)] must specify an IID" )
+            .and_then( |f| utils::parameter_to_guid( f ) )?;
+
+    let iid_tokens = utils::get_guid_tokens( cx, &iid_guid );
+    let iid_ident = idents::iid( &itf_ident );
+
+    // IID_IInterface GUID.
+    push( Annotatable::Item(
+        quote_item!( cx,
+            #[allow(non_upper_case_globals)]
+            const $iid_ident : com_runtime::GUID = $iid_tokens;
+        ).unwrap()
+    ) );
+
+    // Create the base vtable field.
+    // All of our interfaces inherit from IUnknown.
+    let mut fields = vec![
+        quote_tokens!( cx, __base : com_runtime::IUnknownVtbl, )
+    ];
+
+    // Process the impl items. This gathers all COM-visible methods and defines
+    // delegating calls for them. These delegating calls are the ones that are
+    // invoked by the clients. The calls then convert everything to the RUST
+    // interface.
+    //
+    // The impl may have various kinds of items - we only support the ones that
+    // seem okay so there's a bit of continue'ing involved in the for-loop.
+    for ( method_ident, method_sig ) in fns {
+        let _res : Result<(), ()> = do catch {
+
+            // Get the self argument and the remaining args.
+            let ( args, _) =
+                    utils::get_method_args( cx, method_sig ).ok_or(())?;
+            let ( ret_ty, _ ) =
+                    utils::get_method_rvalues( cx, &method_sig ).ok_or(())?;
+
+            // Create the vtable field and add it to the vector of fields.
+            let vtable_method_decl = quote_tokens!(
+                cx,
+                #[allow(dead_code)]
+                $method_ident :
+                    unsafe extern "stdcall" fn( $args ) -> $ret_ty,
+            );
+            fields.push( vtable_method_decl );
+
+            Ok(())
+        };
+    }
+
+    // Create the vtable. We've already gathered all the vtable method
+    // pointer fields so defining the struct is simple enough.
+    let vtable_ident = idents::vtable_struct( &itf_ident );
+    let vtable = quote_item!(
+        cx,
+        #[allow(non_camel_case_types)]
+        struct $vtable_ident { $fields }
+    ).unwrap();
+    push( Annotatable::Item( vtable ) );
+
+    Ok(())
+}
+
+/// `com_interface` MultiDecorator handler.
+///
+/// Delegates to a Result<>ful try_... variant.
+pub fn expand_com_interface(
+    cx: &mut ExtCtxt,
+    sp: Span,
+    mi: &MetaItem,
+    item: &Annotatable,
+    push: &mut FnMut( Annotatable )
+) {
+    if let Err( err ) = try_expand_com_interface( cx, sp, mi, item, push ) {
+        cx.span_err( mi.span, err );
+    }
+}
+
+
+/// `com_impl` MultiDecorator handler.
+///
+/// Delegates to a Result<>ful try_... variant.
+pub fn expand_com_impl(
+    cx: &mut ExtCtxt,
+    sp: Span,
+    mi: &MetaItem,
+    item: &Annotatable,
+    push: &mut FnMut( Annotatable )
+) {
+    if let Err( err ) = try_expand_com_impl( cx, sp, mi, item, push ) {
+        cx.span_err( mi.span, err );
+    }
+}
+
+
 /// Registers the syntax extensions.
 #[plugin_registrar]
 pub fn registrar( reg: &mut Registry ) {
     reg.register_syntax_extension(
+            Symbol::intern("com_library"),
+            MultiDecorator( Box::new( expand_com_library ) ) );
+    reg.register_syntax_extension(
             Symbol::intern("com_visible"),
             MultiDecorator( Box::new( expand_com_visible ) ) );
     reg.register_syntax_extension(
-            Symbol::intern("com_library"),
-            MultiDecorator( Box::new( expand_com_library ) ) );
+            Symbol::intern("com_interface"),
+            MultiDecorator( Box::new( expand_com_interface ) ) );
+    reg.register_syntax_extension(
+            Symbol::intern("com_impl"),
+            MultiDecorator( Box::new( expand_com_impl ) ) );
 }
 
 /// Prints an item as code.

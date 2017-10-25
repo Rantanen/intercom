@@ -1,0 +1,349 @@
+
+extern crate com_runtime;
+
+use syntax::ptr::P;
+use syntax::ext::base::{ExtCtxt, Annotatable};
+use syntax::tokenstream::TokenTree;
+use syntax::ast::*;
+use syntax::print::pprust;
+
+pub fn trace( t : &str, n : &str ) {
+    println!( "Added {}: {}", t, n );
+}
+
+pub fn get_ident_and_fns(
+    a : &Annotatable
+) -> Option< ( Ident, Vec<(&Ident, &MethodSig)> ) >
+{
+    // Get the annotated item.
+    let item = match a {
+        &Annotatable::Item( ref item ) => item,
+        _ => return None
+    };
+
+    match item.node {
+        ItemKind::Impl( .., ref trait_ref, ref ty, ref items ) => {
+            let ( _, struct_ident, items ) = get_impl_data_raw( trait_ref, ty, items );
+            Some( ( struct_ident, items ) )
+        },
+        ItemKind::Trait( .., ref items ) => {
+
+            let methods : Option< Vec< (&Ident, &MethodSig) > > = items
+                    .into_iter()
+                    .map( |i| get_trait_method( i ).map( |m| ( &i.ident, m ) ) )
+                    .collect();
+
+            match methods {
+                Some( m ) => Some( ( item.ident, m ) ),
+                None => None
+            }
+        },
+        _ => None
+    }
+}
+
+pub fn get_impl_data(
+    a : &Annotatable
+) -> Option< ( Option< Ident >, Ident, Vec< ( &Ident, &MethodSig ) > ) >
+{
+    if let &Annotatable::Item( ref item ) = a {
+        if let ItemKind::Impl( .., ref trait_ref, ref ty, ref items ) = item.node {
+            return Some( get_impl_data_raw( trait_ref, ty, items ) );
+        }
+    }
+    None
+}
+
+fn get_impl_data_raw<'a>(
+    trait_ref : &'a Option<TraitRef>,
+    struct_ty : &'a P<Ty>,
+    items : &'a [ImplItem]
+) -> ( Option<Ident>, Ident, Vec< ( &'a Ident, &'a MethodSig ) > )
+{
+
+    let struct_ident = match get_ty_ident( struct_ty ) {
+        Some( ty_ident ) => ty_ident,
+        None => panic!()
+    };
+
+    let trait_ident = match trait_ref {
+        &Some( ref tr ) => Some( path_to_ident( &tr.path ) ),
+        &None => None
+    };
+
+    let methods_opt : Option< Vec< (&Ident, &MethodSig) > > = items
+            .into_iter()
+            .map( |i| get_impl_method( i ).map( |m| ( &i.ident, m ) ) )
+            .collect();
+    let methods = methods_opt.unwrap_or( vec![] );
+
+    ( trait_ident, struct_ident, methods )
+}
+
+pub fn path_to_ident(
+    p : &Path
+) -> Ident
+{
+    p.segments.last().unwrap().identifier.clone()
+}
+
+
+pub fn get_struct_ident_from_annotatable(
+    a : &Annotatable
+) -> Option< Ident >
+{
+    // Get the annotated item.
+    if let &Annotatable::Item( ref item ) = a {
+        return Some( item.ident )
+    }
+
+    None
+}
+
+pub fn get_metaitem_params(
+    mi : &MetaItem
+) -> Option< Vec< &NestedMetaItemKind > >
+{
+    if let MetaItemKind::List( ref v ) = mi.node {
+        return Some( v.into_iter().map( |sp| &sp.node ).collect() );
+    }
+
+    None
+}
+
+pub fn get_ty_ident(
+    ty : &Ty
+) -> Option<Ident>
+{
+    match ty.node {
+        TyKind::Path( _, ref p ) =>
+            p.segments.last().map( |l| l.identifier.clone() ),
+        _ => None
+    }
+}
+
+pub fn get_impl_method(
+    i : &ImplItem
+) -> Option< &MethodSig >
+{
+    if let ImplItemKind::Method( ref method_sig, _ ) = i.node {
+        return Some( method_sig );
+    }
+    None
+}
+
+pub fn get_trait_method(
+    i : &TraitItem
+) -> Option< &MethodSig >
+{
+    if let TraitItemKind::Method( ref method_sig, _ ) = i.node {
+        return Some( method_sig );
+    }
+    None
+}
+
+pub fn parameter_to_guid(
+    p : &NestedMetaItemKind
+) -> Result< com_runtime::GUID, &'static str >
+{
+    if let &NestedMetaItemKind::Literal( ref l ) = p {
+        if let LitKind::Str( ref s, _ ) = l.node {
+            return com_runtime::GUID::parse( &s.as_str() );
+        }
+    }
+
+    return Err( "GUID parameter must be literal string" );
+}
+
+pub fn parameter_to_ident(
+    p : &NestedMetaItemKind
+) -> Option<Ident>
+{
+    if let &NestedMetaItemKind::MetaItem( MetaItem { name, .. } ) = p {
+        return Some( Ident::from_str( &name.as_str() ) );
+    }
+
+    None
+}
+
+pub fn get_method_args(
+    cx : &mut ExtCtxt,
+    m : &MethodSig
+) -> Option<(
+    Vec<Vec<TokenTree>>,
+    Vec<Vec<TokenTree>>,
+)>
+{
+    m.decl.inputs
+        .split_first()
+        .and_then( | (self_arg, other_args ) | {
+
+            // Get the self arg. This is always a ComPtr.
+            let mut args = vec![
+                quote_tokens!( cx, self_void : com_runtime::ComPtr, )
+            ];
+
+            // Process the remaining args into the args and params arrays.
+            let mut params : Vec<Vec<TokenTree>> = vec![];
+            for ref arg_ref in other_args {
+                
+                // Get the arg for the args.
+                let arg = arg_ref.clone();
+                args.push( quote_tokens!( cx, $arg, ) );
+
+                // We can't just clone the arg name into param name. This will
+                // cause errors. I suspect this is because Rust attempts to use
+                // the same tokens for two different purposes that are
+                // represented by different AST nodes.
+                let param_name = Ident::from_str(
+                        &pprust::pat_to_string( &(*arg_ref.pat) ) );
+                params.push( quote_tokens!( cx, $param_name, ) );
+            }
+
+            // Add the [retval] arg if one exists and isn't ().
+            if let Some( outs ) = get_out_and_ret( cx, m ) {
+                if let ( Some( out_ty ), _ ) = outs {
+                    if ! is_unit( &out_ty.node ) {
+                        args.push( quote_tokens!( cx, __out : *mut $out_ty ) );
+                    }
+                }
+            } else {
+                return None
+            };
+
+            // Ensure the first parameter is &self.
+            // Static methods don't count here.
+            if let TyKind::Rptr( _, _ ) = self_arg.ty.node {
+            } else {
+                return None
+            }
+
+            Some( (
+                args,
+                params,
+            ) )
+        } )
+}
+
+pub fn is_unit(
+    tk : &TyKind
+) -> bool
+{
+    if let &TyKind::Tup( ref v ) = tk {
+        if v.len() == 0 {
+            return true
+        }
+    }
+    false
+}
+
+pub fn get_ret_types(
+    cx: &mut ExtCtxt,
+    ret_ty : &Ty
+) -> Result< ( Option<P<Ty>>, P<Ty> ), &'static str >
+{
+    // Get the path type on the return value.
+    let path = match &ret_ty.node {
+        &TyKind::Path( _, ref p ) => p,
+        _ => return Err( "Use Result as a return type" )
+    };
+
+    // Find the last path segment.
+    let last_segment = path.segments.last().unwrap();
+
+    // Check the last segment has angle bracketed parameters.
+    if let &Some( ref p ) = &last_segment.parameters {
+        if let PathParameters::AngleBracketed( ref data ) = **p {
+
+            // Angle bracketed parameters exist. We're assuming this is
+            // some kind of Result<ok> or Result<ok, err>. In either case
+            // we can take the first parameter as the 'ok' type.
+            //
+            // TODO: Figure out whether we can ask the compiler whether
+            // the type matches Result<S,E> type.
+            return Ok( (
+                data.types.first().and_then( |x| Some( x.clone() ) ),
+                quote_ty!( cx, com_runtime::HRESULT )
+            ) )
+        }
+    }
+
+    // Default value. We get here only if we didn't return a type from
+    // the if statements above.
+    Ok( ( None, quote_ty!( cx, $path ) ) )
+}
+
+pub fn get_out_and_ret(
+    cx : &mut ExtCtxt,
+    m : &MethodSig
+) -> Option< ( Option< P<Ty> >, P<Ty> ) >
+{
+    let output = &m.decl.output;
+    let result_ty = match output {
+        &FunctionRetTy::Ty( ref ty ) => ty,
+        _ => return None
+    };
+
+    get_ret_types( cx, &result_ty ).ok()
+}
+
+pub fn get_method_rvalues(
+    cx : &mut ExtCtxt,
+    m : &MethodSig
+) -> Option< ( P<Ty>, Vec<TokenTree> ) >
+{
+    let ( out_ty, ret_ty ) = match get_out_and_ret( cx, m ) {
+        Some( s ) => s,
+        None => return None,
+    };
+
+    Some( match out_ty {
+        // Result<(), _>. Ignore the [retval] value but handle the Err
+        // as the method return value.
+        Some( ref unit ) if is_unit( &unit.node ) => (
+            ret_ty,
+            quote_tokens!( cx,
+                match result {
+                    Ok( _ ) => com_runtime::S_OK,
+                    Err( e ) => e
+                } ) ),
+
+        // Result<_, _>. Ok() -> __out + S_OK, Err() -> E_*
+        Some(_) => (
+            ret_ty,
+            quote_tokens!( cx,
+                match result {
+                    Ok( r ) => { *__out = r; com_runtime::S_OK },
+                    Err( e ) => e
+                } ) ),
+
+        // Not a Result<..>, assume we can return the return value as is.
+        None => (
+            ret_ty, quote_tokens!( cx, return result ) ),
+    } )
+}
+
+pub fn get_guid_tokens(
+    cx : &mut ExtCtxt,
+    g : &com_runtime::GUID
+) -> Vec<TokenTree>
+{
+    let d1 = g.data1;
+    let d2 = g.data2;
+    let d3 = g.data3;
+    let d4_0 = g.data4[ 0 ];
+    let d4_1 = g.data4[ 1 ];
+    let d4_2 = g.data4[ 2 ];
+    let d4_3 = g.data4[ 3 ];
+    let d4_4 = g.data4[ 4 ];
+    let d4_5 = g.data4[ 5 ];
+    let d4_6 = g.data4[ 6 ];
+    let d4_7 = g.data4[ 7 ];
+    quote_tokens!( cx,
+        com_runtime::GUID {
+            data1: $d1, data2: $d2, data3: $d3,
+            data4: [ $d4_0, $d4_1, $d4_2, $d4_3, $d4_4, $d4_5, $d4_6, $d4_7 ]
+        }
+    )
+}
+

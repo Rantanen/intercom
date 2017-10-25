@@ -1,5 +1,5 @@
 [
-    uuid(12341234-1234-1234-1234-12341234000A),
+    uuid(12341234-1234-1234-1234-123412340000),
     helpstring("RustCom Library"),
     lcid(0x09),
     version(1.0)
@@ -8,9 +8,9 @@ library Calculator
 {
     [
         object,
-        uuid(12341234-1234-1234-1234-123412340001),
+        uuid(12341234-1234-1234-1234-123412340002),
         nonextensible,
-        helpstring("ICalculator instance"),
+        helpstring("ICalculator interface"),
         pointer_default(unique)
     ]
     interface ICalculator : IUnknown
@@ -25,9 +25,25 @@ library Calculator
         HRESULT Multiply([in] int value, [out, retval] int* result);
     };
 
+    [
+        object,
+        uuid(12341234-1234-1234-1234-123412340003),
+        nonextensible,
+        helpstring("IMemory interface"),
+        pointer_default(unique)
+    ]
+    interface IMemory : IUnknown
+    {
+        [id(1), helpstring( "Stores current value" )]
+        HRESULT Store([out, retval] size_t* slot);
+
+        [id(2), helpstring( "Recalls previously stored value" )]
+        HRESULT Recall([in] size_t value );
+    };
+
     importlib("stdole2.tlb");
     [
-        uuid(12341234-1234-1234-1234-123412340002),
+        uuid(12341234-1234-1234-1234-123412340001),
         version(1.0),
         helpstring( "Calculator class" )
     ]

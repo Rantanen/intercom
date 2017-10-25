@@ -48,6 +48,13 @@ typedef interface ICalculator ICalculator;
 #endif 	/* __ICalculator_FWD_DEFINED__ */
 
 
+#ifndef __IMemory_FWD_DEFINED__
+#define __IMemory_FWD_DEFINED__
+typedef interface IMemory IMemory;
+
+#endif 	/* __IMemory_FWD_DEFINED__ */
+
+
 #ifndef __Calculator_FWD_DEFINED__
 #define __Calculator_FWD_DEFINED__
 
@@ -86,7 +93,7 @@ EXTERN_C const IID IID_ICalculator;
 
 #if defined(__cplusplus) && !defined(CINTERFACE)
     
-    MIDL_INTERFACE("12341234-1234-1234-1234-123412340001")
+    MIDL_INTERFACE("12341234-1234-1234-1234-123412340002")
     ICalculator : public IUnknown
     {
     public:
@@ -181,11 +188,101 @@ EXTERN_C const IID IID_ICalculator;
 #endif 	/* __ICalculator_INTERFACE_DEFINED__ */
 
 
+#ifndef __IMemory_INTERFACE_DEFINED__
+#define __IMemory_INTERFACE_DEFINED__
+
+/* interface IMemory */
+/* [unique][helpstring][nonextensible][uuid][object] */ 
+
+
+EXTERN_C const IID IID_IMemory;
+
+#if defined(__cplusplus) && !defined(CINTERFACE)
+    
+    MIDL_INTERFACE("12341234-1234-1234-1234-123412340003")
+    IMemory : public IUnknown
+    {
+    public:
+        virtual /* [helpstring][id] */ HRESULT STDMETHODCALLTYPE Store( 
+            /* [retval][out] */ SIZE_T *slot) = 0;
+        
+        virtual /* [helpstring][id] */ HRESULT STDMETHODCALLTYPE Recall( 
+            /* [in] */ SIZE_T value) = 0;
+        
+    };
+    
+    
+#else 	/* C style interface */
+
+    typedef struct IMemoryVtbl
+    {
+        BEGIN_INTERFACE
+        
+        HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
+            IMemory * This,
+            /* [in] */ REFIID riid,
+            /* [annotation][iid_is][out] */ 
+            _COM_Outptr_  void **ppvObject);
+        
+        ULONG ( STDMETHODCALLTYPE *AddRef )( 
+            IMemory * This);
+        
+        ULONG ( STDMETHODCALLTYPE *Release )( 
+            IMemory * This);
+        
+        /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *Store )( 
+            IMemory * This,
+            /* [retval][out] */ SIZE_T *slot);
+        
+        /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *Recall )( 
+            IMemory * This,
+            /* [in] */ SIZE_T value);
+        
+        END_INTERFACE
+    } IMemoryVtbl;
+
+    interface IMemory
+    {
+        CONST_VTBL struct IMemoryVtbl *lpVtbl;
+    };
+
+    
+
+#ifdef COBJMACROS
+
+
+#define IMemory_QueryInterface(This,riid,ppvObject)	\
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
+
+#define IMemory_AddRef(This)	\
+    ( (This)->lpVtbl -> AddRef(This) ) 
+
+#define IMemory_Release(This)	\
+    ( (This)->lpVtbl -> Release(This) ) 
+
+
+#define IMemory_Store(This,slot)	\
+    ( (This)->lpVtbl -> Store(This,slot) ) 
+
+#define IMemory_Recall(This,value)	\
+    ( (This)->lpVtbl -> Recall(This,value) ) 
+
+#endif /* COBJMACROS */
+
+
+#endif 	/* C style interface */
+
+
+
+
+#endif 	/* __IMemory_INTERFACE_DEFINED__ */
+
+
 EXTERN_C const CLSID CLSID_Calculator;
 
 #ifdef __cplusplus
 
-class DECLSPEC_UUID("12341234-1234-1234-1234-123412340002")
+class DECLSPEC_UUID("12341234-1234-1234-1234-123412340001")
 Calculator;
 #endif
 #endif /* __Calculator_LIBRARY_DEFINED__ */

@@ -14,11 +14,21 @@ pub struct GUID {
 pub type IID = GUID;
 pub type REFIID = *const IID;
 pub type REFCLSID = *const IID;
+pub type HRESULT = i32;
+
 
 pub type ComPtr = *mut std::os::raw::c_void;
 
-pub const S_OK : u32 = 0;
-pub const E_NOINTERFACE : u32 = 0x80004002;
+pub const S_OK : HRESULT = 0;
+
+#[allow(overflowing_literals)]
+pub const E_NOINTERFACE : HRESULT = 0x80004002 as HRESULT;
+
+#[allow(non_upper_case_globals)]
+pub const IID_IUnknown : GUID = GUID {
+    data1: 0, data2: 0, data3: 0,
+    data4: [ 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 ]
+};
 
 #[no_mangle]
 #[allow(non_camel_case_types)]
@@ -32,22 +42,22 @@ pub extern "stdcall" fn DllMain(
 
 #[repr(C)]
 #[allow(non_camel_case_types)]
-pub struct __IUnknown_vtable
+pub struct IUnknownVtbl
 {
     pub query_interface : unsafe extern "stdcall" fn(
         s : ComPtr,
         _riid : REFIID,
         out : *mut ComPtr
-    ) -> u32,
+    ) -> HRESULT,
     pub add_ref: unsafe extern "stdcall" fn( s : ComPtr ) -> u32,
     pub release: unsafe extern "stdcall" fn( s : ComPtr ) -> u32,
 }
 
 #[allow(non_camel_case_types)]
 pub struct __ClassFactory_vtable {
-    pub __base: __IUnknown_vtable,
-    pub create_instance: unsafe extern "stdcall" fn( ComPtr, ComPtr, REFIID, *mut ComPtr ) -> u32,
-    pub lock_server: unsafe extern "stdcall" fn( ComPtr, bool ) -> u32
+    pub __base: IUnknownVtbl,
+    pub create_instance: unsafe extern "stdcall" fn( ComPtr, ComPtr, REFIID, *mut ComPtr ) -> HRESULT,
+    pub lock_server: unsafe extern "stdcall" fn( ComPtr, bool ) -> HRESULT
 }
 
 pub struct ClassFactory {
@@ -62,7 +72,7 @@ impl ClassFactory {
         self_void : ComPtr,
         _riid : REFIID,
         out : *mut ComPtr
-    ) -> u32 {
+    ) -> HRESULT {
         // Query interface needs to increment RC.
         let self_ptr : *mut ClassFactory = std::mem::transmute( self_void );
         (*self_ptr).rc += 1;
@@ -99,7 +109,7 @@ impl ClassFactory {
     pub unsafe extern "stdcall" fn lock_server(
         self_void : ComPtr,
         lock : bool
-    ) -> u32 {
+    ) -> HRESULT {
         if lock {
             ClassFactory::add_ref( self_void );
         } else {
@@ -109,7 +119,7 @@ impl ClassFactory {
     }
 }
 
-pub type ComResult<A> = Result<A, u32>;
+pub type ComResult<A> = Result<A, HRESULT>;
 
 enum GuidFormat { Braces, Hyphens, Raw }
 

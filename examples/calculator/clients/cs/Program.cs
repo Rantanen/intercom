@@ -20,6 +20,13 @@ namespace cs
 			int result = calc.Substract(55);
 
 			Console.WriteLine(result);
+
+			IMemory calcMemory = (IMemory)calc;
+			var slot = calcMemory.Store();
+			Console.WriteLine(calc.Add(10000));
+
+			calcMemory.Recall(slot);
+			Console.WriteLine(calc.Add(1000));
 		}
 	}
 }

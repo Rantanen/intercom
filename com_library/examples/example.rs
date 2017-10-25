@@ -1,4 +1,4 @@
-#![feature( plugin, custom_attribute )]
+#![feature( plugin, custom_attribute, attr_literals )]
 #![plugin( com_library )]
 #![allow(non_snake_case)]
 #![allow(dead_code)]
@@ -10,15 +10,28 @@ extern crate com_runtime;
 
 use std::os::raw::c_void;
 
+#[com_visible("{12341234-1234-1234-1234-123412340001}", Foo)]
 struct Foo {}
 
-#[com_visible("{12341234-1234-1234-1234-123412340001}")]
+#[com_interface("{12341234-1234-1234-1234-123412340002}")]
+#[com_impl]
 impl Foo
 {
     fn new() -> Foo { eprintln!( "Created Foo" ); Foo {} }
     fn bar( &self, a : u32 ) -> com_runtime::ComResult<u8> { Ok(10) }
+    fn baz1( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
+    fn baz2( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
+    fn baz3( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
+    fn baz4( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
+    fn baz5( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
+    fn baz6( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
+    fn baz7( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
+    fn baz8( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
+    fn baz9( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
+    fn baz0( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
 }
 
+#[com_visible( "{12341234-1234-1234-1234-123412340003}", Bar, BarItf )]
 struct Bar {
     value : u32
 }
@@ -30,7 +43,8 @@ impl Drop for Bar
     }
 }
 
-#[com_visible("{12341234-1234-1234-1234-123412340002}")]
+#[com_interface("{12341234-1234-1234-1234-123412340004}")]
+#[com_impl]
 impl Bar
 {
     fn new() -> Bar { eprintln!( "Created Bar" ); Bar { value : 0 } }
@@ -47,6 +61,17 @@ impl Bar
     fn empty_method() -> u32 { 10 }
 }
 
+#[com_interface("{12341234-1234-1234-1234-123412340005}")]
+trait BarItf
+{
+    fn stuff( &self, a : u32 ) -> com_runtime::ComResult<u16>;
+}
+
+#[com_impl]
+impl BarItf for Bar {
+    fn stuff( &self, a : u32 ) -> com_runtime::ComResult<u16> { Ok(123) }
+}
+
 fn main()
 {
     // Horrible Rust code ahead. This mimics the C++ calls.
@@ -54,8 +79,8 @@ fn main()
 
         // DllGetClassObject params. Null value for the return value.
         // It will be assigned by the DllGetClassObject.
-        let mut clsid = com_runtime::GUID::parse( "{12341234-1234-1234-1234-123412340002}" ).unwrap();
-        let mut iid = com_runtime::GUID::parse( "{12341234-1234-1234-1234-123412340002}" ).unwrap();
+        let mut clsid = com_runtime::GUID::parse( "{12341234-1234-1234-1234-123412340003}" ).unwrap();
+        let mut iid = com_runtime::GUID::parse( "{12341234-1234-1234-1234-123412340004}" ).unwrap();
         let mut classFactory_ptr = std::mem::transmute( std::ptr::null::<c_void>() );
 
         // Acquire the class factory.
@@ -76,23 +101,24 @@ fn main()
                     &mut bar_ptr ) );
 
         // Got the interface pointer.
-        let mut ibar : &mut __Bar_ptr
+        let ibar : &mut __BarCoClass
                 = std::mem::transmute( bar_ptr );
         eprintln!( "transmuted" );
-        let fun = &ibar.__vtable.baz;
-        let fun2 = &ibar.__vtable.baz;
+        let fun = &ibar.vtables.Bar.baz;
+        let fun2 = &ibar.vtables.Bar.baz;
+        eprintln!( "Got fns" );
 
         // Invoke baz()
-        let mut baz_val = 0u16;
+        let baz_val = 0u16;
         eprintln!( "baz: {}",
                 (fun)(
-                    std::mem::transmute( &ibar ),
+                    std::mem::transmute( &ibar.vtables.Bar ),
                     53 ) );
 
         // Invoke bar()
         let mut bar_val = 0u8;
         eprintln!( "bar: {}",
-                (ibar.__vtable.bar)(
+                (ibar.vtables.Bar.bar)(
                     std::mem::transmute( &ibar ),
                     10,
                     &mut bar_val ) );
@@ -112,7 +138,7 @@ fn main()
         let result = {
             let ret_val_ptr : *mut u8
                     = &mut ret_val as *mut _;
-            // unsafe { ((*f_ptr).__vtable.bar)( f_ptr_cvoid, 0, ret_val_ptr ) }
+            // unsafe { ((*f_ptr).vtables.Bar.bar)( f_ptr_cvoid, 0, ret_val_ptr ) }
             unsafe { __Foo_IFoo_bar( f_ptr_cvoid, 0, ret_val_ptr ) }
         };
         println!( "Result: {} ({})", ret_val, result );

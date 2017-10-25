@@ -9,3 +9,4 @@ crate-type = [ "cdylib" ]
 [dependencies]
 com_runtime = { path = "../../com_runtime" }
 com_library = { path = "../../com_library" }
+winapi = "0.2.8"
