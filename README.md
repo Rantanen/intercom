@@ -105,7 +105,7 @@ there are four attributes available:
 
 [syntax extensions]: https://doc.rust-lang.org/1.12.0/book/compiler-plugins.html
 
-### Expansions
+## Expansions
 
 Rough approximation of the attribute expansions is displayed below. This is
 meant to give some kind of an idea of how the COM objects are implemented. For
@@ -113,16 +113,18 @@ accurate representation, have a look at the `com_library` source code.
 
 The attributes are described in somewhat of a dependnecy order.
 
-#### `[com_interface(...)]`
+### `#[com_interface(...)]`
 
 Defines the IID constant and virtual table struct for the trait.
 
 ```rust
 #[com_interface("{...}")]
 trait IFoo { fn method(&self, parameter: i32) -> com_runtime::Result<i8>; }
+```
 
-// Expands the following items:
+#### Expands
 
+```rust
 const IID_IFoo : GUID = Guid::parse("{...}");
 
 struct __IFooVtbl {
@@ -135,7 +137,7 @@ struct __IFooVtbl {
 }
 ```
 
-#### `[com_class(...)]`
+### `#[com_class(...)]`
 
 Defines the CoClass struct and the primary IUnknown implementation for the
 struct.
@@ -143,9 +145,11 @@ struct.
 ```rust
 #[com_class("{...}", IFoo, IBar)]
 struct Foo { ... }
+```
 
-// Expands the following items:
+#### Expands
 
+```rust
 /// List of vtables for all the interfaces implemented by Foo.
 struct __FooVtblList {
     IUnknown: com_runtime::IUnknownVtbl,
@@ -235,7 +239,7 @@ impl __FooCoClass {
 }
 ```
 
-#### `#[com_impl]`
+### `#[com_impl]`
 
 Creates the delegating method implementation and the static virtual table
 instance.
@@ -245,9 +249,11 @@ instance.
 impl IFoo for Foo {
     fn method(&self, parameter: i32) -> com_runtime::Result<i8> { ... }
 }
+```
 
-// Expands the following items:
+#### Expands
 
+```rust
 /// Foo::IFoo::IUnknown::QueryInterface
 pub unsafe extern "stdcall" fn __Foo_IFoo_query_interface(
     self_void: *mut c_void,
@@ -285,16 +291,18 @@ const __Foo_IFooVtbl_INSTANCE : __IFooVtbl = __IFooVtbl {
 };
 ```
 
-#### `#[com_library]`
+### `#[com_library]`
 
 Defines the entry point and the `IClassFactory` implementation for creating the
 CoClasses.
 
 ```rust
 #[com_library(Foo)]
+```
 
-// Expands the following items:
+#### Expands
 
+```rust
 /// Class factory create_instance implementation.
 pub unsafe extern "stdcall" fn __ClassFactory_create_instance(
     self_void: *mut c_void,
