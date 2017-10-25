@@ -10,7 +10,7 @@ extern crate com_runtime;
 
 use std::os::raw::c_void;
 
-#[com_visible("{12341234-1234-1234-1234-123412340001}", Foo)]
+#[com_class("{12341234-1234-1234-1234-123412340001}", Foo)]
 struct Foo {}
 
 #[com_interface("{12341234-1234-1234-1234-123412340002}")]
@@ -31,7 +31,7 @@ impl Foo
     fn baz0( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
 }
 
-#[com_visible( "{12341234-1234-1234-1234-123412340003}", Bar, BarItf )]
+#[com_class( "{12341234-1234-1234-1234-123412340003}", Bar, BarItf )]
 struct Bar {
     value : u32
 }

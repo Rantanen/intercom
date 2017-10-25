@@ -16,15 +16,14 @@ Rust COM server:
     Calculator
 )]
 
-#[com_visible("{12341234-1234-1234-1234-123412340001}")]
+#[com_class("{12341234-1234-1234-1234-123412340001}")]
 struct Calculator{
     value: i32
 }
 
 #[com_interface("{12341234-1234-1234-1234-123412340002}")]
 #[com_impl]
-impl Calculator
-{
+impl Calculator {
     pub fn new() -> Calculator { Calculator { value: 0 } }
 
     pb fn add( &mut self, value: i32 ) -> com_runtime::ComResult<i32>
@@ -94,16 +93,16 @@ there are four attributes available:
 - `[com_interface(IID)]` - An attribute that specifies a `trait` or an `impl`
   as a COM interface. The attribute results in the virtual table struct to be
   defined for the interface.
-- `[com_visible(CLSID, Itfs...)]` - An attribute defined on a `struct`. This
+- `[com_class(CLSID, Itfs...)]` - An attribute defined on a `struct`. This
   attribute creates the reference counted `CoClass` struct for the type and
   implements the basic `IUnknown` interface for it. 
 - `[com_impl]` - Finally the `[com_impl]` attribute specifies the `impl`s that
-  implement the `[com_interface]`s for the `[com_visible]` types. While the
+  implement the `[com_interface]`s for the `[com_class]` types. While the
   attribute doesn't provide any extra information for the implementation, it
   has technical reasons to exist. Its expansion is responsible for defining the
   delegating methods that know how to translate the COM call coming from the
   client into a Rust call to the user defined functions or the primary
-  `IUnknown` methods implemented by the `[com_visible]` expansion.
+  `IUnknown` methods implemented by the `[com_class]` expansion.
 
 [syntax extensions]: https://doc.rust-lang.org/1.12.0/book/compiler-plugins.html
 
@@ -137,13 +136,13 @@ struct __IFooVtbl {
 }
 ```
 
-#### `[com_visible(...)]`
+#### `[com_class(...)]`
 
 Defines the CoClass struct and the primary IUnknown implementation for the
 struct.
 
 ```rust
-#[com_visible("{...}", IFoo, IBar)]
+#[com_class("{...}", IFoo, IBar)]
 struct Foo { ... }
 
 // Expands the following items:

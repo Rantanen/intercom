@@ -10,7 +10,7 @@
 extern crate com_runtime;
 extern crate winapi;
 
-#[com_visible("{12341234-1234-1234-1234-123412340001}", Calculator, Memory)]
+#[com_class("{12341234-1234-1234-1234-123412340001}", Calculator, Memory)]
 struct Calculator {
     value : i32,
     store : Vec<i32>,

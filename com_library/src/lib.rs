@@ -172,7 +172,7 @@ pub fn try_expand_com_impl(
     Ok(())
 }
 
-pub fn try_expand_com_visible(
+pub fn try_expand_com_class(
     cx: &mut ExtCtxt,
     _sp: Span,
     mi: &MetaItem,
@@ -182,7 +182,7 @@ pub fn try_expand_com_visible(
 {
     // Get the item info the attribute is bound to.
     let struct_ident = utils::get_struct_ident_from_annotatable( item )
-            .ok_or( "[com_visible] must be applied to struct" )?;
+            .ok_or( "[com_class] must be applied to struct" )?;
     let coclass_ident = idents::coclass( &struct_ident );
     let iunk_ident = Ident::from_str( "IUnknown" );
     let query_interface_ident = idents::method_impl(
@@ -195,7 +195,7 @@ pub fn try_expand_com_visible(
     let ( clsid_guid, itfs ) = utils::get_metaitem_params( mi )
             .as_ref()
             .and_then( |ref params| params.split_first() )
-            .ok_or( "[com_visible(IID, itfs...)] must specify an IID" )
+            .ok_or( "[com_class(IID, itfs...)] must specify an IID" )
             .and_then( |( f, itfs )|
                 Ok( (
                     utils::parameter_to_guid( f )?,
@@ -392,17 +392,17 @@ pub fn try_expand_com_visible(
     Ok(())
 }
 
-/// `com_visible` MultiDecorator handler.
+/// `com_class` MultiDecorator handler.
 ///
 /// Delegates to a Result<>ful try_... variant.
-pub fn expand_com_visible(
+pub fn expand_com_class(
     cx: &mut ExtCtxt,
     sp: Span,
     mi: &MetaItem,
     item: &Annotatable,
     push: &mut FnMut( Annotatable )
 ) {
-    if let Err( err ) = try_expand_com_visible( cx, sp, mi, item, push ) {
+    if let Err( err ) = try_expand_com_class( cx, sp, mi, item, push ) {
         cx.span_err( mi.span, err );
     }
 }
@@ -671,8 +671,8 @@ pub fn registrar( reg: &mut Registry ) {
             Symbol::intern("com_library"),
             MultiDecorator( Box::new( expand_com_library ) ) );
     reg.register_syntax_extension(
-            Symbol::intern("com_visible"),
-            MultiDecorator( Box::new( expand_com_visible ) ) );
+            Symbol::intern("com_class"),
+            MultiDecorator( Box::new( expand_com_class ) ) );
     reg.register_syntax_extension(
             Symbol::intern("com_interface"),
             MultiDecorator( Box::new( expand_com_interface ) ) );
