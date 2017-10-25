@@ -17,7 +17,7 @@ Rust COM server:
 )]
 
 #[com_class("{12341234-1234-1234-1234-123412340001}")]
-struct Calculator{
+struct Calculator {
     value: i32
 }
 
@@ -26,10 +26,9 @@ struct Calculator{
 impl Calculator {
     pub fn new() -> Calculator { Calculator { value: 0 } }
 
-    pb fn add( &mut self, value: i32 ) -> com_runtime::ComResult<i32>
-    {
+    pb fn add(&mut self, value: i32) -> com_runtime::ComResult<i32> {
         self.value += value;
-        Ok( self.value )
+        Ok(self.value)
     }
 }
 ```
@@ -124,7 +123,7 @@ trait IFoo { fn method(&self, parameter: i32) -> com_runtime::Result<i8>; }
 
 // Expands the following items:
 
-const IID_IFoo: GUID = Guid::parse( "{...}" );
+const IID_IFoo : GUID = Guid::parse("{...}");
 
 struct __IFooVtbl {
     __base: com_runtime::IUnknownVtbl,
@@ -166,8 +165,8 @@ struct __FooCoClass {
 ///
 /// These are needed when we receive a call through a vtable and we need to
 /// translate the vtable pointer back to the __FooCoClass instance.
-const __Foo_IFooVtbl_offset: usize = offset_of!( __FooCoClass, vtables.IFoo );
-const __Foo_IBarVtbl_offset: usize = offset_of!( __FooCoClass, vtables.IBar );
+const __Foo_IFooVtbl_offset : usize = offset_of!(__FooCoClass, vtables.IFoo);
+const __Foo_IBarVtbl_offset : usize = offset_of!(__FooCoClass, vtables.IBar);
 
 /// Foo::IUnknown::QueryInterface
 pub unsafe extern "stdcall" fn __Foo_IUnknown_query_interface(
@@ -183,7 +182,7 @@ pub unsafe extern "stdcall" fn __Foo_IUnknown_query_interface(
         _ => return E_NOINTERFACE
     }
 
-    __Foo_IUnknown_add_ref( self_void );
+    __Foo_IUnknown_add_ref(self_void);
     S_OK
 }
 
@@ -213,7 +212,7 @@ pub unsafe extern "stdcall" fn __Foo_IUnknown_release(
 }
 
 /// Foo::IUnknown vtable
-const __Foo_IUnknownVtbl_INSTANCE: com_runtime::IUnknownVtbl
+const __Foo_IUnknownVtbl_INSTANCE : com_runtime::IUnknownVtbl
     = com_runtime::IUnknownVtbl {
         query_interface: __Foo_IUnknown_query_interface,
         add_ref: __Foo_IUnknown_add_ref,
@@ -268,11 +267,11 @@ pub unsafe extern "stdcall" fn __Foo_IFoo_method(
     &self, parameter: i32, __out: *mut i8
 ) -> HRESULT
 {
-    self_coclass = ( self_void - __Foo_IFooVtbl_offset ) as *mut __FooCoClass;
-    let result = (*self_coclass).data.method( parameter );
+    self_coclass = (self_void - __Foo_IFooVtbl_offset) as *mut __FooCoClass;
+    let result = (*self_coclass).data.method(parameter);
     match result {
-        Ok( out ) => { *__out = out; S_OK },
-        Err( e ) => e
+        Ok(out) => { *__out = out; S_OK },
+        Err(e) => e
     }
 }
 
@@ -306,7 +305,7 @@ pub unsafe extern "stdcall" fn __ClassFactory_create_instance(
 {
     let self_ptr = self_void as *mut com_runtime::ClassFactory;
     let coclass = match self_ptr.clsid {
-        CLSID_Foo => Box::into_raw( Box::new( __FooCoClass::new() ) ),
+        CLSID_Foo => Box::into_raw(Box::new(__FooCoClass::new())),
         _ => return CLASS_E_CLASSNOTAVAILABLE,
     }
 
@@ -336,11 +335,11 @@ pub unsafe extern "stdcall" fn DllGetClassObject(
     out: *mut *mut c_void
 ) -> HRESULT
 {
-    *out = Box::into_raw( Box::new( com_runtime::ClassFactory {
+    *out = Box::into_raw(Box::new(com_runtime::ClassFactory {
         vtable: &__ClassFactoryVtbl_INSTANCE,
         rc: 1,
         clsid: *rclsid,
-    } ) );
+    }));
     S_OK
 }
 ```
