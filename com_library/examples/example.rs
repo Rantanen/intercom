@@ -1,3 +1,4 @@
+#![feature(unique, shared)]
 #![feature( plugin, custom_attribute, attr_literals )]
 #![plugin( com_library )]
 #![allow(non_snake_case)]
@@ -54,6 +55,7 @@ impl Bar
     }
     fn baz( &mut self, b : u32 ) -> u16 {
         eprintln!( "baz" );
+        eprintln!( "{:p}", &self );
         self.value = b;
         ( b & 0xffff ) as u16
     }
@@ -101,24 +103,24 @@ fn main()
                     &mut bar_ptr ) );
 
         // Got the interface pointer.
-        let ibar : &mut __BarCoClass
-                = std::mem::transmute( bar_ptr );
+        let ibar : &mut com_runtime::ComBox< Bar > = std::mem::transmute( bar_ptr );
         eprintln!( "transmuted" );
-        let fun = &ibar.vtables.Bar.baz;
-        let fun2 = &ibar.vtables.Bar.baz;
-        eprintln!( "Got fns" );
+        eprintln!( "ComBox: {:p}, Value: {:p}", bar_ptr, ibar as &Bar );
+        ibar.baz( 53 );
+
+        let Bar_vtbl = com_runtime::ComBox::vtable( &ibar ).Bar;
+        let fun = Bar_vtbl.baz;
+        let fun2 = Bar_vtbl.bar;
 
         // Invoke baz()
         let baz_val = 0u16;
         eprintln!( "baz: {}",
-                (fun)(
-                    std::mem::transmute( &ibar.vtables.Bar ),
-                    53 ) );
+                (fun)( &Bar_vtbl as *const _ as usize as *mut _, 53 ) );
 
         // Invoke bar()
         let mut bar_val = 0u8;
         eprintln!( "bar: {}",
-                (ibar.vtables.Bar.bar)(
+                ( com_runtime::ComBox::vtable( &ibar ).Bar.bar)(
                     std::mem::transmute( &ibar ),
                     10,
                     &mut bar_val ) );

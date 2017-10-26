@@ -166,6 +166,132 @@ pub fn parameter_to_ident(
     None
 }
 
+trait ParamHandler {
+    fn get_arg_ty(
+        &self,
+        cx : &mut ExtCtxt,
+        ty : &P<Ty>
+    ) -> Vec<TokenTree>;
+    fn get_call_param(
+        &self,
+        cx : &mut ExtCtxt,
+        ident : &Ident,
+        ty : &P<Ty>
+    ) -> Vec<TokenTree>;
+    fn write_out_param(
+        &self,
+        cx : &mut ExtCtxt,
+        ident : &Ident,
+        ty : &P<Ty>
+    ) -> Vec<TokenTree>;
+}
+
+struct IdentityParam;
+impl ParamHandler for IdentityParam {
+    fn get_arg_ty(
+        &self,
+        cx : &mut ExtCtxt,
+        ty : &P<Ty>
+    ) -> Vec<TokenTree>
+    {
+        quote_tokens!( cx, $ty )
+    }
+    fn get_call_param(
+        &self,
+        cx : &mut ExtCtxt,
+        ident : &Ident,
+        ty : &P<Ty>
+    ) -> Vec<TokenTree>
+    {
+        quote_tokens!( cx, $ident )
+    }
+    fn write_out_param(
+        &self,
+        cx : &mut ExtCtxt,
+        ident : &Ident,
+        ty : &P<Ty>
+    ) -> Vec<TokenTree>
+    {
+        quote_tokens!( cx, *__out = r.into(); )
+    }
+}
+
+struct ComRcParam;
+impl ParamHandler for ComRcParam {
+    fn get_arg_ty(
+        &self,
+        cx : &mut ExtCtxt,
+        ty : &P<Ty>
+    ) -> Vec<TokenTree>
+    {
+        quote_tokens!( cx, com_runtime::RawComPtr )
+    }
+    fn get_call_param(
+        &self,
+        cx : &mut ExtCtxt,
+        ident : &Ident,
+        ty : &P<Ty>
+    ) -> Vec<TokenTree>
+    {
+        quote_tokens!( cx, $ident )
+    }
+    fn write_out_param(
+        &self,
+        cx : &mut ExtCtxt,
+        ident : &Ident,
+        ty : &P<Ty>
+    ) -> Vec<TokenTree>
+    {
+        let none_tokens = quote_tokens!( cx, );
+        let comrc_params = match ty.node {
+            TyKind::Path( _, ref p ) => {
+                let last_segment = &p.segments.last().unwrap();
+                match last_segment.parameters {
+                    Some( ref p ) => match **p {
+                        PathParameters::AngleBracketed( ref data ) => data,
+                        _ => return none_tokens
+                    },
+                    _ => return none_tokens
+                }
+            }
+            _ => return none_tokens
+        };
+
+        let itf_ty = match comrc_params.types.first() {
+            Some( ty ) => ty,
+            _ => return none_tokens
+        };
+
+        let itf_ident = match get_ty_ident( itf_ty ) {
+            Some( ty_ident ) => ty_ident,
+            None => panic!()
+        };
+
+        let iid_ident = super::idents::iid( &itf_ident );
+        quote_tokens!( cx,
+            com_runtime::ComRc::query_interface( &r, &$iid_ident, __out ) )
+    }
+}
+
+pub fn get_param_handler(
+    arg_ty : &P<Ty>,
+) -> Box<ParamHandler>
+{
+    match arg_ty.node {
+
+        TyKind::Path( _, ref p ) => {
+            let name : &str = &p.segments.last().unwrap().identifier.name.as_str();
+            match name {
+                "ComRc" => Box::new( ComRcParam ),
+                _ => Box::new( IdentityParam )
+            }
+        },
+
+        // Default to identity param.
+        _ => Box::new( IdentityParam )
+    }
+}
+
 pub fn get_method_args(
     cx : &mut ExtCtxt,
     m : &MethodSig
@@ -180,31 +306,37 @@ pub fn get_method_args(
 
             // Get the self arg. This is always a ComPtr.
             let mut args = vec![
-                quote_tokens!( cx, self_void : com_runtime::ComPtr, )
+                quote_tokens!( cx, self_vtable : com_runtime::RawComPtr, )
             ];
 
             // Process the remaining args into the args and params arrays.
             let mut params : Vec<Vec<TokenTree>> = vec![];
-            for ref arg_ref in other_args {
-                
-                // Get the arg for the args.
-                let arg = arg_ref.clone();
+            for arg_ref in other_args {
+
+                // Get the type handler.
+                let handler = get_param_handler( &arg_ref.ty );
+                let ty = handler.get_arg_ty( cx, &arg_ref.ty );
+                let arg_ident = Ident::from_str(
+                        &pprust::pat_to_string( &(*arg_ref.pat) ) );
+
+                // Construct the arguemnt. quote_tokens! has difficulties parsing
+                // arguments on their own so construct the Arg using quote_arg!
+                // and then push the tokens using quote_tokens!.
+                let arg = quote_arg!( cx, $arg_ident : $ty );
                 args.push( quote_tokens!( cx, $arg, ) );
 
-                // We can't just clone the arg name into param name. This will
-                // cause errors. I suspect this is because Rust attempts to use
-                // the same tokens for two different purposes that are
-                // represented by different AST nodes.
-                let param_name = Ident::from_str(
-                        &pprust::pat_to_string( &(*arg_ref.pat) ) );
-                params.push( quote_tokens!( cx, $param_name, ) );
+                // Get the call parameter.
+                let call_param = handler.get_call_param( cx, &arg_ident, &arg_ref.ty );
+                params.push( call_param );
             }
 
             // Add the [retval] arg if one exists and isn't ().
             if let Some( outs ) = get_out_and_ret( cx, m ) {
                 if let ( Some( out_ty ), _ ) = outs {
                     if ! is_unit( &out_ty.node ) {
-                        args.push( quote_tokens!( cx, __out : *mut $out_ty ) );
+                        let handler = get_param_handler( &out_ty );
+                        let ty = handler.get_arg_ty( cx, &out_ty );
+                        args.push( quote_tokens!( cx, __out : *mut $ty ) );
                     }
                 }
             } else {
@@ -309,13 +441,18 @@ pub fn get_method_rvalues(
                 } ) ),
 
         // Result<_, _>. Ok() -> __out + S_OK, Err() -> E_*
-        Some(_) => (
-            ret_ty,
-            quote_tokens!( cx,
-                match result {
-                    Ok( r ) => { *__out = r; com_runtime::S_OK },
-                    Err( e ) => e
-                } ) ),
+        Some( ref out_ty ) => {
+            let handler = get_param_handler( &out_ty );
+            let out_ident = Ident::from_str( "__out" );
+            let write_out = handler.write_out_param( cx, &out_ident, &out_ty );
+            (
+                ret_ty,
+                quote_tokens!( cx,
+                    match result {
+                        Ok( r ) => { $write_out; com_runtime::S_OK },
+                        Err( e ) => e
+                    } ) )
+        },
 
         // Not a Result<..>, assume we can return the return value as is.
         None => (

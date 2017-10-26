@@ -55,6 +55,13 @@ typedef interface IMemory IMemory;
 #endif 	/* __IMemory_FWD_DEFINED__ */
 
 
+#ifndef __ICloneable_FWD_DEFINED__
+#define __ICloneable_FWD_DEFINED__
+typedef interface ICloneable ICloneable;
+
+#endif 	/* __ICloneable_FWD_DEFINED__ */
+
+
 #ifndef __Calculator_FWD_DEFINED__
 #define __Calculator_FWD_DEFINED__
 
@@ -276,6 +283,86 @@ EXTERN_C const IID IID_IMemory;
 
 
 #endif 	/* __IMemory_INTERFACE_DEFINED__ */
+
+
+#ifndef __ICloneable_INTERFACE_DEFINED__
+#define __ICloneable_INTERFACE_DEFINED__
+
+/* interface ICloneable */
+/* [unique][helpstring][nonextensible][uuid][object] */ 
+
+
+EXTERN_C const IID IID_ICloneable;
+
+#if defined(__cplusplus) && !defined(CINTERFACE)
+    
+    MIDL_INTERFACE("12341234-1234-1234-1234-123412340004")
+    ICloneable : public IUnknown
+    {
+    public:
+        virtual /* [helpstring][id] */ HRESULT STDMETHODCALLTYPE Clone( 
+            /* [retval][out] */ ICalculator **clone) = 0;
+        
+    };
+    
+    
+#else 	/* C style interface */
+
+    typedef struct ICloneableVtbl
+    {
+        BEGIN_INTERFACE
+        
+        HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
+            ICloneable * This,
+            /* [in] */ REFIID riid,
+            /* [annotation][iid_is][out] */ 
+            _COM_Outptr_  void **ppvObject);
+        
+        ULONG ( STDMETHODCALLTYPE *AddRef )( 
+            ICloneable * This);
+        
+        ULONG ( STDMETHODCALLTYPE *Release )( 
+            ICloneable * This);
+        
+        /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *Clone )( 
+            ICloneable * This,
+            /* [retval][out] */ ICalculator **clone);
+        
+        END_INTERFACE
+    } ICloneableVtbl;
+
+    interface ICloneable
+    {
+        CONST_VTBL struct ICloneableVtbl *lpVtbl;
+    };
+
+    
+
+#ifdef COBJMACROS
+
+
+#define ICloneable_QueryInterface(This,riid,ppvObject)	\
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
+
+#define ICloneable_AddRef(This)	\
+    ( (This)->lpVtbl -> AddRef(This) ) 
+
+#define ICloneable_Release(This)	\
+    ( (This)->lpVtbl -> Release(This) ) 
+
+
+#define ICloneable_Clone(This,clone)	\
+    ( (This)->lpVtbl -> Clone(This,clone) ) 
+
+#endif /* COBJMACROS */
+
+
+#endif 	/* C style interface */
+
+
+
+
+#endif 	/* __ICloneable_INTERFACE_DEFINED__ */
 
 
 EXTERN_C const CLSID CLSID_Calculator;

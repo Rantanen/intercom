@@ -41,6 +41,19 @@ library Calculator
         HRESULT Recall([in] size_t value );
     };
 
+    [
+        object,
+        uuid(12341234-1234-1234-1234-123412340004),
+        nonextensible,
+        helpstring("ICloneable interface"),
+        pointer_default(unique)
+    ]
+    interface ICloneable : IUnknown
+    {
+        [id(1), helpstring( "Clones the calculator" )]
+        HRESULT Clone([out, retval] ICalculator** clone);
+    };
+
     importlib("stdole2.tlb");
     [
         uuid(12341234-1234-1234-1234-123412340001),

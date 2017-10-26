@@ -1,13 +1,6 @@
 
 use syntax::ast::Ident;
 
-pub fn coclass(
-    struct_name: &Ident
-) -> Ident
-{
-    Ident::from_str( &format!( "__{}CoClass", struct_name ) )
-}
-
 pub fn clsid(
     struct_name: &Ident
 ) -> Ident
