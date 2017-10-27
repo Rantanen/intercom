@@ -2,11 +2,14 @@
 #![feature(unique, shared)]
 
 use std::ptr;
+mod classfactory;
+
+pub use classfactory::*;
 
 // <3 winapi
 // (Re-defining these here as not to pull the whole winapi as dev dependency)
 #[repr(C)]
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Clone)]
 pub struct GUID {
     pub data1: u32,
     pub data2: u16,
@@ -29,7 +32,13 @@ pub const E_NOINTERFACE : HRESULT = 0x80004002 as HRESULT;
 
 #[allow(non_upper_case_globals)]
 pub const IID_IUnknown : GUID = GUID {
-    data1: 0, data2: 0, data3: 0,
+    data1: 0x00000000, data2: 0x0000, data3: 0x0000,
+    data4: [ 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 ]
+};
+
+#[allow(non_upper_case_globals)]
+pub const IID_IClassFactory : GUID = GUID {
+    data1: 0x00000001, data2: 0x0000, data3: 0x0000,
     data4: [ 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 ]
 };
 
@@ -57,7 +66,7 @@ pub struct ComBox< T: CoClass > {
 
 impl<T: CoClass> ComBox<T> {
 
-    pub fn allocate( value : T ) -> ptr::Unique<ComBox<T>> {
+    pub fn new_ptr( value : T ) -> ptr::Unique<ComBox<T>> {
         Box::into_unique( Box::new( ComBox {
             vtable_list: T::create_vtable_list(),
             ref_count: 1,
@@ -71,23 +80,46 @@ impl<T: CoClass> ComBox<T> {
     }
 
     pub unsafe fn release( this : *mut Self ) -> u32 {
+
+        // Ensure we're not releasing an interface that has no references.
+        //
+        // Note: If the interface has no references, it has already been
+        // dropped. As a result we can't guarantee that it's ref_count stays
+        // as zero as the memory could have been reallocated for something else.
+        //
+        // However this is still an effective check in the case where the client
+        // attempts to release a com pointer twice and the memory hasn't been
+        // reused.
+        //
+        // It might not be deterministic, but in the cases where it triggers
+        // it's way better than the access violation error we'd otherwise get.
+        if (*this).ref_count == 0 {
+            panic!( "Attempt to release pointer with no references." );
+        }
+
+        // Decrease the ref count and store a copy of it. We'll need a local
+        // copy for a return value in case we end up dropping the ComBox
+        // instance. after the drop referencing *this would be undeterministic.
         (*this).ref_count -= 1;
         let rc = (*this).ref_count;
 
         // If that was the last reference we can drop self. Do this by giving
         // it back to a box and then dropping the box. This should reverse the
         // allocation we did by boxing the value in the first place.
-        if rc == 0 {
-            drop( Box::from_raw( this ) );
-        }
+        if rc == 0 { drop( Box::from_raw( this ) ); }
         rc
+    }
+
+    pub unsafe fn from_ptr<'a>( ptr : RawComPtr ) -> &'a mut ComBox< T >
+    {
+        &mut *( ptr as *mut ComBox< T > )
     }
 
     pub unsafe extern "stdcall" fn add_ref_ptr(
         self_iunk : RawComPtr
     ) -> u32
     {
-        ComBox::add_ref( &mut *( self_iunk as *mut ComBox< T > ) )
+        ComBox::add_ref( ComBox::<T>::from_ptr( self_iunk ) )
     }
 
     pub unsafe extern "stdcall" fn release_ptr(
@@ -101,11 +133,33 @@ impl<T: CoClass> ComBox<T> {
         &this.vtable_list
     }
 
+    /// Gets the ComBox holding the value.
+    ///
+    /// This is unsafe for two reasons:
+    /// - Most importantly the method makes the assumption that there is
+    ///   a ComBox around the value. If there is none, the behavior is
+    ///   undefined.
+    /// - Secondly the method returns a mutable reference to the ComBox. The
+    ///   caller already has a mutable reference to the value within that
+    ///   ComBox. As a result, the caller now gets two mutable references to
+    ///   the value. The caller should not attempt to modify the value through
+    ///   the ComBox itself.
+    pub unsafe fn of( value : &mut T ) -> &mut ComBox< T > {
+
+        let combox_loc = value as *mut T as usize - Self::value_offset();
+        &mut *( combox_loc as *mut ComBox< T > )
+    }
+
     #[inline(always)]
     pub unsafe fn null_vtable() -> &'static T::VTableList {
         let null_combox =
                 std::ptr::null() as *const ComBox< T >;
         &(*null_combox).vtable_list
+    }
+
+    fn value_offset() -> usize {
+        let null_combox = std::ptr::null() as *const ComBox<T>;
+        unsafe { &( (*null_combox).value ) as *const _ as usize }
     }
 }
 
@@ -131,7 +185,7 @@ pub struct ComRc< T: CoClass > {
 impl<T> ComRc<T> where T : CoClass {
     pub fn new( value : T ) -> ComRc<T> {
         ComRc {
-            ptr: ptr::Shared::from( ComBox::allocate( value ) )
+            ptr: ptr::Shared::from( ComBox::new_ptr( value ) )
         }
     }
 
@@ -170,72 +224,6 @@ pub struct IUnknownVtbl
     ) -> HRESULT,
     pub add_ref: unsafe extern "stdcall" fn( s : RawComPtr ) -> u32,
     pub release: unsafe extern "stdcall" fn( s : RawComPtr ) -> u32,
-}
-
-#[allow(non_camel_case_types)]
-pub struct __ClassFactory_vtable {
-    pub __base: IUnknownVtbl,
-    pub create_instance: unsafe extern "stdcall" fn( RawComPtr, RawComPtr, REFIID, *mut RawComPtr ) -> HRESULT,
-    pub lock_server: unsafe extern "stdcall" fn( RawComPtr, bool ) -> HRESULT
-}
-
-pub struct ClassFactory {
-    pub __vtable : &'static __ClassFactory_vtable,
-    pub clsid : REFCLSID,
-    pub rc : u32
-}
-
-impl ClassFactory {
-
-    pub unsafe extern "stdcall" fn query_interface(
-        self_void : RawComPtr,
-        _riid : REFIID,
-        out : *mut RawComPtr
-    ) -> HRESULT {
-        // Query interface needs to increment RC.
-        let self_ptr : *mut ClassFactory = std::mem::transmute( self_void );
-        (*self_ptr).rc += 1;
-        *out = self_void;
-        S_OK
-    }
-
-    pub unsafe extern "stdcall" fn add_ref(
-        self_void : RawComPtr
-    ) -> u32 {
-        let self_ptr : *mut ClassFactory = std::mem::transmute( self_void );
-        (*self_ptr).rc += 1;
-        (*self_ptr).rc
-    }
-
-    pub unsafe extern "stdcall" fn release(
-        self_void : RawComPtr
-    ) -> u32 {
-        let self_ptr : *mut ClassFactory = std::mem::transmute( self_void );
-
-        // We need a copy of the rc value in case we end up
-        // dropping the ptr. We can't reference it during
-        // return at that point.
-        (*self_ptr).rc -= 1;
-        let rc = (*self_ptr).rc;
-        if rc == 0 {
-            // Take ownership of the ptr and let it go out
-            // of scope to destroy it.
-            Box::from_raw( self_ptr );
-        }
-        rc
-    }
-
-    pub unsafe extern "stdcall" fn lock_server(
-        self_void : RawComPtr,
-        lock : bool
-    ) -> HRESULT {
-        if lock {
-            ClassFactory::add_ref( self_void );
-        } else {
-            ClassFactory::release( self_void );
-        }
-        S_OK
-    }
 }
 
 pub type ComResult<A> = Result<A, HRESULT>;

@@ -74,8 +74,22 @@ impl BarItf for Bar {
     fn stuff( &self, a : u32 ) -> com_runtime::ComResult<u16> { Ok(123) }
 }
 
+fn create( clsid : com_runtime::GUID ) -> com_runtime::ComResult< com_runtime::RawComPtr >
+{
+    Err( com_runtime::S_OK )
+}
+
+struct CF {
+    clsid : com_runtime::REFCLSID
+}
+
 fn main()
 {
+    let dummy_classfactory = com_runtime::ClassFactory::new( &CLSID_Bar, |clsid| Err( com_runtime::S_OK ) );
+    println!("Class factory size: {}, expected: {}",
+        std::mem::size_of_val(&dummy_classfactory),
+        std::mem::size_of::<usize>());
+
     // Horrible Rust code ahead. This mimics the C++ calls.
     unsafe {
 
@@ -87,17 +101,20 @@ fn main()
 
         // Acquire the class factory.
         eprintln!( "DllGetClassObject: {}",
-                  DllGetClassObject( &mut clsid, &mut iid, &mut classFactory_ptr ) );
+                  DllGetClassObject( &mut clsid, &mut com_runtime::IID_IClassFactory, &mut classFactory_ptr ) );
 
-        // Got the class factory pointer. Cast to class factory.
-        let classFactory : &mut com_runtime::ClassFactory
-                = std::mem::transmute( classFactory_ptr );
+        // Got the class factory pointer.
+        //
+        // The vtable is a the start of the struct and we asked for the
+        // IClassFactory interface, we can consider the pointer to the class
+        // factory as a pointer to a IClassFactory vtable pointer.
+        let classFactory_vtbl_ptr_ptr = classFactory_ptr as *const *const com_runtime::ClassFactoryVtbl;
 
         // Invoke the create instance method.
         let mut bar_ptr = std::mem::transmute( std::ptr::null::<c_void>() );
         eprintln!( "create_instance: {}",
-                (classFactory.__vtable.create_instance)(
-                    std::mem::transmute( classFactory ),  // &this
+                ((**classFactory_vtbl_ptr_ptr).create_instance)(
+                    classFactory_ptr,  // &this
                     std::mem::transmute( std::ptr::null::<c_void>() ),
                     &mut iid,
                     &mut bar_ptr ) );
@@ -127,23 +144,4 @@ fn main()
 
         eprintln!( "Result: {}", bar_val );
     }
-
-    /*
-    let f = Foo {};
-    println!( "{}", f.bar( 0 ).unwrap() );
-
-    let mut f = Box::new( __Foo_ptr::new() );
-    {
-        let f_ptr = Box::into_raw( f );
-        let f_ptr_cvoid = f_ptr as *mut c_void;
-        let mut ret_val : u8 = 0;
-        let result = {
-            let ret_val_ptr : *mut u8
-                    = &mut ret_val as *mut _;
-            // unsafe { ((*f_ptr).vtables.Bar.bar)( f_ptr_cvoid, 0, ret_val_ptr ) }
-            unsafe { __Foo_IFoo_bar( f_ptr_cvoid, 0, ret_val_ptr ) }
-        };
-        println!( "Result: {} ({})", ret_val, result );
-    }
-    */
 }

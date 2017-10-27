@@ -386,66 +386,12 @@ pub fn try_expand_com_library(
         let struct_ident = Ident::from_str( &struct_ident.as_str() );
         let clsid_name = idents::clsid( &struct_ident );
         match_arms.push( quote_tokens!( cx,
-            self::$clsid_name => {
-                com_runtime::ComBox::allocate( $struct_ident::new() )
-                        .as_ptr() as com_runtime::RawComPtr
-            },
+            self::$clsid_name =>
+                Ok( com_runtime::ComBox::new_ptr(
+                        $struct_ident::new()
+                    ).as_ptr() as com_runtime::RawComPtr ),
         ) );
     }
-
-    // Define the ClassFactory create_instance function.
-    // 
-    // This function is responsible for constructing all of our COM coclasses.
-    let create_instance_ident = Ident::from_str( "__ClassFactory_create_instance" );
-    let create_instance_def = quote_item!(
-        cx,
-        #[allow(non_snake_case)]
-        #[allow(dead_code)]
-        pub unsafe extern "stdcall" fn $create_instance_ident(
-            self_vtable: com_runtime::RawComPtr,
-            _outer : com_runtime::RawComPtr,
-            _iid : com_runtime::REFIID,
-            out : *mut com_runtime::RawComPtr
-        ) -> com_runtime::HRESULT
-        {
-            // Turn the *c_void to a ClassFactory pointer.
-            let self_ptr : *mut com_runtime::ClassFactory = std::mem::transmute( self_vtable );
-
-            // Match based on the clsid.
-            #[allow(non_upper_case_globals)]
-            let out_ptr = match *(*self_ptr).clsid {
-                $match_arms
-                _ => {
-                    return com_runtime::E_NOINTERFACE
-                }
-            };
-
-            // Return the created instance.
-            *out = out_ptr;
-            com_runtime::S_OK
-        } ).unwrap();
-    push( Annotatable::Item( create_instance_def ) );
-
-    // Create the ClassFactory vtable instance.
-    // 
-    // Most of the vtable is static, but the create_instance needs to be
-    // defined per library.
-    let vtable_instance_ident = Ident::from_str( "__ClassFactory_vtable_instance" );
-    let vtable_instance = quote_item!(
-        cx,
-        #[allow(non_upper_case_globals)]
-        const $vtable_instance_ident : com_runtime::__ClassFactory_vtable =
-                com_runtime::__ClassFactory_vtable {
-                    __base : com_runtime::IUnknownVtbl {
-                        query_interface : com_runtime::ClassFactory::query_interface,
-                        add_ref : com_runtime::ClassFactory::add_ref,
-                        release : com_runtime::ClassFactory::release,
-                    },
-                    create_instance: $create_instance_ident,
-                    lock_server : com_runtime::ClassFactory::lock_server,
-                };
-    ).unwrap();
-    push( Annotatable::Item( vtable_instance ) );
 
     // Implement DllGetClassObject.
     //
@@ -464,21 +410,17 @@ pub fn try_expand_com_library(
             pout : *mut com_runtime::RawComPtr
         ) -> com_runtime::HRESULT
         {
-            // Create a ClassFactory. Save an add_ref by defining the
-            // reference count as 1.
-            let classFactory = Box::new( com_runtime::ClassFactory {
-                __vtable : &$vtable_instance_ident,
-                clsid : rclsid,
-                rc : 1
-            } );
+            // Create new class factory.
+            // Specify a create function that is able to create all the contained
+            // coclasses.
+            *pout = com_runtime::ComBox::new_ptr(
+                com_runtime::ClassFactory::new( rclsid, | clsid | {
 
-            // Detach the class factory form the Box. This prevents it from
-            // being destroyed when the Box is dropped. We need to handle the
-            // destruction in release() manually.
-            let ptrClassFactory = Box::into_raw( classFactory );
-
-            // Assign to output and return OK.
-            *pout = ptrClassFactory as com_runtime::RawComPtr;
+                    match *clsid {
+                        $match_arms
+                        _ => Err( com_runtime::E_NOINTERFACE ),
+                    }
+                } ) ).as_ptr() as com_runtime::RawComPtr;
             com_runtime::S_OK
         }
     ).unwrap();
