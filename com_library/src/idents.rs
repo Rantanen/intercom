@@ -49,13 +49,6 @@ pub fn vtable_list(
     Ident::from_str( &format!( "__{}VtblList", struct_ident.name ).as_str() )
 }
 
-pub fn vtable_list_instance(
-    struct_ident : &Ident
-) -> Ident
-{
-    Ident::from_str( &format!( "__{}VtblList_INSTANCE", struct_ident.name ).as_str() )
-}
-
 pub fn vtable_offset(
     s : &Ident,
     i : &Ident

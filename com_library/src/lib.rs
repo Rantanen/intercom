@@ -60,10 +60,6 @@ pub fn try_expand_com_impl(
     let iunk_ident = Ident::from_str( "IUnknown" );
     let primary_query_interface_ident = idents::method_impl(
             &struct_ident, &iunk_ident, "query_interface" );
-    let primary_add_ref_ident = idents::method_impl(
-            &struct_ident, &iunk_ident, "add_ref" );
-    let primary_release_ident = idents::method_impl(
-            &struct_ident, &iunk_ident, "release" );
 
     /////////////////////
     // $itf::QueryInterface, AddRef & Release
@@ -186,10 +182,6 @@ pub fn try_expand_com_class(
     let iunk_ident = Ident::from_str( "IUnknown" );
     let query_interface_ident = idents::method_impl(
             &struct_ident, &iunk_ident, "query_interface" );
-    let add_ref_ident = idents::method_impl(
-            &struct_ident, &iunk_ident, "add_ref" );
-    let release_ident = idents::method_impl(
-            &struct_ident, &iunk_ident, "release" );
 
     let ( clsid_guid, itfs ) = utils::get_metaitem_params( mi )
             .as_ref()
@@ -335,7 +327,7 @@ pub fn try_expand_com_class(
     let clsid_const = quote_item!(
         cx,
         #[allow(non_upper_case_globals)]
-        const $clsid_ident : com_runtime::GUID = $clsid_guid_tokens;
+        const $clsid_ident : com_runtime::CLSID = $clsid_guid_tokens;
     ).unwrap();
     push( Annotatable::Item( clsid_const ) );
 
@@ -470,7 +462,7 @@ pub fn try_expand_com_interface(
     push( Annotatable::Item(
         quote_item!( cx,
             #[allow(non_upper_case_globals)]
-            const $iid_ident : com_runtime::GUID = $iid_tokens;
+            const $iid_ident : com_runtime::IID = $iid_tokens;
         ).unwrap()
     ) );
 

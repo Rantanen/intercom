@@ -200,7 +200,7 @@ impl ParamHandler for IdentityParam {
         &self,
         cx : &mut ExtCtxt,
         ident : &Ident,
-        ty : &P<Ty>
+        _ty : &P<Ty>
     ) -> Vec<TokenTree>
     {
         quote_tokens!( cx, $ident )
@@ -209,10 +209,10 @@ impl ParamHandler for IdentityParam {
         &self,
         cx : &mut ExtCtxt,
         ident : &Ident,
-        ty : &P<Ty>
+        _ty : &P<Ty>
     ) -> Vec<TokenTree>
     {
-        quote_tokens!( cx, *__out = r.into(); )
+        quote_tokens!( cx, *$ident = r.into(); )
     }
 }
 
@@ -221,7 +221,7 @@ impl ParamHandler for ComRcParam {
     fn get_arg_ty(
         &self,
         cx : &mut ExtCtxt,
-        ty : &P<Ty>
+        _ty : &P<Ty>
     ) -> Vec<TokenTree>
     {
         quote_tokens!( cx, com_runtime::RawComPtr )
@@ -230,7 +230,7 @@ impl ParamHandler for ComRcParam {
         &self,
         cx : &mut ExtCtxt,
         ident : &Ident,
-        ty : &P<Ty>
+        _ty : &P<Ty>
     ) -> Vec<TokenTree>
     {
         quote_tokens!( cx, $ident )
@@ -269,11 +269,11 @@ impl ParamHandler for ComRcParam {
 
         let iid_ident = super::idents::iid( &itf_ident );
         quote_tokens!( cx,
-            com_runtime::ComRc::query_interface( &r, &$iid_ident, __out ) )
+            com_runtime::ComRc::query_interface( &r, &$iid_ident, $ident ) )
     }
 }
 
-pub fn get_param_handler(
+fn get_param_handler(
     arg_ty : &P<Ty>,
 ) -> Box<ParamHandler>
 {
