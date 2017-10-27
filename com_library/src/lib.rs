@@ -120,13 +120,13 @@ pub fn try_expand_com_impl(
 
     // Implement the delegating calls for the coclass.
     for ( method_ident, method_sig ) in fns {
-        let _res : Result<(), ()> = do catch {
+        let field = do catch {
 
             // Get the self argument and the remaining args.
             let ( args, params ) =
-                    utils::get_method_args( cx, method_sig ).ok_or(())?;
+                    utils::get_method_args( cx, method_sig )?;
             let ( ret_ty, return_statement ) =
-                    utils::get_method_rvalues( cx, &method_sig ).ok_or(())?;
+                    utils::get_method_rvalues( cx, &method_sig )?;
 
             let method_impl_ident = idents::method_impl(
                 &struct_ident,
@@ -151,12 +151,11 @@ pub fn try_expand_com_impl(
                     $return_statement
                 }
             ).unwrap() ) );
-            vtable_fields.push( quote_tokens!( cx,
-                    $method_ident : $method_impl_ident, ) );
 
-
-            Ok(())
+            Some( quote_tokens!( cx, $method_ident : $method_impl_ident, ) )
         };
+
+        if let Some( f ) = field { vtable_fields.push( f ) }
     }
 
     push( Annotatable::Item( quote_item!( cx,
@@ -480,13 +479,15 @@ pub fn try_expand_com_interface(
     // The impl may have various kinds of items - we only support the ones that
     // seem okay so there's a bit of continue'ing involved in the for-loop.
     for ( method_ident, method_sig ) in fns {
-        let _res : Result<(), ()> = do catch {
+
+        // Try to get the method declaration.
+        let method = do catch {
 
             // Get the self argument and the remaining args.
             let ( args, _) =
-                    utils::get_method_args( cx, method_sig ).ok_or(())?;
+                    utils::get_method_args( cx, method_sig )?;
             let ( ret_ty, _ ) =
-                    utils::get_method_rvalues( cx, &method_sig ).ok_or(())?;
+                    utils::get_method_rvalues( cx, &method_sig )?;
 
             // Create the vtable field and add it to the vector of fields.
             let vtable_method_decl = quote_tokens!(
@@ -495,10 +496,12 @@ pub fn try_expand_com_interface(
                 $method_ident :
                     unsafe extern "stdcall" fn( $args ) -> $ret_ty,
             );
-            fields.push( vtable_method_decl );
 
-            Ok(())
+            Some( vtable_method_decl )
         };
+        
+        // If the method was valid push it to the fields.
+        if let Some( m ) = method { fields.push( m ) }
     }
 
     // Create the vtable. We've already gathered all the vtable method
@@ -507,6 +510,7 @@ pub fn try_expand_com_interface(
     let vtable = quote_item!(
         cx,
         #[allow(non_camel_case_types)]
+        #[repr(C)]
         pub struct $vtable_ident { $fields }
     ).unwrap();
     push( Annotatable::Item( vtable ) );
