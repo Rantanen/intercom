@@ -58,10 +58,6 @@ pub fn try_expand_com_impl(
     let release_ident = idents::method_impl(
             &struct_ident, &itf_ident, "release" );
 
-    let iunk_ident = Ident::from_str( "IUnknown" );
-    let primary_query_interface_ident = idents::method_impl(
-            &struct_ident, &iunk_ident, "query_interface" );
-
     /////////////////////
     // $itf::QueryInterface, AddRef & Release
     //
@@ -78,8 +74,10 @@ pub fn try_expand_com_impl(
                 // Get the primary iunk interface by offsetting the current
                 // self_vtable with the vtable offset. Once we have the primary
                 // pointer we can delegate the call to the primary implementation.
-                let iunk_void = ( self_vtable as usize - $vtable_offset() ) as com_runtime::RawComPtr;
-                $primary_query_interface_ident( iunk_void, riid, out )
+                com_runtime::ComBox::< $struct_ident >::query_interface(
+                        &mut *(( self_vtable as usize - $vtable_offset() ) as *mut _ ),
+                        riid,
+                        out )
             }
         ).unwrap() ) );
     push( Annotatable::Item( quote_item!( cx,
@@ -180,8 +178,6 @@ pub fn try_expand_com_class(
     let struct_ident = utils::get_struct_ident_from_annotatable( item )
             .ok_or( "[com_class] must be applied to struct" )?;
     let iunk_ident = Ident::from_str( "IUnknown" );
-    let query_interface_ident = idents::method_impl(
-            &struct_ident, &iunk_ident, "query_interface" );
 
     let ( clsid_guid, itfs ) = utils::get_metaitem_params( mi )
             .as_ref()
@@ -202,7 +198,11 @@ pub fn try_expand_com_class(
     // the IUnknown we need.
     let mut match_arms = vec![
         quote_tokens!(
-            cx, com_runtime::IID_IUnknown => self_iunk,
+            cx, com_runtime::IID_IUnknown =>
+                ( &vtables._IUnknown )
+                    as *const &com_runtime::IUnknownVtbl
+                    as *mut &com_runtime::IUnknownVtbl
+                    as com_runtime::RawComPtr,
         ) ];
 
     // The vtable fields.
@@ -259,8 +259,10 @@ pub fn try_expand_com_class(
         // be the vtable corresponding to the given IID so we'll just offset
         // the self_vtable by the vtable offset.
         match_arms.push( quote_tokens!(
-            cx, self::$iid_ident =>
-                ( self_iunk as usize + $offset_ident() ) as com_runtime::RawComPtr,
+            cx, self::$iid_ident => &vtables.$itf
+                    as *const &$vtable_struct_ident
+                    as *mut &$vtable_struct_ident
+                    as com_runtime::RawComPtr,
         ) );
     }
 
@@ -270,30 +272,10 @@ pub fn try_expand_com_class(
     // The primary add_ref and release. As these are on the IUnknown interface
     // the self_vtable here points to the start of the ComRef structure.
     push( Annotatable::Item( quote_item!( cx,
-            #[allow(non_snake_case)]
-            #[allow(dead_code)]
-            pub unsafe extern "stdcall" fn $query_interface_ident(
-                self_iunk : com_runtime::RawComPtr,
-                riid : com_runtime::REFIID,
-                out : *mut com_runtime::RawComPtr
-            ) -> com_runtime::HRESULT
-            {
-                *out = match *riid {
-                    $match_arms
-                    _ => return com_runtime::E_NOINTERFACE
-                };
-
-                // We did *out assignment. Add reference count.
-                com_runtime::ComBox::< $struct_ident >::add_ref_ptr( self_iunk );
-
-                com_runtime::S_OK
-            }
-        ).unwrap() ) );
-    push( Annotatable::Item( quote_item!( cx,
             #[allow(non_upper_case_globals)]
             const $iunk_vtable_instance_ident : com_runtime::IUnknownVtbl
                     = com_runtime::IUnknownVtbl {
-                        query_interface : $query_interface_ident,
+                        query_interface : com_runtime::ComBox::< $struct_ident >::query_interface_ptr,
                         add_ref : com_runtime::ComBox::< $struct_ident >::add_ref_ptr,
                         release : com_runtime::ComBox::< $struct_ident >::release_ptr,
                     };
@@ -325,6 +307,16 @@ pub fn try_expand_com_class(
                     $vtable_list_ident {
                         $vtable_list_field_values
                     }
+                }
+                fn query_interface(
+                    vtables : &Self::VTableList,
+                    riid : com_runtime::REFIID,
+                ) -> com_runtime::ComResult< com_runtime::RawComPtr > {
+                    if riid.is_null() { return Err( com_runtime::E_NOINTERFACE ) }
+                    Ok( match *unsafe { &*riid } {
+                        $match_arms
+                        _ => return Err( com_runtime::E_NOINTERFACE )
+                    } )
                 }
             }
         ).unwrap() ) );

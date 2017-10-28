@@ -31,9 +31,27 @@ pub type HRESULT = i32;
 /// HRESULT indicating the opration completed successfully.
 pub const S_OK : HRESULT = 0;
 
+
+
+/// HRESULT for unimplemented functionality.
+#[allow(overflowing_literals)]
+pub const E_NOTIMPL : HRESULT = 0x80004001 as HRESULT;
+
 /// HRESULT indicating the type does not support the requested interface.
 #[allow(overflowing_literals)]
 pub const E_NOINTERFACE : HRESULT = 0x80004002 as HRESULT;
+
+/// HRESULT indicating a pointer parameter was invalid.
+#[allow(overflowing_literals)]
+pub const E_POINTER : HRESULT = 0x80004003 as HRESULT;
+
+/// HRESULT for aborted operation.
+#[allow(overflowing_literals)]
+pub const E_ABORT : HRESULT = 0x80004004 as HRESULT;
+
+/// HRESULT for unspecified failure.
+#[allow(overflowing_literals)]
+pub const E_FAIL : HRESULT = 0x80004005 as HRESULT;
 
 /// IUnknown interface ID.
 #[allow(non_upper_case_globals)]

@@ -89,11 +89,6 @@ fn main()
     // Horrible Rust code ahead. This mimics the C++ calls.
     unsafe {
 
-        // DllGetClassObject params. Null value for the return value.
-        // It will be assigned by the DllGetClassObject.
-        let mut clsid = com_runtime::GUID::parse( "{12341234-1234-1234-1234-123412340003}" ).unwrap();
-        let mut iid = com_runtime::GUID::parse( "{12341234-1234-1234-1234-123412340004}" ).unwrap();
-
         // Acquire the class factory.
         let mut classFactory = std::mem::uninitialized();
         eprintln!( "DllGetClassObject: {}",
@@ -117,6 +112,10 @@ fn main()
                     std::mem::transmute( std::ptr::null::<c_void>() ),
                     &com_runtime::IID_IUnknown,
                     &mut bar_iunk ) );
+        eprintln!( "- Received: {:p}, with vtable {:p} (Expected {:p})",
+                   bar_iunk,
+                   *( bar_iunk as *const com_runtime::RawComPtr ),
+                   &__Bar_IUnknownVtbl_INSTANCE );
 
         // Invoke the create instance method.
         //
@@ -129,6 +128,10 @@ fn main()
                     std::mem::transmute( std::ptr::null::<c_void>() ),
                     &IID_Bar,
                     &mut bar_bar ) );
+        eprintln!( "- Received: {:p}, with vtable {:p} (Expected {:p})",
+                   bar_bar,
+                   *( bar_bar as *const com_runtime::RawComPtr ),
+                   &__Bar_BarVtbl_INSTANCE );
 
         let mut bar_bar_iunk = std::mem::uninitialized();
         eprintln!( "Querying IUnknown on Bar::Bar" );

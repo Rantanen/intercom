@@ -55,7 +55,7 @@ impl<T: CoClass> Drop for ComRc<T> {
 }
 
 impl<T : CoClass> std::convert::Into< RawComPtr > for ComRc<T> {
-    fn into(self) -> *mut std::os::raw::c_void {
+    fn into(self) -> RawComPtr {
         self.ptr.as_ptr() as RawComPtr
     }
 }

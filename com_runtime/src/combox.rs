@@ -7,6 +7,10 @@ use super::*;
 pub trait CoClass {
     type VTableList: AsRef<IUnknownVtbl>;
     fn create_vtable_list() -> Self::VTableList;
+    fn query_interface(
+        vtables : &Self::VTableList,
+        riid : REFIID,
+    ) -> ComResult< RawComPtr >;
 }
 
 /// Type factory for the concrete COM coclass types.
@@ -48,6 +52,40 @@ impl<T: CoClass> ComBox<T> {
             ref_count: 1,
             value: value,
         } ) )
+    }
+
+    pub fn as_comptr( &self ) -> RawComPtr
+    {
+        ( &self.vtable_list as &AsRef<IUnknownVtbl> ).as_ref()
+                as *const IUnknownVtbl
+                as *mut IUnknownVtbl
+                as RawComPtr
+    }
+
+    /// Acquires a specific interface pointer.
+    ///
+    /// Increments the reference count to include the reference through the
+    /// returned interface pointer.
+    ///
+    /// The acquired interface must be released explicitly when not needed
+    /// anymore.
+    ///
+    /// The method isn't technically unsafe in regard to Rust unsafety, but
+    /// it's marked as unsafe to discourage it's use due to high risks of
+    /// memory leaks.
+    pub unsafe fn query_interface(
+        this : &mut Self,
+        riid : REFIID,
+        out : *mut RawComPtr,
+    ) -> HRESULT {
+
+        eprintln!( "ComBox::query_interface" );
+        let hr = match T::query_interface( &this.vtable_list, riid ) {
+            Ok( ptr ) => { *out = ptr; Self::add_ref( this ); S_OK },
+            Err( e ) => { *out = std::ptr::null_mut(); e },
+        };
+        eprintln!( "- Result: {:p} -> {:p}", &this, *out );
+        hr
     }
 
     /// Increments the reference count.
@@ -116,6 +154,16 @@ impl<T: CoClass> ComBox<T> {
         &mut *( ptr as *mut ComBox< T > )
     }
 
+    /// Pointer variant of the `query_interface` function.
+    pub unsafe extern "stdcall" fn query_interface_ptr(
+        self_iunk : RawComPtr,
+        riid : REFIID,
+        out : *mut RawComPtr,
+    ) -> HRESULT
+    {
+        ComBox::query_interface( ComBox::<T>::from_ptr( self_iunk ), riid, out )
+    }
+
     /// Pointer variant of the `add_ref` function.
     pub unsafe extern "stdcall" fn add_ref_ptr(
         self_iunk : RawComPtr
@@ -158,9 +206,8 @@ impl<T: CoClass> ComBox<T> {
 
         // Resolve the offset of the 'value' field.
         let null_combox = std::ptr::null() as *const ComBox<T>;
-        let value_offset = unsafe {
-            &( (*null_combox).value ) as *const _ as usize
-        };
+        let value_offset = 
+            &( (*null_combox).value ) as *const _ as usize;
 
         let combox_loc = value as *mut T as usize - value_offset;
         &mut *( combox_loc as *mut ComBox< T > )

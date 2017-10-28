@@ -18,6 +18,19 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > CoClass for ClassFactory<T> 
     fn create_vtable_list() -> Self::VTableList {
         ClassFactory::<T>::create_vtable()
     }
+    fn query_interface(
+        vtables : &Self::VTableList,
+        riid : REFIID,
+    ) -> ComResult< RawComPtr >
+    {
+        if riid.is_null() { return Err( E_NOINTERFACE ) }
+        unsafe { match *riid {
+            super::IID_IUnknown | super::IID_IClassFactory =>
+                    Ok( vtables as *const _ as RawComPtr ),
+            _ => return Err( E_NOINTERFACE ),
+        } }
+    }
+
 }
 
 impl AsRef<IUnknownVtbl> for ClassFactoryVtbl {
@@ -32,27 +45,18 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
         Self { clsid, create_instance }
     }
 
-    pub unsafe extern "stdcall" fn query_interface(
-        self_vtbl : RawComPtr,
-        riid : REFIID,
-        out : *mut RawComPtr,
-    ) -> HRESULT
-    {
-        *out = match *riid {
-            IID_IUnknown | IID_IClassFactory => self_vtbl,
-            _ => return E_NOINTERFACE,
-        };
-
-        S_OK
-    }
-
     pub unsafe extern "stdcall" fn create_instance(
         self_vtbl : RawComPtr,
-        outer : RawComPtr,
+        _outer : RawComPtr,
         riid : REFIID,
         out : *mut RawComPtr,
     ) -> HRESULT
     {
+        *out = std::ptr::null_mut();
+        if out.is_null() {
+            return E_POINTER
+        }
+
         let cb = ComBox::< Self >::from_ptr( self_vtbl );
 
         let iunk_ptr = match (cb.create_instance)( cb.clsid ) {
@@ -73,17 +77,17 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
         lock : bool
     ) -> HRESULT
     {
-        // match lock {
-            // true => ComBox::add_ref_ptr( self_vtbl ),
-            // false => ComBox::release_ptr( self_vtbl ),
-        // };
+        match lock {
+            true => ComBox::<Self>::add_ref_ptr( self_vtbl ),
+            false => ComBox::<Self>::release_ptr( self_vtbl ),
+        };
         S_OK
     }
 
     pub fn create_vtable() -> &'static ClassFactoryVtbl {
         &ClassFactoryVtbl {
             __base : IUnknownVtbl {
-                query_interface : Self::query_interface,
+                query_interface : ComBox::< Self >::query_interface_ptr,
                 add_ref : ComBox::< Self >::add_ref_ptr,
                 release : ComBox::< Self >::release_ptr,
             },
