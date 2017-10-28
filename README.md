@@ -151,92 +151,69 @@ struct Foo { ... }
 
 ```rust
 /// List of vtables for all the interfaces implemented by Foo.
+///
+/// The specific interface vtables are expanded during [com_impl].
 struct __FooVtblList {
     IUnknown: com_runtime::IUnknownVtbl,
     IFoo: __IFooVtbl,
     IBar: __IBarVtbl
 }
 
-/// CoClass instance for Foo.
-/// This is the type given out when Foo is created by the COM client.
-struct __FooCoClass {
-    vtables: &__FooVtblList,
-    rc: u32,
-    data: Foo
+/// Foo::IUnknown vtable
+const __Foo_IUnknownVtbl_INSTANCE : com_runtime::IUnknownVtbl
+    = com_runtime::IUnknownVtbl {
+        query_interface: com_runtime::ComBox::< Foo >::query_interface_ptr,
+        add_ref: com_runtime::ComBox::< Foo >::add_ref,
+        release: com_runtime::ComBox::< Foo >::release,
+    };
+
+/// CoClass implementation for Foo.
+/// This is a requirement for using Foo with the ComBox<T> type, which
+/// implements IUnknown and the virtual tables for COM clients.
+impl com_runtime::CoClass for Foo {
+    type VTableList = __FooVtblList;
+
+    /// Constructs the list of vtables for the object.
+    ///
+    /// Since these are the interface pointers passed to the COM clients, these
+    /// need a known offset from the ComBox<..> &self reference. We achieve
+    /// this by constructing the list as a copy for each ComBox<..> instance.
+    fn create_vtable_list() -> self::VTableList {
+        __FooVtblList {
+            IUnknown: &__Foo_IUnknownVtbl_INSTANCE,
+            IFoo: &__Foo_IFooVtbl_INSTANCE,
+            IBar: &__Foo_IBarVtbl_INSTANCE,
+        }
+    }
+
+    /// Query interface implementation.
+    ///
+    /// Returns a virtual table reference for the given interface ID.
+    fn query_interface(
+        vtables : &Self::VTableList,
+        riid : com_runtime::REFIID
+    ) -> ComResult< com_runtime::RawComPtr > {
+
+        match *riid {
+            IID_IUnknown => Ok( &vtables.IUnknown ),
+            IID_Foo => Ok( &vtables.Foo ),
+            IID_Bar => Ok( &vtables.Bar ),
+            _ => Err( E_NOINTERFACE )
+        }
+    }
+}
+
+/// The vtbl list must be resorvable to an IUnknown virtual table.
+impl AsRef<com_runtime::IUnknownVtbl> for __FooVtblList {
+    fn as_ref< &self ) -> &com_runtime::IUnknownVtbl { &self.IUnknown }
 }
 
 /// vtable offsets.
 ///
 /// These are needed when we receive a call through a vtable and we need to
 /// translate the vtable pointer back to the __FooCoClass instance.
-const __Foo_IFooVtbl_offset : usize = offset_of!(__FooCoClass, vtables.IFoo);
-const __Foo_IBarVtbl_offset : usize = offset_of!(__FooCoClass, vtables.IBar);
-
-/// Foo::IUnknown::QueryInterface
-pub unsafe extern "stdcall" fn __Foo_IUnknown_query_interface(
-    self_void: *mut c_void,
-    riid: *const GUID,
-    out: *mut *mut c_void
-) -> HRESULT
-{
-    *out = match *riid {
-        IID_IUnknown => self_void,  // self_void is the IUnknown pointer here.
-        IID_IFoo => self_void + __Foo_IFooVtbl_offset,
-        IID_IBar => self_void + __Foo_IBarVtbl_offset,
-        _ => return E_NOINTERFACE
-    }
-
-    __Foo_IUnknown_add_ref(self_void);
-    S_OK
-}
-
-/// Foo::IUnknown::AddRef
-pub unsafe extern "stdcall" fn __Foo_IUnknown_add_ref(
-    self_void: *mut c_void
-) -> u32
-{
-    let self_ptr = self_void as *mut __FooCoClass;
-    (*self_ptr).rc += 1;
-    (*self_ptr).rc
-}
-
-/// Foo::IUnknown::Release
-pub unsafe extern "stdcall" fn __Foo_IUnknown_release(
-    self_void: *mut c_void
-) -> u32
-{
-    let self_ptr = self_void as *mut __FooCoClass;
-    (*self_ptr).rc -= 1;
-    rc = (*self_ptr).rc;
-
-    if rc == 0 {
-        // Drop self_ptr
-    }
-    rc
-}
-
-/// Foo::IUnknown vtable
-const __Foo_IUnknownVtbl_INSTANCE : com_runtime::IUnknownVtbl
-    = com_runtime::IUnknownVtbl {
-        query_interface: __Foo_IUnknown_query_interface,
-        add_ref: __Foo_IUnknown_add_ref,
-        release: __Foo_IUnknown_release,
-    };
-
-/// CoClass impl
-impl __FooCoClass {
-    fn new() -> __FooCoClass {
-        __FooCoClass {
-            vtables: {
-                IUnknown: &__Foo_IUnknownVtbl_INSTANCE;
-                IFoo: &__Foo_IFooVtbl_INSTANCE,
-                IBar: &__Foo_IBarVtbl_INSTANCE,
-            },
-            rc: 0,
-            data: Foo::new()
-        }
-    }
-}
+const __Foo_IFooVtbl_offset : usize = offset_of!(ComBox<Foo>, vtable_list.IFoo);
+const __Foo_IBarVtbl_offset : usize = offset_of!(ComBox<Foo>, vtable_list.IBar);
 ```
 
 ### `#[com_impl]`
@@ -256,31 +233,40 @@ impl IFoo for Foo {
 ```rust
 /// Foo::IFoo::IUnknown::QueryInterface
 pub unsafe extern "stdcall" fn __Foo_IFoo_query_interface(
-    self_void: *mut c_void,
+    self_vtable: *mut c_void,
     riid: *mut GUID,
     out: *mut *mut c_void
 ) -> HRESULT
 {
-    let iunk_void = (self_void - __Foo_IFooVtbl_offset);
-    __Foo_IUnknown_query_interface(iunk_void, riid, out)
+    // Convert the interface pointer to ComBox pointer and delegate to the
+    // ComBox query_interface.
+    com_runtime::ComBox::< Foo >::query_interface(
+            transmute( self_vtable - __Foo_IFooVtbl_offset ), riid, out )
 }
 
 // These are implemented the same way as QueryInterface above.
 pub unsafe extern "stdcall" fn __Foo_IFoo_add_ref(...) { ... }
 pub unsafe extern "stdcall" fn __Foo_IFoo_release(...) { ... }
 
+/// Delegating method implementation for the `<Foo as IFoo>.method`.
 pub unsafe extern "stdcall" fn __Foo_IFoo_method(
-    &self, parameter: i32, __out: *mut i8
+    self_vtable : RawComPtr, parameter: i32, __out: *mut i8
 ) -> HRESULT
 {
-    self_coclass = (self_void - __Foo_IFooVtbl_offset) as *mut __FooCoClass;
-    let result = (*self_coclass).data.method(parameter);
+    // Acquires the ComBox reference from the virtual table pointer.
+    let self_comptr = (self_vtable - __Foo_IFooVtbl_offset)
+        as *mut com_runtime::ComBox< Foo >;
+    let result = (*self_combox).method(parameter);
     match result {
         Ok(out) => { *__out = out; S_OK },
-        Err(e) => e
+        Err(e) => { *__out = ptr::null_mut(); e },
     }
 }
 
+/// The static vtable instance for the interface.
+///
+/// The VTableList instances contained in each ComBox<..> contain refernces
+/// to this instance.
 const __Foo_IFooVtbl_INSTANCE : __IFooVtbl = __IFooVtbl {
     __base: com_runtime::IUnknownVtbl {
         query_interface: __Foo_IFoo_query_interface,
@@ -343,11 +329,14 @@ pub unsafe extern "stdcall" fn DllGetClassObject(
     out: *mut *mut c_void
 ) -> HRESULT
 {
-    *out = Box::into_raw(Box::new(com_runtime::ClassFactory {
-        vtable: &__ClassFactoryVtbl_INSTANCE,
-        rc: 1,
-        clsid: *rclsid,
-    }));
-    S_OK
+    *out = com_runtime::ComBox::new_ptr(
+            com_runtime::ClassFactory::new( rclsid, | clsid | {
+                match *clsid {
+                    CLSID_Foo => Ok( com_runtime::ComBox::new_ptr(
+                        Foo::new() ).as_ptr() as com_runtime::RawComPtr ),
+                    _ => Err( E_NOINTERFACE ),
+                }
+            } ) ).as_ptr() as com_runtime::RawComPtr;
+    com_runtime::S_OK
 }
 ```
