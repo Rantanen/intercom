@@ -323,12 +323,13 @@ pub fn get_method_rvalues(
             let param = paramhandlers::get_param_handler( &out_ty );
             let out_ident = Ident::from_str( "__out" );
             let write_out = param.write_out( cx, &out_ident, &out_ty );
+            let write_null = param.write_null( cx, &out_ident, &out_ty );
             (
                 ret_ty,
                 quote_tokens!( cx,
                     match result {
                         Ok( r ) => { $write_out; com_runtime::S_OK },
-                        Err( e ) => e
+                        Err( e ) => { $write_null; e },
                     } ) )
         },
 

@@ -1,6 +1,7 @@
 
 use super::*;
 
+#[repr(C)]
 pub struct BStr( *mut u16 );
 
 #[link(name = "oleaut32")]
@@ -12,10 +13,6 @@ extern "system" {
 }
 
 impl BStr {
-
-    fn as_bstr_ptr( &mut self ) -> *mut u16 { self.0 }
-
-    unsafe fn from_bstr_ptr( ptr : *mut u16 ) -> BStr { BStr( ptr ) }
 
     pub fn len_bytes( &self ) -> u32
     {
@@ -41,4 +38,8 @@ impl BStr {
                 ( self.len_bytes() as usize ) / 2 ) };
         String::from_utf16_lossy( slice )
     }
+}
+
+impl Default for BStr {
+    fn default() -> Self { BStr( std::ptr::null_mut() ) }
 }

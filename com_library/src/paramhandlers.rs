@@ -27,6 +27,13 @@ pub trait ParamHandler {
     {
         quote_tokens!( cx, *$ident = r.into(); )
     }
+
+    fn write_null(
+        &self, cx : &mut ExtCtxt, ident : &Ident, _ty : &P<Ty>
+    ) -> Vec<TokenTree>
+    {
+        quote_tokens!( cx, *$ident = Default::default(); )
+    }
 }
 
 struct IdentityParam;
