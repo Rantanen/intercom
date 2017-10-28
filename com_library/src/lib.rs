@@ -6,6 +6,7 @@
 
 mod utils;
 mod idents;
+mod paramhandlers;
 
 extern crate syntax;
 extern crate syntax_pos;
@@ -307,6 +308,14 @@ pub fn try_expand_com_class(
             #[allow(non_snake_case)]
             pub struct $vtable_list_ident {
                 $vtable_list_fields
+            }
+        ).unwrap() ) );
+    push( Annotatable::Item( quote_item!( cx,
+            #[allow(non_snake_case)]
+            impl AsRef<com_runtime::IUnknownVtbl> for $vtable_list_ident {
+                fn as_ref( &self ) -> &com_runtime::IUnknownVtbl {
+                    &self._IUnknown
+                }
             }
         ).unwrap() ) );
     push( Annotatable::Item( quote_item!( cx,

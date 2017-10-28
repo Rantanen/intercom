@@ -20,6 +20,12 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > CoClass for ClassFactory<T> 
     }
 }
 
+impl AsRef<IUnknownVtbl> for ClassFactoryVtbl {
+    fn as_ref( &self ) -> &IUnknownVtbl {
+        &self.__base
+    }
+}
+
 impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
 
     pub fn new( clsid : REFCLSID, create_instance : T ) -> Self {
@@ -43,16 +49,21 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
     pub unsafe extern "stdcall" fn create_instance(
         self_vtbl : RawComPtr,
         outer : RawComPtr,
-        iid : REFIID,
+        riid : REFIID,
         out : *mut RawComPtr,
     ) -> HRESULT
     {
         let cb = ComBox::< Self >::from_ptr( self_vtbl );
 
-        *out = match (cb.create_instance)( cb.clsid ) {
+        let iunk_ptr = match (cb.create_instance)( cb.clsid ) {
             Ok( m ) => m,
             Err( hr ) => return hr,
-        };
+        } as *const *const IUnknownVtbl;
+
+        ((**iunk_ptr).query_interface)(
+            iunk_ptr as RawComPtr,
+            riid,
+            out );
 
         S_OK
     }

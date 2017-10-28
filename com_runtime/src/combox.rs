@@ -5,7 +5,7 @@ use super::*;
 ///
 /// Used to specify the virtual table for the ComBox.
 pub trait CoClass {
-    type VTableList: std::any::Any;
+    type VTableList: AsRef<IUnknownVtbl>;
     fn create_vtable_list() -> Self::VTableList;
 }
 
@@ -135,6 +135,10 @@ impl<T: CoClass> ComBox<T> {
     /// Returns a reference to the virtual on the ComBox.
     pub unsafe fn vtable( this : &Self ) -> &T::VTableList {
         &this.vtable_list
+    }
+
+    pub fn iunknown( this : &Self ) -> &IUnknownVtbl {
+        this.vtable_list.as_ref()
     }
 
     /// Gets the ComBox holding the value.
