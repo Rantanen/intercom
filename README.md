@@ -54,13 +54,41 @@ class Program
 - [x] Basic vtable and delegate construction.
 - [x] Proper QueryInterface implementation with proper IID checking.
 - [x] Multiple interface implementation.
+- [ ] Automatic IDL generation for MIDL. This is needed for the toolchain.
+      being able to define an interface in Rust and then call that from C++/C#
+      would be awesome if the user didn't need to specify the IDL by hand.
+- [ ] Ability to accept `Rc<Itf>` as input value and call its methods.
 - [ ] More complex parameter values, such as the dreaded structs.
+  - [x] Primitive values (Anything that is binary compatible between Rust
+        and COM)
+  - [x] BSTRs
+  - [ ] SAFEARRAY
+  - [ ] Structs (?) - This might already be okay **for `__out` values**,
+        actual return values need work but might be low priority.
 - [ ] Test harness...
 - [ ] IErrorInfo
+- [ ] `IStringAllocator` or ` IAllocator` to allow sharing allocated memory.
+      This is needed especially if we strive for cross platform compatibiliity.
+      The problem comes mainly through strings, especially BSTRs and those are
+      usually handled by the `SysAllocString`, etc. in Windows.
 
 ### Maybe one day
 - [ ] Automatic IDispatch derive.
-- [ ] Automatic IDL generation for MIDL.
+
+### Refactoring changes
+
+- [ ] Get rid of the field offset calculations. Instead implement
+      `struct IInterfacePtr( RawComPtr )` types for the COM interfaces. These
+      would have `AsRef` impls for the various virtual tables. The compiler
+      should be able to resolve these statically. The use of these raw structs
+      would also make the interface definitions a bit saner. For example the
+      IUnknown implementation would accept `IUnknownPtr` parameter instead of
+      a `ComPtr`.
+- [ ] `ComRc` needs a `Cow` enum (or similar) within it to track whether the
+      `ComRc` borrows or owns the value. I want to make the `ComRc` _the_ type
+      too use when handling various COM pointers - no matter whether these are
+      self created, received as function call parameters are result of return
+      values from COM invocations.
 
 # Technical details
 
