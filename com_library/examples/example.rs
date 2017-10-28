@@ -5,36 +5,15 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-#[com_library( Foo, Bar )]
+#[com_library( Bar )]
 
 extern crate com_runtime;
 
 use std::os::raw::c_void;
 
-#[com_class("{12341234-1234-1234-1234-123412340001}", Foo)]
-struct Foo {}
-
-#[com_interface("{12341234-1234-1234-1234-123412340002}")]
-#[com_impl]
-impl Foo
-{
-    fn new() -> Foo { eprintln!( "Created Foo" ); Foo {} }
-    fn bar( &self, a : u32 ) -> com_runtime::ComResult<u8> { Ok(10) }
-    fn baz1( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
-    fn baz2( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
-    fn baz3( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
-    fn baz4( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
-    fn baz5( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
-    fn baz6( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
-    fn baz7( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
-    fn baz8( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
-    fn baz9( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
-    fn baz0( &self, a : u32 ) -> com_runtime::ComResult<()> { Ok(()) }
-}
-
-#[com_class( "{12341234-1234-1234-1234-123412340003}", Bar, BarItf )]
+#[com_class( "{12341234-1234-1234-1234-123412340003}", Bar, StringFunctions )]
 struct Bar {
-    value : u32
+    value : i16
 }
 
 impl Drop for Bar
@@ -49,29 +28,41 @@ impl Drop for Bar
 impl Bar
 {
     fn new() -> Bar { eprintln!( "Created Bar" ); Bar { value : 0 } }
-    fn bar( &self, a : u32 ) -> com_runtime::ComResult<u8> {
-        eprintln!( "bar" );
-        Ok( ( ( a + self.value ) & 0xff ) as u8 )
+
+    fn accumulate( &mut self, a : i16 ) -> com_runtime::ComResult<i16> {
+        self.value += a;
+        Ok( self.value )
     }
-    fn baz( &mut self, b : u32 ) -> u16 {
-        eprintln!( "baz" );
-        eprintln!( "{:p}", &self );
-        self.value = b;
-        ( b & 0xffff ) as u16
+    fn clip( &self, min : i16, max : i16 ) -> i16 {
+
+        // Intentionally 'i16' instead of 'ComResult<i16>'.
+        match self.value {
+            n if n < min => min,
+            n if n > max => max,
+            n => n
+        }
     }
+
+    // Ensure these don't cause problems. They can't be called over COM.
     fn static_method( c : u32 ) -> u32 { 10 }
     fn empty_method() -> u32 { 10 }
 }
 
 #[com_interface("{12341234-1234-1234-1234-123412340005}")]
-trait BarItf
+trait StringFunctions
 {
-    fn stuff( &self, a : u32 ) -> com_runtime::ComResult<u16>;
+    fn join( &self, a : String, b : String ) -> com_runtime::ComResult<String>;
 }
 
 #[com_impl]
-impl BarItf for Bar {
-    fn stuff( &self, a : u32 ) -> com_runtime::ComResult<u16> { Ok(123) }
+impl StringFunctions for Bar {
+
+    fn join( &self, mut a : String, b : String ) -> com_runtime::ComResult<String>
+    {
+        a.push_str( " + " );
+        a.push_str( &b );
+        Ok( a )
+    }
 }
 
 fn create( clsid : com_runtime::GUID ) -> com_runtime::ComResult< com_runtime::RawComPtr >
@@ -81,6 +72,11 @@ fn create( clsid : com_runtime::GUID ) -> com_runtime::ComResult< com_runtime::R
 
 struct CF {
     clsid : com_runtime::REFCLSID
+}
+
+macro_rules! com_call {
+    ( ( $itf:path ) $vtbl:ident . $method:ident ( $( $param:expr ),* ) ) =>
+        ( ( (**( $vtbl as *const *const $itf )). $method )( std::mem::transmute( $vtbl ), $( $param, )* ) )
 }
 
 fn main()
@@ -97,51 +93,86 @@ fn main()
         // It will be assigned by the DllGetClassObject.
         let mut clsid = com_runtime::GUID::parse( "{12341234-1234-1234-1234-123412340003}" ).unwrap();
         let mut iid = com_runtime::GUID::parse( "{12341234-1234-1234-1234-123412340004}" ).unwrap();
-        let mut classFactory_ptr = std::mem::transmute( std::ptr::null::<c_void>() );
 
         // Acquire the class factory.
+        let mut classFactory = std::mem::uninitialized();
         eprintln!( "DllGetClassObject: {}",
-                  DllGetClassObject( &mut clsid, &mut com_runtime::IID_IClassFactory, &mut classFactory_ptr ) );
+                  DllGetClassObject( &mut CLSID_Bar, &mut com_runtime::IID_IClassFactory, &mut classFactory ) );
 
         // Got the class factory pointer.
         //
         // The vtable is a the start of the struct and we asked for the
         // IClassFactory interface, we can consider the pointer to the class
         // factory as a pointer to a IClassFactory vtable pointer.
-        let classFactory_vtbl_ptr_ptr = classFactory_ptr as *const *const com_runtime::ClassFactoryVtbl;
+        let classFactory_vtbl_ptr_ptr = classFactory as *const *const com_runtime::ClassFactoryVtbl;
 
         // Invoke the create instance method.
-        let mut bar_ptr = std::mem::transmute( std::ptr::null::<c_void>() );
-        eprintln!( "create_instance: {}",
+        //
+        // This is an example of a raw COM call without the com_call! macro.
+        let mut bar_iunk = std::mem::uninitialized();
+        eprintln!( "Creating Bar::IUnknown" );
+        eprintln!( "- HRESULT: {}",
                 ((**classFactory_vtbl_ptr_ptr).create_instance)(
-                    classFactory_ptr,  // &this
+                    classFactory,  // &this
                     std::mem::transmute( std::ptr::null::<c_void>() ),
-                    &mut iid,
-                    &mut bar_ptr ) );
+                    &com_runtime::IID_IUnknown,
+                    &mut bar_iunk ) );
 
-        // Got the interface pointer.
-        let ibar : &mut com_runtime::ComBox< Bar > = std::mem::transmute( bar_ptr );
-        eprintln!( "transmuted" );
-        eprintln!( "ComBox: {:p}, Value: {:p}", bar_ptr, ibar as &Bar );
-        ibar.baz( 53 );
+        // Invoke the create instance method.
+        //
+        // This is an example of a raw COM call without the com_call! macro.
+        let mut bar_bar = std::mem::uninitialized();
+        eprintln!( "Creating Bar::Bar" );
+        eprintln!( "- HRESULT: {}",
+                ((**classFactory_vtbl_ptr_ptr).create_instance)(
+                    classFactory,  // &this
+                    std::mem::transmute( std::ptr::null::<c_void>() ),
+                    &IID_Bar,
+                    &mut bar_bar ) );
 
-        let Bar_vtbl = com_runtime::ComBox::vtable( &ibar ).Bar;
-        let fun = Bar_vtbl.baz;
-        let fun2 = Bar_vtbl.bar;
+        let mut bar_bar_iunk = std::mem::uninitialized();
+        eprintln!( "Querying IUnknown on Bar::Bar" );
+        eprintln!( "- HRESULT: {}", com_call!(
+                (com_runtime::IUnknownVtbl)
+                    bar_bar.query_interface( &com_runtime::IID_IUnknown, &mut bar_bar_iunk )
+                ) );
 
-        // Invoke baz()
-        let baz_val = 0u16;
-        eprintln!( "baz: {}",
-                (fun)( &Bar_vtbl as *const _ as usize as *mut _, 53 ) );
+        eprintln!( "Bar::IUnknown {:p}, Bar::Bar::IUnknown: {:p}, expected: {:p}",
+                *( bar_iunk as *const *const com_runtime::IUnknownVtbl ),
+                *( bar_bar_iunk as *const *const com_runtime::IUnknownVtbl ),
+                &( __Bar_IUnknownVtbl_INSTANCE ) );
 
-        // Invoke bar()
-        let mut bar_val = 0u8;
-        eprintln!( "bar: {}",
-                ( com_runtime::ComBox::vtable( &ibar ).Bar.bar)(
-                    std::mem::transmute( &ibar ),
-                    10,
-                    &mut bar_val ) );
+        let mut result = 0i16;
+        eprintln!( "Calling Bar::accumulate" );
+        eprintln!( "- HRESULT: {}", com_call!(
+                (__BarVtbl) bar_bar.accumulate( 10, &mut result ) ) );
+        eprintln!( "- Result: {}", result );
+        eprintln!( "Calling Bar::accumulate" );
+        eprintln!( "- HRESULT: {}", com_call!(
+                (__BarVtbl) bar_bar.accumulate( 15, &mut result ) ) );
+        eprintln!( "- Result: {}", result );
 
-        eprintln!( "Result: {}", bar_val );
+        eprintln!( "Calling Bar::clip" );
+        eprintln!( "- Result( 10, 11 ): {}", com_call!(
+                (__BarVtbl) bar_bar.clip( 10, 11 ) ) );
+        eprintln!( "- Result( 10, 50 ): {}", com_call!(
+                (__BarVtbl) bar_bar.clip( 10, 50 ) ) );
+        eprintln!( "- Result( 50, 80 ): {}", com_call!(
+                (__BarVtbl) bar_bar.clip( 50, 80 ) ) );
+
+        let mut bar_strfuns = std::mem::uninitialized();
+        eprintln!( "Querying StringFunctions interface" );
+        eprintln!( "- HRESULT: {}", com_call!(
+                (com_runtime::IUnknownVtbl)
+                    bar_bar.query_interface( &IID_StringFunctions, &mut bar_strfuns ) ) );
+
+        let bstr_param1 = com_runtime::BStr::string_to_bstr( &String::from( "First" ) );
+        let bstr_param2 = com_runtime::BStr::string_to_bstr( &String::from( "Second" ) );
+        let mut bstr_return = std::mem::uninitialized();
+        eprintln!( "Calling Bar::join" );
+        eprintln!( "- HRESULT: {}", com_call!(
+                (__StringFunctionsVtbl) bar_strfuns.join(
+                    bstr_param1, bstr_param2, &mut bstr_return ) ) );
+        eprintln!( "- Result: {}", com_runtime::BStr::bstr_to_string( &bstr_return ) );
     }
 }

@@ -7,6 +7,7 @@ mod classfactory; pub use classfactory::*;
 mod guid; pub use guid::*;
 mod combox; pub use combox::*;
 mod comrc; pub use comrc::*;
+mod bstr; pub use bstr::*;
 
 /// Raw COM pointer type.
 pub type RawComPtr = *mut std::os::raw::c_void;
