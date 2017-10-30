@@ -3,7 +3,7 @@
 #![plugin( com_library )]
 
 // Declare available COM classes.
-#[com_library(
+#[com_library( "{1234-1234-1234-1234-1234-1232412340000}",
     Calculator
 )]
 
@@ -78,12 +78,12 @@ impl Memory for Calculator {
 
 #[com_interface("{12341234-1234-1234-1234-123412340004}")]
 trait Cloneable {
-    fn clone_calculator( &mut self ) -> com_runtime::ComResult< com_runtime::ComRc< Calculator > >;
+    fn clone_calculator( &self ) -> com_runtime::ComResult< com_runtime::ComRc< Calculator > >;
 }
 
 #[com_impl]
 impl Cloneable for Calculator {
-    fn clone_calculator( &mut self ) -> com_runtime::ComResult< com_runtime::ComRc< Calculator > >
+    fn clone_calculator( &self ) -> com_runtime::ComResult< com_runtime::ComRc< Calculator > >
     {
         println!( "Cloneable::Clone" );
         Ok( com_runtime::ComRc::new( Calculator {
