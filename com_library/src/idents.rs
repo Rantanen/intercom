@@ -1,18 +1,18 @@
 
-use syntax::ast::Ident;
+use syn::*;
 
 pub fn clsid(
     struct_name: &Ident
 ) -> Ident
 {
-    Ident::from_str( &format!( "CLSID_{}", struct_name ) )
+    Ident::from( format!( "CLSID_{}", struct_name ) )
 }
 
 pub fn iid(
     itf_name: &Ident
 ) -> Ident
 {
-    Ident::from_str( &format!( "IID_{}", itf_name ) )
+    Ident::from( format!( "IID_{}", itf_name ) )
 }
 
 pub fn method_impl(
@@ -21,15 +21,15 @@ pub fn method_impl(
     method_name: &str
 ) -> Ident
 {
-    Ident::from_str( &format!( "__{}_{}_{}",
-            struct_ident.name, itf_ident.name, method_name ) )
+    Ident::from( format!( "__{}_{}_{}",
+            struct_ident, itf_ident, method_name ) )
 }
 
 pub fn vtable_struct(
     itf_ident : &Ident
 ) -> Ident
 {
-    Ident::from_str( &format!( "__{}Vtbl", itf_ident.name ).as_str() )
+    Ident::from( format!( "__{}Vtbl", itf_ident ) )
 }
 
 pub fn vtable_instance(
@@ -37,16 +37,16 @@ pub fn vtable_instance(
     itf_ident : &Ident,
 ) -> Ident
 {
-    Ident::from_str( &format!( "__{}_{}Vtbl_INSTANCE",
-                        struct_name.name,
-                        itf_ident.name ).as_str() )
+    Ident::from( format!( "__{}_{}Vtbl_INSTANCE",
+                        struct_name,
+                        itf_ident ) )
 }
 
 pub fn vtable_list(
     struct_ident : &Ident
 ) -> Ident
 {
-    Ident::from_str( &format!( "__{}VtblList", struct_ident.name ).as_str() )
+    Ident::from( format!( "__{}VtblList", struct_ident ) )
 }
 
 pub fn vtable_offset(
@@ -54,6 +54,6 @@ pub fn vtable_offset(
     i : &Ident
 ) -> Ident
 {
-    Ident::from_str( &format!( "__{}_{}Vtbl_offset", s.name, i.name ) )
+    Ident::from( format!( "__{}_{}Vtbl_offset", s, i ) )
 }
 

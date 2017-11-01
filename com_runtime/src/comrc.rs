@@ -5,7 +5,7 @@ use super::*;
 ///
 /// Provides a safe way to handle the unsafe `ComBox` values.
 pub struct ComRc< T: CoClass > {
-    ptr : ptr::Shared<ComBox<T>>
+    ptr : *mut ComBox<T>
 }
 
 impl<T> ComRc<T> where T : CoClass {
@@ -13,13 +13,13 @@ impl<T> ComRc<T> where T : CoClass {
     /// Creates a new reference counted COM object.
     pub fn new( value : T ) -> ComRc<T> {
         ComRc {
-            ptr: ptr::Shared::from( unsafe { ComBox::new_ptr( value ) } )
+            ptr: unsafe { ComBox::new_ptr( value ) }
         }
     }
 
     /// Acquires a raw COM pointer to the object.
     pub fn as_ptr( this : &Self ) -> RawComPtr {
-        this.ptr.as_ptr() as RawComPtr
+        this.ptr as RawComPtr
     }
 
     /// Performs a query interface operation.
@@ -39,10 +39,10 @@ impl<T> ComRc<T> where T : CoClass {
     ) -> HRESULT
     {
         // The iunknown vtable is at the start of the data.
-        let vtables = ComBox::vtable( this.ptr.as_ref() );
+        let vtables = ComBox::vtable( &*this.ptr );
         let iunk = vtables as *const _ as *const *const IUnknownVtbl;
         ((**iunk).query_interface)(
-                this.ptr.as_ptr() as RawComPtr, iid, out )
+                this.ptr as RawComPtr, iid, out )
     }
 }
 
@@ -50,13 +50,13 @@ impl<T: CoClass> Drop for ComRc<T> {
 
     /// Decrements the reference count on the ComBox.
     fn drop( &mut self ) {
-        unsafe { ComBox::release( self.ptr.as_ptr() ) };
+        unsafe { ComBox::release( self.ptr ) };
     }
 }
 
 impl<T : CoClass> std::convert::Into< RawComPtr > for ComRc<T> {
     fn into(self) -> RawComPtr {
-        self.ptr.as_ptr() as RawComPtr
+        self.ptr as RawComPtr
     }
 }
 

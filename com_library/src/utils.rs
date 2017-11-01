@@ -1,31 +1,22 @@
 
 extern crate com_runtime;
 
-use super::paramhandlers;
-
-use syntax::ast::*;
-use syntax::ext::base::{ExtCtxt, Annotatable};
-use syntax::print::pprust;
-use syntax::ptr::P;
-use syntax::tokenstream::TokenTree;
+use super::*;
+use syn::*;
+use quote::Tokens;
 
 pub fn trace( t : &str, n : &str ) {
     println!( "Added {}: {}", t, n );
 }
 
 pub fn get_ident_and_fns(
-    a : &Annotatable
-) -> Option< ( Ident, Vec<(&Ident, &MethodSig)> ) >
+    item : &Item
+) -> Option< ( &Ident, Vec<(&Ident, &MethodSig)> ) >
 {
-    // Get the annotated item.
-    let item = match a {
-        &Annotatable::Item( ref item ) => item,
-        _ => return None
-    };
-
     match item.node {
         ItemKind::Impl( .., ref trait_ref, ref ty, ref items ) => {
-            let ( _, struct_ident, items ) = get_impl_data_raw( trait_ref, ty, items );
+            let ( _, struct_ident, items ) =
+                    get_impl_data_raw( trait_ref, ty, items );
             Some( ( struct_ident, items ) )
         },
         ItemKind::Trait( .., ref items ) => {
@@ -36,7 +27,7 @@ pub fn get_ident_and_fns(
                     .collect();
 
             match methods {
-                Some( m ) => Some( ( item.ident, m ) ),
+                Some( m ) => Some( ( &item.ident, m ) ),
                 None => None
             }
         },
@@ -44,23 +35,21 @@ pub fn get_ident_and_fns(
     }
 }
 
-pub fn get_impl_data(
-    a : &Annotatable
-) -> Option< ( Option< Ident >, Ident, Vec< ( &Ident, &MethodSig ) > ) >
+pub fn get_impl_data<'a>(
+    item : &'a Item
+) -> Option< ( Option<&'a Ident>, &'a Ident, Vec< ( &'a Ident, &'a MethodSig ) > ) >
 {
-    if let &Annotatable::Item( ref item ) = a {
-        if let ItemKind::Impl( .., ref trait_ref, ref ty, ref items ) = item.node {
-            return Some( get_impl_data_raw( trait_ref, ty, items ) );
-        }
+    if let ItemKind::Impl( .., ref trait_ref, ref ty, ref items ) = item.node {
+        return Some( get_impl_data_raw( trait_ref, ty, items ) );
     }
     None
 }
 
 fn get_impl_data_raw<'a>(
-    trait_ref : &'a Option<TraitRef>,
-    struct_ty : &'a P<Ty>,
+    trait_ref : &'a Option<Path>,
+    struct_ty : &'a Ty,
     items : &'a [ImplItem]
-) -> ( Option<Ident>, Ident, Vec< ( &'a Ident, &'a MethodSig ) > )
+) -> ( Option<&'a Ident>, &'a Ident, Vec< ( &'a Ident, &'a MethodSig ) > )
 {
 
     let struct_ident = match get_ty_ident( struct_ty ) {
@@ -69,7 +58,7 @@ fn get_impl_data_raw<'a>(
     };
 
     let trait_ident = match trait_ref {
-        &Some( ref tr ) => Some( path_to_ident( &tr.path ) ),
+        &Some( ref tr ) => Some( path_to_ident( &tr ) ),
         &None => None
     };
 
@@ -84,30 +73,24 @@ fn get_impl_data_raw<'a>(
 
 pub fn path_to_ident(
     p : &Path
-) -> Ident
+) -> &Ident
 {
-    p.segments.last().unwrap().identifier.clone()
+    &p.segments.last().unwrap().ident
 }
-
 
 pub fn get_struct_ident_from_annotatable(
-    a : &Annotatable
-) -> Option< Ident >
+    item : &Item
+) -> &Ident
 {
-    // Get the annotated item.
-    if let &Annotatable::Item( ref item ) = a {
-        return Some( item.ident )
-    }
-
-    None
+    &item.ident
 }
 
-pub fn get_metaitem_params(
-    mi : &MetaItem
-) -> Option< Vec< &NestedMetaItemKind > >
+pub fn get_attr_params(
+    attr : &Attribute
+) -> Option< &Vec<NestedMetaItem> >
 {
-    if let MetaItemKind::List( ref v ) = mi.node {
-        return Some( v.into_iter().map( |sp| &sp.node ).collect() );
+    if let MetaItem::List( _, ref v ) = attr.value {
+        return Some( v );
     }
 
     None
@@ -115,11 +98,11 @@ pub fn get_metaitem_params(
 
 pub fn get_ty_ident(
     ty : &Ty
-) -> Option<Ident>
+) -> Option<&Ident>
 {
-    match ty.node {
-        TyKind::Path( _, ref p ) =>
-            p.segments.last().map( |l| l.identifier.clone() ),
+    match ty {
+        &Ty::Path( _, ref p ) =>
+            p.segments.last().map( |l| &l.ident ),
         _ => None
     }
 }
@@ -145,36 +128,21 @@ pub fn get_trait_method(
 }
 
 pub fn parameter_to_guid(
-    p : &NestedMetaItemKind
+    p : &NestedMetaItem
 ) -> Result< com_runtime::GUID, &'static str >
 {
-    if let &NestedMetaItemKind::Literal( ref l ) = p {
-        if let LitKind::Str( ref s, _ ) = l.node {
-            return com_runtime::GUID::parse( &s.as_str() );
-        }
+    if let &NestedMetaItem::Literal( Lit::Str( ref s, _ ) ) = p {
+        return com_runtime::GUID::parse( &s.as_str() );
     }
 
     return Err( "GUID parameter must be literal string" );
 }
 
-pub fn parameter_to_ident(
-    p : &NestedMetaItemKind
-) -> Option<Ident>
-{
-    if let &NestedMetaItemKind::MetaItem( MetaItem { name, .. } ) = p {
-        return Some( Ident::from_str( &name.as_str() ) );
-    }
-
-    None
-}
-
-
 pub fn get_method_args(
-    cx : &mut ExtCtxt,
     m : &MethodSig
 ) -> Option<(
-    Vec<Vec<TokenTree>>,
-    Vec<Vec<TokenTree>>,
+    Vec<Tokens>,
+    Vec<Tokens>,
 )>
 {
     m.decl.inputs
@@ -183,38 +151,41 @@ pub fn get_method_args(
 
             // Get the self arg. This is always a ComPtr.
             let mut args = vec![
-                quote_tokens!( cx, self_vtable : com_runtime::RawComPtr, )
+                quote!( self_vtable : com_runtime::RawComPtr, )
             ];
 
             // Process the remaining args into the args and params arrays.
-            let mut params : Vec<Vec<TokenTree>> = vec![];
+            let mut params : Vec<Tokens> = vec![];
             for arg_ref in other_args {
 
                 // Get the type handler.
-                let param = paramhandlers::get_param_handler( &arg_ref.ty );
-                let ty = param.arg_ty( cx, &arg_ref.ty );
-                let arg_ident = Ident::from_str(
-                        &pprust::pat_to_string( &(*arg_ref.pat) ) );
+                let arg_ty = arg_to_ty( &arg_ref );
+                let param = paramhandlers::get_param_handler(
+                    &arg_ty );
+                let ty = param.arg_ty( &arg_ty );
+                let arg_ident = match arg_to_ident( arg_ref ) {
+                    Ok(i) => i, Err(e) => panic!(e.msg)
+                };
 
                 // Construct the arguemnt. quote_tokens! has difficulties parsing
                 // arguments on their own so construct the Arg using quote_arg!
                 // and then push the tokens using quote_tokens!.
-                let arg = quote_arg!( cx, $arg_ident : $ty );
-                args.push( quote_tokens!( cx, $arg, ) );
+                let arg = quote!( #arg_ident : #ty );
+                args.push( quote!( #arg, ) );
 
                 // Get the call parameter.
-                let call_param = param.for_call( cx, &arg_ident, &arg_ref.ty );
-                params.push( quote_tokens!( cx, $call_param, ) );
+                let call_param = param.for_call( &arg_ident, &arg_ty );
+                params.push( quote!( #call_param, ) );
             }
 
             // Add the [retval] arg if one exists and isn't ().
-            if let Some( outs ) = get_out_and_ret( cx, m ) {
+            if let Some( outs ) = get_out_and_ret( m ) {
                 if let ( Some( out_ty ), _ ) = outs {
-                    if ! is_unit( &out_ty.node ) {
+                    if ! is_unit( &out_ty ) {
                         let param = paramhandlers::get_param_handler(
                                 &out_ty );
-                        let ty = param.arg_ty( cx, &out_ty );
-                        args.push( quote_tokens!( cx, __out : *mut $ty ) );
+                        let ty = param.arg_ty( &out_ty );
+                        args.push( quote!( __out : *mut #ty ) );
                     }
                 }
             } else {
@@ -223,7 +194,7 @@ pub fn get_method_args(
 
             // Ensure the first parameter is &self.
             // Static methods don't count here.
-            if let TyKind::Rptr( _, _ ) = self_arg.ty.node {
+            if let &FnArg::SelfRef(..) = self_arg {
             } else {
                 return None
             }
@@ -236,10 +207,10 @@ pub fn get_method_args(
 }
 
 pub fn is_unit(
-    tk : &TyKind
+    tk : &Ty
 ) -> bool
 {
-    if let &TyKind::Tup( ref v ) = tk {
+    if let &Ty::Tup( ref v ) = tk {
         if v.len() == 0 {
             return true
         }
@@ -248,13 +219,12 @@ pub fn is_unit(
 }
 
 pub fn get_ret_types(
-    cx: &mut ExtCtxt,
     ret_ty : &Ty
-) -> Result< ( Option<P<Ty>>, P<Ty> ), &'static str >
+) -> Result< ( Option<Ty>, Tokens ), &'static str >
 {
     // Get the path type on the return value.
-    let path = match &ret_ty.node {
-        &TyKind::Path( _, ref p ) => p,
+    let path = match ret_ty {
+        &Ty::Path( _, ref p ) => p,
         _ => return Err( "Use Result as a return type" )
     };
 
@@ -262,9 +232,8 @@ pub fn get_ret_types(
     let last_segment = path.segments.last().unwrap();
 
     // Check the last segment has angle bracketed parameters.
-    if let &Some( ref p ) = &last_segment.parameters {
-        if let PathParameters::AngleBracketed( ref data ) = **p {
-
+    if let PathParameters::AngleBracketed( ref data ) = last_segment.parameters {
+        if data.types.len() > 0 {
             // Angle bracketed parameters exist. We're assuming this is
             // some kind of Result<ok> or Result<ok, err>. In either case
             // we can take the first parameter as the 'ok' type.
@@ -273,20 +242,19 @@ pub fn get_ret_types(
             // the type matches Result<S,E> type.
             return Ok( (
                 data.types.first().and_then( |x| Some( x.clone() ) ),
-                quote_ty!( cx, com_runtime::HRESULT )
+                quote!( com_runtime::HRESULT )
             ) )
         }
     }
 
     // Default value. We get here only if we didn't return a type from
     // the if statements above.
-    Ok( ( None, quote_ty!( cx, $path ) ) )
+    Ok( ( None, quote!( #path ) ) )
 }
 
 pub fn get_out_and_ret(
-    cx : &mut ExtCtxt,
     m : &MethodSig
-) -> Option< ( Option< P<Ty> >, P<Ty> ) >
+) -> Option< ( Option<Ty>, Tokens ) >
 {
     let output = &m.decl.output;
     let result_ty = match output {
@@ -294,15 +262,14 @@ pub fn get_out_and_ret(
         _ => return None
     };
 
-    get_ret_types( cx, &result_ty ).ok()
+    get_ret_types( &result_ty ).ok()
 }
 
 pub fn get_method_rvalues(
-    cx : &mut ExtCtxt,
     m : &MethodSig
-) -> Option< ( P<Ty>, Vec<TokenTree> ) >
+) -> Option< ( Tokens, Tokens ) >
 {
-    let ( out_ty, ret_ty ) = match get_out_and_ret( cx, m ) {
+    let ( out_ty, ret_ty ) = match get_out_and_ret( m ) {
         Some( s ) => s,
         None => return None,
     };
@@ -310,9 +277,9 @@ pub fn get_method_rvalues(
     Some( match out_ty {
         // Result<(), _>. Ignore the [retval] value but handle the Err
         // as the method return value.
-        Some( ref unit ) if is_unit( &unit.node ) => (
+        Some( ref unit ) if is_unit( &unit ) => (
             ret_ty,
-            quote_tokens!( cx,
+            quote!(
                 match result {
                     Ok( _ ) => com_runtime::S_OK,
                     Err( e ) => e
@@ -321,28 +288,80 @@ pub fn get_method_rvalues(
         // Result<_, _>. Ok() -> __out + S_OK, Err() -> E_*
         Some( ref out_ty ) => {
             let param = paramhandlers::get_param_handler( &out_ty );
-            let out_ident = Ident::from_str( "__out" );
-            let write_out = param.write_out( cx, &out_ident, &out_ty );
-            let write_null = param.write_null( cx, &out_ident, &out_ty );
+            let out_ident = Ident::from( "__out" );
+            let write_out = param.write_out( &out_ident, &out_ty );
+            let write_null = param.write_null( &out_ident, &out_ty );
             (
                 ret_ty,
-                quote_tokens!( cx,
+                quote!(
                     match result {
-                        Ok( r ) => { $write_out; com_runtime::S_OK },
-                        Err( e ) => { $write_null; e },
+                        Ok( r ) => { #write_out; com_runtime::S_OK },
+                        Err( e ) => { #write_null; e },
                     } ) )
         },
 
         // Not a Result<..>, assume we can return the return value as is.
         None => (
-            ret_ty, quote_tokens!( cx, return result ) ),
+            ret_ty, quote!( return result ) ),
     } )
 }
 
+fn arg_to_ident(
+    arg : &FnArg,
+) -> Result<Ident, MacroError> {
+    Ok( match arg {
+        &FnArg::SelfRef(..) | &FnArg::SelfValue(..)
+            => Ident::from( "self" ),
+        &FnArg::Captured( ref pat, _ ) => match pat {
+            &Pat::Ident( _, ref i, _ ) => i.clone(),
+            _ => Err( format!( "Unsupported argument: {:?}", arg ) )?,
+        },
+        &FnArg::Ignored(..) => Ident::from( "_" ),
+    } )
+}
+
+fn arg_to_ty(
+    arg : &FnArg,
+) -> Ty
+{
+    match arg {
+        &FnArg::Captured( _, ref ty )
+            | &FnArg::Ignored( ref ty )
+            => ty.clone(),
+        &FnArg::SelfRef( ref life, m )
+            => Ty::Rptr( life.clone(), Box::new( MutTy {
+                mutability: m,
+                ty: self_ty()
+            } ) ),
+        &FnArg::SelfValue( m )
+            => self_ty(),
+    }
+}
+
+fn self_ty() -> Ty {
+    Ty::Path(
+        None,
+        Path::from( PathSegment::from( Ident::from( "Self" ) ) )
+    )
+}
+
+pub fn parameter_to_ident(
+    p : &NestedMetaItem
+) -> Option<&Ident>
+{
+    match p {
+        &NestedMetaItem::MetaItem( ref mi ) => Some( match mi {
+            &MetaItem::Word( ref i ) => i,
+            &MetaItem::List( ref i, .. ) => i,
+            &MetaItem::NameValue( ref i, .. ) => i,
+        } ),
+        _ => None
+    }
+}
+
 pub fn get_guid_tokens(
-    cx : &mut ExtCtxt,
     g : &com_runtime::GUID
-) -> Vec<TokenTree>
+) -> Tokens
 {
     let d1 = g.data1;
     let d2 = g.data2;
@@ -355,11 +374,10 @@ pub fn get_guid_tokens(
     let d4_5 = g.data4[ 5 ];
     let d4_6 = g.data4[ 6 ];
     let d4_7 = g.data4[ 7 ];
-    quote_tokens!( cx,
+    quote!( 
         com_runtime::GUID {
-            data1: $d1, data2: $d2, data3: $d3,
-            data4: [ $d4_0, $d4_1, $d4_2, $d4_3, $d4_4, $d4_5, $d4_6, $d4_7 ]
+            data1: #d1, data2: #d2, data3: #d3,
+            data4: [ #d4_0, #d4_1, #d4_2, #d4_3, #d4_4, #d4_5, #d4_6, #d4_7 ]
         }
     )
 }
-

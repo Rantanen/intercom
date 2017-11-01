@@ -46,8 +46,8 @@ impl<T: CoClass> ComBox<T> {
     /// need to immediately increment the count.
     ///
     /// The value should be cleaned by calling 'release'.
-    pub unsafe fn new_ptr( value : T ) -> ptr::Unique<ComBox<T>> {
-        Box::into_unique( Box::new( ComBox {
+    pub unsafe fn new_ptr( value : T ) -> *mut ComBox<T> {
+        Box::into_raw( Box::new( ComBox {
             vtable_list: T::create_vtable_list(),
             ref_count: 1,
             value: value,

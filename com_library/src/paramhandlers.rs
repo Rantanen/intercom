@@ -1,38 +1,36 @@
 
 use super::utils;
 
-use syntax::ast::*;
-use syntax::ext::base::{ExtCtxt, Annotatable};
-use syntax::ptr::P;
-use syntax::tokenstream::TokenTree;
+use syn::*;
+use quote::Tokens;
 
 pub trait ParamHandler {
     fn arg_ty(
-        &self, cx : &mut ExtCtxt, ty : &P<Ty>
-    ) -> Vec<TokenTree>
+        &self, ty : &Ty
+    ) -> Tokens
     {
-        quote_tokens!( cx, $ty )
+        quote!( #ty )
     }
 
     fn for_call(
-        &self, cx : &mut ExtCtxt, ident : &Ident, _ty : &P<Ty>
-    ) -> Vec<TokenTree>
+        &self, ident : &Ident, _ty : &Ty
+    ) -> Tokens
     {
-        quote_tokens!( cx, $ident.into() )
+        quote!( #ident.into() )
     }
 
     fn write_out(
-        &self, cx : &mut ExtCtxt, ident : &Ident, _ty : &P<Ty>
-    ) -> Vec<TokenTree>
+        &self, ident : &Ident, _ty : &Ty
+    ) -> Tokens
     {
-        quote_tokens!( cx, *$ident = r.into(); )
+        quote!( *#ident = r.into(); )
     }
 
     fn write_null(
-        &self, cx : &mut ExtCtxt, ident : &Ident, _ty : &P<Ty>
-    ) -> Vec<TokenTree>
+        &self, ident : &Ident, _ty : &Ty
+    ) -> Tokens
     {
-        quote_tokens!( cx, *$ident = Default::default(); )
+        quote!( *#ident = Default::default(); )
     }
 }
 
@@ -42,25 +40,22 @@ impl ParamHandler for IdentityParam { }
 struct ComRcParam;
 impl ParamHandler for ComRcParam {
     fn arg_ty(
-        &self, cx : &mut ExtCtxt, _ty : &P<Ty>
-    ) -> Vec<TokenTree>
+        &self, ty : &Ty
+    ) -> Tokens
     {
-        quote_tokens!( cx, com_runtime::RawComPtr )
+        quote!( com_runtime::RawComPtr )
     }
 
     fn write_out(
-        &self, cx : &mut ExtCtxt, ident : &Ident, ty : &P<Ty>
-    ) -> Vec<TokenTree>
+        &self, ident : &Ident, ty : &Ty
+    ) -> Tokens
     {
-        let none_tokens = quote_tokens!( cx, );
-        let comrc_params = match ty.node {
-            TyKind::Path( _, ref p ) => {
+        let none_tokens = quote!( );
+        let comrc_params = match ty {
+            &Ty::Path( _, ref p ) => {
                 let last_segment = &p.segments.last().unwrap();
                 match last_segment.parameters {
-                    Some( ref p ) => match **p {
-                        PathParameters::AngleBracketed( ref data ) => data,
-                        _ => return none_tokens
-                    },
+                    PathParameters::AngleBracketed( ref data ) => data,
                     _ => return none_tokens
                 }
             }
@@ -78,9 +73,9 @@ impl ParamHandler for ComRcParam {
         };
 
         let iid_ident = super::idents::iid( &itf_ident );
-        quote_tokens!( cx,
+        quote!(
             com_runtime::ComRc::query_interface(
-                    &r, &$iid_ident, $ident ) )
+                    &r, &#iid_ident, #ident ) )
     }
 }
 
@@ -88,35 +83,35 @@ struct StringParam;
 impl ParamHandler for StringParam
 {
     fn arg_ty(
-        &self, cx : &mut ExtCtxt, _ty : &P<Ty>
-    ) -> Vec<TokenTree>
+        &self, ty : &Ty
+    ) -> Tokens
     {
-        quote_tokens!( cx, com_runtime::BStr )
+        quote!( com_runtime::BStr )
     }
 
     fn for_call(
-        &self, cx : &mut ExtCtxt, ident : &Ident, _ty : &P<Ty>
-    ) -> Vec<TokenTree>
+        &self, ident : &Ident, _ty : &Ty
+    ) -> Tokens
     {
-        quote_tokens!( cx, $ident.bstr_to_string() )
+        quote!( #ident.bstr_to_string() )
     }
 
     fn write_out(
-        &self, cx : &mut ExtCtxt, ident : &Ident, _ty : &P<Ty>
-    ) -> Vec<TokenTree>
+        &self, ident : &Ident, _ty : &Ty
+    ) -> Tokens
     {
-        quote_tokens!( cx, *$ident = com_runtime::BStr::string_to_bstr( &r ) )
+        quote!( *#ident = com_runtime::BStr::string_to_bstr( &r ) )
     }
 }
 
 pub fn get_param_handler(
-    arg_ty : &P<Ty>,
+    arg_ty : &Ty,
 ) -> Box<ParamHandler>
 {
-    match arg_ty.node {
+    match arg_ty {
 
-        TyKind::Path( _, ref p ) => {
-            let name : &str = &p.segments.last().unwrap().identifier.name.as_str();
+        &Ty::Path( _, ref p ) => {
+            let name : &str = &p.segments.last().unwrap().ident.as_ref();
             match name {
                 "ComRc" => Box::new( ComRcParam ),
                 "String" => Box::new( StringParam ),

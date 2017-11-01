@@ -1,19 +1,28 @@
-#![feature(unique, shared)]
-#![feature( plugin, custom_attribute, attr_literals )]
-#![plugin( com_library )]
+#![feature(proc_macro)]
+#![feature(attr_literals)]
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
+extern crate com_library;
+use com_library::com_library;
 #[com_library( Bar )]
 
 extern crate com_runtime;
+use com_library::com_interface;
+use com_library::com_impl;
+use com_library::com_class;
 
 use std::os::raw::c_void;
 
 #[com_class( "{12341234-1234-1234-1234-123412340003}", Bar, StringFunctions )]
 struct Bar {
     value : i16
+}
+
+impl Bar
+{
+    fn new() -> Bar { eprintln!( "Created Bar" ); Bar { value : 0 } }
 }
 
 impl Drop for Bar
@@ -27,8 +36,6 @@ impl Drop for Bar
 #[com_impl]
 impl Bar
 {
-    fn new() -> Bar { eprintln!( "Created Bar" ); Bar { value : 0 } }
-
     fn accumulate( &mut self, a : i16 ) -> com_runtime::ComResult<i16> {
         self.value += a;
         Ok( self.value )

@@ -1,6 +1,9 @@
 #![crate_type="dylib"]
-#![feature( plugin, custom_attribute, unique, type_ascription )]
-#![plugin( com_library )]
+#![feature(type_ascription, proc_macro)]
+
+#[macro_use]
+#[proc_macro]
+extern crate com_library;
 
 // Declare available COM classes.
 #[com_library( "{1234-1234-1234-1234-1234-1232412340000}",
