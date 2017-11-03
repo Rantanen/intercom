@@ -6,6 +6,8 @@
 mod utils;
 mod idents;
 mod paramhandlers;
+mod error;
+use error::MacroError;
 
 extern crate proc_macro;
 use proc_macro::{TokenStream, LexError};
@@ -15,24 +17,6 @@ extern crate syn;
 extern crate quote;
 
 use syn::*;
-
-struct MacroError {
-    msg : String,
-}
-
-impl<'a> From<&'a str> for MacroError {
-    fn from(m:&'a str) -> MacroError { MacroError { msg : m.to_owned() } }
-}
-
-impl From<String> for MacroError {
-    fn from(m:String) -> MacroError { MacroError { msg : m } }
-}
-
-impl From<LexError> for MacroError {
-    fn from(e:LexError) -> MacroError {
-        MacroError { msg : "Error parsing token stream".to_owned() }
-    }
-}
 
 #[proc_macro_attribute]
 pub fn com_interface(
@@ -48,25 +32,14 @@ pub fn com_interface(
 
 fn expand_com_interface(
     attr_tokens: &TokenStream,
-    tokens: TokenStream,
+    item_tokens: TokenStream,
 ) -> Result<TokenStream, MacroError>
 {
-    let attr_rendered = format!( "#[com_interface{}]", attr_tokens.to_string() );
-    let attr = match syn::parse_outer_attr( &attr_rendered ) {
-        Ok(t) => t,
-        Err(e) => {
-            println!( "Err: {:?} ", e );
-            error( "Could not parse [com_interface] attribute", attr_tokens )
-        },
-    };
-    let item = match syn::parse_item( &tokens.to_string() ) {
-        Ok(t) => t,
-        Err(e) => error( "Could not parse [com_interface] item", &attr ),
-    };
-    let mut output = vec![ quote!( #item ) ];
+    let ( mut output, attr, item ) =
+            utils::parse_inputs( "com_interface", &attr_tokens, &item_tokens )?;
 
-    let ( itf_ident, fns )
-            = utils::get_ident_and_fns( &item )
+    let ( itf_ident, fns ) =
+            utils::get_ident_and_fns( &item )
                 .ok_or( "[com_interface(IID:&str)] must be applied to trait or struct impl" )?;
 
     let iid_guid = utils::get_attr_params( &attr )
@@ -96,11 +69,11 @@ fn expand_com_interface(
     // interface.
     //
     // The impl may have various kinds of items - we only support the ones that
-    // seem okay so there's a bit of continue'ing involved in the for-loop.
+    // seem okay. So in case we encounter any errors we'll just skip the method
+    // silently. This is done by breaking out of the 'catch' before adding the
+    // method to the vtable fields.
     for ( method_ident, method_sig ) in fns {
-
-        // Try to get the method declaration.
-        let method = do catch {
+        do catch {
 
             // Get the self argument and the remaining args.
             let ( args, _) =
@@ -109,8 +82,7 @@ fn expand_com_interface(
                     utils::get_method_rvalues( &method_sig )?;
 
             // Create the vtable field and add it to the vector of fields.
-            let mut arg_tokens = quote::Tokens::new();
-            arg_tokens.append_all( args.iter() );
+            let arg_tokens = utils::flatten( args.iter() );
             println!( "{} -> {} ", method_ident, ret_ty );
             let vtable_method_decl = quote!(
                 #[allow(dead_code)]
@@ -126,21 +98,15 @@ fn expand_com_interface(
     // Create the vtable. We've already gathered all the vtable method
     // pointer fields so defining the struct is simple enough.
     let vtable_ident = idents::vtable_struct( &itf_ident );
-    let mut field_tokens = quote::Tokens::new();
-    field_tokens.append_all( fields.iter() );
+    let field_tokens = utils::flatten( fields.iter() );
     output.push( quote!(
         #[allow(non_camel_case_types)]
         #[repr(C)]
         pub struct #vtable_ident { #field_tokens }
     ) );
 
-    Ok( TokenStream::from_str(
-            &output.into_iter()
-                .map( |t| t.parse::<String>().unwrap() )
-                .fold( String::new(), |prev,next| prev + &next ) )? )
+    Ok( utils::tokens_to_tokenstream( output )? )
 }
-
-
 
 #[proc_macro_attribute]
 pub fn com_impl(
@@ -157,22 +123,11 @@ pub fn com_impl(
 /// Implements the `com_impl` decorator.
 fn expand_com_impl(
     attr_tokens: &TokenStream,
-    tokens: TokenStream,
+    item_tokens: TokenStream,
 ) -> Result<TokenStream, MacroError>
 {
-    let attr_rendered = format!( "#[com_interface{}]", attr_tokens.to_string() );
-    let attr = match syn::parse_outer_attr( &attr_rendered ) {
-        Ok(t) => t,
-        Err(e) => {
-            println!( "Err: {:?} ", e );
-            error( "Could not parse [com_interface] attribute", attr_tokens )
-        },
-    };
-    let item = match syn::parse_item( &tokens.to_string() ) {
-        Ok(t) => t,
-        Err(e) => error( "Could not parse [com_interface] item", &attr ),
-    };
-    let mut output = vec![ quote!( #item ) ];
+    let ( mut output, attr, item ) =
+            utils::parse_inputs( "com_impl", &attr_tokens, &item_tokens )?;
 
     // Get the item info the attribute is bound to.
     let ( itf_ident_opt, struct_ident, fns )
@@ -185,18 +140,16 @@ fn expand_com_impl(
         &struct_ident,
         &itf_ident );
 
-    let query_interface_ident = idents::method_impl(
-            &struct_ident, &itf_ident, "query_interface" );
-    let add_ref_ident = idents::method_impl(
-            &struct_ident, &itf_ident, "add_ref" );
-    let release_ident = idents::method_impl(
-            &struct_ident, &itf_ident, "release" );
 
     /////////////////////
     // #itf::QueryInterface, AddRef & Release
     //
     // The primary add_ref and release. As these are on the IUnknown interface
     // the self_vtable here points to the start of the ComRef structure.
+
+    // QueryInterface
+    let query_interface_ident = idents::method_impl(
+            &struct_ident, &itf_ident, "query_interface" );
     output.push( quote!(
             #[allow(non_snake_case)]
             pub unsafe extern "stdcall" fn #query_interface_ident(
@@ -214,6 +167,10 @@ fn expand_com_impl(
                         out )
             }
         ) );
+
+    // AddRef
+    let add_ref_ident = idents::method_impl(
+            &struct_ident, &itf_ident, "add_ref" );
     output.push( quote!(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
@@ -224,6 +181,10 @@ fn expand_com_impl(
                         &mut *(( self_vtable as usize - #vtable_offset() ) as *mut _ ) )
             }
         ) );
+
+    // Release
+    let release_ident = idents::method_impl(
+            &struct_ident, &itf_ident, "release" );
     output.push( quote!(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
@@ -253,7 +214,7 @@ fn expand_com_impl(
 
     // Implement the delegating calls for the coclass.
     for ( method_ident, method_sig ) in fns {
-        let field = do catch {
+        do catch {
 
             // Get the self argument and the remaining args.
             let ( args, params ) =
@@ -272,10 +233,8 @@ fn expand_com_impl(
             // vtable for the current interface. To get the coclass and thus
             // the actual 'data' struct, we'll need to offset the self_vtable
             // with the vtable offset.
-            let mut arg_tokens = quote::Tokens::new();
-            arg_tokens.append_all( args.iter() );
-            let mut param_tokens = quote::Tokens::new();
-            param_tokens.append_all( params.iter() );
+            let arg_tokens = utils::flatten( args.iter() );
+            let param_tokens = utils::flatten( params.iter() );
             output.push( quote!(
                 #[allow(non_snake_case)]
                 #[allow(dead_code)]
@@ -291,24 +250,19 @@ fn expand_com_impl(
                 }
             ) );
 
-            Some( quote!( #method_ident : #method_impl_ident, ) )
+            vtable_fields.push( quote!( #method_ident : #method_impl_ident, ) );
+            Some(())
         };
-
-        if let Some( f ) = field { vtable_fields.push( f ) }
     }
 
-    let mut vtable_field_tokens = quote::Tokens::new();
-    vtable_field_tokens.append_all( vtable_fields.iter() );
+    let vtable_field_tokens = utils::flatten( vtable_fields.iter() );
     output.push( quote!(
             #[allow(non_upper_case_globals)]
             const #vtable_instance_ident : #vtable_struct_ident
                     = #vtable_struct_ident { #vtable_field_tokens };
         ) );
 
-    Ok( TokenStream::from_str(
-            &output.into_iter()
-                .map( |t| t.parse::<String>().unwrap() )
-                .fold( String::new(), |prev,next| prev + &next ) )? )
+    Ok( utils::tokens_to_tokenstream( output )? )
 }
 
 #[proc_macro_attribute]
@@ -325,22 +279,11 @@ pub fn com_class(
 
 fn expand_com_class(
     attr_tokens: &TokenStream,
-    tokens: TokenStream,
+    item_tokens: TokenStream,
 ) -> Result<TokenStream, MacroError>
 {
-    let attr_rendered = format!( "#[com_interface{}]", attr_tokens.to_string() );
-    let attr = match syn::parse_outer_attr( &attr_rendered ) {
-        Ok(t) => t,
-        Err(e) => {
-            println!( "Err: {:?} ", e );
-            error( "Could not parse [com_interface] attribute", attr_tokens )
-        },
-    };
-    let item = match syn::parse_item( &tokens.to_string() ) {
-        Ok(t) => t,
-        Err(e) => error( "Could not parse [com_interface] item", &attr ),
-    };
-    let mut output = vec![ quote!( #item ) ];
+    let ( mut output, attr, item ) =
+            utils::parse_inputs( "com_class", &attr_tokens, &item_tokens )?;
 
     // Get the item info the attribute is bound to.
     let struct_ident = utils::get_struct_ident_from_annotatable( &item );
@@ -453,12 +396,9 @@ fn expand_com_class(
     // Define the vtable list struct first. This lists the vtables of all the
     // interfaces that the coclass implements.
     let vtable_list_ident = idents::vtable_list( &struct_ident );
-    let mut vtable_field_tokens = quote::Tokens::new();
-    vtable_field_tokens.append_all( vtable_list_fields.iter() );
-    let mut vtable_value_tokens = quote::Tokens::new();
-    vtable_value_tokens.append_all( vtable_list_field_values.iter() );
-    let mut match_arm_tokens = quote::Tokens::new();
-    match_arm_tokens.append_all( match_arms.iter() );
+    let vtable_field_tokens = utils::flatten( vtable_list_fields.iter() );
+    let vtable_value_tokens = utils::flatten( vtable_list_field_values.iter() );
+    let match_arm_tokens = utils::flatten( match_arms.iter() );
     output.push( quote!(
             #[allow(non_snake_case)]
             pub struct #vtable_list_ident {
@@ -503,10 +443,7 @@ fn expand_com_class(
     );
     output.push( clsid_const );
 
-    Ok( TokenStream::from_str(
-            &output.into_iter()
-                .map( |t| t.parse::<String>().unwrap() )
-                .fold( String::new(), |prev,next| prev + &next ) )? )
+    Ok( utils::tokens_to_tokenstream( output )? )
 }
 
 #[proc_macro_attribute]
@@ -523,22 +460,11 @@ pub fn com_library(
 
 fn expand_com_library(
     attr_tokens: &TokenStream,
-    tokens: TokenStream,
+    item_tokens: TokenStream,
 ) -> Result<TokenStream, MacroError>
 {
-    let attr_rendered = format!( "#![com_library{}]", attr_tokens.to_string() );
-    let attr = match syn::parse_inner_attr( &attr_rendered ) {
-        Ok(t) => t,
-        Err(e) => {
-            println!( "Err: {:?} ", e );
-            error( "Could not parse [com_library] attribute", attr_tokens )
-        },
-    };
-    let item = match syn::parse_item( &tokens.to_string() ) {
-        Ok(t) => t,
-        Err(e) => error( "Could not parse [com_library] item", &attr ),
-    };
-    let mut output = vec![ quote!( #item ) ];
+    let ( mut output, attr, item ) =
+            utils::parse_inputs( "com_library", &attr_tokens, &item_tokens )?;
 
     // Get the decorator parameters.
     let params = utils::get_attr_params( &attr )
@@ -568,8 +494,7 @@ fn expand_com_library(
     // infrastructure uses. The COM client uses this method to acquire
     // the IClassFactory interfaces that are then used to construct the
     // actual coclasses.
-    let mut match_arm_tokens = quote::Tokens::new();
-    match_arm_tokens.append_all( match_arms.iter() );
+    let match_arm_tokens = utils::flatten( match_arms.iter() );
     let dll_get_class_object = quote!(
         #[no_mangle]
         #[allow(non_snake_case)]
@@ -596,10 +521,7 @@ fn expand_com_library(
     );
     output.push( dll_get_class_object );
 
-    Ok( TokenStream::from_str(
-            &output.into_iter()
-                .map( |t| t.parse::<String>().unwrap() )
-                .fold( String::new(), |prev,next| prev + &next ) )? )
+    Ok( utils::tokens_to_tokenstream( output )? )
 }
 
 fn error<E,T>(

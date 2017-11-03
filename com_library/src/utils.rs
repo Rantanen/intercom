@@ -5,8 +5,52 @@ use super::*;
 use syn::*;
 use quote::Tokens;
 
+use error::MacroError;
+
 pub fn trace( t : &str, n : &str ) {
     println!( "Added {}: {}", t, n );
+}
+
+pub fn parse_inputs(
+    attr_name: &str,
+    attr_tokens: &TokenStream,
+    item_tokens: &TokenStream,
+) -> Result<( Vec<Tokens>, Attribute, Item ), MacroError>
+{
+    let attr_rendered = format!( "#[{}{}]", attr_name, attr_tokens.to_string() );
+    let attr = match syn::parse_outer_attr( &attr_rendered ) {
+        Ok(t) => t,
+        Err(e) => error(
+                format!( "Could not parse [{}] attribute", attr_name ),
+                attr_tokens ),
+    };
+    let item = match syn::parse_item( &item_tokens.to_string() ) {
+        Ok(t) => t,
+        Err(e) => error(
+                format!( "Could not parse [{}] item", attr_name ),
+                &attr ),
+    };
+
+    Ok( ( vec![ quote!( #item ) ], attr, item ) )
+}
+
+pub fn tokens_to_tokenstream<T: IntoIterator<Item=Tokens>>(
+    tokens : T,
+) -> Result<TokenStream, LexError>
+{
+    TokenStream::from_str(
+            &tokens.into_iter()
+                .map( |t| t.parse::<String>().unwrap() )
+                .fold( String::new(), |prev, next| prev + &next ) )
+}
+
+pub fn flatten<'a, I: Iterator<Item=&'a Tokens>>(
+    tokens: I
+) -> Tokens
+{
+    let mut all_tokens = quote::Tokens::new();
+    all_tokens.append_all( tokens );
+    all_tokens
 }
 
 pub fn get_ident_and_fns(
