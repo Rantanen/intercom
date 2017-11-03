@@ -8,3 +8,4 @@ name = "com_runtime"
 
 [dependencies]
 com_common = { path = "../com_common" }
+com_library = { path = "../com_library" }

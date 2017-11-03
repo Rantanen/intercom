@@ -291,7 +291,7 @@ pub fn get_ret_types(
 
     // Default value. We get here only if we didn't return a type from
     // the if statements above.
-    Ok( ( None, quote!( #path ) ) )
+    Ok( ( None, quote!( #ret_ty ) ) )
 }
 
 pub fn get_out_and_ret(
@@ -417,7 +417,7 @@ pub fn get_guid_tokens(
     let d4_6 = g.data4[ 6 ];
     let d4_7 = g.data4[ 7 ];
     quote!( 
-        guid::GUID {
+        com_runtime::GUID {
             data1: #d1, data2: #d2, data3: #d3,
             data4: [ #d4_0, #d4_1, #d4_2, #d4_3, #d4_4, #d4_5, #d4_6, #d4_7 ]
         }

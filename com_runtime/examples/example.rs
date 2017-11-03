@@ -4,14 +4,13 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-extern crate com_library;
-use com_library::com_library;
-#[com_library( Bar )]
-
 extern crate com_runtime;
-use com_library::com_interface;
-use com_library::com_impl;
-use com_library::com_class;
+use com_runtime::com_library;
+use com_runtime::com_interface;
+use com_runtime::com_impl;
+use com_runtime::com_class;
+
+#[com_library( Bar )]
 
 use std::os::raw::c_void;
 
