@@ -79,7 +79,7 @@ fn expand_com_interface(
     let iid_guid = utils::get_attr_params( &attr )
             .as_ref()
             .and_then( |ref params| params.first() )
-            .ok_or( "[com_interface(IID:&str)] must specify an IID" )
+            .ok_or( "[com_interface(IID:&str)] must specify an IID".to_owned() )
             .and_then( |f| utils::parameter_to_guid( f ) )?;
 
     let iid_tokens = utils::get_guid_tokens( &iid_guid );
@@ -117,7 +117,6 @@ fn expand_com_interface(
 
             // Create the vtable field and add it to the vector of fields.
             let arg_tokens = utils::flatten( args.iter() );
-            println!( "{} -> {} ", method_ident, ret_ty );
             let vtable_method_decl = quote!(
                 #[allow(dead_code)]
                 #method_ident :
@@ -302,7 +301,7 @@ fn expand_com_class(
     let ( clsid_guid, itfs ) = utils::get_attr_params( &attr )
             .as_ref()
             .and_then( |ref params| params.split_first() )
-            .ok_or( "[com_class(IID, itfs...)] must specify an IID" )
+            .ok_or( "[com_class(IID, itfs...)] must specify an IID".to_owned() )
             .and_then( |( f, itfs )|
                 Ok( (
                     utils::parameter_to_guid( f )?,

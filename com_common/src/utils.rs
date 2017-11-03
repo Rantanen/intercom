@@ -171,13 +171,13 @@ pub fn get_trait_method(
 
 pub fn parameter_to_guid(
     p : &NestedMetaItem
-) -> Result< guid::GUID, &'static str >
+) -> Result< guid::GUID, String >
 {
     if let &NestedMetaItem::Literal( Lit::Str( ref s, _ ) ) = p {
         return guid::GUID::parse( &s.as_str() );
     }
 
-    return Err( "GUID parameter must be literal string" );
+    return Err( "GUID parameter must be literal string".to_owned() );
 }
 
 pub fn get_method_args(
@@ -262,7 +262,7 @@ pub fn is_unit(
 
 pub fn get_ret_types(
     ret_ty : &Ty
-) -> Result< ( Option<Ty>, Tokens ), &'static str >
+) -> Result< ( Option<Ty>, Ty ), &'static str >
 {
     // Get the path type on the return value.
     let path = match ret_ty {
@@ -284,19 +284,28 @@ pub fn get_ret_types(
             // the type matches Result<S,E> type.
             return Ok( (
                 data.types.first().and_then( |x| Some( x.clone() ) ),
-                quote!( com_runtime::HRESULT )
+                Ty::Path(
+                    None,
+                    Path {
+                        global: true,
+                        segments: vec![
+                            PathSegment::from( Ident::from( "com_runtime" ) ),
+                            PathSegment::from( Ident::from( "HRESULT" ) ),
+                        ]
+                    }
+                )
             ) )
         }
     }
 
     // Default value. We get here only if we didn't return a type from
     // the if statements above.
-    Ok( ( None, quote!( #ret_ty ) ) )
+    Ok( ( None, ret_ty.clone() ) )
 }
 
 pub fn get_out_and_ret(
     m : &MethodSig
-) -> Option< ( Option<Ty>, Tokens ) >
+) -> Option< ( Option<Ty>, Ty ) >
 {
     let output = &m.decl.output;
     let result_ty = match output {
@@ -309,7 +318,7 @@ pub fn get_out_and_ret(
 
 pub fn get_method_rvalues(
     m : &MethodSig
-) -> Option< ( Tokens, Tokens ) >
+) -> Option< ( Ty, Tokens ) >
 {
     let ( out_ty, ret_ty ) = match get_out_and_ret( m ) {
         Some( s ) => s,

@@ -6,7 +6,7 @@
 extern crate com_library;
 
 // Declare available COM classes.
-#[com_library( "{1234-1234-1234-1234-1234-1232412340000}",
+#[com_library( "{12341234-1234-1234-1234-123412340000}",
     Calculator
 )]
 

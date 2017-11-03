@@ -25,7 +25,7 @@ impl GUID {
     /// - Braces and hyphens: {00000000-0000-0000-0000-000000000000}
     /// - Hyphens only: 00000000-0000-0000-0000-000000000000
     /// - Raw hexadecimal: 00000000000000000000000000000000
-    pub fn parse( guid : &str ) -> Result< GUID, &'static str >
+    pub fn parse( guid : &str ) -> Result< GUID, String >
     {
         // We support the following formats:
         // {00000000-0000-0000-0000-000000000000} (38 chars)
@@ -38,7 +38,9 @@ impl GUID {
             38 => GuidFormat::Braces,
             36 => GuidFormat::Hyphens,
             32 => GuidFormat::Raw,
-            _ => return Err( GUID_ERR )
+            _ => return Err( format!(
+                    "Unrecognized GUID format: '{}' ({})",
+                    guid, guid.len() ) ),
         };
 
         // Define the format requirements.
@@ -80,7 +82,11 @@ impl GUID {
             // otherwise error out. In any case we'll go past this guard
             // only if we're expeting a hexadecimal-digit.
             if let Some( b ) = format[ i_char ] {
-                if chr == b { continue } else { return Err( GUID_ERR ) }
+                if chr == b {
+                    continue
+                } else {
+                    return Err( format!( "Unexpected character in GUID: {}", chr ) );
+                }
             }
 
             // Convert the hexadecimal character into a numerical value.
@@ -88,7 +94,7 @@ impl GUID {
                 b'0'...b'9' => chr - b'0',
                 b'a'...b'f' => chr - b'a' + 10,
                 b'A'...b'F' => chr - b'A' + 10,
-                _ => return Err( GUID_ERR )
+                _ => return Err( format!( "Unrecognized character in GUID: {}", chr ) )
             };
 
             // Each digit corresponds to one half of a byte in the final [u8]
@@ -135,6 +141,26 @@ impl GUID {
 }
 
 impl std::fmt::Display for GUID {
+
+    /// Formats the GUID in brace-hyphenated format for display.
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!( f,
+            "{:08x}-{:04x}-{:04x}-{:02x}{:02x}-{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",
+            self.data1,
+            self.data2,
+            self.data3,
+            self.data4[0],
+            self.data4[1],
+            self.data4[2],
+            self.data4[3],
+            self.data4[4],
+            self.data4[5],
+            self.data4[6],
+            self.data4[7] )
+    }
+}
+
+impl std::fmt::UpperHex for GUID {
 
     /// Formats the GUID in brace-hyphenated format for display.
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {

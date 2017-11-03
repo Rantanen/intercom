@@ -22,6 +22,12 @@ impl From<String> for AppError {
     }
 }
 
+impl<'a> From<&'a str> for AppError {
+    fn from( e : &'a str ) -> AppError {
+        AppError( e.to_owned() )
+    }
+}
+
 impl From<glob::PatternError> for AppError {
     fn from( e : glob::PatternError ) -> AppError {
         AppError( String::from( e.description() ) )
