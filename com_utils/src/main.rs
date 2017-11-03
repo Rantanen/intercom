@@ -6,6 +6,7 @@ extern crate clap;
 extern crate if_chain;
 extern crate syn;
 extern crate glob;
+extern crate com_common;
 
 mod idl;
 

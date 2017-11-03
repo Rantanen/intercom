@@ -1,11 +1,11 @@
 
-extern crate com_runtime;
-
-use super::*;
+use proc_macro::{TokenStream, LexError};
+use std::str::FromStr;
 use syn::*;
 use quote::Tokens;
 
 use error::MacroError;
+use super::*;
 
 pub fn trace( t : &str, n : &str ) {
     println!( "Added {}: {}", t, n );
@@ -20,15 +20,13 @@ pub fn parse_inputs(
     let attr_rendered = format!( "#[{}{}]", attr_name, attr_tokens.to_string() );
     let attr = match syn::parse_outer_attr( &attr_rendered ) {
         Ok(t) => t,
-        Err(e) => error(
-                format!( "Could not parse [{}] attribute", attr_name ),
-                attr_tokens ),
+        Err(e) => Err(
+                format!( "Could not parse [{}] attribute", attr_name ) )?,
     };
     let item = match syn::parse_item( &item_tokens.to_string() ) {
         Ok(t) => t,
-        Err(e) => error(
-                format!( "Could not parse [{}] item", attr_name ),
-                &attr ),
+        Err(e) => Err(
+                format!( "Could not parse [{}] item", attr_name ) )?,
     };
 
     Ok( ( vec![ quote!( #item ) ], attr, item ) )
@@ -173,10 +171,10 @@ pub fn get_trait_method(
 
 pub fn parameter_to_guid(
     p : &NestedMetaItem
-) -> Result< com_runtime::GUID, &'static str >
+) -> Result< guid::GUID, &'static str >
 {
     if let &NestedMetaItem::Literal( Lit::Str( ref s, _ ) ) = p {
-        return com_runtime::GUID::parse( &s.as_str() );
+        return guid::GUID::parse( &s.as_str() );
     }
 
     return Err( "GUID parameter must be literal string" );
@@ -404,7 +402,7 @@ pub fn parameter_to_ident(
 }
 
 pub fn get_guid_tokens(
-    g : &com_runtime::GUID
+    g : &guid::GUID
 ) -> Tokens
 {
     let d1 = g.data1;
@@ -419,7 +417,7 @@ pub fn get_guid_tokens(
     let d4_6 = g.data4[ 6 ];
     let d4_7 = g.data4[ 7 ];
     quote!( 
-        com_runtime::GUID {
+        guid::GUID {
             data1: #d1, data2: #d2, data3: #d3,
             data4: [ #d4_0, #d4_1, #d4_2, #d4_3, #d4_4, #d4_5, #d4_6, #d4_7 ]
         }

@@ -1,6 +1,7 @@
 
 use super::*;
 use std::io::Read;
+use com_common::utils::*;
 
 #[derive(Debug)]
 pub struct Interface {

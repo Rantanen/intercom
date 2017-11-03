@@ -3,15 +3,13 @@
 #![feature(catch_expr)]
 #![feature(type_ascription)]
 
-mod utils;
-mod idents;
-mod paramhandlers;
-mod error;
-use error::MacroError;
+extern crate com_common;
+use com_common::idents;
+use com_common::utils;
+use com_common::error::MacroError;
 
 extern crate proc_macro;
 use proc_macro::{TokenStream, LexError};
-use std::str::FromStr;
 extern crate syn;
 #[macro_use]
 extern crate quote;

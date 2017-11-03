@@ -4,10 +4,12 @@
 use std::ptr;
 
 mod classfactory; pub use classfactory::*;
-mod guid; pub use guid::*;
 mod combox; pub use combox::*;
 mod comrc; pub use comrc::*;
 mod bstr; pub use bstr::*;
+
+extern crate com_common;
+pub use com_common::guid::*;
 
 /// Raw COM pointer type.
 pub type RawComPtr = *mut std::os::raw::c_void;

@@ -4,9 +4,8 @@ version = "0.1.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 
 [dependencies]
-#syn = "0.111" // { git = "https://github.com/dtolnay/syn", features = [ "full" ] }
 syn = { version = "0.11", features = [ "full" ] }
-# clap = { version = "2.27.1", features = [ "debug" ] }
-clap = { git = "https://github.com/kbknapp/clap-rs.git" }
+clap = { version = "2.27.1" }
 glob = "0.2.11"
 if_chain = "0.1.2"
+com_common = { path = "../com_common" }

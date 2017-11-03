@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "com_common",
+    "com_library",
+    "com_runtime",
+    "com_utils",
+]

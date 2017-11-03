@@ -7,3 +7,4 @@ authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 name = "com_runtime"
 
 [dependencies]
+com_common = { path = "../com_common" }
