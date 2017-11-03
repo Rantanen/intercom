@@ -28,6 +28,42 @@ pub fn com_interface(
     }
 }
 
+#[proc_macro_attribute]
+pub fn com_impl(
+    attr: TokenStream,
+    tokens: TokenStream,
+) -> TokenStream
+{
+    match expand_com_impl( &attr, tokens ) {
+        Ok(t) => t,
+        Err(e) => error(e, &attr),
+    }
+}
+
+#[proc_macro_attribute]
+pub fn com_class(
+    attr: TokenStream,
+    tokens: TokenStream,
+) -> TokenStream
+{
+    match expand_com_class( &attr, tokens ) {
+        Ok(t) => t,
+        Err(e) => error(e, &attr),
+    }
+}
+
+#[proc_macro_attribute]
+pub fn com_library(
+    attr: TokenStream,
+    tokens: TokenStream,
+) -> TokenStream
+{
+    match expand_com_library( &attr, tokens ) {
+        Ok(t) => t,
+        Err(e) => error(e, &attr),
+    }
+}
+
 fn expand_com_interface(
     attr_tokens: &TokenStream,
     item_tokens: TokenStream,
@@ -104,18 +140,6 @@ fn expand_com_interface(
     ) );
 
     Ok( utils::tokens_to_tokenstream( output )? )
-}
-
-#[proc_macro_attribute]
-pub fn com_impl(
-    attr: TokenStream,
-    tokens: TokenStream,
-) -> TokenStream
-{
-    match expand_com_impl( &attr, tokens ) {
-        Ok(t) => t,
-        Err(e) => error(e, &attr),
-    }
 }
 
 /// Implements the `com_impl` decorator.
@@ -261,18 +285,6 @@ fn expand_com_impl(
         ) );
 
     Ok( utils::tokens_to_tokenstream( output )? )
-}
-
-#[proc_macro_attribute]
-pub fn com_class(
-    attr: TokenStream,
-    tokens: TokenStream,
-) -> TokenStream
-{
-    match expand_com_class( &attr, tokens ) {
-        Ok(t) => t,
-        Err(e) => error(e, &attr),
-    }
 }
 
 fn expand_com_class(
@@ -442,18 +454,6 @@ fn expand_com_class(
     output.push( clsid_const );
 
     Ok( utils::tokens_to_tokenstream( output )? )
-}
-
-#[proc_macro_attribute]
-pub fn com_library(
-    attr: TokenStream,
-    tokens: TokenStream,
-) -> TokenStream
-{
-    match expand_com_library( &attr, tokens ) {
-        Ok(t) => t,
-        Err(e) => error(e, &attr),
-    }
 }
 
 fn expand_com_library(
