@@ -1,17 +1,14 @@
 #![crate_type="dylib"]
 #![feature(type_ascription, proc_macro)]
 
-#[macro_use]
-#[proc_macro]
-extern crate com_library;
+extern crate com_runtime;
+use com_runtime::*;
+extern crate winapi;
 
 // Declare available COM classes.
 #[com_library( "{12341234-1234-1234-1234-123412340000}",
     Calculator
 )]
-
-extern crate com_runtime;
-extern crate winapi;
 
 #[com_class("{12341234-1234-1234-1234-123412340001}", Calculator, Memory, Cloneable )]
 pub struct Calculator {

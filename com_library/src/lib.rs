@@ -1,4 +1,4 @@
-#![feature(proc_macro, faosdaodasd)]
+#![feature(proc_macro)]
 #![allow(unused_imports)]
 #![feature(catch_expr)]
 #![feature(type_ascription)]
@@ -464,16 +464,23 @@ fn expand_com_library(
             utils::parse_inputs( "com_library", &attr_tokens, &item_tokens )?;
 
     // Get the decorator parameters.
-    let params = utils::get_attr_params( &attr )
-            .ok_or( "[com_library(...)] needs visible structs as parameters." )?;
+    let ( libid, coclasses ) = utils::get_attr_params( &attr )
+            .as_ref()
+            .and_then( |ref params| params.split_first() )
+            .ok_or( "[com_library(LIBID, coclasses...)] must specify the LIBID".to_owned() )
+            .and_then( |( f, itfs )|
+                Ok( (
+                    utils::parameter_to_guid( f )?,
+                    ( itfs.into_iter()
+                        .map( |i|
+                            utils::parameter_to_ident( i )
+                                .ok_or( "Invalid interface" ))
+                        .collect() : Result<Vec<&Ident>, &'static str> )?
+                ) ) )?;
 
     // Create the match-statmeent patterns for each supposedly visible COM class.
     let mut match_arms = vec![];
-    for p in params {
-
-        // Extract the class name from the parameter item.
-        let struct_ident = utils::parameter_to_ident( p )
-                .ok_or( format!( "Parameter '{:?}' is invalid interface name", p ) )?;
+    for struct_ident in coclasses {
 
         // Construct the match pattern.
         let clsid_name = idents::clsid( &struct_ident );

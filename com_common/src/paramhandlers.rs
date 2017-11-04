@@ -27,10 +27,21 @@ pub trait ParamHandler {
     }
 
     fn write_null(
-        &self, ident : &Ident, _ty : &Ty
+        &self, ident : &Ident, ty : &Ty
     ) -> Tokens
     {
-        quote!( *#ident = Default::default(); )
+        match ty {
+            &Ty::Path( _, ref p ) => {
+                let name : &str = &p.segments.last().unwrap().ident.as_ref();
+                match name {
+                    "c_void" => quote!( *#ident = std::ptr::null_mut() ),
+                    "RawComPtr" => quote!( *#ident = std::ptr::null_mut() ),
+                    "ComRc" => quote!( *#ident = std::ptr::null_mut() ),
+                    _ => quote!( *#ident = Default::default(); )
+                }
+            },
+            _ => quote!( *#ident = Default::default(); )
+        }
     }
 }
 

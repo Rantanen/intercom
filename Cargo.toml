@@ -4,4 +4,6 @@ members = [
     "com_library",
     "com_runtime",
     "com_utils",
+
+    "test/calculator",
 ]
