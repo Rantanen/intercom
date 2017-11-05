@@ -1,14 +1,19 @@
 #![crate_type="dylib"]
 #![feature(unique, shared)]
 
-use std::ptr;
-
 mod classfactory; pub use classfactory::*;
 mod combox; pub use combox::*;
 mod comrc; pub use comrc::*;
 mod bstr; pub use bstr::*;
 mod guid; pub use guid::GUID;
 
+// The crate doesn't really need the macros. However Rust will complain that
+// the import does nothing if we don't define #[macro_use]. Once we define
+// #[macro_use] to get rid of that warning, Rust will complain that the
+// #[macro_use] does nothing. Fortunately THAT warning comes with a named
+// warning option so we can allow that explicitly.
+#[allow(unused_imports)]
+#[macro_use]
 extern crate intercom_attributes;
 pub use intercom_attributes::*;
 

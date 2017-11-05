@@ -51,7 +51,7 @@ impl ParamHandler for IdentityParam { }
 struct ComRcParam;
 impl ParamHandler for ComRcParam {
     fn arg_ty(
-        &self, ty : &Ty
+        &self, _ : &Ty
     ) -> Tokens
     {
         quote!( intercom::RawComPtr )
@@ -94,7 +94,7 @@ struct StringParam;
 impl ParamHandler for StringParam
 {
     fn arg_ty(
-        &self, ty : &Ty
+        &self, _ : &Ty
     ) -> Tokens
     {
         quote!( intercom::BStr )

@@ -147,7 +147,7 @@ fn expand_com_impl(
     item_tokens: TokenStream,
 ) -> Result<TokenStream, MacroError>
 {
-    let ( mut output, attr, item ) =
+    let ( mut output, _, item ) =
             utils::parse_inputs( "com_impl", &attr_tokens, &item_tokens )?;
 
     // Get the item info the attribute is bound to.
@@ -459,11 +459,11 @@ fn expand_com_library(
     item_tokens: TokenStream,
 ) -> Result<TokenStream, MacroError>
 {
-    let ( mut output, attr, item ) =
+    let ( mut output, _, _ ) =
             utils::parse_inputs( "com_library", &attr_tokens, &item_tokens )?;
 
     // Get the decorator parameters.
-    let ( _, libid, coclasses ) = utils::parse_com_lib_tokens( attr_tokens )?;
+    let ( _, _, coclasses ) = utils::parse_com_lib_tokens( attr_tokens )?;
 
     // Create the match-statmeent patterns for each supposedly visible COM class.
     let mut match_arms = vec![];

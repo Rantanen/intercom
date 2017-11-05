@@ -1,5 +1,5 @@
 
-use proc_macro::{TokenStream, LexError};
+use proc_macro::{LexError};
 
 pub struct MacroError {
     pub msg : String,
@@ -14,7 +14,7 @@ impl From<String> for MacroError {
 }
 
 impl From<LexError> for MacroError {
-    fn from(e:LexError) -> MacroError {
+    fn from(_:LexError) -> MacroError {
         MacroError { msg : "Error parsing token stream".to_owned() }
     }
 }

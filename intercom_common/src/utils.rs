@@ -58,7 +58,7 @@ fn parse_attr_tokens(
     let attr_rendered = format!( "#[{}{}]", attr_name, attr_tokens.to_string() );
     Ok( match syn::parse_outer_attr( &attr_rendered ) {
         Ok(t) => t,
-        Err(e) => Err(
+        Err(_) => Err(
                 format!( "Could not parse [{}] attribute", attr_name ) )?,
     } )
 }
@@ -72,7 +72,7 @@ pub fn parse_inputs(
     let attr = parse_attr_tokens( attr_name, attr_tokens )?;
     let item = match syn::parse_item( &item_tokens.to_string() ) {
         Ok(t) => t,
-        Err(e) => Err(
+        Err(_) => Err(
                 format!( "Could not parse [{}] item", attr_name ) )?,
     };
 
@@ -458,7 +458,7 @@ fn arg_to_ty(
                 mutability: m,
                 ty: self_ty()
             } ) ),
-        &FnArg::SelfValue( m )
+        &FnArg::SelfValue(_)
             => self_ty(),
     }
 }

@@ -14,9 +14,6 @@ pub struct GUID {
     pub data4: [ u8; 8 ],
 }
 
-// We'll want to fix the error handlign at some point.
-const GUID_ERR : &str = "Error parsing the GUID";
-
 impl GUID {
 
     /// Parses the given string as a GUID.
