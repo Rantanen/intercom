@@ -464,25 +464,14 @@ fn expand_com_library(
             utils::parse_inputs( "com_library", &attr_tokens, &item_tokens )?;
 
     // Get the decorator parameters.
-    let ( libid, coclasses ) = utils::get_attr_params( &attr )
-            .as_ref()
-            .and_then( |ref params| params.split_first() )
-            .ok_or( "[com_library(LIBID, coclasses...)] must specify the LIBID".to_owned() )
-            .and_then( |( f, itfs )|
-                Ok( (
-                    utils::parameter_to_guid( f )?,
-                    ( itfs.into_iter()
-                        .map( |i|
-                            utils::parameter_to_ident( i )
-                                .ok_or( "Invalid interface" ))
-                        .collect() : Result<Vec<&Ident>, &'static str> )?
-                ) ) )?;
+    let ( _, libid, coclasses ) = utils::parse_com_lib_tokens( attr_tokens )?;
 
     // Create the match-statmeent patterns for each supposedly visible COM class.
     let mut match_arms = vec![];
-    for struct_ident in coclasses {
+    for class_name in coclasses {
 
         // Construct the match pattern.
+        let struct_ident = Ident::from( class_name );
         let clsid_name = idents::clsid( &struct_ident );
         match_arms.push( quote!(
             self::#clsid_name =>

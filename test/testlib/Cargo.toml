@@ -1,5 +1,5 @@
 [package]
-name = "calculator"
+name = "TestLib"
 version = "0.1.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 

@@ -11,18 +11,65 @@ pub fn trace( t : &str, n : &str ) {
     println!( "Added {}: {}", t, n );
 }
 
+pub fn parse_com_lib_tokens(
+    tokens : &TokenStream,
+) -> Result<( String, guid::GUID, Vec<String> ), MacroError>
+{
+    parse_com_lib_attribute( &parse_attr_tokens( "com_lib", tokens )? )
+}
+
+pub fn parse_com_lib_attribute(
+    attr : &Attribute,
+) -> Result<( String, guid::GUID, Vec<String> ), MacroError>
+{
+    let params = get_parameters( attr )
+            .ok_or( format!( "Bad parameters on com_library" ) )?;
+
+    let ( libname_param, other_params ) = params.split_first()
+            .ok_or( format!( "Not enough com_library parameters" ) )?;
+    let ( libid_param, cls_params ) = other_params.split_first()
+            .ok_or( format!( "Not enough com_library parameters" ) )?;
+
+
+    Ok( (
+        match libname_param {
+            &AttrParam::Word( w ) => format!( "{}", w ),
+            _ => Err( format!( "Invalid library name" ) )?,
+        },
+        match libid_param {
+            &AttrParam::Literal( &syn::Lit::Str( ref g, .. ) )
+                => guid::GUID::parse( g )?,
+            _ => Err( format!( "Invalid LIBID" ) )?,
+        },
+        cls_params
+            .into_iter()
+            .map( |cls| match cls {
+                &AttrParam::Word( w ) => Ok( format!( "{}", w ) ),
+                _ => Err( format!( "Bad interface" ) ),
+            } ).collect::<Result<_,_>>()?
+    ) )
+}
+
+fn parse_attr_tokens(
+    attr_name: &str,
+    attr_tokens: &TokenStream,
+) -> Result< Attribute, MacroError >
+{
+    let attr_rendered = format!( "#[{}{}]", attr_name, attr_tokens.to_string() );
+    Ok( match syn::parse_outer_attr( &attr_rendered ) {
+        Ok(t) => t,
+        Err(e) => Err(
+                format!( "Could not parse [{}] attribute", attr_name ) )?,
+    } )
+}
+
 pub fn parse_inputs(
     attr_name: &str,
     attr_tokens: &TokenStream,
     item_tokens: &TokenStream,
 ) -> Result<( Vec<Tokens>, Attribute, Item ), MacroError>
 {
-    let attr_rendered = format!( "#[{}{}]", attr_name, attr_tokens.to_string() );
-    let attr = match syn::parse_outer_attr( &attr_rendered ) {
-        Ok(t) => t,
-        Err(e) => Err(
-                format!( "Could not parse [{}] attribute", attr_name ) )?,
-    };
+    let attr = parse_attr_tokens( attr_name, attr_tokens )?;
     let item = match syn::parse_item( &item_tokens.to_string() ) {
         Ok(t) => t,
         Err(e) => Err(
@@ -125,6 +172,33 @@ pub fn get_struct_ident_from_annotatable(
 ) -> &Ident
 {
     &item.ident
+}
+
+pub enum AttrParam<'a> {
+    Literal( &'a syn::Lit ),
+    Word( &'a syn::Ident ),
+}
+
+pub fn get_parameters(
+    attr : &syn::Attribute
+) -> Option< Vec< AttrParam > >
+{
+    Some( match attr.value {
+
+        syn::MetaItem::Word(..) => return None,
+        syn::MetaItem::NameValue(..) => return None,
+        syn::MetaItem::List( _, ref l ) =>
+            l.iter().map( |i| match i {
+                &syn::NestedMetaItem::MetaItem( ref mi ) =>
+                        AttrParam::Word( match mi {
+                            &syn::MetaItem::Word( ref i ) => i,
+                            &syn::MetaItem::List( ref i, _ ) => i,
+                            &syn::MetaItem::NameValue( ref i, _ ) => i,
+                        } ),
+                &syn::NestedMetaItem::Literal( ref l ) =>
+                        AttrParam::Literal( l ),
+            } ).collect() ,
+    } )
 }
 
 pub fn get_attr_params(

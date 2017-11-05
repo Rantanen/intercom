@@ -1,0 +1,201 @@
+
+        [
+            uuid( 12341234-1234-1234-1234-123412340000 )
+        ]
+        library TestLib
+        {
+            importlib("stdole2.tlb");
+            
+            interface IPrimitiveOperations;
+        
+
+            interface IStatefulOperations;
+        
+
+            interface IResultOperations;
+        
+
+            interface IClassCreator;
+        
+
+            interface ICreatedClass;
+        
+            
+            [
+                object,
+                uuid( 12341234-1234-1234-1234-123412340002 ),
+                nonextensible,
+                pointer_default(unique)
+            ]
+            interface IPrimitiveOperations : IUnknown
+            {
+                
+                [id(0)]
+                int8 I8( [in] int8 v );
+            
+
+                [id(1)]
+                uint8 U8( [in] uint8 v );
+            
+
+                [id(2)]
+                uint16 U16( [in] uint16 v );
+            
+
+                [id(3)]
+                int16 I16( [in] int16 v );
+            
+
+                [id(4)]
+                int32 I32( [in] int32 v );
+            
+
+                [id(5)]
+                uint32 U32( [in] uint32 v );
+            
+
+                [id(6)]
+                int64 I64( [in] int64 v );
+            
+
+                [id(7)]
+                uint64 U64( [in] uint64 v );
+            
+
+                [id(8)]
+                double F64( [in] double v );
+            
+
+                [id(9)]
+                float F32( [in] float v );
+            
+            }
+        
+
+            [
+                object,
+                uuid( 12341234-1234-1234-1234-123412340004 ),
+                nonextensible,
+                pointer_default(unique)
+            ]
+            interface IStatefulOperations : IUnknown
+            {
+                
+                [id(0)]
+                void PutValue( [in] int32 v );
+            
+
+                [id(1)]
+                int32 GetValue(  );
+            
+            }
+        
+
+            [
+                object,
+                uuid( 12341234-1234-1234-1234-123412340006 ),
+                nonextensible,
+                pointer_default(unique)
+            ]
+            interface IResultOperations : IUnknown
+            {
+                
+                [id(0)]
+                HRESULT SOk(  );
+            
+
+                [id(1)]
+                HRESULT NotImpl(  );
+            
+
+                [id(2)]
+                HRESULT Sqrt( [in] double value, [out, retval] double* __out );
+            
+            }
+        
+
+            [
+                object,
+                uuid( 12341234-1234-1234-1234-123412340009 ),
+                nonextensible,
+                pointer_default(unique)
+            ]
+            interface IClassCreator : IUnknown
+            {
+                
+                [id(0)]
+                HRESULT CreateRoot( [in] int32 id, [out, retval] ICreatedClass** __out );
+            
+            }
+        
+
+            [
+                object,
+                uuid( 12341234-1234-1234-1234-123412340010 ),
+                nonextensible,
+                pointer_default(unique)
+            ]
+            interface ICreatedClass : IUnknown
+            {
+                
+                [id(0)]
+                HRESULT GetId( [out, retval] int32* __out );
+            
+
+                [id(1)]
+                HRESULT GetParentId( [out, retval] int32* __out );
+            
+            }
+        
+            
+            [
+                uuid( 12341234-1234-1234-1234-123412340001 )
+            ]
+            coclass PrimitiveOperations
+            {
+                
+                interface IPrimitiveOperations;
+            }
+        
+
+            [
+                uuid( 12341234-1234-1234-1234-123412340003 )
+            ]
+            coclass StatefulOperations
+            {
+                
+                interface IStatefulOperations;
+            }
+        
+
+            [
+                uuid( 12341234-1234-1234-1234-123412340005 )
+            ]
+            coclass ResultOperations
+            {
+                
+                interface IResultOperations;
+            }
+        
+
+            [
+                uuid( 12341234-1234-1234-1234-123412340007 )
+            ]
+            coclass ClassCreator
+            {
+                
+                interface IClassCreator;
+            }
+        
+
+            [
+                uuid( 12341234-1234-1234-1234-123412340008 )
+            ]
+            coclass CreatedClass
+            {
+                
+                interface ICreatedClass;
+            }
+        
+        }
+        

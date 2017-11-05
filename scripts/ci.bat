@@ -8,5 +8,22 @@ REM Build stuff
 cd ..
 cargo build
 
-cd test/calculator
-../../com_utils/target/debug/com_utils.exe idl .
+pushd com_utils
+
+pushd ..\test\
+
+pushd testlib
+cargo build
+
+cd ..\..\com_utils
+cargo run -- idl ..\test\testlib > ..\test\testlib\testlib.idl
+cargo run -- manifest ..\test\testlib > ..\test\testlib\TestLib.Assembly.manifest
+popd
+
+pushd cpp
+devenv cpp.sln /Build
+cd x64\Debug
+cpp.exe
+popd
+pwd
+

@@ -79,13 +79,10 @@ impl<T: CoClass> ComBox<T> {
         out : *mut RawComPtr,
     ) -> HRESULT {
 
-        eprintln!( "ComBox::query_interface" );
-        let hr = match T::query_interface( &this.vtable_list, riid ) {
+        match T::query_interface( &this.vtable_list, riid ) {
             Ok( ptr ) => { *out = ptr; Self::add_ref( this ); S_OK },
             Err( e ) => { *out = std::ptr::null_mut(); e },
-        };
-        eprintln!( "- Result: {:p} -> {:p}", &this, *out );
-        hr
+        }
     }
 
     /// Increments the reference count.

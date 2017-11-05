@@ -9,6 +9,8 @@ extern crate glob;
 extern crate com_common;
 
 mod idl;
+mod manifest;
+mod parse;
 
 use clap::{App, AppSettings, SubCommand, Arg, ArgMatches};
 use std::error::Error;
@@ -25,6 +27,12 @@ impl From<String> for AppError {
 impl<'a> From<&'a str> for AppError {
     fn from( e : &'a str ) -> AppError {
         AppError( e.to_owned() )
+    }
+}
+
+impl From<com_common::error::MacroError> for AppError {
+    fn from( e : com_common::error::MacroError ) -> AppError {
+        AppError( String::from( e.msg ) )
     }
 }
 
@@ -48,12 +56,20 @@ impl std::fmt::Display for AppError {
 
 fn main() {
     let matches = App::new( "Rust COM utility" )
-            .version( "0.1" )
+            .version( crate_version!() )
             .author( "Mikko Rantanen <rantanen@jubjubnest.net>" )
             .setting( AppSettings::SubcommandRequiredElseHelp )
             .subcommand( SubCommand::with_name( "idl" )
                 .about( "Generates IDL file from the Rust crate" )
-                .version( crate_version!() )
+                .arg( Arg::with_name( "path" )
+                   .help( "Path to the crate to process" )
+                   .default_value( "." )
+                   .index( 1 )
+                )
+            )
+            .subcommand( SubCommand::with_name( "manifest" )
+                .about( "Generates a manifest file for the Rust crate for \
+                            registration free COM" )
                 .arg( Arg::with_name( "path" )
                    .help( "Path to the crate to process" )
                    .default_value( "." )
@@ -63,17 +79,10 @@ fn main() {
         .get_matches();
 
     if let Err( e ) = match matches.subcommand() {
-        ( "idl", Some( idl_matches ) ) => { idl::run( idl_matches ) },
+        ( "idl", Some( args ) ) => { idl::run( args ) },
+        ( "manifest", Some( args ) ) => { manifest::run( args ) },
         _ => unreachable!(),
     } {
         eprintln!( "{}", e );
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
     }
 }

@@ -95,8 +95,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\..\target\debug\calculator.dll $(OutDir)\calculator.dll
-cp $(ProjectDir)..\..\src\calculator.x.manifest $(OutDir)\calculator.x.manifest</Command>
+      <Command>cp $(ProjectDir)..\testlib\target\debug\TestLib.dll $(OutDir)\TestLib.dll
+cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.manifest</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -112,8 +112,8 @@ cp $(ProjectDir)..\..\src\calculator.x.manifest $(OutDir)\calculator.x.manifest<
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\..\target\debug\calculator.dll $(OutDir)\calculator.dll
-cp $(ProjectDir)..\..\src\calculator.x.manifest $(OutDir)\calculator.x.manifest</Command>
+      <Command>cp $(ProjectDir)..\testlib\target\debug\TestLib.dll $(OutDir)\TestLib.dll
+cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.manifest</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -133,8 +133,8 @@ cp $(ProjectDir)..\..\src\calculator.x.manifest $(OutDir)\calculator.x.manifest<
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\..\target\debug\calculator.dll $(OutDir)\calculator.dll
-cp $(ProjectDir)..\..\src\calculator.x.manifest $(OutDir)\calculator.x.manifest</Command>
+      <Command>cp $(ProjectDir)..\testlib\target\debug\TestLib.dll $(OutDir)\TestLib.dll
+cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.manifest</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,27 +154,32 @@ cp $(ProjectDir)..\..\src\calculator.x.manifest $(OutDir)\calculator.x.manifest<
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\..\target\debug\calculator.dll $(OutDir)\calculator.dll
-cp $(ProjectDir)..\..\src\calculator.x.manifest $(OutDir)\calculator.x.manifest</Command>
+      <Command>cp $(ProjectDir)..\testlib\target\debug\TestLib.dll $(OutDir)\TestLib.dll
+cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.manifest</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="calculator_h.h" />
+    <ClInclude Include="catch.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TestLib_h.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="calculator_i.c" />
+    <ClCompile Include="iunknown.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="primitive_tests.cpp" />
+    <ClCompile Include="result.cpp" />
+    <ClCompile Include="return_interfaces.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TestLib_i.c" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="..\..\src\calculator.idl" />
+    <Midl Include="..\testlib\TestLib.idl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

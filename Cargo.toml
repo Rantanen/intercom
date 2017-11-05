@@ -5,5 +5,5 @@ members = [
     "com_runtime",
     "com_utils",
 
-    "test/calculator",
 ]
+exclude = [ "test" ]

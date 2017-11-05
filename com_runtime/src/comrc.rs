@@ -60,4 +60,10 @@ impl<T : CoClass> std::convert::Into< RawComPtr > for ComRc<T> {
     }
 }
 
+impl<T : CoClass> std::ops::Deref for ComRc<T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        unsafe { &**self.ptr }
+    }
+}
 

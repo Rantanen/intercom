@@ -7,9 +7,7 @@ mod classfactory; pub use classfactory::*;
 mod combox; pub use combox::*;
 mod comrc; pub use comrc::*;
 mod bstr; pub use bstr::*;
-
-extern crate com_common;
-pub use com_common::guid::GUID;
+mod guid; pub use guid::GUID;
 
 extern crate com_library;
 pub use com_library::*;
@@ -57,6 +55,10 @@ pub const E_ABORT : HRESULT = 0x80004004 as HRESULT;
 /// HRESULT for unspecified failure.
 #[allow(overflowing_literals)]
 pub const E_FAIL : HRESULT = 0x80004005 as HRESULT;
+
+/// HRESULT for invalid argument.
+#[allow(overflowing_literals)]
+pub const E_INVALIDARG : HRESULT = 0x80070057 as HRESULT;
 
 /// IUnknown interface ID.
 #[allow(non_upper_case_globals)]
