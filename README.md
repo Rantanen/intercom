@@ -1,6 +1,7 @@
 # Intercom
 ### Utilities for writing COM components in Rust
 
+[![crates.io](https://img.shields.io/crates/v/intercom.svg)](https://crates.io/crates/intercom)
 [![Build status](https://ci.appveyor.com/api/projects/status/q88b7xk6l72kup0y?svg=true)](https://ci.appveyor.com/project/Rantanen/intercom)
 
 The COM export allows one to write reusable components in Rust, which can then
