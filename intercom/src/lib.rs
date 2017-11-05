@@ -9,8 +9,8 @@ mod comrc; pub use comrc::*;
 mod bstr; pub use bstr::*;
 mod guid; pub use guid::GUID;
 
-extern crate com_library;
-pub use com_library::*;
+extern crate intercom_attributes;
+pub use intercom_attributes::*;
 
 /// Raw COM pointer type.
 pub type RawComPtr = *mut std::os::raw::c_void;

@@ -7,5 +7,5 @@ authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 crate-type = [ "cdylib" ]
 
 [dependencies]
-com_runtime = { path = "../../com_runtime" }
+intercom = { path = "../../intercom" }
 winapi = "0.2.8"

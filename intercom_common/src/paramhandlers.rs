@@ -54,7 +54,7 @@ impl ParamHandler for ComRcParam {
         &self, ty : &Ty
     ) -> Tokens
     {
-        quote!( com_runtime::RawComPtr )
+        quote!( intercom::RawComPtr )
     }
 
     fn write_out(
@@ -85,7 +85,7 @@ impl ParamHandler for ComRcParam {
 
         let iid_ident = super::idents::iid( &itf_ident );
         quote!(
-            com_runtime::ComRc::query_interface(
+            intercom::ComRc::query_interface(
                     &r, &#iid_ident, #ident ) )
     }
 }
@@ -97,7 +97,7 @@ impl ParamHandler for StringParam
         &self, ty : &Ty
     ) -> Tokens
     {
-        quote!( com_runtime::BStr )
+        quote!( intercom::BStr )
     }
 
     fn for_call(
@@ -111,7 +111,7 @@ impl ParamHandler for StringParam
         &self, ident : &Ident, _ty : &Ty
     ) -> Tokens
     {
-        quote!( *#ident = com_runtime::BStr::string_to_bstr( &r ) )
+        quote!( *#ident = intercom::BStr::string_to_bstr( &r ) )
     }
 }
 

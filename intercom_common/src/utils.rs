@@ -267,7 +267,7 @@ pub fn get_method_args(
 
             // Get the self arg. This is always a ComPtr.
             let mut args = vec![
-                quote!( self_vtable : com_runtime::RawComPtr, )
+                quote!( self_vtable : intercom::RawComPtr, )
             ];
 
             // Process the remaining args into the args and params arrays.
@@ -363,7 +363,7 @@ pub fn get_ret_types(
                     Path {
                         global: true,
                         segments: vec![
-                            PathSegment::from( Ident::from( "com_runtime" ) ),
+                            PathSegment::from( Ident::from( "intercom" ) ),
                             PathSegment::from( Ident::from( "HRESULT" ) ),
                         ]
                     }
@@ -406,7 +406,7 @@ pub fn get_method_rvalues(
             ret_ty,
             quote!(
                 match result {
-                    Ok( _ ) => com_runtime::S_OK,
+                    Ok( _ ) => intercom::S_OK,
                     Err( e ) => e
                 } ) ),
 
@@ -420,7 +420,7 @@ pub fn get_method_rvalues(
                 ret_ty,
                 quote!(
                     match result {
-                        Ok( r ) => { #write_out; com_runtime::S_OK },
+                        Ok( r ) => { #write_out; intercom::S_OK },
                         Err( e ) => { #write_null; e },
                     } ) )
         },
@@ -500,7 +500,7 @@ pub fn get_guid_tokens(
     let d4_6 = g.data4[ 6 ];
     let d4_7 = g.data4[ 7 ];
     quote!( 
-        com_runtime::GUID {
+        intercom::GUID {
             data1: #d1, data2: #d2, data3: #d3,
             data4: [ #d4_0, #d4_1, #d4_2, #d4_3, #d4_4, #d4_5, #d4_6, #d4_7 ]
         }

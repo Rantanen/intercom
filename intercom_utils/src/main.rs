@@ -6,7 +6,7 @@ extern crate clap;
 extern crate if_chain;
 extern crate syn;
 extern crate glob;
-extern crate com_common;
+extern crate intercom_common;
 
 mod idl;
 mod manifest;
@@ -30,8 +30,8 @@ impl<'a> From<&'a str> for AppError {
     }
 }
 
-impl From<com_common::error::MacroError> for AppError {
-    fn from( e : com_common::error::MacroError ) -> AppError {
+impl From<intercom_common::error::MacroError> for AppError {
+    fn from( e : intercom_common::error::MacroError ) -> AppError {
         AppError( String::from( e.msg ) )
     }
 }

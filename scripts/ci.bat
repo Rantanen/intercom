@@ -8,14 +8,14 @@ REM Build stuff
 cd ..
 cargo build
 
-pushd com_utils
+pushd intercom_utils
 
 pushd ..\test\
 
 pushd testlib
 cargo build
 
-cd ..\..\com_utils
+cd ..\..\intercom_utils
 cargo run -- idl ..\test\testlib > ..\test\testlib\testlib.idl
 cargo run -- manifest ..\test\testlib > ..\test\testlib\TestLib.Assembly.manifest
 popd

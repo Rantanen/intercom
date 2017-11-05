@@ -1,7 +1,7 @@
 
 use super::*;
-use com_common::*;
-use com_common::guid::GUID;
+use intercom_common::*;
+use intercom_common::guid::GUID;
 use std::io::Read;
 use std::borrow::Borrow;
 use std::collections::HashMap;

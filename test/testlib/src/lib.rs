@@ -1,8 +1,8 @@
 #![crate_type="dylib"]
 #![feature(type_ascription, proc_macro)]
 
-extern crate com_runtime;
-use com_runtime::*;
+extern crate intercom;
+use intercom::*;
 extern crate winapi;
 
 // Declare available COM classes.

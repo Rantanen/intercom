@@ -1,4 +1,4 @@
-# COM-export-rs
+# Intercom
 ### Utilities for writing COM components in Rust
 
 The COM export allows one to write reusable components in Rust, which can then

@@ -1,8 +1,11 @@
 [package]
-name = "com_common"
+name = "intercom_utils"
 version = "0.1.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 
 [dependencies]
 syn = { version = "0.11", features = [ "full" ] }
-quote = { version = "0.3" }
+clap = { version = "2.27.1" }
+glob = "0.2.11"
+if_chain = "0.1.2"
+intercom_common = { path = "../intercom_common" }

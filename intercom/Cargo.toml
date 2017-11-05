@@ -1,10 +1,10 @@
 [package]
-name = "com_runtime"
+name = "intercom"
 version = "0.1.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 
 [lib]
-name = "com_runtime"
+name = "intercom"
 
 [dependencies]
-com_library = { path = "../com_library" }
+intercom_attributes = { path = "../intercom_attributes" }
