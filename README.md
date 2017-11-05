@@ -1,6 +1,8 @@
 # Intercom
 ### Utilities for writing COM components in Rust
 
+[![Build status](https://ci.appveyor.com/api/projects/status/q88b7xk6l72kup0y?svg=true)](https://ci.appveyor.com/project/Rantanen/intercom)
+
 The COM export allows one to write reusable components in Rust, which can then
 be consumed in any COM-compatible language. This includes C++, C#, VB.Net, etc.
 
