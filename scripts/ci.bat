@@ -17,7 +17,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 popd
 
 REM Generate IDL and Manifest for the testlib.
-pushd intercom_utils
+pushd intercom-utils
 
 cargo run -- idl ..\test\testlib > ..\test\testlib\testlib.idl
 if %errorlevel% neq 0 exit /b %errorlevel%

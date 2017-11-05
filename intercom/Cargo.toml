@@ -2,9 +2,11 @@
 name = "intercom"
 version = "0.1.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
+license = "MIT"
+repository = "https://github.com/Rantanen/intercom"
 
 [lib]
 name = "intercom"
 
 [dependencies]
-intercom_attributes = { path = "../intercom_attributes" }
+intercom-attributes = { version = "0.1.0", path = "../intercom-attributes" }
