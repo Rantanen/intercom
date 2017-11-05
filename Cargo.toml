@@ -1,9 +1,9 @@
 [workspace]
 members = [
-    "intercom_common",
-    "intercom_attributes",
+    "intercom-common",
+    "intercom-attributes",
     "intercom",
-    "intercom_utils",
+    "intercom-utils",
 
 ]
 exclude = [ "test" ]
