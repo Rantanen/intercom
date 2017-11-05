@@ -1,6 +1,7 @@
 
 #include "catch.hpp"
 #include "TestLib_h.h"
+#include <iostream>
 
 TEST_CASE( "Objects maintain their state" )
 {

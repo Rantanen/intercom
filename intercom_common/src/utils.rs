@@ -384,7 +384,7 @@ pub fn get_out_and_ret(
     let output = &m.decl.output;
     let result_ty = match output {
         &FunctionRetTy::Ty( ref ty ) => ty,
-        _ => return None
+        &FunctionRetTy::Default => return Some( ( None, Ty::Tup( vec![] ) ) ),
     };
 
     get_ret_types( &result_ty ).ok()

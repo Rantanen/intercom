@@ -13,7 +13,7 @@ impl<T> ComRc<T> where T : CoClass {
     /// Creates a new reference counted COM object.
     pub fn new( value : T ) -> ComRc<T> {
         ComRc {
-            ptr: unsafe { ComBox::new_ptr( value ) }
+            ptr: Box::into_raw( ComBox::new( value ) )
         }
     }
 

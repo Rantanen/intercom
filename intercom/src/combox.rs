@@ -42,16 +42,17 @@ impl<T: CoClass> ComBox<T> {
 
     /// Creates a new ComBox and returns a pointer to it.
     ///
-    /// The box is initialized with a reference count of one so there is no
-    /// need to immediately increment the count.
+    /// The box is initialized with a reference count of zero. In most cases
+    /// the ComBox creation is followed by query_interface, which increments the
+    /// ref_count.
     ///
     /// The value should be cleaned by calling 'release'.
-    pub unsafe fn new_ptr( value : T ) -> *mut ComBox<T> {
-        Box::into_raw( Box::new( ComBox {
+    pub fn new( value : T ) -> Box<ComBox<T>> {
+        Box::new( ComBox {
             vtable_list: T::create_vtable_list(),
-            ref_count: 1,
+            ref_count: 0,
             value: value,
-        } ) )
+        } )
     }
 
     pub fn as_comptr( &self ) -> RawComPtr

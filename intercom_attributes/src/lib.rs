@@ -236,17 +236,16 @@ fn expand_com_impl(
     // Implement the delegating calls for the coclass.
     for ( method_ident, method_sig ) in fns {
         do catch {
+            let method_impl_ident = idents::method_impl(
+                &struct_ident,
+                &itf_ident,
+                &method_ident.as_ref() );
 
             // Get the self argument and the remaining args.
             let ( args, params ) =
                     utils::get_method_args( method_sig )?;
             let ( ret_ty, return_statement ) =
                     utils::get_method_rvalues( &method_sig )?;
-
-            let method_impl_ident = idents::method_impl(
-                &struct_ident,
-                &itf_ident,
-                &method_ident.as_ref() );
 
             // Define the delegating method implementation.
             //
@@ -475,9 +474,9 @@ fn expand_com_library(
         let clsid_name = idents::clsid( &struct_ident );
         match_arms.push( quote!(
             self::#clsid_name =>
-                Ok( intercom::ComBox::new_ptr(
+                Ok( Box::into_raw( intercom::ComBox::new(
                         #struct_ident::new()
-                    ) as intercom::RawComPtr ),
+                    ) ) as intercom::RawComPtr ),
         ) );
     }
 
@@ -494,21 +493,29 @@ fn expand_com_library(
         #[allow(dead_code)]
         pub unsafe extern "stdcall" fn DllGetClassObject(
             rclsid : intercom::REFCLSID,
-            _riid : intercom::REFIID,
+            riid : intercom::REFIID,
             pout : *mut intercom::RawComPtr
         ) -> intercom::HRESULT
         {
             // Create new class factory.
             // Specify a create function that is able to create all the contained
             // coclasses.
-            *pout = intercom::ComBox::new_ptr(
+            let mut combox = intercom::ComBox::new(
                 intercom::ClassFactory::new( rclsid, | clsid | {
 
                     match *clsid {
                         #match_arm_tokens
                         _ => Err( intercom::E_NOINTERFACE ),
                     }
-                } ) ) as intercom::RawComPtr;
+                } ) );
+            intercom::ComBox::query_interface(
+                    combox.as_mut(),
+                    riid,
+                    pout );
+
+            // We've assigned the interface to pout, we can now
+            // detach the Box from Rust memory management.
+            Box::into_raw( combox );
             intercom::S_OK
         }
     );

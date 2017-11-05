@@ -170,6 +170,7 @@ cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.
     <ClCompile Include="primitive_tests.cpp" />
     <ClCompile Include="result.cpp" />
     <ClCompile Include="return_interfaces.cpp" />
+    <ClCompile Include="stateful.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

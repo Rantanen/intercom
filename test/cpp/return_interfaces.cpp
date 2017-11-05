@@ -2,7 +2,10 @@
 #include "catch.hpp"
 #include "TestLib_h.h"
 
-TEST_CASE( "Methods accept and return COM objects" ) {
+TEST_CASE( "Methods accept and return COM objects" )
+{
+	// Initialize COM.
+	CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
 
 	// Get the IPrimitiveOperations interface.
 	IClassCreator* pOps = nullptr;
@@ -30,4 +33,6 @@ TEST_CASE( "Methods accept and return COM objects" ) {
 		REQUIRE( hr == S_OK );
 		REQUIRE( id == 10 );
 	}
+
+	CoUninitialize();
 }

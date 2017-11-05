@@ -5,7 +5,10 @@
 #include "catch.hpp"
 #include "TestLib_h.h"
 
-TEST_CASE( "Primitive types are supported" ) {
+TEST_CASE( "Primitive types are supported" )
+{
+	// Initialize COM.
+	CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
 
 	// Get the IPrimitiveOperations interface.
 	IPrimitiveOperations* pOps = nullptr;
@@ -129,5 +132,7 @@ TEST_CASE( "Primitive types are supported" ) {
 		REQUIRE( pOps->F64( 0.1234 ) == ( 1.0 / 0.1234 ) );
 		REQUIRE( pOps->F64( 3.0 ) == ( 1.0 / 3.0 ) );
 	}
+
+	CoUninitialize();
 }
 	

@@ -49,8 +49,10 @@ pub struct StatefulOperations {
 #[com_interface("{12341234-1234-1234-1234-123412340004}")]
 #[com_impl]
 impl StatefulOperations {
-    pub fn new() -> StatefulOperations { StatefulOperations { state : 0 } }
-    pub fn put_value( &mut self, v : i32 ) { self.state = v; }
+    pub fn new() -> StatefulOperations { StatefulOperations { state : 0xABBACD00 } }
+    pub fn put_value( &mut self, v : i32 ) {
+        self.state = v;
+    }
     pub fn get_value( &mut self ) -> i32 { self.state }
 }
 
