@@ -1,0 +1,4 @@
+/packages
+*.sln.DotSettings.user
+TestLib.tlb
+TestLib.Interop.dll

@@ -35,3 +35,14 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 popd
 
+REM Build C# test suite
+pushd test\cs
+
+midl ..\testlib\testlib.idl /tlb TestLib.tlb
+tlbimp TestLib.tlb /machine:X64 /out:TestLib.Interop.dll
+
+devenv cs.sln /Build "Release|x64"
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+popd
+
