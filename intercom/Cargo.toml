@@ -6,6 +6,9 @@ license = "MIT"
 repository = "https://github.com/Rantanen/intercom"
 description = "Utilities for writing COM visible Rust components."
 
+[badges]
+appveyor = { repository = "Rantanen/intercom", branch = "master", service = "github" }
+
 [lib]
 name = "intercom"
 
