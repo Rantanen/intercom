@@ -19,6 +19,9 @@ install:
     - rustc -vV
     - cargo -vV
 
+before_build:
+    - nuget restore test\cs\cs.sln
+
 platform:
     - x64
 
