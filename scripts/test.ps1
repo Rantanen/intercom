@@ -9,5 +9,5 @@ $wc.UploadFile( "https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_J
 popd
 
 pushd test\cs\bin\x64\Release
-vstest.console /logger:Appveyor cs.dll
+vstest.console /logger:Appveyor /platform:x64 cs.dll
 popd
