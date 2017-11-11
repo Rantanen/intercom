@@ -7,6 +7,7 @@ extern crate winapi;
 
 // Declare available COM classes.
 #[com_library( TestLib, "{12341234-1234-1234-1234-123412340000}",
+    RefCountOperations,
     PrimitiveOperations,
     StatefulOperations,
     ResultOperations,
@@ -97,7 +98,12 @@ impl ClassCreator {
     // First we should support random COM interfaces. After that we should
     // support specific Rust COM classes through special QueryInterface.
     //
-    // pub fn create_child( &self, id : i32, parent : ComRc<CreatedClass> ) -> ComResult<ComRc<CreatedClass>> {
+    // pub fn create_child(
+    //     &self,
+    //     id : i32,
+    //     parent : ComRc<CreatedClass>
+    // ) -> ComResult<ComRc<CreatedClass>>
+    // {
     //     Ok( ComRc::new( CreatedClass::new_child( id, &*parent ) ) )
     // }
 }
@@ -111,4 +117,22 @@ impl CreatedClass {
 
     pub fn get_id( &self ) -> ComResult<i32> { Ok( self.id ) }
     pub fn get_parent_id( &self ) -> ComResult<i32> { Ok( self.parent ) }
+}
+
+#[com_class("{12341234-1234-1234-1234-123412340011}", RefCountOperations )]
+pub struct RefCountOperations {}
+
+#[com_interface("{12341234-1234-1234-1234-123412340012}")]
+#[com_impl]
+impl RefCountOperations {
+    pub fn new() -> RefCountOperations { RefCountOperations { } }
+
+    pub fn get_ref_count( &self ) -> u32 {
+        let combox = unsafe { ComBox::of( self ) };
+        combox.get_ref_count()
+    }
+
+    pub fn get_new( &self ) -> ComResult<ComRc<RefCountOperations>> {
+        Ok( ComRc::new( RefCountOperations::new() ) )
+    }
 }

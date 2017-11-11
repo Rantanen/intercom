@@ -32,7 +32,11 @@ TEST_CASE( "Methods accept and return COM objects" )
 
 		REQUIRE( hr == S_OK );
 		REQUIRE( id == 10 );
+
+		pParent->Release();
 	}
+
+	pOps->Release();
 
 	CoUninitialize();
 }

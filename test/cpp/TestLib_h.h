@@ -76,6 +76,25 @@ typedef interface ICreatedClass ICreatedClass;
 #endif 	/* __ICreatedClass_FWD_DEFINED__ */
 
 
+#ifndef __IRefCountOperations_FWD_DEFINED__
+#define __IRefCountOperations_FWD_DEFINED__
+typedef interface IRefCountOperations IRefCountOperations;
+
+#endif 	/* __IRefCountOperations_FWD_DEFINED__ */
+
+
+#ifndef __RefCountOperations_FWD_DEFINED__
+#define __RefCountOperations_FWD_DEFINED__
+
+#ifdef __cplusplus
+typedef class RefCountOperations RefCountOperations;
+#else
+typedef struct RefCountOperations RefCountOperations;
+#endif /* __cplusplus */
+
+#endif 	/* __RefCountOperations_FWD_DEFINED__ */
+
+
 #ifndef __PrimitiveOperations_FWD_DEFINED__
 #define __PrimitiveOperations_FWD_DEFINED__
 
@@ -147,6 +166,7 @@ extern "C"{
 
 /* library TestLib */
 /* [uuid] */ 
+
 
 
 
@@ -683,6 +703,102 @@ EXTERN_C const IID IID_ICreatedClass;
 
 #endif 	/* __ICreatedClass_INTERFACE_DEFINED__ */
 
+
+#ifndef __IRefCountOperations_INTERFACE_DEFINED__
+#define __IRefCountOperations_INTERFACE_DEFINED__
+
+/* interface IRefCountOperations */
+/* [unique][nonextensible][uuid][object] */ 
+
+
+EXTERN_C const IID IID_IRefCountOperations;
+
+#if defined(__cplusplus) && !defined(CINTERFACE)
+    
+    MIDL_INTERFACE("12341234-1234-1234-1234-123412340012")
+    IRefCountOperations : public IUnknown
+    {
+    public:
+        virtual /* [id] */ UINT32 STDMETHODCALLTYPE GetRefCount( void) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE GetNew( 
+            /* [retval][out] */ IRefCountOperations **__out) = 0;
+        
+    };
+    
+    
+#else 	/* C style interface */
+
+    typedef struct IRefCountOperationsVtbl
+    {
+        BEGIN_INTERFACE
+        
+        HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
+            IRefCountOperations * This,
+            /* [in] */ REFIID riid,
+            /* [annotation][iid_is][out] */ 
+            _COM_Outptr_  void **ppvObject);
+        
+        ULONG ( STDMETHODCALLTYPE *AddRef )( 
+            IRefCountOperations * This);
+        
+        ULONG ( STDMETHODCALLTYPE *Release )( 
+            IRefCountOperations * This);
+        
+        /* [id] */ UINT32 ( STDMETHODCALLTYPE *GetRefCount )( 
+            IRefCountOperations * This);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *GetNew )( 
+            IRefCountOperations * This,
+            /* [retval][out] */ IRefCountOperations **__out);
+        
+        END_INTERFACE
+    } IRefCountOperationsVtbl;
+
+    interface IRefCountOperations
+    {
+        CONST_VTBL struct IRefCountOperationsVtbl *lpVtbl;
+    };
+
+    
+
+#ifdef COBJMACROS
+
+
+#define IRefCountOperations_QueryInterface(This,riid,ppvObject)	\
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
+
+#define IRefCountOperations_AddRef(This)	\
+    ( (This)->lpVtbl -> AddRef(This) ) 
+
+#define IRefCountOperations_Release(This)	\
+    ( (This)->lpVtbl -> Release(This) ) 
+
+
+#define IRefCountOperations_GetRefCount(This)	\
+    ( (This)->lpVtbl -> GetRefCount(This) ) 
+
+#define IRefCountOperations_GetNew(This,__out)	\
+    ( (This)->lpVtbl -> GetNew(This,__out) ) 
+
+#endif /* COBJMACROS */
+
+
+#endif 	/* C style interface */
+
+
+
+
+#endif 	/* __IRefCountOperations_INTERFACE_DEFINED__ */
+
+
+EXTERN_C const CLSID CLSID_RefCountOperations;
+
+#ifdef __cplusplus
+
+class DECLSPEC_UUID("12341234-1234-1234-1234-123412340011")
+RefCountOperations;
+#endif
 
 EXTERN_C const CLSID CLSID_PrimitiveOperations;
 

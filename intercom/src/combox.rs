@@ -98,6 +98,11 @@ impl<T: CoClass> ComBox<T> {
         this.ref_count
     }
 
+    /// Gets the reference count of the object.
+    pub fn get_ref_count( &self ) -> u32 {
+        self.ref_count
+    }
+
     /// Decrements the reference count. Destroys the object if the count reaches
     /// zero.
     ///
@@ -200,7 +205,31 @@ impl<T: CoClass> ComBox<T> {
     ///   one given as a parameter and an indirect one available through the
     ///   return value. The caller should not attempt to access the value data
     ///   through the returned `ComBox` reference.
-    pub unsafe fn of( value : &mut T ) -> &mut ComBox< T > {
+    pub unsafe fn of( value : &T ) -> &ComBox< T > {
+
+        // Resolve the offset of the 'value' field.
+        let null_combox = std::ptr::null() as *const ComBox<T>;
+        let value_offset = 
+            &( (*null_combox).value ) as *const _ as usize;
+
+        let combox_loc = value as *const T as usize - value_offset;
+        &mut *( combox_loc as *mut ComBox< T > )
+    }
+
+    /// Gets the ComBox holding the value.
+    ///
+    /// This is unsafe for two reasons:
+    /// - There is no way for the method to check that the value is actually
+    ///   contained in a `ComBox`. It is up to the caller to ensure this method
+    ///   is only called with values that exist within a `ComBox`.
+    /// - The method returns a mutable reference to the ComBox containing the
+    ///   value. As demonstrated by the parameter type, the caller already has
+    ///   a mutable reference to the value itself. As a result the caller will
+    ///   end up with two different mutable references to the value - the direct
+    ///   one given as a parameter and an indirect one available through the
+    ///   return value. The caller should not attempt to access the value data
+    ///   through the returned `ComBox` reference.
+    pub unsafe fn of_mut( value : &mut T ) -> &mut ComBox< T > {
 
         // Resolve the offset of the 'value' field.
         let null_combox = std::ptr::null() as *const ComBox<T>;

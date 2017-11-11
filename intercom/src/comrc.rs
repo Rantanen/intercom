@@ -12,9 +12,11 @@ impl<T> ComRc<T> where T : CoClass {
 
     /// Creates a new reference counted COM object.
     pub fn new( value : T ) -> ComRc<T> {
-        ComRc {
-            ptr: Box::into_raw( ComBox::new( value ) )
-        }
+
+        // Construct the ComBox and register the reference held by ComRc.
+        let mut cb = ComBox::new( value );
+        unsafe { ComBox::add_ref( &mut cb ) };
+        ComRc { ptr: Box::into_raw( cb ) }
     }
 
     /// Acquires a raw COM pointer to the object.
