@@ -32,7 +32,6 @@ fn result_to_idl(
             let args = m.arguments.iter().map(|a| {
                 let ( attrs, out_ptr ) = match a.dir {
                     ArgDirection::In => ( "in", "" ),
-                    ArgDirection::Out => ( "out", "*" ),
                     ArgDirection::Return => ( "out, retval", "*" ),
                 };
                 format!( "[{}] {}{} {}", attrs, a.ty, out_ptr, a.name )

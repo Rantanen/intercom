@@ -3,10 +3,14 @@
 #![feature(catch_expr)]
 #![feature(type_ascription)]
 
+use std::iter;
+
 extern crate intercom_common;
 use intercom_common::idents;
 use intercom_common::utils;
+use intercom_common::ast_converters::*;
 use intercom_common::error::MacroError;
+use intercom_common::methodinfo::ComMethodInfo;
 
 extern crate proc_macro;
 use proc_macro::{TokenStream, LexError};
@@ -72,7 +76,7 @@ fn expand_com_interface(
     let ( mut output, attr, item ) =
             utils::parse_inputs( "com_interface", &attr_tokens, &item_tokens )?;
 
-    let ( itf_ident, fns ) =
+    let ( itf_ident, fns, itf_type ) =
             utils::get_ident_and_fns( &item )
                 .ok_or( "[com_interface(IID:&str)] must be applied to trait or struct impl" )?;
 
@@ -84,6 +88,7 @@ fn expand_com_interface(
 
     let iid_tokens = utils::get_guid_tokens( &iid_guid );
     let iid_ident = idents::iid( &itf_ident );
+    let vtable_ident = idents::vtable_struct( &itf_ident );
 
     // IID_IInterface GUID.
     output.push( quote!(
@@ -96,6 +101,7 @@ fn expand_com_interface(
     let mut fields = vec![
         quote!( __base : intercom::IUnknownVtbl, )
     ];
+    let mut impls = vec![];
 
     // Process the impl items. This gathers all COM-visible methods and defines
     // delegating calls for them. These delegating calls are the ones that are
@@ -110,33 +116,85 @@ fn expand_com_interface(
         do catch {
 
             // Get the self argument and the remaining args.
-            let ( args, _) =
+            let method_info = ComMethodInfo::new(
+                    &method_ident, &method_sig.decl ).ok()?;
+            let ( args, _ ) =
                     utils::get_method_args( method_sig )?;
             let ( ret_ty, _ ) =
                     utils::get_method_rvalues( &method_sig )?;
 
             // Create the vtable field and add it to the vector of fields.
             let arg_tokens = utils::flatten( args.iter() );
-            let vtable_method_decl = quote!(
-                #[allow(dead_code)]
+            fields.push( quote!(
                 #method_ident :
                     unsafe extern "stdcall" fn( #arg_tokens ) -> #ret_ty,
-            );
+            ) );
 
-            fields.push( vtable_method_decl );
+            let self_arg = method_info.rust_self_arg;
+            let return_ty = method_info.rust_return_ty;
+            let impl_args = method_info.args.iter().map( |ca| {
+                let name = &ca.name;
+                let ty = &ca.ty;
+                quote!( #name : #ty )
+            } );
+            let out_arg_declarations = method_info.returnhandler.com_out_args()
+                    .iter()
+                    .map( |ca| {
+                        let ident = &ca.name;
+                        let ty = &ca.ty;
+                        quote!( let mut #ident : #ty = Default::default(); )
+                    } ).collect::<Vec<_>>();
+            let in_params = method_info.args
+                    .iter()
+                    .map( |ca| {
+                        let param = ca.handler.rust_to_com( &ca.name );
+                        quote!( #param )
+                    } ).collect::<Vec<_>>();
+            let out_params = method_info.returnhandler.com_out_args()
+                    .iter()
+                    .map( |ca| {
+                        let name = &ca.name;
+                        quote!( &mut #name )
+                    } ).collect::<Vec<_>>();
+            let params = iter::once( quote!( comptr ) )
+                .chain( in_params )
+                .chain( out_params );
+            let return_ident = Ident::from( "__result" );
+            let return_statement = method_info
+                    .returnhandler
+                    .return_statement( &return_ident );
+
+            impls.push( quote!(
+                fn #method_ident( #self_arg, #( #impl_args ),* ) -> #return_ty {
+                    let comptr = intercom::ComItf::ptr( self );
+                    let vtbl = comptr as *const *const #vtable_ident;
+                    unsafe {
+                        #( #out_arg_declarations )*;
+                        let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
+                        #return_statement
+                    }
+                }
+            ) );
             Some(())
         };
     }
 
     // Create the vtable. We've already gathered all the vtable method
     // pointer fields so defining the struct is simple enough.
-    let vtable_ident = idents::vtable_struct( &itf_ident );
     let field_tokens = utils::flatten( fields.iter() );
     output.push( quote!(
         #[allow(non_camel_case_types)]
         #[repr(C)]
         pub struct #vtable_ident { #field_tokens }
     ) );
+
+    if itf_type == utils::InterfaceType::Trait {
+        output.push( quote!(
+            impl #itf_ident for intercom::ComItf< #itf_ident > {
+                #( #impls )*
+            }
+        ) );
+    }
 
     Ok( utils::tokens_to_tokenstream( output )? )
 }
@@ -306,9 +364,9 @@ fn expand_com_class(
                     utils::parameter_to_guid( f )?,
                     ( itfs.into_iter()
                         .map( |i|
-                            utils::parameter_to_ident( i )
-                                .ok_or( "Invalid interface" ))
-                        .collect() : Result<Vec<&Ident>, &'static str> )?
+                            i.get_ident()
+                                .or( Err( "Invalid interface" ) ))
+                        .collect() : Result<Vec<Ident>, &'static str> )?
                 ) ) )?;
 
     // IUnknown vtable match. As the primary query_interface is implemented
@@ -364,7 +422,6 @@ fn expand_com_class(
                     }
                 }
         ) );
-        utils::trace( "vtable_offset", &offset_ident.as_ref() );
 
         // The vtable pointer to for the ComBox vtable list.
         vtable_list_fields.push( quote!(

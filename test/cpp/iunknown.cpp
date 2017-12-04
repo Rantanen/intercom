@@ -92,6 +92,7 @@ TEST_CASE( "Basic IUnknown implementation works" )
 				REQUIRE( pRefCount->Release() == 0 );
 			}
 		}
+
 		SECTION( "COM interface returned from function has proper ref count" )
 		{
 			IRefCountOperations* pAnotherRefCount = nullptr;

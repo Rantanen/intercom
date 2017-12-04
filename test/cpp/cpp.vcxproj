@@ -95,7 +95,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\testlib\target\debug\TestLib.dll $(OutDir)\TestLib.dll
+      <Command>cp $(ProjectDir)..\testlib\target\debug\test_lib.dll $(OutDir)\TestLib.dll
 cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.manifest</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -112,7 +112,7 @@ cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\testlib\target\debug\TestLib.dll $(OutDir)\TestLib.dll
+      <Command>cp $(ProjectDir)..\testlib\target\debug\test_lib.dll $(OutDir)\TestLib.dll
 cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.manifest</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -133,7 +133,7 @@ cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\testlib\target\debug\TestLib.dll $(OutDir)\TestLib.dll
+      <Command>cp $(ProjectDir)..\testlib\target\debug\test_lib.dll $(OutDir)\TestLib.dll
 cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.manifest</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -154,7 +154,7 @@ cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\testlib\target\debug\TestLib.dll $(OutDir)\TestLib.dll
+      <Command>cp $(ProjectDir)..\testlib\target\debug\test_lib.dll $(OutDir)\TestLib.dll
 cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.manifest</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -165,6 +165,7 @@ cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.
     <ClInclude Include="TestLib_h.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="interface_params.cpp" />
     <ClCompile Include="iunknown.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="primitive_tests.cpp" />

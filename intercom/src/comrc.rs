@@ -24,6 +24,14 @@ impl<T> ComRc<T> where T : CoClass {
         this.ptr as RawComPtr
     }
 
+    /// Converts the ComRc into a raw COM pointer. Prevents the ref count
+    /// being decremented as the ComRc goes out of scope.
+    pub fn into_raw( this: Self ) -> RawComPtr {
+        let ptr = this.ptr as RawComPtr;
+        std::mem::forget( this );
+        ptr
+    }
+
     /// Performs a query interface operation.
     ///
     /// The operation assumes the COM object has the IUnknown virtual table
@@ -37,14 +45,20 @@ impl<T> ComRc<T> where T : CoClass {
     pub unsafe fn query_interface(
         this : &Self,
         iid : &GUID,
-        out : *mut RawComPtr
-    ) -> HRESULT
+    ) -> ComResult<RawComPtr>
     {
         // The iunknown vtable is at the start of the data.
         let vtables = ComBox::vtable( &*this.ptr );
         let iunk = vtables as *const _ as *const *const IUnknownVtbl;
-        ((**iunk).query_interface)(
-                this.ptr as RawComPtr, iid, out )
+        let mut out_ptr = std::ptr::null_mut();
+        let hr = ((**iunk).query_interface)(
+                this.ptr as RawComPtr, iid, &mut out_ptr );
+
+        if hr == S_OK {
+            Ok( out_ptr )
+        } else {
+            Err( hr )
+        }
     }
 }
 

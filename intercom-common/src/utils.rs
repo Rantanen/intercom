@@ -6,6 +6,7 @@ use quote::Tokens;
 
 use error::MacroError;
 use super::*;
+use ast_converters::*;
 
 pub fn trace( t : &str, n : &str ) {
     println!( "Added {}: {}", t, n );
@@ -98,15 +99,18 @@ pub fn flatten<'a, I: Iterator<Item=&'a Tokens>>(
     all_tokens
 }
 
+#[derive(PartialEq)]
+pub enum InterfaceType { Trait, Struct }
+
 pub fn get_ident_and_fns(
     item : &Item
-) -> Option< ( &Ident, Vec<(&Ident, &MethodSig)> ) >
+) -> Option< ( &Ident, Vec<(&Ident, &MethodSig)>, InterfaceType ) >
 {
     match item.node {
         ItemKind::Impl( .., ref trait_ref, ref ty, ref items ) => {
             let ( _, struct_ident, items ) =
                     get_impl_data_raw( trait_ref, ty, items );
-            Some( ( struct_ident, items ) )
+            Some( ( struct_ident, items, InterfaceType::Struct ) )
         },
         ItemKind::Trait( .., ref items ) => {
 
@@ -116,7 +120,7 @@ pub fn get_ident_and_fns(
                     .collect();
 
             match methods {
-                Some( m ) => Some( ( &item.ident, m ) ),
+                Some( m ) => Some( ( &item.ident, m, InterfaceType::Trait ) ),
                 None => None
             }
         },
@@ -275,12 +279,11 @@ pub fn get_method_args(
             for arg_ref in other_args {
 
                 // Get the type handler.
-                let arg_ty = arg_to_ty( &arg_ref );
-                let param = paramhandlers::get_param_handler(
-                    &arg_ty );
-                let ty = param.arg_ty( &arg_ty );
-                let arg_ident = match arg_to_ident( arg_ref ) {
-                    Ok(i) => i, Err(e) => panic!(e.msg)
+                let arg_ty = arg_ref.get_ty().unwrap();
+                let param = tyhandlers::get_ty_handler( &arg_ty );
+                let ty = param.com_ty();
+                let arg_ident = match arg_ref.get_ident() {
+                    Ok(i) => i, Err(e) => panic!(e)
                 };
 
                 // Construct the arguemnt. quote_tokens! has difficulties parsing
@@ -290,7 +293,7 @@ pub fn get_method_args(
                 args.push( quote!( #arg, ) );
 
                 // Get the call parameter.
-                let call_param = param.for_call( &arg_ident, &arg_ty );
+                let call_param = param.com_to_rust( &arg_ident );
                 params.push( quote!( #call_param, ) );
             }
 
@@ -298,9 +301,8 @@ pub fn get_method_args(
             if let Some( outs ) = get_out_and_ret( m ) {
                 if let ( Some( out_ty ), _ ) = outs {
                     if ! is_unit( &out_ty ) {
-                        let param = paramhandlers::get_param_handler(
-                                &out_ty );
-                        let ty = param.arg_ty( &out_ty );
+                        let param = tyhandlers::get_ty_handler( &out_ty );
+                        let ty = param.com_ty();
                         args.push( quote!( __out : *mut #ty ) );
                     }
                 }
@@ -412,16 +414,16 @@ pub fn get_method_rvalues(
 
         // Result<_, _>. Ok() -> __out + S_OK, Err() -> E_*
         Some( ref out_ty ) => {
-            let param = paramhandlers::get_param_handler( &out_ty );
+            let param = tyhandlers::get_ty_handler( &out_ty );
             let out_ident = Ident::from( "__out" );
-            let write_out = param.write_out( &out_ident, &out_ty );
-            let write_null = param.write_null( &out_ident, &out_ty );
+            let result_value = param.rust_to_com( &Ident::from( "r" ) );
+            let default_value = param.default_value();
             (
                 ret_ty,
                 quote!(
                     match result {
-                        Ok( r ) => { #write_out; intercom::S_OK },
-                        Err( e ) => { #write_null; e },
+                        Ok( r ) => { *#out_ident = #result_value; intercom::S_OK },
+                        Err( e ) => { *#out_ident = #default_value; e },
                     } ) )
         },
 
@@ -429,59 +431,6 @@ pub fn get_method_rvalues(
         None => (
             ret_ty, quote!( return result ) ),
     } )
-}
-
-fn arg_to_ident(
-    arg : &FnArg,
-) -> Result<Ident, MacroError> {
-    Ok( match arg {
-        &FnArg::SelfRef(..) | &FnArg::SelfValue(..)
-            => Ident::from( "self" ),
-        &FnArg::Captured( ref pat, _ ) => match pat {
-            &Pat::Ident( _, ref i, _ ) => i.clone(),
-            _ => Err( format!( "Unsupported argument: {:?}", arg ) )?,
-        },
-        &FnArg::Ignored(..) => Ident::from( "_" ),
-    } )
-}
-
-fn arg_to_ty(
-    arg : &FnArg,
-) -> Ty
-{
-    match arg {
-        &FnArg::Captured( _, ref ty )
-            | &FnArg::Ignored( ref ty )
-            => ty.clone(),
-        &FnArg::SelfRef( ref life, m )
-            => Ty::Rptr( life.clone(), Box::new( MutTy {
-                mutability: m,
-                ty: self_ty()
-            } ) ),
-        &FnArg::SelfValue(_)
-            => self_ty(),
-    }
-}
-
-fn self_ty() -> Ty {
-    Ty::Path(
-        None,
-        Path::from( PathSegment::from( Ident::from( "Self" ) ) )
-    )
-}
-
-pub fn parameter_to_ident(
-    p : &NestedMetaItem
-) -> Option<&Ident>
-{
-    match p {
-        &NestedMetaItem::MetaItem( ref mi ) => Some( match mi {
-            &MetaItem::Word( ref i ) => i,
-            &MetaItem::List( ref i, .. ) => i,
-            &MetaItem::NameValue( ref i, .. ) => i,
-        } ),
-        _ => None
-    }
 }
 
 pub fn get_guid_tokens(

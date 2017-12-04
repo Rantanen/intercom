@@ -2,8 +2,6 @@
 
 #[macro_use]
 extern crate clap;
-#[macro_use]
-extern crate if_chain;
 extern crate syn;
 extern crate glob;
 extern crate intercom_common;

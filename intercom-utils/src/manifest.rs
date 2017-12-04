@@ -17,7 +17,7 @@ pub fn run( idl_params : &ArgMatches ) -> AppResult {
 
 fn result_to_manifest(
     r : &ParseResult,
-    rn : &HashMap<String, String>,
+    _rn : &HashMap<String, String>,
 ) {
     let classes = r.class_names.iter().map(|class_name| {
 

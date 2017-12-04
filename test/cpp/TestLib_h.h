@@ -83,6 +83,13 @@ typedef interface IRefCountOperations IRefCountOperations;
 #endif 	/* __IRefCountOperations_FWD_DEFINED__ */
 
 
+#ifndef __ISharedInterface_FWD_DEFINED__
+#define __ISharedInterface_FWD_DEFINED__
+typedef interface ISharedInterface ISharedInterface;
+
+#endif 	/* __ISharedInterface_FWD_DEFINED__ */
+
+
 #ifndef __RefCountOperations_FWD_DEFINED__
 #define __RefCountOperations_FWD_DEFINED__
 
@@ -155,6 +162,18 @@ typedef struct CreatedClass CreatedClass;
 #endif 	/* __CreatedClass_FWD_DEFINED__ */
 
 
+#ifndef __SharedImplementation_FWD_DEFINED__
+#define __SharedImplementation_FWD_DEFINED__
+
+#ifdef __cplusplus
+typedef class SharedImplementation SharedImplementation;
+#else
+typedef struct SharedImplementation SharedImplementation;
+#endif /* __cplusplus */
+
+#endif 	/* __SharedImplementation_FWD_DEFINED__ */
+
+
 #ifdef __cplusplus
 extern "C"{
 #endif 
@@ -166,6 +185,7 @@ extern "C"{
 
 /* library TestLib */
 /* [uuid] */ 
+
 
 
 
@@ -792,6 +812,106 @@ EXTERN_C const IID IID_IRefCountOperations;
 #endif 	/* __IRefCountOperations_INTERFACE_DEFINED__ */
 
 
+#ifndef __ISharedInterface_INTERFACE_DEFINED__
+#define __ISharedInterface_INTERFACE_DEFINED__
+
+/* interface ISharedInterface */
+/* [unique][nonextensible][uuid][object] */ 
+
+
+EXTERN_C const IID IID_ISharedInterface;
+
+#if defined(__cplusplus) && !defined(CINTERFACE)
+    
+    MIDL_INTERFACE("12341234-1234-1234-1234-123412340013")
+    ISharedInterface : public IUnknown
+    {
+    public:
+        virtual /* [id] */ UINT32 STDMETHODCALLTYPE GetValue( void) = 0;
+        
+        virtual /* [id] */ void STDMETHODCALLTYPE SetValue( 
+            /* [in] */ UINT32 v) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE DivideBy( 
+            /* [in] */ ISharedInterface *divisor,
+            /* [retval][out] */ UINT32 *__out) = 0;
+        
+    };
+    
+    
+#else 	/* C style interface */
+
+    typedef struct ISharedInterfaceVtbl
+    {
+        BEGIN_INTERFACE
+        
+        HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
+            ISharedInterface * This,
+            /* [in] */ REFIID riid,
+            /* [annotation][iid_is][out] */ 
+            _COM_Outptr_  void **ppvObject);
+        
+        ULONG ( STDMETHODCALLTYPE *AddRef )( 
+            ISharedInterface * This);
+        
+        ULONG ( STDMETHODCALLTYPE *Release )( 
+            ISharedInterface * This);
+        
+        /* [id] */ UINT32 ( STDMETHODCALLTYPE *GetValue )( 
+            ISharedInterface * This);
+        
+        /* [id] */ void ( STDMETHODCALLTYPE *SetValue )( 
+            ISharedInterface * This,
+            /* [in] */ UINT32 v);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *DivideBy )( 
+            ISharedInterface * This,
+            /* [in] */ ISharedInterface *divisor,
+            /* [retval][out] */ UINT32 *__out);
+        
+        END_INTERFACE
+    } ISharedInterfaceVtbl;
+
+    interface ISharedInterface
+    {
+        CONST_VTBL struct ISharedInterfaceVtbl *lpVtbl;
+    };
+
+    
+
+#ifdef COBJMACROS
+
+
+#define ISharedInterface_QueryInterface(This,riid,ppvObject)	\
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
+
+#define ISharedInterface_AddRef(This)	\
+    ( (This)->lpVtbl -> AddRef(This) ) 
+
+#define ISharedInterface_Release(This)	\
+    ( (This)->lpVtbl -> Release(This) ) 
+
+
+#define ISharedInterface_GetValue(This)	\
+    ( (This)->lpVtbl -> GetValue(This) ) 
+
+#define ISharedInterface_SetValue(This,v)	\
+    ( (This)->lpVtbl -> SetValue(This,v) ) 
+
+#define ISharedInterface_DivideBy(This,divisor,__out)	\
+    ( (This)->lpVtbl -> DivideBy(This,divisor,__out) ) 
+
+#endif /* COBJMACROS */
+
+
+#endif 	/* C style interface */
+
+
+
+
+#endif 	/* __ISharedInterface_INTERFACE_DEFINED__ */
+
+
 EXTERN_C const CLSID CLSID_RefCountOperations;
 
 #ifdef __cplusplus
@@ -838,6 +958,14 @@ EXTERN_C const CLSID CLSID_CreatedClass;
 
 class DECLSPEC_UUID("12341234-1234-1234-1234-123412340008")
 CreatedClass;
+#endif
+
+EXTERN_C const CLSID CLSID_SharedImplementation;
+
+#ifdef __cplusplus
+
+class DECLSPEC_UUID("12341234-1234-1234-1234-123412340014")
+SharedImplementation;
 #endif
 #endif /* __TestLib_LIBRARY_DEFINED__ */
 

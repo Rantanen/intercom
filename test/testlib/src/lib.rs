@@ -13,6 +13,7 @@ extern crate winapi;
     ResultOperations,
     ClassCreator,
     CreatedClass,
+    SharedImplementation,
 )]
 
 #[com_class("{12341234-1234-1234-1234-123412340001}", PrimitiveOperations )]
@@ -50,7 +51,7 @@ pub struct StatefulOperations {
 #[com_interface("{12341234-1234-1234-1234-123412340004}")]
 #[com_impl]
 impl StatefulOperations {
-    pub fn new() -> StatefulOperations { StatefulOperations { state : 0xABBACD00 } }
+    pub fn new() -> StatefulOperations { StatefulOperations { state : 0xABBACD } }
     pub fn put_value( &mut self, v : i32 ) {
         self.state = v;
     }
@@ -134,5 +135,32 @@ impl RefCountOperations {
 
     pub fn get_new( &self ) -> ComResult<ComRc<RefCountOperations>> {
         Ok( ComRc::new( RefCountOperations::new() ) )
+    }
+}
+
+#[com_interface("{12341234-1234-1234-1234-123412340013}")]
+pub trait ISharedInterface {
+    fn get_value( &self ) -> u32;
+    fn set_value( &mut self, v : u32 );
+    fn divide_by( &self, divisor: ComItf<ISharedInterface> ) -> ComResult<u32>;
+}
+
+#[com_class("{12341234-1234-1234-1234-123412340014}", ISharedInterface)]
+pub struct SharedImplementation { value: u32 }
+
+impl SharedImplementation {
+    pub fn new() -> SharedImplementation { SharedImplementation { value: 0 } }
+}
+
+#[com_impl]
+impl ISharedInterface for SharedImplementation {
+    fn get_value( &self ) -> u32 { self.value }
+    fn set_value( &mut self, v : u32 ) { self.value = v }
+    fn divide_by( &self, other: ComItf<ISharedInterface> ) -> ComResult<u32> {
+        let divisor = other.get_value();
+        match divisor {
+            0 => Err( intercom::E_INVALIDARG ),
+            _ => Ok( self.value / divisor ),
+        }
     }
 }

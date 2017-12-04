@@ -3,7 +3,6 @@ use super::*;
 use intercom_common::*;
 use intercom_common::guid::GUID;
 use std::io::Read;
-use std::borrow::Borrow;
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -38,7 +37,7 @@ pub struct MethodArg {
     pub ty: String,
 }
 
-#[derive(Debug, PartialEq)] pub enum ArgDirection { In, Out, Return }
+#[derive(Debug, PartialEq)] pub enum ArgDirection { In, Return }
 #[derive(Debug)] pub enum Mutability { Mutable, Immutable }
 
 #[derive(Debug)]
@@ -118,14 +117,14 @@ pub fn gather_renames(
     for item in c.items {
         match item.node {
 
-            syn::ItemKind::Impl(.., ty, items) => {
+            syn::ItemKind::Impl(.., ty, _) => {
                 let struct_ident = utils::get_ty_ident( &ty ).ok_or(
                     format!( "Could not resolve ident of {:?}", ty ) )?;
 
                 let itf_attr = item.attrs
                         .iter()
                         .find(|attr| attr.value.name() == "com_interface");
-                if let Some( itf ) = itf_attr {
+                if let Some(..) = itf_attr {
 
                     let iname =
                         format!( "I{}", struct_ident );
@@ -195,11 +194,6 @@ pub fn process_struct(
     let class_attr = match get_attribute( "com_class", attrs ) {
         Some( a ) => a,
         _ => return Ok(())
-    };
-
-    let params = match class_attr.value {
-        syn::MetaItem::List( _, ref params ) => params,
-        _ => Err( format!( "Bad parameters on com_class on {}", ident ) )?,
     };
 
     let params = utils::get_parameters( class_attr )
@@ -279,11 +273,6 @@ pub fn process_interface(
     let interface_attr = match get_attribute( "com_interface", attrs ) {
         Some( a ) => a,
         _ => return Ok(())
-    };
-
-    let params = match interface_attr.value {
-        syn::MetaItem::List( _, ref params ) => params,
-        _ => Err( format!( "Bad parameters on com_interface on {}", ident ) )?,
     };
 
     let params = utils::get_parameters( interface_attr )
@@ -437,7 +426,6 @@ fn get_com_ty(
             | &syn::Ty::Paren(..)
             | &syn::Ty::Infer
             | &syn::Ty::Mac(..)
-            | &syn::Ty::Never
             => Err( format!( "Argument type not supported: {:?}", ty ) )?,
     } )
 }
@@ -467,6 +455,7 @@ fn segment_to_ty(
 
     Ok( match ty.as_str() {
         "ComRc" => format!( "{}*", get_com_ty( rn, &args[0] )? ),
+        "ComItf" => format!( "{}*", get_com_ty( rn, &args[0] )? ),
         "usize" => "size_t".to_owned(),
         "u64" => "uint64".to_owned(),
         "i64" => "int64".to_owned(),
@@ -511,7 +500,6 @@ pub fn camel_case( input : &str ) -> String {
             } else {
                 output.push( c );
             }
-            capitalize = false;
         }
 
     }

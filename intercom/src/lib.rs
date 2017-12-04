@@ -4,6 +4,7 @@
 mod classfactory; pub use classfactory::*;
 mod combox; pub use combox::*;
 mod comrc; pub use comrc::*;
+mod comitf; pub use comitf::*;
 mod bstr; pub use bstr::*;
 mod guid; pub use guid::GUID;
 
