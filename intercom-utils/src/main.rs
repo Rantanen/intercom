@@ -13,7 +13,16 @@ mod parse;
 use clap::{App, AppSettings, SubCommand, Arg, ArgMatches};
 use std::error::Error;
 
+/// Intercom utils error type.
+///
+/// In a application-level error handling we don't really care about responding
+/// to errors currently. What we need is a way to report them though.
+///
+/// The AppError carries the error message and we can use From<T> impls to
+/// convert various other error types into it.
 pub struct AppError( String );
+
+/// Intercom utils result type.
 pub type AppResult = Result< (), AppError >;
 
 impl From<String> for AppError {
@@ -52,7 +61,10 @@ impl std::fmt::Display for AppError {
     }
 }
 
+/// Main entry point.
 fn main() {
+
+    // Define the command line arguments using clap.
     let matches = App::new( "Rust COM utility" )
             .version( crate_version!() )
             .author( "Mikko Rantanen <rantanen@jubjubnest.net>" )
@@ -76,11 +88,13 @@ fn main() {
             )
         .get_matches();
 
+    // Match the sub-command and invoke the correct command handler.
     if let Err( e ) = match matches.subcommand() {
         ( "idl", Some( args ) ) => { idl::run( args ) },
         ( "manifest", Some( args ) ) => { manifest::run( args ) },
         _ => unreachable!(),
     } {
+        // Error occurred in the sub-command. Report it before stopping.
         eprintln!( "{}", e );
     }
 }
