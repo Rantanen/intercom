@@ -20,6 +20,17 @@ extern crate quote;
 
 use syn::*;
 
+// Note the rustdoc comments on the [proc_macro_attribute] functions document
+// "attributes", not "functions".
+//
+// While at "com_interface" function creates virtual tables, etc. when it is
+// invoked, the attribute doesn't "creates" these. Instead the attribute just
+// "defines" the trait/impl as a COM interface.
+//
+// The runtime documentation for developers is present in the expand_...
+// methods below.
+
+/// Defines a COM interface.
 #[proc_macro_attribute]
 pub fn com_interface(
     attr: TokenStream,
@@ -32,6 +43,7 @@ pub fn com_interface(
     }
 }
 
+/// Defines an implementation of a COM interface.
 #[proc_macro_attribute]
 pub fn com_impl(
     attr: TokenStream,
@@ -44,6 +56,7 @@ pub fn com_impl(
     }
 }
 
+/// Defines a COM class that implements one or more COM interfaces.
 #[proc_macro_attribute]
 pub fn com_class(
     attr: TokenStream,
@@ -56,6 +69,7 @@ pub fn com_class(
     }
 }
 
+/// Defines the COM library.
 #[proc_macro_attribute]
 pub fn com_library(
     attr: TokenStream,
@@ -68,29 +82,38 @@ pub fn com_library(
     }
 }
 
+/// Expands the `com_interface` attribute.
+///
+/// The attribute expansion results in the following items:
+///
+/// - Global IID for the interface.
+/// - Virtual table struct definition for the interface.
+/// - Implementation for the delegating methods when calling the COM interface
+///   from Rust.
 fn expand_com_interface(
     attr_tokens: &TokenStream,
     item_tokens: TokenStream,
 ) -> Result<TokenStream, MacroError>
 {
+    // Parse the attribute.
     let ( mut output, attr, item ) =
             utils::parse_inputs( "com_interface", &attr_tokens, &item_tokens )?;
-
     let ( itf_ident, fns, itf_type ) =
             utils::get_ident_and_fns( &item )
-                .ok_or( "[com_interface(IID:&str)] must be applied to trait or struct impl" )?;
+                .ok_or( "[com_interface(IID:&str)] must be applied to trait \
+                        or struct impl" )?;
+    let iid_ident = idents::iid( &itf_ident );
+    let vtable_ident = idents::vtable_struct( &itf_ident );
 
+    // The first parameter in the [com_interface] attribute is the IID guid.
     let iid_guid = utils::get_attr_params( &attr )
             .as_ref()
             .and_then( |ref params| params.first() )
             .ok_or( "[com_interface(IID:&str)] must specify an IID".to_owned() )
             .and_then( |f| utils::parameter_to_guid( f ) )?;
 
-    let iid_tokens = utils::get_guid_tokens( &iid_guid );
-    let iid_ident = idents::iid( &itf_ident );
-    let vtable_ident = idents::vtable_struct( &itf_ident );
-
     // IID_IInterface GUID.
+    let iid_tokens = utils::get_guid_tokens( &iid_guid );
     output.push( quote!(
         #[allow(non_upper_case_globals)]
         const #iid_ident : intercom::IID = #iid_tokens;
@@ -101,23 +124,29 @@ fn expand_com_interface(
     let mut fields = vec![
         quote!( __base : intercom::IUnknownVtbl, )
     ];
-    let mut impls = vec![];
 
-    // Process the impl items. This gathers all COM-visible methods and defines
-    // delegating calls for them. These delegating calls are the ones that are
-    // invoked by the clients. The calls then convert everything to the RUST
-    // interface.
+    // Process the trait items. Each COM-callable method on the trait will
+    // result in a field in the virtual table.
     //
-    // The impl may have various kinds of items - we only support the ones that
-    // seem okay. So in case we encounter any errors we'll just skip the method
-    // silently. This is done by breaking out of the 'catch' before adding the
-    // method to the vtable fields.
+    // We will also create the delegating call from Rust to COM for these
+    // methods.
+    //
+    // NOTE: Currently we are skipping methods that aren't "COM compatible".
+    //       However as we need to be able to delegate the calls from Rust
+    //       to COM and this requires implementing the trait for a random
+    //       COM pointer, we might need to fail the traits that have COM
+    //       incompatible functions instead.
+    let mut impls = vec![];
     for ( method_ident, method_sig ) in fns {
         do catch {
 
-            // Get the self argument and the remaining args.
+            // Parse the method info.
             let method_info = ComMethodInfo::new(
                     &method_ident, &method_sig.decl ).ok()?;
+
+            // The vtable still uses the old utils::* methods for these.
+            // We'll want to replace these with ComMethodInfo-based handling
+            // in the future.
             let ( args, _ ) =
                     utils::get_method_args( method_sig )?;
             let ( ret_ty, _ ) =
@@ -130,13 +159,18 @@ fn expand_com_interface(
                     unsafe extern "stdcall" fn( #arg_tokens ) -> #ret_ty,
             ) );
 
-            let self_arg = method_info.rust_self_arg;
-            let return_ty = method_info.rust_return_ty;
+            // COM delegate implementation.
+
+            // Format the method arguments into tokens.
             let impl_args = method_info.args.iter().map( |ca| {
                 let name = &ca.name;
                 let ty = &ca.ty;
                 quote!( #name : #ty )
             } );
+
+            // The COM out-arguments that mirror the Rust return value will
+            // require temporary variables during the COM call. Format their
+            // declarations.
             let out_arg_declarations = method_info.returnhandler.com_out_args()
                     .iter()
                     .map( |ca| {
@@ -144,6 +178,8 @@ fn expand_com_interface(
                         let ty = &ca.ty;
                         quote!( let mut #ident : #ty = Default::default(); )
                     } ).collect::<Vec<_>>();
+
+            // Format the in and out parameters for the COM call.
             let in_params = method_info.args
                     .iter()
                     .map( |ca| {
@@ -156,14 +192,23 @@ fn expand_com_interface(
                         let name = &ca.name;
                         quote!( &mut #name )
                     } ).collect::<Vec<_>>();
+
+            // Combine the parameters into the final parameter list.
+            // This includes the 'this' pointer and both the IN and OUT
+            // parameters.
             let params = iter::once( quote!( comptr ) )
                 .chain( in_params )
                 .chain( out_params );
+
+            // Create the return statement. 
             let return_ident = Ident::from( "__result" );
             let return_statement = method_info
                     .returnhandler
                     .return_statement( &return_ident );
 
+            // Create the method implementation using the bits defined above.
+            let self_arg = method_info.rust_self_arg;
+            let return_ty = method_info.rust_return_ty;
             impls.push( quote!(
                 fn #method_ident( #self_arg, #( #impl_args ),* ) -> #return_ty {
                     let comptr = intercom::ComItf::ptr( self );
@@ -188,6 +233,12 @@ fn expand_com_interface(
         pub struct #vtable_ident { #field_tokens }
     ) );
 
+    // If this is a trait (as opposed to an implicit struct `impl`), include
+    // the Rust-to-COM call implementations.
+    //
+    // If the [com_interface] is on an implicit struct `impl` we'd end up with
+    // `impl StructName for intercom::ComItf<StructName>`, which is invalid
+    // syntax when `StructName` is struct instead of a trait.
     if itf_type == utils::InterfaceType::Trait {
         output.push( quote!(
             impl #itf_ident for intercom::ComItf< #itf_ident > {
@@ -199,16 +250,21 @@ fn expand_com_interface(
     Ok( utils::tokens_to_tokenstream( output )? )
 }
 
-/// Implements the `com_impl` decorator.
+/// Expands the `com_impl` attribute.
+///
+/// The attribute expansion results in the following items:
+///
+/// - Implementation for the delegating methods when calling the Rust methods
+///   from COM.
+/// - Virtual table instance for the COM type.
 fn expand_com_impl(
     attr_tokens: &TokenStream,
     item_tokens: TokenStream,
 ) -> Result<TokenStream, MacroError>
 {
+    // Parse the attribute.
     let ( mut output, _, item ) =
             utils::parse_inputs( "com_impl", &attr_tokens, &item_tokens )?;
-
-    // Get the item info the attribute is bound to.
     let ( itf_ident_opt, struct_ident, fns )
             = utils::get_impl_data( &item )
                 .ok_or( "[com_impl] must be applied to an impl" )?;
@@ -219,12 +275,16 @@ fn expand_com_impl(
         &struct_ident,
         &itf_ident );
 
-
     /////////////////////
     // #itf::QueryInterface, AddRef & Release
     //
-    // The primary add_ref and release. As these are on the IUnknown interface
-    // the self_vtable here points to the start of the ComRef structure.
+    // Note that the actual methods implementation for these bits differs from
+    // the primary IUnknown methods. When the methods are being called through
+    // this vtable, the self_vtable pointer will point to this vtable and not
+    // the start of the CoClass instance.
+    //
+    // We can convert these to the ComBox references by offsetting the pointer
+    // by the known vtable offset.
 
     // QueryInterface
     let query_interface_ident = idents::method_impl(
@@ -275,12 +335,9 @@ fn expand_com_impl(
             }
         ) );
 
-    // Start the vtable with the IUnknown implementation.
-    //
-    // Note that the actual methods implementation for these bits differs from
-    // the primary IUnknown methods. When the methods are being called through
-    // this vtable, the self_vtable pointer will point to this vtable and not
-    // the start of the CoClass instance.
+    // Start the definition fo the vtable fields. The base interface is always
+    // IUnknown at this point. We might support IDispatch later, but for now
+    // we only support IUnknown.
     let mut vtable_fields = vec![
         quote!(
             __base : intercom::IUnknownVtbl {
@@ -290,8 +347,15 @@ fn expand_com_impl(
             },
         ) ];
 
-
-    // Implement the delegating calls for the coclass.
+    // Process the impl items. This gathers all COM-visible methods and defines
+    // delegating calls for them. These delegating calls are the ones that are
+    // invoked by the clients. The calls then convert everything to the RUST
+    // interface.
+    //
+    // The impl may have various kinds of items - we only support the ones that
+    // seem okay. So in case we encounter any errors we'll just skip the method
+    // silently. This is done by breaking out of the 'catch' before adding the
+    // method to the vtable fields.
     for ( method_ident, method_sig ) in fns {
         do catch {
             let method_impl_ident = idents::method_impl(
@@ -328,11 +392,14 @@ fn expand_com_impl(
                 }
             ) );
 
+            // Include the delegating method in the virtual table fields.
             vtable_fields.push( quote!( #method_ident : #method_impl_ident, ) );
             Some(())
         };
     }
 
+    // Now that we've gathered all the virtual table fields, we can finally
+    // emit the virtual table instance.
     let vtable_field_tokens = utils::flatten( vtable_fields.iter() );
     output.push( quote!(
             #[allow(non_upper_case_globals)]
@@ -343,18 +410,26 @@ fn expand_com_impl(
     Ok( utils::tokens_to_tokenstream( output )? )
 }
 
+/// Expands the `com_class` attribute.
+///
+/// The attribute expansion results in the following items:
+///
+/// - Virtual table offset values for the different interfaces.
+/// - IUnknown virtual table instance.
+/// - CoClass trait implementation.
 fn expand_com_class(
     attr_tokens: &TokenStream,
     item_tokens: TokenStream,
 ) -> Result<TokenStream, MacroError>
 {
+    // Parse the attribute.
     let ( mut output, attr, item ) =
             utils::parse_inputs( "com_class", &attr_tokens, &item_tokens )?;
-
-    // Get the item info the attribute is bound to.
     let struct_ident = utils::get_struct_ident_from_annotatable( &item );
     let iunk_ident = Ident::from( "IUnknown".to_owned() );
 
+    // Parse the attribute parameters. [com_class] specifies the CLSID as the
+    // first parameter and the remaining parameters are implemented interfaces.
     let ( clsid_guid, itfs ) = utils::get_attr_params( &attr )
             .as_ref()
             .and_then( |ref params| params.split_first() )
@@ -372,26 +447,28 @@ fn expand_com_class(
     // IUnknown vtable match. As the primary query_interface is implemented
     // on the root IUnknown interface, the self_vtable here should already be
     // the IUnknown we need.
-    let mut match_arms = vec![
+    let mut query_interface_match_arms = vec![
         quote!(
             intercom::IID_IUnknown =>
                 ( &vtables._IUnknown )
                     as *const &intercom::IUnknownVtbl
                     as *mut &intercom::IUnknownVtbl
-                    as intercom::RawComPtr,
+                    as intercom::RawComPtr
         ) ];
 
-    // The vtable fields.
+    // Gather the virtual table list struct field definitions and their values.
+    // The definitions are needed when we define the virtual table list struct,
+    // which is different for each com_class. The values are needed when we
+    // construct the virtual table list.
+    //
+    // IUnknown _MUST_ be the first interface defined. This is done to ensure
+    // the IUnknown pointer matches the ComBox pointer.
     let iunk_vtable_instance_ident =
             idents::vtable_instance( &struct_ident, &iunk_ident );
-    let mut vtable_list_fields = vec![
-        quote!(
-            _IUnknown : &'static intercom::IUnknownVtbl,
-        ) ];
+    let mut vtable_list_field_decls = vec![
+        quote!( _IUnknown : &'static intercom::IUnknownVtbl ) ];
     let mut vtable_list_field_values = vec![
-        quote!(
-            _IUnknown : &#iunk_vtable_instance_ident,
-        ) ];
+        quote!( _IUnknown : &#iunk_vtable_instance_ident ) ];
 
     // Create the vtable data for the additional interfaces.
     // The data should include the match-arms for the primary query_interface
@@ -423,21 +500,21 @@ fn expand_com_class(
                 }
         ) );
 
-        // The vtable pointer to for the ComBox vtable list.
-        vtable_list_fields.push( quote!(
-                #itf : &'static #vtable_struct_ident,) );
-        vtable_list_field_values.push( quote!(
-                #itf : &#vtable_instance_ident,) );
+        // Add the interface in the vtable list.
+        vtable_list_field_decls.push(
+                quote!( #itf : &'static #vtable_struct_ident ) );
+        vtable_list_field_values.push(
+                quote!( #itf : &#vtable_instance_ident ) );
 
         // As this is the primary IUnknown query_interface, the self_vtable here
         // points to the start of the ComRef structure. The return value should
         // be the vtable corresponding to the given IID so we'll just offset
         // the self_vtable by the vtable offset.
-        match_arms.push( quote!(
+        query_interface_match_arms.push( quote!(
             self::#iid_ident => &vtables.#itf
                     as *const &#vtable_struct_ident
                     as *mut &#vtable_struct_ident
-                    as intercom::RawComPtr,
+                    as intercom::RawComPtr
         ) );
     }
 
@@ -460,30 +537,23 @@ fn expand_com_class(
     //
     // Define the vtable list struct first. This lists the vtables of all the
     // interfaces that the coclass implements.
+
+    // VTableList struct definition.
     let vtable_list_ident = idents::vtable_list( &struct_ident );
-    let vtable_field_tokens = utils::flatten( vtable_list_fields.iter() );
-    let vtable_value_tokens = utils::flatten( vtable_list_field_values.iter() );
-    let match_arm_tokens = utils::flatten( match_arms.iter() );
     output.push( quote!(
             #[allow(non_snake_case)]
             pub struct #vtable_list_ident {
-                #vtable_field_tokens
+                #( #vtable_list_field_decls ),*
             }
         ) );
-    output.push( quote!(
-            #[allow(non_snake_case)]
-            impl AsRef<intercom::IUnknownVtbl> for #vtable_list_ident {
-                fn as_ref( &self ) -> &intercom::IUnknownVtbl {
-                    &self._IUnknown
-                }
-            }
-        ) );
+
+    // The actual CoClass implementation.
     output.push( quote!(
             impl intercom::CoClass for #struct_ident {
                 type VTableList = #vtable_list_ident;
                 fn create_vtable_list() -> Self::VTableList {
                     #vtable_list_ident {
-                        #vtable_value_tokens
+                        #( #vtable_list_field_values ),*
                     }
                 }
                 fn query_interface(
@@ -492,7 +562,7 @@ fn expand_com_class(
                 ) -> intercom::ComResult< intercom::RawComPtr > {
                     if riid.is_null() { return Err( intercom::E_NOINTERFACE ) }
                     Ok( match *unsafe { &*riid } {
-                        #match_arm_tokens
+                        #( #query_interface_match_arms ),*,
                         _ => return Err( intercom::E_NOINTERFACE )
                     } )
                 }
@@ -511,15 +581,19 @@ fn expand_com_class(
     Ok( utils::tokens_to_tokenstream( output )? )
 }
 
+/// Expands the `com_library` attribute.
+///
+/// The attribute expansion results in the following items:
+///
+/// - DllGetClassObject extern function implementation.
 fn expand_com_library(
     attr_tokens: &TokenStream,
     item_tokens: TokenStream,
 ) -> Result<TokenStream, MacroError>
 {
+    // Parse the attribute.
     let ( mut output, _, _ ) =
             utils::parse_inputs( "com_library", &attr_tokens, &item_tokens )?;
-
-    // Get the decorator parameters.
     let ( _, _, coclasses ) = utils::parse_com_lib_tokens( attr_tokens )?;
 
     // Create the match-statmeent patterns for each supposedly visible COM class.
@@ -581,6 +655,10 @@ fn expand_com_library(
     Ok( utils::tokens_to_tokenstream( output )? )
 }
 
+/// Reports errors during attribute expansion.
+///
+/// The proc macros don't have any sane way to report errors. The "recommended"
+/// way to do this is by panicing during compilation.
 fn error<E,T>(
     e: E,
     _attr: &T
