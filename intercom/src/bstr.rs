@@ -4,12 +4,22 @@ use super::*;
 #[repr(C)]
 pub struct BStr( *mut u16 );
 
+#[cfg(windows)]
 #[link(name = "oleaut32")]
 extern "system" {
     pub fn SysAllocStringLen(
         psz: *const u16,
         len: u32
     ) -> BStr;
+}
+
+#[cfg(not(windows))]
+pub fn SysAllocStringLen(
+    psz: *const u16,
+    len: u32
+) -> BStr
+{
+    panic!( "Not implemented" );
 }
 
 impl BStr {
