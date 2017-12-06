@@ -14,6 +14,11 @@ mod error; pub use error::{return_hresult, get_last_error, ComError};
 // #[macro_use] to get rid of that warning, Rust will complain that the
 // #[macro_use] does nothing. Fortunately THAT warning comes with a named
 // warning option so we can allow that explicitly.
+//
+// Unfortunately clippy disagrees on the macro_use being unused and claims that
+// the unused_imports attribute is useless. So now we also need to tell clippy
+// to ignore useless attributes in this scenario! \:D/
+#[cfg_attr(feature = "cargo-clippy", allow(useless_attribute))]
 #[allow(unused_imports)]
 #[macro_use]
 extern crate intercom_attributes;
@@ -37,90 +42,90 @@ pub type REFCLSID = *const IID;
 /// COM error result value.
 pub type HRESULT = i32;
 
-/// HRESULT indicating the operation completed successfully.
+/// `HRESULT` indicating the operation completed successfully.
 pub const S_OK : HRESULT = 0;
 
-/// HRESULT indicating the operation completed successfully and returned FALSE.
+/// `HRESULT` indicating the operation completed successfully and returned FALSE.
 pub const S_FALSE : HRESULT = 1;
 
-/// HRESULT for unimplemented functionality.
+/// `HRESULT` for unimplemented functionality.
 #[allow(overflowing_literals)]
-pub const E_NOTIMPL : HRESULT = 0x80004001 as HRESULT;
+pub const E_NOTIMPL : HRESULT = 0x8000_4001 as HRESULT;
 
-/// HRESULT indicating the type does not support the requested interface.
+/// `HRESULT` indicating the type does not support the requested interface.
 #[allow(overflowing_literals)]
-pub const E_NOINTERFACE : HRESULT = 0x80004002 as HRESULT;
+pub const E_NOINTERFACE : HRESULT = 0x8000_4002 as HRESULT;
 
-/// HRESULT indicating a pointer parameter was invalid.
+/// `HRESULT` indicating a pointer parameter was invalid.
 #[allow(overflowing_literals)]
-pub const E_POINTER : HRESULT = 0x80004003 as HRESULT;
+pub const E_POINTER : HRESULT = 0x8000_4003 as HRESULT;
 
-/// HRESULT for aborted operation.
+/// `HRESULT` for aborted operation.
 #[allow(overflowing_literals)]
-pub const E_ABORT : HRESULT = 0x80004004 as HRESULT;
+pub const E_ABORT : HRESULT = 0x8000_4004 as HRESULT;
 
-/// HRESULT for unspecified failure.
+/// `HRESULT` for unspecified failure.
 #[allow(overflowing_literals)]
-pub const E_FAIL : HRESULT = 0x80004005 as HRESULT;
+pub const E_FAIL : HRESULT = 0x8000_4005 as HRESULT;
 
-/// HRESULT for invalid argument.
+/// `HRESULT` for invalid argument.
 #[allow(overflowing_literals)]
-pub const E_INVALIDARG : HRESULT = 0x80070057 as HRESULT;
+pub const E_INVALIDARG : HRESULT = 0x8007_0057 as HRESULT;
 
-/// IUnknown interface ID.
+/// `IUnknown` interface ID.
 #[allow(non_upper_case_globals)]
 pub const IID_IUnknown : GUID = GUID {
-    data1: 0x00000000, data2: 0x0000, data3: 0x0000,
+    data1: 0x0000_0000, data2: 0x0000, data3: 0x0000,
     data4: [ 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 ]
 };
 
-/// IClassFactory interface ID.
+/// `IClassFactory` interface ID.
 #[allow(non_upper_case_globals)]
 pub const IID_IClassFactory : GUID = GUID {
-    data1: 0x00000001, data2: 0x0000, data3: 0x0000,
+    data1: 0x0000_0001, data2: 0x0000, data3: 0x0000,
     data4: [ 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 ]
 };
 
-/// ISupportErrorInfo interface ID.
+/// `ISupportErrorInfo` interface ID.
 #[allow(non_upper_case_globals)]
 pub const IID_ISupportErrorInfo : GUID = GUID {
-    data1: 0xDF0B3D60, data2: 0x548F, data3: 0x101B,
+    data1: 0xDF0B_3D60, data2: 0x548F, data3: 0x101B,
     data4: [ 0x8E, 0x65, 0x08, 0x00, 0x2B, 0x2B, 0xD1, 0x19 ]
 };
 
-/// IErrorInfo interface ID.
+/// `IErrorInfo` interface ID.
 #[allow(non_upper_case_globals)]
 pub const IID_IErrorInfo : GUID = GUID {
-    data1: 0x1CF2B120, data2: 0x547D, data3: 0x101B,
+    data1: 0x1CF2_B120, data2: 0x547D, data3: 0x101B,
     data4: [ 0x8E, 0x65, 0x08, 0x00, 0x2B, 0x2B, 0xD1, 0x19 ]
 };
 
-/// IUnknown virtual table layout.
+/// `IUnknown` virtual table layout.
 #[repr(C)]
 pub struct IUnknownVtbl
 {
-    /// QueryInterface method pointer.
+    /// `QueryInterface` method pointer.
     pub query_interface : unsafe extern "stdcall" fn(
         s : RawComPtr,
         _riid : REFIID,
         out : *mut RawComPtr
     ) -> HRESULT,
 
-    /// AddRef method pointer.
+    /// `AddRef` method pointer.
     pub add_ref: unsafe extern "stdcall" fn( s : RawComPtr ) -> u32,
 
-    /// Release method pointer.
+    /// `Release` method pointer.
     pub release: unsafe extern "stdcall" fn( s : RawComPtr ) -> u32,
 }
 
-/// ISupportErrorInfo virtual table layout.
+/// `ISupportErrorInfo` virtual table layout.
 #[repr(C)]
 pub struct ISupportErrorInfoVtbl
 {
-    /// ISupportErrorInfo inherits IUnknown.
+    /// `ISupportErrorInfo` inherits `IUnknown`.
     pub __base : IUnknownVtbl,
 
-    /// QueryInterface method pointer.
+    /// `InterfaceSupportsErrorInfo` method pointer.
     pub interface_supports_error_info : unsafe extern "stdcall" fn(
         s : RawComPtr,
         riid : REFIID,

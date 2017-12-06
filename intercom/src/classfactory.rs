@@ -27,7 +27,7 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > CoClass for ClassFactory<T> 
         unsafe { match *riid {
             super::IID_IUnknown | super::IID_IClassFactory =>
                     Ok( vtables as *const _ as RawComPtr ),
-            _ => return Err( E_NOINTERFACE ),
+            _ => Err( E_NOINTERFACE ),
         } }
     }
 
@@ -78,10 +78,11 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
         lock : bool
     ) -> HRESULT
     {
-        match lock {
-            true => ComBox::<Self>::add_ref_ptr( self_vtbl ),
-            false => ComBox::<Self>::release_ptr( self_vtbl ),
-        };
+        if lock {
+            ComBox::<Self>::add_ref_ptr( self_vtbl );
+        } else {
+            ComBox::<Self>::release_ptr( self_vtbl );
+        }
         S_OK
     }
 

@@ -370,8 +370,6 @@ fn expand_com_impl(
             // Get the self argument and the remaining args.
             let ( args, params ) =
                     utils::get_method_args( method_sig )?;
-            let ( ret_ty, return_statement ) =
-                    utils::get_method_rvalues( &method_sig )?;
 
             let return_ident = Ident::from( "__result" );
             let return_statement = method_info

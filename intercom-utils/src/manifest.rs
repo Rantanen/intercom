@@ -10,7 +10,7 @@ pub fn run( idl_params : &ArgMatches ) -> AppResult {
     let path_str = format!(
             "{}/src/**/*.rs",
             idl_params.value_of( "path" ).unwrap() );
-    let ( renames, result ) = parse_crate( path_str )?;
+    let ( renames, result ) = parse_crate( &path_str )?;
     result_to_manifest( &result, &renames );
 
     Ok(())

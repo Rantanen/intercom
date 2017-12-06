@@ -77,7 +77,7 @@ impl ReturnHandler for HResultHandler {
     fn rust_to_com_return( &self, result : &Ident ) -> Tokens {
 
         let ( ok_writes, err_writes ) = write_out_values(
-            vec![ Ident::from( "v" ) ],
+            &[ Ident::from( "v" ) ],
             self.com_out_args() );
         quote!(
             match #result {
@@ -105,8 +105,8 @@ impl ReturnHandler for HResultHandler {
     }
 }
 
-/// Result type that supports error info for the Err value. Converted to
-/// [retval] on success or HRESULT + IErrorInfo on error.
+/// Result type that supports error info for the `Err` value. Converted to
+/// `[retval]` on success or `HRESULT` + `IErrorInfo` on error.
 struct ErrorResultHandler { retval_ty: Ty, return_ty: Ty }
 impl ReturnHandler for ErrorResultHandler {
 
@@ -135,7 +135,7 @@ impl ReturnHandler for ErrorResultHandler {
     fn rust_to_com_return( &self, result : &Ident ) -> Tokens {
 
         let ( ok_writes, err_writes ) = write_out_values(
-            vec![ Ident::from( "v" ) ],
+            &[ Ident::from( "v" ) ],
             self.com_out_args() );
         quote!(
             match #result {
@@ -167,8 +167,8 @@ impl ReturnHandler for ErrorResultHandler {
 }
 
 fn write_out_values(
-    idents : Vec<Ident>,
-    out_args : Vec<ComArg>
+    idents : &[Ident],
+    out_args : Vec<ComArg>,
 ) -> ( Vec<Tokens>, Vec<Tokens> )
 {
     let mut ok_tokens = vec![];
@@ -192,8 +192,7 @@ fn get_ok_values(
     let mut tokens = vec![];
     for out_arg in out_args {
 
-        let arg_value = out_arg.handler.rust_to_com(
-                &Ident::from( out_arg.name ) );
+        let arg_value = out_arg.handler.rust_to_com( &out_arg.name );
         tokens.push( quote!( #arg_value ) );
     }
     tokens
@@ -210,8 +209,8 @@ pub fn get_return_handler(
         ( &None, &Some( ref ty ) )
             => Box::new( ReturnOnlyHandler( ty.clone() ) ),
         ( &Some( ref rv ), &Some( ref rt ) )
-            if match rt {
-                &Ty::Path( _, ref return_ty ) 
+            if match *rt {
+                Ty::Path( _, ref return_ty ) 
                     if return_ty.get_ident() == Ok( Ident::from( "HRESULT" ) )
                     => true,
                 _ => false

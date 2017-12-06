@@ -3,7 +3,7 @@ use super::*;
 
 /// Trait required by any COM coclass type.
 ///
-/// Used to specify the virtual table for the ComBox.
+/// Used to specify the virtual table for the `ComBox`.
 pub trait CoClass {
     type VTableList;
     fn create_vtable_list() -> Self::VTableList;
@@ -19,7 +19,7 @@ pub trait CoClass {
 /// Type factory for the concrete COM coclass types.
 ///
 /// Includes the virtual tables required for COM method invocations, reference
-/// count required for IUnknown implementation and the custom value struct
+/// count required for `IUnknown` implementation and the custom value struct
 /// required for any user defined interfaces.
 ///
 /// While this struct is available for manual handling of raw COM interface
@@ -28,10 +28,10 @@ pub trait CoClass {
 /// able to enforce.
 ///
 /// The methods that handle `RawComPtr` types must only be invoked with correct
-/// pointer values. There's no type checking for the pointers and the ComBox
+/// pointer values. There's no type checking for the pointers and the `ComBox`
 /// will make serious assumptions on the pointers passed in.
 ///
-/// Furthermore the `new_ptr` constructor and the IUnknown methods `add_ref`
+/// Furthermore the `new_ptr` constructor and the `IUnknown` methods `add_ref`
 /// and `release` must be used correctly together. Failure to do so will result
 /// either in memory leaks or access to dangling pointers.
 #[repr(C)]
@@ -140,10 +140,7 @@ impl<T: CoClass> ComBox<T> {
         riid : REFIID,
     ) -> HRESULT {
 
-        match T::interface_supports_error_info( riid ) {
-            true => S_OK,
-            false => S_FALSE,
-        }
+        if T::interface_supports_error_info( riid ) { S_OK } else { S_FALSE }
     }
 
     /// Converts a RawComPtr to a ComBox reference.
@@ -262,7 +259,7 @@ impl<T: CoClass> ComBox<T> {
     /// The reference may be used to further get references to the various
     /// VTableList fields to resolve offset values between the various VTable
     /// pointers and the actual `ComBox` containing these pointers.
-    #[inline(always)]
+    #[inline]
     pub unsafe fn null_vtable() -> &'static T::VTableList {
         let null_combox =
                 std::ptr::null() as *const ComBox< T >;

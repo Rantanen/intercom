@@ -24,29 +24,29 @@ pub fn parse_com_lib_attribute(
 ) -> Result<( String, guid::GUID, Vec<String> ), MacroError>
 {
     let params = get_parameters( attr )
-            .ok_or( format!( "Bad parameters on com_library" ) )?;
+            .ok_or( "Bad parameters on com_library" )?;
 
     let ( libname_param, other_params ) = params.split_first()
-            .ok_or( format!( "Not enough com_library parameters" ) )?;
+            .ok_or( "Not enough com_library parameters" )?;
     let ( libid_param, cls_params ) = other_params.split_first()
-            .ok_or( format!( "Not enough com_library parameters" ) )?;
+            .ok_or( "Not enough com_library parameters" )?;
 
 
     Ok( (
-        match libname_param {
-            &AttrParam::Word( w ) => format!( "{}", w ),
-            _ => Err( format!( "Invalid library name" ) )?,
+        match *libname_param {
+            AttrParam::Word( w ) => format!( "{}", w ),
+            _ => Err( "Invalid library name" )?,
         },
-        match libid_param {
-            &AttrParam::Literal( &syn::Lit::Str( ref g, .. ) )
+        match *libid_param {
+            AttrParam::Literal( &syn::Lit::Str( ref g, .. ) )
                 => guid::GUID::parse( g )?,
-            _ => Err( format!( "Invalid LIBID" ) )?,
+            _ => Err( "Invalid LIBID" )?,
         },
         cls_params
             .into_iter()
-            .map( |cls| match cls {
-                &AttrParam::Word( w ) => Ok( format!( "{}", w ) ),
-                _ => Err( format!( "Bad interface" ) ),
+            .map( |cls| match *cls {
+                AttrParam::Word( w ) => Ok( format!( "{}", w ) ),
+                _ => Err( "Bad interface" ),
             } ).collect::<Result<_,_>>()?
     ) )
 }
@@ -102,9 +102,15 @@ pub fn flatten<'a, I: Iterator<Item=&'a Tokens>>(
 #[derive(PartialEq)]
 pub enum InterfaceType { Trait, Struct }
 
+pub type InterfaceData<'a> = (
+    &'a Ident,
+    Vec< ( &'a Ident, &'a MethodSig ) >,
+    InterfaceType
+);
+
 pub fn get_ident_and_fns(
     item : &Item
-) -> Option< ( &Ident, Vec<(&Ident, &MethodSig)>, InterfaceType ) >
+) -> Option< InterfaceData >
 {
     match item.node {
         ItemKind::Impl( .., ref trait_ref, ref ty, ref items ) => {
@@ -128,9 +134,15 @@ pub fn get_ident_and_fns(
     }
 }
 
-pub fn get_impl_data<'a>(
-    item : &'a Item
-) -> Option< ( Option<&'a Ident>, &'a Ident, Vec< ( &'a Ident, &'a MethodSig ) > ) >
+pub type ImplData<'a> = (
+    Option<&'a Ident>,
+    &'a Ident,
+    Vec< ( &'a Ident, &'a MethodSig ) >
+);
+
+pub fn get_impl_data(
+    item : &Item
+) -> Option< ImplData >
 {
     if let ItemKind::Impl( .., ref trait_ref, ref ty, ref items ) = item.node {
         return Some( get_impl_data_raw( trait_ref, ty, items ) );
@@ -142,7 +154,7 @@ fn get_impl_data_raw<'a>(
     trait_ref : &'a Option<Path>,
     struct_ty : &'a Ty,
     items : &'a [ImplItem]
-) -> ( Option<&'a Ident>, &'a Ident, Vec< ( &'a Ident, &'a MethodSig ) > )
+) -> ImplData<'a>
 {
 
     let struct_ident = match get_ty_ident( struct_ty ) {
@@ -150,16 +162,16 @@ fn get_impl_data_raw<'a>(
         None => panic!()
     };
 
-    let trait_ident = match trait_ref {
-        &Some( ref tr ) => Some( path_to_ident( &tr ) ),
-        &None => None
+    let trait_ident = match *trait_ref {
+        Some( ref tr ) => Some( path_to_ident( tr ) ),
+        None => None
     };
 
     let methods_opt : Option< Vec< (&Ident, &MethodSig) > > = items
             .into_iter()
             .map( |i| get_impl_method( i ).map( |m| ( &i.ident, m ) ) )
             .collect();
-    let methods = methods_opt.unwrap_or( vec![] );
+    let methods = methods_opt.unwrap_or_else( || vec![] );
 
     ( trait_ident, struct_ident, methods )
 }
@@ -189,18 +201,25 @@ pub fn get_parameters(
 {
     Some( match attr.value {
 
-        syn::MetaItem::Word(..) => return None,
-        syn::MetaItem::NameValue(..) => return None,
+        syn::MetaItem::Word(..)
+            | syn::MetaItem::NameValue(..) => return None,
         syn::MetaItem::List( _, ref l ) =>
-            l.iter().map( |i| match i {
-                &syn::NestedMetaItem::MetaItem( ref mi ) =>
-                        AttrParam::Word( match mi {
-                            &syn::MetaItem::Word( ref i ) => i,
-                            &syn::MetaItem::List( ref i, _ ) => i,
-                            &syn::MetaItem::NameValue( ref i, _ ) => i,
-                        } ),
-                &syn::NestedMetaItem::Literal( ref l ) =>
-                        AttrParam::Literal( l ),
+            l.iter().map( |i| {
+
+                match *i {
+
+                    syn::NestedMetaItem::MetaItem( ref mi ) =>
+
+                            AttrParam::Word( match *mi {
+                                syn::MetaItem::Word( ref i )
+                                    | syn::MetaItem::List( ref i, _ )
+                                    | syn::MetaItem::NameValue( ref i, _ )
+                                    => i,
+                            } ),
+
+                    syn::NestedMetaItem::Literal( ref l ) =>
+                            AttrParam::Literal( l ),
+                }
             } ).collect() ,
     } )
 }
@@ -220,8 +239,8 @@ pub fn get_ty_ident(
     ty : &Ty
 ) -> Option<&Ident>
 {
-    match ty {
-        &Ty::Path( _, ref p ) =>
+    match *ty {
+        Ty::Path( _, ref p ) =>
             p.segments.last().map( |l| &l.ident ),
         _ => None
     }
@@ -251,11 +270,11 @@ pub fn parameter_to_guid(
     p : &NestedMetaItem
 ) -> Result< guid::GUID, String >
 {
-    if let &NestedMetaItem::Literal( Lit::Str( ref s, _ ) ) = p {
-        return guid::GUID::parse( &s.as_str() );
+    if let NestedMetaItem::Literal( Lit::Str( ref s, _ ) ) = *p {
+        return guid::GUID::parse( s.as_str() );
     }
 
-    return Err( "GUID parameter must be literal string".to_owned() );
+    Err( "GUID parameter must be literal string".to_owned() )
 }
 
 pub fn get_method_args(
@@ -312,7 +331,7 @@ pub fn get_method_args(
 
             // Ensure the first parameter is &self.
             // Static methods don't count here.
-            if let &FnArg::SelfRef(..) = self_arg {
+            if let FnArg::SelfRef(..) = *self_arg {
             } else {
                 return None
             }
@@ -328,12 +347,11 @@ pub fn is_unit(
     tk : &Ty
 ) -> bool
 {
-    if let &Ty::Tup( ref v ) = tk {
-        if v.len() == 0 {
-            return true
-        }
+    if let Ty::Tup( ref v ) = *tk {
+        v.is_empty()
+    } else {
+        false
     }
-    false
 }
 
 pub fn unit_ty() -> Ty
@@ -346,8 +364,8 @@ pub fn get_ret_types(
 ) -> Result< ( Option<Ty>, Ty ), &'static str >
 {
     // Get the path type on the return value.
-    let path = match ret_ty {
-        &Ty::Path( _, ref p ) => p,
+    let path = match *ret_ty {
+        Ty::Path( _, ref p ) => p,
         _ => return Err( "Use Result as a return type" )
     };
 
@@ -356,7 +374,8 @@ pub fn get_ret_types(
 
     // Check the last segment has angle bracketed parameters.
     if let PathParameters::AngleBracketed( ref data ) = last_segment.parameters {
-        if data.types.len() > 0 {
+        if data.types.is_empty() {
+
             // Angle bracketed parameters exist. We're assuming this is
             // some kind of Result<ok> or Result<ok, err>. In either case
             // we can take the first parameter as the 'ok' type.
@@ -389,12 +408,12 @@ pub fn get_out_and_ret(
 ) -> Option< ( Option<Ty>, Ty ) >
 {
     let output = &m.decl.output;
-    let result_ty = match output {
-        &FunctionRetTy::Ty( ref ty ) => ty,
-        &FunctionRetTy::Default => return Some( ( None, Ty::Tup( vec![] ) ) ),
+    let result_ty = match *output {
+        FunctionRetTy::Ty( ref ty ) => ty,
+        FunctionRetTy::Default => return Some( ( None, Ty::Tup( vec![] ) ) ),
     };
 
-    get_ret_types( &result_ty ).ok()
+    get_ret_types( result_ty ).ok()
 }
 
 pub fn get_method_rvalues(
@@ -409,7 +428,7 @@ pub fn get_method_rvalues(
     Some( match out_ty {
         // Result<(), _>. Ignore the [retval] value but handle the Err
         // as the method return value.
-        Some( ref unit ) if is_unit( &unit ) => (
+        Some( ref unit ) if is_unit( unit ) => (
             ret_ty,
             quote!(
                 match result {
@@ -419,7 +438,7 @@ pub fn get_method_rvalues(
 
         // Result<_, _>. Ok() -> __out + S_OK, Err() -> E_*
         Some( ref out_ty ) => {
-            let param = tyhandlers::get_ty_handler( &out_ty );
+            let param = tyhandlers::get_ty_handler( out_ty );
             let out_ident = Ident::from( "__out" );
             let result_value = param.rust_to_com( &Ident::from( "r" ) );
             let default_value = param.default_value();

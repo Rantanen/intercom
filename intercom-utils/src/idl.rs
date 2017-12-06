@@ -13,7 +13,7 @@ pub fn run( idl_params : &ArgMatches ) -> AppResult {
             idl_params.value_of( "path" ).unwrap() );
 
     // Parse the sources and convert the result into an IDL.
-    let ( renames, result ) = parse_crate( path_str )?;
+    let ( renames, result ) = parse_crate( &path_str )?;
     result_to_idl( &result, &renames );
 
     Ok(())
@@ -92,7 +92,7 @@ fn result_to_idl(
         // Get the interfaces the class implements.
         let interfaces = coclass.interfaces.iter().map(|itf| {
             format!( r###"
-                interface {};"###, try_rename( rn, &itf ) )
+                interface {};"###, try_rename( rn, itf ) )
         } ).collect::<Vec<_>>().join( "\n" );
 
         // Format the final coclass definition now that we have the class

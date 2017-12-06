@@ -1,7 +1,7 @@
 
 use super::*;
 
-/// Error structure used to represent the COM IErrorInfo.
+/// Error structure used to represent the COM `IErrorInfo`.
 pub struct ComError {
     pub description : String,
     pub hresult : HRESULT,
@@ -25,7 +25,7 @@ pub fn SetErrorInfo(
 /// Error info COM object data.
 struct ErrorInfo { pub description : String }
 
-/// CoClass implementation for the ErrorInfo COM object.
+/// `CoClass` implementation for the `ErrorInfo` COM object.
 impl CoClass for ErrorInfo {
 
     /// Virtual table type.
@@ -47,7 +47,7 @@ impl CoClass for ErrorInfo {
         }
     }
 
-    /// Query interface implementation. Supports only IUnknown and IErrorInfo.
+    /// Query interface implementation. Supports only `IUnknown` and `IErrorInfo`.
     fn query_interface(
         vtables : &Self::VTableList,
         riid : REFIID,
@@ -57,17 +57,17 @@ impl CoClass for ErrorInfo {
         unsafe { match *riid {
             super::IID_IUnknown | super::IID_IErrorInfo =>
                 Ok( vtables as *const _ as RawComPtr ),
-            _ => return Err( E_NOINTERFACE ),
+            _ => Err( E_NOINTERFACE ),
         } }
     }
 
-    /// IErrorInfo itself doesn't support error info.
+    /// `IErrorInfo` itself doesn't support error info.
     ///
     /// We don't want to override errors when doing error processing.
     fn interface_supports_error_info( _riid : REFIID ) -> bool { false }
 }
 
-/// IErrorInfo virtual table.
+/// `IErrorInfo` virtual table.
 struct IErrorInfoVtbl {
     pub __base: IUnknownVtbl,
     pub get_guid: unsafe extern "stdcall" fn(
@@ -82,7 +82,7 @@ struct IErrorInfoVtbl {
             RawComPtr, *mut u32 ) -> HRESULT
 }
 
-/// IErrorInfo::GetGuid raw COM implementation.
+/// `IErrorInfo::GetGuid` raw COM implementation.
 unsafe extern "stdcall" fn get_guid_impl(
     _this : RawComPtr,
     guid : *mut GUID
@@ -96,7 +96,7 @@ unsafe extern "stdcall" fn get_guid_impl(
     S_OK
 }
 
-/// IErrorInfo::GetSource raw COM implementation.
+/// `IErrorInfo::GetSource` raw COM implementation.
 unsafe extern "stdcall" fn get_source_impl(
     _this : RawComPtr,
     source : *mut BStr
@@ -110,7 +110,7 @@ unsafe extern "stdcall" fn get_source_impl(
     S_OK
 }
 
-/// IErrorInfo::GetDescription raw COM implementation.
+/// `IErrorInfo::GetDescription` raw COM implementation.
 unsafe extern "stdcall" fn get_description_impl(
     this : RawComPtr,
     desc : *mut BStr
@@ -125,7 +125,7 @@ unsafe extern "stdcall" fn get_description_impl(
     S_OK
 }
 
-/// IErrorInfo::GetHelpFile raw COM implementation.
+/// `IErrorInfo::GetHelpFile` raw COM implementation.
 unsafe extern "stdcall" fn get_help_file_impl(
     _this : RawComPtr,
     help_file : *mut BStr
@@ -139,7 +139,7 @@ unsafe extern "stdcall" fn get_help_file_impl(
     S_OK
 }
 
-/// IErrorInfo::GetHelpContext raw COM implementation.
+/// `IErrorInfo::GetHelpContext` raw COM implementation.
 unsafe extern "stdcall" fn get_help_context_impl(
     _this : RawComPtr,
     help_context : *mut u32

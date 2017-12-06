@@ -45,7 +45,7 @@ fn check_expansions() {
         //
         // The source is compiled using rustc and the target is just read
         // from the disk.
-        let mut source_code = build( source_path );
+        let mut source_code = build( &source_path );
         let mut target_code = String::new();
         target_file.read_to_string( &mut target_code )
                     .expect( "Failed to read target" );
@@ -57,8 +57,8 @@ fn check_expansions() {
         // compiler pretty print format in the reference target files - which,
         // despite its name, isn't very pretty.
         let changeset = Changeset::new(
-                &format( source_code.trim().to_owned() ),
-                &format( target_code.trim().to_owned() ),
+                &format( source_code.trim() ),
+                &format( target_code.trim() ),
                 "\n" );
 
         // If these were equal, there's only one "Same" diff segment.
@@ -80,14 +80,14 @@ fn check_expansions() {
 
 /// Compiles a single file using rustc using similar options than what
 /// cargo would have used.
-fn build( path : String ) -> String {
+fn build( path : &str ) -> String {
 
     // Launch rustc.
     let output = std::process::Command::new( "rustc" )
             .args( &[
                 "--crate-name", "source",
                 "--crate-type", "lib",
-                &path,
+                path,
                 "--out-dir", "tests/out",
                 "-L", "dependency=../target/debug/deps",
                 "--extern", "intercom=../target/debug/libintercom.rlib",
@@ -108,12 +108,12 @@ fn build( path : String ) -> String {
 }
 
 /// Removes comments from the code.
-fn strip_comments( code : String ) -> String {
+fn strip_comments( code : &str ) -> String {
     let re = regex::Regex::new( r"//.*" ).expect( "Bad regex" );
-    re.replace_all( &code, "" ).into_owned()
+    re.replace_all( code, "" ).into_owned()
 }
 
-fn format( code : String ) -> String {
+fn format( code : &str ) -> String {
 
     // Strip comments. This allows us to embed comments in the target files
     // without requiring the attributes to expand these comments.

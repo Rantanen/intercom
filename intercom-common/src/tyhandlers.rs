@@ -37,13 +37,14 @@ pub trait TyHandler {
     /// Gets the default value for the type.
     fn default_value( &self) -> Tokens
     {
-        match self.rust_ty() {
-            &Ty::Path( _, ref p ) => {
-                let name : &str = &p.segments.last().unwrap().ident.as_ref();
+        match *self.rust_ty() {
+            Ty::Path( _, ref p ) => {
+                let name : &str = p.segments.last().unwrap().ident.as_ref();
                 match name {
-                    "c_void" => quote!( std::ptr::null_mut() ),
-                    "RawComPtr" => quote!( std::ptr::null_mut() ),
-                    "ComRc" => quote!( std::ptr::null_mut() ),
+                    "c_void"
+                        | "RawComPtr"
+                        | "ComRc"
+                        => quote!( std::ptr::null_mut() ),
                     _ => quote!( Default::default() )
                 }
             },
@@ -62,8 +63,8 @@ impl TyHandler for IdentityParam {
 }
 
 
-/// ComRc parameter handler. Supports ComRc Rust type and converts this to/from
-/// RawComPtr COM type.
+/// `ComRc` parameter handler. Supports `ComRc` Rust type and converts this
+/// to/from `RawComPtr` COM type.
 struct ComRcParam( Ty );
 
 impl TyHandler for ComRcParam {
@@ -103,7 +104,7 @@ impl TyHandler for ComRcParam {
 
         // Conversion is done with query_interface, which requires the
         // IID of the ComRc interface type.
-        let iid_ident = super::idents::iid( &itf_ident );
+        let iid_ident = super::idents::iid( itf_ident );
         quote!( intercom::ComRc::query_interface( &#ident, &#iid_ident )
                 .expect( "ComRc<T> does not support interface T" ) )
     }
@@ -131,7 +132,7 @@ impl TyHandler for StringParam
     }
 }
 
-/// Resolves the TyHandler to use.
+/// Resolves the `TyHandler` to use.
 pub fn get_ty_handler(
     arg_ty : &Ty,
 ) -> Box<TyHandler>
@@ -141,16 +142,16 @@ pub fn get_ty_handler(
 
     // The match is done using the original ty so we can borrow it while we
     // yield ownership to the cloned 'ty'.
-    match arg_ty {
+    match *arg_ty {
 
         // Ty::Path represents various qualified type names, such as structs
         // and traits.
-        &Ty::Path( .., ref p ) => {
+        Ty::Path( .., ref p ) => {
 
             // Match based on the last segment. We can't rely on the fully
             // qualified name to be in the previous segments thanks to use-
             // statements.
-            let name : &str = &p.segments.last().unwrap().ident.as_ref();
+            let name : &str = p.segments.last().unwrap().ident.as_ref();
             match name {
 
                 "ComRc" => Box::new( ComRcParam( ty ) ),

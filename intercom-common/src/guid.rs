@@ -16,12 +16,17 @@ pub struct GUID {
 
 impl GUID {
 
+    pub fn zero_guid() -> GUID {
+        GUID { data1: 0, data2: 0, data3: 0, data4: [ 0; 8 ] }
+    }
+
     /// Parses the given string as a GUID.
     ///
     /// Supported formats include:
     /// - Braces and hyphens: {00000000-0000-0000-0000-000000000000}
     /// - Hyphens only: 00000000-0000-0000-0000-000000000000
     /// - Raw hexadecimal: 00000000000000000000000000000000
+    #[cfg_attr(feature = "cargo-clippy", allow(explicit_counter_loop))]
     pub fn parse( guid : &str ) -> Result< GUID, String >
     {
         // We support the following formats:
@@ -106,6 +111,10 @@ impl GUID {
             } else {
                 buffer[ byte ] += value;
             }
+
+            // 'digit' is incremented only when we actually match a hex-digit
+            // in the GUID. 'i_char', which is the loop counter, also includes
+            // all the GUID formatting characters, such as {} and -.
             digit += 1;
         }
 
@@ -119,16 +128,16 @@ impl GUID {
         // we'll just go with raw calculations.
         Ok( GUID {
             data1:
-                ( ( buffer[ 0 ] as u32 ) << 24 ) +
-                ( ( buffer[ 1 ] as u32 ) << 16 ) +
-                ( ( buffer[ 2 ] as u32 ) << 8 ) +
-                ( ( buffer[ 3 ] as u32 ) << 0 ),
+                ( u32::from( buffer[ 0 ] ) << 24 ) +
+                ( u32::from( buffer[ 1 ] ) << 16 ) +
+                ( u32::from( buffer[ 2 ] ) << 8 ) +
+                ( u32::from( buffer[ 3 ] ) ),
             data2:
-                ( ( buffer[ 4 ] as u16 ) << 8 ) +
-                ( ( buffer[ 5 ] as u16 ) << 0 ),
+                ( u16::from( buffer[ 4 ] ) << 8 ) +
+                ( u16::from( buffer[ 5 ] ) ),
             data3:
-                ( ( buffer[ 6 ] as u16 ) << 8 ) +
-                ( ( buffer[ 7 ] as u16 ) << 0 ),
+                ( u16::from( buffer[ 6 ] ) << 8 ) +
+                ( u16::from( buffer[ 7 ] ) ),
             data4: [
                 buffer[ 8 ], buffer[ 9 ], buffer[ 10 ], buffer[ 11 ],
                 buffer[ 12 ], buffer[ 13 ], buffer[ 14 ], buffer[ 15 ],

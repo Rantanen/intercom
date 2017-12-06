@@ -48,7 +48,7 @@ pub struct MethodArg {
 /// Mutability information.
 #[derive(Debug)] pub enum Mutability { Mutable, Immutable }
 
-/// COM CoClass details.
+/// COM `CoClass` details.
 #[derive(Debug)]
 pub struct CoClass {
     pub clsid : GUID,
@@ -84,20 +84,20 @@ pub struct ParseResult {
 ///
 /// Returns 
 pub fn parse_crate(
-    path : String,
+    path : &str,
 ) -> Result< ( HashMap<String, String>, ParseResult ), AppError > {
 
     // Glob the sources.
-    let files = glob::glob( &path )?.collect::<Vec<_>>();
+    let files = glob::glob( path )?.collect::<Vec<_>>();
 
     // Gather renames first.
     let mut renames = HashMap::new();
     for entry in &files {
 
         // Get the path from the directory entry.
-        let path = match entry {
-            &Err( ref e ) => { eprintln!( "{}", e ); continue; },
-            &Ok( ref path ) => path,
+        let path = match *entry {
+            Err( ref e ) => { eprintln!( "{}", e ); continue; },
+            Ok( ref path ) => path,
         };
 
         // Read the source.
@@ -115,9 +115,9 @@ pub fn parse_crate(
     for entry in &files {
 
         // Get the path from the directory entry.
-        let path = match entry {
-            &Err( ref e ) => { eprintln!( "{}", e ); continue; },
-            &Ok( ref path ) => path,
+        let path = match *entry {
+            Err( ref e ) => { eprintln!( "{}", e ); continue; },
+            Ok( ref path ) => path,
         };
 
         // Read the source.
@@ -164,28 +164,26 @@ pub fn gather_renames(
 
     // Process each item.
     for item in c.items {
-        match item.node {
 
-            // Only implicit impls need renaming.
-            syn::ItemKind::Impl(.., ty, _) => {
-                let struct_ident = utils::get_ty_ident( &ty ).ok_or(
-                    format!( "Could not resolve ident of {:?}", ty ) )?;
+        // Only implicit impls need renaming.
+        if let syn::ItemKind::Impl( .., ty, _ ) = item.node {
 
-                // Ensure the impl is marked with com_interface attribute.
-                // Non-com_interface impls don't matter here.
-                let itf_attr = item.attrs
-                        .iter()
-                        .find(|attr| attr.value.name() == "com_interface");
-                if let Some(..) = itf_attr {
+            let struct_ident = utils::get_ty_ident( &ty ).ok_or_else( ||
+                format!( "Could not resolve ident of {:?}", ty ) )?;
 
-                    // com_interface attribute was found. Add the rename.
-                    let iname =
-                        format!( "I{}", struct_ident );
-                    rn.insert( struct_ident.to_string(), iname );
-                }
-            },
-            _ => {}
-        };
+            // Ensure the impl is marked with com_interface attribute.
+            // Non-com_interface impls don't matter here.
+            let itf_attr = item.attrs
+                    .iter()
+                    .find(|attr| attr.value.name() == "com_interface");
+            if let Some(..) = itf_attr {
+
+                // com_interface attribute was found. Add the rename.
+                let iname =
+                    format!( "I{}", struct_ident );
+                rn.insert( struct_ident.to_string(), iname );
+            }
+        }
     }
 
     Ok(())
@@ -193,7 +191,7 @@ pub fn gather_renames(
 
 /// Processes a single file.
 ///
-/// * `c` - File to process as a syn::Crate AST structure.
+/// * `c` - File to process as a `syn::Crate` AST structure.
 /// * `r` - Mutable parse result that we append our results in.
 /// * `rn` - Rename data to use when resolving type names.
 pub fn process_crate(
@@ -223,7 +221,7 @@ pub fn process_crate(
                     process_trait( &item.ident, &item.attrs, &items, r, rn )?,
             syn::ItemKind::Impl(.., ty, items) =>
                     process_impl(
-                        utils::get_ty_ident( &ty ).ok_or(
+                        utils::get_ty_ident( &ty ).ok_or_else( ||
                             format!( "Could not resolve ident of {:?}", ty ) )?,
                         &item.attrs,
                         &items,
@@ -255,7 +253,7 @@ pub fn process_com_lib_attr(
 /// Process COM struct.
 pub fn process_struct(
     ident: &syn::Ident,
-    attrs: &Vec<syn::Attribute>,
+    attrs: &[syn::Attribute],
     r: &mut ParseResult,
 ) -> Result<(), AppError> {
 
@@ -268,22 +266,24 @@ pub fn process_struct(
 
     // Get the COM parameters.
     let params = utils::get_parameters( class_attr )
-            .ok_or( format!( "Bad parameters on com_class on {}", ident ) )?;
+            .ok_or_else( ||
+                format!( "Bad parameters on com_class on {}", ident ) )?;
     let ( name_param, itf_params ) = params.split_first()
-            .ok_or( format!( "Not enough com_class parameters on {}", ident ) )?;
+            .ok_or_else( ||
+                format!( "Not enough com_class parameters on {}", ident ) )?;
 
     // Parse the CLSID from the attribute.
-    let clsid = match name_param {
-        &utils::AttrParam::Literal( &syn::Lit::Str( ref g, .. ) ) => g,
+    let clsid = match *name_param {
+        utils::AttrParam::Literal( &syn::Lit::Str( ref g, .. ) ) => g,
         _ => Err( format!( "Invalid CLSID on {}", ident ) )?,
     };
 
     // Parse the interface names.
     let interfaces = itf_params
             .into_iter()
-            .map( |itf| match itf {
-                &utils::AttrParam::Word( w ) => Ok( format!( "{}", w ) ),
-                _ => Err( format!( "Bad interface" ) ),
+            .map( |itf| match *itf {
+                utils::AttrParam::Word( w ) => Ok( format!( "{}", w ) ),
+                _ => Err( "Bad interface" ),
             } ).collect::<Result<_,_>>()?;
             
     // Store the class details.
@@ -297,13 +297,13 @@ pub fn process_struct(
 
 /// Process a trait.
 ///
-/// Most of the processing is done in process_interface. This method only takes
-/// care of the trait-specific bits that don't apply to the case where the
-/// interface is defined with an impl.
+/// Most of the processing is done in `process_interface`. This method only
+/// takes care of the trait-specific bits that don't apply to the case where
+/// the interface is defined with an impl.
 pub fn process_trait( 
     ident : &syn::Ident,
-    attrs : &Vec<syn::Attribute>,
-    items : &Vec<syn::TraitItem>,
+    attrs : &[syn::Attribute],
+    items : &[syn::TraitItem],
     r: &mut ParseResult,
     rn : &HashMap<String, String>,
 ) -> Result<(), AppError> {
@@ -325,13 +325,13 @@ pub fn process_trait(
 
 /// Process an impl.
 ///
-/// Most of the processing is done in process_interface. This method only takes
-/// care of the impl-specific bits that don't apply to the case where the
-/// interface is defined with a trait.
+/// Most of the processing is done in `process_interface`. This method only
+/// takes care of the impl-specific bits that don't apply to the case where
+/// the interface is defined with a trait.
 pub fn process_impl( 
     ident : &syn::Ident,
-    attrs : &Vec<syn::Attribute>,
-    items : &Vec<syn::ImplItem>,
+    attrs : &[syn::Attribute],
+    items : &[syn::ImplItem],
     r: &mut ParseResult,
     rn : &HashMap<String, String>,
 ) -> Result<(), AppError> {
@@ -348,13 +348,13 @@ pub fn process_impl(
     }
 
     // Process the interface.
-    process_interface( &ident, attrs, methods, r, rn )
+    process_interface( ident, attrs, methods, r, rn )
 }
 
 /// Processes a COM interface.
 pub fn process_interface( 
     ident : &syn::Ident,
-    attrs : &Vec<syn::Attribute>,
+    attrs : &[syn::Attribute],
     items : Vec<( &syn::Ident, &syn::MethodSig )>,
     r: &mut ParseResult,
     rn : &HashMap<String, String>,
@@ -369,13 +369,13 @@ pub fn process_interface(
 
     // Parse [com_interface(..)] parameters.
     let params = utils::get_parameters( interface_attr )
-            .ok_or( format!( "Bad parameters on com_interface on {}", ident ) )?;
+            .ok_or_else( || format!( "Bad parameters on com_interface on {}", ident ) )?;
     let guid_param = params.first()
-            .ok_or( format!( "Not enough com_interface parameters on {}", ident ) )?;
+            .ok_or_else( || format!( "Not enough com_interface parameters on {}", ident ) )?;
 
     // Get the interface IID.
-    let iid = match guid_param {
-        &utils::AttrParam::Literal( &syn::Lit::Str( ref g, .. ) ) => g,
+    let iid = match *guid_param {
+        utils::AttrParam::Literal( &syn::Lit::Str( ref g, .. ) ) => g,
         _ => Err( format!( "Invalid IID on {}", ident ) )?,
     };
 
@@ -393,13 +393,13 @@ pub fn process_interface(
 /// Gets a specific attribute from a list of attributes.
 fn get_attribute<'a, 'b>(
     name : &'b str,
-    attrs : &'a Vec<syn::Attribute>
+    attrs : &'a [syn::Attribute]
 ) -> Option< &'a syn::Attribute >
 {
     attrs.iter().find( |attr| attr.value.name() == name )
 }
 
-/// Converts syn method definitions into ComMethod data structures.
+/// Converts syn method definitions into `ComMethod` data structures.
 fn get_com_methods(
     rn : &HashMap<String, String>,
     methods : Vec<( &syn::Ident, &syn::MethodSig )>
@@ -420,8 +420,8 @@ fn get_com_methods(
         };
 
         // Only self by reference is supported. COM never transfer ownership.
-        let mutability = match self_arg {
-            &syn::FnArg::SelfRef( _, m ) => match m {
+        let mutability = match *self_arg {
+            syn::FnArg::SelfRef( _, m ) => match m {
                 syn::Mutability::Mutable => Mutability::Mutable,
                 syn::Mutability::Immutable => Mutability::Immutable,
             },
@@ -451,14 +451,14 @@ fn get_com_methods(
         //
         // We should migrate this to the ComMethodInfo/ReturnHandler infra at
         // some point in the future.
-        let rvalue = match &method.decl.output {
+        let rvalue = match method.decl.output {
 
             // "Default" return type means the type was omitted, thus there is
             // no return value.
-            &syn::FunctionRetTy::Default => "void".to_owned(),
+            syn::FunctionRetTy::Default => "void".to_owned(),
 
             // Return type is defined.
-            &syn::FunctionRetTy::Ty( ref ty ) => {
+            syn::FunctionRetTy::Ty( ref ty ) => {
 
                 // Convert the return type into [retval] and COM return type.
                 let ( out_ty_opt, ret_ty ) = utils::get_ret_types( ty )?;
@@ -504,15 +504,15 @@ fn get_com_args(
 
         // We have already skipped the first self-argument here.
         // All the remaining arguments must be defined properly.
-        let ( pat, ty ) = match arg {
-            &syn::FnArg::Captured( ref pat, ref ty ) => ( pat, ty ),
+        let ( pat, ty ) = match *arg {
+            syn::FnArg::Captured( ref pat, ref ty ) => ( pat, ty ),
             _ => Err( format!( "Unsupported argument type: {:?}", arg ) )?,
         };
 
         // Currently we only support the simple arguments. No destructuring or
         // other arguemnt types are allowed.
-        let ident = match pat {
-            &syn::Pat::Ident( _, ref ident, _ ) => ident,
+        let ident = match *pat {
+            syn::Pat::Ident( _, ref ident, _ ) => ident,
             _ => Err( format!( "Unsupported argument pattern: {:?}", pat ) )?,
         };
 
@@ -535,13 +535,13 @@ fn get_com_ty(
     ty : &syn::Ty,
 ) -> Result< String, AppError > {
 
-    Ok( match ty {
+    Ok( match *ty {
 
         // Pointer types.
-        &syn::Ty::Slice( ref ty )
+        syn::Ty::Slice( ref ty )
             => format!( "*{}", get_com_ty( rn, ty )? ),
-        &syn::Ty::Ptr( ref mutty )
-            | &syn::Ty::Rptr( .., ref mutty )
+        syn::Ty::Ptr( ref mutty )
+            | syn::Ty::Rptr( .., ref mutty )
             => match mutty.mutability {
                 syn::Mutability::Mutable
                     => format!( "*{}", get_com_ty( rn, &mutty.ty )? ),
@@ -551,25 +551,25 @@ fn get_com_ty(
 
         // This is quite experimental. Do IDLs even support staticly sized
         // arrays? Currently this turns [u8; 3] into "uint8[3]" IDL type.
-        &syn::Ty::Array( ref ty, ref count )
+        syn::Ty::Array( ref ty, ref count )
             => format!( "{}[{:?}]", get_com_ty( rn, ty.as_ref() )?, count ),
 
         // Normal Rust struct/trait type.
-        &syn::Ty::Path(.., ref path )
+        syn::Ty::Path(.., ref path )
             => path_to_ty( rn, path )?,
 
         // Tuple with length 0, ie. Unit tuple: (). This is void-equivalent.
-        &syn::Ty::Tup( ref l ) if l.len() == 0
+        syn::Ty::Tup( ref l ) if l.is_empty()
             => "void".to_owned(),
 
-        &syn::Ty::BareFn(..)
-            | &syn::Ty::Never
-            | &syn::Ty::Tup(..)
-            | &syn::Ty::TraitObject(..)
-            | &syn::Ty::ImplTrait(..)
-            | &syn::Ty::Paren(..)
-            | &syn::Ty::Infer
-            | &syn::Ty::Mac(..)
+        syn::Ty::BareFn(..)
+            | syn::Ty::Never
+            | syn::Ty::Tup(..)
+            | syn::Ty::TraitObject(..)
+            | syn::Ty::ImplTrait(..)
+            | syn::Ty::Paren(..)
+            | syn::Ty::Infer
+            | syn::Ty::Mac(..)
             => Err( format!( "Argument type not supported: {:?}", ty ) )?,
     } )
 }
@@ -611,8 +611,8 @@ fn segment_to_ty(
     Ok( match ty.as_str() {
         
         // Hardcoded handling for parameter types.
-        "ComRc" => format!( "{}*", get_com_ty( rn, &args[0] )? ),
-        "ComItf" => format!( "{}*", get_com_ty( rn, &args[0] )? ),
+        "ComRc" | "ComItf"
+            => format!( "{}*", get_com_ty( rn, &args[0] )? ),
         "String" => "BSTR".to_owned(),
         "usize" => "size_t".to_owned(),
         "u64" => "uint64".to_owned(),
@@ -628,7 +628,7 @@ fn segment_to_ty(
 
         // Default handling checks if we need to rename the type, such as
         // Foo -> IFoo for implicit interfaces.
-        t @ _ => try_rename( rn, t ),
+        t => try_rename( rn, t ),
     } )
 }
 
@@ -647,7 +647,7 @@ pub fn try_rename(
     }
 }
 
-/// Convert the Rust identifier from snake_case to PascalCase
+/// Convert the Rust identifier from `snake_case` to `PascalCase`
 pub fn pascal_case( input : &str ) -> String {
 
     // Allocate the output string. We'll never increase the amount of
@@ -659,26 +659,26 @@ pub fn pascal_case( input : &str ) -> String {
     let mut capitalize = true;
     for c in input.chars() {
 
-        // Skip "_"'s but capitalize the next character.
+        // Check the capitalization requirement.
         if c == '_' {
+
+            // Skip '_' but capitalize the following character.
             capitalize = true;
+
+        } else if capitalize { 
+
+            // Capitalize. Add the uppercase characters.
+            for c_up in c.to_uppercase() {
+                output.push( c_up )
+            }
+
+            // No need to capitalize any more.
+            capitalize = false;
+            
         } else {
 
-            // Not "_". See if we need to capitalize or not.
-            if capitalize { 
-
-                // Capitalize. Add the uppercase characters.
-                for c_up in c.to_uppercase() {
-                    output.push( c_up )
-                }
-                // No need to capitalize any more.
-                capitalize = false;
-                
-            } else {
-
-                // No need to capitalize. Just add the character as is.
-                output.push( c );
-            }
+            // No need to capitalize. Just add the character as is.
+            output.push( c );
         }
 
     }

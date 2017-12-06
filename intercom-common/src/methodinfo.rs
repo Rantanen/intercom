@@ -4,12 +4,13 @@ use syn::*;
 use ast_converters::*;
 use tyhandlers::{TyHandler, get_ty_handler};
 use returnhandlers::{ReturnHandler, get_return_handler};
+use utils;
 
 #[derive(Debug)]
 pub enum ComMethodInfoError {
     TooFewArguments,
     BadSelfArg,
-    BadArg(FnArg),
+    BadArg(Box<FnArg>),
     BadReturnTy,
 }
 
@@ -66,8 +67,8 @@ impl ComMethodInfo {
             .and_then( | ( self_arg, other_args ) | {
 
                 // Resolve the self argument.
-                let ( is_const, rust_self_arg ) = match self_arg {
-                    &FnArg::SelfRef(.., m) => (
+                let ( is_const, rust_self_arg ) = match *self_arg {
+                    FnArg::SelfRef(.., m) => (
                         m == Mutability::Immutable,
                         self_arg.clone(),
                     ),
@@ -77,9 +78,13 @@ impl ComMethodInfo {
                 // Process other arguments.
                 let args = other_args.iter().map( | arg | {
                     let ty = arg.get_ty()
-                        .or( Err( ComMethodInfoError::BadArg( arg.clone() ) ) )?;
+                        .or_else( |_| Err(
+                            ComMethodInfoError::BadArg( Box::new( arg.clone() ) )
+                        ) )?;
                     let ident = arg.get_ident()
-                        .or( Err( ComMethodInfoError::BadArg( arg.clone() ) ) )?;
+                        .or_else( |_| Err(
+                            ComMethodInfoError::BadArg( Box::new( arg.clone() ) )
+                        ) )?;
 
                     Ok( ComArg::new( ident, ty ) )
                 } ).collect::<Result<_,_>>()?;
@@ -93,14 +98,12 @@ impl ComMethodInfo {
                 .or( Err( ComMethodInfoError::BadReturnTy ) )?;
 
         // Resolve the return type and retval type.
-        let ( retval_type, return_type ) = if is_unit( &rust_return_ty ) {
+        let ( retval_type, return_type ) = if utils::is_unit( &rust_return_ty ) {
             ( None, None )
+        } else if let Some( ( retval, ret ) ) = try_parse_result( &rust_return_ty ) {
+            ( Some( retval ), Some( ret ) )
         } else {
-            if let Some( ( retval, ret ) ) = try_parse_result( &rust_return_ty ) {
-                ( Some( retval ), Some( ret ) )
-            } else {
-                ( None, Some( rust_return_ty.clone() ) )
-            }
+            ( None, Some( rust_return_ty.clone() ) )
         };
 
         let returnhandler = get_return_handler( &retval_type, &return_type )
@@ -120,8 +123,8 @@ impl ComMethodInfo {
 
 fn try_parse_result( ty : &Ty ) -> Option<( Ty, Ty )>
 {
-    let path = match ty {
-        &Ty::Path( _, ref p ) => p,
+    let path = match *ty {
+        Ty::Path( _, ref p ) => p,
         _ => return None,
     };
 
@@ -160,18 +163,6 @@ fn hresult_ty() -> Ty {
             ]
         }
     )
-}
-
-pub fn is_unit(
-    tk : &Ty
-) -> bool
-{
-    if let &Ty::Tup( ref v ) = tk {
-        if v.len() == 0 {
-            return true
-        }
-    }
-    false
 }
 
 #[cfg(test)]

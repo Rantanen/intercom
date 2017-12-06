@@ -8,6 +8,11 @@ pub struct ComRc< T: CoClass > {
     ptr : *mut ComBox<T>
 }
 
+// ComRc is a smart pointer and shouldn't introduce methods on 'self'.
+//
+// Various as_ and into_ methods here are properly implemented static methods
+// which is the recommended alternative - compare this to std::Box.
+#[cfg_attr(feature = "cargo-clippy", allow(wrong_self_convention))]
 impl<T> ComRc<T> where T : CoClass {
 
     /// Creates a new reference counted COM object.

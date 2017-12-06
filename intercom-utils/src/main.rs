@@ -18,7 +18,7 @@ use std::error::Error;
 /// In a application-level error handling we don't really care about responding
 /// to errors currently. What we need is a way to report them though.
 ///
-/// The AppError carries the error message and we can use From<T> impls to
+/// The `AppError` carries the error message and we can use `From<T>` impls to
 /// convert various other error types into it.
 pub struct AppError( String );
 
@@ -39,7 +39,7 @@ impl<'a> From<&'a str> for AppError {
 
 impl From<intercom_common::error::MacroError> for AppError {
     fn from( e : intercom_common::error::MacroError ) -> AppError {
-        AppError( String::from( e.msg ) )
+        AppError( e.msg )
     }
 }
 
