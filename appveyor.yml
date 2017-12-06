@@ -29,5 +29,6 @@ build_script:
     - cmd: .\scripts\ci.bat
 
 test_script:
-    - ps: .\scripts\test.ps1
+    - cargo clippy --all -- -D warnings
     - cargo test
+    - ps: .\scripts\test.ps1
