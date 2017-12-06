@@ -1,8 +1,3 @@
-# Something wrong with this for now. Not supported currently.
-# cargo test
-# $cargo_ok = $?
-$cargo_ok = $true
-
 pushd test\cpp\x64\Release
 ./cpp.exe
 $cpp_ok = $?
@@ -28,6 +23,6 @@ if ( Test-Path env:APPVEYOR_JOB_ID ) {
 
 popd
 
-if( -not ( $cargo_ok -and $cpp_ok -and $cs_ok ) ) {
+if( -not ( $cpp_ok -and $cs_ok ) ) {
     exit -1
 }
