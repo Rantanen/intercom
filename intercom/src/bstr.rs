@@ -14,9 +14,10 @@ extern "system" {
 }
 
 #[cfg(not(windows))]
-pub fn SysAllocStringLen(
-    psz: *const u16,
-    len: u32
+#[allow(non_snake_case)]
+pub unsafe fn SysAllocStringLen(
+    _psz: *const u16,
+    _len: u32
 ) -> BStr
 {
     panic!( "Not implemented" );
