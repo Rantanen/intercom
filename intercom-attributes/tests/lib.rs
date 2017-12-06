@@ -50,7 +50,12 @@ fn check_expansions() {
         target_file.read_to_string( &mut target_code )
                     .expect( "Failed to read target" );
 
-        // Generate diffs for both sources.
+        // Generate diffs for both sources
+        // Ensure the linebreaks are the same for both. This seems to be
+        // somewhat of an issue on AppVeyor.
+        target = target.replace( "\r", "" );
+        source = source.replace( "\r", "" );.
+
         // 
         // Use rustfmt to format both pieces of code so that we have a
         // canonical format for them. Without rustfmt we'd need to match the
