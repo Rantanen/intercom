@@ -17,5 +17,5 @@ quote = { version = "0.3" }
 
 [dev-dependencies]
 difference = "1.0.0"
-rustfmt-nightly = { git = "https://github.com/rust-lang-nursery/rustfmt" }
+rustfmt-nightly = "0.2"
 regex = "0.2"
