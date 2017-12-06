@@ -149,11 +149,10 @@ fn expand_com_interface(
             // in the future.
             let ( args, _ ) =
                     utils::get_method_args( method_sig )?;
-            let ( ret_ty, _ ) =
-                    utils::get_method_rvalues( &method_sig )?;
 
             // Create the vtable field and add it to the vector of fields.
             let arg_tokens = utils::flatten( args.iter() );
+            let ret_ty = method_info.returnhandler.com_ty();
             fields.push( quote!(
                 #method_ident :
                     unsafe extern "stdcall" fn( #arg_tokens ) -> #ret_ty,

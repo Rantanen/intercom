@@ -374,7 +374,7 @@ pub fn get_ret_types(
 
     // Check the last segment has angle bracketed parameters.
     if let PathParameters::AngleBracketed( ref data ) = last_segment.parameters {
-        if data.types.is_empty() {
+        if ! data.types.is_empty() {
 
             // Angle bracketed parameters exist. We're assuming this is
             // some kind of Result<ok> or Result<ok, err>. In either case

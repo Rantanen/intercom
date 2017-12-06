@@ -59,19 +59,19 @@ pub struct __FooVtbl {
     com_result_method: unsafe extern "stdcall" fn(
         self_vtable: intercom::RawComPtr,
         __out: *mut u16
-    ) -> ::intercom::HRESULT,
+    ) -> intercom::HRESULT,
 
     rust_result_method: unsafe extern "stdcall" fn(
         self_vtable: intercom::RawComPtr,
         __out: *mut u16
-    ) -> ::intercom::HRESULT,
+    ) -> intercom::HRESULT,
 
     complete_method: unsafe extern "stdcall" fn(
         self_vtable: intercom::RawComPtr,
         a: u16,
         b: i16,
         __out: *mut bool
-    ) -> ::intercom::HRESULT,
+    ) -> intercom::HRESULT,
 }
 
 // Reverse delegates.
