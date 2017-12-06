@@ -53,8 +53,8 @@ fn check_expansions() {
         // Generate diffs for both sources
         // Ensure the linebreaks are the same for both. This seems to be
         // somewhat of an issue on AppVeyor.
-        target = target.replace( "\r", "" );
-        source = source.replace( "\r", "" );.
+        target_code = target_code.replace( "\r", "" );
+        source_code = source_code.replace( "\r", "" );
 
         // 
         // Use rustfmt to format both pieces of code so that we have a
@@ -105,7 +105,11 @@ fn build( path : &str ) -> String {
     // Ensure the compilation was successful.
     if ! output.status.success() {
         println!( "FAILED TO COMPILE SOURCE {}", path );
-        panic!( format!( "{}", String::from_utf8( output.stderr ).unwrap() ) );
+        panic!( format!(
+                "{}\n\n{}",
+                String::from_utf8( output.stdout ).unwrap(),
+                String::from_utf8( output.stderr ).unwrap()
+            ) );
     }
 
     // stdout is utf8 byte stream. Parse it into a string.
@@ -118,11 +122,17 @@ fn strip_comments( code : &str ) -> String {
     re.replace_all( code, "" ).into_owned()
 }
 
+fn strip_empty_lines( code : &str ) -> String {
+    let re = regex::Regex::new( r"^\s+$" ).expect( "Bad regex" );
+    re.replace_all( code, "" ).into_owned().replace( "\n\n", "" )
+}
+
 fn format( code : &str ) -> String {
 
     // Strip comments. This allows us to embed comments in the target files
     // without requiring the attributes to expand these comments.
     let code = strip_comments( code );
+    let code = strip_empty_lines( &code );
 
     // Use default config but instead of altering the source/target files just
     // "display" the formatted code. This results in the output being available
