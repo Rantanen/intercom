@@ -1,0 +1,9 @@
+language: rust
+cache: cargo
+sudo: false
+rust:
+    - nightly
+script:
+    - cargo build
+    - cargo clippy --all -- -D warnings
+    - cargo test
