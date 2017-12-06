@@ -4,6 +4,7 @@ sudo: false
 rust:
     - nightly
 script:
+    - cargo install clippy
     - cargo build
     - cargo clippy --all -- -D warnings
     - cargo test
