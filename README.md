@@ -3,6 +3,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/intercom.svg)](https://crates.io/crates/intercom)
 [![Build status](https://ci.appveyor.com/api/projects/status/q88b7xk6l72kup0y?svg=true)](https://ci.appveyor.com/project/Rantanen/intercom)
+[![Build Status](https://travis-ci.org/Rantanen/intercom.svg?branch=master)](https://travis-ci.org/Rantanen/intercom)
 
 The COM export allows one to write reusable components in Rust, which can then
 be consumed in any COM-compatible language. This includes C++, C#, VB.Net, etc.
