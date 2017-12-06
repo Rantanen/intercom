@@ -17,9 +17,10 @@ extern "system" {
 }
 
 #[cfg(not(windows))]
+#[allow(non_snake_case)]
 pub fn SetErrorInfo(
-    dw_reserved: u32,
-    errorinfo: RawComPtr,
+    _dw_reserved: u32,
+    _errorinfo: RawComPtr,
 ) -> HRESULT { S_OK }
 
 /// Error info COM object data.
