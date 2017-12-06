@@ -60,6 +60,15 @@ impl GetIdent for FnArg {
     }
 }
 
+impl GetIdent for Path {
+
+    fn get_ident( &self ) -> Result<Ident, String> {
+
+        self.segments.last().map( |l| l.ident.clone() )
+                .ok_or( "Empty path".to_owned() )
+    }
+}
+
 impl GetIdent for NestedMetaItem {
 
     fn get_ident( &self ) -> Result<Ident, String>

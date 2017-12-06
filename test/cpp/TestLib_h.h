@@ -90,6 +90,13 @@ typedef interface ISharedInterface ISharedInterface;
 #endif 	/* __ISharedInterface_FWD_DEFINED__ */
 
 
+#ifndef __IErrorSource_FWD_DEFINED__
+#define __IErrorSource_FWD_DEFINED__
+typedef interface IErrorSource IErrorSource;
+
+#endif 	/* __IErrorSource_FWD_DEFINED__ */
+
+
 #ifndef __RefCountOperations_FWD_DEFINED__
 #define __RefCountOperations_FWD_DEFINED__
 
@@ -174,6 +181,18 @@ typedef struct SharedImplementation SharedImplementation;
 #endif 	/* __SharedImplementation_FWD_DEFINED__ */
 
 
+#ifndef __ErrorSource_FWD_DEFINED__
+#define __ErrorSource_FWD_DEFINED__
+
+#ifdef __cplusplus
+typedef class ErrorSource ErrorSource;
+#else
+typedef struct ErrorSource ErrorSource;
+#endif /* __cplusplus */
+
+#endif 	/* __ErrorSource_FWD_DEFINED__ */
+
+
 #ifdef __cplusplus
 extern "C"{
 #endif 
@@ -185,6 +204,7 @@ extern "C"{
 
 /* library TestLib */
 /* [uuid] */ 
+
 
 
 
@@ -912,6 +932,88 @@ EXTERN_C const IID IID_ISharedInterface;
 #endif 	/* __ISharedInterface_INTERFACE_DEFINED__ */
 
 
+#ifndef __IErrorSource_INTERFACE_DEFINED__
+#define __IErrorSource_INTERFACE_DEFINED__
+
+/* interface IErrorSource */
+/* [unique][nonextensible][uuid][object] */ 
+
+
+EXTERN_C const IID IID_IErrorSource;
+
+#if defined(__cplusplus) && !defined(CINTERFACE)
+    
+    MIDL_INTERFACE("12341234-1234-1234-1234-123412340016")
+    IErrorSource : public IUnknown
+    {
+    public:
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE StoreError( 
+            /* [in] */ HRESULT hr,
+            /* [in] */ BSTR desc) = 0;
+        
+    };
+    
+    
+#else 	/* C style interface */
+
+    typedef struct IErrorSourceVtbl
+    {
+        BEGIN_INTERFACE
+        
+        HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
+            IErrorSource * This,
+            /* [in] */ REFIID riid,
+            /* [annotation][iid_is][out] */ 
+            _COM_Outptr_  void **ppvObject);
+        
+        ULONG ( STDMETHODCALLTYPE *AddRef )( 
+            IErrorSource * This);
+        
+        ULONG ( STDMETHODCALLTYPE *Release )( 
+            IErrorSource * This);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *StoreError )( 
+            IErrorSource * This,
+            /* [in] */ HRESULT hr,
+            /* [in] */ BSTR desc);
+        
+        END_INTERFACE
+    } IErrorSourceVtbl;
+
+    interface IErrorSource
+    {
+        CONST_VTBL struct IErrorSourceVtbl *lpVtbl;
+    };
+
+    
+
+#ifdef COBJMACROS
+
+
+#define IErrorSource_QueryInterface(This,riid,ppvObject)	\
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
+
+#define IErrorSource_AddRef(This)	\
+    ( (This)->lpVtbl -> AddRef(This) ) 
+
+#define IErrorSource_Release(This)	\
+    ( (This)->lpVtbl -> Release(This) ) 
+
+
+#define IErrorSource_StoreError(This,hr,desc)	\
+    ( (This)->lpVtbl -> StoreError(This,hr,desc) ) 
+
+#endif /* COBJMACROS */
+
+
+#endif 	/* C style interface */
+
+
+
+
+#endif 	/* __IErrorSource_INTERFACE_DEFINED__ */
+
+
 EXTERN_C const CLSID CLSID_RefCountOperations;
 
 #ifdef __cplusplus
@@ -966,6 +1068,14 @@ EXTERN_C const CLSID CLSID_SharedImplementation;
 
 class DECLSPEC_UUID("12341234-1234-1234-1234-123412340014")
 SharedImplementation;
+#endif
+
+EXTERN_C const CLSID CLSID_ErrorSource;
+
+#ifdef __cplusplus
+
+class DECLSPEC_UUID("12341234-1234-1234-1234-123412340015")
+ErrorSource;
 #endif
 #endif /* __TestLib_LIBRARY_DEFINED__ */
 

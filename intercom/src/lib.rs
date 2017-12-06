@@ -7,6 +7,7 @@ mod comrc; pub use comrc::*;
 mod comitf; pub use comitf::*;
 mod bstr; pub use bstr::*;
 mod guid; pub use guid::GUID;
+mod error; pub use error::{return_hresult, get_last_error, ComError};
 
 // The crate doesn't really need the macros. However Rust will complain that
 // the import does nothing if we don't define #[macro_use]. Once we define
@@ -36,11 +37,11 @@ pub type REFCLSID = *const IID;
 /// COM error result value.
 pub type HRESULT = i32;
 
-
-/// HRESULT indicating the opration completed successfully.
+/// HRESULT indicating the operation completed successfully.
 pub const S_OK : HRESULT = 0;
 
-
+/// HRESULT indicating the operation completed successfully and returned FALSE.
+pub const S_FALSE : HRESULT = 1;
 
 /// HRESULT for unimplemented functionality.
 #[allow(overflowing_literals)]
@@ -80,6 +81,20 @@ pub const IID_IClassFactory : GUID = GUID {
     data4: [ 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 ]
 };
 
+/// ISupportErrorInfo interface ID.
+#[allow(non_upper_case_globals)]
+pub const IID_ISupportErrorInfo : GUID = GUID {
+    data1: 0xDF0B3D60, data2: 0x548F, data3: 0x101B,
+    data4: [ 0x8E, 0x65, 0x08, 0x00, 0x2B, 0x2B, 0xD1, 0x19 ]
+};
+
+/// IErrorInfo interface ID.
+#[allow(non_upper_case_globals)]
+pub const IID_IErrorInfo : GUID = GUID {
+    data1: 0x1CF2B120, data2: 0x547D, data3: 0x101B,
+    data4: [ 0x8E, 0x65, 0x08, 0x00, 0x2B, 0x2B, 0xD1, 0x19 ]
+};
+
 /// IUnknown virtual table layout.
 #[repr(C)]
 pub struct IUnknownVtbl
@@ -96,6 +111,20 @@ pub struct IUnknownVtbl
 
     /// Release method pointer.
     pub release: unsafe extern "stdcall" fn( s : RawComPtr ) -> u32,
+}
+
+/// ISupportErrorInfo virtual table layout.
+#[repr(C)]
+pub struct ISupportErrorInfoVtbl
+{
+    /// ISupportErrorInfo inherits IUnknown.
+    pub __base : IUnknownVtbl,
+
+    /// QueryInterface method pointer.
+    pub interface_supports_error_info : unsafe extern "stdcall" fn(
+        s : RawComPtr,
+        riid : REFIID,
+    ) -> HRESULT,
 }
 
 // Do we need this? Would rather not export this through an extern crate

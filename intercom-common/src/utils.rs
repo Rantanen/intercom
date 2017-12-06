@@ -336,6 +336,11 @@ pub fn is_unit(
     false
 }
 
+pub fn unit_ty() -> Ty
+{
+    Ty::Tup( vec![] )
+}
+
 pub fn get_ret_types(
     ret_ty : &Ty
 ) -> Result< ( Option<Ty>, Ty ), &'static str >
