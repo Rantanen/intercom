@@ -21,7 +21,7 @@ impl BStr {
         }
     }
 
-    pub fn string_to_bstr( s : &String ) -> BStr {
+    pub fn string_to_bstr( s : &str ) -> BStr {
 
         let len = s.len() as u32;
         unsafe {

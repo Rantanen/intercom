@@ -165,6 +165,7 @@ cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.
     <ClInclude Include="TestLib_h.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="error_info.cpp" />
     <ClCompile Include="interface_params.cpp" />
     <ClCompile Include="iunknown.cpp" />
     <ClCompile Include="main.cpp" />

@@ -90,7 +90,7 @@ impl Foo for intercom::ComItf<Foo> {
             let __result = ((**vtbl).rust_result_method)(comptr, &mut __out);
             if __result == intercom::S_OK {
                 Ok(__out.into())
-            } else { Err(__result) }
+            } else { Err(intercom::get_last_error()) }
         }
     }
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {

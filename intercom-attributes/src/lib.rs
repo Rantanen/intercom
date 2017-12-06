@@ -204,7 +204,7 @@ fn expand_com_interface(
             let return_ident = Ident::from( "__result" );
             let return_statement = method_info
                     .returnhandler
-                    .return_statement( &return_ident );
+                    .com_to_rust_return( &return_ident );
 
             // Create the method implementation using the bits defined above.
             let self_arg = method_info.rust_self_arg;
@@ -363,11 +363,20 @@ fn expand_com_impl(
                 &itf_ident,
                 &method_ident.as_ref() );
 
+            // Parse the method info.
+            let method_info = ComMethodInfo::new(
+                    &method_ident, &method_sig.decl ).ok()?;
+
             // Get the self argument and the remaining args.
             let ( args, params ) =
                     utils::get_method_args( method_sig )?;
             let ( ret_ty, return_statement ) =
                     utils::get_method_rvalues( &method_sig )?;
+
+            let return_ident = Ident::from( "__result" );
+            let return_statement = method_info
+                    .returnhandler
+                    .rust_to_com_return( &return_ident );
 
             // Define the delegating method implementation.
             //
@@ -377,6 +386,7 @@ fn expand_com_impl(
             // with the vtable offset.
             let arg_tokens = utils::flatten( args.iter() );
             let param_tokens = utils::flatten( params.iter() );
+            let ret_ty = method_info.returnhandler.com_ty();
             output.push( quote!(
                 #[allow(non_snake_case)]
                 #[allow(dead_code)]
@@ -385,9 +395,10 @@ fn expand_com_impl(
                 ) -> #ret_ty {
                     // Acquire the reference to the ComBox. For this we need
                     // to offset the current 'self_vtable' vtable pointer.
-                    let self_comptr = ( self_vtable as usize - #vtable_offset() )
+                    let self_combox = ( self_vtable as usize - #vtable_offset() )
                             as *mut intercom::ComBox< #struct_ident >;
-                    let result = (*self_comptr).#method_ident( #param_tokens );
+
+                    let #return_ident = (*self_combox).#method_ident( #param_tokens );
                     #return_statement
                 }
             ) );
@@ -426,7 +437,7 @@ fn expand_com_class(
     let ( mut output, attr, item ) =
             utils::parse_inputs( "com_class", &attr_tokens, &item_tokens )?;
     let struct_ident = utils::get_struct_ident_from_annotatable( &item );
-    let iunk_ident = Ident::from( "IUnknown".to_owned() );
+    let isupporterrorinfo_ident = Ident::from( "ISupportErrorInfo".to_owned() );
 
     // Parse the attribute parameters. [com_class] specifies the CLSID as the
     // first parameter and the remaining parameters are implemented interfaces.
@@ -450,25 +461,35 @@ fn expand_com_class(
     let mut query_interface_match_arms = vec![
         quote!(
             intercom::IID_IUnknown =>
-                ( &vtables._IUnknown )
-                    as *const &intercom::IUnknownVtbl
-                    as *mut &intercom::IUnknownVtbl
+                ( &vtables._ISupportErrorInfo )
+                    as *const &intercom::ISupportErrorInfoVtbl
+                    as *mut &intercom::ISupportErrorInfoVtbl
+                    as intercom::RawComPtr
+        ),
+        quote!(
+            intercom::IID_ISupportErrorInfo =>
+                ( &vtables._ISupportErrorInfo )
+                    as *const &intercom::ISupportErrorInfoVtbl
+                    as *mut &intercom::ISupportErrorInfoVtbl
                     as intercom::RawComPtr
         ) ];
+    let mut support_error_info_match_arms = vec![] ;
 
     // Gather the virtual table list struct field definitions and their values.
     // The definitions are needed when we define the virtual table list struct,
     // which is different for each com_class. The values are needed when we
     // construct the virtual table list.
     //
-    // IUnknown _MUST_ be the first interface defined. This is done to ensure
-    // the IUnknown pointer matches the ComBox pointer.
-    let iunk_vtable_instance_ident =
-            idents::vtable_instance( &struct_ident, &iunk_ident );
+    // The primary IUnknown virtual table _MUST_ be at the beginning of the list.
+    // This is done to ensure the IUnknown pointer matches the ComBox pointer.
+    // We ensure this by defining the primary IUnknown methods on the
+    // ISupportErrorInfo virtual table and having that at the beginning.
+    let isupporterrorinfo_vtable_instance_ident =
+            idents::vtable_instance( &struct_ident, &isupporterrorinfo_ident );
     let mut vtable_list_field_decls = vec![
-        quote!( _IUnknown : &'static intercom::IUnknownVtbl ) ];
+        quote!( _ISupportErrorInfo : &'static intercom::ISupportErrorInfoVtbl ) ];
     let mut vtable_list_field_values = vec![
-        quote!( _IUnknown : &#iunk_vtable_instance_ident ) ];
+        quote!( _ISupportErrorInfo : &#isupporterrorinfo_vtable_instance_ident ) ];
 
     // Create the vtable data for the additional interfaces.
     // The data should include the match-arms for the primary query_interface
@@ -506,30 +527,45 @@ fn expand_com_class(
         vtable_list_field_values.push(
                 quote!( #itf : &#vtable_instance_ident ) );
 
-        // As this is the primary IUnknown query_interface, the self_vtable here
-        // points to the start of the ComRef structure. The return value should
-        // be the vtable corresponding to the given IID so we'll just offset
-        // the self_vtable by the vtable offset.
+        // Define the query_interface match arm for the current interface.
+        // This just gets the correct interface vtable reference from the list
+        // of vtables.
         query_interface_match_arms.push( quote!(
             self::#iid_ident => &vtables.#itf
                     as *const &#vtable_struct_ident
                     as *mut &#vtable_struct_ident
                     as intercom::RawComPtr
         ) );
+
+        // Define the support error info match arms.
+        support_error_info_match_arms.push( quote!(
+            self::#iid_ident => true
+        ) );
     }
 
     /////////////////////
-    // IUnknown::QueryInterface, AddRef & Release
+    // ISupportErrorInfo virtual table instance.
     //
-    // The primary add_ref and release. As these are on the IUnknown interface
-    // the self_vtable here points to the start of the ComRef structure.
+    // The primary IUnknown virtual table is embedded in this one.
     output.push( quote!(
             #[allow(non_upper_case_globals)]
-            const #iunk_vtable_instance_ident : intercom::IUnknownVtbl
-                    = intercom::IUnknownVtbl {
-                        query_interface : intercom::ComBox::< #struct_ident >::query_interface_ptr,
-                        add_ref : intercom::ComBox::< #struct_ident >::add_ref_ptr,
-                        release : intercom::ComBox::< #struct_ident >::release_ptr,
+            const #isupporterrorinfo_vtable_instance_ident
+                    : intercom::ISupportErrorInfoVtbl
+                    = intercom::ISupportErrorInfoVtbl {
+                        __base : intercom::IUnknownVtbl {
+                            query_interface
+                                : intercom::ComBox::< #struct_ident >
+                                    ::query_interface_ptr,
+                            add_ref
+                                : intercom::ComBox::< #struct_ident >
+                                    ::add_ref_ptr,
+                            release
+                                : intercom::ComBox::< #struct_ident >
+                                    ::release_ptr,
+                        },
+                        interface_supports_error_info
+                            : intercom::ComBox::< #struct_ident >
+                                ::interface_supports_error_info_ptr,
                     };
         ) );
 
@@ -565,6 +601,16 @@ fn expand_com_class(
                         #( #query_interface_match_arms ),*,
                         _ => return Err( intercom::E_NOINTERFACE )
                     } )
+                }
+
+                fn interface_supports_error_info(
+                    riid : REFIID
+                ) -> bool
+                {
+                    match *unsafe { &*riid } {
+                        #( #support_error_info_match_arms ),*,
+                        _ => false
+                    }
                 }
             }
         ) );

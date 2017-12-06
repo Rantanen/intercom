@@ -24,19 +24,20 @@ fn __Foo_FooVtbl_offset() -> usize {
     }
 }
 #[allow(non_upper_case_globals)]
-const __Foo_IUnknownVtbl_INSTANCE: intercom::IUnknownVtbl =
-    intercom::IUnknownVtbl{query_interface:
-                               intercom::ComBox::<Foo>::query_interface_ptr,
-                           add_ref: intercom::ComBox::<Foo>::add_ref_ptr,
-                           release: intercom::ComBox::<Foo>::release_ptr,};
+const __Foo_ISupportErrorInfoVtbl_INSTANCE: intercom::ISupportErrorInfoVtbl =
+    intercom::ISupportErrorInfoVtbl{__base:
+                                        intercom::IUnknownVtbl{query_interface:
+                                                                   intercom::ComBox::<Foo>::query_interface_ptr,
+                                                               add_ref:
+                                                                   intercom::ComBox::<Foo>::add_ref_ptr,
+                                                               release:
+                                                                   intercom::ComBox::<Foo>::release_ptr,},
+                                    interface_supports_error_info:
+                                        intercom::ComBox::<Foo>::interface_supports_error_info_ptr,};
 #[allow(non_snake_case)]
 pub struct __FooVtblList {
-    _IUnknown: &'static intercom::IUnknownVtbl,
+    _ISupportErrorInfo: &'static intercom::ISupportErrorInfoVtbl,
     Foo: &'static __FooVtbl,
-}
-#[allow(non_snake_case)]
-impl AsRef<intercom::IUnknownVtbl> for __FooVtblList {
-    fn as_ref(&self) -> &intercom::IUnknownVtbl { &self._IUnknown }
 }
 impl intercom::CoClass for Foo {
     type
@@ -44,7 +45,8 @@ impl intercom::CoClass for Foo {
     =
     __FooVtblList;
     fn create_vtable_list() -> Self::VTableList {
-        __FooVtblList{_IUnknown: &__Foo_IUnknownVtbl_INSTANCE,
+        __FooVtblList{_ISupportErrorInfo:
+                          &__Foo_ISupportErrorInfoVtbl_INSTANCE,
                       Foo: &__Foo_FooVtbl_INSTANCE,}
     }
     fn query_interface(vtables: &Self::VTableList, riid: intercom::REFIID)
@@ -52,13 +54,23 @@ impl intercom::CoClass for Foo {
         if riid.is_null() { return Err(intercom::E_NOINTERFACE) }
         Ok(match *unsafe { &*riid } {
                intercom::IID_IUnknown =>
-               (&vtables._IUnknown) as *const &intercom::IUnknownVtbl as
-                   *mut &intercom::IUnknownVtbl as intercom::RawComPtr,
+               (&vtables._ISupportErrorInfo) as
+                   *const &intercom::ISupportErrorInfoVtbl as
+                   *mut &intercom::ISupportErrorInfoVtbl as
+                   intercom::RawComPtr,
+               intercom::IID_ISupportErrorInfo =>
+               (&vtables._ISupportErrorInfo) as
+                   *const &intercom::ISupportErrorInfoVtbl as
+                   *mut &intercom::ISupportErrorInfoVtbl as
+                   intercom::RawComPtr,
                self::IID_Foo =>
                &vtables.Foo as *const &__FooVtbl as *mut &__FooVtbl as
                    intercom::RawComPtr,
                _ => return Err(intercom::E_NOINTERFACE),
            })
+    }
+    fn interface_supports_error_info(riid: REFIID) -> bool {
+        match *unsafe { &*riid } { self::IID_Foo => true, _ => false, }
     }
 }
 #[allow(non_upper_case_globals)]
@@ -113,46 +125,44 @@ pub unsafe extern "stdcall" fn __Foo_Foo_release(self_vtable:
 pub unsafe extern "stdcall" fn __Foo_Foo_simple_method(self_vtable:
                                                            intercom::RawComPtr)
  -> () {
-    let self_comptr =
+    let self_combox =
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut intercom::ComBox<Foo>;
-    let result = (*self_comptr).simple_method();
-    return result
+    let __result = (*self_combox).simple_method();
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 pub unsafe extern "stdcall" fn __Foo_Foo_arg_method(self_vtable:
                                                         intercom::RawComPtr,
                                                     a: u16) -> () {
-    let self_comptr =
+    let self_combox =
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut intercom::ComBox<Foo>;
-    let result = (*self_comptr).arg_method(a.into());
-    return result
+    let __result = (*self_combox).arg_method(a.into());
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 pub unsafe extern "stdcall" fn __Foo_Foo_simple_result_method(self_vtable:
                                                                   intercom::RawComPtr)
  -> u16 {
-    let self_comptr =
+    let self_combox =
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut intercom::ComBox<Foo>;
-    let result = (*self_comptr).simple_result_method();
-    return result
+    let __result = (*self_combox).simple_result_method();
+    __result
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 pub unsafe extern "stdcall" fn __Foo_Foo_com_result_method(self_vtable:
                                                                intercom::RawComPtr,
                                                            __out: *mut u16)
- -> ::intercom::HRESULT {
-    let self_comptr =
+ -> intercom::HRESULT {
+    let self_combox =
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut intercom::ComBox<Foo>;
-    let result = (*self_comptr).com_result_method();
-    match result {
-        Ok(r) => { *__out = r.into(); intercom::S_OK }
+    let __result = (*self_combox).com_result_method();
+    match __result {
+        Ok(v) => { *__out = v.into(); intercom::S_OK }
         Err(e) => { *__out = Default::default(); e }
     }
 }
@@ -161,14 +171,14 @@ pub unsafe extern "stdcall" fn __Foo_Foo_com_result_method(self_vtable:
 pub unsafe extern "stdcall" fn __Foo_Foo_rust_result_method(self_vtable:
                                                                 intercom::RawComPtr,
                                                             __out: *mut u16)
- -> ::intercom::HRESULT {
-    let self_comptr =
+ -> intercom::HRESULT {
+    let self_combox =
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut intercom::ComBox<Foo>;
-    let result = (*self_comptr).rust_result_method();
-    match result {
-        Ok(r) => { *__out = r.into(); intercom::S_OK }
-        Err(e) => { *__out = Default::default(); e }
+    let __result = (*self_combox).rust_result_method();
+    match __result {
+        Ok(v) => { *__out = v.into(); intercom::S_OK }
+        Err(e) => { *__out = Default::default(); intercom::return_hresult(e) }
     }
 }
 #[allow(non_snake_case)]
@@ -177,13 +187,13 @@ pub unsafe extern "stdcall" fn __Foo_Foo_complete_method(self_vtable:
                                                              intercom::RawComPtr,
                                                          a: u16, b: i16,
                                                          __out: *mut bool)
- -> ::intercom::HRESULT {
-    let self_comptr =
+ -> intercom::HRESULT {
+    let self_combox =
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut intercom::ComBox<Foo>;
-    let result = (*self_comptr).complete_method(a.into(), b.into());
-    match result {
-        Ok(r) => { *__out = r.into(); intercom::S_OK }
+    let __result = (*self_combox).complete_method(a.into(), b.into());
+    match __result {
+        Ok(v) => { *__out = v.into(); intercom::S_OK }
         Err(e) => { *__out = Default::default(); e }
     }
 }
