@@ -11,6 +11,9 @@ pub trait CoClass {
         vtables : &Self::VTableList,
         riid : REFIID,
     ) -> ComResult< RawComPtr >;
+    fn interface_supports_error_info(
+        riid : REFIID
+    ) -> bool;
 }
 
 /// Type factory for the concrete COM coclass types.
@@ -130,6 +133,19 @@ impl<T: CoClass> ComBox<T> {
         rc
     }
 
+    /// Checks whether the given interface identified by the IID supports error
+    /// info through IErrorInfo.
+    pub unsafe fn interface_supports_error_info(
+        _this : &mut Self,
+        riid : REFIID,
+    ) -> HRESULT {
+
+        match T::interface_supports_error_info( riid ) {
+            true => S_OK,
+            false => S_FALSE,
+        }
+    }
+
     /// Converts a RawComPtr to a ComBox reference.
     ///
     /// The method is unsafe in two different ways
@@ -173,6 +189,17 @@ impl<T: CoClass> ComBox<T> {
     ) -> u32
     {
         ComBox::release( self_iunk as *mut ComBox< T > )
+    }
+
+    /// Pointer variant of the `release` function.
+    pub unsafe extern "stdcall" fn interface_supports_error_info_ptr(
+        self_iunk : RawComPtr,
+        riid : REFIID,
+    ) -> HRESULT
+    {
+        ComBox::interface_supports_error_info(
+                ComBox::<T>::from_ptr( self_iunk ),
+                riid )
     }
 
     /// Returns a reference to the virtual on the ComBox.

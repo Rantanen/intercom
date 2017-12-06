@@ -56,6 +56,9 @@
     <ClCompile Include="interface_params.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="error_info.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="..\testlib\TestLib.idl">

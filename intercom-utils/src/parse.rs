@@ -613,6 +613,7 @@ fn segment_to_ty(
         // Hardcoded handling for parameter types.
         "ComRc" => format!( "{}*", get_com_ty( rn, &args[0] )? ),
         "ComItf" => format!( "{}*", get_com_ty( rn, &args[0] )? ),
+        "String" => "BSTR".to_owned(),
         "usize" => "size_t".to_owned(),
         "u64" => "uint64".to_owned(),
         "i64" => "int64".to_owned(),

@@ -16,6 +16,10 @@ pub struct GUID {
 
 impl GUID {
 
+    pub fn zero_guid() -> GUID {
+        GUID { data1: 0, data2: 0, data3: 0, data4: [ 0; 8 ] }
+    }
+
     /// Parses the given string as a GUID.
     ///
     /// Supported formats include:

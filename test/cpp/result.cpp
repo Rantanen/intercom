@@ -1,7 +1,7 @@
 #include "catch.hpp"
 #include "TestLib_h.h"
 
-TEST_CASE( "HRESULT can be returned" )
+TEST_CASE( "Results can be returned" )
 {
 	// Initialize COM.
 	CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
@@ -24,17 +24,23 @@ TEST_CASE( "HRESULT can be returned" )
 		REQUIRE( pOps->NotImpl() == E_NOTIMPL );
 	}
 
-	SECTION( "HRESULT " )
+	SECTION( "Rust results are converted to [retval] and HRESULT" )
 	{
-		double out;
+		double out = -1;
 
-		// Success case. Returns S_OK and value.
-		REQUIRE( pOps->Sqrt( 16.0, OUT &out ) == S_OK );
-		REQUIRE( out == 4.0 );
+		SECTION( "Success yields S_OK and [retval]" )
+		{
+			// Success case. Returns S_OK and value.
+			REQUIRE( pOps->Sqrt( 16.0, OUT &out ) == S_OK );
+			REQUIRE( out == 4.0 );
+		}
 
-		// Fail case. Returns error and sets value to 0.
-		REQUIRE( pOps->Sqrt( -1.0, OUT &out ) == E_INVALIDARG );
-		REQUIRE( out == 0 );
+		SECTION( "Failure yields error value and resets [retval]" )
+		{
+			// Fail case. Returns error and sets value to 0.
+			REQUIRE( pOps->Sqrt( -1.0, OUT &out ) == E_INVALIDARG );
+			REQUIRE( out == 0 );
+		}
 	}
 
 	CoUninitialize();

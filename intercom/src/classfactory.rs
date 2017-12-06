@@ -31,6 +31,7 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > CoClass for ClassFactory<T> 
         } }
     }
 
+    fn interface_supports_error_info( _riid : REFIID ) -> bool { false }
 }
 
 impl AsRef<IUnknownVtbl> for ClassFactoryVtbl {
@@ -52,10 +53,10 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
         out : *mut RawComPtr,
     ) -> HRESULT
     {
-        *out = std::ptr::null_mut();
         if out.is_null() {
             return E_POINTER
         }
+        *out = std::ptr::null_mut();
 
         let cb = ComBox::< Self >::from_ptr( self_vtbl );
 
