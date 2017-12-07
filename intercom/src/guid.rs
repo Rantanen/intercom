@@ -146,6 +146,12 @@ impl GUID {
     }
 }
 
+impl Default for GUID {
+    fn default() -> GUID {
+        GUID::zero_guid()
+    }
+}
+
 impl std::fmt::Display for GUID {
 
     /// Formats the GUID in brace-hyphenated format for display.
