@@ -20,9 +20,15 @@ mod error; pub use error::{return_hresult, get_last_error, ComError};
 // to ignore useless attributes in this scenario! \:D/
 #[cfg_attr(feature = "cargo-clippy", allow(useless_attribute))]
 #[allow(unused_imports)]
-#[macro_use]
 extern crate intercom_attributes;
 pub use intercom_attributes::*;
+
+// intercom_attributes use "intercom::" to qualify things in this crate.
+// Declare such module here and import everything we have in it to make those
+// references valid.
+mod intercom {
+    pub use ::*;
+}
 
 /// Raw COM pointer type.
 pub type RawComPtr = *mut std::os::raw::c_void;
@@ -72,25 +78,11 @@ pub const E_FAIL : HRESULT = 0x8000_4005 as HRESULT;
 #[allow(overflowing_literals)]
 pub const E_INVALIDARG : HRESULT = 0x8007_0057 as HRESULT;
 
-/// `IUnknown` interface ID.
-#[allow(non_upper_case_globals)]
-pub const IID_IUnknown : GUID = GUID {
-    data1: 0x0000_0000, data2: 0x0000, data3: 0x0000,
-    data4: [ 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 ]
-};
-
 /// `IClassFactory` interface ID.
 #[allow(non_upper_case_globals)]
 pub const IID_IClassFactory : GUID = GUID {
     data1: 0x0000_0001, data2: 0x0000, data3: 0x0000,
     data4: [ 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 ]
-};
-
-/// `ISupportErrorInfo` interface ID.
-#[allow(non_upper_case_globals)]
-pub const IID_ISupportErrorInfo : GUID = GUID {
-    data1: 0xDF0B_3D60, data2: 0x548F, data3: 0x101B,
-    data4: [ 0x8E, 0x65, 0x08, 0x00, 0x2B, 0x2B, 0xD1, 0x19 ]
 };
 
 /// `IErrorInfo` interface ID.
@@ -100,37 +92,28 @@ pub const IID_IErrorInfo : GUID = GUID {
     data4: [ 0x8E, 0x65, 0x08, 0x00, 0x2B, 0x2B, 0xD1, 0x19 ]
 };
 
-/// `IUnknown` virtual table layout.
-#[repr(C)]
-pub struct IUnknownVtbl
-{
-    /// `QueryInterface` method pointer.
-    pub query_interface : unsafe extern "stdcall" fn(
-        s : RawComPtr,
-        _riid : REFIID,
-        out : *mut RawComPtr
-    ) -> HRESULT,
+mod interfaces {
 
-    /// `AddRef` method pointer.
-    pub add_ref: unsafe extern "stdcall" fn( s : RawComPtr ) -> u32,
+    #[::com_interface( "00000000-0000-0000-C000-000000000046", NO_BASE )]
+    pub trait IUnknown {
+        fn query_interface( &self, riid : ::REFIID ) -> ::ComResult< ::RawComPtr >;
+        fn add_ref( &self ) -> u32;
+        fn release( &self ) -> u32;
+    }
 
-    /// `Release` method pointer.
-    pub release: unsafe extern "stdcall" fn( s : RawComPtr ) -> u32,
+    #[::com_interface( "DF0B3D60-548F-101B-8E65-08002B2BD119" )]
+    pub trait ISupportErrorInfo {
+        fn interface_supports_error_info( &self, riid : ::REFIID ) -> ::HRESULT;
+    }
 }
 
-/// `ISupportErrorInfo` virtual table layout.
-#[repr(C)]
-pub struct ISupportErrorInfoVtbl
-{
-    /// `ISupportErrorInfo` inherits `IUnknown`.
-    pub __base : IUnknownVtbl,
+pub use interfaces::__IUnknownVtbl as IUnknownVtbl;
+pub use interfaces::IID_IUnknown;
+pub use interfaces::IUnknown;
 
-    /// `InterfaceSupportsErrorInfo` method pointer.
-    pub interface_supports_error_info : unsafe extern "stdcall" fn(
-        s : RawComPtr,
-        riid : REFIID,
-    ) -> HRESULT,
-}
+pub use interfaces::__ISupportErrorInfoVtbl as ISupportErrorInfoVtbl;
+pub use interfaces::IID_ISupportErrorInfo;
+pub use interfaces::ISupportErrorInfo;
 
 // Do we need this? Would rather not export this through an extern crate
 // for another dll.
