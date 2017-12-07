@@ -1,157 +1,142 @@
 
+use std::convert::TryFrom;
 use super::*;
+mod intercom {
+    pub use ::*;
+}
 
-/// Error structure used to represent the COM `IErrorInfo`.
+/// Error structure containing the available information on a COM error.
 pub struct ComError {
-    pub description : String,
+
+    /// `HRESULT` that triggered the error.
     pub hresult : HRESULT,
+
+    /// Possible detailed error info.
+    pub error_info : Option<ErrorInfo>,
+}
+
+impl ComError {
+
+    /// Constructs a new `ComError` from a `HRESULT` code.
+    pub fn new_hr( hresult : HRESULT ) -> ComError
+    {
+        ComError { hresult, error_info: None }
+    }
+
+    /// Construts a new `ComError` with a given message.
+    pub fn new_message(
+        hresult: HRESULT,
+        description: String
+    ) -> ComError
+    {
+        ComError {
+            hresult,
+            error_info: Some( ErrorInfo::new( description ) )
+        }
+    }
+
+    /// Gets the message if it's available.
+    pub fn message( &self ) -> Option< &str >
+    {
+        self.error_info.as_ref().map( |e| e.description.as_str() )
+    }
 }
 
 #[cfg(windows)]
-#[link(name = "oleaut32")]
-extern "system" {
-    pub fn SetErrorInfo(
-        dw_reserved: u32,
-        errorinfo: RawComPtr,
-    ) -> HRESULT;
+#[allow(non_snake_case)]
+mod error_store {
+
+    #[link(name = "oleaut32")]
+    extern "system" {
+        pub fn SetErrorInfo(
+            dw_reserved: u32,
+            errorinfo: ::RawComPtr,
+        ) -> ::HRESULT;
+
+        pub fn GetErrorInfo(
+            dw_reserved: u32,
+            errorinfo: &mut ::RawComPtr,
+        ) -> ::HRESULT;
+    }
 }
 
 #[cfg(not(windows))]
 #[allow(non_snake_case)]
-pub fn SetErrorInfo(
-    _dw_reserved: u32,
-    _errorinfo: RawComPtr,
-) -> HRESULT { S_OK }
+mod error_store {
+
+    pub fn SetErrorInfo(
+        _dw_reserved: u32,
+        _errorinfo: ::RawComPtr,
+    ) -> ::HRESULT { S_OK }
+
+    pub fn GetErrorInfo(
+        dw_reserved: u32,
+        errorinfo: &mut ::RawComPtr,
+    ) -> ::HRESULT { S_OK }
+}
 
 /// Error info COM object data.
-struct ErrorInfo { pub description : String }
+#[com_class( "00000000-0000-0000-0000-000000000000", IErrorInfo )]
+pub struct ErrorInfo {
+    guid : GUID,
+    source : String,
+    description : String,
+    help_file: String,
+    help_context: u32,
+}
 
-/// `CoClass` implementation for the `ErrorInfo` COM object.
-impl CoClass for ErrorInfo {
-
-    /// Virtual table type.
-    type VTableList = &'static IErrorInfoVtbl;
-
-    /// Virtual table constructor.
-    fn create_vtable_list() -> Self::VTableList {
-        &IErrorInfoVtbl {
-            __base : IUnknownVtbl {
-                query_interface : ComBox::< Self >::query_interface_ptr,
-                add_ref : ComBox::< Self >::add_ref_ptr,
-                release : ComBox::< Self >::release_ptr,
-            },
-            get_guid : get_guid_impl,
-            get_source : get_source_impl,
-            get_description : get_description_impl,
-            get_help_file : get_help_file_impl,
-            get_help_context : get_help_context_impl,
+impl ErrorInfo {
+    pub fn new( description : String ) -> ErrorInfo {
+        ErrorInfo {
+            description,
+            guid: GUID::zero_guid(),
+            source: String::new(),
+            help_file: String::new(),
+            help_context: 0,
         }
     }
 
-    /// Query interface implementation. Supports only `IUnknown` and `IErrorInfo`.
-    fn query_interface(
-        vtables : &Self::VTableList,
-        riid : REFIID,
-    ) -> ComResult< RawComPtr >
-    {
-        if riid.is_null() { return Err( E_NOINTERFACE ) }
-        unsafe { match *riid {
-            super::IID_IUnknown | super::IID_IErrorInfo =>
-                Ok( vtables as *const _ as RawComPtr ),
-            _ => Err( E_NOINTERFACE ),
-        } }
+    pub fn guid( &self ) -> &GUID { &self.guid }
+    pub fn source( &self ) -> &str { &self.source }
+    pub fn description( &self ) -> &str { &self.description }
+    pub fn help_file( &self ) -> &str { &self.help_file }
+    pub fn help_context( &self ) -> u32 { self.help_context }
+}
+
+impl<'a> TryFrom<&'a IErrorInfo> for ErrorInfo {
+
+    type Error = ::HRESULT;
+
+    fn try_from( source : &'a IErrorInfo ) -> Result<Self, Self::Error> {
+
+        Ok( ErrorInfo {
+            guid: source.get_guid()?,
+            source: source.get_source()?.to_owned(),
+            description: source.get_description()?.to_owned(),
+            help_file: source.get_help_file()?.to_owned(),
+            help_context: source.get_help_context()?,
+        } )
     }
-
-    /// `IErrorInfo` itself doesn't support error info.
-    ///
-    /// We don't want to override errors when doing error processing.
-    fn interface_supports_error_info( _riid : REFIID ) -> bool { false }
 }
 
-/// `IErrorInfo` virtual table.
-struct IErrorInfoVtbl {
-    pub __base: IUnknownVtbl,
-    pub get_guid: unsafe extern "stdcall" fn(
-            RawComPtr, *mut GUID ) -> HRESULT,
-    pub get_source: unsafe extern "stdcall" fn(
-            RawComPtr, *mut BStr ) -> HRESULT,
-    pub get_description: unsafe extern "stdcall" fn(
-            RawComPtr, *mut BStr ) -> HRESULT,
-    pub get_help_file: unsafe extern "stdcall" fn(
-            RawComPtr, *mut BStr ) -> HRESULT,
-    pub get_help_context: unsafe extern "stdcall" fn(
-            RawComPtr, *mut u32 ) -> HRESULT
-}
-
-/// `IErrorInfo::GetGuid` raw COM implementation.
-unsafe extern "stdcall" fn get_guid_impl(
-    _this : RawComPtr,
-    guid : *mut GUID
-) -> HRESULT
+#[com_interface( "1CF2B120-547D-101B-8E65-08002B2BD119" )]
+trait IErrorInfo
 {
-    if guid.is_null() {
-        return E_INVALIDARG;
-    }
-
-    *guid = GUID::zero_guid();
-    S_OK
+    fn get_guid( &self ) -> ComResult< GUID >;
+    fn get_source( &self ) -> ComResult< String >;
+    fn get_description( &self ) -> ComResult< String >;
+    fn get_help_file( &self ) -> ComResult< String >;
+    fn get_help_context( &self ) -> ComResult< u32 >;
 }
 
-/// `IErrorInfo::GetSource` raw COM implementation.
-unsafe extern "stdcall" fn get_source_impl(
-    _this : RawComPtr,
-    source : *mut BStr
-) -> HRESULT
+#[com_impl]
+impl IErrorInfo for ErrorInfo
 {
-    if source.is_null() {
-        return E_INVALIDARG;
-    }
-
-    *source = BStr::string_to_bstr( "Intercom-Component" );
-    S_OK
-}
-
-/// `IErrorInfo::GetDescription` raw COM implementation.
-unsafe extern "stdcall" fn get_description_impl(
-    this : RawComPtr,
-    desc : *mut BStr
-) -> HRESULT
-{
-    if desc.is_null() {
-        return E_INVALIDARG;
-    }
-
-    let cb = ComBox::< ErrorInfo >::from_ptr( this );
-    *desc = BStr::string_to_bstr( &cb.description );
-    S_OK
-}
-
-/// `IErrorInfo::GetHelpFile` raw COM implementation.
-unsafe extern "stdcall" fn get_help_file_impl(
-    _this : RawComPtr,
-    help_file : *mut BStr
-) -> HRESULT
-{
-    if help_file.is_null() {
-        return E_INVALIDARG;
-    }
-
-    *help_file = BStr::string_to_bstr( "" );
-    S_OK
-}
-
-/// `IErrorInfo::GetHelpContext` raw COM implementation.
-unsafe extern "stdcall" fn get_help_context_impl(
-    _this : RawComPtr,
-    help_context : *mut u32
-) -> HRESULT
-{
-    if help_context.is_null() {
-        return E_INVALIDARG;
-    }
-
-    *help_context = 0;
-    S_OK
+    fn get_guid( &self ) -> ComResult< GUID > { Ok( self.guid.clone() ) }
+    fn get_source( &self ) -> ComResult< String > { Ok( self.source.clone() ) }
+    fn get_description( &self ) -> ComResult< String > { Ok( self.description.clone() ) }
+    fn get_help_file( &self ) -> ComResult< String > { Ok( self.help_file.clone() ) }
+    fn get_help_context( &self ) -> ComResult< u32 > { Ok( self.help_context ) }
 }
 
 /// Extracts the HRESULT from the error result and stores the extended error
@@ -162,27 +147,38 @@ pub fn return_hresult< E >( error : E ) -> HRESULT
     // Convet the error.
     let com_error = error.into();
 
-    // Construct the COM class used for IErrorInfo. The class contains the
-    // description in memory.
-    let mut info = ComBox::< ErrorInfo >::new( ErrorInfo {
-        description: com_error.description
-    } );
+    match com_error.error_info {
 
-    // Get the IErrorInfo interface and set it in thread memory.
-    let mut error_ptr : RawComPtr = std::ptr::null_mut();
-    unsafe {
+        Some( error_info ) => {
 
-        // We are intentionally ignoring the HRESULT codes here. We don't
-        // want to override the original error HRESULT with these codes.
-        ComBox::query_interface(
-                info.as_mut(),
-                &IID_IErrorInfo,
-                &mut error_ptr );
-        SetErrorInfo( 0, error_ptr );
+            // ComError contains ErrorInfo. We need to set this in the OS error
+            // store.
 
-        // SetErrorInfo took ownership of the error.
-        // Forget it from the Box.
-        Box::into_raw( info );
+            // Construct the COM class used for IErrorInfo. The class contains the
+            // description in memory.
+            let mut info = ComBox::< ErrorInfo >::new( error_info );
+
+            // Get the IErrorInfo interface and set it in thread memory.
+            let mut error_ptr : RawComPtr = std::ptr::null_mut();
+            unsafe {
+
+                // We are intentionally ignoring the HRESULT codes here. We don't
+                // want to override the original error HRESULT with these codes.
+                ComBox::query_interface(
+                        info.as_mut(),
+                        &IID_IErrorInfo,
+                        &mut error_ptr );
+                error_store::SetErrorInfo( 0, error_ptr );
+
+                // SetErrorInfo took ownership of the error.
+                // Forget it from the Box.
+                Box::into_raw( info );
+            }
+        },
+        None => {
+            // No error info in the ComError.
+            unsafe { error_store::SetErrorInfo( 0, std::ptr::null_mut() ); }
+        }
     }
 
     // Return the HRESULT of the original error.
@@ -190,8 +186,39 @@ pub fn return_hresult< E >( error : E ) -> HRESULT
 }
 
 /// Gets the last COM error that occurred on the current thread.
-pub fn get_last_error< E >() -> E
+pub fn get_last_error< E >( last_hr : HRESULT ) -> E
     where E : From< ComError >
 {
-    panic!( "Not implemented" );
+    let com_error = ComError {
+        hresult: last_hr,
+        error_info: unsafe {
+
+            // Get the last error COM interface.
+            let mut error_ptr : RawComPtr = std::ptr::null_mut();
+            let hr = error_store::GetErrorInfo( 0, &mut error_ptr );
+
+            if hr == S_OK {
+
+                let ierrorinfo = ComItf::< IErrorInfo >::wrap( error_ptr );;
+
+                // Construct a proper ErrorInfo struct from the COM interface.
+                let error_info = ErrorInfo::try_from(
+                        &ierrorinfo as &IErrorInfo ).ok();
+
+                // Release the interface.
+                let iunk : &ComItf<IUnknown> = ierrorinfo.as_ref();
+                iunk.release();
+
+                error_info
+
+            } else {
+
+                // GetErrorInfo didn't return proper error. Don't provide one
+                // in the ComError.
+                None
+            }
+        },
+    };
+
+    E::from( com_error )
 }

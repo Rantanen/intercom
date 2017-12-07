@@ -197,10 +197,15 @@ impl ErrorSource
 impl From<TestError> for intercom::ComError
 {
     fn from( source : TestError ) -> intercom::ComError {
-        intercom::ComError {
-            description: source.1,
-            hresult: source.0,
-        }
+        intercom::ComError::new_message( source.0, source.1 )
     }
 }
 
+impl From<intercom::ComError> for TestError
+{
+    fn from( source : intercom::ComError ) -> TestError {
+        TestError(
+            source.hresult,
+            source.message().unwrap_or( "" ).to_owned() )
+    }
+}
