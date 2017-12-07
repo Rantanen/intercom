@@ -25,8 +25,8 @@ trait Foo {
 // Interface ID
 //
 #[allow(non_upper_case_globals)]
-const IID_Foo: intercom::IID =
-        intercom::GUID {
+pub const IID_Foo: ::intercom::IID =
+        ::intercom::GUID {
             data1: 0u32, data2: 0u16, data3: 0u16,
             data4: [ 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8 ]
         };
@@ -39,50 +39,50 @@ const IID_Foo: intercom::IID =
 pub struct __FooVtbl {
 
     // Base interface.
-    __base: intercom::IUnknownVtbl,
+    __base: ::intercom::IUnknownVtbl,
 
     // Method entries.
 
-    simple_method: unsafe extern "stdcall" fn(
-        self_vtable: intercom::RawComPtr
+    pub simple_method: unsafe extern "stdcall" fn(
+        self_vtable: ::intercom::RawComPtr
     ) -> (),
 
-    arg_method: unsafe extern "stdcall" fn(
-        self_vtable: intercom::RawComPtr,
+    pub arg_method: unsafe extern "stdcall" fn(
+        self_vtable: ::intercom::RawComPtr,
         a: u16
     ) -> (),
 
-    simple_result_method: unsafe extern "stdcall" fn(
-        self_vtable: intercom::RawComPtr
+    pub simple_result_method: unsafe extern "stdcall" fn(
+        self_vtable: ::intercom::RawComPtr
     ) -> u16,
 
-    com_result_method: unsafe extern "stdcall" fn(
-        self_vtable: intercom::RawComPtr,
+    pub com_result_method: unsafe extern "stdcall" fn(
+        self_vtable: ::intercom::RawComPtr,
         __out: *mut u16
-    ) -> intercom::HRESULT,
+    ) -> ::intercom::HRESULT,
 
-    rust_result_method: unsafe extern "stdcall" fn(
-        self_vtable: intercom::RawComPtr,
+    pub rust_result_method: unsafe extern "stdcall" fn(
+        self_vtable: ::intercom::RawComPtr,
         __out: *mut u16
-    ) -> intercom::HRESULT,
+    ) -> ::intercom::HRESULT,
 
-    complete_method: unsafe extern "stdcall" fn(
-        self_vtable: intercom::RawComPtr,
+    pub complete_method: unsafe extern "stdcall" fn(
+        self_vtable: ::intercom::RawComPtr,
         a: u16,
         b: i16,
         __out: *mut bool
-    ) -> intercom::HRESULT,
+    ) -> ::intercom::HRESULT,
 }
 
 // Reverse delegates.
 //
 // Implement the trait for the ComItf. This allows calling the COM interface
 // using the Rust trait methods.
-impl Foo for intercom::ComItf<Foo>
+impl Foo for ::intercom::ComItf<Foo>
 {
     fn simple_method(&self) -> ()
     {
-        let comptr = intercom::ComItf::ptr(self);
+        let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
         unsafe {
             let __result = ((**vtbl).simple_method)(comptr);
@@ -91,7 +91,7 @@ impl Foo for intercom::ComItf<Foo>
 
     fn arg_method(&self, a: u16) -> ()
     {
-        let comptr = intercom::ComItf::ptr(self);
+        let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
         unsafe {
@@ -101,7 +101,7 @@ impl Foo for intercom::ComItf<Foo>
 
     fn simple_result_method(&self) -> u16
     {
-        let comptr = intercom::ComItf::ptr(self);
+        let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
         unsafe {
@@ -114,7 +114,7 @@ impl Foo for intercom::ComItf<Foo>
 
     fn com_result_method(&self) -> ComResult<u16>
     {
-        let comptr = intercom::ComItf::ptr(self);
+        let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
         unsafe {
@@ -126,7 +126,7 @@ impl Foo for intercom::ComItf<Foo>
             //
             // TODO: We'll need to support other SUCCESS values in the future
             //       for Ok(..) as well.
-            if __result == intercom::S_OK {
+            if __result == ::intercom::S_OK {
                 Ok(__out.into())
             } else {
                 Err(__result)
@@ -136,7 +136,7 @@ impl Foo for intercom::ComItf<Foo>
 
     fn rust_result_method(&self) -> Result<u16, i32>
     {
-        let comptr = intercom::ComItf::ptr(self);
+        let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
         unsafe {
@@ -147,10 +147,10 @@ impl Foo for intercom::ComItf<Foo>
             //
             // The Err-case will use IErrorInfo to construct the original
             // error type.
-            if __result == intercom::S_OK {
+            if __result == ::intercom::S_OK {
                 Ok(__out.into())
             } else {
-                Err(intercom::get_last_error())
+                Err(::intercom::get_last_error())
             }
         }
     }
@@ -161,7 +161,7 @@ impl Foo for intercom::ComItf<Foo>
         b: i16
     ) -> ComResult<bool>
     {
-        let comptr = intercom::ComItf::ptr(self);
+        let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
         unsafe {
 
@@ -169,7 +169,7 @@ impl Foo for intercom::ComItf<Foo>
             let __result = ((**vtbl).complete_method)(
                     comptr, a.into(), b.into(), &mut __out);
 
-            if __result == intercom::S_OK {
+            if __result == ::intercom::S_OK {
                 Ok(__out.into())
             } else {
                 Err(__result)

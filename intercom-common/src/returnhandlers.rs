@@ -66,7 +66,7 @@ impl ReturnHandler for HResultHandler {
                 quote!( #( #ok_values )* )
             };
         quote!(
-            if #result == intercom::S_OK {
+            if #result == ::intercom::S_OK {
                 Ok( #ok_tokens )
             } else {
                 Err( #result )
@@ -81,7 +81,7 @@ impl ReturnHandler for HResultHandler {
             self.com_out_args() );
         quote!(
             match #result {
-                Ok( v ) => { #( #ok_writes );*; intercom::S_OK },
+                Ok( v ) => { #( #ok_writes );*; ::intercom::S_OK },
                 Err( e ) => { #( #err_writes );*; e },
             }
         )
@@ -111,7 +111,7 @@ struct ErrorResultHandler { retval_ty: Ty, return_ty: Ty }
 impl ReturnHandler for ErrorResultHandler {
 
     fn rust_ty( &self ) -> Ty { self.return_ty.clone() }
-    fn com_ty( &self ) -> Ty { parse_type( "intercom::HRESULT" ).unwrap() }
+    fn com_ty( &self ) -> Ty { parse_type( "::intercom::HRESULT" ).unwrap() }
 
     fn com_to_rust_return( &self, result : &Ident ) -> Tokens {
 
@@ -124,10 +124,10 @@ impl ReturnHandler for ErrorResultHandler {
                 quote!( #( #ok_values )* )
             };
         quote!(
-            if #result == intercom::S_OK {
+            if #result == ::intercom::S_OK {
                 Ok( #ok_tokens )
             } else {
-                Err( intercom::get_last_error() )
+                Err( ::intercom::get_last_error() )
             }
         )
     }
@@ -139,10 +139,10 @@ impl ReturnHandler for ErrorResultHandler {
             self.com_out_args() );
         quote!(
             match #result {
-                Ok( v ) => { #( #ok_writes );*; intercom::S_OK },
+                Ok( v ) => { #( #ok_writes );*; ::intercom::S_OK },
                 Err( e ) => {
                     #( #err_writes );*;
-                    intercom::return_hresult( e )
+                    ::intercom::return_hresult( e )
                 },
             }
         )

@@ -122,7 +122,7 @@ fn expand_com_interface(
     let iid_tokens = utils::get_guid_tokens( &iid_guid );
     output.push( quote!(
         #[allow(non_upper_case_globals)]
-        const #iid_ident : intercom::IID = #iid_tokens;
+        pub const #iid_ident : ::intercom::IID = #iid_tokens;
     ) );
 
     // Create a vector for the virtual table fields and insert the base
@@ -172,7 +172,7 @@ fn expand_com_interface(
             let arg_tokens = utils::flatten( args.iter() );
             let ret_ty = method_info.returnhandler.com_ty();
             fields.push( quote!(
-                #method_ident :
+                pub #method_ident :
                     unsafe extern "stdcall" fn( #arg_tokens ) -> #ret_ty,
             ) );
 
@@ -229,7 +229,7 @@ fn expand_com_interface(
             let return_ty = method_info.rust_return_ty;
             impls.push( quote!(
                 fn #method_ident( #self_arg, #( #impl_args ),* ) -> #return_ty {
-                    let comptr = intercom::ComItf::ptr( self );
+                    let comptr = ::intercom::ComItf::ptr( self );
                     let vtbl = comptr as *const *const #vtable_ident;
                     unsafe {
                         #( #out_arg_declarations )*;
@@ -259,7 +259,7 @@ fn expand_com_interface(
     // syntax when `StructName` is struct instead of a trait.
     if itf_type == utils::InterfaceType::Trait {
         output.push( quote!(
-            impl #itf_ident for intercom::ComItf< #itf_ident > {
+            impl #itf_ident for ::intercom::ComItf< #itf_ident > {
                 #( #impls )*
             }
         ) );
@@ -310,15 +310,15 @@ fn expand_com_impl(
     output.push( quote!(
             #[allow(non_snake_case)]
             pub unsafe extern "stdcall" fn #query_interface_ident(
-                self_vtable : intercom::RawComPtr,
-                riid : intercom::REFIID,
-                out : *mut intercom::RawComPtr
-            ) -> intercom::HRESULT
+                self_vtable : ::intercom::RawComPtr,
+                riid : ::intercom::REFIID,
+                out : *mut ::intercom::RawComPtr
+            ) -> ::intercom::HRESULT
             {
                 // Get the primary iunk interface by offsetting the current
                 // self_vtable with the vtable offset. Once we have the primary
                 // pointer we can delegate the call to the primary implementation.
-                intercom::ComBox::< #struct_ident >::query_interface(
+                ::intercom::ComBox::< #struct_ident >::query_interface(
                         &mut *(( self_vtable as usize - #vtable_offset() ) as *mut _ ),
                         riid,
                         out )
@@ -332,9 +332,9 @@ fn expand_com_impl(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
             pub unsafe extern "stdcall" fn #add_ref_ident(
-                self_vtable : intercom::RawComPtr
+                self_vtable : ::intercom::RawComPtr
             ) -> u32 {
-                intercom::ComBox::< #struct_ident >::add_ref(
+                ::intercom::ComBox::< #struct_ident >::add_ref(
                         &mut *(( self_vtable as usize - #vtable_offset() ) as *mut _ ) )
             }
         ) );
@@ -346,9 +346,9 @@ fn expand_com_impl(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
             pub unsafe extern "stdcall" fn #release_ident(
-                self_vtable : intercom::RawComPtr
+                self_vtable : ::intercom::RawComPtr
             ) -> u32 {
-                intercom::ComBox::< #struct_ident >::release_ptr(
+                ::intercom::ComBox::< #struct_ident >::release_ptr(
                         ( self_vtable as usize - #vtable_offset() ) as *mut _ )
             }
         ) );
@@ -358,7 +358,7 @@ fn expand_com_impl(
     // we only support IUnknown.
     let mut vtable_fields = vec![
         quote!(
-            __base : intercom::IUnknownVtbl {
+            __base : ::intercom::IUnknownVtbl {
                 query_interface : #query_interface_ident,
                 add_ref : #add_ref_ident,
                 release : #release_ident,
@@ -412,7 +412,7 @@ fn expand_com_impl(
                     // Acquire the reference to the ComBox. For this we need
                     // to offset the current 'self_vtable' vtable pointer.
                     let self_combox = ( self_vtable as usize - #vtable_offset() )
-                            as *mut intercom::ComBox< #struct_ident >;
+                            as *mut ::intercom::ComBox< #struct_ident >;
 
                     let #return_ident = (*self_combox).#method_ident( #param_tokens );
                     #return_statement
@@ -476,18 +476,18 @@ fn expand_com_class(
     // the IUnknown we need.
     let mut query_interface_match_arms = vec![
         quote!(
-            intercom::IID_IUnknown =>
+            ::intercom::IID_IUnknown =>
                 ( &vtables._ISupportErrorInfo )
-                    as *const &intercom::ISupportErrorInfoVtbl
-                    as *mut &intercom::ISupportErrorInfoVtbl
-                    as intercom::RawComPtr
+                    as *const &::intercom::ISupportErrorInfoVtbl
+                    as *mut &::intercom::ISupportErrorInfoVtbl
+                    as ::intercom::RawComPtr
         ),
         quote!(
-            intercom::IID_ISupportErrorInfo =>
+            ::intercom::IID_ISupportErrorInfo =>
                 ( &vtables._ISupportErrorInfo )
-                    as *const &intercom::ISupportErrorInfoVtbl
-                    as *mut &intercom::ISupportErrorInfoVtbl
-                    as intercom::RawComPtr
+                    as *const &::intercom::ISupportErrorInfoVtbl
+                    as *mut &::intercom::ISupportErrorInfoVtbl
+                    as ::intercom::RawComPtr
         ) ];
     let mut support_error_info_match_arms = vec![] ;
 
@@ -503,7 +503,7 @@ fn expand_com_class(
     let isupporterrorinfo_vtable_instance_ident =
             idents::vtable_instance( &struct_ident, &isupporterrorinfo_ident );
     let mut vtable_list_field_decls = vec![
-        quote!( _ISupportErrorInfo : &'static intercom::ISupportErrorInfoVtbl ) ];
+        quote!( _ISupportErrorInfo : &'static ::intercom::ISupportErrorInfoVtbl ) ];
     let mut vtable_list_field_values = vec![
         quote!( _ISupportErrorInfo : &#isupporterrorinfo_vtable_instance_ident ) ];
 
@@ -531,7 +531,7 @@ fn expand_com_class(
                 #[allow(non_snake_case)]
                 fn #offset_ident() -> usize {
                     unsafe { 
-                        &intercom::ComBox::< #struct_ident >::null_vtable().#itf
+                        &::intercom::ComBox::< #struct_ident >::null_vtable().#itf
                                 as *const _ as usize
                     }
                 }
@@ -550,7 +550,7 @@ fn expand_com_class(
             self::#iid_ident => &vtables.#itf
                     as *const &#vtable_struct_ident
                     as *mut &#vtable_struct_ident
-                    as intercom::RawComPtr
+                    as ::intercom::RawComPtr
         ) );
 
         // Define the support error info match arms.
@@ -566,21 +566,21 @@ fn expand_com_class(
     output.push( quote!(
             #[allow(non_upper_case_globals)]
             const #isupporterrorinfo_vtable_instance_ident
-                    : intercom::ISupportErrorInfoVtbl
-                    = intercom::ISupportErrorInfoVtbl {
-                        __base : intercom::IUnknownVtbl {
+                    : ::intercom::ISupportErrorInfoVtbl
+                    = ::intercom::ISupportErrorInfoVtbl {
+                        __base : ::intercom::IUnknownVtbl {
                             query_interface
-                                : intercom::ComBox::< #struct_ident >
+                                : ::intercom::ComBox::< #struct_ident >
                                     ::query_interface_ptr,
                             add_ref
-                                : intercom::ComBox::< #struct_ident >
+                                : ::intercom::ComBox::< #struct_ident >
                                     ::add_ref_ptr,
                             release
-                                : intercom::ComBox::< #struct_ident >
+                                : ::intercom::ComBox::< #struct_ident >
                                     ::release_ptr,
                         },
                         interface_supports_error_info
-                            : intercom::ComBox::< #struct_ident >
+                            : ::intercom::ComBox::< #struct_ident >
                                 ::interface_supports_error_info_ptr,
                     };
         ) );
@@ -601,7 +601,7 @@ fn expand_com_class(
 
     // The actual CoClass implementation.
     output.push( quote!(
-            impl intercom::CoClass for #struct_ident {
+            impl ::intercom::CoClass for #struct_ident {
                 type VTableList = #vtable_list_ident;
                 fn create_vtable_list() -> Self::VTableList {
                     #vtable_list_ident {
@@ -610,12 +610,12 @@ fn expand_com_class(
                 }
                 fn query_interface(
                     vtables : &Self::VTableList,
-                    riid : intercom::REFIID,
-                ) -> intercom::ComResult< intercom::RawComPtr > {
-                    if riid.is_null() { return Err( intercom::E_NOINTERFACE ) }
+                    riid : ::intercom::REFIID,
+                ) -> ::intercom::ComResult< ::intercom::RawComPtr > {
+                    if riid.is_null() { return Err( ::intercom::E_NOINTERFACE ) }
                     Ok( match *unsafe { &*riid } {
                         #( #query_interface_match_arms ),*,
-                        _ => return Err( intercom::E_NOINTERFACE )
+                        _ => return Err( ::intercom::E_NOINTERFACE )
                     } )
                 }
 
@@ -636,7 +636,7 @@ fn expand_com_class(
     let clsid_guid_tokens = utils::get_guid_tokens( &clsid_guid );
     let clsid_const = quote!(
         #[allow(non_upper_case_globals)]
-        const #clsid_ident : intercom::CLSID = #clsid_guid_tokens;
+        const #clsid_ident : ::intercom::CLSID = #clsid_guid_tokens;
     );
     output.push( clsid_const );
 
@@ -667,9 +667,9 @@ fn expand_com_library(
         let clsid_name = idents::clsid( &struct_ident );
         match_arms.push( quote!(
             self::#clsid_name =>
-                Ok( Box::into_raw( intercom::ComBox::new(
+                Ok( Box::into_raw( ::intercom::ComBox::new(
                         #struct_ident::new()
-                    ) ) as intercom::RawComPtr ),
+                    ) ) as ::intercom::RawComPtr ),
         ) );
     }
 
@@ -685,23 +685,23 @@ fn expand_com_library(
         #[allow(non_snake_case)]
         #[allow(dead_code)]
         pub unsafe extern "stdcall" fn DllGetClassObject(
-            rclsid : intercom::REFCLSID,
-            riid : intercom::REFIID,
-            pout : *mut intercom::RawComPtr
-        ) -> intercom::HRESULT
+            rclsid : ::intercom::REFCLSID,
+            riid : ::intercom::REFIID,
+            pout : *mut ::intercom::RawComPtr
+        ) -> ::intercom::HRESULT
         {
             // Create new class factory.
             // Specify a create function that is able to create all the contained
             // coclasses.
-            let mut combox = intercom::ComBox::new(
-                intercom::ClassFactory::new( rclsid, | clsid | {
+            let mut combox = ::intercom::ComBox::new(
+                ::intercom::ClassFactory::new( rclsid, | clsid | {
 
                     match *clsid {
                         #match_arm_tokens
-                        _ => Err( intercom::E_NOINTERFACE ),
+                        _ => Err( ::intercom::E_NOINTERFACE ),
                     }
                 } ) );
-            intercom::ComBox::query_interface(
+            ::intercom::ComBox::query_interface(
                     combox.as_mut(),
                     riid,
                     pout );
@@ -709,7 +709,7 @@ fn expand_com_library(
             // We've assigned the interface to pout, we can now
             // detach the Box from Rust memory management.
             Box::into_raw( combox );
-            intercom::S_OK
+            ::intercom::S_OK
         }
     );
     output.push( dll_get_class_object );

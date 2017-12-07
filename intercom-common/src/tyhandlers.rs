@@ -44,7 +44,7 @@ pub trait TyHandler {
                     "c_void"
                         | "RawComPtr"
                         | "ComRc"
-                        => quote!( std::ptr::null_mut() ),
+                        => quote!( ::std::ptr::null_mut() ),
                     _ => quote!( Default::default() )
                 }
             },
@@ -73,7 +73,7 @@ impl TyHandler for ComRcParam {
 
     fn com_ty( &self ) -> Tokens
     {
-        quote!( intercom::RawComPtr )
+        quote!( ::intercom::RawComPtr )
     }
 
     fn rust_to_com( &self, ident : &Ident ) -> Tokens
@@ -105,7 +105,7 @@ impl TyHandler for ComRcParam {
         // Conversion is done with query_interface, which requires the
         // IID of the ComRc interface type.
         let iid_ident = super::idents::iid( itf_ident );
-        quote!( intercom::ComRc::query_interface( &#ident, &#iid_ident )
+        quote!( ::intercom::ComRc::query_interface( &#ident, &#iid_ident )
                 .expect( "ComRc<T> does not support interface T" ) )
     }
 }
@@ -118,7 +118,7 @@ impl TyHandler for StringParam
 
     fn com_ty( &self ) -> Tokens
     {
-        quote!( intercom::BStr )
+        quote!( ::intercom::BStr )
     }
 
     fn com_to_rust( &self, ident : &Ident ) -> Tokens
@@ -128,7 +128,7 @@ impl TyHandler for StringParam
 
     fn rust_to_com( &self, ident : &Ident ) -> Tokens
     {
-        quote!( *#ident = intercom::BStr::string_to_bstr( &r ) )
+        quote!( *#ident = ::intercom::BStr::string_to_bstr( &r ) )
     }
 }
 

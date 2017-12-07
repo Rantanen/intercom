@@ -290,7 +290,7 @@ pub fn get_method_args(
 
             // Get the self arg. This is always a ComPtr.
             let mut args = vec![
-                quote!( self_vtable : intercom::RawComPtr, )
+                quote!( self_vtable : ::intercom::RawComPtr, )
             ];
 
             // Process the remaining args into the args and params arrays.
@@ -432,7 +432,7 @@ pub fn get_method_rvalues(
             ret_ty,
             quote!(
                 match result {
-                    Ok( _ ) => intercom::S_OK,
+                    Ok( _ ) => ::intercom::S_OK,
                     Err( e ) => e
                 } ) ),
 
@@ -446,7 +446,7 @@ pub fn get_method_rvalues(
                 ret_ty,
                 quote!(
                     match result {
-                        Ok( r ) => { *#out_ident = #result_value; intercom::S_OK },
+                        Ok( r ) => { *#out_ident = #result_value; ::intercom::S_OK },
                         Err( e ) => { *#out_ident = #default_value; e },
                     } ) )
         },
@@ -473,7 +473,7 @@ pub fn get_guid_tokens(
     let d4_6 = g.data4[ 6 ];
     let d4_7 = g.data4[ 7 ];
     quote!( 
-        intercom::GUID {
+        ::intercom::GUID {
             data1: #d1, data2: #d2, data3: #d3,
             data4: [ #d4_0, #d4_1, #d4_2, #d4_3, #d4_4, #d4_5, #d4_6, #d4_7 ]
         }

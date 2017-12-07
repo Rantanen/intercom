@@ -156,7 +156,7 @@ fn hresult_ty() -> Ty {
     Ty::Path(
         None,
         Path {
-            global: false,
+            global: true,
             segments: vec![
                 PathSegment::from( Ident::from( "intercom" ) ),
                 PathSegment::from( Ident::from( "HRESULT" ) ),
@@ -224,7 +224,7 @@ mod tests {
                 parse_type( "String" ).ok() );
         assert_eq!(
                 info.return_type,
-                parse_type( "intercom::HRESULT" ).ok() );
+                parse_type( "::intercom::HRESULT" ).ok() );
     }
 
     #[test]
