@@ -193,7 +193,8 @@ fn expand_com_interface(
                     .map( |ca| {
                         let ident = &ca.name;
                         let ty = &ca.ty;
-                        quote!( let mut #ident : #ty = Default::default(); )
+                        let default = ca.handler.default_value();
+                        quote!( let mut #ident : #ty = #default; )
                     } ).collect::<Vec<_>>();
 
             // Format the in and out parameters for the COM call.
