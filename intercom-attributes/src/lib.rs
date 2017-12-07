@@ -192,7 +192,7 @@ fn expand_com_interface(
                     .iter()
                     .map( |ca| {
                         let ident = &ca.name;
-                        let ty = &ca.ty;
+                        let ty = &ca.handler.com_ty();
                         let default = ca.handler.default_value();
                         quote!( let mut #ident : #ty = #default; )
                     } ).collect::<Vec<_>>();

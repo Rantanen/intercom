@@ -54,3 +54,15 @@ impl BStr {
 impl Default for BStr {
     fn default() -> Self { BStr( std::ptr::null_mut() ) }
 }
+
+impl From<BStr> for String {
+    fn from( source : BStr ) -> String {
+        source.bstr_to_string()
+    }
+}
+
+impl From<String> for BStr {
+    fn from( source : String ) -> BStr {
+        BStr::string_to_bstr( &source )
+    }
+}

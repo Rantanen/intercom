@@ -3,6 +3,7 @@ use syn::*;
 use quote::Tokens;
 use methodinfo::ComArg;
 use ast_converters::*;
+use tyhandlers;
 use utils;
 
 /// Defines return handler for handling various different return type schemes.
@@ -12,7 +13,10 @@ pub trait ReturnHandler {
     fn rust_ty( &self ) -> Ty;
 
     /// The return type for COM implementation.
-    fn com_ty( &self ) -> Ty { self.rust_ty() }
+    fn com_ty( &self ) -> Ty
+    {
+        tyhandlers::get_ty_handler( &self.rust_ty() ).com_ty()
+    }
 
     /// Gets the return statement for converting the COM result into Rust
     /// return.
@@ -39,11 +43,11 @@ impl ReturnHandler for ReturnOnlyHandler {
     fn rust_ty( &self ) -> Ty { self.0.clone() }
 
     fn com_to_rust_return( &self, result : &Ident ) -> Tokens {
-        quote!( #result )
+        quote!( #result.into() )
     }
 
     fn rust_to_com_return( &self, result : &Ident ) -> Tokens {
-        quote!( #result )
+        quote!( #result.into() )
     }
 
     fn com_out_args( &self ) -> Vec<ComArg> { vec![] }
@@ -54,6 +58,7 @@ struct HResultHandler { retval_ty: Ty, return_ty: Ty }
 impl ReturnHandler for HResultHandler {
 
     fn rust_ty( &self ) -> Ty { self.return_ty.clone() }
+    fn com_ty( &self ) -> Ty { parse_type( "::intercom::HRESULT" ).unwrap() }
 
     fn com_to_rust_return( &self, result : &Ident ) -> Tokens {
 

@@ -160,6 +160,8 @@ impl Foo
     fn com_result_method(&self) -> ComResult<u16> { Ok(0) }
     fn rust_result_method(&self) -> Result<u16, i32> { Ok(0) }
 
+    fn string_method(&self, input : String) -> String { input }
+
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool>
     {
         Ok(true)
@@ -252,7 +254,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_simple_result_method(
             *mut ::intercom::ComBox<Foo>;
 
     let __result = (*self_combox).simple_result_method();
-    __result
+    __result.into()
 }
 
 #[allow(non_snake_case)]
@@ -304,6 +306,20 @@ pub unsafe extern "stdcall" fn __Foo_Foo_rust_result_method(
 
 #[allow(non_snake_case)]
 #[allow(dead_code)]
+pub unsafe extern "stdcall" fn __Foo_Foo_string_method(
+    self_vtable: ::intercom::RawComPtr,
+    input: ::intercom::BStr,
+) -> ::intercom::BStr {
+    let self_combox =
+        (self_vtable as usize - __Foo_FooVtbl_offset()) as
+            *mut ::intercom::ComBox<Foo>;
+
+    let __result = (*self_combox).string_method(input.into());
+    __result.into()
+}
+
+#[allow(non_snake_case)]
+#[allow(dead_code)]
 pub unsafe extern "stdcall" fn __Foo_Foo_complete_method(
     self_vtable: ::intercom::RawComPtr,
     a: u16,
@@ -336,5 +352,6 @@ const __Foo_FooVtbl_INSTANCE: __FooVtbl =
         simple_result_method: __Foo_Foo_simple_result_method,
         com_result_method: __Foo_Foo_com_result_method,
         rust_result_method: __Foo_Foo_rust_result_method,
+        string_method: __Foo_Foo_string_method,
         complete_method: __Foo_Foo_complete_method,
     };

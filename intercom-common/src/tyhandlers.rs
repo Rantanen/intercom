@@ -9,13 +9,12 @@ use quote::Tokens;
 pub trait TyHandler {
 
     /// The Rust type.
-    fn rust_ty( &self ) -> &Ty;
+    fn rust_ty( &self ) -> Ty;
 
     /// The COM type.
-    fn com_ty( &self ) -> Tokens
+    fn com_ty( &self ) -> Ty
     {
-        let ty = &self.rust_ty();
-        quote!( #ty )
+        self.rust_ty()
     }
 
     /// Converts a COM parameter named by the ident into a Rust type.
@@ -37,7 +36,7 @@ pub trait TyHandler {
     /// Gets the default value for the type.
     fn default_value( &self) -> Tokens
     {
-        match *self.rust_ty() {
+        match self.rust_ty() {
             Ty::Path( _, ref p ) => {
                 let name : &str = p.segments.last().unwrap().ident.as_ref();
                 match name {
@@ -59,7 +58,7 @@ pub trait TyHandler {
 struct IdentityParam( Ty );
 
 impl TyHandler for IdentityParam {
-    fn rust_ty( &self ) -> &Ty { &self.0 }
+    fn rust_ty( &self ) -> Ty { self.0.clone() }
 }
 
 
@@ -69,11 +68,11 @@ struct ComRcParam( Ty );
 
 impl TyHandler for ComRcParam {
 
-    fn rust_ty( &self ) -> &Ty { &self.0 }
+    fn rust_ty( &self ) -> Ty { self.0.clone() }
 
-    fn com_ty( &self ) -> Tokens
+    fn com_ty( &self ) -> Ty
     {
-        quote!( ::intercom::RawComPtr )
+        parse_type( "::intercom::RawComPtr" ).unwrap()
     }
 
     fn rust_to_com( &self, ident : &Ident ) -> Tokens
@@ -114,21 +113,21 @@ impl TyHandler for ComRcParam {
 struct StringParam( Ty );
 impl TyHandler for StringParam
 {
-    fn rust_ty( &self ) -> &Ty { &self.0 }
+    fn rust_ty( &self ) -> Ty { self.0.clone() }
 
-    fn com_ty( &self ) -> Tokens
+    fn com_ty( &self ) -> Ty
     {
-        quote!( ::intercom::BStr )
+        parse_type( "::intercom::BStr" ).unwrap()
     }
 
     fn com_to_rust( &self, ident : &Ident ) -> Tokens
     {
-        quote!( #ident.bstr_to_string() )
+        quote!( #ident.into() )
     }
 
     fn rust_to_com( &self, ident : &Ident ) -> Tokens
     {
-        quote!( *#ident = ::intercom::BStr::string_to_bstr( &r ) )
+        quote!( #ident.into() )
     }
 }
 

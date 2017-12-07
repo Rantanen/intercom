@@ -14,5 +14,7 @@ trait Foo {
     fn com_result_method(&self) -> ComResult<u16>;
     fn rust_result_method(&self) -> Result<u16, i32>;
 
+    fn string_method(&self, msg: String) -> String;
+
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool>;
 }

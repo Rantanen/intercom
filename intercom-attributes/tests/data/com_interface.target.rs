@@ -19,6 +19,8 @@ trait Foo {
     fn com_result_method(&self) -> ComResult<u16>;
     fn rust_result_method(&self) -> Result<u16, i32>;
 
+    fn string_method(&self, msg: String) -> String;
+
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool>;
 }
 
@@ -66,6 +68,11 @@ pub struct __FooVtbl {
         __out: *mut u16
     ) -> ::intercom::HRESULT,
 
+    pub string_method: unsafe extern "stdcall" fn(
+        self_vtable: ::intercom::RawComPtr,
+        msg: ::intercom::BStr
+    ) -> ::intercom::BStr,
+
     pub complete_method: unsafe extern "stdcall" fn(
         self_vtable: ::intercom::RawComPtr,
         a: u16,
@@ -108,7 +115,7 @@ impl Foo for ::intercom::ComItf<Foo>
             let __result = ((**vtbl).simple_result_method)(comptr);
 
             // Return the result as is.
-            __result
+            __result.into()
         }
     }
 
@@ -152,6 +159,17 @@ impl Foo for ::intercom::ComItf<Foo>
             } else {
                 Err(::intercom::get_last_error())
             }
+        }
+    }
+
+    fn string_method(&self, msg: String) -> String
+    {
+        let comptr = ::intercom::ComItf::ptr(self);
+        let vtbl = comptr as *const *const __FooVtbl;
+
+        unsafe {
+            let __result = ((**vtbl).string_method)( comptr, msg.into() );
+            __result.into()
         }
     }
 

@@ -27,6 +27,8 @@ impl Foo
     fn com_result_method(&self) -> ComResult<u16> { Ok(0) }
     fn rust_result_method(&self) -> Result<u16, i32> { Ok(0) }
 
+    fn string_method(&self, input : String) -> String { input }
+
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool>
     {
         Ok(true)
