@@ -106,11 +106,17 @@ fn expand_com_interface(
     let vtable_ident = idents::vtable_struct( &itf_ident );
 
     // The first parameter in the [com_interface] attribute is the IID guid.
-    let iid_guid = utils::get_attr_params( &attr )
+    let attr_params = utils::get_attr_params( &attr );
+    let iid_guid = attr_params
             .as_ref()
             .and_then( |ref params| params.first() )
             .ok_or( "[com_interface(IID:&str)] must specify an IID".to_owned() )
             .and_then( |f| utils::parameter_to_guid( f ) )?;
+
+    // Try to get the base.
+    let base = attr_params
+            .and_then( |p| p.get( 1 ) )
+            .and_then( |p| p.get_ident().ok() );
 
     // IID_IInterface GUID.
     let iid_tokens = utils::get_guid_tokens( &iid_guid );
@@ -119,11 +125,23 @@ fn expand_com_interface(
         const #iid_ident : intercom::IID = #iid_tokens;
     ) );
 
-    // Create the base vtable field.
-    // All of our interfaces inherit from IUnknown.
-    let mut fields = vec![
-        quote!( __base : intercom::IUnknownVtbl, )
-    ];
+    // Create a vector for the virtual table fields and insert the base
+    // interface virtual table in it if required.
+    let mut fields = vec![];
+    if base != Some( Ident::from( "NO_BASE" ) ) {
+
+        // There was no "NO_BASE" specifier in the attribute so we need a base
+        // interface. Check if one was specified or if we should default to
+        // IUnknown.
+        let vtbl = match base {
+            None => quote!( ::intercom::IUnknownVtbl ),
+            Some( ident ) => {
+                let vtbl = idents::vtable_struct( &ident );
+                quote!( #vtbl )
+            }
+        };
+        fields.push( quote!( __base : #vtbl, ) );
+    }
 
     // Process the trait items. Each COM-callable method on the trait will
     // result in a field in the virtual table.
