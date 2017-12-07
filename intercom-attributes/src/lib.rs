@@ -140,7 +140,7 @@ fn expand_com_interface(
                 quote!( #vtbl )
             }
         };
-        fields.push( quote!( __base : #vtbl, ) );
+        fields.push( quote!( pub __base : #vtbl, ) );
     }
 
     // Process the trait items. Each COM-callable method on the trait will

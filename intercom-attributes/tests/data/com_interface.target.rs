@@ -39,7 +39,7 @@ pub const IID_Foo: ::intercom::IID =
 pub struct __FooVtbl {
 
     // Base interface.
-    __base: ::intercom::IUnknownVtbl,
+    pub __base: ::intercom::IUnknownVtbl,
 
     // Method entries.
 
