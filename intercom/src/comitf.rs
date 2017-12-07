@@ -17,3 +17,10 @@ impl<T> ComItf<T> where T: ?Sized {
 
     pub fn ptr( this : &Self ) -> RawComPtr { this.ptr }
 }
+
+impl<T> AsRef<ComItf<IUnknown>> for ComItf<T> where T: ?Sized {
+
+    fn as_ref( &self ) -> &ComItf<IUnknown> {
+        unsafe { &*( self as *const _ as *const ComItf<IUnknown> ) }
+    }
+}
