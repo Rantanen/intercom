@@ -76,7 +76,7 @@ mod error_store {
 }
 
 /// Error info COM object data.
-#[com_class( "00000000-0000-0000-0000-000000000000", IErrorInfo )]
+#[com_class( NO_CLSID, IErrorInfo )]
 pub struct ErrorInfo {
     guid : GUID,
     source : String,

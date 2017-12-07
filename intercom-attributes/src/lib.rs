@@ -461,15 +461,26 @@ fn expand_com_class(
             .as_ref()
             .and_then( |ref params| params.split_first() )
             .ok_or( "[com_class(IID, itfs...)] must specify an IID".to_owned() )
-            .and_then( |( f, itfs )|
-                Ok( (
-                    utils::parameter_to_guid( f )?,
+            .and_then( |( f, itfs )| {
+
+                let guid = match *f {
+                    NestedMetaItem::MetaItem( ref mi ) => {
+                        match mi.get_ident()?.to_string().as_str() {
+                            "NO_CLSID" => None,
+                            _ => return Err( "Invalid GUID constant".to_owned() ),
+                        }
+                    },
+                    _ => Some( utils::parameter_to_guid( f )? )
+                };
+
+                Ok( ( guid,
                     ( itfs.into_iter()
                         .map( |i|
                             i.get_ident()
                                 .or( Err( "Invalid interface" ) ))
                         .collect() : Result<Vec<Ident>, &'static str> )?
-                ) ) )?;
+                ) ) 
+            } )?;
 
     // IUnknown vtable match. As the primary query_interface is implemented
     // on the root IUnknown interface, the self_vtable here should already be
@@ -633,12 +644,14 @@ fn expand_com_class(
 
     // CLSID constant for the class.
     let clsid_ident = idents::clsid( &struct_ident );
-    let clsid_guid_tokens = utils::get_guid_tokens( &clsid_guid );
-    let clsid_const = quote!(
-        #[allow(non_upper_case_globals)]
-        const #clsid_ident : ::intercom::CLSID = #clsid_guid_tokens;
-    );
-    output.push( clsid_const );
+    if let Some( ref guid ) = clsid_guid {
+        let clsid_guid_tokens = utils::get_guid_tokens( guid );
+        let clsid_const = quote!(
+            #[allow(non_upper_case_globals)]
+            const #clsid_ident : ::intercom::CLSID = #clsid_guid_tokens;
+        );
+        output.push( clsid_const );
+    }
 
     Ok( utils::tokens_to_tokenstream( output )? )
 }

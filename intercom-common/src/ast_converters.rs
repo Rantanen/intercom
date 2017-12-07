@@ -74,13 +74,20 @@ impl GetIdent for NestedMetaItem {
     fn get_ident( &self ) -> Result<Ident, String>
     {
         match *self {
-            NestedMetaItem::MetaItem( ref mi ) => Ok( match *mi {
-                MetaItem::Word( ref i )
-                    | MetaItem::List( ref i, .. )
-                    | MetaItem::NameValue( ref i, .. )
-                    => i,
-            }.clone() ),
+            NestedMetaItem::MetaItem( ref mi ) => mi.get_ident(),
             _ => Err( format!( "Unsupported meta item kind: {:?}", self ) ),
+        }
+    }
+}
+
+impl GetIdent for MetaItem {
+    fn get_ident( &self ) -> Result<Ident, String>
+    {
+        match *self {
+            MetaItem::Word( ref i )
+                | MetaItem::List( ref i, .. )
+                | MetaItem::NameValue( ref i, .. )
+                => Ok( i.clone() )
         }
     }
 }
