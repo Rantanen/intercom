@@ -47,55 +47,59 @@ pub type CLSID = GUID;
 pub type REFCLSID = *const IID;
 
 /// COM error result value.
-pub type HRESULT = i32;
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy)]
+#[repr(C)]
+pub struct HRESULT { pub hr : i32 }
+
+impl HRESULT {
+    pub fn new( hr : u32 ) -> HRESULT {
+        #[allow(overflowing_literals)]
+        HRESULT { hr : hr as i32 }
+    }
+}
+
+macro_rules! make_hr {
+    ( $hr_name: ident, $hr_value: expr ) => {
+        #[allow(overflowing_literals)]
+        pub const $hr_name : HRESULT = HRESULT { hr: $hr_value as i32 };
+    }
+}
 
 /// `HRESULT` indicating the operation completed successfully.
-pub const S_OK : HRESULT = 0;
+make_hr!( S_OK, 0 );
 
 /// `HRESULT` indicating the operation completed successfully and returned FALSE.
-pub const S_FALSE : HRESULT = 1;
+make_hr!( S_FALSE, 1 );
 
 /// `HRESULT` for unimplemented functionality.
-#[allow(overflowing_literals)]
-pub const E_NOTIMPL : HRESULT = 0x8000_4001 as HRESULT;
+make_hr!( E_NOTIMPL, 0x8000_4001 );
 
 /// `HRESULT` indicating the type does not support the requested interface.
-#[allow(overflowing_literals)]
-pub const E_NOINTERFACE : HRESULT = 0x8000_4002 as HRESULT;
+make_hr!( E_NOINTERFACE, 0x8000_4002 );
 
 /// `HRESULT` indicating a pointer parameter was invalid.
-#[allow(overflowing_literals)]
-pub const E_POINTER : HRESULT = 0x8000_4003 as HRESULT;
+make_hr!( E_POINTER, 0x8000_4003 );
 
 /// `HRESULT` for aborted operation.
-#[allow(overflowing_literals)]
-pub const E_ABORT : HRESULT = 0x8000_4004 as HRESULT;
+make_hr!( E_ABORT, 0x8000_4004 );
 
 /// `HRESULT` for unspecified failure.
-#[allow(overflowing_literals)]
-pub const E_FAIL : HRESULT = 0x8000_4005 as HRESULT;
+make_hr!( E_FAIL, 0x8000_4005 );
 
 /// `HRESULT` for invalid argument.
-#[allow(overflowing_literals)]
-pub const E_INVALIDARG : HRESULT = 0x8007_0057 as HRESULT;
+make_hr!( E_INVALIDARG, 0x8007_0057 );
 
-#[allow(overflowing_literals)]
-pub const E_ACCESSDENIED : HRESULT = 0x8007_0005 as HRESULT;
+make_hr!( E_ACCESSDENIED, 0x8007_0005 );
 
-#[allow(overflowing_literals)]
-pub const STG_E_FILENOTFOUND : HRESULT = 0x8003_0002 as HRESULT;
+make_hr!( STG_E_FILENOTFOUND, 0x8003_0002 );
 
-#[allow(overflowing_literals)]
-pub const RPC_E_DISCONNECTED : HRESULT = 0x8001_0108 as HRESULT;
+make_hr!( RPC_E_DISCONNECTED, 0x8001_0108 );
 
-#[allow(overflowing_literals)]
-pub const RPC_E_CALL_REJECTED : HRESULT = 0x8001_0001 as HRESULT;
+make_hr!( RPC_E_CALL_REJECTED, 0x8001_0001 );
 
-#[allow(overflowing_literals)]
-pub const RPC_E_CALL_CANCELED : HRESULT = 0x8001_0002 as HRESULT;
+make_hr!( RPC_E_CALL_CANCELED, 0x8001_0002 );
 
-#[allow(overflowing_literals)]
-pub const RPC_E_TIMEOUT : HRESULT = 0x8001_011F as HRESULT;
+make_hr!( RPC_E_TIMEOUT, 0x8001_011F );
 
 
 /// `IClassFactory` interface ID.
