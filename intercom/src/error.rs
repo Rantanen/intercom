@@ -67,12 +67,12 @@ mod error_store {
     pub fn SetErrorInfo(
         _dw_reserved: u32,
         _errorinfo: ::RawComPtr,
-    ) -> ::HRESULT { S_OK }
+    ) -> ::HRESULT { ::S_OK }
 
     pub fn GetErrorInfo(
         dw_reserved: u32,
         errorinfo: &mut ::RawComPtr,
-    ) -> ::HRESULT { S_OK }
+    ) -> ::HRESULT { ::S_OK }
 }
 
 /// Error info COM object data.
