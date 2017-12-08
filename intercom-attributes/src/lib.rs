@@ -265,7 +265,7 @@ fn expand_com_interface(
         ) );
     }
 
-    Ok( utils::tokens_to_tokenstream( output )? )
+    Ok( utils::tokens_to_tokenstream( item_tokens, output )? )
 }
 
 /// Expands the `com_impl` attribute.
@@ -434,7 +434,7 @@ fn expand_com_impl(
                     = #vtable_struct_ident { #vtable_field_tokens };
         ) );
 
-    Ok( utils::tokens_to_tokenstream( output )? )
+    Ok( utils::tokens_to_tokenstream( item_tokens, output )? )
 }
 
 /// Expands the `com_class` attribute.
@@ -653,7 +653,7 @@ fn expand_com_class(
         output.push( clsid_const );
     }
 
-    Ok( utils::tokens_to_tokenstream( output )? )
+    Ok( utils::tokens_to_tokenstream( item_tokens, output )? )
 }
 
 /// Expands the `com_library` attribute.
@@ -727,7 +727,7 @@ fn expand_com_library(
     );
     output.push( dll_get_class_object );
 
-    Ok( utils::tokens_to_tokenstream( output )? )
+    Ok( utils::tokens_to_tokenstream( item_tokens, output )? )
 }
 
 /// Reports errors during attribute expansion.

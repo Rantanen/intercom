@@ -1,6 +1,7 @@
 
 use proc_macro::{TokenStream, LexError};
 use std::str::FromStr;
+use std::iter::FromIterator;
 use syn::*;
 use quote::Tokens;
 
@@ -77,17 +78,22 @@ pub fn parse_inputs(
                 format!( "Could not parse [{}] item", attr_name ) )?,
     };
 
-    Ok( ( vec![ quote!( #item ) ], attr, item ) )
+    Ok( ( vec![], attr, item ) )
 }
 
 pub fn tokens_to_tokenstream<T: IntoIterator<Item=Tokens>>(
+    original : TokenStream,
     tokens : T,
 ) -> Result<TokenStream, LexError>
 {
-    TokenStream::from_str(
-            &tokens.into_iter()
-                .map( |t| t.parse::<String>().unwrap() )
-                .fold( String::new(), |prev, next| prev + &next ) )
+    Ok( TokenStream::from_iter(
+        std::iter::once( original )
+            .chain( std::iter::once( 
+                TokenStream::from_str(
+                        &tokens.into_iter()
+                            .map( |t| t.parse::<String>().unwrap() )
+                            .fold( String::new(), |prev, next| prev + &next ) )?
+            ) ) ) )
 }
 
 pub fn flatten<'a, I: Iterator<Item=&'a Tokens>>(
