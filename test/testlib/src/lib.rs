@@ -206,6 +206,6 @@ impl From<intercom::ComError> for TestError
     fn from( source : intercom::ComError ) -> TestError {
         TestError(
             source.hresult,
-            source.message().unwrap_or( "" ).to_owned() )
+            source.description().unwrap_or( "" ).to_owned() )
     }
 }

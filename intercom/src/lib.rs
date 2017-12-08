@@ -79,6 +79,25 @@ pub const E_FAIL : HRESULT = 0x8000_4005 as HRESULT;
 #[allow(overflowing_literals)]
 pub const E_INVALIDARG : HRESULT = 0x8007_0057 as HRESULT;
 
+#[allow(overflowing_literals)]
+pub const E_ACCESSDENIED : HRESULT = 0x8007_0005 as HRESULT;
+
+#[allow(overflowing_literals)]
+pub const STG_E_FILENOTFOUND : HRESULT = 0x8003_0002 as HRESULT;
+
+#[allow(overflowing_literals)]
+pub const RPC_E_DISCONNECTED : HRESULT = 0x8001_0108 as HRESULT;
+
+#[allow(overflowing_literals)]
+pub const RPC_E_CALL_REJECTED : HRESULT = 0x8001_0001 as HRESULT;
+
+#[allow(overflowing_literals)]
+pub const RPC_E_CALL_CANCELED : HRESULT = 0x8001_0002 as HRESULT;
+
+#[allow(overflowing_literals)]
+pub const RPC_E_TIMEOUT : HRESULT = 0x8001_011F as HRESULT;
+
+
 /// `IClassFactory` interface ID.
 #[allow(non_upper_case_globals)]
 pub const IID_IClassFactory : GUID = GUID {

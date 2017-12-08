@@ -1,9 +1,8 @@
 
+use std::error::Error;
 use std::convert::TryFrom;
+
 use super::*;
-mod intercom {
-    pub use ::*;
-}
 
 /// Error structure containing the available information on a COM error.
 pub struct ComError {
@@ -35,10 +34,52 @@ impl ComError {
         }
     }
 
-    /// Gets the message if it's available.
-    pub fn message( &self ) -> Option< &str >
+    /// Gets the description if it's available.
+    pub fn description( &self ) -> Option< &str >
     {
         self.error_info.as_ref().map( |e| e.description.as_str() )
+    }
+}
+
+impl From<ComError> for std::io::Error {
+
+    fn from( com_error : ComError ) -> std::io::Error {
+
+        let error_kind = match com_error.hresult {
+
+            ::STG_E_FILENOTFOUND => std::io::ErrorKind::NotFound,
+            ::E_ACCESSDENIED => std::io::ErrorKind::PermissionDenied,
+            ::RPC_E_CALL_REJECTED => std::io::ErrorKind::ConnectionRefused,
+            ::RPC_E_DISCONNECTED => std::io::ErrorKind::ConnectionReset,
+            ::RPC_E_CALL_CANCELED => std::io::ErrorKind::ConnectionAborted,
+            ::RPC_E_TIMEOUT => std::io::ErrorKind::TimedOut,
+            ::E_INVALIDARG => std::io::ErrorKind::InvalidInput,
+            _ => std::io::ErrorKind::Other,
+        };
+
+        std::io::Error::new(
+                error_kind,
+                com_error.description().unwrap_or( "Unknown error" ) )
+    }
+}
+
+impl From<std::io::Error> for ComError {
+
+    fn from( io_error : std::io::Error ) -> ComError {
+
+        let hresult = match io_error.kind() {
+
+            std::io::ErrorKind::NotFound => ::STG_E_FILENOTFOUND,
+            std::io::ErrorKind::PermissionDenied => ::E_ACCESSDENIED,
+            std::io::ErrorKind::ConnectionRefused => ::RPC_E_CALL_REJECTED,
+            std::io::ErrorKind::ConnectionReset => ::RPC_E_DISCONNECTED,
+            std::io::ErrorKind::ConnectionAborted => ::RPC_E_CALL_CANCELED,
+            std::io::ErrorKind::TimedOut => ::RPC_E_TIMEOUT,
+            std::io::ErrorKind::InvalidInput => ::E_INVALIDARG,
+            _ => ::E_FAIL,
+        };
+
+        ComError::new_message( hresult, io_error.description().to_owned() )
     }
 }
 
