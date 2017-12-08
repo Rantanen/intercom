@@ -105,14 +105,14 @@ mod error_store {
 #[allow(non_snake_case)]
 mod error_store {
 
-    pub fn SetErrorInfo(
+    pub unsafe fn SetErrorInfo(
         _dw_reserved: u32,
         _errorinfo: ::RawComPtr,
     ) -> ::HRESULT { ::S_OK }
 
-    pub fn GetErrorInfo(
-        dw_reserved: u32,
-        errorinfo: &mut ::RawComPtr,
+    pub unsafe fn GetErrorInfo(
+        _dw_reserved: u32,
+        _errorinfo: &mut ::RawComPtr,
     ) -> ::HRESULT { ::S_OK }
 }
 
