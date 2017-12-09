@@ -21,7 +21,7 @@ install:
     - cargo -vV
 
 before_build:
-    - nuget restore test\cs\cs.sln
+    - nuget restore test\msvs\cs\cs.sln
 
 platform:
     - x64
