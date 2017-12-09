@@ -1,4 +1,4 @@
-pushd test\cpp\x64\Release
+pushd test\cpp-raw\msvc\x64\Release
 ./cpp.exe
 $cpp_ok = $?
 

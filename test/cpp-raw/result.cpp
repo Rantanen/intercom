@@ -1,19 +1,17 @@
+#include "os.h"
 #include "catch.hpp"
-#include "TestLib_h.h"
 
 TEST_CASE( "Results can be returned" )
 {
 	// Initialize COM.
-	CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
+	InitializeRuntime();
 
 	// Get the IResultOperations interface.
 	IResultOperations* pOps = nullptr;
-	HRESULT hr = CoCreateInstance(
+	HRESULT hr = CreateInstance(
 			CLSID_ResultOperations,
-			nullptr,
-			CLSCTX_INPROC_SERVER,
 			IID_IResultOperations,
-			reinterpret_cast< void** >( &pOps ) );
+			&pOps );
 
 	REQUIRE( hr == S_OK );
 	REQUIRE( pOps != nullptr );
@@ -43,5 +41,5 @@ TEST_CASE( "Results can be returned" )
 		}
 	}
 
-	CoUninitialize();
+	UninitializeRuntime();
 }

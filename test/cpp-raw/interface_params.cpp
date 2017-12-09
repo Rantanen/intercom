@@ -1,6 +1,6 @@
 
+#include "os.h"
 #include "catch.hpp"
-#include "TestLib_h.h"
 
 class CppImplementation : public ISharedInterface
 {
@@ -18,26 +18,22 @@ class CppImplementation : public ISharedInterface
 TEST_CASE( "Methods accept COM interfaces as parameters." )
 {
 	// Initialize COM.
-	CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
+	InitializeRuntime();
 
 	// Get the first SharedImplementation object.
 	ISharedInterface* pItf1 = nullptr;
-	HRESULT hr = CoCreateInstance(
+	HRESULT hr = CreateInstance(
 		CLSID_SharedImplementation,
-		nullptr,
-		CLSCTX_INPROC_SERVER,
 		IID_ISharedInterface,
-		reinterpret_cast< void** >( &pItf1 ) );
+		&pItf1 );
 	REQUIRE( hr == S_OK );
 
 	// Get the second SharedImplementation object.
 	ISharedInterface* pItf2 = nullptr;
-	hr = CoCreateInstance(
+	hr = CreateInstance(
 		CLSID_SharedImplementation,
-		nullptr,
-		CLSCTX_INPROC_SERVER,
 		IID_ISharedInterface,
-		reinterpret_cast< void** >( &pItf2 ) );
+		&pItf2 );
 	REQUIRE( hr == S_OK );
 
 	REQUIRE( pItf1 != nullptr );
@@ -68,6 +64,6 @@ TEST_CASE( "Methods accept COM interfaces as parameters." )
 	pItf1->Release();
 	pItf2->Release();
 
-	CoUninitialize();
+	UninitializeRuntime();
 }
 

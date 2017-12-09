@@ -1,19 +1,17 @@
+#include "os.h"
 #include "catch.hpp"
-#include "TestLib_h.h"
 
 TEST_CASE( "Interfaces support error info" )
 {
 	// Initialize COM.
-	CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
+	InitializeRuntime();
 
 	// Get the error source interface.
 	IErrorSource* pErrorSource = nullptr;
-	HRESULT hr = CoCreateInstance(
+	HRESULT hr = CreateInstance(
 		CLSID_ErrorSource,
-		nullptr,
-		CLSCTX_INPROC_SERVER,
 		IID_IErrorSource,
-		reinterpret_cast< void** >( &pErrorSource ) );
+		&pErrorSource );
 	REQUIRE( hr == S_OK );
 	REQUIRE( pErrorSource != nullptr );
 
@@ -67,5 +65,5 @@ TEST_CASE( "Interfaces support error info" )
 
 	pErrorSource->Release();
 
-	CoUninitialize();
+	UninitializeRuntime();
 }

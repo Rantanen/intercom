@@ -4,6 +4,8 @@ pushd %installdir%
 call .\VC\Auxiliary\Build\vcvars64.bat
 popd
 
+echo on
+
 REM Build Intercom
 cargo build
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -28,7 +30,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 popd
 
 REM Build C++ test suite
-pushd test\cpp
+pushd test\cpp-raw\msvc
 
 devenv cpp.sln /Build "Release|x64"
 if %errorlevel% neq 0 exit /b %errorlevel%

@@ -1,20 +1,18 @@
 
+#include "os.h"
 #include "catch.hpp"
-#include "TestLib_h.h"
 
 TEST_CASE( "Methods accept and return COM objects" )
 {
 	// Initialize COM.
-	CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
+	InitializeRuntime();
 
 	// Get the IPrimitiveOperations interface.
 	IClassCreator* pOps = nullptr;
-	HRESULT hr = CoCreateInstance(
-		CLSID_ClassCreator,
-		nullptr,
-		CLSCTX_INPROC_SERVER,
-		IID_IClassCreator,
-		reinterpret_cast< void** >( &pOps ) );
+	HRESULT hr = CreateInstance(
+			CLSID_ClassCreator,
+			IID_IClassCreator,
+			&pOps );
 
 	REQUIRE( hr == S_OK );
 	REQUIRE( pOps != nullptr );
@@ -38,5 +36,5 @@ TEST_CASE( "Methods accept and return COM objects" )
 
 	pOps->Release();
 
-	CoUninitialize();
+	UninitializeRuntime();
 }

@@ -1,22 +1,17 @@
 
+#include "os.h"
 #include "catch.hpp"
-#include "TestLib_h.h"
 
 TEST_CASE( "Basic IUnknown implementation works" )
 {
 	// Initialize COM.
-	CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
+	InitializeRuntime();
 
 	SECTION( "create instance succeeds" )
 	{
 
 		IRefCountOperations* pRefCount = nullptr;
-		HRESULT hr = CoCreateInstance(
-				CLSID_RefCountOperations,
-				nullptr,
-				CLSCTX_INPROC_SERVER,
-				IID_IRefCountOperations,
-				reinterpret_cast<void**>( &pRefCount ));
+		HRESULT hr = CreateInstance( CLSID_RefCountOperations, IID_IRefCountOperations, &pRefCount );
 
 		REQUIRE( hr == S_OK );
 		REQUIRE( pRefCount != nullptr );
@@ -111,5 +106,5 @@ TEST_CASE( "Basic IUnknown implementation works" )
 	}
 
 	// Uninitialize COM.
-	CoUninitialize();
+	UninitializeRuntime();
 }

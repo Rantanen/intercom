@@ -1,21 +1,18 @@
 
+#include "os.h"
 #include "catch.hpp"
-#include "TestLib_h.h"
-#include <iostream>
 
 TEST_CASE( "Objects maintain their state" )
 {
 	// Initialize COM.
-	CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
+	InitializeRuntime();
 
 	// Get the IResultOperations interface.
 	IStatefulOperations* pOps = nullptr;
-	HRESULT hr = CoCreateInstance(
+	HRESULT hr = CreateInstance(
 			CLSID_StatefulOperations,
-			nullptr,
-			CLSCTX_INPROC_SERVER,
 			IID_IStatefulOperations,
-			reinterpret_cast< void** >( &pOps ) );
+			&pOps );
 
 	REQUIRE( hr == S_OK );
 	REQUIRE( pOps != nullptr );
@@ -30,5 +27,5 @@ TEST_CASE( "Objects maintain their state" )
 		REQUIRE( pOps->GetValue() == 55555 );
 	}
 
-	CoUninitialize();
+	UninitializeRuntime();
 }

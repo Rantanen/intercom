@@ -2,22 +2,20 @@
 #define NOMINMAX
 #include <climits>
 
+#include "os.h"
 #include "catch.hpp"
-#include "TestLib_h.h"
 
 TEST_CASE( "Primitive types are supported" )
 {
 	// Initialize COM.
-	CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
+	InitializeRuntime();
 
 	// Get the IPrimitiveOperations interface.
 	IPrimitiveOperations* pOps = nullptr;
-	HRESULT hr = CoCreateInstance(
+	HRESULT hr = CreateInstance(
 			CLSID_PrimitiveOperations,
-			nullptr,
-			CLSCTX_INPROC_SERVER,
 			IID_IPrimitiveOperations,
-			reinterpret_cast< void** >( &pOps ) );
+			&pOps );
 
 	REQUIRE( hr == S_OK );
 	REQUIRE( pOps != nullptr );
@@ -133,6 +131,6 @@ TEST_CASE( "Primitive types are supported" )
 		REQUIRE( pOps->F64( 3.0 ) == ( 1.0 / 3.0 ) );
 	}
 
-	CoUninitialize();
+	UninitializeRuntime();
 }
 	
