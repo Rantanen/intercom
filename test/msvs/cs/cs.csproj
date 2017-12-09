@@ -90,8 +90,8 @@
     <Error Condition="!Exists('packages\MSTest.TestAdapter.1.1.18\build\net45\MSTest.TestAdapter.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\MSTest.TestAdapter.1.1.18\build\net45\MSTest.TestAdapter.targets'))" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>cp $(ProjectDir)..\testlib\target\debug\test_lib.dll $(ProjectDir)$(OutDir)TestLib.dll
-cp $(ProjectDir)..\testlib\TestLib.Assembly.manifest $(ProjectDir)$(OutDir)TestLib.Assembly.manifest</PostBuildEvent>
+    <PostBuildEvent>cp $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(ProjectDir)$(OutDir)TestLib.dll
+cp $(ProjectDir)..\..\testlib\TestLib.Assembly.manifest $(ProjectDir)$(OutDir)TestLib.Assembly.manifest</PostBuildEvent>
   </PropertyGroup>
   <Import Project="packages\MSTest.TestAdapter.1.1.18\build\net45\MSTest.TestAdapter.targets" Condition="Exists('packages\MSTest.TestAdapter.1.1.18\build\net45\MSTest.TestAdapter.targets')" />
 </Project>
