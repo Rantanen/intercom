@@ -1,7 +1,4 @@
 
-use proc_macro::{TokenStream, LexError};
-use std::str::FromStr;
-use std::iter::FromIterator;
 use syn::*;
 use quote::Tokens;
 
@@ -15,7 +12,7 @@ pub fn trace( t : &str, n : &str ) {
 
 pub fn parse_com_lib_tokens(
     crate_name : &str,
-    tokens : &TokenStream,
+    tokens : &str,
 ) -> Result<( guid::GUID, Vec<String> ), MacroError>
 {
     parse_com_lib_attribute(
@@ -53,10 +50,10 @@ pub fn parse_com_lib_attribute(
 
 fn parse_attr_tokens(
     attr_name: &str,
-    attr_tokens: &TokenStream,
+    attr_tokens: &str,
 ) -> Result< Attribute, MacroError >
 {
-    let attr_rendered = format!( "#[{}{}]", attr_name, attr_tokens.to_string() );
+    let attr_rendered = format!( "#[{}{}]", attr_name, attr_tokens );
     Ok( match syn::parse_outer_attr( &attr_rendered ) {
         Ok(t) => t,
         Err(_) => Err(
@@ -66,8 +63,8 @@ fn parse_attr_tokens(
 
 pub fn parse_inputs(
     attr_name: &str,
-    attr_tokens: &TokenStream,
-    item_tokens: &TokenStream,
+    attr_tokens: &str,
+    item_tokens: &str,
 ) -> Result<( Vec<Tokens>, Attribute, Item ), MacroError>
 {
     let attr = parse_attr_tokens( attr_name, attr_tokens )?;
@@ -78,21 +75,6 @@ pub fn parse_inputs(
     };
 
     Ok( ( vec![], attr, item ) )
-}
-
-pub fn tokens_to_tokenstream<T: IntoIterator<Item=Tokens>>(
-    original : TokenStream,
-    tokens : T,
-) -> Result<TokenStream, LexError>
-{
-    Ok( TokenStream::from_iter(
-        std::iter::once( original )
-            .chain( std::iter::once( 
-                TokenStream::from_str(
-                        &tokens.into_iter()
-                            .map( |t| t.parse::<String>().unwrap() )
-                            .fold( String::new(), |prev, next| prev + &next ) )?
-            ) ) ) )
 }
 
 pub fn flatten<'a, I: Iterator<Item=&'a Tokens>>(

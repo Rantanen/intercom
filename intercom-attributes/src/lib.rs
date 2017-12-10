@@ -5,6 +5,8 @@
 
 use std::iter;
 use std::env;
+use std::str::FromStr;
+use std::iter::FromIterator;
 
 extern crate intercom_common;
 use intercom_common::idents;
@@ -107,8 +109,9 @@ fn expand_com_interface(
 ) -> Result<TokenStream, MacroError>
 {
     // Parse the attribute.
-    let ( mut output, attr, item ) =
-            utils::parse_inputs( "com_interface", &attr_tokens, &item_tokens )?;
+    let ( mut output, attr, item ) = utils::parse_inputs(
+            "com_interface",
+            &attr_tokens.to_string(), &item_tokens.to_string() )?;
     let ( itf_ident, fns, itf_type ) =
             utils::get_ident_and_fns( &item )
                 .ok_or( "[com_interface(IID:&str)] must be applied to trait \
@@ -284,7 +287,7 @@ fn expand_com_interface(
         ) );
     }
 
-    Ok( utils::tokens_to_tokenstream( item_tokens, output )? )
+    Ok( tokens_to_tokenstream( item_tokens, output )? )
 }
 
 /// Expands the `com_impl` attribute.
@@ -300,8 +303,8 @@ fn expand_com_impl(
 ) -> Result<TokenStream, MacroError>
 {
     // Parse the attribute.
-    let ( mut output, _, item ) =
-            utils::parse_inputs( "com_impl", &attr_tokens, &item_tokens )?;
+    let ( mut output, _, item ) = utils::parse_inputs(
+            "com_impl", &attr_tokens.to_string(), &item_tokens.to_string() )?;
     let ( itf_ident_opt, struct_ident, fns )
             = utils::get_impl_data( &item )
                 .ok_or( "[com_impl] must be applied to an impl" )?;
@@ -457,7 +460,7 @@ fn expand_com_impl(
                     = #vtable_struct_ident { #vtable_field_tokens };
         ) );
 
-    Ok( utils::tokens_to_tokenstream( item_tokens, output )? )
+    Ok( tokens_to_tokenstream( item_tokens, output )? )
 }
 
 /// Expands the `com_class` attribute.
@@ -473,8 +476,8 @@ fn expand_com_class(
 ) -> Result<TokenStream, MacroError>
 {
     // Parse the attribute.
-    let ( mut output, attr, item ) =
-            utils::parse_inputs( "com_class", &attr_tokens, &item_tokens )?;
+    let ( mut output, attr, item ) = utils::parse_inputs(
+            "com_class", &attr_tokens.to_string(), &item_tokens.to_string() )?;
     let struct_ident = utils::get_struct_ident_from_annotatable( &item );
     let isupporterrorinfo_ident = Ident::from( "ISupportErrorInfo".to_owned() );
 
@@ -672,7 +675,7 @@ fn expand_com_class(
         output.push( clsid_const );
     }
 
-    Ok( utils::tokens_to_tokenstream( item_tokens, output )? )
+    Ok( tokens_to_tokenstream( item_tokens, output )? )
 }
 
 /// Expands the `com_library` attribute.
@@ -689,7 +692,7 @@ fn expand_com_library(
 
     // Parse the attribute.
     let ( _, coclasses ) = utils::parse_com_lib_tokens(
-            &lib_name(), attr_tokens )?;
+            &lib_name(), &attr_tokens.to_string() )?;
 
     // Create the match-statmeent patterns for each supposedly visible COM class.
     let mut match_arms = vec![];
@@ -748,7 +751,7 @@ fn expand_com_library(
     );
     output.push( dll_get_class_object );
 
-    Ok( utils::tokens_to_tokenstream( item_tokens, output )? )
+    Ok( tokens_to_tokenstream( item_tokens, output )? )
 }
 
 /// Reports errors during attribute expansion.
@@ -763,3 +766,20 @@ fn error<E,T>(
 {
     panic!( "{}", MacroError::from( e ).msg )
 }
+
+fn tokens_to_tokenstream<T: IntoIterator<Item=quote::Tokens>>(
+    original : TokenStream,
+    tokens : T,
+) -> Result<TokenStream, MacroError>
+{
+    Ok( TokenStream::from_iter(
+        std::iter::once( original )
+            .chain( std::iter::once( 
+                TokenStream::from_str(
+                        &tokens.into_iter()
+                            .map( |t| t.parse::<String>().unwrap() )
+                            .fold( String::new(), |prev, next| prev + &next ) )
+                    .map_err( |_| "Failed to parse generated code." )?
+            ) ) ) )
+}
+
