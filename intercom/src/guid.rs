@@ -23,6 +23,7 @@ impl GUID {
     /// Parses the given string as a GUID.
     ///
     /// Supported formats include:
+    /// 
     /// - Braces and hyphens: {00000000-0000-0000-0000-000000000000}
     /// - Hyphens only: 00000000-0000-0000-0000-000000000000
     /// - Raw hexadecimal: 00000000000000000000000000000000

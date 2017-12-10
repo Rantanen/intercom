@@ -58,6 +58,7 @@ const __Foo_ISupportErrorInfoVtbl_INSTANCE: ::intercom::ISupportErrorInfoVtbl =
 // This struct lists the virtual tables of all interfaces that the Foo COM
 // class supports.
 #[allow(non_snake_case)]
+#[doc(hidden)]
 pub struct __FooVtblList {
 
     // ISupportErrorInfo virtual table. It's important this is the first
@@ -130,7 +131,7 @@ impl ::intercom::CoClass for Foo {
         })
     }
 
-    fn interface_supports_error_info(riid: REFIID) -> bool {
+    fn interface_supports_error_info(riid: ::intercom::REFIID) -> bool {
         match *unsafe { &*riid } {
 
             // Only the custom interfaces support error info.
@@ -143,6 +144,7 @@ impl ::intercom::CoClass for Foo {
 
 // Class ID.
 #[allow(non_upper_case_globals)]
+#[doc = "`Foo` class ID."]
 const CLSID_Foo: ::intercom::CLSID =
     ::intercom::GUID {
         data1: 0u32, data2: 0u16, data3: 0u16,
@@ -171,6 +173,7 @@ impl Foo
 // Method implementations for the implicit "IFoo" interface.
 
 #[allow(non_snake_case)]
+#[doc(hidden)]
 pub unsafe extern "stdcall" fn __Foo_Foo_query_interface(
     self_vtable: ::intercom::RawComPtr,
     riid: ::intercom::REFIID,
@@ -192,6 +195,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_query_interface(
 
 #[allow(non_snake_case)]
 #[allow(dead_code)]
+#[doc(hidden)]
 pub unsafe extern "stdcall" fn __Foo_Foo_add_ref(
     self_vtable: ::intercom::RawComPtr
 ) -> u32
@@ -202,6 +206,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_add_ref(
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
+#[doc(hidden)]
 pub unsafe extern "stdcall" fn __Foo_Foo_release(
     self_vtable: ::intercom::RawComPtr
 ) -> u32
@@ -218,6 +223,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_release(
 
 #[allow(non_snake_case)]
 #[allow(dead_code)]
+#[doc(hidden)]
 pub unsafe extern "stdcall" fn __Foo_Foo_simple_method(
     self_vtable: ::intercom::RawComPtr
 ) -> ()
@@ -231,6 +237,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_simple_method(
 
 #[allow(non_snake_case)]
 #[allow(dead_code)]
+#[doc(hidden)]
 pub unsafe extern "stdcall" fn __Foo_Foo_arg_method(
     self_vtable: ::intercom::RawComPtr,
     a: u16
@@ -245,6 +252,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_arg_method(
 
 #[allow(non_snake_case)]
 #[allow(dead_code)]
+#[doc(hidden)]
 pub unsafe extern "stdcall" fn __Foo_Foo_simple_result_method(
     self_vtable: ::intercom::RawComPtr
 ) -> u16
@@ -259,6 +267,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_simple_result_method(
 
 #[allow(non_snake_case)]
 #[allow(dead_code)]
+#[doc(hidden)]
 pub unsafe extern "stdcall" fn __Foo_Foo_com_result_method(
     self_vtable: ::intercom::RawComPtr,
     __out: *mut u16
@@ -280,6 +289,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_com_result_method(
 
 #[allow(non_snake_case)]
 #[allow(dead_code)]
+#[doc(hidden)]
 pub unsafe extern "stdcall" fn __Foo_Foo_rust_result_method(
     self_vtable: ::intercom::RawComPtr,
     __out: *mut u16
@@ -306,6 +316,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_rust_result_method(
 
 #[allow(non_snake_case)]
 #[allow(dead_code)]
+#[doc(hidden)]
 pub unsafe extern "stdcall" fn __Foo_Foo_string_method(
     self_vtable: ::intercom::RawComPtr,
     input: ::intercom::BStr,
@@ -320,6 +331,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_string_method(
 
 #[allow(non_snake_case)]
 #[allow(dead_code)]
+#[doc(hidden)]
 pub unsafe extern "stdcall" fn __Foo_Foo_complete_method(
     self_vtable: ::intercom::RawComPtr,
     a: u16,

@@ -136,7 +136,9 @@ fn expand_com_interface(
 
     // IID_IInterface GUID.
     let iid_tokens = utils::get_guid_tokens( &iid_guid );
+    let iid_doc = format!( "`{}` interface ID.", itf_ident );
     output.push( quote!(
+        #[doc = #iid_doc]
         #[allow(non_upper_case_globals)]
         pub const #iid_ident : ::intercom::IID = #iid_tokens;
     ) );
@@ -264,6 +266,7 @@ fn expand_com_interface(
     output.push( quote!(
         #[allow(non_camel_case_types)]
         #[repr(C)]
+        #[doc(hidden)]
         pub struct #vtable_ident { #field_tokens }
     ) );
 
@@ -325,6 +328,7 @@ fn expand_com_impl(
             &struct_ident, &itf_ident, "query_interface" );
     output.push( quote!(
             #[allow(non_snake_case)]
+            #[doc(hidden)]
             pub unsafe extern "stdcall" fn #query_interface_ident(
                 self_vtable : ::intercom::RawComPtr,
                 riid : ::intercom::REFIID,
@@ -347,6 +351,7 @@ fn expand_com_impl(
     output.push( quote!(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
+            #[doc(hidden)]
             pub unsafe extern "stdcall" fn #add_ref_ident(
                 self_vtable : ::intercom::RawComPtr
             ) -> u32 {
@@ -361,6 +366,7 @@ fn expand_com_impl(
     output.push( quote!(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
+            #[doc(hidden)]
             pub unsafe extern "stdcall" fn #release_ident(
                 self_vtable : ::intercom::RawComPtr
             ) -> u32 {
@@ -422,6 +428,7 @@ fn expand_com_impl(
             output.push( quote!(
                 #[allow(non_snake_case)]
                 #[allow(dead_code)]
+                #[doc(hidden)]
                 pub unsafe extern "stdcall" fn #method_impl_ident(
                     #arg_tokens
                 ) -> #ret_ty {
@@ -614,6 +621,7 @@ fn expand_com_class(
     let vtable_list_ident = idents::vtable_list( &struct_ident );
     output.push( quote!(
             #[allow(non_snake_case)]
+            #[doc(hidden)]
             pub struct #vtable_list_ident {
                 #( #vtable_list_field_decls ),*
             }
@@ -640,7 +648,7 @@ fn expand_com_class(
                 }
 
                 fn interface_supports_error_info(
-                    riid : REFIID
+                    riid : ::intercom::REFIID
                 ) -> bool
                 {
                     match *unsafe { &*riid } {
@@ -655,8 +663,10 @@ fn expand_com_class(
     let clsid_ident = idents::clsid( &struct_ident );
     if let Some( ref guid ) = clsid_guid {
         let clsid_guid_tokens = utils::get_guid_tokens( guid );
+        let clsid_doc = format!( "`{}` class ID.", struct_ident );
         let clsid_const = quote!(
             #[allow(non_upper_case_globals)]
+            #[doc = #clsid_doc ]
             const #clsid_ident : ::intercom::CLSID = #clsid_guid_tokens;
         );
         output.push( clsid_const );
@@ -707,6 +717,7 @@ fn expand_com_library(
         #[no_mangle]
         #[allow(non_snake_case)]
         #[allow(dead_code)]
+        #[doc(hidden)]
         pub unsafe extern "stdcall" fn DllGetClassObject(
             rclsid : ::intercom::REFCLSID,
             riid : ::intercom::REFIID,

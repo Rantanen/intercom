@@ -145,7 +145,7 @@ impl<T: CoClass> ComBox<T> {
 
     /// Converts a RawComPtr to a ComBox reference.
     ///
-    /// The method is unsafe in two different ways
+    /// The method is unsafe in two different ways:
     ///
     /// - There is no way for the method to ensure the RawComPtr points to
     ///   a valid ComBox<T> instance. It's the caller's responsibility to
@@ -207,9 +207,11 @@ impl<T: CoClass> ComBox<T> {
     /// Gets the ComBox holding the value.
     ///
     /// This is unsafe for two reasons:
+    ///
     /// - There is no way for the method to check that the value is actually
     ///   contained in a `ComBox`. It is up to the caller to ensure this method
     ///   is only called with values that exist within a `ComBox`.
+    ///
     /// - The method returns a mutable reference to the ComBox containing the
     ///   value. As demonstrated by the parameter type, the caller already has
     ///   a mutable reference to the value itself. As a result the caller will
@@ -231,9 +233,11 @@ impl<T: CoClass> ComBox<T> {
     /// Gets the ComBox holding the value.
     ///
     /// This is unsafe for two reasons:
+    ///
     /// - There is no way for the method to check that the value is actually
     ///   contained in a `ComBox`. It is up to the caller to ensure this method
     ///   is only called with values that exist within a `ComBox`.
+    ///
     /// - The method returns a mutable reference to the ComBox containing the
     ///   value. As demonstrated by the parameter type, the caller already has
     ///   a mutable reference to the value itself. As a result the caller will

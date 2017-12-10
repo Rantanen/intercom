@@ -26,6 +26,7 @@ trait Foo {
 
 // Interface ID
 //
+#[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
 pub const IID_Foo: ::intercom::IID =
         ::intercom::GUID {
@@ -38,6 +39,7 @@ pub const IID_Foo: ::intercom::IID =
 // Contains the base interface and an entry for each method.
 #[allow(non_camel_case_types)]
 #[repr(C)]
+#[doc(hidden)]
 pub struct __FooVtbl {
 
     // Base interface.

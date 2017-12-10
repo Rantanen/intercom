@@ -2,12 +2,14 @@
 use super::*;
 
 #[allow(non_camel_case_types)]
+#[doc(hidden)]
 pub struct ClassFactoryVtbl {
     pub __base: IUnknownVtbl,
     pub create_instance: unsafe extern "stdcall" fn( RawComPtr, RawComPtr, REFIID, *mut RawComPtr ) -> HRESULT,
     pub lock_server: unsafe extern "stdcall" fn( RawComPtr, bool ) -> HRESULT
 }
 
+#[doc(hidden)]
 pub struct ClassFactory<T> {
     pub clsid : REFCLSID,
     pub create_instance : T,
