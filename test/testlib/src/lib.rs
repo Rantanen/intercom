@@ -6,7 +6,7 @@ use intercom::*;
 extern crate winapi;
 
 // Declare available COM classes.
-#[com_library( TestLib, "{12341234-1234-1234-1234-123412340000}",
+#[com_library( "{12341234-1234-1234-1234-123412340000}",
     RefCountOperations,
     PrimitiveOperations,
     StatefulOperations,

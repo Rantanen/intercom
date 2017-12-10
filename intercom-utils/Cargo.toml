@@ -12,3 +12,4 @@ clap = { version = "2.27.1" }
 glob = "0.2.11"
 if_chain = "0.1.2"
 intercom-common = { version = "0.1.0", path = "../intercom-common" }
+toml = "0.4.5"

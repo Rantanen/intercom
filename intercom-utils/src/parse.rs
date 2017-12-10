@@ -71,7 +71,7 @@ impl CoClass {
 /// The result of a parse.
 #[derive(Default, Debug)]
 pub struct ParseResult {
-    pub libname : Option<String>,
+    pub libname : String,
     pub libid : Option<GUID>,
     pub class_names : Vec<String>,
     pub interfaces : Vec<Interface>,
@@ -84,11 +84,26 @@ pub struct ParseResult {
 ///
 /// Returns 
 pub fn parse_crate(
-    path : &str,
+    crate_root : &str,
 ) -> Result< ( HashMap<String, String>, ParseResult ), AppError > {
 
+    let cargo_toml = parse_toml( &format!( "{}/Cargo.toml", crate_root ) )?;
+    let libname = match cargo_toml {
+        toml::Value::Table( root ) => match root.get( "package" ) {
+            Some( &toml::Value::Table( ref package ) )
+                => match package.get( "name" ) {
+                    Some( &toml::Value::String( ref name ) )
+                        => name.clone(),
+                    _ => Err( "No 'name' parameter under [package]" )?,
+                },
+            _ => Err( "Could not find [package] in Cargo.toml" )?,
+        },
+        _ => Err( "Could not parse Cargo.toml" )?
+    };
+
     // Glob the sources.
-    let files = glob::glob( path )?.collect::<Vec<_>>();
+    let src_path = format!( "{}/src/**/*.rs", crate_root );
+    let files = glob::glob( &src_path )?.collect::<Vec<_>>();
 
     // Gather renames first.
     let mut renames = HashMap::new();
@@ -111,7 +126,10 @@ pub fn parse_crate(
     }
 
     // Parse the files.
-    let mut result = ParseResult { ..Default::default() };
+    let mut result = ParseResult {
+        libname: libname,
+        ..Default::default()
+    };
     for entry in &files {
 
         // Get the path from the directory entry.
@@ -131,6 +149,15 @@ pub fn parse_crate(
     }
 
     Ok( ( renames, result ) )
+}
+
+fn parse_toml( path : &str ) -> Result< toml::Value, AppError >
+{
+    let mut f = std::fs::File::open( path )?;
+    let mut buf = String::new();
+    f.read_to_string( &mut buf )?;
+
+    Ok( buf.parse::<toml::Value>()? )
 }
 
 /// Gathers COM type renames.
@@ -242,8 +269,9 @@ pub fn process_com_lib_attr(
 ) -> Result<(), AppError> {
 
     // Store the details defined on the library attribute in the results.
-    let ( libname, libid, class_names ) = utils::parse_com_lib_attribute( attr )?;
-    r.libname = Some( libname );
+    let ( libid, class_names ) = utils::parse_com_lib_attribute(
+            &r.libname,
+            attr )?;
     r.libid = Some( libid );
     r.class_names = class_names;
 

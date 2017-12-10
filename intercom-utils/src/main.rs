@@ -5,6 +5,7 @@ extern crate clap;
 extern crate syn;
 extern crate glob;
 extern crate intercom_common;
+extern crate toml;
 
 mod idl;
 mod manifest;
@@ -51,6 +52,12 @@ impl From<glob::PatternError> for AppError {
 
 impl From<std::io::Error> for AppError {
     fn from( e : std::io::Error ) -> AppError {
+        AppError( String::from( e.description() ) )
+    }
+}
+
+impl From<toml::de::Error> for AppError {
+    fn from( e : toml::de::Error ) -> AppError {
         AppError( String::from( e.description() ) )
     }
 }

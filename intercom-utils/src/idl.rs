@@ -3,17 +3,14 @@ use std::collections::HashMap;
 use super::*;
 use parse::*;
 
+use intercom_common::utils;
+
 /// Runs the 'idl' subcommand.
 pub fn run( idl_params : &ArgMatches ) -> AppResult {
 
-    // The 'path' command line parameter points to the crate root.
-    // We get the rust sources from the /src/ subdirectory.
-    let path_str = format!(
-            "{}/src/**/*.rs",
-            idl_params.value_of( "path" ).unwrap() );
-
     // Parse the sources and convert the result into an IDL.
-    let ( renames, result ) = parse_crate( &path_str )?;
+    let ( renames, result ) = parse_crate(
+            idl_params.value_of( "path" ).unwrap() )?;
     result_to_idl( &result, &renames );
 
     Ok(())

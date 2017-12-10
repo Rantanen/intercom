@@ -4,6 +4,7 @@
 #![feature(type_ascription)]
 
 use std::iter;
+use std::env;
 
 extern crate intercom_common;
 use intercom_common::idents;
@@ -19,6 +20,16 @@ extern crate syn;
 extern crate quote;
 
 use syn::*;
+
+/// Resolve the name of the package being compiled.
+fn lib_name() -> String {
+
+    // Cargo stores the currently compiled package in the CARGO_PKG_NAME
+    // environment variable.
+    env::var( "CARGO_PKG_NAME" )
+        .expect( "Could not resolve package name. \
+                 Ensure CARGO_PKG_NAME environment variable is defined." )
+}
 
 // Note the rustdoc comments on the [proc_macro_attribute] functions document
 // "attributes", not "functions".
@@ -666,10 +677,11 @@ fn expand_com_library(
     item_tokens: TokenStream,
 ) -> Result<TokenStream, MacroError>
 {
+    let mut output = vec![];
+
     // Parse the attribute.
-    let ( mut output, _, _ ) =
-            utils::parse_inputs( "com_library", &attr_tokens, &item_tokens )?;
-    let ( _, _, coclasses ) = utils::parse_com_lib_tokens( attr_tokens )?;
+    let ( _, coclasses ) = utils::parse_com_lib_tokens(
+            &lib_name(), attr_tokens )?;
 
     // Create the match-statmeent patterns for each supposedly visible COM class.
     let mut match_arms = vec![];
