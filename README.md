@@ -5,32 +5,33 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/q88b7xk6l72kup0y?svg=true)](https://ci.appveyor.com/project/Rantanen/intercom)
 [![Build Status](https://travis-ci.org/Rantanen/intercom.svg?branch=master)](https://travis-ci.org/Rantanen/intercom)
 
-The COM export allows one to write reusable components in Rust, which can then
-be consumed in any COM-compatible language. This includes C++, C#, VB.Net, etc.
+Intercom enables the user to write reusable components in Rust, that are
+binary compatible with the Component Object Model interface standard. These
+components can be used in any language that supports static COM components,
+including C++, C# and VB.Net.
 
 ## Example
 
 Rust COM server:
 
 ```rust
-#![feature(plugin, custom_attribute)]
-#![plugin(com_library)]
+#![feature(proc_macro)]
 
-#[com_library(
-    Calculator
-)]
+pub use intercom::*;
 
-#[com_class("{12341234-1234-1234-1234-123412340001}")]
+#[com_library(AUTO_GUID, Calculator)]
+
+#[com_class(AUTO_GUID)]
 struct Calculator {
     value: i32
 }
 
-#[com_interface("{12341234-1234-1234-1234-123412340002}")]
+#[com_interface(AUTO_GUID)]
 #[com_impl]
 impl Calculator {
     pub fn new() -> Calculator { Calculator { value: 0 } }
 
-    pb fn add(&mut self, value: i32) -> com_runtime::ComResult<i32> {
+    pb fn add(&mut self, value: i32) -> ComResult<i32> {
         self.value += value;
         Ok(self.value)
     }
@@ -53,46 +54,19 @@ class Program
 }
 ```
 
-## Status
+## Other crates
 
-- [x] Basic vtable and delegate construction.
-- [x] Proper QueryInterface implementation with proper IID checking.
-- [x] Multiple interface implementation.
-- [ ] Automatic IDL generation for MIDL. This is needed for the toolchain.
-      being able to define an interface in Rust and then call that from C++/C#
-      would be awesome if the user didn't need to specify the IDL by hand.
-- [ ] Ability to accept `Rc<Itf>` as input value and call its methods.
-- [ ] More complex parameter values, such as the dreaded structs.
-  - [x] Primitive values (Anything that is binary compatible between Rust
-        and COM)
-  - [x] BSTRs
-  - [ ] SAFEARRAY
-  - [ ] Structs (?) - This might already be okay **for `__out` values**,
-        actual return values need work but might be low priority.
-- [ ] Test harness...
-- [ ] IErrorInfo
-- [ ] `IStringAllocator` or ` IAllocator` to allow sharing allocated memory.
-      This is needed especially if we strive for cross platform compatibiliity.
-      The problem comes mainly through strings, especially BSTRs and those are
-      usually handled by the `SysAllocString`, etc. in Windows.
+Intercom isn't the first time Rust is playing with COM interfaces. There are at
+least two other crates that are related to COM support.
 
-### Maybe one day
-- [ ] Automatic IDispatch derive.
+- [`winapi-rs`](https://github.com/retep998/winapi-rs) contains various COM
+  interface definitions for Microsoft's Windows APIs.
+- [`winrt-rust`](https://github.com/contextfree/winrt-rust) provides support for
+  Windows Runtime (WinRT) APIs for Rust.
 
-### Refactoring changes
-
-- [ ] Get rid of the field offset calculations. Instead implement
-      `struct IInterfacePtr( RawComPtr )` types for the COM interfaces. These
-      would have `AsRef` impls for the various virtual tables. The compiler
-      should be able to resolve these statically. The use of these raw structs
-      would also make the interface definitions a bit saner. For example the
-      IUnknown implementation would accept `IUnknownPtr` parameter instead of
-      a `ComPtr`.
-- [ ] `ComRc` needs a `Cow` enum (or similar) within it to track whether the
-      `ComRc` borrows or owns the value. I want to make the `ComRc` _the_ type
-      too use when handling various COM pointers - no matter whether these are
-      self created, received as function call parameters are result of return
-      values from COM invocations.
+Ideally these crates would play well together. If you encounter usability
+issues in using these crates together with Intercom, feel free to create an
+issue describing the problem.
 
 # Technical details
 
@@ -115,18 +89,18 @@ and `"stdcall"` in Rust).
 
 ## Implementation
 
-The `COM-export` libraries are built over Rust [syntax extensions]. Currently
+The Intercom libraries are built over Rust [proc macro attributes]. Currently
 there are four attributes available:
 
-- `[com_library(Classes...)]` - A required attribute that implements the
-  exported `DllGetClassObject` entry point as well as the CoClass implementing
-  the `IClassFactory` interface.
+- `[com_library(LIBID, Classes...)]` - A required attribute that implements the
+  exported `DllGetClassObject` entry point as well as the `CoClass` for the
+  `ClassFactory`.
 - `[com_interface(IID)]` - An attribute that specifies a `trait` or an `impl`
   as a COM interface. The attribute results in the virtual table struct to be
   defined for the interface.
 - `[com_class(CLSID, Itfs...)]` - An attribute defined on a `struct`. This
-  attribute creates the reference counted `CoClass` struct for the type and
-  implements the basic `IUnknown` interface for it. 
+  attribute implements the necessary `CoClass` for the struct, which allows
+  constructing the reference counted `ComBox<T>` instances on the object.
 - `[com_impl]` - Finally the `[com_impl]` attribute specifies the `impl`s that
   implement the `[com_interface]`s for the `[com_class]` types. While the
   attribute doesn't provide any extra information for the implementation, it
@@ -135,240 +109,5 @@ there are four attributes available:
   client into a Rust call to the user defined functions or the primary
   `IUnknown` methods implemented by the `[com_class]` expansion.
 
-[syntax extensions]: https://doc.rust-lang.org/1.12.0/book/compiler-plugins.html
+[proc macro attributes]: https://github.com/rust-lang/rfcs/blob/master/text/1566-proc-macros.md
 
-## Expansions
-
-Rough approximation of the attribute expansions is displayed below. This is
-meant to give some kind of an idea of how the COM objects are implemented. For
-accurate representation, have a look at the `com_library` source code.
-
-The attributes are described in somewhat of a dependnecy order.
-
-### `#[com_interface(...)]`
-
-Defines the IID constant and virtual table struct for the trait.
-
-```rust
-#[com_interface("{...}")]
-trait IFoo { fn method(&self, parameter: i32) -> com_runtime::Result<i8>; }
-```
-
-#### Expands
-
-```rust
-const IID_IFoo : GUID = Guid::parse("{...}");
-
-struct __IFooVtbl {
-    __base: com_runtime::IUnknownVtbl,
-    method: unsafe extern "stdcall" fn(
-        self_void: *mut c_void,
-        prameter: i32,
-        __out: *mut i8
-    ) -> HRESULT
-}
-```
-
-### `#[com_class(...)]`
-
-Defines the CoClass struct and the primary IUnknown implementation for the
-struct.
-
-```rust
-#[com_class("{...}", IFoo, IBar)]
-struct Foo { ... }
-```
-
-#### Expands
-
-```rust
-/// List of vtables for all the interfaces implemented by Foo.
-///
-/// The specific interface vtables are expanded during [com_impl].
-struct __FooVtblList {
-    IUnknown: com_runtime::IUnknownVtbl,
-    IFoo: __IFooVtbl,
-    IBar: __IBarVtbl
-}
-
-/// Foo::IUnknown vtable
-const __Foo_IUnknownVtbl_INSTANCE : com_runtime::IUnknownVtbl
-    = com_runtime::IUnknownVtbl {
-        query_interface: com_runtime::ComBox::< Foo >::query_interface_ptr,
-        add_ref: com_runtime::ComBox::< Foo >::add_ref,
-        release: com_runtime::ComBox::< Foo >::release,
-    };
-
-/// CoClass implementation for Foo.
-/// This is a requirement for using Foo with the ComBox<T> type, which
-/// implements IUnknown and the virtual tables for COM clients.
-impl com_runtime::CoClass for Foo {
-    type VTableList = __FooVtblList;
-
-    /// Constructs the list of vtables for the object.
-    ///
-    /// Since these are the interface pointers passed to the COM clients, these
-    /// need a known offset from the ComBox<..> &self reference. We achieve
-    /// this by constructing the list as a copy for each ComBox<..> instance.
-    fn create_vtable_list() -> self::VTableList {
-        __FooVtblList {
-            IUnknown: &__Foo_IUnknownVtbl_INSTANCE,
-            IFoo: &__Foo_IFooVtbl_INSTANCE,
-            IBar: &__Foo_IBarVtbl_INSTANCE,
-        }
-    }
-
-    /// Query interface implementation.
-    ///
-    /// Returns a virtual table reference for the given interface ID.
-    fn query_interface(
-        vtables : &Self::VTableList,
-        riid : com_runtime::REFIID
-    ) -> ComResult< com_runtime::RawComPtr > {
-
-        match *riid {
-            IID_IUnknown => Ok( &vtables.IUnknown ),
-            IID_Foo => Ok( &vtables.Foo ),
-            IID_Bar => Ok( &vtables.Bar ),
-            _ => Err( E_NOINTERFACE )
-        }
-    }
-}
-
-/// The vtbl list must be resorvable to an IUnknown virtual table.
-impl AsRef<com_runtime::IUnknownVtbl> for __FooVtblList {
-    fn as_ref< &self ) -> &com_runtime::IUnknownVtbl { &self.IUnknown }
-}
-
-/// vtable offsets.
-///
-/// These are needed when we receive a call through a vtable and we need to
-/// translate the vtable pointer back to the __FooCoClass instance.
-const __Foo_IFooVtbl_offset : usize = offset_of!(ComBox<Foo>, vtable_list.IFoo);
-const __Foo_IBarVtbl_offset : usize = offset_of!(ComBox<Foo>, vtable_list.IBar);
-```
-
-### `#[com_impl]`
-
-Creates the delegating method implementation and the static virtual table
-instance.
-
-```rust
-#[com_impl]
-impl IFoo for Foo {
-    fn method(&self, parameter: i32) -> com_runtime::Result<i8> { ... }
-}
-```
-
-#### Expands
-
-```rust
-/// Foo::IFoo::IUnknown::QueryInterface
-pub unsafe extern "stdcall" fn __Foo_IFoo_query_interface(
-    self_vtable: *mut c_void,
-    riid: *mut GUID,
-    out: *mut *mut c_void
-) -> HRESULT
-{
-    // Convert the interface pointer to ComBox pointer and delegate to the
-    // ComBox query_interface.
-    com_runtime::ComBox::< Foo >::query_interface(
-            transmute( self_vtable - __Foo_IFooVtbl_offset ), riid, out )
-}
-
-// These are implemented the same way as QueryInterface above.
-pub unsafe extern "stdcall" fn __Foo_IFoo_add_ref(...) { ... }
-pub unsafe extern "stdcall" fn __Foo_IFoo_release(...) { ... }
-
-/// Delegating method implementation for the `<Foo as IFoo>.method`.
-pub unsafe extern "stdcall" fn __Foo_IFoo_method(
-    self_vtable : RawComPtr, parameter: i32, __out: *mut i8
-) -> HRESULT
-{
-    // Acquires the ComBox reference from the virtual table pointer.
-    let self_comptr = (self_vtable - __Foo_IFooVtbl_offset)
-        as *mut com_runtime::ComBox< Foo >;
-    let result = (*self_combox).method(parameter);
-    match result {
-        Ok(out) => { *__out = out; S_OK },
-        Err(e) => { *__out = ptr::null_mut(); e },
-    }
-}
-
-/// The static vtable instance for the interface.
-///
-/// The VTableList instances contained in each ComBox<..> contain refernces
-/// to this instance.
-const __Foo_IFooVtbl_INSTANCE : __IFooVtbl = __IFooVtbl {
-    __base: com_runtime::IUnknownVtbl {
-        query_interface: __Foo_IFoo_query_interface,
-        add_ref: __Foo_IFoo_add_ref,
-        release: __Foo_IFoo_release
-    },
-    method: __Foo_IFoo_method
-};
-```
-
-### `#[com_library]`
-
-Defines the entry point and the `IClassFactory` implementation for creating the
-CoClasses.
-
-```rust
-#[com_library(Foo)]
-```
-
-#### Expands
-
-```rust
-/// Class factory create_instance implementation.
-pub unsafe extern "stdcall" fn __ClassFactory_create_instance(
-    self_void: *mut c_void,
-    outer: *mut c_void,
-    riid: *mut GUID,
-    out: *mut *mut c_void
-) -> HRESULT
-{
-    let self_ptr = self_void as *mut com_runtime::ClassFactory;
-    let coclass = match self_ptr.clsid {
-        CLSID_Foo => Box::into_raw(Box::new(__FooCoClass::new())),
-        _ => return CLASS_E_CLASSNOTAVAILABLE,
-    }
-
-    // The IUnknown vtable is at the very beginning of the CoClass struct.
-    // This allows us to acquire pointer to it without knowing which CoClass
-    // this is.
-    (*coclass as com_runtime::IUnknownVtbl).query_interface(coclass, riid, out)
-}
-
-/// Class factory vtable required due to custom create_instance.
-const __ClassFactoryVtbl_INSTANCE : com_runtime::__ClassFactory_vtbl =
-        com_runtime::__ClassFactory_vtbl {
-            __base : com_runtime::IUnknownVtbl {
-                query_interface: com_runtime::ClassFactory::query_interface,
-                add_ref: com_runtime::ClassFactory::add_ref,
-                release: com_runtime::ClassFactory::release,
-            },
-            create_instance: __ClassFactory_create_instance,
-            locK_server: com_runtime::ClassFactory::lock_server,
-        };
-
-/// The symbolic DllGetClassObject entry point.
-#[no_mangle]
-pub unsafe extern "stdcall" fn DllGetClassObject(
-    rclsid: *mut c_void,
-    riid: *mut GUID,
-    out: *mut *mut c_void
-) -> HRESULT
-{
-    *out = com_runtime::ComBox::new_ptr(
-            com_runtime::ClassFactory::new( rclsid, | clsid | {
-                match *clsid {
-                    CLSID_Foo => Ok( com_runtime::ComBox::new_ptr(
-                        Foo::new() ).as_ptr() as com_runtime::RawComPtr ),
-                    _ => Err( E_NOINTERFACE ),
-                }
-            } ) ).as_ptr() as com_runtime::RawComPtr;
-    com_runtime::S_OK
-}
-```
