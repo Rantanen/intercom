@@ -117,15 +117,20 @@ fn expand_com_interface(
     let vtable_ident = idents::vtable_struct( &itf_ident );
 
     // The first parameter in the [com_interface] attribute is the IID guid.
-    let attr_params = utils::get_attr_params( &attr );
+    let crate_name = lib_name();
+    let attr_params = utils::get_parameters( &attr );
     let iid_guid = attr_params
             .as_ref()
             .and_then( |ref params| params.first() )
             .ok_or( "[com_interface(IID:&str)] must specify an IID".to_owned() )
-            .and_then( |f| utils::parameter_to_guid( f ) )?;
+            .and_then( |f| utils::parameter_to_guid( 
+                            f, &crate_name, itf_ident.as_ref(), "IID"
+                        ) )?
+            .ok_or( "Interfaces must specify IID" )?;
 
     // Try to get the base.
     let base = attr_params
+            .as_ref()
             .and_then( |p| p.get( 1 ) )
             .and_then( |p| p.get_ident().ok() );
 
@@ -468,22 +473,15 @@ fn expand_com_class(
 
     // Parse the attribute parameters. [com_class] specifies the CLSID as the
     // first parameter and the remaining parameters are implemented interfaces.
-    let ( clsid_guid, itfs ) = utils::get_attr_params( &attr )
+    let crate_name = lib_name();
+    let ( clsid_guid, itfs ) = utils::get_parameters( &attr )
             .as_ref()
             .and_then( |ref params| params.split_first() )
             .ok_or( "[com_class(IID, itfs...)] must specify an IID".to_owned() )
             .and_then( |( f, itfs )| {
 
-                let guid = match *f {
-                    NestedMetaItem::MetaItem( ref mi ) => {
-                        match mi.get_ident()?.to_string().as_str() {
-                            "NO_CLSID" => None,
-                            _ => return Err( "Invalid GUID constant".to_owned() ),
-                        }
-                    },
-                    _ => Some( utils::parameter_to_guid( f )? )
-                };
-
+                let guid = utils::parameter_to_guid(
+                            f, &crate_name, struct_ident.as_ref(), "CLSID" )?;
                 Ok( ( guid,
                     ( itfs.into_iter()
                         .map( |i|
@@ -716,8 +714,8 @@ fn expand_com_library(
         ) -> ::intercom::HRESULT
         {
             // Create new class factory.
-            // Specify a create function that is able to create all the contained
-            // coclasses.
+            // Specify a create function that is able to create all the
+            // contained coclasses.
             let mut combox = ::intercom::ComBox::new(
                 ::intercom::ClassFactory::new( rclsid, | clsid | {
 

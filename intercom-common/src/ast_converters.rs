@@ -69,6 +69,18 @@ impl GetIdent for Path {
     }
 }
 
+impl<'a> GetIdent for ::utils::AttrParam<'a> {
+
+    fn get_ident( &self ) -> Result<Ident, String>
+    {
+        match *self {
+            ::utils::AttrParam::Word( ident )
+                => Ok( ident.clone() ),
+            _ => Err( format!( "Unsupported AttrParam kind: {:?}", self ) ),
+        }
+    }
+}
+
 impl GetIdent for NestedMetaItem {
 
     fn get_ident( &self ) -> Result<Ident, String>

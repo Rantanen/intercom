@@ -144,6 +144,16 @@ impl GUID {
             ]
         } )
     }
+
+    // Get GUID as bytes.
+    pub fn as_bytes( &self ) -> &[u8; 16]
+    {
+        // We know the GUIDs are 128 bits (16 bytes).
+        // Do the equivalent of a reinterpret_cast.
+        unsafe {
+            &*( self as *const _ as *const [u8; 16] )
+        }
+    }
 }
 
 impl std::fmt::Display for GUID {

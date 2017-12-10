@@ -5,6 +5,9 @@ use intercom_common::guid::GUID;
 use std::io::Read;
 use std::collections::HashMap;
 
+#[derive(Debug)]
+pub enum GUIDType { CLSID, IID }
+
 /// COM interface details.
 #[derive(Debug)]
 pub struct Interface {
@@ -278,6 +281,28 @@ pub fn process_com_lib_attr(
     Ok(())
 }
 
+pub fn get_guid(
+    results : &ParseResult,
+    guid_type : &GUIDType,
+    ident : &syn::Ident,
+    param : &utils::AttrParam
+) -> Result< GUID, AppError >
+{
+    match *param {
+        utils::AttrParam::Literal( &syn::Lit::Str( ref g, .. ) )
+            => Ok( GUID::parse( g )? ),
+        utils::AttrParam::Word( i ) if i == "AUTO_GUID"
+            => Ok( utils::generate_guid(
+                &results.libname,
+                ident.as_ref(),
+                match *guid_type {
+                    GUIDType::CLSID => "CLSID",
+                    GUIDType::IID => "IID",
+                } ) ),
+        _ => Err( format!( "Invalid GUID on {}, {:?}", ident, param ) )?,
+    }
+}
+
 /// Process COM struct.
 pub fn process_struct(
     ident: &syn::Ident,
@@ -301,10 +326,7 @@ pub fn process_struct(
                 format!( "Not enough com_class parameters on {}", ident ) )?;
 
     // Parse the CLSID from the attribute.
-    let clsid = match *name_param {
-        utils::AttrParam::Literal( &syn::Lit::Str( ref g, .. ) ) => g,
-        _ => Err( format!( "Invalid CLSID on {}", ident ) )?,
-    };
+    let clsid = get_guid( r, &GUIDType::CLSID, ident, name_param )?;
 
     // Parse the interface names.
     let interfaces = itf_params
@@ -316,7 +338,7 @@ pub fn process_struct(
             
     // Store the class details.
     r.classes.push( CoClass::new(
-            GUID::parse( clsid )?,
+            clsid,
             format!( "{}", ident ),
             interfaces ) );
 
@@ -402,17 +424,14 @@ pub fn process_interface(
             .ok_or_else( || format!( "Not enough com_interface parameters on {}", ident ) )?;
 
     // Get the interface IID.
-    let iid = match *guid_param {
-        utils::AttrParam::Literal( &syn::Lit::Str( ref g, .. ) ) => g,
-        _ => Err( format!( "Invalid IID on {}", ident ) )?,
-    };
+    let iid = get_guid( r, &GUIDType::IID, ident, guid_param )?;
 
     // Process the methods.
     let methods = get_com_methods( rn, items )?;
             
     // Insert the new interface definition in the results.
     r.interfaces.push( Interface::new(
-            GUID::parse( iid )?,
+            iid,
             format!( "{}", ident ),
             methods ) );
     Ok(())

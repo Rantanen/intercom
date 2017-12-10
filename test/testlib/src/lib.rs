@@ -6,7 +6,7 @@ use intercom::*;
 extern crate winapi;
 
 // Declare available COM classes.
-#[com_library( "{12341234-1234-1234-1234-123412340000}",
+#[com_library( AUTO_GUID,
     RefCountOperations,
     PrimitiveOperations,
     StatefulOperations,
@@ -44,12 +44,12 @@ impl PrimitiveOperations
     pub fn f32( &self, v : f32 ) -> f32 { 1f32 / v }
 }
 
-#[com_class("{12341234-1234-1234-1234-123412340003}", StatefulOperations )]
+#[com_class( AUTO_GUID, StatefulOperations )]
 pub struct StatefulOperations {
     state : i32
 }
 
-#[com_interface("{12341234-1234-1234-1234-123412340004}")]
+#[com_interface( AUTO_GUID )]
 #[com_impl]
 impl StatefulOperations {
     pub fn new() -> StatefulOperations { StatefulOperations { state : 0xABBACD } }
@@ -59,10 +59,10 @@ impl StatefulOperations {
     pub fn get_value( &mut self ) -> i32 { self.state }
 }
 
-#[com_class("{12341234-1234-1234-1234-123412340005}", ResultOperations )]
+#[com_class( AUTO_GUID, ResultOperations )]
 pub struct ResultOperations { }
 
-#[com_interface("{12341234-1234-1234-1234-123412340006}")]
+#[com_interface( AUTO_GUID )]
 #[com_impl]
 impl ResultOperations {
     pub fn new() -> ResultOperations { ResultOperations {} }
@@ -81,13 +81,13 @@ impl ResultOperations {
     }
 }
 
-#[com_class("{12341234-1234-1234-1234-123412340007}", ClassCreator )]
+#[com_class( AUTO_GUID, ClassCreator )]
 pub struct ClassCreator { }
 
-#[com_class("{12341234-1234-1234-1234-123412340008}", CreatedClass )]
+#[com_class( AUTO_GUID, CreatedClass )]
 pub struct CreatedClass { id : i32, parent: i32 }
 
-#[com_interface("{12341234-1234-1234-1234-123412340009}")]
+#[com_interface( AUTO_GUID )]
 #[com_impl]
 impl ClassCreator {
     pub fn new() -> ClassCreator { ClassCreator {} }
@@ -110,7 +110,7 @@ impl ClassCreator {
     // }
 }
 
-#[com_interface("{12341234-1234-1234-1234-123412340010}")]
+#[com_interface( AUTO_GUID )]
 #[com_impl]
 impl CreatedClass {
     pub fn new() -> CreatedClass { unreachable!() }
@@ -121,10 +121,10 @@ impl CreatedClass {
     pub fn get_parent_id( &self ) -> ComResult<i32> { Ok( self.parent ) }
 }
 
-#[com_class("{12341234-1234-1234-1234-123412340011}", RefCountOperations )]
+#[com_class( AUTO_GUID, RefCountOperations )]
 pub struct RefCountOperations {}
 
-#[com_interface("{12341234-1234-1234-1234-123412340012}")]
+#[com_interface( AUTO_GUID )]
 #[com_impl]
 impl RefCountOperations {
     pub fn new() -> RefCountOperations { RefCountOperations { } }
@@ -139,14 +139,14 @@ impl RefCountOperations {
     }
 }
 
-#[com_interface("{12341234-1234-1234-1234-123412340013}")]
+#[com_interface( AUTO_GUID )]
 pub trait ISharedInterface {
     fn get_value( &self ) -> u32;
     fn set_value( &mut self, v : u32 );
     fn divide_by( &self, divisor: ComItf<ISharedInterface> ) -> ComResult<u32>;
 }
 
-#[com_class("{12341234-1234-1234-1234-123412340014}", ISharedInterface)]
+#[com_class( AUTO_GUID, ISharedInterface)]
 pub struct SharedImplementation { value: u32 }
 
 impl SharedImplementation {
@@ -166,7 +166,7 @@ impl ISharedInterface for SharedImplementation {
     }
 }
 
-#[com_class("{12341234-1234-1234-1234-123412340015}", ErrorSource)]
+#[com_class( AUTO_GUID, ErrorSource)]
 pub struct ErrorSource;
 
 #[derive(Debug)]
@@ -182,7 +182,7 @@ impl std::fmt::Display for TestError {
     }
 }
 
-#[com_interface("{12341234-1234-1234-1234-123412340016}")]
+#[com_interface( AUTO_GUID )]
 #[com_impl]
 impl ErrorSource
 {

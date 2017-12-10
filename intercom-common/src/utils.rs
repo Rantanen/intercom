@@ -14,35 +14,34 @@ pub fn trace( t : &str, n : &str ) {
 }
 
 pub fn parse_com_lib_tokens(
+    crate_name : &str,
     tokens : &TokenStream,
-) -> Result<( String, guid::GUID, Vec<String> ), MacroError>
+) -> Result<( guid::GUID, Vec<String> ), MacroError>
 {
-    parse_com_lib_attribute( &parse_attr_tokens( "com_lib", tokens )? )
+    parse_com_lib_attribute(
+        crate_name,
+        &parse_attr_tokens( "com_library", tokens )? )
 }
 
 pub fn parse_com_lib_attribute(
+    crate_name : &str,
     attr : &Attribute,
-) -> Result<( String, guid::GUID, Vec<String> ), MacroError>
+) -> Result<( guid::GUID, Vec<String> ), MacroError>
 {
     let params = get_parameters( attr )
             .ok_or( "Bad parameters on com_library" )?;
 
-    let ( libname_param, other_params ) = params.split_first()
-            .ok_or( "Not enough com_library parameters" )?;
-    let ( libid_param, cls_params ) = other_params.split_first()
+    let ( libid_param, cls_params ) = params.split_first()
             .ok_or( "Not enough com_library parameters" )?;
 
 
     Ok( (
-        match *libname_param {
-            AttrParam::Word( w ) => format!( "{}", w ),
-            _ => Err( "Invalid library name" )?,
-        },
-        match *libid_param {
-            AttrParam::Literal( &syn::Lit::Str( ref g, .. ) )
-                => guid::GUID::parse( g )?,
-            _ => Err( "Invalid LIBID" )?,
-        },
+        parameter_to_guid(
+            libid_param,
+            crate_name,
+            "",
+            "LIBID" )?
+            .ok_or( "Library must specify LIBID" )?,
         cls_params
             .into_iter()
             .map( |cls| match *cls {
@@ -196,6 +195,7 @@ pub fn get_struct_ident_from_annotatable(
     &item.ident
 }
 
+#[derive(PartialEq, Eq, Debug)]
 pub enum AttrParam<'a> {
     Literal( &'a syn::Lit ),
     Word( &'a syn::Ident ),
@@ -207,8 +207,10 @@ pub fn get_parameters(
 {
     Some( match attr.value {
 
+        // Attributes without parameter lists don't have params.
         syn::MetaItem::Word(..)
             | syn::MetaItem::NameValue(..) => return None,
+
         syn::MetaItem::List( _, ref l ) =>
             l.iter().map( |i| {
 
@@ -228,17 +230,6 @@ pub fn get_parameters(
                 }
             } ).collect() ,
     } )
-}
-
-pub fn get_attr_params(
-    attr : &Attribute
-) -> Option< &Vec<NestedMetaItem> >
-{
-    if let MetaItem::List( _, ref v ) = attr.value {
-        return Some( v );
-    }
-
-    None
 }
 
 pub fn get_ty_ident(
@@ -272,15 +263,83 @@ pub fn get_trait_method(
     None
 }
 
+const AUTO_GUID_BASE : guid::GUID = guid::GUID {
+    data1: 0x4449_494C,
+    data2: 0xDE1F,
+    data3: 0x4525,
+    data4: [ 0xB9, 0x57, 0x89, 0xD6, 0x0C, 0xE9, 0x34, 0x77 ]
+};
+
 pub fn parameter_to_guid(
-    p : &NestedMetaItem
-) -> Result< guid::GUID, String >
+    p : &AttrParam,
+    crate_name : &str,
+    item_name : &str,
+    item_type : &str,
+) -> Result< Option< guid::GUID >, String >
 {
-    if let NestedMetaItem::Literal( Lit::Str( ref s, _ ) ) = *p {
-        return guid::GUID::parse( s.as_str() );
+    if let AttrParam::Word( i ) = *p {
+        return Ok( match i.as_ref() {
+            "AUTO_GUID" =>
+                Some( generate_guid( crate_name, item_name, item_type ) ),
+            "NO_GUID" =>
+                None,
+            _ => return Err( format!( "Invalid GUID: {:?}", i ) ),
+        } );
+    }
+
+    if let AttrParam::Literal( &Lit::Str( ref s, _ ) ) = *p {
+        return Ok( Some( guid::GUID::parse( s.as_str() )? ) );
     }
 
     Err( "GUID parameter must be literal string".to_owned() )
+}
+
+pub fn generate_guid(
+    crate_name : &str,
+    item_name : &str,
+    item_type : &str,
+) -> guid::GUID
+{
+    // Hash the name. The name will be hashed in a form similar to:
+    // CLSID:random_rust_crate:FooBar
+    let mut hash = sha1::Sha1::new();
+    hash.update( AUTO_GUID_BASE.as_bytes() );
+    hash.update( item_type.as_bytes() );
+    hash.update( b":" );
+    hash.update( crate_name.as_bytes() );
+    hash.update( b":" );
+    hash.update( item_name.as_bytes() );
+
+    let digest = hash.digest();
+    let bytes = digest.bytes();
+
+    // Set the GUID bytes according to RFC-4122, section 4.3.
+    let time_low : u32
+        = ( u32::from( bytes[0] ) << 24 )
+        + ( u32::from( bytes[1] ) << 16 )
+        + ( u32::from( bytes[2] ) << 8 )
+        + u32::from( bytes[3] );
+    let time_mid : u16
+        = ( u16::from( bytes[4] ) << 8 )
+        + ( u16::from( bytes[5] ) );
+    let time_hi_and_version : u16
+        = (
+            (
+                ( u16::from( bytes[6] ) << 8 ) + u16::from( bytes[7] )
+            ) & 0x0fff
+        ) | 0x3000;
+    let clk_seq_hi_res : u8
+        = ( bytes[8] & 0b0011_1111 ) | 0b0100_0000;
+    let clk_seq_low : u8 = bytes[9];
+
+    guid::GUID {
+        data1: time_low,
+        data2: time_mid,
+        data3: time_hi_and_version,
+        data4: [
+            clk_seq_hi_res, clk_seq_low,
+            bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15] ]
+    }
 }
 
 pub fn get_method_args(

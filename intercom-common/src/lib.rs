@@ -2,6 +2,7 @@
 extern crate quote;
 extern crate syn;
 extern crate proc_macro;
+extern crate sha1;
 
 pub mod guid;
 pub mod error;
