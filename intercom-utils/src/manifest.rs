@@ -30,7 +30,7 @@ fn result_to_manifest(
         format!( r###"
                 <comClass progid="{}.{}"
                     clsid="{{{}}}" />
-        "###, r.libname.as_ref().unwrap(), coclass.name, coclass.clsid )
+        "###, utils::pascal_case( &r.libname ), coclass.name, coclass.clsid )
     } ).collect::<Vec<_>>().join( "\n" );
 
 
@@ -47,8 +47,8 @@ fn result_to_manifest(
             </file>
         </assembly>
         "###,
-        r.libname.as_ref().unwrap(),
-        r.libname.as_ref().unwrap(),
+        utils::pascal_case( &r.libname ),
+        utils::pascal_case( &r.libname ),
         r.libid.as_ref().unwrap(),
         classes );
 }

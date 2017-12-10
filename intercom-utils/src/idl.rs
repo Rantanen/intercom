@@ -56,7 +56,7 @@ fn result_to_idl(
             format!( r###"
                 [id({:X})]
                 {} {}( {} );
-            "###, i, m.rvalue, pascal_case( &m.name ), args )
+            "###, i, m.rvalue, utils::pascal_case( &m.name ), args )
 
         } ).collect::<Vec<_>>().join( "\n" );
 
@@ -122,7 +122,7 @@ fn result_to_idl(
         }}
         "###,
     r.libid.as_ref().unwrap(),
-    r.libname.as_ref().unwrap(),
+    utils::pascal_case( &r.libname ),
     itf_introductions,
     itfs,
     classes );

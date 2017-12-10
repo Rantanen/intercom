@@ -485,3 +485,42 @@ pub fn get_guid_tokens(
         }
     )
 }
+
+/// Convert the Rust identifier from `snake_case` to `PascalCase`
+pub fn pascal_case( input : &str ) -> String {
+
+    // Allocate the output string. We'll never increase the amount of
+    // characters so we can reserve string buffer using the input string length.
+    let mut output = String::new();
+    output.reserve( input.len() );
+
+    // Process each character from the input.
+    let mut capitalize = true;
+    for c in input.chars() {
+
+        // Check the capitalization requirement.
+        if c == '_' {
+
+            // Skip '_' but capitalize the following character.
+            capitalize = true;
+
+        } else if capitalize {
+
+            // Capitalize. Add the uppercase characters.
+            for c_up in c.to_uppercase() {
+                output.push( c_up )
+            }
+
+            // No need to capitalize any more.
+            capitalize = false;
+
+        } else {
+
+            // No need to capitalize. Just add the character as is.
+            output.push( c );
+        }
+
+    }
+    output
+}
+
