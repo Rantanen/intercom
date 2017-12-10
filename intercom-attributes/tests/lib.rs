@@ -17,8 +17,19 @@ use std::io::Read;
 #[test]
 fn check_expansions() {
 
+    let mut root_path = std::env::current_exe().unwrap();
+    loop {
+        if root_path.join( "Cargo.toml" ).exists() {
+            break;
+        }
+        assert!( root_path.pop() );
+    }
+
+    let crate_path = root_path.join( "intercom-attributes" );
+    let data_path = crate_path.join( "tests/data" );
+
     // Get the source test data files.
-    let test_data = fs::read_dir( "tests/data" ).unwrap();
+    let test_data = fs::read_dir( data_path ).unwrap();
     let source_paths = test_data
             .into_iter()
             .map( |e| e.expect("Failed to read entry").path() )
@@ -45,7 +56,8 @@ fn check_expansions() {
         //
         // The source is compiled using rustc and the target is just read
         // from the disk.
-        let mut source_code = build( &source_path );
+        let mut source_code = build(
+                    crate_path.to_str().unwrap(), &source_path );
         let mut target_code = String::new();
         target_file.read_to_string( &mut target_code )
                     .expect( "Failed to read target" );
@@ -85,10 +97,12 @@ fn check_expansions() {
 
 /// Compiles a single file using rustc using similar options than what
 /// cargo would have used.
-fn build( path : &str ) -> String {
+fn build( cwd: &str, path : &str ) -> String {
 
     // Launch rustc.
     let output = std::process::Command::new( "rustc" )
+            .current_dir( cwd )
+            .env( "CARGO_PKG_NAME", "TestLib" )
             .args( &[
                 "--crate-name", "source",
                 "--crate-type", "lib",
