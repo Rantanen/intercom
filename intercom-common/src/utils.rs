@@ -301,7 +301,7 @@ pub fn generate_guid(
 ) -> guid::GUID
 {
     // Hash the name. The name will be hashed in a form similar to:
-    // CLSID:random_rust_crate:FooBar
+    // AUTO_GUID_BASE + "CLSID:random_rust_crate:FooBar"
     let mut hash = sha1::Sha1::new();
     hash.update( AUTO_GUID_BASE.as_bytes() );
     hash.update( item_type.as_bytes() );
