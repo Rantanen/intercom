@@ -1,6 +1,6 @@
 [package]
 name = "intercom"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 license = "MIT"
 repository = "https://github.com/Rantanen/intercom"
@@ -13,4 +13,4 @@ appveyor = { repository = "Rantanen/intercom", branch = "master", service = "git
 name = "intercom"
 
 [dependencies]
-intercom-attributes = { version = "0.1.0", path = "../intercom-attributes" }
+intercom-attributes = { version = "0.2.0", path = "../intercom-attributes" }
