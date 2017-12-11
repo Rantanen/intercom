@@ -4,6 +4,7 @@
 [![crates.io](https://img.shields.io/crates/v/intercom.svg)](https://crates.io/crates/intercom)
 [![Build status](https://ci.appveyor.com/api/projects/status/q88b7xk6l72kup0y?svg=true)](https://ci.appveyor.com/project/Rantanen/intercom)
 [![Build Status](https://travis-ci.org/Rantanen/intercom.svg?branch=master)](https://travis-ci.org/Rantanen/intercom)
+[![codecov](https://codecov.io/gh/Rantanen/intercom/branch/master/graph/badge.svg)](https://codecov.io/gh/Rantanen/intercom)
 
 Intercom enables the user to write reusable components in Rust, that are
 binary compatible with the Component Object Model interface standard. These
