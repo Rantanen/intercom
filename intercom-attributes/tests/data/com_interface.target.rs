@@ -138,7 +138,7 @@ impl Foo for ::intercom::ComItf<Foo>
             if __result == ::intercom::S_OK {
                 Ok(__out.into())
             } else {
-                Err(__result)
+                Err(::intercom::get_last_error(__result))
             }
         }
     }
@@ -159,7 +159,7 @@ impl Foo for ::intercom::ComItf<Foo>
             if __result == ::intercom::S_OK {
                 Ok(__out.into())
             } else {
-                Err(::intercom::get_last_error())
+                Err(::intercom::get_last_error(__result))
             }
         }
     }
@@ -192,7 +192,7 @@ impl Foo for ::intercom::ComItf<Foo>
             if __result == ::intercom::S_OK {
                 Ok(__out.into())
             } else {
-                Err(__result)
+                Err(::intercom::get_last_error(__result))
             }
         }
     }

@@ -20,6 +20,12 @@ pub struct ComArg {
     pub handler: Box<TyHandler>,
 }
 
+impl ::std::fmt::Debug for ComArg {
+    fn fmt( &self, f: &mut ::std::fmt::Formatter ) -> ::std::fmt::Result {
+        write!( f, "{}: {:?}", self.name, self.ty )
+    }
+}
+
 impl ComArg {
 
     pub fn new( name: Ident, ty: Ty ) -> ComArg {

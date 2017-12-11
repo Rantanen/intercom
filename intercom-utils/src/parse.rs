@@ -2,6 +2,7 @@
 use super::*;
 use intercom_common::*;
 use intercom_common::guid::GUID;
+use intercom_common::methodinfo;
 use std::io::Read;
 use std::collections::HashMap;
 
@@ -46,7 +47,7 @@ pub struct MethodArg {
 }
 
 /// Argument direction.
-#[derive(Debug, PartialEq)] pub enum ArgDirection { In, Return }
+#[derive(Debug, PartialEq)] pub enum ArgDirection { In, Out, Return }
 
 /// Mutability information.
 #[derive(Debug)] pub enum Mutability { Mutable, Immutable }
@@ -456,81 +457,47 @@ fn get_com_methods(
     let mut v = vec![];
     for ( ident, method ) in methods {
 
-        // Rust should use &self as the first parameter. Split it from the
-        // parameter inputs.
-        let ( self_arg, other_args ) = match method.decl.inputs.split_first() {
-            Some( ( s, other ) ) => ( s, other ),
-
-            // Getting first fails if there are no arguments. This means no
-            // 'self' argument, thus not a proper instance method.
-            _ => continue,
-        };
-
-        // Only self by reference is supported. COM never transfer ownership.
-        let mutability = match *self_arg {
-            syn::FnArg::SelfRef( _, m ) => match m {
-                syn::Mutability::Mutable => Mutability::Mutable,
-                syn::Mutability::Immutable => Mutability::Immutable,
-            },
-
-            // All other cases are either non-borrowed self values: Either
-            // self-by-ownership or non-self parameters in case of static
-            // methods. All of these result in the method being skipped.
-            //
-            // NOTE: Due to new requirements for interfaces, we might need to
-            //       error out on these cases. If there are "unsupported"
-            //       methods in the traits, we can't support Rust-to-COM calls
-            //       for these. However for implicit impls we don't support
-            //       Rust-to-COM calls anyway currently and things like
-            //       new-constructors, etc. would fall under this case.
-            //
-            //       Need to consider this in the future.
-            _ => continue,
-        };
-
         // Get COM arguments.
-        let mut args = match get_com_args( rn, other_args ) {
-            Ok(v) => v,
-            Err(e) => { eprintln!( "{}", e ); continue },
+        let method_res = methodinfo::ComMethodInfo::new( ident, &method.decl );
+        let method_info = match method_res {
+            Ok( mi ) => mi,
+            Err( _ ) => continue,
         };
 
-        // Figure out the return type.
-        //
-        // We should migrate this to the ComMethodInfo/ReturnHandler infra at
-        // some point in the future.
-        let rvalue = match method.decl.output {
+        let in_args = method_info.args
+                .iter()
+                .map( |ref ca| Some( MethodArg {
+                        name: ca.name.to_string(),
+                        dir: ArgDirection::In,
+                        ty: get_cpp_ty( rn, &ca.handler.com_ty() ).ok()?
+                    } ) )
+                .filter_map(|o| o)
+                .collect::<Vec<_>>();
+        let out_args = method_info.returnhandler
+                .com_out_args()
+                .iter()
+                .map( |ref ca| Some( MethodArg {
+                        name: ca.name.to_string(),
+                        dir: match method_info.retval_type {
+                            Some( syn::Ty::Tup(_) ) => ArgDirection::Out,
+                            _ => ArgDirection::Return,
+                        },
+                        ty: get_cpp_ty( rn, &ca.handler.com_ty() ).ok()?
+                    } ) )
+                .filter_map(|o| o)
+                .collect::<Vec<_>>();
+        let args = in_args.into_iter().chain( out_args.into_iter() ).collect();
 
-            // "Default" return type means the type was omitted, thus there is
-            // no return value.
-            syn::FunctionRetTy::Default => "void".to_owned(),
-
-            // Return type is defined.
-            syn::FunctionRetTy::Ty( ref ty ) => {
-
-                // Convert the return type into [retval] and COM return type.
-                let ( out_ty_opt, ret_ty ) = utils::get_ret_types( ty )?;
-
-                // If there was a [retval] out-value, add that in the arguemnts.
-                if let Some( out_ty ) = out_ty_opt {
-                    let arg_ty = get_com_ty( rn, &out_ty )?;
-                    if arg_ty != "void" {
-                        args.push( MethodArg {
-                            name: "__out".to_owned(),
-                            dir: ArgDirection::Return,
-                            ty: arg_ty
-                        } );
-                    }
-                }
-                
-                // Return the COM equivalent for the return type.
-                get_com_ty( rn, &ret_ty )?
-            }
-        };
+        let rvalue = get_cpp_ty( rn, &method_info.returnhandler.com_ty() )?;
 
         // Add the ComMethod details in the result vector.
         v.push( ComMethod {
             name : format!( "{}", ident ),
-            mutability: mutability,
+            mutability: if method_info.is_const {
+                            Mutability::Immutable
+                        } else {
+                            Mutability::Mutable
+                        },
             arguments: args,
             rvalue: rvalue,
         } );
@@ -539,45 +506,8 @@ fn get_com_methods(
     Ok( v )
 }
 
-/// Gets COM arguments for a method.
-fn get_com_args(
-    rn : &HashMap<String, String>,
-    args : &[syn::FnArg]
-) -> Result< Vec<MethodArg>, AppError > {
-
-    // Gather all arguments.
-    let mut v = vec![];
-    for arg in args {
-
-        // We have already skipped the first self-argument here.
-        // All the remaining arguments must be defined properly.
-        let ( pat, ty ) = match *arg {
-            syn::FnArg::Captured( ref pat, ref ty ) => ( pat, ty ),
-            _ => Err( format!( "Unsupported argument type: {:?}", arg ) )?,
-        };
-
-        // Currently we only support the simple arguments. No destructuring or
-        // other arguemnt types are allowed.
-        let ident = match *pat {
-            syn::Pat::Ident( _, ref ident, _ ) => ident,
-            _ => Err( format!( "Unsupported argument pattern: {:?}", pat ) )?,
-        };
-
-        // Argument type.
-        let idl_ty = get_com_ty( rn, ty )?;
-
-        // Add the method argument in the result vector.
-        v.push( MethodArg {
-            name: ident.to_string(),
-            dir: ArgDirection::In, 
-            ty: idl_ty
-        } );
-    }
-    Ok( v )
-}
-
 /// Gets the COM type for a Rust type.
-fn get_com_ty(
+fn get_cpp_ty(
     rn : &HashMap<String, String>,
     ty : &syn::Ty,
 ) -> Result< String, AppError > {
@@ -586,20 +516,20 @@ fn get_com_ty(
 
         // Pointer types.
         syn::Ty::Slice( ref ty )
-            => format!( "*{}", get_com_ty( rn, ty )? ),
+            => format!( "*{}", get_cpp_ty( rn, ty )? ),
         syn::Ty::Ptr( ref mutty )
             | syn::Ty::Rptr( .., ref mutty )
             => match mutty.mutability {
                 syn::Mutability::Mutable
-                    => format!( "*{}", get_com_ty( rn, &mutty.ty )? ),
+                    => format!( "*{}", get_cpp_ty( rn, &mutty.ty )? ),
                 syn::Mutability::Immutable
-                    => format!( "*const {}", get_com_ty( rn, &mutty.ty )? ),
+                    => format!( "*const {}", get_cpp_ty( rn, &mutty.ty )? ),
             },
 
         // This is quite experimental. Do IDLs even support staticly sized
         // arrays? Currently this turns [u8; 3] into "uint8[3]" IDL type.
         syn::Ty::Array( ref ty, ref count )
-            => format!( "{}[{:?}]", get_com_ty( rn, ty.as_ref() )?, count ),
+            => format!( "{}[{:?}]", get_cpp_ty( rn, ty.as_ref() )?, count ),
 
         // Normal Rust struct/trait type.
         syn::Ty::Path(.., ref path )
@@ -659,7 +589,8 @@ fn segment_to_ty(
         
         // Hardcoded handling for parameter types.
         "ComRc" | "ComItf"
-            => format!( "{}*", get_com_ty( rn, &args[0] )? ),
+            => format!( "{}*", get_cpp_ty( rn, &args[0] )? ),
+        "RawComPtr" => "*void".to_owned(),
         "String" => "BSTR".to_owned(),
         "usize" => "size_t".to_owned(),
         "u64" => "uint64".to_owned(),

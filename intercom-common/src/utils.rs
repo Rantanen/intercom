@@ -369,7 +369,7 @@ pub fn get_method_args(
                     if ! is_unit( &out_ty ) {
                         let param = tyhandlers::get_ty_handler( &out_ty );
                         let ty = param.com_ty();
-                        args.push( quote!( __out : *mut #ty ) );
+                        args.push( quote!( __outX : *mut #ty ) );
                     }
                 }
             } else {
@@ -486,7 +486,7 @@ pub fn get_method_rvalues(
         // Result<_, _>. Ok() -> __out + S_OK, Err() -> E_*
         Some( ref out_ty ) => {
             let param = tyhandlers::get_ty_handler( out_ty );
-            let out_ident = Ident::from( "__out" );
+            let out_ident = Ident::from( "__outX" );
             let result_value = param.rust_to_com( &Ident::from( "r" ) );
             let default_value = param.default_value();
             (

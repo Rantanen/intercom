@@ -183,18 +183,30 @@ fn expand_com_interface(
             let method_info = ComMethodInfo::new(
                     &method_ident, &method_sig.decl ).ok()?;
 
-            // The vtable still uses the old utils::* methods for these.
-            // We'll want to replace these with ComMethodInfo-based handling
-            // in the future.
-            let ( args, _ ) =
-                    utils::get_method_args( method_sig )?;
+            let in_args = method_info.args
+                    .iter()
+                    .map( |ca| {
+                        let name = &ca.name;
+                        let com_ty = ca.handler.com_ty();
+                        quote!( #name : #com_ty )
+                    } ).collect::<Vec<_>>();
+            let out_args = method_info.returnhandler.com_out_args()
+                    .iter()
+                    .map( |ca| {
+                        let name = &ca.name;
+                        let com_ty = ca.handler.com_ty();
+                        quote!( #name : *mut #com_ty )
+                    } ).collect::<Vec<_>>();
+            let self_arg = quote!( self_vtable : ::intercom::RawComPtr );
+            let args = iter::once( self_arg )
+                                .chain( in_args )
+                                .chain( out_args );
 
             // Create the vtable field and add it to the vector of fields.
-            let arg_tokens = utils::flatten( args.iter() );
             let ret_ty = method_info.returnhandler.com_ty();
             fields.push( quote!(
                 pub #method_ident :
-                    unsafe extern "stdcall" fn( #arg_tokens ) -> #ret_ty,
+                    unsafe extern "stdcall" fn( #( #args ),* ) -> #ret_ty,
             ) );
 
             // COM delegate implementation.
@@ -410,9 +422,32 @@ fn expand_com_impl(
             let method_info = ComMethodInfo::new(
                     &method_ident, &method_sig.decl ).ok()?;
 
-            // Get the self argument and the remaining args.
-            let ( args, params ) =
-                    utils::get_method_args( method_sig )?;
+            let in_args = method_info.args
+                    .iter()
+                    .map( |ca| {
+                        let name = &ca.name;
+                        let com_ty = ca.handler.com_ty();
+                        quote!( #name : #com_ty )
+                    } ).collect::<Vec<_>>();
+            let out_args = method_info.returnhandler.com_out_args()
+                    .iter()
+                    .map( |ca| {
+                        let name = &ca.name;
+                        let com_ty = ca.handler.com_ty();
+                        quote!( #name : *mut #com_ty )
+                    } ).collect::<Vec<_>>();
+            let self_arg = quote!( self_vtable : ::intercom::RawComPtr );
+            let args = iter::once( self_arg )
+                                .chain( in_args )
+                                .chain( out_args );
+
+            // Format the in and out parameters for the Rust call.
+            let in_params = method_info.args
+                    .iter()
+                    .map( |ca| {
+                        let param = ca.handler.com_to_rust( &ca.name );
+                        quote!( #param )
+                    } ).collect::<Vec<_>>();
 
             let return_ident = Ident::from( "__result" );
             let return_statement = method_info
@@ -425,22 +460,22 @@ fn expand_com_impl(
             // vtable for the current interface. To get the coclass and thus
             // the actual 'data' struct, we'll need to offset the self_vtable
             // with the vtable offset.
-            let arg_tokens = utils::flatten( args.iter() );
-            let param_tokens = utils::flatten( params.iter() );
             let ret_ty = method_info.returnhandler.com_ty();
             output.push( quote!(
                 #[allow(non_snake_case)]
                 #[allow(dead_code)]
                 #[doc(hidden)]
                 pub unsafe extern "stdcall" fn #method_impl_ident(
-                    #arg_tokens
+                    #( #args ),*
                 ) -> #ret_ty {
                     // Acquire the reference to the ComBox. For this we need
                     // to offset the current 'self_vtable' vtable pointer.
                     let self_combox = ( self_vtable as usize - #vtable_offset() )
                             as *mut ::intercom::ComBox< #struct_ident >;
 
-                    let #return_ident = (*self_combox).#method_ident( #param_tokens );
+                    let #return_ident = (*self_combox).#method_ident(
+                        #( #in_params ),* );
+
                     #return_statement
                 }
             ) );

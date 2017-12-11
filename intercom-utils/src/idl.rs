@@ -41,6 +41,7 @@ fn result_to_idl(
                 // whether the argument is passed by pointer or value.
                 let ( attrs, out_ptr ) = match a.dir {
                     ArgDirection::In => ( "in", "" ),
+                    ArgDirection::Out => ( "out", "*" ),
                     ArgDirection::Return => ( "out, retval", "*" ),
                 };
                 format!( "[{}] {}{} {}", attrs, a.ty, out_ptr, a.name )

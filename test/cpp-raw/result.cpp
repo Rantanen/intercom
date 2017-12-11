@@ -39,6 +39,18 @@ TEST_CASE( "Results can be returned" )
 			REQUIRE( pOps->Sqrt( -1.0, OUT &out ) == E_INVALIDARG );
 			REQUIRE( out == 0 );
 		}
+
+		SECTION( "Tuples are converted to multiple OUT parameters" )
+		{
+			uint16_t left;
+			uint16_t right;
+
+			hr = pOps->Tuple( 0xABBA0CD0, OUT &left, OUT &right );
+
+			REQUIRE( hr == S_OK );
+			REQUIRE( left == 0xABBA );
+			REQUIRE( right == 0x0CD0 );
+		}
 	}
 
 	UninitializeRuntime();

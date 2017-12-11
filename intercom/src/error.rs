@@ -83,6 +83,18 @@ impl From<std::io::Error> for ComError {
     }
 }
 
+impl From<::HRESULT> for ComError {
+    fn from( hresult : ::HRESULT ) -> ComError {
+        ComError::new_hr( hresult )
+    }
+}
+
+impl From<ComError> for ::HRESULT {
+    fn from( error : ComError ) -> ::HRESULT {
+        error.hresult
+    }
+}
+
 #[cfg(windows)]
 #[allow(non_snake_case)]
 mod error_store {

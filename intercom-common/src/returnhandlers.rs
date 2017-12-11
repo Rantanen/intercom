@@ -2,7 +2,6 @@
 use syn::*;
 use quote::Tokens;
 use methodinfo::ComArg;
-use ast_converters::*;
 use tyhandlers;
 use utils;
 
@@ -53,63 +52,6 @@ impl ReturnHandler for ReturnOnlyHandler {
     fn com_out_args( &self ) -> Vec<ComArg> { vec![] }
 }
 
-/// Result return type that is converted into COM [retval] and HRESULT return.
-struct HResultHandler { retval_ty: Ty, return_ty: Ty }
-impl ReturnHandler for HResultHandler {
-
-    fn rust_ty( &self ) -> Ty { self.return_ty.clone() }
-    fn com_ty( &self ) -> Ty { parse_type( "::intercom::HRESULT" ).unwrap() }
-
-    fn com_to_rust_return( &self, result : &Ident ) -> Tokens {
-
-        // Return statement checks for S_OK (should be is_success) HRESULT and
-        // yields either Ok or Err Result based on that.
-        let ok_values = get_ok_values( self.com_out_args() );
-        let ok_tokens = if ok_values.len() != 1 {
-                quote!( ( #( #ok_values ),* ) )
-            } else {
-                quote!( #( #ok_values )* )
-            };
-        quote!(
-            if #result == ::intercom::S_OK {
-                Ok( #ok_tokens )
-            } else {
-                Err( #result )
-            }
-        )
-    }
-
-    fn rust_to_com_return( &self, result : &Ident ) -> Tokens {
-
-        let ( ok_writes, err_writes ) = write_out_values(
-            &[ Ident::from( "v" ) ],
-            self.com_out_args() );
-        quote!(
-            match #result {
-                Ok( v ) => { #( #ok_writes );*; ::intercom::S_OK },
-                Err( e ) => { #( #err_writes );*; e },
-            }
-        )
-    }
-
-    fn com_out_args( &self ) -> Vec<ComArg> {
-
-        if utils::is_unit( &self.retval_ty ) {
-            return vec![];
-        }
-
-        // Since we have only one out value in any case, we can hardcode the
-        // __out here. The only thing that relies on it being hardcoded is the
-        // HResultHandler itself.
-        vec![
-            ComArg::new(
-                Ident::from( "__out" ),
-                self.retval_ty.clone()
-            )
-        ]
-    }
-}
-
 /// Result type that supports error info for the `Err` value. Converted to
 /// `[retval]` on success or `HRESULT` + `IErrorInfo` on error.
 struct ErrorResultHandler { retval_ty: Ty, return_ty: Ty }
@@ -132,19 +74,42 @@ impl ReturnHandler for ErrorResultHandler {
             if #result == ::intercom::S_OK {
                 Ok( #ok_tokens )
             } else {
-                Err( ::intercom::get_last_error() )
+                Err( ::intercom::get_last_error( #result ) )
             }
         )
     }
 
     fn rust_to_com_return( &self, result : &Ident ) -> Tokens {
 
+        // Get the OK idents. We'll use v0, v1, v2, ... depending on the amount
+        // of patterns we need for possible tuples.
+        let ok_idents = self.com_out_args()
+                    .iter()
+                    .enumerate()
+                    .map( |(idx, _)| Ident::from( format!( "v{}", idx + 1 ) ) )
+                    .collect::<Vec<_>>();
+
+        // Generate the pattern for the Ok(..).
+        // Tuples get (v0, v1, v2, ..) pattern while everything else is
+        // represented with just Ok( v0 ) as there's just one parameter.
+        let ok_pattern = {
+            // quote! takes ownership of tokens if we allow so let's give them
+            // by reference here.
+            let rok_idents = &ok_idents;
+            match self.retval_ty {
+                Ty::Tup( _ ) => quote!( ( #( #rok_idents ),* ) ),
+
+                // Non-tuples should have only one ident. Concatenate the vector.
+                _ => quote!( #( #rok_idents )* ),
+            }
+        };
+
         let ( ok_writes, err_writes ) = write_out_values(
-            &[ Ident::from( "v" ) ],
+            &ok_idents,
             self.com_out_args() );
         quote!(
             match #result {
-                Ok( v ) => { #( #ok_writes );*; ::intercom::S_OK },
+                Ok( #ok_pattern ) => { #( #ok_writes );*; ::intercom::S_OK },
                 Err( e ) => {
                     #( #err_writes );*;
                     ::intercom::return_hresult( e )
@@ -154,20 +119,23 @@ impl ReturnHandler for ErrorResultHandler {
     }
 
     fn com_out_args( &self ) -> Vec<ComArg> {
+        get_out_args_for_result( &self.retval_ty )
+    }
+}
 
-        if utils::is_unit( &self.retval_ty ) {
-            return vec![];
-        }
+fn get_out_args_for_result( retval_ty : &Ty ) -> Vec<ComArg> {
 
-        // Since we have only one out value in any case, we can hardcode the
-        // __out here. The only thing that relies on it being hardcoded is the
-        // HResultHandler itself.
-        vec![
-            ComArg::new(
-                Ident::from( "__out" ),
-                self.retval_ty.clone()
-            )
-        ]
+    match *retval_ty {
+
+        // Tuples map to multiple out args, no [retval].
+        Ty::Tup( ref v ) =>
+            v.iter()
+                .enumerate()
+                .map( |( idx, ty )| ComArg::new(
+                                    Ident::from( format!( "__out{}", idx + 1) ),
+                                    ty.clone() ) )
+                .collect::<Vec<_>>(),
+        _ => vec![ ComArg::new( Ident::from( "__out" ), retval_ty.clone() ) ],
     }
 }
 
@@ -213,17 +181,6 @@ pub fn get_return_handler(
         ( &None, &None ) => Box::new( VoidHandler ),
         ( &None, &Some( ref ty ) )
             => Box::new( ReturnOnlyHandler( ty.clone() ) ),
-        ( &Some( ref rv ), &Some( ref rt ) )
-            if match *rt {
-                Ty::Path( _, ref return_ty ) 
-                    if return_ty.get_ident() == Ok( Ident::from( "HRESULT" ) )
-                    => true,
-                _ => false
-            }
-            => Box::new( HResultHandler {
-                retval_ty: rv.clone(),
-                return_ty: rt.clone()
-            } ),
         ( &Some( ref rv ), &Some( ref rt ) )
             => Box::new( ErrorResultHandler {
                 retval_ty: rv.clone(),

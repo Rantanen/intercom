@@ -161,6 +161,7 @@ impl Foo
     fn simple_result_method(&self) -> u16 { 0 }
     fn com_result_method(&self) -> ComResult<u16> { Ok(0) }
     fn rust_result_method(&self) -> Result<u16, i32> { Ok(0) }
+    fn tuple_result_method(&self) -> Result<(u8, u16, u32), i32> { Ok(0) }
 
     fn string_method(&self, input : String) -> String { input }
 
@@ -282,8 +283,11 @@ pub unsafe extern "stdcall" fn __Foo_Foo_com_result_method(
     // Convert the Rust result into [retval] and HRESULT.
     // On error we need to reset the [retval] into a "known" value.
     match __result {
-        Ok(v) => { *__out = v.into(); ::intercom::S_OK }
-        Err(e) => { *__out = Default::default(); e }
+        Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+        Err(e) => {
+            *__out = Default::default();
+            ::intercom::return_hresult( e )
+        }
     }
 }
 
@@ -301,9 +305,45 @@ pub unsafe extern "stdcall" fn __Foo_Foo_rust_result_method(
 
     let __result = (*self_combox).rust_result_method();
     match __result {
-        Ok(v) => { *__out = v.into(); ::intercom::S_OK }
+        Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
         Err(e) => {
             *__out = Default::default();
+
+            // This is Result<_,_> method instead of ComResult<_>. In this case
+            // the Err value needs to be converted to HRESULT for the COM
+            // return value. The return_hresult also stores the detailed error
+            // description to support IErrorInfo.
+            ::intercom::return_hresult(e)
+        }
+    }
+}
+
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+pub unsafe extern "stdcall" fn __Foo_Foo_tuple_result_method(
+    self_vtable: ::intercom::RawComPtr,
+    __out1: *mut u8,
+    __out2: *mut u16,
+    __out3: *mut u32
+) -> ::intercom::HRESULT
+{
+    let self_combox =
+        (self_vtable as usize - __Foo_FooVtbl_offset()) as
+            *mut ::intercom::ComBox<Foo>;
+
+    let __result = (*self_combox).tuple_result_method();
+    match __result {
+        Ok((v1, v2, v3)) => {
+            *__out1 = v1.into();
+            *__out2 = v2.into();
+            *__out3 = v3.into();
+            ::intercom::S_OK
+        },
+        Err(e) => {
+            *__out1 = Default::default();
+            *__out2 = Default::default();
+            *__out3 = Default::default();
 
             // This is Result<_,_> method instead of ComResult<_>. In this case
             // the Err value needs to be converted to HRESULT for the COM
@@ -345,8 +385,11 @@ pub unsafe extern "stdcall" fn __Foo_Foo_complete_method(
 
     let __result = (*self_combox).complete_method(a.into(), b.into());
     match __result {
-        Ok(v) => { *__out = v.into(); ::intercom::S_OK }
-        Err(e) => { *__out = Default::default(); e }
+        Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+        Err(e) => {
+            *__out = Default::default();
+            ::intercom::return_hresult( e )
+        }
     }
 }
 
@@ -364,6 +407,7 @@ const __Foo_FooVtbl_INSTANCE: __FooVtbl =
         simple_result_method: __Foo_Foo_simple_result_method,
         com_result_method: __Foo_Foo_com_result_method,
         rust_result_method: __Foo_Foo_rust_result_method,
+        tuple_result_method: __Foo_Foo_tuple_result_method,
         string_method: __Foo_Foo_string_method,
         complete_method: __Foo_Foo_complete_method,
     };

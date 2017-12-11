@@ -33,5 +33,18 @@ namespace cs
 			var lib = new TestLib.Interop.ResultOperations();
 			lib.SOk();
 		}
+
+		[TestMethod]
+		public void Tuples()
+		{
+			var lib = new TestLib.Interop.ResultOperations();
+
+			ushort left;
+			ushort right;
+			lib.Tuple( 0xCAFEBABE, out left, out right );
+
+			Assert.AreEqual( 0xCAFE, left );
+			Assert.AreEqual( 0xBABE, right );
+		}
 	}
 }
