@@ -639,6 +639,47 @@ fn expand_com_class(
         support_error_info_match_arms.push( quote!(
             self::#iid_ident => true
         ) );
+
+        let into_expect_msg = format!(
+            "query_interface( {} ) failed for {}",
+            iid_ident, itf );
+        output.push( quote!(
+            impl From< ::intercom::ComRc< #struct_ident > >
+                for ::intercom::ComItf< #itf >
+            {
+                fn from(
+                    coclass : ::intercom::ComRc< #struct_ident >
+                ) -> Self
+                {
+                    Self::from( &coclass )
+                }
+            }
+        ) );
+        output.push( quote!(
+            impl<'a> From< &'a ::intercom::ComRc< #struct_ident > >
+                for ::intercom::ComItf< #itf >
+            {
+                fn from(
+                    coclass : &'a ::intercom::ComRc< #struct_ident >
+                ) -> Self
+                {
+                    unsafe {
+                        // ComRc::query_interface is contracted to return
+                        // pointer to the correct interface. We can attach
+                        // safely.
+                        ::intercom::ComItf::wrap(
+
+                            // ComRc references the current struct.
+                            // It is guaranteed to be convertable to the
+                            // current interface.
+                            ::intercom::ComRc::query_interface(
+                                coclass, &#iid_ident
+                            ).expect( #into_expect_msg )
+                        )
+                    }
+                }
+            }
+        ) );
     }
 
     /////////////////////

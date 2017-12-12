@@ -36,6 +36,22 @@ fn __Foo_FooVtbl_offset() -> usize {
     }
 }
 
+impl From<::intercom::ComRc<Foo>> for ::intercom::ComItf<Foo> {
+    fn from( coclass: ::intercom::ComRc<Foo> ) -> Self {
+        Self::from( &coclass )
+    }
+}
+
+impl<'a> From<&'a ::intercom::ComRc<Foo>> for ::intercom::ComItf<Foo> {
+    fn from( coclass: &'a ::intercom::ComRc<Foo> ) -> Self {
+        unsafe {
+            ::intercom::ComItf::wrap(
+                ::intercom::ComRc::query_interface( coclass, &IID_Foo )
+                    .expect( "query_interface( IID_Foo ) failed for Foo" ) )
+        }
+    }
+}
+
 // ISupportErrorInfo virtual table instance for the Foo COM class.
 //
 // Each COM class needs IUnknown and ISupportErrorInfo virtual tables - as the
