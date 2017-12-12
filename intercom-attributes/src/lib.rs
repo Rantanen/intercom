@@ -461,6 +461,12 @@ fn expand_com_impl(
             // the actual 'data' struct, we'll need to offset the self_vtable
             // with the vtable offset.
             let ret_ty = method_info.returnhandler.com_ty();
+            let self_struct_stmt = if method_info.is_const {
+                    quote!( let self_struct : &#itf_ident = &**self_combox )
+                } else {
+                    quote!( let self_struct : &mut #itf_ident = &mut **self_combox )
+                };
+
             output.push( quote!(
                 #[allow(non_snake_case)]
                 #[allow(dead_code)]
@@ -473,8 +479,8 @@ fn expand_com_impl(
                     let self_combox = ( self_vtable as usize - #vtable_offset() )
                             as *mut ::intercom::ComBox< #struct_ident >;
 
-                    let #return_ident = (*self_combox).#method_ident(
-                        #( #in_params ),* );
+                    #self_struct_stmt;
+                    let #return_ident = self_struct.#method_ident( #( #in_params ),* );
 
                     #return_statement
                 }

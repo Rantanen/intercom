@@ -233,7 +233,8 @@ pub unsafe extern "stdcall" fn __Foo_Foo_simple_method(
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut ::intercom::ComBox<Foo>;
 
-    let __result = (*self_combox).simple_method();
+    let self_struct : &Foo = &**self_combox;
+    let __result = self_struct.simple_method();
 }
 
 #[allow(non_snake_case)]
@@ -248,7 +249,8 @@ pub unsafe extern "stdcall" fn __Foo_Foo_arg_method(
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut ::intercom::ComBox<Foo>;
 
-    let __result = (*self_combox).arg_method(a.into());
+    let self_struct : &Foo = &**self_combox;
+    let __result = self_struct.arg_method(a.into());
 }
 
 #[allow(non_snake_case)]
@@ -262,7 +264,8 @@ pub unsafe extern "stdcall" fn __Foo_Foo_simple_result_method(
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut ::intercom::ComBox<Foo>;
 
-    let __result = (*self_combox).simple_result_method();
+    let self_struct : &Foo = &**self_combox;
+    let __result = self_struct.simple_result_method();
     __result.into()
 }
 
@@ -278,7 +281,8 @@ pub unsafe extern "stdcall" fn __Foo_Foo_com_result_method(
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut ::intercom::ComBox<Foo>;
 
-    let __result = (*self_combox).com_result_method();
+    let self_struct : &Foo = &**self_combox;
+    let __result = self_struct.com_result_method();
 
     // Convert the Rust result into [retval] and HRESULT.
     // On error we need to reset the [retval] into a "known" value.
@@ -303,7 +307,8 @@ pub unsafe extern "stdcall" fn __Foo_Foo_rust_result_method(
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut ::intercom::ComBox<Foo>;
 
-    let __result = (*self_combox).rust_result_method();
+    let self_struct : &Foo = &**self_combox;
+    let __result = self_struct.rust_result_method();
     match __result {
         Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
         Err(e) => {
@@ -332,7 +337,8 @@ pub unsafe extern "stdcall" fn __Foo_Foo_tuple_result_method(
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut ::intercom::ComBox<Foo>;
 
-    let __result = (*self_combox).tuple_result_method();
+    let self_struct : &Foo = &**self_combox;
+    let __result = self_struct.tuple_result_method();
     match __result {
         Ok((v1, v2, v3)) => {
             *__out1 = v1.into();
@@ -365,7 +371,8 @@ pub unsafe extern "stdcall" fn __Foo_Foo_string_method(
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut ::intercom::ComBox<Foo>;
 
-    let __result = (*self_combox).string_method(input.into());
+    let self_struct : &Foo = &**self_combox;
+    let __result = self_struct.string_method(input.into());
     __result.into()
 }
 
@@ -383,7 +390,8 @@ pub unsafe extern "stdcall" fn __Foo_Foo_complete_method(
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut ::intercom::ComBox<Foo>;
 
-    let __result = (*self_combox).complete_method(a.into(), b.into());
+    let self_struct : &mut Foo = &mut **self_combox;
+    let __result = self_struct.complete_method(a.into(), b.into());
     match __result {
         Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
         Err(e) => {
