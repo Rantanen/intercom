@@ -1,6 +1,4 @@
 
-use super::utils;
-
 use syn::*;
 use quote::Tokens;
 
@@ -34,7 +32,7 @@ pub trait TyHandler {
     }
 
     /// Gets the default value for the type.
-    fn default_value( &self) -> Tokens
+    fn default_value( &self ) -> Tokens
     {
         match self.rust_ty() {
             Ty::Path( _, ref p ) => {
@@ -42,7 +40,6 @@ pub trait TyHandler {
                 match name {
                     "c_void"
                         | "RawComPtr"
-                        | "ComRc"
                         => quote!( ::std::ptr::null_mut() ),
                     _ => quote!( Default::default() )
                 }
@@ -62,50 +59,18 @@ impl TyHandler for IdentityParam {
 }
 
 
-/// `ComRc` parameter handler. Supports `ComRc` Rust type and converts this
+/// `ComItf` parameter handler. Supports `ComItf` Rust type and ensures the this
 /// to/from `RawComPtr` COM type.
-struct ComRcParam( Ty );
+struct ComItfParam( Ty );
 
-impl TyHandler for ComRcParam {
+impl TyHandler for ComItfParam {
 
     fn rust_ty( &self ) -> Ty { self.0.clone() }
 
-    fn com_ty( &self ) -> Ty
+    /// Gets the default value for the type.
+    fn default_value( &self ) -> Tokens
     {
-        parse_type( "::intercom::RawComPtr" ).unwrap()
-    }
-
-    fn rust_to_com( &self, ident : &Ident ) -> Tokens
-    {
-        // Get the parameter data from the type.
-        let comrc_params = match self.0 {
-            Ty::Path( _, ref p ) => {
-                let last_segment = &p.segments.last().unwrap();
-                match last_segment.parameters {
-                    PathParameters::AngleBracketed( ref data ) => data,
-                    _ => panic!( "ComRc doesn't have <> params" ),
-                }
-            }
-            _ => unreachable!( "ComRcParam should only be used for Ty::Path" ),
-        };
-
-        // Get the interface type.
-        let itf_ty = match comrc_params.types.first() {
-            Some( ty ) => ty,
-            _ => panic!( "ComRc doesn't have type parameters" ),
-        };
-
-        // Name the interface.
-        let itf_ident = match utils::get_ty_ident( itf_ty ) {
-            Some( ty_ident ) => ty_ident,
-            _ => panic!( "Could not resolve name of {:?}", itf_ty ),
-        };
-
-        // Conversion is done with query_interface, which requires the
-        // IID of the ComRc interface type.
-        let iid_ident = super::idents::iid( itf_ident );
-        quote!( ::intercom::ComRc::query_interface( &#ident, &#iid_ident )
-                .expect( "ComRc<T> does not support interface T" ) )
+        quote!( ComItf::null_itf() )
     }
 }
 
@@ -153,7 +118,7 @@ pub fn get_ty_handler(
             let name : &str = p.segments.last().unwrap().ident.as_ref();
             match name {
 
-                "ComRc" => Box::new( ComRcParam( ty ) ),
+                "ComItf" => Box::new( ComItfParam( ty ) ),
                 "String" => Box::new( StringParam( ty ) ),
 
                 // Unknown. Use IdentityParam.

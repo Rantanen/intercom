@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ErrorInfoSupport.cs" />
+    <Compile Include="InterfaceValueOperations.cs" />
     <Compile Include="ResultOperations.cs" />
     <Compile Include="SetUpFixture.cs" />
     <Compile Include="PrimitiveOperations.cs" />

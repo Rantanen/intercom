@@ -1,4 +1,4 @@
-#![crate_type="dylib"]
+﻿#![crate_type="dylib"]
 #![feature(type_ascription, proc_macro, try_from)]
 
 extern crate intercom;
@@ -17,6 +17,25 @@ extern crate winapi;
     SharedImplementation,
     ErrorSource,
 )]
+
+#[com_interface( AUTO_GUID )]
+trait IRefCount 
+{
+    fn get_ref_count( &self ) -> u32;
+}
+
+macro_rules! impl_irefcount {
+    ( $t:ty ) => {
+        #[com_impl]
+        impl IRefCount for $t {
+            fn get_ref_count( &self ) -> u32
+            {
+                let combox = unsafe { ComBox::of( self ) };
+                combox.get_ref_count()
+            }
+        }
+    }
+}
 
 #[com_class("{12341234-1234-1234-1234-123412340001}", PrimitiveOperations )]
 pub struct PrimitiveOperations { }
@@ -92,41 +111,50 @@ impl ResultOperations {
 #[com_class( AUTO_GUID, ClassCreator )]
 pub struct ClassCreator { }
 
-#[com_class( AUTO_GUID, CreatedClass )]
-pub struct CreatedClass { id : i32, parent: i32 }
-
 #[com_interface( AUTO_GUID )]
 #[com_impl]
 impl ClassCreator {
     pub fn new() -> ClassCreator { ClassCreator {} }
 
-    pub fn create_root( &self, id : i32 ) -> ComResult<ComRc<CreatedClass>> {
-        Ok( ComRc::new( CreatedClass::new_with_id( id ) ) )
+    pub fn create_root( &self, id : i32 ) -> ComResult<ComItf<CreatedClass>> {
+        Ok( ComRc::new( CreatedClass::new_with_id( id ) ).into() )
     }
 
-    // ComRc input not supported yet.
-    // First we should support random COM interfaces. After that we should
-    // support specific Rust COM classes through special QueryInterface.
-    //
-    // pub fn create_child(
-    //     &self,
-    //     id : i32,
-    //     parent : ComRc<CreatedClass>
-    // ) -> ComResult<ComRc<CreatedClass>>
-    // {
-    //     Ok( ComRc::new( CreatedClass::new_child( id, &*parent ) ) )
-    // }
+    pub fn create_child(
+        &self,
+        id : i32,
+        parent : ComItf<IParent>
+    ) -> ComResult<ComItf<CreatedClass>>
+    {
+        Ok( ComRc::new(
+            CreatedClass::new_child( id, parent.get_id() )
+        ).into() )
+    }
 }
+
+#[com_class( AUTO_GUID, CreatedClass, IParent, IRefCount )]
+pub struct CreatedClass { id : i32, parent: i32 }
 
 #[com_interface( AUTO_GUID )]
 #[com_impl]
 impl CreatedClass {
     pub fn new() -> CreatedClass { unreachable!() }
     pub fn new_with_id( id : i32 ) -> CreatedClass { CreatedClass { id, parent: 0 } }
-    pub fn new_child( id : i32, parent : &CreatedClass ) -> CreatedClass { CreatedClass { id, parent: parent.id } }
+    pub fn new_child( id : i32, parent : i32 ) -> CreatedClass { CreatedClass { id, parent } }
 
     pub fn get_id( &self ) -> ComResult<i32> { Ok( self.id ) }
     pub fn get_parent_id( &self ) -> ComResult<i32> { Ok( self.parent ) }
+}
+impl_irefcount!( CreatedClass );
+
+#[com_interface( AUTO_GUID )]
+pub trait IParent {
+    fn get_id( &self ) -> i32;
+}
+
+#[com_impl]
+impl IParent for CreatedClass {
+    fn get_id( &self ) -> i32 { self.id }
 }
 
 #[com_class( AUTO_GUID, RefCountOperations )]
@@ -137,13 +165,13 @@ pub struct RefCountOperations {}
 impl RefCountOperations {
     pub fn new() -> RefCountOperations { RefCountOperations { } }
 
+    pub fn get_new( &self ) -> ComResult<ComItf<RefCountOperations>> {
+        Ok( ComRc::new( RefCountOperations::new() ).into() )
+    }
+
     pub fn get_ref_count( &self ) -> u32 {
         let combox = unsafe { ComBox::of( self ) };
         combox.get_ref_count()
-    }
-
-    pub fn get_new( &self ) -> ComResult<ComRc<RefCountOperations>> {
-        Ok( ComRc::new( RefCountOperations::new() ) )
     }
 }
 

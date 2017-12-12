@@ -10,6 +10,8 @@ use std::marker::PhantomData;
 /// This applies only to the pure interfaces.  Implicit interfaces created
 /// through `#[com_interface] impl MyStruct` constructs are not supported for
 /// `ComItf<T>`.
+#[fundamental]
+#[repr(C)]
 pub struct ComItf<T> where T: ?Sized {
     ptr: RawComPtr,
     phantom: PhantomData<T>,

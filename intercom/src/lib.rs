@@ -50,7 +50,7 @@
 
 #![crate_type="dylib"]
 #![feature(unique, shared)]
-#![feature(proc_macro, try_from)]
+#![feature(proc_macro, try_from, fundamental)]
 
 mod classfactory; pub use classfactory::*;
 mod combox; pub use combox::*;

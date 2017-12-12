@@ -19,9 +19,10 @@ trait Foo {
     fn com_result_method(&self) -> ComResult<u16>;
     fn rust_result_method(&self) -> Result<u16, i32>;
 
-    fn string_method(&self, msg: String) -> String;
-
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool>;
+
+    fn string_method(&self, msg: String) -> String;
+    fn comitf_method(&self, itf: ComItf<Foo>) -> ComResult<ComItf<IUnknown>>;
 }
 
 // Interface ID
@@ -79,16 +80,22 @@ pub struct __FooVtbl {
         __out: *mut u16
     ) -> ::intercom::HRESULT,
 
-    pub string_method: unsafe extern "stdcall" fn(
-        self_vtable: ::intercom::RawComPtr,
-        msg: ::intercom::BStr
-    ) -> ::intercom::BStr,
-
     pub complete_method: unsafe extern "stdcall" fn(
         self_vtable: ::intercom::RawComPtr,
         a: u16,
         b: i16,
         __out: *mut bool
+    ) -> ::intercom::HRESULT,
+
+    pub string_method: unsafe extern "stdcall" fn(
+        self_vtable: ::intercom::RawComPtr,
+        msg: ::intercom::BStr
+    ) -> ::intercom::BStr,
+
+    pub comitf_method: unsafe extern "stdcall" fn (
+        self_vtable: ::intercom::RawComPtr,
+        itf: ComItf<Foo>,
+        __out: *mut ComItf<IUnknown>,
     ) -> ::intercom::HRESULT,
 }
 
@@ -173,17 +180,6 @@ impl Foo for ::intercom::ComItf<Foo>
         }
     }
 
-    fn string_method(&self, msg: String) -> String
-    {
-        let comptr = ::intercom::ComItf::ptr(self);
-        let vtbl = comptr as *const *const __FooVtbl;
-
-        unsafe {
-            let __result = ((**vtbl).string_method)( comptr, msg.into() );
-            __result.into()
-        }
-    }
-
     fn complete_method(
         &mut self,
         a: u16,
@@ -200,6 +196,38 @@ impl Foo for ::intercom::ComItf<Foo>
 
             if __result == ::intercom::S_OK {
                 Ok(__out.into())
+            } else {
+                Err(::intercom::get_last_error(__result))
+            }
+        }
+    }
+
+    fn string_method(&self, msg: String) -> String
+    {
+        let comptr = ::intercom::ComItf::ptr(self);
+        let vtbl = comptr as *const *const __FooVtbl;
+
+        unsafe {
+            let __result = ((**vtbl).string_method)( comptr, msg.into() );
+            __result.into()
+        }
+    }
+
+    fn comitf_method(&self, itf: ComItf<Foo>) -> ComResult<ComItf<IUnknown>>
+    {
+        let comptr = ::intercom::ComItf::ptr(self);
+        let vtbl = comptr as *const *const __FooVtbl;
+
+        unsafe {
+            let mut __out: ComItf<IUnknown> = ComItf::null_itf();
+            let __result = ((**vtbl).comitf_method)(comptr, itf.into(), &mut __out);
+
+            // Normal Result, not a ComResult. The Ok-case goes as before.
+            //
+            // The Err-case will use IErrorInfo to construct the original
+            // error type.
+            if __result == ::intercom::S_OK {
+                Ok(__out.into() )
             } else {
                 Err(::intercom::get_last_error(__result))
             }
