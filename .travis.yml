@@ -23,7 +23,7 @@ script:
     # worth the less deterministic behavior here.
     - rm target/debug/* >& /dev/null || true
     - cargo install clippy --force
-    - cargo clippy --all
+    - cargo clippy --all -- -D warnings
     - cargo test
 
 after_success: |
