@@ -32,11 +32,45 @@ impl<T> ComItf<T> where T: ?Sized {
 
     /// Gets the raw COM pointer from the `ComItf<T>`.
     pub fn ptr( this : &Self ) -> RawComPtr { this.ptr }
+
+    /// Returns a `ComItf<T>` value that references a null pointer.
+    ///
+    /// # Safety
+    ///
+    /// The `ComItf<T>` returned by the function will be invalid for any
+    /// method calls. Its purpose is to act as a return value from COM
+    /// methods in the case of an error result.
+    pub unsafe fn null_itf() -> ComItf<T> {
+        ComItf {
+            ptr: ::std::ptr::null_mut(),
+            phantom: PhantomData,
+        }
+    }
 }
 
 impl<T> AsRef<ComItf<IUnknown>> for ComItf<T> where T: ?Sized {
 
     fn as_ref( &self ) -> &ComItf<IUnknown> {
         unsafe { &*( self as *const _ as *const ComItf<IUnknown> ) }
+    }
+}
+
+impl<'a, S, T: IidOf> std::convert::TryFrom<&'a ComItf<S>> for ComItf<T>
+where
+    T: ?Sized,
+    S: ?Sized,
+{
+    type Error = ::HRESULT;
+
+    fn try_from( other : &'a ComItf<S> ) -> Result<ComItf<T>, ::HRESULT> {
+        let iunk : &ComItf<IUnknown> = other.as_ref();
+
+        match iunk.query_interface( T::iid() ) {
+            Ok( ptr ) => Ok( ComItf::<T> {
+                ptr: ptr,
+                phantom: PhantomData::<T>
+            } ),
+            Err( e ) => Err( e )
+        }
     }
 }

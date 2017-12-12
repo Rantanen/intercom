@@ -146,6 +146,17 @@ fn expand_com_interface(
         pub const #iid_ident : ::intercom::IID = #iid_tokens;
     ) );
 
+    // IidOf implementation.
+    let iidof_doc = format!( "Returns `{}`.", iid_ident );
+    output.push( quote!(
+        impl ::intercom::IidOf for #itf_ident {
+            #[doc = #iidof_doc]
+            fn iid() -> &'static ::intercom::IID {
+                & #iid_ident
+            }
+        }
+    ) );
+
     // Create a vector for the virtual table fields and insert the base
     // interface virtual table in it if required.
     let mut fields = vec![];

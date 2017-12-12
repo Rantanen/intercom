@@ -28,11 +28,20 @@ trait Foo {
 //
 #[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
-pub const IID_Foo: ::intercom::IID =
-        ::intercom::GUID {
-            data1: 0u32, data2: 0u16, data3: 0u16,
-            data4: [ 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8 ]
-        };
+pub const IID_Foo: ::intercom::IID = ::intercom::GUID {
+    data1: 0u32,
+    data2: 0u16,
+    data3: 0u16,
+    data4: [ 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8 ]
+};
+
+impl ::intercom::IidOf for Foo {
+
+    #[doc = "Returns `IID_Foo`."]
+    fn iid() -> &'static ::intercom::IID {
+        &IID_Foo
+    }
+}
 
 // Virtual table
 //

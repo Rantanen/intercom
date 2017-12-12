@@ -81,6 +81,10 @@ mod intercom {
     pub use ::*;
 }
 
+pub trait IidOf {
+    fn iid() -> &'static IID;
+}
+
 /// Raw COM pointer type.
 pub type RawComPtr = *mut std::os::raw::c_void;
 
