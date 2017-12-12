@@ -466,7 +466,7 @@ fn get_com_methods(
 
         let in_args = method_info.args
                 .iter()
-                .map( |ref ca| Some( MethodArg {
+                .map( |ca| Some( MethodArg {
                         name: ca.name.to_string(),
                         dir: ArgDirection::In,
                         ty: get_cpp_ty( rn, &ca.handler.com_ty() ).ok()?
@@ -476,7 +476,7 @@ fn get_com_methods(
         let out_args = method_info.returnhandler
                 .com_out_args()
                 .iter()
-                .map( |ref ca| Some( MethodArg {
+                .map( |ca| Some( MethodArg {
                         name: ca.name.to_string(),
                         dir: match method_info.retval_type {
                             Some( syn::Ty::Tup(_) ) => ArgDirection::Out,
