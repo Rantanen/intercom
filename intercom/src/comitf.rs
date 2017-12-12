@@ -48,31 +48,26 @@ impl<T> ComItf<T> where T: ?Sized {
             phantom: PhantomData,
         }
     }
+
+    pub fn try_into< U: IidOf + ?Sized >(
+        &self
+    ) -> Result< ComItf<U>, ::HRESULT >
+    {
+        let iunk : &ComItf<IUnknown> = self.as_ref();
+
+        match iunk.query_interface( U::iid() ) {
+            Ok( ptr ) => Ok( ComItf::<U> {
+                ptr: ptr,
+                phantom: PhantomData
+            } ),
+            Err( e ) => Err( e )
+        }
+    }
 }
 
 impl<T> AsRef<ComItf<IUnknown>> for ComItf<T> where T: ?Sized {
 
     fn as_ref( &self ) -> &ComItf<IUnknown> {
         unsafe { &*( self as *const _ as *const ComItf<IUnknown> ) }
-    }
-}
-
-impl<'a, S, T: IidOf> std::convert::TryFrom<&'a ComItf<S>> for ComItf<T>
-where
-    T: ?Sized,
-    S: ?Sized,
-{
-    type Error = ::HRESULT;
-
-    fn try_from( other : &'a ComItf<S> ) -> Result<ComItf<T>, ::HRESULT> {
-        let iunk : &ComItf<IUnknown> = other.as_ref();
-
-        match iunk.query_interface( T::iid() ) {
-            Ok( ptr ) => Ok( ComItf::<T> {
-                ptr: ptr,
-                phantom: PhantomData::<T>
-            } ),
-            Err( e ) => Err( e )
-        }
     }
 }
