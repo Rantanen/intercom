@@ -1,11 +1,13 @@
 
 use std::collections::HashMap;
-use super::*;
 use parse::*;
+use clap::ArgMatches;
+use error::*;
 
 use intercom_common::utils;
 
 /// Run the manifest sub-command.
+#[allow(dead_code)]
 pub fn run( idl_params : &ArgMatches ) -> AppResult {
 
     // Parse the source files and emit the manifest.

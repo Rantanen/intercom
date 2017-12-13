@@ -5,6 +5,7 @@ use std::convert::TryFrom;
 use super::*;
 
 /// Error structure containing the available information on a COM error.
+#[derive(Debug)]
 pub struct ComError {
 
     /// `HRESULT` that triggered the error.
@@ -130,6 +131,7 @@ mod error_store {
 
 /// Error info COM object data.
 #[com_class( NO_GUID, IErrorInfo )]
+#[derive(Debug)]
 pub struct ErrorInfo {
     guid : GUID,
     source : String,

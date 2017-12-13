@@ -4,6 +4,7 @@ members = [
     "intercom-attributes",
     "intercom",
     "intercom-utils",
+    "intercom-build",
 
 ]
 exclude = [ "test" ]

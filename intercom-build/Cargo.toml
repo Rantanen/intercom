@@ -1,0 +1,10 @@
+[package]
+name = "intercom-build"
+version = "0.1.0"
+authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
+
+[dependencies]
+intercom-utils = { version = "0.2", path = "../intercom-utils" }
+intercom = { version = "0.2", path = "../intercom" }
+winreg = "0.4"
+glob = "0.2"

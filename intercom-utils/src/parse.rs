@@ -1,10 +1,14 @@
 
-use super::*;
+use syn;
 use intercom_common::*;
 use intercom_common::guid::GUID;
 use intercom_common::methodinfo;
 use std::io::Read;
 use std::collections::HashMap;
+use error::*;
+use std::fs;
+use toml;
+use glob;
 
 #[derive(Debug)]
 pub enum GUIDType { CLSID, IID }
@@ -120,7 +124,7 @@ pub fn parse_crate(
         };
 
         // Read the source.
-        let mut f = std::fs::File::open( path )?;
+        let mut f = fs::File::open( path )?;
         let mut buf = String::new();
         f.read_to_string( &mut buf )?;
 
@@ -143,7 +147,7 @@ pub fn parse_crate(
         };
 
         // Read the source.
-        let mut f = std::fs::File::open( path )?;
+        let mut f = fs::File::open( path )?;
         let mut buf = String::new();
         f.read_to_string( &mut buf )?;
 
@@ -157,7 +161,7 @@ pub fn parse_crate(
 
 fn parse_toml( path : &str ) -> Result< toml::Value, AppError >
 {
-    let mut f = std::fs::File::open( path )?;
+    let mut f = fs::File::open( path )?;
     let mut buf = String::new();
     f.read_to_string( &mut buf )?;
 

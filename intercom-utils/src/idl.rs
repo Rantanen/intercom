@@ -1,17 +1,34 @@
 
 use std::collections::HashMap;
-use super::*;
+use std::io::Write;
 use parse::*;
-
+use std::path::Path;
+use clap::ArgMatches;
 use intercom_common::utils;
+use error::*;
+use std::io;
 
 /// Runs the 'idl' subcommand.
+#[allow(dead_code)]
 pub fn run( idl_params : &ArgMatches ) -> AppResult {
 
     // Parse the sources and convert the result into an IDL.
     let ( renames, result ) = parse_crate(
             idl_params.value_of( "path" ).unwrap() )?;
-    result_to_idl( &result, &renames );
+    result_to_idl( &result, &renames, &mut io::stdout() );
+
+    Ok(())
+}
+
+#[allow(dead_code)]
+pub fn create_idl( path : &Path, out : &mut Write ) -> Result<(), ()> {
+
+    // Parse the sources and convert the result into an IDL.
+    let ( renames, result ) = parse_crate(
+            &path.to_string_lossy() )
+                    .map_err( |_| () )?;
+
+    result_to_idl( &result, &renames, out );
 
     Ok(())
 }
@@ -20,6 +37,7 @@ pub fn run( idl_params : &ArgMatches ) -> AppResult {
 fn result_to_idl(
     r : &ParseResult,
     rn : &HashMap<String, String>,
+    out : &mut io::Write,
 ) {
     // Introduce all interfaces so we don't get errors on undeclared items.
     let itf_introductions = r.interfaces.iter().map(|itf| {
@@ -107,7 +125,7 @@ fn result_to_idl(
     } ).collect::<Vec<_>>().join( "\n" );
 
     // We got the interfaces and classes. We can format and output the IDL.
-    println!( r###"
+    writeln!( out, r###"
         [
             uuid( {:X} )
         ]
@@ -123,5 +141,5 @@ fn result_to_idl(
     utils::pascal_case( &r.libname ),
     itf_introductions,
     itfs,
-    classes );
+    classes ).unwrap();
 }

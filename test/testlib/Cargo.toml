@@ -2,6 +2,7 @@
 name = "test_lib"
 version = "0.1.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
+build = "build.rs"
 
 [lib]
 crate-type = [ "cdylib" ]
@@ -9,3 +10,6 @@ crate-type = [ "cdylib" ]
 [dependencies]
 intercom = { path = "../../intercom" }
 winapi = "0.2.8"
+
+[build-dependencies]
+intercom-build = { path = "../../intercom-build" }

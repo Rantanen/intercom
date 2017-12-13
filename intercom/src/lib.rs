@@ -59,6 +59,7 @@ mod comitf; pub use comitf::*;
 mod bstr; pub use bstr::*;
 mod guid; pub use guid::GUID;
 mod error; pub use error::{return_hresult, get_last_error, ComError, ErrorInfo};
+pub mod runtime;
 
 // The crate doesn't really need the macros. However Rust will complain that
 // the import does nothing if we don't define #[macro_use]. Once we define
