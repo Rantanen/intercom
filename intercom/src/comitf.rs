@@ -63,6 +63,44 @@ impl<T> ComItf<T> where T: ?Sized {
             Err( e ) => Err( e )
         }
     }
+
+    pub unsafe fn out_mut_ptr( &mut self ) -> &mut RawComPtr {
+        &mut self.ptr
+    }
+}
+
+#[cfg(windows)]
+#[link(name = "ole32")]
+extern "system" {
+    #[doc(hidden)]
+    pub fn CoCreateInstance(
+        clsid : ::guid::GUID,
+        outer : RawComPtr,
+        cls_context: u32,
+        riid : ::REFIID,
+        out : &mut RawComPtr,
+    ) -> ::HRESULT;
+}
+
+#[cfg(windows)]
+impl<T: IidOf + ?Sized> ComItf<T>
+{
+    pub fn create( clsid : GUID ) -> ::ComResult< ComItf<T> > {
+
+        unsafe {
+            let mut out = ComItf::null_itf();
+            match CoCreateInstance(
+                    clsid,
+                    std::ptr::null_mut(),
+                    1, // in-proc server.
+                    T::iid(),
+                    &mut ComItf::out_mut_ptr( &mut out ) ) {
+
+                ::S_OK => Ok( out ),
+                e => Err( e ),
+            }
+        }
+    }
 }
 
 impl<T> AsRef<ComItf<IUnknown>> for ComItf<T> where T: ?Sized {
