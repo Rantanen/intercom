@@ -6,3 +6,9 @@ target
 .vs
 *.vcxproj.user
 *.csproj.user
+
+# CMake artifacts
+build
+CMakeFiles
+Makefile
+

@@ -1,9 +1,11 @@
 
 #define NOMINMAX
-#include <climits>
+#include <limits>
 
 #include "os.h"
 #include "catch.hpp"
+
+#include "testlib.h"
 
 TEST_CASE( "Primitive types are supported" )
 {
@@ -133,4 +135,4 @@ TEST_CASE( "Primitive types are supported" )
 
 	UninitializeRuntime();
 }
-	
+

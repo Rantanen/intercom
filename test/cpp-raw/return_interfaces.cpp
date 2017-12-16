@@ -2,6 +2,8 @@
 #include "os.h"
 #include "catch.hpp"
 
+#include "testlib.h"
+
 TEST_CASE( "Methods accept and return COM objects" )
 {
 	// Initialize COM.

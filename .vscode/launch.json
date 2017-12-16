@@ -11,6 +11,16 @@
             "name": "Debug Intercom",
             "program": "${workspaceRoot}/target/debug/intercom",
             "args": [ "test" ],
+            "cwd": "${workspaceRoot}",
+            "sourceLanguages": [
+                "rust"
+            ]
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Cpp-Raw",
+            "program": "${workspaceRoot}/test/cpp-raw/build/cpp-raw",
             "cwd": "${workspaceRoot}"
         }
     ]

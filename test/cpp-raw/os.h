@@ -1,4 +1,8 @@
 
+#include "../../intercom-cpp/src/data_types.h"
+#include "../../intercom-cpp/src/error_codes.h"
+#include "../../intercom-cpp/src/guiddef.h"
+
 // Interface definitions.
 #ifdef _MSC_VER
 #include "msvc/import.h"

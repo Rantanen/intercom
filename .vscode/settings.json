@@ -1,0 +1,15 @@
+{
+    "files.trimTrailingWhitespace": true,
+    "editor.renderWhitespace": "all",
+    "rust.mode": "rls",
+    "files.associations": {
+        "array": "c",
+        "chrono": "c",
+        "functional": "c",
+        "ratio": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "climits": "cpp"
+    }
+}

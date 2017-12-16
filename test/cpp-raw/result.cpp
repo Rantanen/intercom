@@ -1,6 +1,8 @@
 #include "os.h"
 #include "catch.hpp"
 
+#include "testlib.h"
+
 TEST_CASE( "Results can be returned" )
 {
 	// Initialize COM.
@@ -40,17 +42,17 @@ TEST_CASE( "Results can be returned" )
 			REQUIRE( out == 0 );
 		}
 
-		SECTION( "Tuples are converted to multiple OUT parameters" )
-		{
-			uint16_t left;
-			uint16_t right;
+		// SECTION( "Tuples are converted to multiple OUT parameters" )
+		// {
+		// 	uint16_t left;
+		// 	uint16_t right;
 
-			hr = pOps->Tuple( 0xABBA0CD0, OUT &left, OUT &right );
+		// 	hr = pOps->Tuple( 0xABBA0CD0, OUT &left, OUT &right );
 
-			REQUIRE( hr == S_OK );
-			REQUIRE( left == 0xABBA );
-			REQUIRE( right == 0x0CD0 );
-		}
+		// 	REQUIRE( hr == S_OK );
+		// 	REQUIRE( left == 0xABBA );
+		// 	REQUIRE( right == 0x0CD0 );
+		// }
 	}
 
 	UninitializeRuntime();
