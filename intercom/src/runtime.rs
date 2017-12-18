@@ -34,7 +34,7 @@ mod os {
 
 #[cfg(not(windows))]
 mod os {
-    pub fn initialize() {}
+    pub fn initialize() -> ::HRESULT { ::S_OK }
 
     pub fn uninitialize() {}
 }

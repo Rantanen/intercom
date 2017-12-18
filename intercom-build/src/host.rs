@@ -2,22 +2,26 @@
 use std::env;
 
 #[derive(PartialEq)]
+#[allow(dead_code)]
 pub enum Compiler {
     Msvc,
     Gnu,
 }
 
 #[derive(PartialEq)]
+#[allow(dead_code)]
 pub enum Architecture {
     X86,
     X64,
 }
 
+#[allow(dead_code)]
 pub struct Host {
     pub arch : Architecture,
     pub compiler : Compiler,
 }
 
+#[allow(dead_code)]
 pub fn get_host() -> Host {
 
     let host_triple = env::var( "HOST" ).expect( "HOST not set" );
