@@ -7,7 +7,7 @@ use ::host;
 #[allow(dead_code)]
 #[allow(non_upper_case_globals)]
 const CLSID_SetupConfiguration : GUID = GUID {
-    data1: 0x177f0c4a,
+    data1: 0x177f_0c4a,
     data2: 0x1cd3,
     data3: 0x4de7,
     data4: [ 0xa3, 0x2c, 0x71, 0xdb, 0xbb, 0x9f, 0xa3, 0x6d ]
@@ -82,91 +82,151 @@ pub struct ToolPaths {
     pub incs : Vec<PathBuf>,
 }
 
+/// Finds a path for the target within the roots.
+///
+/// * `roots` - Roots to search the target under.
+/// * `target` - Path to send. May contain directories, such as `x86/foo.lib`.
+///
+/// Returns the full path to the target or None if the target was not found.
 fn find_path( roots : &[&PathBuf], path : &str ) -> Option< PathBuf > {
 
+    // Glob options. We'll want case insensitive searching thanks to Windows.
+    let options = ::glob::MatchOptions {
+        case_sensitive: false,
+        require_literal_separator: true,
+        require_literal_leading_dot: true,
+    };
+
+    // Go through all the roots one by one.
     for root in roots {
+
+        // Create the glob pattern. Concatenate the root with the target and
+        // throw ** in between.
         let root_str = root.to_string_lossy();
         let pattern = format!( "{}/**/{}", root_str, path );
-        let options = ::glob::MatchOptions {
-            case_sensitive: false,
-            require_literal_separator: true,
-            require_literal_leading_dot: true,
-        };
+
+        // Go through all entries.
         for entry in ::glob::glob_with( &pattern, &options ).unwrap() {
-            if let Ok( path ) = entry {
-                return Some( PathBuf::from( path ) );
+            if let Ok( entry_path ) = entry {
+
+                // The first entry we find, we'll return.
+                return Some( entry_path );
             }
         }
     }
 
+    // No paths found. Return none as the default.
     None
 }
 
+/// Get compiler paths from absolute file paths.
+///
+/// The compiler takes paths to the directories containing the files we want
+/// as LIB and INCLUDE paths. This function strips the file name from the path
+/// and deduplicates the resulting directories.
 fn get_compiler_paths( paths : &[ PathBuf ] ) -> Vec<PathBuf>
 {
+    // Get the directory paths from the file paths.
     let mut dir_paths = paths.into_iter()
         .filter_map(
             |p| p.parent().and_then(
                 |p| Some( p.to_owned() ) ) )
         .collect::<Vec<_>>();
+
+    // De-duplicate the directories.
     dir_paths.sort();
     dir_paths.dedup();
 
     dir_paths
 }
 
-pub fn get_tool_paths() -> Result<ToolPaths, String> {
-    ::intercom::runtime::initialize()
-            .map_err( |hr| format!( "Failed to initialize COM: {:?}", hr ) )?;
+/// Gets the Windows kit path and version.
+fn get_kit_path() -> ( String, String ) {
 
-    let setup_conf = ComItf::<ISetupConfiguration2>
-            ::create( CLSID_SetupConfiguration ).unwrap();
-    let instances = setup_conf.enum_instances().unwrap();
-
-    let ( next, _ ) = instances.next( 1 ).unwrap();
-    let installation_path = next.get_installation_path().unwrap();
-
+    // Get the Windows Kits registry key.
     let hklm = ::winreg::RegKey::predef( ::winreg::enums::HKEY_LOCAL_MACHINE );
     let installed_roots = hklm.open_subkey_with_flags(
             r"SOFTWARE\Microsoft\Windows Kits\Installed Roots",
             ::winreg::enums::KEY_READ ).unwrap();
+
+    // KitsRoot10 value has the root directory.
     let kitroot : String = installed_roots.get_value( "KitsRoot10" ).unwrap();
+
+    // Enumerate the installed roots and get one of them.
+    // We shouldn't need a specific version currently so we'll just take one.
     let kitversion = installed_roots.enum_keys().nth( 0 ).unwrap().unwrap();
+
+    ( kitroot, kitversion )
+}
+
+/// Gets the VS 2017+ installation path.
+fn get_vs_path() -> Result<String, String> {
+
+    ::intercom::runtime::initialize()
+            .map_err( |hr| format!( "Failed to initialize COM: {:?}", hr ) )?;
+
+    // Get the COM API entry point for the new VS configuration API.
+    let setup_conf = ComItf::<ISetupConfiguration2>
+            ::create( CLSID_SetupConfiguration ).unwrap();
+
+    // Get the first instance.
+    let instances = setup_conf.enum_instances().unwrap();
+    let ( next, _ ) = instances.next( 1 ).unwrap();
+
+    // Read the installation path. We don't care about anything else for now.
+    let installation_path = next.get_installation_path().unwrap();
 
     ::intercom::runtime::uninitialize();
 
-    let sdkroot = PathBuf::from( &kitroot );
-    let sdk_lib_root = sdkroot.join( "Lib" ).join( &kitversion );
-    let sdk_include_root = sdkroot.join( "Include" ).join( &kitversion );
+    Ok( installation_path )
+}
 
-    let mut vsroot = PathBuf::from( &installation_path );
-    vsroot.push( r"VC\Tools\MSVC" );
+pub fn get_tool_paths() -> Result<ToolPaths, String> {
 
-    let libs = get_compiler_paths( &vec![
-            find_path( &[ &sdk_lib_root ], r"x64\ucrt.lib" ).unwrap(),
-            find_path( &[ &sdk_lib_root ], r"x64\ole32.lib" ).unwrap(),
-            find_path( &[ &vsroot ], r"lib\x64\vcruntime.lib" ).unwrap(),
+    // Get the Windows kit base path and version.
+    let ( kitroot, kitversion ) = get_kit_path();
+    let kitroot = PathBuf::from( &kitroot );
+
+    // Form the kit lib and include paths.
+    // let kit_lib_root = kitroot.join( "Lib" ).join( &kitversion );
+    let kit_include_root = kitroot.join( "Include" ).join( &kitversion );
+
+    // Get the Visual C++ tools path.
+    let vsroot = PathBuf::from( &get_vs_path()? ).join( r"VC\Tools\MSVC" );
+
+    // Resolve the required libs.
+    let libs = get_compiler_paths( &[
+
+            // These paths cover most of the lib dirs. However no idea if we
+            // need them so they are commented out until something complains.
+
+            // find_path( &[ &kit_lib_root ], r"x64\ucrt.lib" ).unwrap(),
+            // find_path( &[ &kit_lib_root ], r"x64\ole32.lib" ).unwrap(),
+            // find_path( &[ &vsroot ], r"lib\x64\vcruntime.lib" ).unwrap(),
         ] );
 
-    let incs = get_compiler_paths( &vec![
-            find_path( &[ &sdk_include_root ], r"oaidl.idl" ).unwrap(),
-            find_path( &[ &sdk_include_root ], r"wtypes.idl" ).unwrap(),
+    // Resolve the required include directories.
+    let incs = get_compiler_paths( &[
+            find_path( &[ &kit_include_root ], r"oaidl.idl" ).unwrap(),
+            find_path( &[ &kit_include_root ], r"wtypes.idl" ).unwrap(),
         ] );
 
+    // We'll need the C compiler for the preprocessing of the IDL.
     let mut vs_bin = find_path( &[ &vsroot ], r"Hostx64\x64\cl.exe" ).unwrap();
     vs_bin.pop();
 
+    // Resource compiler depends on the toolchain.
     let host = host::get_host();
     let rc = match host.compiler {
         host::Compiler::Msvc =>
-            sdkroot.join( format!( r"bin\{}\x64\rc.exe", kitversion ) ),
+            kitroot.join( format!( r"bin\{}\x64\rc.exe", kitversion ) ),
         host::Compiler::Gnu =>
             PathBuf::from( "windres.exe" ),  // Needs to be on PATH.
     };
 
     Ok( ToolPaths {
-        mt: sdkroot.join( format!( r"bin\{}\x64\mt.exe", kitversion ) ),
-        midl: sdkroot.join( format!( r"bin\{}\x64\midl.exe", kitversion ) ),
+        mt: kitroot.join( format!( r"bin\{}\x64\mt.exe", kitversion ) ),
+        midl: kitroot.join( format!( r"bin\{}\x64\midl.exe", kitversion ) ),
         rc: rc,
 
         vs_bin: vs_bin,

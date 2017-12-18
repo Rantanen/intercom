@@ -21,7 +21,7 @@ pub struct Host {
 pub fn get_host() -> Host {
 
     let host_triple = env::var( "HOST" ).expect( "HOST not set" );
-    let host_triple_parts = host_triple.split( "-" ).collect::<Vec<_>>();
+    let host_triple_parts = host_triple.split( '-' ).collect::<Vec<_>>();
 
     let arch = host_triple_parts[ 0 ];
     let compiler = host_triple_parts.last().unwrap();

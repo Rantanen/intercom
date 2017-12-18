@@ -54,7 +54,7 @@ pub fn build() {
         let mut idl = File::create( &idl_path )
                 .expect( &format!( "Could not create file: {:?}", idl_path ) );
         intercom_utils::create_idl(
-                    &Path::new( &toml_dir ),
+                    Path::new( &toml_dir ),
                     &mut idl )
                 .expect( "Failed to form IDL" );
         idl.sync_all()
@@ -85,7 +85,8 @@ pub fn build() {
                 .env( "PATH",
                     format!( "{};{}",
                         &paths.vs_bin.to_string_lossy(),
-                        env::var( "PATH" ).unwrap_or( "".to_owned() ) ) )
+                        env::var( "PATH" )
+                            .unwrap_or_else( |_| "".to_owned() ) ) )
                 .env( "LIB", libs )
                 .env( "INCLUDE", incs )
                 .current_dir( &out_dir )
