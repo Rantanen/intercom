@@ -23,8 +23,10 @@ namespace cs
 		{
 			UnsafeNativeMethods.ACTCTX context = new UnsafeNativeMethods.ACTCTX();
 			context.cbSize = Marshal.SizeOf( typeof( UnsafeNativeMethods.ACTCTX ) );
-			var manifest = Path.Combine( Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ), "TestLib.Assembly.manifest" );
+			var manifest = Path.Combine( Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ), "test_lib.dll" );
+			context.dwFlags = 0x008;
 			context.lpSource = manifest;
+			context.lpResourceName = new IntPtr( 1 );
 
 			hActCtx = UnsafeNativeMethods.CreateActCtx( ref context );
 			if( hActCtx == ( IntPtr ) ( -1 ) )
@@ -62,16 +64,16 @@ namespace cs
         internal static extern void ReleaseActCtx(IntPtr hActCtx);
 
         // Activation context structure
-        [StructLayout(LayoutKind.Sequential, Pack = 4, CharSet = CharSet.Unicode)]
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         internal struct ACTCTX
         {
-            public Int32 cbSize;
-            public UInt32 dwFlags;
+            public int cbSize;
+            public uint dwFlags;
             public string lpSource;
-            public UInt16 wProcessorArchitecture;
-            public UInt16 wLangId;
+            public ushort wProcessorArchitecture;
+            public Int16 wLangId;
             public string lpAssemblyDirectory;
-            public string lpResourceName;
+            public IntPtr lpResourceName;
             public string lpApplicationName;
             public IntPtr hModule;
         }

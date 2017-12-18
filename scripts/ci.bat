@@ -40,8 +40,7 @@ popd
 REM Build C# test suite
 pushd test\cs
 
-midl ..\testlib\testlib.idl /tlb TestLib.tlb
-tlbimp TestLib.tlb /machine:X64 /out:TestLib.Interop.dll
+tlbimp ..\testlib\target\debug\test_lib.dll /MACHINE:X64 /out:TestLib.Interop.dll
 
 devenv cs.sln /Build "Release|x64"
 if %errorlevel% neq 0 exit /b %errorlevel%
