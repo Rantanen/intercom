@@ -179,7 +179,7 @@ fn parse_toml( path : &str ) -> Result< toml::Value, AppError >
 /// impl interface must have a different name. In our case we prefix the struct
 /// name with an 'I'.
 ///
-/// ```
+/// ```no-test
 /// struct Foo;
 ///
 /// #[com_interface]
@@ -188,7 +188,7 @@ fn parse_toml( path : &str ) -> Result< toml::Value, AppError >
 ///
 /// results in
 ///
-/// ```
+/// ```no-test
 /// coclass Foo { .. }
 /// interface IFoo { .. }
 /// ```

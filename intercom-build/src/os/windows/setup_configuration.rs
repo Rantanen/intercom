@@ -243,6 +243,10 @@ mod test
     fn get_tool_paths_returns_valid_paths() {
         ::intercom::runtime::initialize().unwrap();
 
+        // The HOST env variable is set for build.rs, not for tests.
+        // We need to fake one here.
+        ::std::env::set_var( "HOST", "x86_64-pc-windows-msvc" );
+
         let paths = get_tool_paths().unwrap();
         assert!( paths.mt.exists() );
         assert!( paths.rc.exists() );
