@@ -1,7 +1,7 @@
 
 // Interface definitions.
 #ifdef _MSC_VER
-#include "msvc/TestLib_h.h"
+#include "msvc/import.h"
 #endif
 
 // Platform specific runtime initialization.

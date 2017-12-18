@@ -95,8 +95,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\TestLib.dll
-cp $(ProjectDir)..\..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.manifest</Command>
+      <Command>cp $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\test_lib.dll</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -112,8 +111,7 @@ cp $(ProjectDir)..\..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assemb
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\TestLib.dll
-cp $(ProjectDir)..\..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.manifest</Command>
+      <Command>cp $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\test_lib.dll</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -133,8 +131,7 @@ cp $(ProjectDir)..\..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assemb
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\TestLib.dll
-cp $(ProjectDir)..\..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.manifest</Command>
+      <Command>cp $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\test_lib.dll</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,21 +151,16 @@ cp $(ProjectDir)..\..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assemb
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\TestLib.dll
-cp $(ProjectDir)..\..\testlib\TestLib.Assembly.manifest $(OutDir)\TestLib.Assembly.manifest</Command>
+      <Command>cp $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\test_lib.dll</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="../*.h" />
+    <ClInclude Include="import.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="../*.cpp" />
-    <ClCompile Include="../*.c" />
     <ClCompile Include="os.cpp" />
-    <ClCompile Include="TestLib_i.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <Midl Include="..\..\testlib\TestLib.idl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

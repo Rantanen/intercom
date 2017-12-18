@@ -1,6 +1,8 @@
 
 #include "../os.h"
 
+#pragma comment(linker, "\"/manifestdependency:name='test_lib' type='win32' version='1.0.0.0'\"" )
+
 void InitializeRuntime()
 {
 	CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
