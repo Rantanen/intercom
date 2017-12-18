@@ -6,6 +6,6 @@ authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 [dependencies]
 intercom-utils = { version = "0.2", path = "../intercom-utils" }
 intercom = { version = "0.2", path = "../intercom" }
-winreg = "0.4"
+winapi = { version = "0.3", features = [ "winreg" ] }
 glob = "0.2"
 cc = "1.0"

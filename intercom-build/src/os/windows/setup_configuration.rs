@@ -1,7 +1,16 @@
 
-use intercom::*;
-use std::path::PathBuf;
+extern crate glob;
+extern crate winapi;
+use self::winapi::shared::minwindef::{DWORD, HKEY};
+use self::winapi::um::winnt::{KEY_READ};
+use self::winapi::um::winreg;
 
+extern crate intercom;
+use intercom::*;
+
+use std::path::PathBuf;
+use std::ffi::OsString;
+use std::os::windows::ffi::{OsStrExt, OsStringExt};
 use ::host;
 
 #[allow(dead_code)]
@@ -91,7 +100,7 @@ pub struct ToolPaths {
 fn find_path( roots : &[&PathBuf], path : &str ) -> Option< PathBuf > {
 
     // Glob options. We'll want case insensitive searching thanks to Windows.
-    let options = ::glob::MatchOptions {
+    let options = glob::MatchOptions {
         case_sensitive: false,
         require_literal_separator: true,
         require_literal_leading_dot: true,
@@ -106,7 +115,7 @@ fn find_path( roots : &[&PathBuf], path : &str ) -> Option< PathBuf > {
         let pattern = format!( "{}/**/{}", root_str, path );
 
         // Go through all entries.
-        for entry in ::glob::glob_with( &pattern, &options ).unwrap() {
+        for entry in glob::glob_with( &pattern, &options ).unwrap() {
             if let Ok( entry_path ) = entry {
 
                 // The first entry we find, we'll return.
@@ -141,28 +150,79 @@ fn get_compiler_paths( paths : &[ PathBuf ] ) -> Vec<PathBuf>
 }
 
 /// Gets the Windows kit path and version.
-fn get_kit_path() -> ( String, String ) {
+fn get_kit_path() -> Result<( String, String ), String> {
 
-    // Get the Windows Kits registry key.
-    let hklm = ::winreg::RegKey::predef( ::winreg::enums::HKEY_LOCAL_MACHINE );
-    let installed_roots = hklm.open_subkey_with_flags(
-            r"SOFTWARE\Microsoft\Windows Kits\Installed Roots",
-            ::winreg::enums::KEY_READ ).unwrap();
+    unsafe {
 
-    // KitsRoot10 value has the root directory.
-    let kitroot : String = installed_roots.get_value( "KitsRoot10" ).unwrap();
+        // Turn the various string constants into WCHAR* strings for winapi.
+        let key = OsString::from( "SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots\0" )
+                    .encode_wide()
+                    .collect::<Vec<_>>();
+        let value = OsString::from( "KitsRoot10\0" )
+                    .encode_wide()
+                    .collect::<Vec<_>>();
 
-    // Enumerate the installed roots and get one of them.
-    // We shouldn't need a specific version currently so we'll just take one.
-    let kitversion = installed_roots.enum_keys().nth( 0 ).unwrap().unwrap();
+        // Open the Installed Roots registry key.
+        let mut hkey_roots : HKEY = ::std::ptr::null_mut();
+        let mut disp : DWORD = 0;
+        winreg::RegCreateKeyExW(
+            winreg::HKEY_LOCAL_MACHINE,
+            key.as_slice().as_ptr(),
+            0, ::std::ptr::null_mut(), 0,
+            KEY_READ,
+            ::std::ptr::null_mut(),
+            &mut hkey_roots,
+            &mut disp );
+        if hkey_roots.is_null() {
+            return Err( "Could not open Windows Kits registry key".to_owned() );
+        }
 
-    ( kitroot, kitversion )
+        // Get the 'KitsRoot10' value from the above key.
+        let mut buf = Vec::with_capacity( 250 );
+        let mut buf_len : DWORD = 250;
+        let hr = winreg::RegQueryValueExW(
+                hkey_roots, value.as_slice().as_ptr(), ::std::ptr::null_mut(),
+                ::std::ptr::null_mut(),
+                buf.as_mut_ptr() as *mut _,
+                &mut buf_len );
+        if hr != 0 {
+            return Err( "Could not read KitsRoot10 registry value".to_owned() );
+        }
+
+        // Turn the value into a rust string.
+        buf.set_len( ( buf_len / 2 ) as usize - 1 );
+        let kitsroot_osstring = OsString::from_wide( &buf );
+        let kitsroot = kitsroot_osstring.to_string_lossy().to_owned();
+
+        // Get the first sub-key under the Installed Roots. We don't really
+        // care which kit version this is as long as it's one that is present
+        // on the system.
+        let mut buf = Vec::with_capacity( 250 );
+        let mut buf_len : DWORD = 250;
+        let hr = winreg::RegEnumKeyExW(
+            hkey_roots, 0,
+            buf.as_mut_ptr(), &mut buf_len,
+            ::std::ptr::null_mut(),
+            ::std::ptr::null_mut(),
+            ::std::ptr::null_mut(),
+            ::std::ptr::null_mut() );
+        if hr != 0 {
+            return Err( "Could not read Windows Kits versions".to_owned() );
+        }
+
+        // Turn the installed version to a rust string.
+        buf.set_len( buf_len as usize );
+        let kitsversion_osstring = OsString::from_wide( &buf );
+        let kitsversion = kitsversion_osstring.to_string_lossy().to_owned();
+
+        Ok( ( kitsroot.into_owned(), kitsversion.into_owned() ) )
+    }
 }
 
 /// Gets the VS 2017+ installation path.
 fn get_vs_path() -> Result<String, String> {
 
-    ::intercom::runtime::initialize()
+    intercom::runtime::initialize()
             .map_err( |hr| format!( "Failed to initialize COM: {:?}", hr ) )?;
 
     // Get the COM API entry point for the new VS configuration API.
@@ -176,7 +236,7 @@ fn get_vs_path() -> Result<String, String> {
     // Read the installation path. We don't care about anything else for now.
     let installation_path = next.get_installation_path().unwrap();
 
-    ::intercom::runtime::uninitialize();
+    intercom::runtime::uninitialize();
 
     Ok( installation_path )
 }
@@ -184,7 +244,7 @@ fn get_vs_path() -> Result<String, String> {
 pub fn get_tool_paths() -> Result<ToolPaths, String> {
 
     // Get the Windows kit base path and version.
-    let ( kitroot, kitversion ) = get_kit_path();
+    let ( kitroot, kitversion ) = get_kit_path()?;
     let kitroot = PathBuf::from( &kitroot );
 
     // Form the kit lib and include paths.
@@ -245,7 +305,7 @@ mod test
 
     #[test]
     fn get_vs_2017_details() {
-        ::intercom::runtime::initialize().unwrap();
+        intercom::runtime::initialize().unwrap();
 
         let setup_conf = ComItf ::<ISetupConfiguration2>
                 ::create( CLSID_SetupConfiguration ).unwrap();
@@ -284,7 +344,7 @@ mod test
         assert_eq!( installation_path_actual.trim(), installation_path );
         assert_eq!( installation_version_actual.trim(), installation_version );
 
-        ::intercom::runtime::uninitialize();
+        intercom::runtime::uninitialize();
     }
 
     fn get_intercom_root() -> PathBuf {
@@ -301,7 +361,7 @@ mod test
 
     #[test]
     fn get_tool_paths_returns_valid_paths() {
-        ::intercom::runtime::initialize().unwrap();
+        intercom::runtime::initialize().unwrap();
 
         // The HOST env variable is set for build.rs, not for tests.
         // We need to fake one here.
@@ -312,6 +372,6 @@ mod test
         assert!( paths.rc.exists() );
         assert!( paths.midl.exists() );
 
-        ::intercom::runtime::uninitialize();
+        intercom::runtime::uninitialize();
     }
 }
