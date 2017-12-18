@@ -1,5 +1,6 @@
 
 extern crate intercom_utils;
+extern crate cc;
 
 use ::std::env;
 use ::std::path::Path;
@@ -7,9 +8,14 @@ use ::std::fs::File;
 use ::std::process::Command;
 use ::std::io::Write;
 
+use ::host;
+
 mod setup_configuration;
 
 pub fn build() {
+
+    // Get the host.
+    let host = host::get_host();
 
     // Read the Cargo environment variables.
     let out_dir = env::var( "OUT_DIR" )
@@ -29,10 +35,19 @@ pub fn build() {
             .join( format!( "{}.tlb", pkg_name ) );
     let rc_path = Path::new( &out_dir )
             .join( format!( "{}.rc", pkg_name ) );
-    let res_path = Path::new( &out_dir )
-            .join( format!( "{}.res", pkg_name ) );
-    let lib_path = Path::new( &out_dir )
-            .join( format!( "{}.res.lib", pkg_name ) );
+
+    let res_name = format!( "{}.res", pkg_name );
+    let res_path = Path::new( &out_dir ).join( &res_name );
+
+    // The lib name will depend on the compiler as the different linkers,
+    // dictated by the compiler toolchain, will have different requirements for
+    // the file names.
+    let lib_name = match host.compiler {
+        host::Compiler::Msvc => format!( "{}.lib", res_name ),
+        host::Compiler::Gnu => format!( "lib{}.a", res_name ),
+    };
+
+    let lib_path = Path::new( &out_dir ).join( &lib_name );
 
     // Generate IDL using intercom_utils.
     {
@@ -109,25 +124,46 @@ pub fn build() {
         ).expect( "Could not write resource script." );
     }
 
-    // Compile the resource script into a resource dll.
-    {
-        if ! Command::new( paths.rc )
-                .current_dir( &out_dir )
-                .arg( &rc_path )
-                .status()
-                .unwrap().success() {
+    // Compile the resource script into a resource object file.
+    // The final command depends on the comiler toolchain we use as MSVC will
+    // use rc.exe while MinGW will use windres.exe.
+    match host.compiler {
+        host::Compiler::Msvc => {
+            if ! Command::new( paths.rc )
+                    .current_dir( &out_dir )
+                    .arg( &rc_path )
+                    .status()
+                    .unwrap().success() {
 
-                    panic!( "rc.exe did not execute successfully" );
-                }
+                        panic!( "rc.exe did not execute successfully" );
+                    }
+
+            // 'rc.exe' will result in 'foo.res'. We'll need 'foo.res.lib' as
+            // rustc will insist on '.lib' extension.
+            ::std::fs::rename( &res_path, &lib_path )
+                    .expect( &format!(
+                            "Failed to rename {:?} to {:?}",
+                            res_path, lib_path ) );
+
+            // Instruct rustc to link the resource dll.
+            println!( "cargo:rustc-link-lib=dylib={}", res_name );
+            println!( "cargo:rustc-link-search=native={}", out_dir );
+        },
+        host::Compiler::Gnu => {
+            if ! Command::new( paths.rc )
+                    .current_dir( &out_dir )
+                    .arg( "-J" ).arg( "rc" )
+                    .arg( "-i" ).arg( &rc_path )
+                    .arg( "-O" ).arg( "coff" )
+                    .arg( "-o" ).arg( &res_path )
+                    .status()
+                    .unwrap().success() {
+
+                        panic!( "windres.exe did not execute successfully" );
+                    }
+            cc::Build::new()
+                    .object( &res_path )
+                    .compile( &format!( "lib{}.res.a", pkg_name ) );
+        }
     }
-
-    // Rename the resource dll in such a way that rustc will find it.
-    // On MSVC this means appending '.lib' in the end.
-    ::std::fs::rename( &res_path, &lib_path )
-            .expect( &format!(
-                    "Failed to rename {:?} to {:?}",
-                    res_path, lib_path ) );
-
-    // Instruct rustc to link the resource dll.
-    println!( "cargo:rustc-link-lib=dylib={}", &res_path.to_string_lossy()[2..] );
 }

@@ -2,6 +2,8 @@
 use intercom::*;
 use std::path::PathBuf;
 
+use ::host;
+
 #[allow(dead_code)]
 #[allow(non_upper_case_globals)]
 const CLSID_SetupConfiguration : GUID = GUID {
@@ -154,10 +156,18 @@ pub fn get_tool_paths() -> Result<ToolPaths, String> {
     let mut vs_bin = find_path( &[ &vsroot ], r"Hostx64\x64\cl.exe" ).unwrap();
     vs_bin.pop();
 
+    let host = host::get_host();
+    let rc = match host.compiler {
+        host::Compiler::Msvc =>
+            sdkroot.join( format!( r"bin\{}\x64\rc.exe", kitversion ) ),
+        host::Compiler::Gnu =>
+            PathBuf::from( "windres.exe" ),  // Needs to be on PATH.
+    };
+
     Ok( ToolPaths {
         mt: sdkroot.join( format!( r"bin\{}\x64\mt.exe", kitversion ) ),
-        rc: sdkroot.join( format!( r"bin\{}\x64\rc.exe", kitversion ) ),
         midl: sdkroot.join( format!( r"bin\{}\x64\midl.exe", kitversion ) ),
+        rc: rc,
 
         vs_bin: vs_bin,
 
