@@ -4,7 +4,6 @@ use quote::Tokens;
 
 use error::MacroError;
 use super::*;
-use ast_converters::*;
 
 pub fn trace( t : &str, n : &str ) {
     println!( "Added {}: {}", t, n );
@@ -324,72 +323,6 @@ pub fn generate_guid(
     }
 }
 
-pub fn get_method_args(
-    m : &MethodSig
-) -> Option<(
-    Vec<Tokens>,
-    Vec<Tokens>,
-)>
-{
-    m.decl.inputs
-        .split_first()
-        .and_then( | (self_arg, other_args ) | {
-
-            // Get the self arg. This is always a ComPtr.
-            let mut args = vec![
-                quote!( self_vtable : ::intercom::RawComPtr, )
-            ];
-
-            // Process the remaining args into the args and params arrays.
-            let mut params : Vec<Tokens> = vec![];
-            for arg_ref in other_args {
-
-                // Get the type handler.
-                let arg_ty = arg_ref.get_ty().unwrap();
-                let param = tyhandlers::get_ty_handler( &arg_ty );
-                let ty = param.com_ty();
-                let arg_ident = match arg_ref.get_ident() {
-                    Ok(i) => i, Err(e) => panic!(e)
-                };
-
-                // Construct the arguemnt. quote_tokens! has difficulties parsing
-                // arguments on their own so construct the Arg using quote_arg!
-                // and then push the tokens using quote_tokens!.
-                let arg = quote!( #arg_ident : #ty );
-                args.push( quote!( #arg, ) );
-
-                // Get the call parameter.
-                let call_param = param.com_to_rust( &arg_ident );
-                params.push( quote!( #call_param, ) );
-            }
-
-            // Add the [retval] arg if one exists and isn't ().
-            if let Some( outs ) = get_out_and_ret( m ) {
-                if let ( Some( out_ty ), _ ) = outs {
-                    if ! is_unit( &out_ty ) {
-                        let param = tyhandlers::get_ty_handler( &out_ty );
-                        let ty = param.com_ty();
-                        args.push( quote!( __outX : *mut #ty ) );
-                    }
-                }
-            } else {
-                return None
-            };
-
-            // Ensure the first parameter is &self.
-            // Static methods don't count here.
-            if let FnArg::SelfRef(..) = *self_arg {
-            } else {
-                return None
-            }
-
-            Some( (
-                args,
-                params,
-            ) )
-        } )
-}
-
 pub fn is_unit(
     tk : &Ty
 ) -> bool
@@ -404,104 +337,6 @@ pub fn is_unit(
 pub fn unit_ty() -> Ty
 {
     Ty::Tup( vec![] )
-}
-
-pub fn get_ret_types(
-    ret_ty : &Ty
-) -> Result< ( Option<Ty>, Ty ), &'static str >
-{
-    // Get the path type on the return value.
-    let path = match *ret_ty {
-        Ty::Path( _, ref p ) => p,
-        _ => return Err( "Use Result as a return type" )
-    };
-
-    // Find the last path segment.
-    let last_segment = path.segments.last().unwrap();
-
-    // Check the last segment has angle bracketed parameters.
-    if let PathParameters::AngleBracketed( ref data ) = last_segment.parameters {
-        if ! data.types.is_empty() {
-
-            // Angle bracketed parameters exist. We're assuming this is
-            // some kind of Result<ok> or Result<ok, err>. In either case
-            // we can take the first parameter as the 'ok' type.
-            //
-            // TODO: Figure out whether we can ask the compiler whether
-            // the type matches Result<S,E> type.
-            return Ok( (
-                data.types.first().and_then( |x| Some( x.clone() ) ),
-                Ty::Path(
-                    None,
-                    Path {
-                        global: true,
-                        segments: vec![
-                            PathSegment::from( Ident::from( "intercom" ) ),
-                            PathSegment::from( Ident::from( "HRESULT" ) ),
-                        ]
-                    }
-                )
-            ) )
-        }
-    }
-
-    // Default value. We get here only if we didn't return a type from
-    // the if statements above.
-    Ok( ( None, ret_ty.clone() ) )
-}
-
-pub fn get_out_and_ret(
-    m : &MethodSig
-) -> Option< ( Option<Ty>, Ty ) >
-{
-    let output = &m.decl.output;
-    let result_ty = match *output {
-        FunctionRetTy::Ty( ref ty ) => ty,
-        FunctionRetTy::Default => return Some( ( None, Ty::Tup( vec![] ) ) ),
-    };
-
-    get_ret_types( result_ty ).ok()
-}
-
-pub fn get_method_rvalues(
-    m : &MethodSig
-) -> Option< ( Ty, Tokens ) >
-{
-    let ( out_ty, ret_ty ) = match get_out_and_ret( m ) {
-        Some( s ) => s,
-        None => return None,
-    };
-
-    Some( match out_ty {
-        // Result<(), _>. Ignore the [retval] value but handle the Err
-        // as the method return value.
-        Some( ref unit ) if is_unit( unit ) => (
-            ret_ty,
-            quote!(
-                match result {
-                    Ok( _ ) => ::intercom::S_OK,
-                    Err( e ) => e
-                } ) ),
-
-        // Result<_, _>. Ok() -> __out + S_OK, Err() -> E_*
-        Some( ref out_ty ) => {
-            let param = tyhandlers::get_ty_handler( out_ty );
-            let out_ident = Ident::from( "__outX" );
-            let result_value = param.rust_to_com( &Ident::from( "r" ) );
-            let default_value = param.default_value();
-            (
-                ret_ty,
-                quote!(
-                    match result {
-                        Ok( r ) => { *#out_ident = #result_value; ::intercom::S_OK },
-                        Err( e ) => { *#out_ident = #default_value; e },
-                    } ) )
-        },
-
-        // Not a Result<..>, assume we can return the return value as is.
-        None => (
-            ret_ty, quote!( return result ) ),
-    } )
 }
 
 pub fn get_guid_tokens(
