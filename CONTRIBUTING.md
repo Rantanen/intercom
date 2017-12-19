@@ -39,6 +39,13 @@ The utils crate implements the command line utility for working with
 Intercom-libraries. Mostly this involves things like generating cross-language
 headers or bindings for the COM libraries, etc.
 
+### `intercom-build`
+
+Build utilities for working with crates using Intercom. As of now, this is
+meaningful only on Windows, where the build crate is responsible for
+implementing utility method for embedding the TypeLib and the manifest in the
+final dll library file.
+
 ### `intercom-common`
 
 The `intercom-common` crate defines common functionality used for processing
