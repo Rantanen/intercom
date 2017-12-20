@@ -18,8 +18,8 @@ typedef GUID IID;
 #define CLSID_DEFINED
 typedef IID CLSID;
 
-typedef IID REFCLSID;
-typedef IID REFIID;
+typedef const IID& REFCLSID;
+typedef const IID& REFIID;
 
 
 #endif

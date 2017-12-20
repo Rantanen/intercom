@@ -21,7 +21,11 @@
             "request": "launch",
             "name": "Debug Cpp-Raw",
             "program": "${workspaceRoot}/test/cpp-raw/build/cpp-raw",
-            "cwd": "${workspaceRoot}"
+            "cwd": "${workspaceRoot}",
+            "sourceLanguages": [
+                "rust",
+                "cpp"
+            ]
         }
     ]
 }

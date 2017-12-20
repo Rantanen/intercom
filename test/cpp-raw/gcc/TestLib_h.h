@@ -35,6 +35,13 @@
 
 /* Forward Declarations */
 
+#ifndef __IRefCount_FWD_DEFINED__
+#define __IRefCount_FWD_DEFINED__
+typedef interface IRefCount IRefCount;
+
+#endif 	/* __IRefCount_FWD_DEFINED__ */
+
+
 #ifndef __IPrimitiveOperations_FWD_DEFINED__
 #define __IPrimitiveOperations_FWD_DEFINED__
 typedef interface IPrimitiveOperations IPrimitiveOperations;
@@ -68,6 +75,13 @@ typedef interface IClassCreator IClassCreator;
 typedef interface ICreatedClass ICreatedClass;
 
 #endif 	/* __ICreatedClass_FWD_DEFINED__ */
+
+
+#ifndef __IParent_FWD_DEFINED__
+#define __IParent_FWD_DEFINED__
+typedef interface IParent IParent;
+
+#endif 	/* __IParent_FWD_DEFINED__ */
 
 
 #ifndef __IRefCountOperations_FWD_DEFINED__
@@ -208,7 +222,87 @@ extern "C"{
 
 
 
+
+
 EXTERN_C const IID LIBID_TestLib;
+
+#ifndef __IRefCount_INTERFACE_DEFINED__
+#define __IRefCount_INTERFACE_DEFINED__
+
+/* interface IRefCount */
+/* [unique][nonextensible][uuid][object] */
+
+
+EXTERN_C const IID IID_IRefCount;
+
+#if defined(__cplusplus) && !defined(CINTERFACE)
+
+    MIDL_INTERFACE("aa5b7352-5d7a-35b9-5206-145b041f2c1c")
+    IRefCount : public IUnknown
+    {
+    public:
+        virtual /* [id] */ UINT32 STDMETHODCALLTYPE GetRefCount( void) = 0;
+
+    };
+
+
+#else 	/* C style interface */
+
+    typedef struct IRefCountVtbl
+    {
+        BEGIN_INTERFACE
+
+        HRESULT ( STDMETHODCALLTYPE *QueryInterface )(
+            IRefCount * This,
+            /* [in] */ REFIID riid,
+            /* [annotation][iid_is][out] */
+            _COM_Outptr_  void **ppvObject);
+
+        ULONG ( STDMETHODCALLTYPE *AddRef )(
+            IRefCount * This);
+
+        ULONG ( STDMETHODCALLTYPE *Release )(
+            IRefCount * This);
+
+        /* [id] */ UINT32 ( STDMETHODCALLTYPE *GetRefCount )(
+            IRefCount * This);
+
+        END_INTERFACE
+    } IRefCountVtbl;
+
+    interface IRefCount
+    {
+        CONST_VTBL struct IRefCountVtbl *lpVtbl;
+    };
+
+
+
+#ifdef COBJMACROS
+
+
+#define IRefCount_QueryInterface(This,riid,ppvObject)	\
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) )
+
+#define IRefCount_AddRef(This)	\
+    ( (This)->lpVtbl -> AddRef(This) )
+
+#define IRefCount_Release(This)	\
+    ( (This)->lpVtbl -> Release(This) )
+
+
+#define IRefCount_GetRefCount(This)	\
+    ( (This)->lpVtbl -> GetRefCount(This) )
+
+#endif /* COBJMACROS */
+
+
+#endif 	/* C style interface */
+
+
+
+
+#endif 	/* __IRefCount_INTERFACE_DEFINED__ */
+
 
 #ifndef __IPrimitiveOperations_INTERFACE_DEFINED__
 #define __IPrimitiveOperations_INTERFACE_DEFINED__
@@ -391,7 +485,7 @@ EXTERN_C const IID IID_IStatefulOperations;
 
 #if defined(__cplusplus) && !defined(CINTERFACE)
 
-    MIDL_INTERFACE("12341234-1234-1234-1234-123412340004")
+    MIDL_INTERFACE("2b9bddd2-31f5-3d4b-79a0-ac8e8d11a93e")
     IStatefulOperations : public IUnknown
     {
     public:
@@ -479,7 +573,7 @@ EXTERN_C const IID IID_IResultOperations;
 
 #if defined(__cplusplus) && !defined(CINTERFACE)
 
-    MIDL_INTERFACE("12341234-1234-1234-1234-123412340006")
+    MIDL_INTERFACE("ffb673d9-7896-3a4c-4fa8-f72406588aa1")
     IResultOperations : public IUnknown
     {
     public:
@@ -490,6 +584,11 @@ EXTERN_C const IID IID_IResultOperations;
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE Sqrt(
             /* [in] */ double value,
             /* [retval][out] */ double *__out) = 0;
+
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE Tuple(
+            /* [in] */ UINT32 value,
+            /* [out] */ UINT16 *__out1,
+            /* [out] */ UINT16 *__out2) = 0;
 
     };
 
@@ -523,6 +622,12 @@ EXTERN_C const IID IID_IResultOperations;
             /* [in] */ double value,
             /* [retval][out] */ double *__out);
 
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *Tuple )(
+            IResultOperations * This,
+            /* [in] */ UINT32 value,
+            /* [out] */ UINT16 *__out1,
+            /* [out] */ UINT16 *__out2);
+
         END_INTERFACE
     } IResultOperationsVtbl;
 
@@ -555,6 +660,9 @@ EXTERN_C const IID IID_IResultOperations;
 #define IResultOperations_Sqrt(This,value,__out)	\
     ( (This)->lpVtbl -> Sqrt(This,value,__out) )
 
+#define IResultOperations_Tuple(This,value,__out1,__out2)	\
+    ( (This)->lpVtbl -> Tuple(This,value,__out1,__out2) )
+
 #endif /* COBJMACROS */
 
 
@@ -577,12 +685,17 @@ EXTERN_C const IID IID_IClassCreator;
 
 #if defined(__cplusplus) && !defined(CINTERFACE)
 
-    MIDL_INTERFACE("12341234-1234-1234-1234-123412340009")
+    MIDL_INTERFACE("2e7e23e8-f66d-3779-6c74-61898d7b40cd")
     IClassCreator : public IUnknown
     {
     public:
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE CreateRoot(
             /* [in] */ INT32 id,
+            /* [retval][out] */ ICreatedClass **__out) = 0;
+
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE CreateChild(
+            /* [in] */ INT32 id,
+            /* [in] */ IParent *parent,
             /* [retval][out] */ ICreatedClass **__out) = 0;
 
     };
@@ -611,6 +724,12 @@ EXTERN_C const IID IID_IClassCreator;
             /* [in] */ INT32 id,
             /* [retval][out] */ ICreatedClass **__out);
 
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *CreateChild )(
+            IClassCreator * This,
+            /* [in] */ INT32 id,
+            /* [in] */ IParent *parent,
+            /* [retval][out] */ ICreatedClass **__out);
+
         END_INTERFACE
     } IClassCreatorVtbl;
 
@@ -637,6 +756,9 @@ EXTERN_C const IID IID_IClassCreator;
 #define IClassCreator_CreateRoot(This,id,__out)	\
     ( (This)->lpVtbl -> CreateRoot(This,id,__out) )
 
+#define IClassCreator_CreateChild(This,id,parent,__out)	\
+    ( (This)->lpVtbl -> CreateChild(This,id,parent,__out) )
+
 #endif /* COBJMACROS */
 
 
@@ -659,7 +781,7 @@ EXTERN_C const IID IID_ICreatedClass;
 
 #if defined(__cplusplus) && !defined(CINTERFACE)
 
-    MIDL_INTERFACE("12341234-1234-1234-1234-123412340010")
+    MIDL_INTERFACE("104eb174-fd00-3ecf-7e0d-d965564279e7")
     ICreatedClass : public IUnknown
     {
     public:
@@ -738,6 +860,84 @@ EXTERN_C const IID IID_ICreatedClass;
 #endif 	/* __ICreatedClass_INTERFACE_DEFINED__ */
 
 
+#ifndef __IParent_INTERFACE_DEFINED__
+#define __IParent_INTERFACE_DEFINED__
+
+/* interface IParent */
+/* [unique][nonextensible][uuid][object] */
+
+
+EXTERN_C const IID IID_IParent;
+
+#if defined(__cplusplus) && !defined(CINTERFACE)
+
+    MIDL_INTERFACE("cea1c199-bf71-3b0a-5a4c-ee3f5a0ae5ce")
+    IParent : public IUnknown
+    {
+    public:
+        virtual /* [id] */ INT32 STDMETHODCALLTYPE GetId( void) = 0;
+
+    };
+
+
+#else 	/* C style interface */
+
+    typedef struct IParentVtbl
+    {
+        BEGIN_INTERFACE
+
+        HRESULT ( STDMETHODCALLTYPE *QueryInterface )(
+            IParent * This,
+            /* [in] */ REFIID riid,
+            /* [annotation][iid_is][out] */
+            _COM_Outptr_  void **ppvObject);
+
+        ULONG ( STDMETHODCALLTYPE *AddRef )(
+            IParent * This);
+
+        ULONG ( STDMETHODCALLTYPE *Release )(
+            IParent * This);
+
+        /* [id] */ INT32 ( STDMETHODCALLTYPE *GetId )(
+            IParent * This);
+
+        END_INTERFACE
+    } IParentVtbl;
+
+    interface IParent
+    {
+        CONST_VTBL struct IParentVtbl *lpVtbl;
+    };
+
+
+
+#ifdef COBJMACROS
+
+
+#define IParent_QueryInterface(This,riid,ppvObject)	\
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) )
+
+#define IParent_AddRef(This)	\
+    ( (This)->lpVtbl -> AddRef(This) )
+
+#define IParent_Release(This)	\
+    ( (This)->lpVtbl -> Release(This) )
+
+
+#define IParent_GetId(This)	\
+    ( (This)->lpVtbl -> GetId(This) )
+
+#endif /* COBJMACROS */
+
+
+#endif 	/* C style interface */
+
+
+
+
+#endif 	/* __IParent_INTERFACE_DEFINED__ */
+
+
 #ifndef __IRefCountOperations_INTERFACE_DEFINED__
 #define __IRefCountOperations_INTERFACE_DEFINED__
 
@@ -749,14 +949,14 @@ EXTERN_C const IID IID_IRefCountOperations;
 
 #if defined(__cplusplus) && !defined(CINTERFACE)
 
-    MIDL_INTERFACE("12341234-1234-1234-1234-123412340012")
+    MIDL_INTERFACE("6b198a07-2d86-340e-717e-f416a3905d6e")
     IRefCountOperations : public IUnknown
     {
     public:
-        virtual /* [id] */ UINT32 STDMETHODCALLTYPE GetRefCount( void) = 0;
-
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE GetNew(
             /* [retval][out] */ IRefCountOperations **__out) = 0;
+
+        virtual /* [id] */ UINT32 STDMETHODCALLTYPE GetRefCount( void) = 0;
 
     };
 
@@ -779,12 +979,12 @@ EXTERN_C const IID IID_IRefCountOperations;
         ULONG ( STDMETHODCALLTYPE *Release )(
             IRefCountOperations * This);
 
-        /* [id] */ UINT32 ( STDMETHODCALLTYPE *GetRefCount )(
-            IRefCountOperations * This);
-
         /* [id] */ HRESULT ( STDMETHODCALLTYPE *GetNew )(
             IRefCountOperations * This,
             /* [retval][out] */ IRefCountOperations **__out);
+
+        /* [id] */ UINT32 ( STDMETHODCALLTYPE *GetRefCount )(
+            IRefCountOperations * This);
 
         END_INTERFACE
     } IRefCountOperationsVtbl;
@@ -809,11 +1009,11 @@ EXTERN_C const IID IID_IRefCountOperations;
     ( (This)->lpVtbl -> Release(This) )
 
 
-#define IRefCountOperations_GetRefCount(This)	\
-    ( (This)->lpVtbl -> GetRefCount(This) )
-
 #define IRefCountOperations_GetNew(This,__out)	\
     ( (This)->lpVtbl -> GetNew(This,__out) )
+
+#define IRefCountOperations_GetRefCount(This)	\
+    ( (This)->lpVtbl -> GetRefCount(This) )
 
 #endif /* COBJMACROS */
 
@@ -837,7 +1037,7 @@ EXTERN_C const IID IID_ISharedInterface;
 
 #if defined(__cplusplus) && !defined(CINTERFACE)
 
-    MIDL_INTERFACE("12341234-1234-1234-1234-123412340013")
+    MIDL_INTERFACE("1df08ff6-aafb-37ec-53cf-cde249ceeb4b")
     ISharedInterface : public IUnknown
     {
     public:
@@ -937,7 +1137,7 @@ EXTERN_C const IID IID_IErrorSource;
 
 #if defined(__cplusplus) && !defined(CINTERFACE)
 
-    MIDL_INTERFACE("12341234-1234-1234-1234-123412340016")
+    MIDL_INTERFACE("5505b7b6-5ca4-3e38-667b-a9823f1d5a0f")
     IErrorSource : public IUnknown
     {
     public:
@@ -1012,7 +1212,7 @@ EXTERN_C const CLSID CLSID_RefCountOperations;
 
 #ifdef __cplusplus
 
-class DECLSPEC_UUID("12341234-1234-1234-1234-123412340011")
+class DECLSPEC_UUID("f06af5f0-745a-3b29-4839-d2d39a3f08cd")
 RefCountOperations;
 #endif
 
@@ -1028,7 +1228,7 @@ EXTERN_C const CLSID CLSID_StatefulOperations;
 
 #ifdef __cplusplus
 
-class DECLSPEC_UUID("12341234-1234-1234-1234-123412340003")
+class DECLSPEC_UUID("694c1893-2fa8-3d4c-6acf-69c59366721e")
 StatefulOperations;
 #endif
 
@@ -1036,7 +1236,7 @@ EXTERN_C const CLSID CLSID_ResultOperations;
 
 #ifdef __cplusplus
 
-class DECLSPEC_UUID("12341234-1234-1234-1234-123412340005")
+class DECLSPEC_UUID("e5ce34c4-c1ad-34bc-69f6-d1bfa6bb2596")
 ResultOperations;
 #endif
 
@@ -1044,7 +1244,7 @@ EXTERN_C const CLSID CLSID_ClassCreator;
 
 #ifdef __cplusplus
 
-class DECLSPEC_UUID("12341234-1234-1234-1234-123412340007")
+class DECLSPEC_UUID("3323cccd-1a38-33a4-4ae1-4dc92a7e8dc5")
 ClassCreator;
 #endif
 
@@ -1052,7 +1252,7 @@ EXTERN_C const CLSID CLSID_CreatedClass;
 
 #ifdef __cplusplus
 
-class DECLSPEC_UUID("12341234-1234-1234-1234-123412340008")
+class DECLSPEC_UUID("51ed4fb8-35d8-36c6-78fd-6bc582c84b19")
 CreatedClass;
 #endif
 
@@ -1060,7 +1260,7 @@ EXTERN_C const CLSID CLSID_SharedImplementation;
 
 #ifdef __cplusplus
 
-class DECLSPEC_UUID("12341234-1234-1234-1234-123412340014")
+class DECLSPEC_UUID("88687644-9cb2-3bd6-4c23-db547d399029")
 SharedImplementation;
 #endif
 
@@ -1068,7 +1268,7 @@ EXTERN_C const CLSID CLSID_ErrorSource;
 
 #ifdef __cplusplus
 
-class DECLSPEC_UUID("12341234-1234-1234-1234-123412340015")
+class DECLSPEC_UUID("2af563c2-dc1c-339a-6035-f5f8180fae86")
 ErrorSource;
 #endif
 #endif /* __TestLib_LIBRARY_DEFINED__ */
@@ -1082,4 +1282,3 @@ ErrorSource;
 #endif
 
 #endif
-

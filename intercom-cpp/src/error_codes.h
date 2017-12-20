@@ -21,7 +21,7 @@ typedef uint32_t HRESULT;
 #define E_NOTIMPL 0x80004001
 
 // Not implemented.
-#define E_INVALIDARG 0x80004002
+#define E_INVALIDARG 0x80070057
 
 // 	Unspecified failure.
 #define E_FAIL 0x80004005

@@ -43,3 +43,7 @@ add_executable(${PROJECT_NAME} ${PROJECT1_SRCS} ${PROJECT1_COMPILER_SPECIFIC_SRC
 # Link to testlib
 find_library(TESTLIB_LOCATION libtest_lib.so PATHS "${PROJECT_SOURCE_DIR}/../testlib/target/debug/")
 target_link_libraries(${PROJECT_NAME} ${TESTLIB_LOCATION})
+
+# Link to ld.so, support for loading dynamic libraries.
+find_library(LD_LOCATION dl)
+target_link_libraries(${PROJECT_NAME} ${LD_LOCATION})

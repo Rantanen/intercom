@@ -9,6 +9,7 @@
 
 #include <inttypes.h>
 
+typedef int BOOL;
 typedef int8_t INT8;
 typedef uint8_t UINT8;
 typedef int16_t INT16;
