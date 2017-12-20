@@ -70,7 +70,7 @@ fn result_to_idl(
             // This means backwards compatibility is maintained as long as all
             // new methods are added to the end of the traits.
             format!( r###"
-                [id({:X})]
+                [id({:-X})]
                 {} {}( {} );
             "###, i, m.rvalue, utils::pascal_case( &m.name ), args )
 
@@ -81,7 +81,7 @@ fn result_to_idl(
         format!( r###"
             [
                 object,
-                uuid( {:X} ),
+                uuid( {:-X} ),
                 nonextensible,
                 pointer_default(unique)
             ]
@@ -115,7 +115,7 @@ fn result_to_idl(
         // details.
         format!( r###"
             [
-                uuid( {:X} )
+                uuid( {:-X} )
             ]
             coclass {}
             {{
@@ -127,7 +127,7 @@ fn result_to_idl(
     // We got the interfaces and classes. We can format and output the IDL.
     writeln!( out, r###"
         [
-            uuid( {:X} )
+            uuid( {:-X} )
         ]
         library {}
         {{

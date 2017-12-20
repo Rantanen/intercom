@@ -156,23 +156,30 @@ impl GUID {
     }
 }
 
+impl Default for GUID {
+    fn default() -> GUID {
+        GUID::zero_guid()
+    }
+}
+
 impl std::fmt::Display for GUID {
 
     /// Formats the GUID in brace-hyphenated format for display.
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!( f,
-            "{:08x}-{:04x}-{:04x}-{:02x}{:02x}-{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",
-            self.data1,
-            self.data2,
-            self.data3,
-            self.data4[0],
-            self.data4[1],
-            self.data4[2],
-            self.data4[3],
-            self.data4[4],
-            self.data4[5],
-            self.data4[6],
-            self.data4[7] )
+        fmt_guid( self, f, GuidFmtCase::Upper, GuidFmt::Braces )
+    }
+}
+
+impl std::fmt::LowerHex for GUID {
+
+    /// Formats the GUID in brace-hyphenated format for display.
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let fmt = if f.sign_minus() {
+            GuidFmt::Hyphens
+        } else {
+            GuidFmt::Raw
+        };
+        fmt_guid( self, f, GuidFmtCase::Lower, fmt )
     }
 }
 
@@ -180,18 +187,198 @@ impl std::fmt::UpperHex for GUID {
 
     /// Formats the GUID in brace-hyphenated format for display.
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!( f,
-            "{:08x}-{:04x}-{:04x}-{:02x}{:02x}-{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",
-            self.data1,
-            self.data2,
-            self.data3,
-            self.data4[0],
-            self.data4[1],
-            self.data4[2],
-            self.data4[3],
-            self.data4[4],
-            self.data4[5],
-            self.data4[6],
-            self.data4[7] )
+        let fmt = if f.sign_minus() {
+            GuidFmt::Hyphens
+        } else {
+            GuidFmt::Raw
+        };
+        fmt_guid( self, f, GuidFmtCase::Upper, fmt )
+    }
+}
+
+enum GuidFmtCase { Lower, Upper }
+enum GuidFmt { Braces, Hyphens, Raw }
+
+fn fmt_guid(
+    g : &GUID,
+    f: &mut std::fmt::Formatter,
+    case : GuidFmtCase,
+    fmt : GuidFmt
+) -> std::fmt::Result
+{
+    match case {
+        GuidFmtCase::Lower => match fmt {
+            GuidFmt::Braces =>
+                write!( f,
+                    "{{{:08x}-{:04x}-{:04x}-{:02x}{:02x}-{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}}}",
+                    g.data1, g.data2, g.data3,
+                    g.data4[0], g.data4[1], g.data4[2], g.data4[3],
+                    g.data4[4], g.data4[5], g.data4[6], g.data4[7] ),
+            GuidFmt::Hyphens =>
+                write!( f,
+                    "{:08x}-{:04x}-{:04x}-{:02x}{:02x}-{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",
+                    g.data1, g.data2, g.data3,
+                    g.data4[0], g.data4[1], g.data4[2], g.data4[3],
+                    g.data4[4], g.data4[5], g.data4[6], g.data4[7] ),
+            GuidFmt::Raw =>
+                write!( f,
+                    "{:08x}{:04x}{:04x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",
+                    g.data1, g.data2, g.data3,
+                    g.data4[0], g.data4[1], g.data4[2], g.data4[3],
+                    g.data4[4], g.data4[5], g.data4[6], g.data4[7] ),
+        },
+        GuidFmtCase::Upper => match fmt {
+            GuidFmt::Braces =>
+                write!( f,
+                    "{{{:08X}-{:04X}-{:04X}-{:02X}{:02X}-{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}}}",
+                    g.data1, g.data2, g.data3,
+                    g.data4[0], g.data4[1], g.data4[2], g.data4[3],
+                    g.data4[4], g.data4[5], g.data4[6], g.data4[7] ),
+            GuidFmt::Hyphens =>
+                write!( f,
+                    "{:08X}-{:04X}-{:04X}-{:02X}{:02X}-{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}",
+                    g.data1, g.data2, g.data3,
+                    g.data4[0], g.data4[1], g.data4[2], g.data4[3],
+                    g.data4[4], g.data4[5], g.data4[6], g.data4[7] ),
+            GuidFmt::Raw =>
+                write!( f,
+                    "{:08X}{:04X}{:04X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}",
+                    g.data1, g.data2, g.data3,
+                    g.data4[0], g.data4[1], g.data4[2], g.data4[3],
+                    g.data4[4], g.data4[5], g.data4[6], g.data4[7] ),
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    
+    #[test]
+    fn zero_guid() {
+        let guid = GUID::zero_guid();
+
+        assert_eq!( 0, guid.data1 );
+        assert_eq!( 0, guid.data2 );
+        assert_eq!( 0, guid.data3 );
+        assert_eq!( [ 0, 0, 0, 0, 0, 0, 0, 0 ], guid.data4 );
+    }
+
+    #[test]
+    fn parse_braces() {
+
+        let expected = GUID {
+            data1: 0x12345678,
+            data2: 0x90ab,
+            data3: 0xcdef,
+            data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
+        };
+
+        let actual = GUID::parse( "{12345678-90ab-cdef-fedc-ba0987654321}" )
+                            .unwrap();
+
+        assert_eq!( expected, actual );
+    }
+
+    #[test]
+    fn parse_hyphenated() {
+
+        let expected = GUID {
+            data1: 0x12345678,
+            data2: 0x90ab,
+            data3: 0xcdef,
+            data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
+        };
+
+        let actual = GUID::parse( "12345678-90ab-cdef-fedc-ba0987654321" )
+                            .unwrap();
+
+        assert_eq!( expected, actual );
+    }
+
+    #[test]
+    fn parse_raw() {
+
+        let expected = GUID {
+            data1: 0x12345678,
+            data2: 0x90ab,
+            data3: 0xcdef,
+            data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
+        };
+
+        let actual = GUID::parse( "1234567890abcdeffedcba0987654321" )
+                            .unwrap();
+
+        assert_eq!( expected, actual );
+    }
+
+    #[test]
+    fn format_default() {
+
+        let expected = "{12345678-90AB-CDEF-FEDC-BA0987654321}";
+        let guid = GUID {
+            data1: 0x12345678,
+            data2: 0x90ab,
+            data3: 0xcdef,
+            data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
+        };
+        
+        assert_eq!( expected, format!( "{}", guid ) );
+    }
+
+    #[test]
+    fn format_lowerhex() {
+
+        let expected = "1234567890abcdeffedcba0987654321";
+        let guid = GUID {
+            data1: 0x12345678,
+            data2: 0x90ab,
+            data3: 0xcdef,
+            data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
+        };
+        
+        assert_eq!( expected, format!( "{:x}", guid ) );
+    }
+
+    #[test]
+    fn format_lowerhex_hyphens() {
+
+        let expected = "12345678-90ab-cdef-fedc-ba0987654321";
+        let guid = GUID {
+            data1: 0x12345678,
+            data2: 0x90ab,
+            data3: 0xcdef,
+            data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
+        };
+        
+        assert_eq!( expected, format!( "{:-x}", guid ) );
+    }
+
+    #[test]
+    fn format_upperhex() {
+
+        let expected = "1234567890ABCDEFFEDCBA0987654321";
+        let guid = GUID {
+            data1: 0x12345678,
+            data2: 0x90ab,
+            data3: 0xcdef,
+            data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
+        };
+        
+        assert_eq!( expected, format!( "{:X}", guid ) );
+    }
+
+    #[test]
+    fn format_upperhex_hyphens() {
+
+        let expected = "12345678-90AB-CDEF-FEDC-BA0987654321";
+        let guid = GUID {
+            data1: 0x12345678,
+            data2: 0x90ab,
+            data3: 0xcdef,
+            data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
+        };
+        
+        assert_eq!( expected, format!( "{:-X}", guid ) );
     }
 }
