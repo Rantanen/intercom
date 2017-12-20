@@ -12,5 +12,9 @@ build
 CMakeFiles
 Makefile
 
+# Dolphin metadata
+.directory
+
 # CMakeTools plugin, may contain full paths
 .vscode/.cmaketools.json
+
