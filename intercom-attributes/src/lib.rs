@@ -1,7 +1,6 @@
 #![feature(proc_macro)]
 #![allow(unused_imports)]
 #![feature(catch_expr)]
-#![feature(type_ascription)]
 #![recursion_limit="128"]
 
 use std::iter;
@@ -563,11 +562,11 @@ fn expand_com_class(
                 let guid = utils::parameter_to_guid(
                             f, &crate_name, struct_ident.as_ref(), "CLSID" )?;
                 Ok( ( guid,
-                    ( itfs.into_iter()
+                    itfs.into_iter()
                         .map( |i|
                             i.get_ident()
                                 .or( Err( "Invalid interface" ) ))
-                        .collect() : Result<Vec<Ident>, &'static str> )?
+                        .collect::<Result<Vec<_>, &'static str>>()?
                 ) ) 
             } )?;
 
