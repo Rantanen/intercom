@@ -211,7 +211,7 @@ pub fn return_hresult< E >( error : E ) -> HRESULT
 
             // Construct the COM class used for IErrorInfo. The class contains the
             // description in memory.
-            let mut info = ComBox::< ErrorInfo >::new( error_info );
+            let mut info = ComStruct::< ErrorInfo >::new( error_info );
 
             // Get the IErrorInfo interface and set it in thread memory.
             let mut error_ptr : RawComPtr = std::ptr::null_mut();
@@ -224,10 +224,6 @@ pub fn return_hresult< E >( error : E ) -> HRESULT
                         &IID_IErrorInfo,
                         &mut error_ptr );
                 error_store::SetErrorInfo( 0, error_ptr );
-
-                // SetErrorInfo took ownership of the error.
-                // Forget it from the Box.
-                Box::into_raw( info );
             }
         },
         None => {
@@ -257,8 +253,7 @@ pub fn get_last_error< E >( last_hr : HRESULT ) -> E
                 let ierrorinfo = ComItf::< IErrorInfo >::wrap( error_ptr );;
 
                 // Construct a proper ErrorInfo struct from the COM interface.
-                let error_info = ErrorInfo::try_from(
-                        &ierrorinfo as &IErrorInfo ).ok();
+                let error_info = ErrorInfo::try_from( &*ierrorinfo ).ok();
 
                 // Release the interface.
                 let iunk : &ComItf<IUnknown> = ierrorinfo.as_ref();

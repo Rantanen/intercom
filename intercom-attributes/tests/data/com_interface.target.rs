@@ -234,3 +234,10 @@ impl Foo for ::intercom::ComItf<Foo>
         }
     }
 }
+
+impl ::std::ops::Deref for ::intercom::ComItf<Foo> {
+    type Target = Foo;
+    fn deref(&self) -> &Self::Target {
+        self
+    }
+}

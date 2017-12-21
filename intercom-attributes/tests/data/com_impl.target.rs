@@ -36,18 +36,42 @@ fn __Foo_FooVtbl_offset() -> usize {
     }
 }
 
-impl From<::intercom::ComRc<Foo>> for ::intercom::ComItf<Foo> {
-    fn from( coclass: ::intercom::ComRc<Foo> ) -> Self {
-        Self::from( &coclass )
+impl From<::intercom::ComStruct<Foo>> for ::intercom::ComRc<Foo> {
+    fn from( source: ::intercom::ComStruct<Foo> ) -> Self {
+        let itf: ::intercom::ComItf<Foo> = source.into();
+        ::intercom::ComRc::attach( itf )
     }
 }
 
-impl<'a> From<&'a ::intercom::ComRc<Foo>> for ::intercom::ComItf<Foo> {
-    fn from( coclass: &'a ::intercom::ComRc<Foo> ) -> Self {
+impl From<::intercom::ComStruct<Foo>> for ::intercom::ComItf<Foo> {
+    fn from( source: ::intercom::ComStruct<Foo> ) -> Self {
         unsafe {
-            ::intercom::ComItf::wrap(
-                ::intercom::ComRc::query_interface( coclass, &IID_Foo )
-                    .expect( "query_interface( IID_Foo ) failed for Foo" ) )
+
+            // We are using the CoClass::query_interface here. This one
+            // doesn't increment ref count, which means well need to be careful
+            // not to decrease it when 'source' goes out of scope.
+            let itf = ::intercom::ComItf::wrap(
+                < Foo as ::intercom::CoClass >::query_interface(
+                        ::intercom::ComBox::vtable( &source ), &IID_Foo )
+                    .expect( "query_interface( IID_Foo ) failed for Foo" ) );
+
+            // Don't decrease the ref count.
+            std::mem::forget( source );
+
+            itf
+        }
+    }
+}
+
+impl ::std::ops::Deref for ::intercom::ComItf<Foo> {
+    type Target = Foo;
+    fn deref(&self) -> &Self::Target {
+        unsafe {
+            let self_combox = (
+                    ::intercom::ComItf::ptr(self) as usize
+                        - __Foo_FooVtbl_offset()
+                ) as *mut ::intercom::ComBox<Foo>;
+            &**self_combox
         }
     }
 }

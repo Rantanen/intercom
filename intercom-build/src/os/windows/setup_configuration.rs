@@ -225,16 +225,19 @@ fn get_vs_path() -> Result<String, String> {
     intercom::runtime::initialize()
             .map_err( |hr| format!( "Failed to initialize COM: {:?}", hr ) )?;
 
-    // Get the COM API entry point for the new VS configuration API.
-    let setup_conf = ComItf::<ISetupConfiguration2>
-            ::create( CLSID_SetupConfiguration ).unwrap();
+    let installation_path = {
 
-    // Get the first instance.
-    let instances = setup_conf.enum_instances().unwrap();
-    let ( next, _ ) = instances.next( 1 ).unwrap();
+        // Get the COM API entry point for the new VS configuration API.
+        let setup_conf = ComRc::<ISetupConfiguration2>
+                ::create( CLSID_SetupConfiguration ).unwrap();
 
-    // Read the installation path. We don't care about anything else for now.
-    let installation_path = next.get_installation_path().unwrap();
+        // Get the first instance.
+        let instances = setup_conf.enum_instances().unwrap();
+        let ( next, _ ) = instances.next( 1 ).unwrap();
+
+        // Read the installation path. We don't care about anything else for now.
+        next.get_installation_path().unwrap()
+    };
 
     intercom::runtime::uninitialize();
 
@@ -307,7 +310,7 @@ mod test
     fn get_vs_2017_details() {
         intercom::runtime::initialize().unwrap();
 
-        let setup_conf = ComItf ::<ISetupConfiguration2>
+        let setup_conf = ComRc::<ISetupConfiguration2>
                 ::create( CLSID_SetupConfiguration ).unwrap();
         let instances = setup_conf.enum_instances().unwrap();
 

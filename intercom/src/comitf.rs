@@ -17,7 +17,7 @@ pub struct ComItf<T> where T: ?Sized {
     phantom: PhantomData<T>,
 }
 
-impl<T> ComItf<T> where T: ?Sized {
+impl<T: ?Sized> ComItf<T> {
 
     /// Creates a `ComItf<T>` from a raw COM interface pointer.
     ///
@@ -49,29 +49,30 @@ impl<T> ComItf<T> where T: ?Sized {
         }
     }
 
+    /// Tries to acquire a different interface from the current COM object.
+    ///
+    /// Returns a reference counted wrapper around the interface if successful.
     pub fn try_into< U: IidOf + ?Sized >(
         &self
-    ) -> Result< ComItf<U>, ::HRESULT >
+    ) -> Result< ComRc<U>, ::HRESULT >
     {
         let iunk : &ComItf<IUnknown> = self.as_ref();
 
         match iunk.query_interface( U::iid() ) {
-            Ok( ptr ) => Ok( ComItf::<U> {
-                ptr: ptr,
-                phantom: PhantomData
-            } ),
+            Ok( ptr ) => unsafe {
+                // QueryInterface is guaranteed to return ptr of correct
+                // interface type, which makes the ComItf::wrap safe here.
+                Ok( ComRc::attach( ComItf::<U>::wrap( ptr ) ) )
+            },
             Err( e ) => Err( e )
         }
-    }
-
-    pub unsafe fn out_mut_ptr( &mut self ) -> &mut RawComPtr {
-        &mut self.ptr
     }
 }
 
 #[cfg(windows)]
 #[link(name = "ole32")]
 extern "system" {
+
     #[doc(hidden)]
     pub fn CoCreateInstance(
         clsid : ::guid::GUID,
@@ -82,29 +83,8 @@ extern "system" {
     ) -> ::HRESULT;
 }
 
-#[cfg(windows)]
-impl<T: IidOf + ?Sized> ComItf<T>
+impl<T: ?Sized> AsRef<ComItf<IUnknown>> for ComItf<T>
 {
-    pub fn create( clsid : GUID ) -> ::ComResult< ComItf<T> > {
-
-        unsafe {
-            let mut out = ComItf::null_itf();
-            match CoCreateInstance(
-                    clsid,
-                    std::ptr::null_mut(),
-                    1, // in-proc server.
-                    T::iid(),
-                    &mut ComItf::out_mut_ptr( &mut out ) ) {
-
-                ::S_OK => Ok( out ),
-                e => Err( e ),
-            }
-        }
-    }
-}
-
-impl<T> AsRef<ComItf<IUnknown>> for ComItf<T> where T: ?Sized {
-
     fn as_ref( &self ) -> &ComItf<IUnknown> {
         unsafe { &*( self as *const _ as *const ComItf<IUnknown> ) }
     }
