@@ -69,6 +69,35 @@ Ideally these crates would play well together. If you encounter usability
 issues in using these crates together with Intercom, feel free to create an
 issue describing the problem.
 
+# Nightly requirement
+
+Intercom requires nightly Rust version for few unstable features. By far the
+most important of these is the `proc_macro` attribute. The critical features
+are listed below:
+primary reason for this is the
+`proc_macro` feature, which Intercom relies heavily on with its attributes.The
+other important feature is `specialization`, which we need for handling
+`ComItf` that may point to a Trait interface or a Rust object:
+
+- `proc_macro` - needed for the Intercom attributes.
+  Tracking issue: [#38356](https://github.com/rust-lang/rust/issues/38356)
+- `specialization` - needed for handling `ComItf`, which may refer to an
+  interface that might or might not be a concrete struct interface.
+  Tracking issue: [#31844](https://github.com/rust-lang/rust/issues/31844)
+- `fundamental` - needed for allowing user crates to implement traits on
+  `ComItf`, `ComRc`, etc. through attribute expansion.
+  Tracking issue: [#29635](https://github.com/rust-lang/rust/issues/29635)
+
+Unfortunately the `fundamental` isn't even meant to be stabilized as is. :<
+
+The following features are currently in use, but more for 'nice to have'
+reasons and could be worked around if we needed to get to stable quickly:
+
+- `try_from`, tracking issue: [#33417](https://github.com/rust-lang/rust/issues/33417)
+- `try_trait`, tracking issue: [#42327](https://github.com/rust-lang/rust/issues/42327)
+- `catch_expr`, tracking issue: [#31436](https://github.com/rust-lang/rust/issues/31436)
+
+
 # Technical details
 
 ## Background
