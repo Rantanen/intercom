@@ -186,6 +186,7 @@ fn expand_com_interface(
     //       to COM and this requires implementing the trait for a random
     //       COM pointer, we might need to fail the traits that have COM
     //       incompatible functions instead.
+    let calling_convention = get_calling_convetion();
     let mut impls = vec![];
     for ( method_ident, method_sig ) in fns {
         do catch {
@@ -217,7 +218,7 @@ fn expand_com_interface(
             let ret_ty = method_info.returnhandler.com_ty();
             fields.push( quote!(
                 pub #method_ident :
-                    unsafe extern "stdcall" fn( #( #args ),* ) -> #ret_ty,
+                    unsafe extern #calling_convention fn( #( #args ),* ) -> #ret_ty,
             ) );
 
             // COM delegate implementation.
@@ -367,12 +368,13 @@ fn expand_com_impl(
     // by the known vtable offset.
 
     // QueryInterface
+    let calling_convetion = get_calling_convetion();
     let query_interface_ident = idents::method_impl(
             &struct_ident, &itf_ident, "query_interface" );
     output.push( quote!(
             #[allow(non_snake_case)]
             #[doc(hidden)]
-            pub unsafe extern "stdcall" fn #query_interface_ident(
+            pub unsafe extern #calling_convetion fn #query_interface_ident(
                 self_vtable : ::intercom::RawComPtr,
                 riid : ::intercom::REFIID,
                 out : *mut ::intercom::RawComPtr
@@ -395,7 +397,7 @@ fn expand_com_impl(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
             #[doc(hidden)]
-            pub unsafe extern "stdcall" fn #add_ref_ident(
+            pub unsafe extern #calling_convetion fn #add_ref_ident(
                 self_vtable : ::intercom::RawComPtr
             ) -> u32 {
                 ::intercom::ComBox::< #struct_ident >::add_ref(
@@ -410,7 +412,7 @@ fn expand_com_impl(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
             #[doc(hidden)]
-            pub unsafe extern "stdcall" fn #release_ident(
+            pub unsafe extern #calling_convetion fn #release_ident(
                 self_vtable : ::intercom::RawComPtr
             ) -> u32 {
                 ::intercom::ComBox::< #struct_ident >::release_ptr(
@@ -499,7 +501,7 @@ fn expand_com_impl(
                 #[allow(non_snake_case)]
                 #[allow(dead_code)]
                 #[doc(hidden)]
-                pub unsafe extern "stdcall" fn #method_impl_ident(
+                pub unsafe extern #calling_convetion fn #method_impl_ident(
                     #( #args ),*
                 ) -> #ret_ty {
                     // Acquire the reference to the ComBox. For this we need
@@ -862,13 +864,14 @@ fn expand_com_library(
     // infrastructure uses. The COM client uses this method to acquire
     // the IClassFactory interfaces that are then used to construct the
     // actual coclasses.
+    let calling_convetion = get_calling_convetion();
     let match_arm_tokens = utils::flatten( match_arms.iter() );
     let dll_get_class_object = quote!(
         #[no_mangle]
         #[allow(non_snake_case)]
         #[allow(dead_code)]
         #[doc(hidden)]
-        pub unsafe extern "stdcall" fn DllGetClassObject(
+        pub unsafe extern #calling_convetion fn DllGetClassObject(
             rclsid : ::intercom::REFCLSID,
             riid : ::intercom::REFIID,
             pout : *mut ::intercom::RawComPtr
@@ -922,7 +925,7 @@ fn tokens_to_tokenstream<T: IntoIterator<Item=quote::Tokens>>(
 {
     Ok( TokenStream::from_iter(
         std::iter::once( original )
-            .chain( std::iter::once( 
+            .chain( std::iter::once(
                 TokenStream::from_str(
                         &tokens.into_iter()
                             .map( |t| t.parse::<String>().unwrap() )
@@ -931,3 +934,9 @@ fn tokens_to_tokenstream<T: IntoIterator<Item=quote::Tokens>>(
             ) ) ) )
 }
 
+// https://msdn.microsoft.com/en-us/library/984x0h58.aspx
+#[cfg(windows)]
+fn get_calling_convetion() -> &'static str { "\"stdcall\"" }
+
+#[cfg(not(windows))]
+fn get_calling_convetion() -> &'static str { "C" }

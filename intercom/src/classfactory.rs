@@ -3,10 +3,20 @@ use super::*;
 
 #[allow(non_camel_case_types)]
 #[doc(hidden)]
+#[cfg(windows)]
 pub struct ClassFactoryVtbl {
     pub __base: IUnknownVtbl,
     pub create_instance: unsafe extern "stdcall" fn( RawComPtr, RawComPtr, REFIID, *mut RawComPtr ) -> HRESULT,
     pub lock_server: unsafe extern "stdcall" fn( RawComPtr, bool ) -> HRESULT
+}
+
+#[allow(non_camel_case_types)]
+#[doc(hidden)]
+#[cfg(not(windows))]
+pub struct ClassFactoryVtbl {
+    pub __base: IUnknownVtbl,
+    pub create_instance: unsafe extern "C" fn( RawComPtr, RawComPtr, REFIID, *mut RawComPtr ) -> HRESULT,
+    pub lock_server: unsafe extern "C" fn( RawComPtr, bool ) -> HRESULT
 }
 
 #[doc(hidden)]
@@ -48,7 +58,59 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
         Self { clsid, create_instance }
     }
 
+    #[cfg(windows)]
     pub unsafe extern "stdcall" fn create_instance(
+        self_vtbl : RawComPtr,
+        _outer : RawComPtr,
+        riid : REFIID,
+        out : *mut RawComPtr,
+    ) -> HRESULT
+    {
+        Self::create_instance_agnostic(self_vtbl, _outer, riid, out)
+    }
+
+    #[cfg(not(windows))]
+    pub unsafe extern "C" fn create_instance(
+        self_vtbl : RawComPtr,
+        _outer : RawComPtr,
+        riid : REFIID,
+        out : *mut RawComPtr,
+    ) -> HRESULT
+    {
+        Self::create_instance_agnostic(self_vtbl, _outer, riid, out)
+    }
+
+    #[cfg(windows)]
+    pub unsafe extern "stdcall" fn lock_server(
+        self_vtbl : RawComPtr,
+        lock : bool
+    ) -> HRESULT
+    {
+        Self::lock_server_agnostic(self_vtbl, lock)
+    }
+
+    #[cfg(not(windows))]
+    pub unsafe extern "C" fn lock_server(
+        self_vtbl : RawComPtr,
+        lock : bool
+    ) -> HRESULT
+    {
+        Self::lock_server_agnostic(self_vtbl, lock)
+    }
+
+    pub fn create_vtable() -> &'static ClassFactoryVtbl {
+        &ClassFactoryVtbl {
+            __base : IUnknownVtbl {
+                query_interface : ComBox::< Self >::query_interface_ptr,
+                add_ref : ComBox::< Self >::add_ref_ptr,
+                release : ComBox::< Self >::release_ptr,
+            },
+            create_instance : Self::create_instance,
+            lock_server : Self::lock_server
+        }
+    }
+
+    unsafe fn create_instance_agnostic(
         self_vtbl : RawComPtr,
         _outer : RawComPtr,
         riid : REFIID,
@@ -75,7 +137,7 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
         S_OK
     }
 
-    pub unsafe extern "stdcall" fn lock_server(
+    unsafe fn lock_server_agnostic(
         self_vtbl : RawComPtr,
         lock : bool
     ) -> HRESULT
@@ -86,18 +148,6 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
             ComBox::<Self>::release_ptr( self_vtbl );
         }
         S_OK
-    }
-
-    pub fn create_vtable() -> &'static ClassFactoryVtbl {
-        &ClassFactoryVtbl {
-            __base : IUnknownVtbl {
-                query_interface : ComBox::< Self >::query_interface_ptr,
-                add_ref : ComBox::< Self >::add_ref_ptr,
-                release : ComBox::< Self >::release_ptr,
-            },
-            create_instance : Self::create_instance,
-            lock_server : Self::lock_server
-        }
     }
 }
 
