@@ -166,7 +166,7 @@ impl std::fmt::Display for GUID {
 
     /// Formats the GUID in brace-hyphenated format for display.
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        fmt_guid( self, f, GuidFmtCase::Upper, GuidFmt::Braces )
+        fmt_guid( self, f, &GuidFmtCase::Upper, &GuidFmt::Braces )
     }
 }
 
@@ -179,7 +179,7 @@ impl std::fmt::LowerHex for GUID {
         } else {
             GuidFmt::Raw
         };
-        fmt_guid( self, f, GuidFmtCase::Lower, fmt )
+        fmt_guid( self, f, &GuidFmtCase::Lower, &fmt )
     }
 }
 
@@ -192,7 +192,7 @@ impl std::fmt::UpperHex for GUID {
         } else {
             GuidFmt::Raw
         };
-        fmt_guid( self, f, GuidFmtCase::Upper, fmt )
+        fmt_guid( self, f, &GuidFmtCase::Upper, &fmt )
     }
 }
 
@@ -202,12 +202,12 @@ enum GuidFmt { Braces, Hyphens, Raw }
 fn fmt_guid(
     g : &GUID,
     f: &mut std::fmt::Formatter,
-    case : GuidFmtCase,
-    fmt : GuidFmt
+    case : &GuidFmtCase,
+    fmt : &GuidFmt
 ) -> std::fmt::Result
 {
-    match case {
-        GuidFmtCase::Lower => match fmt {
+    match *case {
+        GuidFmtCase::Lower => match *fmt {
             GuidFmt::Braces =>
                 write!( f,
                     "{{{:08x}-{:04x}-{:04x}-{:02x}{:02x}-{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}}}",
@@ -227,7 +227,7 @@ fn fmt_guid(
                     g.data4[0], g.data4[1], g.data4[2], g.data4[3],
                     g.data4[4], g.data4[5], g.data4[6], g.data4[7] ),
         },
-        GuidFmtCase::Upper => match fmt {
+        GuidFmtCase::Upper => match *fmt {
             GuidFmt::Braces =>
                 write!( f,
                     "{{{:08X}-{:04X}-{:04X}-{:02X}{:02X}-{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}}}",
