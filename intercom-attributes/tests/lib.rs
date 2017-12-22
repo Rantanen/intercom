@@ -68,7 +68,13 @@ fn check_expansions() {
         target_code = target_code.replace( "\r", "" );
         source_code = source_code.replace( "\r", "" );
 
-        // 
+        // Normalize the calling conventions.
+        // The expected results use "stdcall". "C" is more likely
+        // to appear in the tests on its own.
+        // See https://github.com/Rantanen/intercom/pull/31#issuecomment-353516541
+        target_code = target_code.replace( "stdcall", "C" );
+        source_code = source_code.replace( "stdcall", "C" );
+
         // Use rustfmt to format both pieces of code so that we have a
         // canonical format for them. Without rustfmt we'd need to match the
         // compiler pretty print format in the reference target files - which,
