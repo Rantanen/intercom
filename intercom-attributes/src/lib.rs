@@ -936,7 +936,7 @@ fn tokens_to_tokenstream<T: IntoIterator<Item=quote::Tokens>>(
 
 // https://msdn.microsoft.com/en-us/library/984x0h58.aspx
 #[cfg(windows)]
-fn get_calling_convetion() -> &'static str { "\"stdcall\"" }
+fn get_calling_convetion() -> &'static str { "stdcall" }
 
 #[cfg(not(windows))]
 fn get_calling_convetion() -> &'static str { "C" }
