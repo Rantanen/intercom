@@ -69,6 +69,26 @@ Ideally these crates would play well together. If you encounter usability
 issues in using these crates together with Intercom, feel free to create an
 issue describing the problem.
 
+## Cross platform considerations
+
+While COM is traditionally a Windows technology, Intercom is aimed to provide
+a platform independent way to perform method calls between Rust and other
+languages. This gives us two guiding principles for Intercom:
+
+1. There exists a subset of Intercom APIs/conventions, that allows users to
+   write Intercom components that can be compiled and used on any platform.
+2. On platforms that have their own APIs for COM, Intercom components are
+   compatible with the platform APIs and expectations.
+
+In practice this means that on Windows, for example, Intercom will allocate
+strings using `SysAllocString`. This allows Intercom components to be used
+with Windows technologies, such as .Net COM interop.
+
+However the platform independent subset will require strings to be allocated
+and deallocated using [`IIntercomAllocator`]
+
+[`IIntercomAllocator`]: https://github.com/Rantanen/intercom/issues/27
+
 ## Nightly requirement
 
 Intercom requires nightly Rust version for few unstable features. By far the
