@@ -69,7 +69,7 @@ Ideally these crates would play well together. If you encounter usability
 issues in using these crates together with Intercom, feel free to create an
 issue describing the problem.
 
-# Nightly requirement
+## Nightly requirement
 
 Intercom requires nightly Rust version for few unstable features. By far the
 most important of these is the `proc_macro` attribute. The critical features
@@ -98,9 +98,9 @@ reasons and could be worked around if we needed to get to stable quickly:
 - `catch_expr`, tracking issue: [#31436](https://github.com/rust-lang/rust/issues/31436)
 
 
-# Technical details
+## Technical details
 
-## Background
+### Background
 
 COM is based on the use of virtual tables (also known as dispatch tables).
 There is one exported symbol, `DllGetClassObject`, which the clients (pieces of
@@ -117,7 +117,7 @@ and `"stdcall"` in Rust).
 
 [IClassFactory]: https://msdn.microsoft.com/en-us/library/windows/desktop/ms694364(v=vs.85).asp
 
-## Implementation
+### Implementation
 
 The Intercom libraries are built over Rust [proc macro attributes]. Currently
 there are four attributes available:
