@@ -12,8 +12,6 @@
 
 #include <inttypes.h>
 
-typedef uint32_t HRESULT;
-
 // Success.
 #define S_OK 0
 

@@ -1,7 +1,8 @@
 
-#include "../../intercom-cpp/src/data_types.h"
-#include "../../intercom-cpp/src/error_codes.h"
-#include "../../intercom-cpp/src/guiddef.h"
+#define INTERCOM_FLATTEN_DECLARATIONS
+#include <intercom.h>
+#include "../../intercom-cpp/src/msdef.h"
+
 
 // Interface definitions.
 #ifdef _MSC_VER

@@ -93,7 +93,7 @@ fn generate_raw_interface(
     // Now that we have methods sorted out, we can construct the final
     // interface definition.
     let indentation = get_indentation( base_indentation );
-    let interface_text = format!( "{}struct {} : IUnknown\n{}{{\n{}static constexpr IID ID = {};\n\n{}\n{}}};\n",
+    let interface_text = format!( "{}struct {} : IUnknown\n{}{{\n{}static constexpr intercom::IID ID = {};\n\n{}\n{}}};\n",
             indentation, try_rename( rn, &interface.name ), indentation,
             get_indentation( base_indentation + 1 ), guid_to_binary( &interface.iid ),
             generate_raw_methods( interface, base_indentation + 1 ), indentation );
@@ -138,7 +138,7 @@ fn flatten_interface(
     indentation: usize
 ) -> String {
     let interface_name = try_rename( rn, &interface.name );
-    let using_iid = format!( "static constexpr IID IID_{} = {};",
+    let using_iid = format!( "static constexpr intercom::IID IID_{} = {};",
             utils::pascal_case( &interface_name ), guid_to_binary( &interface.iid ) );
     let using_interface = format!( "using {} = {}::raw::{};", utils::pascal_case( &interface_name ), libname,  &interface_name );
     let indentation = get_indentation( indentation );
@@ -177,7 +177,7 @@ fn generate_class_descriptor(
 >       {{
 >           static constexpr CLSID ID = {};
 
->           static constexpr std::array<IID, {}> INTERFACES = {{
+>           static constexpr std::array<intercom::IID, {}> INTERFACES = {{
 {}
 >           }};
 
@@ -213,7 +213,8 @@ fn to_cpp_type(
         "uint32" => "uint32_t",
         "int64" => "int64_t",
         "uint64" => "uint64_t",
-        "BStr" => "BSTR",
+        "BStr" => "intercom::BSTR",
+        "HRESULT" => "intercom::HRESULT",
         _ => ty,
     }
 }
