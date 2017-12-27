@@ -26,6 +26,21 @@
                 "rust",
                 "cpp"
             ]
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Generate C++ Headers",
+            "program": "${workspaceRoot}/target/debug/intercom-utils",
+            "args": [
+                "cpp",
+                "test/testlib"
+            ],
+            "cwd": "${workspaceRoot}",
+            "sourceLanguages": [
+                "rust",
+                "cpp"
+            ]
         }
     ]
 }

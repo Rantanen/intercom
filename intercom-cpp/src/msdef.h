@@ -5,5 +5,5 @@
 #define interface class
 #define EXTERN_C extern "C"
 #define MIDL_INTERFACE( x ) struct
-#define STDMETHODCALLTYPE __attribute__((stdcall))
+#define STDMETHODCALLTYPE
 #define DECLSPEC_UUID( x )

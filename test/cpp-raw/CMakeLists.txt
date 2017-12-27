@@ -20,23 +20,24 @@ ${PROJECT_SOURCE_DIR}/iunknown.cpp
 ${PROJECT_SOURCE_DIR}/main.cpp
 ${PROJECT_SOURCE_DIR}/primitive_tests.cpp
 ${PROJECT_SOURCE_DIR}/result.cpp
-# ${PROJECT_SOURCE_DIR}/return_interfaces.cpp
+${PROJECT_SOURCE_DIR}/return_interfaces.cpp
 ${PROJECT_SOURCE_DIR}/stateful.cpp
 )
-
 
 # Specify additional compiler specific helpers.
 set(PROJECT1_COMPILER_SPECIFIC_SRC)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
 set(PROJECT1_COMPILER_SPECIFIC_SRC
-${PROJECT_SOURCE_DIR}/gcc/os.cpp
-${PROJECT_SOURCE_DIR}/gcc/TestLib_i.cpp
+    ${PROJECT_SOURCE_DIR}/gcc/os.cpp
 )
 endif()
 
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_INCLUDE_DIR}")
+
+# Ensure "intercom.h" is visible.
+include_directories("${PROJECT_INCLUDE_DIR}/../../intercom-cpp")
 
 add_executable(${PROJECT_NAME} ${PROJECT1_SRCS} ${PROJECT1_COMPILER_SPECIFIC_SRC})
 
@@ -44,6 +45,11 @@ add_executable(${PROJECT_NAME} ${PROJECT1_SRCS} ${PROJECT1_COMPILER_SPECIFIC_SRC
 find_library(TESTLIB_LOCATION libtest_lib.so PATHS "${PROJECT_SOURCE_DIR}/../testlib/target/debug/")
 target_link_libraries(${PROJECT_NAME} ${TESTLIB_LOCATION})
 
-# Link to ld.so, support for loading dynamic libraries.
-find_library(LD_LOCATION dl)
-target_link_libraries(${PROJECT_NAME} ${LD_LOCATION})
+# Compile specific linking.
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+
+# Link to dl, support for loading dynamic libraries.
+find_library(DL_LOCATION dl)
+target_link_libraries(${PROJECT_NAME} ${DL_LOCATION})
+
+endif()

@@ -1,6 +1,7 @@
 
 // Include declarations required to test "testlib".
 
+#define INTERCOM_FLATTEN_DECLARATIONS
  #ifdef __GNUC__
- #include "gcc/TestLib_h.h"
+ #include "gcc/test_lib.h"
  #endif

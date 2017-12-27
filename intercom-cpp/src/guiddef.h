@@ -11,10 +11,15 @@ typedef struct _GUID {
     BYTE Data4[8];
 } GUID;
 
+typedef struct _IID {
+    DWORD Data1;
+    WORD Data2;
+    WORD Data3;
+    BYTE Data4[8];
+} IID;
+
 
 #define __IID_DEFINED__
-typedef GUID IID;
-
 #define CLSID_DEFINED
 typedef IID CLSID;
 

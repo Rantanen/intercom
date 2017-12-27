@@ -3,7 +3,7 @@
 #include <mutex>
 
 #include "../os.h"
-#include "TestLib_h.h"
+#include "test_lib.h"
 #include "../../../intercom-cpp/src/cominterop.h"
 #include "../../../intercom-cpp/src/activator.h"
 
