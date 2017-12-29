@@ -12,6 +12,7 @@ use std::error::Error;
 ///
 /// The `AppError` carries the error message and we can use `From<T>` impls to
 /// convert various other error types into it.
+#[derive(Debug)]
 pub struct AppError( String );
 
 /// Intercom utils result type.

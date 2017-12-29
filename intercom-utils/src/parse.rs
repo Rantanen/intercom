@@ -153,6 +153,7 @@ pub fn parse_crate(
 
         // Parse the types.
         let parse_result = syn::parse_crate( &buf )?;
+        try_parse_com_library_attr( &parse_result.attrs, &mut result )?;
         process_crate( parse_result, &mut result, &renames )?;
     }
 
@@ -224,6 +225,21 @@ pub fn gather_renames(
     Ok(())
 }
 
+pub fn try_parse_com_library_attr(
+    attrs : &[syn::Attribute],
+    r: &mut ParseResult
+) -> AppResult
+{
+    let cl_attr = attrs
+            .iter()
+            .find(|attr| attr.value.name() == "com_library");
+    if let Some( cl ) = cl_attr {
+        process_com_lib_attr( cl, r )?;
+    }
+
+    Ok(())
+}
+
 /// Processes a single file.
 ///
 /// * `c` - File to process as a `syn::Crate` AST structure.
@@ -243,12 +259,7 @@ pub fn process_crate(
         // This attribute SHOULD be a crate-level attribute, but that causes
         // all sorts of problems everywhere so unfortunately we need to smack
         // it on a random item instead.
-        let cl_attr = item.attrs
-                .iter()
-                .find(|attr| attr.value.name() == "com_library");
-        if let Some( cl ) = cl_attr {
-            process_com_lib_attr( cl, r )?;
-        }
+        try_parse_com_library_attr( &item.attrs, r )?;
 
         // Process the item.
         match item.node {
