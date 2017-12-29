@@ -106,7 +106,7 @@ fn generate_raw_methods(
 ) -> String {
 
     // Get the method definitions for the current interface.
-    let methods = itf.methods.iter().enumerate().map(|(_i,m)| {
+    itf.methods.iter().enumerate().map(|(_i,m)| {
 
         // Construct the argument list.
         let args = m.arguments.iter().map(|a| {
@@ -127,8 +127,7 @@ fn generate_raw_methods(
         // be added to the end of the traits.
         format!( r###"{}virtual {} INTERCOM_CC {}( {} ) = 0;"###, get_indentation( indentation ), to_cpp_type( &m.rvalue ), utils::pascal_case( &m.name ), args )
 
-    } ).collect::<Vec<_>>().join( "\n" );
-    return methods;
+    } ).collect::<Vec<_>>().join( "\n" )
 }
 
 fn flatten_interface(
