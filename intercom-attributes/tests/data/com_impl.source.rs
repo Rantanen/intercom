@@ -14,7 +14,7 @@ const IID_Foo: intercom::IID = intercom::GUID {
 };
 
 #[com_class("{00000000-0000-0000-0000-000000000000}", Foo)]
-struct Foo;
+pub struct Foo;
 
 #[com_impl]
 impl Foo

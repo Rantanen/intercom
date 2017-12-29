@@ -8,7 +8,7 @@ extern crate std as std;
 extern crate intercom;
 use intercom::*;
 
-trait Foo {
+pub trait Foo {
     fn static_method(a: u16, b: i16);
 
     fn simple_method(&self);

@@ -19,7 +19,7 @@ const IID_Foo: intercom::IID = intercom::GUID {
     data4: [0, 0, 0, 0, 0, 0, 0, 0],
 };
 
-struct Foo;
+pub struct Foo;
 
 // Virtual table offset.
 //
@@ -215,7 +215,7 @@ impl Foo
 
 #[allow(non_snake_case)]
 #[doc(hidden)]
-pub unsafe extern "stdcall" fn __Foo_Foo_query_interface(
+unsafe extern "stdcall" fn __Foo_Foo_query_interface(
     self_vtable: ::intercom::RawComPtr,
     riid: ::intercom::REFIID,
     out: *mut ::intercom::RawComPtr
@@ -237,7 +237,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_query_interface(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-pub unsafe extern "stdcall" fn __Foo_Foo_add_ref(
+unsafe extern "stdcall" fn __Foo_Foo_add_ref(
     self_vtable: ::intercom::RawComPtr
 ) -> u32
 {
@@ -248,7 +248,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_add_ref(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-pub unsafe extern "stdcall" fn __Foo_Foo_release(
+unsafe extern "stdcall" fn __Foo_Foo_release(
     self_vtable: ::intercom::RawComPtr
 ) -> u32
 {
@@ -265,7 +265,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_release(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-pub unsafe extern "stdcall" fn __Foo_Foo_simple_method(
+unsafe extern "stdcall" fn __Foo_Foo_simple_method(
     self_vtable: ::intercom::RawComPtr
 ) -> ()
 {
@@ -280,7 +280,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_simple_method(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-pub unsafe extern "stdcall" fn __Foo_Foo_arg_method(
+unsafe extern "stdcall" fn __Foo_Foo_arg_method(
     self_vtable: ::intercom::RawComPtr,
     a: u16
 ) -> ()
@@ -296,7 +296,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_arg_method(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-pub unsafe extern "stdcall" fn __Foo_Foo_simple_result_method(
+unsafe extern "stdcall" fn __Foo_Foo_simple_result_method(
     self_vtable: ::intercom::RawComPtr
 ) -> u16
 {
@@ -312,7 +312,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_simple_result_method(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-pub unsafe extern "stdcall" fn __Foo_Foo_com_result_method(
+unsafe extern "stdcall" fn __Foo_Foo_com_result_method(
     self_vtable: ::intercom::RawComPtr,
     __out: *mut u16
 ) -> ::intercom::HRESULT
@@ -338,7 +338,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_com_result_method(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-pub unsafe extern "stdcall" fn __Foo_Foo_rust_result_method(
+unsafe extern "stdcall" fn __Foo_Foo_rust_result_method(
     self_vtable: ::intercom::RawComPtr,
     __out: *mut u16
 ) -> ::intercom::HRESULT
@@ -366,7 +366,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_rust_result_method(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-pub unsafe extern "stdcall" fn __Foo_Foo_tuple_result_method(
+unsafe extern "stdcall" fn __Foo_Foo_tuple_result_method(
     self_vtable: ::intercom::RawComPtr,
     __out1: *mut u8,
     __out2: *mut u16,
@@ -403,7 +403,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_tuple_result_method(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-pub unsafe extern "stdcall" fn __Foo_Foo_string_method(
+unsafe extern "stdcall" fn __Foo_Foo_string_method(
     self_vtable: ::intercom::RawComPtr,
     input: ::intercom::BStr,
 ) -> ::intercom::BStr {
@@ -419,7 +419,7 @@ pub unsafe extern "stdcall" fn __Foo_Foo_string_method(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-pub unsafe extern "stdcall" fn __Foo_Foo_complete_method(
+unsafe extern "stdcall" fn __Foo_Foo_complete_method(
     self_vtable: ::intercom::RawComPtr,
     a: u16,
     b: i16,

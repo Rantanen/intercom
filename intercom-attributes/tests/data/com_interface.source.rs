@@ -3,7 +3,7 @@ extern crate intercom;
 use intercom::*;
 
 #[com_interface("00000000-0000-0000-0000-000000000000")]
-trait Foo {
+pub trait Foo {
     fn static_method(a: u16, b: i16);
 
     fn simple_method(&self);

@@ -131,6 +131,20 @@ fn expand_com_interface(
                         ) )?
             .ok_or( "Interfaces must specify IID" )?;
 
+    // Visibility for trait interfaces is the visibility of the trait.
+    //
+    // For implicit interfaces (impl Struct) the visibility is always public.
+    // These interfaces should only exist for COM types that are meant to be
+    // called from external sources as they can't be impl'd for random ComItf.
+    //
+    // Note this may conflict with visibility of the actual [com_class], but
+    // nothing we can do for this really.
+    let visibility = if itf_type == utils::InterfaceType::Trait {
+            &item.vis
+        } else {
+            &Visibility::Public
+        };
+
     // Try to get the base.
     let base = attr_params
             .as_ref()
@@ -143,7 +157,7 @@ fn expand_com_interface(
     output.push( quote!(
         #[doc = #iid_doc]
         #[allow(non_upper_case_globals)]
-        pub const #iid_ident : ::intercom::IID = #iid_tokens;
+        #visibility const #iid_ident : ::intercom::IID = #iid_tokens;
     ) );
 
     // IidOf implementation.
@@ -290,11 +304,12 @@ fn expand_com_interface(
     // Create the vtable. We've already gathered all the vtable method
     // pointer fields so defining the struct is simple enough.
     let field_tokens = utils::flatten( fields.iter() );
+    let visibility = &item.vis;
     output.push( quote!(
         #[allow(non_camel_case_types)]
         #[repr(C)]
         #[doc(hidden)]
-        pub struct #vtable_ident { #field_tokens }
+        #visibility struct #vtable_ident { #field_tokens }
     ) );
 
     // If this is a trait (as opposed to an implicit struct `impl`), include
@@ -374,7 +389,7 @@ fn expand_com_impl(
     output.push( quote!(
             #[allow(non_snake_case)]
             #[doc(hidden)]
-            pub unsafe extern #calling_convetion fn #query_interface_ident(
+            unsafe extern #calling_convetion fn #query_interface_ident(
                 self_vtable : ::intercom::RawComPtr,
                 riid : ::intercom::REFIID,
                 out : *mut ::intercom::RawComPtr
@@ -397,7 +412,7 @@ fn expand_com_impl(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
             #[doc(hidden)]
-            pub unsafe extern #calling_convetion fn #add_ref_ident(
+            unsafe extern #calling_convetion fn #add_ref_ident(
                 self_vtable : ::intercom::RawComPtr
             ) -> u32 {
                 ::intercom::ComBox::< #struct_ident >::add_ref(
@@ -412,7 +427,7 @@ fn expand_com_impl(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
             #[doc(hidden)]
-            pub unsafe extern #calling_convetion fn #release_ident(
+            unsafe extern #calling_convetion fn #release_ident(
                 self_vtable : ::intercom::RawComPtr
             ) -> u32 {
                 ::intercom::ComBox::< #struct_ident >::release_ptr(
@@ -501,7 +516,7 @@ fn expand_com_impl(
                 #[allow(non_snake_case)]
                 #[allow(dead_code)]
                 #[doc(hidden)]
-                pub unsafe extern #calling_convetion fn #method_impl_ident(
+                unsafe extern #calling_convetion fn #method_impl_ident(
                     #( #args ),*
                 ) -> #ret_ty {
                     // Acquire the reference to the ComBox. For this we need
@@ -771,10 +786,11 @@ fn expand_com_class(
 
     // VTableList struct definition.
     let vtable_list_ident = idents::vtable_list( &struct_ident );
+    let visibility = &item.vis;
     output.push( quote!(
             #[allow(non_snake_case)]
             #[doc(hidden)]
-            pub struct #vtable_list_ident {
+            #visibility struct #vtable_list_ident {
                 #( #vtable_list_field_decls ),*
             }
         ) );
