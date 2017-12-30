@@ -116,8 +116,7 @@ fn generate_raw_methods(
             // whether the argument is passed by pointer or value.
             let out_ptr = match a.dir {
                 ArgDirection::In => "",
-                ArgDirection::Out => "*",
-                ArgDirection::Return => "*",
+                ArgDirection::Out | ArgDirection::Return => "*",
             };
             format!( "{}{} {}", to_cpp_type( &a.ty ), out_ptr, a.name )
 
