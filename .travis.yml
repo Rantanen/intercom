@@ -5,14 +5,19 @@ rust:
 
 addons:
     apt:
+        sources:
+            - ubuntu-toolchain-r-test
         packages:
             - libcurl4-openssl-dev
             - libelf-dev
             - libdw-dev
             - cmake
-            - gcc
+            - gcc-5
+            - g++-5
             - binutils-dev
             - libiberty-dev
+env:
+    - CC=gcc-5 CXX=g++-5
 
 script:
     # Ensure the output path is empty of possible previous results. We don't
