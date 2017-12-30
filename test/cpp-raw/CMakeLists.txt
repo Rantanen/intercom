@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.8)
 project (cpp-raw)
 
 set (PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
