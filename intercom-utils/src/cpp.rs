@@ -63,6 +63,7 @@ fn result_to_cpp(
 
     // We got the interfaces and classes. We can format and output the raw interfaces.
     let raw_namespace: String = format!( r###"
+>       #include <array>
 >       #include <intercom.h>
 >       namespace {}
 >       {{

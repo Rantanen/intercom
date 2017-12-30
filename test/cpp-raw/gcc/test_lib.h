@@ -1,4 +1,5 @@
 
+#include <array>
 #include <intercom.h>
 namespace test_lib
 {
