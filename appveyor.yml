@@ -9,7 +9,9 @@ os:
 environment:
     matrix:
     - TARGET: nightly-x86_64-pc-windows-msvc
-    - TARGET: nightly-x86_64-pc-windows-gnu
+
+      # Disable the GNU target for now as it's broken. Rust #47029
+      #- TARGET: nightly-x86_64-pc-windows-gnu
 
 
 install:
