@@ -2,6 +2,8 @@
 #include "os.h"
 #include "catch.hpp"
 
+#include "testlib.h"
+
 class CppImplementation : public ISharedInterface
 {
 	unsigned int GetValue() { return 5; }

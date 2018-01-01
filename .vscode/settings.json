@@ -1,0 +1,14 @@
+{
+    "files.trimTrailingWhitespace": true,
+    "editor.renderWhitespace": "all",
+    "files.associations": {
+        "array": "c",
+        "chrono": "c",
+        "functional": "c",
+        "ratio": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "climits": "cpp"
+    }
+}

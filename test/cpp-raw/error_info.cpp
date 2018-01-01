@@ -1,6 +1,8 @@
 #include "os.h"
 #include "catch.hpp"
 
+#ifdef _MSC_VER
+
 TEST_CASE( "Interfaces support error info" )
 {
 	// Initialize COM.
@@ -67,3 +69,5 @@ TEST_CASE( "Interfaces support error info" )
 
 	UninitializeRuntime();
 }
+
+#endif
