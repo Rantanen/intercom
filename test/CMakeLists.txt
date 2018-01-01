@@ -1,4 +1,4 @@
-project (tests)
+project (test)
 
 
 

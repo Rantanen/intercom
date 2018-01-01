@@ -3,12 +3,12 @@ if( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR} )
 endif()
 
 cmake_minimum_required(VERSION 3.5)
-project(InterCom)
+project(intercom)
 
 # The version number.
-set (InterCom_VERSION_MAJOR 0)
-set (InterCOm_VERSION_MINOR 1)
-set (InterCOm_VERSION_PATCH 1)
+set (intercom_VERSION_MAJOR 0)
+set (intercom_VERSION_MINOR 1)
+set (intercom_VERSION_PATCH 1)
 
 # C++14 support
 set(CMAKE_CXX_STANDARD 14)
