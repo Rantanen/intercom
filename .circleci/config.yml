@@ -1,0 +1,27 @@
+version: 2
+
+jobs:
+    build:
+        docker:
+            - image: rustlang/rust:nightly
+          
+        steps:
+            - checkout
+            - run:
+                name: "Cargo test"
+                command: cargo test
+            - run:
+                name: "C++ test"
+                command: |
+                    gcc --version
+                    g++ --version
+                    apt-get update
+                    apt-get install cmake -y
+                    cmake --version
+                    mkdir build
+                    cd build
+                    cmake ..
+                    make
+                    cd bin
+                    ./cpp-raw
+
