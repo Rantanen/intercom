@@ -9,7 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Define source files.
 set(PROJECT_SRCS
-${PROJECT_SOURCE_DIR}/catch.hpp
 ${PROJECT_SOURCE_DIR}/error_info.cpp
 ${PROJECT_SOURCE_DIR}/interface_params.cpp
 ${PROJECT_SOURCE_DIR}/iunknown.cpp
