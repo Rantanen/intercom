@@ -5,7 +5,7 @@
 #ifdef _MSC_VER
 
 // stdcall
-#define INTERCOM_CC STDMETHODCALLTYE
+#define INTERCOM_CC STDMETHODCALLTYPE
 #else
 
 // cdecl
