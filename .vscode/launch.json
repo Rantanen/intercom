@@ -20,8 +20,8 @@
             "type": "lldb",
             "request": "launch",
             "name": "Debug Cpp-Raw",
-            "program": "${workspaceRoot}/test/cpp-raw/build/cpp-raw",
-            "cwd": "${workspaceRoot}",
+            "program": "${workspaceRoot}/build/bin/cpp-raw",
+            "cwd": "${workspaceRoot}/build/bin",
             "sourceLanguages": [
                 "rust",
                 "cpp"
