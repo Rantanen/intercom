@@ -41,13 +41,13 @@ pub fn parse_com_lib_attribute(
         cls_params
             .into_iter()
             .map( |cls| match *cls {
-                AttrParam::Word( w ) => Ok( format!( "{}", w ) ),
+                AttrParam::Word( ref w ) => Ok( format!( "{}", w ) ),
                 _ => Err( "Bad interface" ),
             } ).collect::<Result<_,_>>()?
     ) )
 }
 
-fn parse_attr_tokens(
+pub fn parse_attr_tokens(
     attr_name: &str,
     attr_tokens: &str,
 ) -> Result< Attribute, MacroError >
@@ -85,7 +85,7 @@ pub fn flatten<'a, I: Iterator<Item=&'a Tokens>>(
     all_tokens
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum InterfaceType { Trait, Struct }
 
 pub type InterfaceData<'a> = (
@@ -177,9 +177,40 @@ pub fn get_struct_ident_from_annotatable(
 }
 
 #[derive(PartialEq, Eq, Debug)]
-pub enum AttrParam<'a> {
-    Literal( &'a syn::Lit ),
-    Word( &'a syn::Ident ),
+pub enum AttrParam {
+    Literal( syn::Lit ),
+    Word( syn::Ident ),
+}
+
+pub fn iter_parameters(
+    attr : &syn::Attribute
+) -> Box< Iterator<Item = AttrParam > >
+{
+    match attr.value {
+
+        // Attributes without parameter lists don't have params.
+        syn::MetaItem::Word(..)
+            | syn::MetaItem::NameValue(..) => Box::new( std::iter::empty() ),
+
+        syn::MetaItem::List( _, ref l ) =>
+            Box::new( l.to_owned().into_iter().map( |i| {
+
+                match i {
+
+                    syn::NestedMetaItem::MetaItem( mi ) =>
+
+                            AttrParam::Word( match mi {
+                                syn::MetaItem::Word( i )
+                                    | syn::MetaItem::List( i, _ )
+                                    | syn::MetaItem::NameValue( i, _ )
+                                    => i,
+                            } ),
+
+                    syn::NestedMetaItem::Literal( l ) =>
+                            AttrParam::Literal( l ),
+                }
+            } ) ),
+    }
 }
 
 pub fn get_parameters(
@@ -193,20 +224,20 @@ pub fn get_parameters(
             | syn::MetaItem::NameValue(..) => return None,
 
         syn::MetaItem::List( _, ref l ) =>
-            l.iter().map( |i| {
+            l.to_owned().into_iter().map( |i| {
 
-                match *i {
+                match i {
 
-                    syn::NestedMetaItem::MetaItem( ref mi ) =>
+                    syn::NestedMetaItem::MetaItem( mi ) =>
 
-                            AttrParam::Word( match *mi {
-                                syn::MetaItem::Word( ref i )
-                                    | syn::MetaItem::List( ref i, _ )
-                                    | syn::MetaItem::NameValue( ref i, _ )
+                            AttrParam::Word( match mi {
+                                syn::MetaItem::Word( i )
+                                    | syn::MetaItem::List( i, _ )
+                                    | syn::MetaItem::NameValue( i, _ )
                                     => i,
                             } ),
 
-                    syn::NestedMetaItem::Literal( ref l ) =>
+                    syn::NestedMetaItem::Literal( l ) =>
                             AttrParam::Literal( l ),
                 }
             } ).collect() ,
@@ -258,7 +289,7 @@ pub fn parameter_to_guid(
     item_type : &str,
 ) -> Result< Option< guid::GUID >, String >
 {
-    if let AttrParam::Word( i ) = *p {
+    if let AttrParam::Word( ref i ) = *p {
         return Ok( match i.as_ref() {
             "AUTO_GUID" =>
                 Some( generate_guid( crate_name, item_name, item_type ) ),
@@ -268,7 +299,7 @@ pub fn parameter_to_guid(
         } );
     }
 
-    if let AttrParam::Literal( &Lit::Str( ref s, _ ) ) = *p {
+    if let AttrParam::Literal( Lit::Str( ref s, _ ) ) = *p {
         return Ok( Some( guid::GUID::parse( s.as_str() )? ) );
     }
 

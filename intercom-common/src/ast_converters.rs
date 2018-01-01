@@ -69,12 +69,12 @@ impl GetIdent for Path {
     }
 }
 
-impl<'a> GetIdent for ::utils::AttrParam<'a> {
+impl<'a> GetIdent for ::utils::AttrParam {
 
     fn get_ident( &self ) -> Result<Ident, String>
     {
         match *self {
-            ::utils::AttrParam::Word( ident )
+            ::utils::AttrParam::Word( ref ident )
                 => Ok( ident.clone() ),
             _ => Err( format!( "Unsupported AttrParam kind: {:?}", self ) ),
         }

@@ -305,9 +305,9 @@ pub fn get_guid(
 ) -> Result< GUID, AppError >
 {
     match *param {
-        utils::AttrParam::Literal( &syn::Lit::Str( ref g, .. ) )
+        utils::AttrParam::Literal( syn::Lit::Str( ref g, .. ) )
             => Ok( GUID::parse( g )? ),
-        utils::AttrParam::Word( i ) if i == "AUTO_GUID"
+        utils::AttrParam::Word( ref i ) if i == "AUTO_GUID"
             => Ok( utils::generate_guid(
                 &results.libname,
                 ident.as_ref(),
@@ -348,7 +348,7 @@ pub fn process_struct(
     let interfaces = itf_params
             .into_iter()
             .map( |itf| match *itf {
-                utils::AttrParam::Word( w ) => Ok( format!( "{}", w ) ),
+                utils::AttrParam::Word( ref w ) => Ok( format!( "{}", w ) ),
                 _ => Err( "Bad interface" ),
             } ).collect::<Result<_,_>>()?;
             

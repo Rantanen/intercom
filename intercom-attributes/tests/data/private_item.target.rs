@@ -321,7 +321,7 @@ impl ::intercom::IidOf for Foo {
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
-struct __FooVtbl {
+pub struct __FooVtbl {
     pub __base: ::intercom::IUnknownVtbl,
     pub trait_method: unsafe extern "stdcall" fn(self_vtable: ::intercom::RawComPtr) -> (),
 }

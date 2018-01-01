@@ -11,3 +11,4 @@ pub mod returnhandlers;
 pub mod utils;
 pub mod ast_converters;
 pub mod methodinfo;
+pub mod model;
