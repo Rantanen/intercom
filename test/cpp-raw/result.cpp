@@ -1,6 +1,8 @@
 #include "os.h"
 #include "catch.hpp"
 
+#include "testlib.h"
+
 TEST_CASE( "Results can be returned" )
 {
 	// Initialize COM.
@@ -36,21 +38,22 @@ TEST_CASE( "Results can be returned" )
 		SECTION( "Failure yields error value and resets [retval]" )
 		{
 			// Fail case. Returns error and sets value to 0.
-			REQUIRE( pOps->Sqrt( -1.0, OUT &out ) == E_INVALIDARG );
+			HRESULT error = pOps->Sqrt( -1.0, OUT &out );
+			REQUIRE( error == E_INVALIDARG );
 			REQUIRE( out == 0 );
 		}
 
-		SECTION( "Tuples are converted to multiple OUT parameters" )
-		{
-			uint16_t left;
-			uint16_t right;
+		// SECTION( "Tuples are converted to multiple OUT parameters" )
+		// {
+		// 	uint16_t left;
+		// 	uint16_t right;
 
-			hr = pOps->Tuple( 0xABBA0CD0, OUT &left, OUT &right );
+		// 	hr = pOps->Tuple( 0xABBA0CD0, OUT &left, OUT &right );
 
-			REQUIRE( hr == S_OK );
-			REQUIRE( left == 0xABBA );
-			REQUIRE( right == 0x0CD0 );
-		}
+		// 	REQUIRE( hr == S_OK );
+		// 	REQUIRE( left == 0xABBA );
+		// 	REQUIRE( right == 0x0CD0 );
+		// }
 	}
 
 	UninitializeRuntime();

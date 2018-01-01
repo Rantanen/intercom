@@ -11,7 +11,36 @@
             "name": "Debug Intercom",
             "program": "${workspaceRoot}/target/debug/intercom",
             "args": [ "test" ],
-            "cwd": "${workspaceRoot}"
+            "cwd": "${workspaceRoot}",
+            "sourceLanguages": [
+                "rust"
+            ]
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Cpp-Raw",
+            "program": "${workspaceRoot}/build/bin/cpp-raw",
+            "cwd": "${workspaceRoot}/build/bin",
+            "sourceLanguages": [
+                "rust",
+                "cpp"
+            ]
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Generate C++ Headers",
+            "program": "${workspaceRoot}/target/debug/intercom-utils",
+            "args": [
+                "cpp",
+                "test/testlib"
+            ],
+            "cwd": "${workspaceRoot}",
+            "sourceLanguages": [
+                "rust",
+                "cpp"
+            ]
         }
     ]
 }

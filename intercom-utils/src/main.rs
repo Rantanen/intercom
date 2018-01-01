@@ -8,6 +8,7 @@ extern crate intercom_common;
 extern crate toml;
 
 mod idl;
+mod cpp;
 mod manifest;
 mod parse;
 mod error;
@@ -39,12 +40,21 @@ fn main() {
                    .index( 1 )
                 )
             )
+            .subcommand( SubCommand::with_name( "cpp" )
+                .about( "Generates C++ header files from the Rust crate" )
+                .arg( Arg::with_name( "path" )
+                   .help( "Path to the crate to process" )
+                   .default_value( "." )
+                   .index( 1 )
+                )
+            )
         .get_matches();
 
     // Match the sub-command and invoke the correct command handler.
     if let Err( e ) = match matches.subcommand() {
         ( "idl", Some( args ) ) => { idl::run( args ) },
         ( "manifest", Some( args ) ) => { manifest::run( args ) },
+        ( "cpp", Some( args ) ) => { cpp::run( args ) },
         _ => unreachable!(),
     } {
         // Error occurred in the sub-command. Report it before stopping.

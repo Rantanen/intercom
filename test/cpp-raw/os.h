@@ -1,4 +1,9 @@
 
+#define INTERCOM_FLATTEN_DECLARATIONS
+#include <intercom.h>
+#include "../../intercom-cpp/src/msdef.h"
+
+
 // Interface definitions.
 #ifdef _MSC_VER
 #include "msvc/import.h"
