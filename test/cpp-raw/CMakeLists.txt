@@ -38,7 +38,8 @@ include_directories("${PROJECT_INCLUDE_DIR}/../../intercom-cpp")
 add_executable(${PROJECT_NAME} ${PROJECT_SRCS} ${PROJECT_COMPILER_SPECIFIC_SRC})
 
 # Link to testlib
-target_link_libraries(${PROJECT_NAME} test_lib)
+add_dependencies(${PROJECT_NAME} test_lib)
+# target_link_libraries(${PROJECT_NAME} test_lib)
 
 # Compile specific linking.
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
