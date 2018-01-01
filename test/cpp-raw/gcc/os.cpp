@@ -9,14 +9,6 @@
 
 using intercom::cpp::Activator;
 
-// Storage for libraries.
-namespace
-{
-	static std::mutex m_libraryLock;
-	static std::unordered_map<std::string, dlopen_wrapper > g_libraries;
-}
-
-
 
 void InitializeRuntime()
 {

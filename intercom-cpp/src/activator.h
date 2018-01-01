@@ -3,9 +3,9 @@
 #define INTERCOM_CPP_ACTIVATOR_H
 
 #include "posix/iclassfactory.h"
-#include "posix/dlopen_wrapper.h"
+#include "posix/dlwrapper.h"
 
-using intercom::cpp::posix::dlopen_wrapper;
+using intercom::cpp::posix::DlWrapper;
 
 #include "cominterop.h"
 
@@ -27,7 +27,7 @@ public:
     ) :
         m_classId( classId ),
         m_library( "./libtest_lib.so",
-            dlopen_wrapper::rtld::lazy ),
+            DlWrapper::rtld::lazy ),
         m_getClassObjectFunc( nullptr ),
         m_classFactory( nullptr )
     {
@@ -65,7 +65,7 @@ private:
 private:
 
     CLSID m_classId;
-    dlopen_wrapper m_library;
+    DlWrapper m_library;
     GetClassObjectFunc m_getClassObjectFunc;
     IClassFactory* m_classFactory;
 
