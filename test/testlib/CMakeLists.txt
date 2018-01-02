@@ -4,11 +4,11 @@ include(ExternalProject)
 # Determine the parameters based on the build type.
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" )
     set(TESTLIB_BINARY_BUILD_PATH "${CMAKE_CURRENT_SOURCE_DIR}/target/release/libtest_lib.so" )
-    set(TESTLIB_BINARY_FINAL_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/libtest_lib.so" )
+    set(TESTLIB_BINARY_FINAL_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libtest_lib.so" )
     set(TESTLIB_BUILD_ARGUMENT_RELEASE "--release")
 else()
     set(TESTLIB_BINARY_BUILD_PATH "${CMAKE_CURRENT_SOURCE_DIR}/target/debug/libtest_lib.so" )
-    set(TESTLIB_BINARY_FINAL_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/libtest_lib.so" )
+    set(TESTLIB_BINARY_FINAL_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libtest_lib.so" )
     set(TESTLIB_BUILD_ARGUMENT_RELEASE "")
 endif()
 
