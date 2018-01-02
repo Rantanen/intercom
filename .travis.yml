@@ -23,16 +23,9 @@ script:
     - cargo install clippy --force
     - cargo clippy --all -- -D warnings
     - cargo test
-    - ls target
-    - ls target/debug
     - mkdir build
-    - cd build
-    - cmake ..
-    - make
-    - cd bin
-    - ./cpp-raw
-    - ls target
-    - ls target/debug
+    - ( cd build && cmake .. && make )
+    - ( cd build/bin && ./cpp-raw )
 
 after_success: |
     # Set up the environment. We need LD_LIBRARY_PATH to include rust libs for
@@ -60,12 +53,7 @@ after_success: |
     export RUN_KCOV="$KCOV --include-pattern=$KCOV_INCLUDE --exclude-pattern=$KCOV_EXCLUDE $KCOV_FLAGS $KCOV_OUT" &&
 
     # Rust #[test]s.
-    echo "####" &&
-    ls target &&
-    echo "####" &&
-    ls target/debug &&
-    echo "####" &&
-    for file in target/debug/deps/intercom*-????????????????;
+    for file in target/debug/intercom*-????????????????;
     do
         ${RUN_KCOV} "$file";
     done &&
