@@ -17,27 +17,29 @@ addons:
             - binutils-dev
             - libiberty-dev
 env:
-    - CC=gcc-5 CXX=g++-5
+    - CC=gcc-5 CXX=g++-5 RUSTFLAGS='-C link-dead-code'
 
 script:
-    # Ensure the output path is empty of possible previous results. We don't
-    # want to repeat these tests. Travis' cargo caching leaves old results in.
-    #
-    # We're not building "release version" anyway so faster compile times are
-    # worth the less deterministic behavior here.
-    - rm target/debug/* >& /dev/null || true
     - cargo install clippy --force
     - cargo clippy --all -- -D warnings
     - cargo test
+    - ls target
+    - ls target/debug
     - mkdir build
     - cd build
     - cmake ..
     - make
     - cd bin
     - ./cpp-raw
+    - ls target
+    - ls target/debug
 
 after_success: |
+    # Set up the environment. We need LD_LIBRARY_PATH to include rust libs for
+    # the rust tests to execute without cargo.
     export LD_LIBRARY_PATH=/home/travis/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib &&
+
+    # Compile kcov.
     wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz &&
     tar xzf master.tar.gz &&
     cd kcov-master &&
@@ -48,15 +50,32 @@ after_success: |
     make install DESTDIR=../../kcov-build &&
     cd ../.. &&
     rm -rf kcov-master &&
-    for file in target/debug/intercom*-????????????????;
+    export KCOV=${PWD}/kcov-build/usr/local/bin/kcov &&
+
+    mkdir -p target/cov &&
+    export KCOV_OUT=${PWD}/target/cov &&
+    export KCOV_INCLUDE=${PWD} &&
+    export RUN_KCOV="$KCOV --include-pattern=$KCOV_INCLUDE --verify $KCOV_OUT" &&
+
+    # Rust #[test]s.
+    echo "####" &&
+    ls target &&
+    echo "####" &&
+    ls target/debug &&
+    echo "####" &&
+    for file in target/debug/deps/intercom*-????????????????;
     do
-        mkdir -p "target/cov/$(basename $file)";
-        ./kcov-build/usr/local/bin/kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file";
+        ${RUN_KCOV} "$file";
     done &&
+
+    # Rust compilation. Tests for attribute expansion.
     for file in intercom-attributes/tests/data/*.source.rs;
     do
-        mkdir -p "target/cov/$(basename $file)";
-        CARGO_PKG_NAME="source" ./kcov-build/usr/local/bin/kcov --include-pattern=${PWD} --verify "target/cov/$(basename $file)" rustc --crate-name source --crate-type lib "$file" --out-dir target/test_out -L dependency=target/debug/deps --extern intercom=target/debug/libintercom.rlib --pretty=expanded -Z unstable-options > /dev/null;
+        CARGO_PKG_NAME="source" ${RUN_KCOV}  rustc --crate-name source --crate-type lib "$file" --out-dir target/test_out -L dependency=target/debug/deps --extern intercom=target/debug/libintercom.rlib --pretty=expanded -Z unstable-options > /dev/null;
     done &&
+
+    # C++ COM client tests. Tests for runtime conversions.
+    ( cd build/bin && ${RUN_KCOV} cpp-raw ) &&
+
     bash <(curl -s https://codecov.io/bash) &&
     echo "Uploaded code coverage"
