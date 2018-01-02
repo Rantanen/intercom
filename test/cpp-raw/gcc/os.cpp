@@ -18,7 +18,7 @@ void UninitializeRuntime()
 {
 }
 
-HRESULT CreateInstance( REFCLSID clsid, REFIID iid, void** pout )
+intercom::HRESULT CreateInstance( intercom::REFCLSID clsid, intercom::REFIID iid, void** pout )
 {
 	Activator activate( clsid );
 	activate.create( iid, pout );

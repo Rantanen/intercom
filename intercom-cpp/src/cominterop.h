@@ -6,8 +6,8 @@
 #include "error_codes.h"
 
 HRESULT DllGetClassObject(
-  REFCLSID rclsid,
-  REFIID riid,
+  intercom::REFCLSID rclsid,
+  intercom::REFIID riid,
   void** ppv
 );
 
