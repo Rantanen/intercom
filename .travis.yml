@@ -55,7 +55,9 @@ after_success: |
     mkdir -p target/cov &&
     export KCOV_OUT=${PWD}/target/cov &&
     export KCOV_INCLUDE=${PWD} &&
-    export RUN_KCOV="$KCOV --include-pattern=$KCOV_INCLUDE --verify $KCOV_OUT" &&
+    export KCOV_EXCLUDE=${PWD}/test &&
+    export KCOV_FLAGS=--verify &&
+    export RUN_KCOV="$KCOV --include-pattern=$KCOV_INCLUDE --exclude-pattern=$KCOV_EXCLUDE $KCOV_FLAGS $KCOV_OUT" &&
 
     # Rust #[test]s.
     echo "####" &&
