@@ -1,29 +1,17 @@
-
 use std::collections::HashMap;
 use parse::*;
-use clap::ArgMatches;
 use intercom_common::utils;
-use intercom_common::guid::*;
-use error::*;
-use std::io;
-
-/// Runs the 'cpp' subcommand.
-pub fn run( cpp_params : &ArgMatches ) -> AppResult {
-
-    // Parse the sources and convert the result into an IDL.
-    let ( renames, result ) = parse_crate(
-            cpp_params.value_of( "path" ).unwrap() )?;
-    result_to_cpp( &result, &renames, &mut io::stdout() );
-
-    Ok(())
-}
+use cpp::*;
 
 /// Converts the parse result into an header  that gets written to stdout.
-fn result_to_cpp(
+pub fn generate(
     r : &ParseResult,
-    rn : &HashMap<String, String>,
-    out : &mut io::Write,
-) {
+    rn : &HashMap<String, String>
+) -> String {
+
+    // Generate descriptor for the library.
+    let library_descriptor = generate_library_descriptor( 1 );
+
     // Introduce all interfaces so we don't get errors on undeclared items.
     let itf_forward_declarations = r.interfaces.iter().map(|itf| {
         format!( "{}struct {};", get_indentation( 1 ), try_rename( rn, &itf.name ) )
@@ -63,10 +51,14 @@ fn result_to_cpp(
 
     // We got the interfaces and classes. We can format and output the raw interfaces.
     let raw_namespace: String = format!( r###"
+#ifndef INTERCOM_LIBRARY_{}_H
+#define INTERCOM_LIBRARY_{}_H
 >       #include <array>
 >       #include <intercom.h>
 >       namespace {}
 >       {{
+>       {}
+
 >       namespace raw
 >       {{
 >       {}
@@ -78,11 +70,27 @@ fn result_to_cpp(
 >       {}
 >       {}
 >       #endif
+#endif
 >       "###,
-        &r.libname, itf_forward_declarations, itfs, class_descriptors,
+        &r.libname, &r.libname, &r.libname,
+        library_descriptor, itf_forward_declarations, itfs, class_descriptors,
         flat_interface_declarations, flat_class_descriptor_declarations );
-    let raw_namespace = raw_namespace.replace( ">       ", "" );
-    writeln!( out, "{}", raw_namespace ).unwrap();
+    raw_namespace.replace( ">       ", "" )
+}
+
+fn generate_library_descriptor(
+    base_indentation: usize
+) -> String {
+
+    let member_indentation = get_indentation( base_indentation + 1 );
+    let windows_name = format!("{}static const char WINDOWS_NAME[];", member_indentation );
+    let posix_name = format!("{}static const char POSIX_NAME[];", member_indentation );
+    let name = format!("{}static const char NAME[];", member_indentation );
+
+    let descriptor_indentation = get_indentation( base_indentation );
+    format!( "{}class Descriptor\n{}{{\n{}public:\n{}\n{}\n{}\n{}}};",
+        descriptor_indentation, descriptor_indentation, descriptor_indentation,
+        name, windows_name, posix_name, descriptor_indentation )
 }
 
 fn generate_raw_interface(
@@ -94,7 +102,7 @@ fn generate_raw_interface(
     // Now that we have methods sorted out, we can construct the final
     // interface definition.
     let indentation = get_indentation( base_indentation );
-    let interface_text = format!( "{}struct {} : IUnknown\n{}{{\n{}static constexpr intercom::IID ID = {};\n\n{}\n{}}};\n",
+    let interface_text = format!( "{}struct {} : IUnknown\n{}{{\n{}static constexpr intercom::IID ID = {};\n{}\n{}}};\n",
             indentation, try_rename( rn, &interface.name ), indentation,
             get_indentation( base_indentation + 1 ), guid_to_binary( &interface.iid ),
             generate_raw_methods( interface, base_indentation + 1 ), indentation );
@@ -174,57 +182,21 @@ fn generate_class_descriptor(
     let class_descriptor: String = format!( r###"
 >       class {}Descriptor
 >       {{
+>       public:
+
 >           static constexpr intercom::CLSID ID = {};
 
 >           static constexpr std::array<intercom::IID, {}> INTERFACES = {{
 {}
 >           }};
 
+>           using Library = {}::Descriptor;
+
 >           {}Descriptor() = delete;
 >           ~{}Descriptor() = delete;
 
->       }};
->       "###,
-    class_name, clsid, coclass.interfaces.len(), interfaces, class_name, class_name );
+>       }};"###,
+    class_name, clsid, coclass.interfaces.len(), interfaces, libname, class_name, class_name, );
     class_descriptor.replace( ">       ", &get_indentation( indentation ) )
 }
 
-/// Gets an empty string for ind One level of indentation is four spaces.
-fn get_indentation(
-    level: usize
-) -> String {
-    let spaces = level * 4;
-    let indentation = format!( r###"{: <1$}"###, "", spaces );
-    indentation
-}
-
-/// Converts a Rust type into applicable C++ type.
-fn to_cpp_type(
-    ty: &str
-) -> &str {
-
-    match ty {
-        "int8" => "int8_t",
-        "uint8" => "uint8_t",
-        "int16" => "int16_t",
-        "uint16" => "uint16_t",
-        "int32" => "int32_t",
-        "uint32" => "uint32_t",
-        "int64" => "int64_t",
-        "uint64" => "uint64_t",
-        "BStr" => "intercom::BSTR",
-        "HRESULT" => "intercom::HRESULT",
-        _ => ty,
-    }
-}
-
-/// Converts a guid to binarys representation.
-fn guid_to_binary(
-    g: &GUID
-) -> String {
-
-    format!( "{{0x{:08x},0x{:04x},0x{:04x},{{0x{:02x},0x{:02x},0x{:02x},0x{:02x},0x{:02x},0x{:02x},0x{:02x},0x{:02x}}}}}",
-            g.data1, g.data2, g.data3,
-            g.data4[0], g.data4[1], g.data4[2], g.data4[3],
-            g.data4[4], g.data4[5], g.data4[6], g.data4[7] )
-}

@@ -25,6 +25,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
 set(PROJECT_COMPILER_SPECIFIC_SRC
     ${PROJECT_SOURCE_DIR}/gcc/os.cpp
+    ${PROJECT_SOURCE_DIR}/gcc/test_lib.cpp
 )
 endif()
 

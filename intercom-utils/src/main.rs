@@ -47,6 +47,11 @@ fn main() {
                    .default_value( "." )
                    .index( 1 )
                 )
+                .arg( Arg::with_name( "output" )
+                   .help( "Target where the C++ header file and associated library implementation are generated." )
+                   .default_value( "." )
+                   .index( 2 )
+                )
             )
         .get_matches();
 
