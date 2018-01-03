@@ -3,9 +3,9 @@
 #define INTERCOM_CPP_ACTIVATOR_H
 
 #include "posix/iclassfactory.h"
-#include "posix/dlopen_wrapper.h"
+#include "posix/dlwrapper.h"
 
-using intercom::cpp::posix::dlopen_wrapper;
+using intercom::cpp::posix::DlWrapper;
 
 #include "cominterop.h"
 
@@ -23,11 +23,11 @@ public:
 public:
 
     Activator(
-        REFCLSID classId  //!< Identifies the class constructed with this activator.
+        intercom::REFCLSID classId  //!< Identifies the class constructed with this activator.
     ) :
         m_classId( classId ),
-        m_library( "./libtest_lib.so",
-            dlopen_wrapper::rtld::lazy ),
+        m_library( "libtest_lib.so",
+            DlWrapper::rtld::lazy ),
         m_getClassObjectFunc( nullptr ),
         m_classFactory( nullptr )
     {
@@ -43,11 +43,11 @@ public:
     }
 
     void create(
-        REFIID riid,
+        intercom::REFIID riid,
         void** ppv
     )
     {
-        HRESULT error = m_classFactory->CreateInstance( nullptr, riid, ppv );
+        intercom::HRESULT error = m_classFactory->CreateInstance( nullptr, riid, ppv );
         if( error != S_OK )
             throw std::exception();
     }
@@ -56,7 +56,7 @@ private:
 
     void init_class_factory()
     {
-        HRESULT error = m_getClassObjectFunc( m_classId, IID_IClassFactory,
+        intercom::HRESULT error = m_getClassObjectFunc( m_classId, IID_IClassFactory,
                 (void**) &m_classFactory );
         if( error != S_OK )
             throw std::exception();
@@ -64,8 +64,8 @@ private:
 
 private:
 
-    CLSID m_classId;
-    dlopen_wrapper m_library;
+    intercom::CLSID m_classId;
+    DlWrapper m_library;
     GetClassObjectFunc m_getClassObjectFunc;
     IClassFactory* m_classFactory;
 

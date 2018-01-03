@@ -13,7 +13,7 @@ namespace posix
 {
 
 //!
-class dlopen_wrapper
+class DlWrapper
 {
 public:
 
@@ -74,7 +74,7 @@ public:
     };
 
     //! Loads a dynamic shared objec into process' address space.
-    dlopen_wrapper(
+    DlWrapper(
         const char* file,
         rtld flags
     ) :
@@ -89,7 +89,7 @@ public:
     }
 
     //! Decrements the reference count of the dynamic shared object.
-    ~dlopen_wrapper()
+    ~DlWrapper()
     {
         // Proper lifetime management has not been implemented for dlopen_wrapper.
         //if( m_handle != nullptr )

@@ -13,7 +13,7 @@ struct IUnknown
 {
 public:
 
-    virtual HRESULT INTERCOM_CC QueryInterface(
+    virtual intercom::HRESULT INTERCOM_CC QueryInterface(
         intercom::REFIID riid,
         void **ppvObject
     ) = 0;
@@ -24,6 +24,6 @@ public:
     virtual uint32_t INTERCOM_CC Release() = 0;
 };
 
-static const IID IID_IUnknown = { 0x00000000, 0x0000, 0x0000, { 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  0x46 } };
+static const intercom::IID IID_IUnknown = { 0x00000000, 0x0000, 0x0000, { 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  0x46 } };
 
 #endif

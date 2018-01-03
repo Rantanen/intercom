@@ -149,7 +149,7 @@ fn flatten_class_descriptor(
     coclass: &CoClass,
     indentation: usize
 ) -> String {
-    let using_clsid = format!( "static constexpr CLSID CLSID_{} = {};",
+    let using_clsid = format!( "static constexpr intercom::CLSID CLSID_{} = {};",
             utils::pascal_case( class_name ), guid_to_binary( &coclass.clsid ) );
     let indentation = get_indentation( indentation );
     format!("{}{}", indentation, using_clsid )
@@ -174,7 +174,7 @@ fn generate_class_descriptor(
     let class_descriptor: String = format!( r###"
 >       class {}Descriptor
 >       {{
->           static constexpr CLSID ID = {};
+>           static constexpr intercom::CLSID ID = {};
 
 >           static constexpr std::array<intercom::IID, {}> INTERFACES = {{
 {}
