@@ -322,9 +322,9 @@ impl ComImpl
 
         Ok( ComImpl {
             struct_name: struct_ident.clone(),
-            interface_name: itf_ident_opt
-                    .map_or( struct_ident.clone(), |i| i.clone() ),
             is_trait_impl: itf_ident_opt.is_some(),
+            interface_name: itf_ident_opt
+                    .unwrap_or_else( || struct_ident.clone() ),
             methods: methods,
         } )
     }

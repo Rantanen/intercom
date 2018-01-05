@@ -69,6 +69,18 @@ impl GetIdent for Path {
     }
 }
 
+impl GetIdent for Ty {
+
+    fn get_ident( &self ) -> Result<Ident, String> {
+
+        match *self {
+            Ty::Path( _, ref p ) => p.get_ident(),
+            _ => Err( format!( "Cannot get Ident for {:?}", self ) )
+        }
+    }
+}
+
+
 impl<'a> GetIdent for ::utils::AttrParam {
 
     fn get_ident( &self ) -> Result<Ident, String>

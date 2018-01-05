@@ -469,11 +469,10 @@ fn expand_com_impl(
 
     // Now that we've gathered all the virtual table fields, we can finally
     // emit the virtual table instance.
-    let vtable_field_tokens = utils::flatten( vtable_fields.iter() );
     output.push( quote!(
             #[allow(non_upper_case_globals)]
             const #vtable_instance_ident : #vtable_struct_ident
-                    = #vtable_struct_ident { #vtable_field_tokens };
+                    = #vtable_struct_ident { #( #vtable_fields )* };
         ) );
 
     Ok( tokens_to_tokenstream( item_tokens, output )? )

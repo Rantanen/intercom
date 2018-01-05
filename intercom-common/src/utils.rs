@@ -5,19 +5,7 @@ use quote::Tokens;
 use error::MacroError;
 use super::*;
 
-pub fn trace( t : &str, n : &str ) {
-    println!( "Added {}: {}", t, n );
-}
-
-pub fn parse_com_lib_tokens(
-    crate_name : &str,
-    tokens : &str,
-) -> Result<( guid::GUID, Vec<String> ), MacroError>
-{
-    parse_com_lib_attribute(
-        crate_name,
-        &parse_attr_tokens( "com_library", tokens )? )
-}
+use ast_converters::*;
 
 pub fn parse_com_lib_attribute(
     crate_name : &str,
@@ -60,36 +48,11 @@ pub fn parse_attr_tokens(
     } )
 }
 
-pub fn parse_inputs(
-    attr_name: &str,
-    attr_tokens: &str,
-    item_tokens: &str,
-) -> Result<( Vec<Tokens>, Attribute, Item ), MacroError>
-{
-    let attr = parse_attr_tokens( attr_name, attr_tokens )?;
-    let item = match syn::parse_item( &item_tokens.to_string() ) {
-        Ok(t) => t,
-        Err(_) => Err(
-                format!( "Could not parse [{}] item", attr_name ) )?,
-    };
-
-    Ok( ( vec![], attr, item ) )
-}
-
-pub fn flatten<'a, I: Iterator<Item=&'a Tokens>>(
-    tokens: I
-) -> Tokens
-{
-    let mut all_tokens = quote::Tokens::new();
-    all_tokens.append_all( tokens );
-    all_tokens
-}
-
 #[derive(PartialEq, Clone, Copy)]
 pub enum InterfaceType { Trait, Struct }
 
 pub type InterfaceData<'a> = (
-    &'a Ident,
+    Ident,
     Vec< ( &'a Ident, &'a MethodSig ) >,
     InterfaceType
 );
@@ -112,7 +75,7 @@ pub fn get_ident_and_fns(
                     .collect();
 
             match methods {
-                Some( m ) => Some( ( &item.ident, m, InterfaceType::Trait ) ),
+                Some( m ) => Some( ( item.ident.clone(), m, InterfaceType::Trait ) ),
                 None => None
             }
         },
@@ -121,8 +84,8 @@ pub fn get_ident_and_fns(
 }
 
 pub type ImplData<'a> = (
-    Option<&'a Ident>,
-    &'a Ident,
+    Option<Ident>,
+    Ident,
     Vec< ( &'a Ident, &'a MethodSig ) >
 );
 
@@ -143,13 +106,9 @@ fn get_impl_data_raw<'a>(
 ) -> ImplData<'a>
 {
 
-    let struct_ident = match get_ty_ident( struct_ty ) {
-        Some( ty_ident ) => ty_ident,
-        None => panic!()
-    };
-
+    let struct_ident = struct_ty.get_ident().unwrap();
     let trait_ident = match *trait_ref {
-        Some( ref tr ) => Some( path_to_ident( tr ) ),
+        Some( ref tr ) => tr.get_ident().ok(),
         None => None
     };
 
@@ -160,20 +119,6 @@ fn get_impl_data_raw<'a>(
     let methods = methods_opt.unwrap_or_else( || vec![] );
 
     ( trait_ident, struct_ident, methods )
-}
-
-pub fn path_to_ident(
-    p : &Path
-) -> &Ident
-{
-    &p.segments.last().unwrap().ident
-}
-
-pub fn get_struct_ident_from_annotatable(
-    item : &Item
-) -> &Ident
-{
-    &item.ident
 }
 
 #[derive(PartialEq, Eq, Debug)]
