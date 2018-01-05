@@ -1,10 +1,11 @@
 
-use std::collections::HashMap;
 use std::io::Write;
-use parse::*;
 use std::path::Path;
 use clap::ArgMatches;
 use intercom_common::utils;
+use intercom_common::model;
+use intercom_common::methodinfo;
+use intercom_common::foreign_ty::*;
 use error::*;
 use std::io;
 
@@ -13,9 +14,13 @@ use std::io;
 pub fn run( idl_params : &ArgMatches ) -> AppResult {
 
     // Parse the sources and convert the result into an IDL.
-    let ( renames, result ) = parse_crate(
-            idl_params.value_of( "path" ).unwrap() )?;
-    result_to_idl( &result, &renames, &mut io::stdout() );
+    let path = Path::new( idl_params.value_of( "path" ).unwrap() );
+    let krate = if path.is_file() {
+            model::ComCrate::parse_cargo_toml( path )
+        } else {
+            model::ComCrate::parse_cargo_toml( &path.join( "Cargo.toml" ) )
+        }.unwrap();
+    result_to_idl( &krate, &mut io::stdout() );
 
     Ok(())
 }
@@ -24,45 +29,50 @@ pub fn run( idl_params : &ArgMatches ) -> AppResult {
 pub fn create_idl( path : &Path, out : &mut Write ) -> Result<(), ()> {
 
     // Parse the sources and convert the result into an IDL.
-    let ( renames, result ) = parse_crate(
-            &path.to_string_lossy() )
-                    .map_err( |_| () )?;
-
-    result_to_idl( &result, &renames, out );
+    let krate = if path.is_file() {
+            model::ComCrate::parse_cargo_toml( path )
+        } else {
+            model::ComCrate::parse_cargo_toml( &path.join( "Cargo.toml" ) )
+        }.unwrap();
+    result_to_idl( &krate, out );
 
     Ok(())
 }
 
 /// Converts the parse result into an IDL that gets written to stdout.
 fn result_to_idl(
-    r : &ParseResult,
-    rn : &HashMap<String, String>,
+    c : &model::ComCrate,
     out : &mut io::Write,
 ) {
+    let foreign = CTyHandler;
+
     // Introduce all interfaces so we don't get errors on undeclared items.
-    let itf_introductions = r.interfaces.iter().map(|itf| {
+    let itf_introductions = c.interfaces().iter().map(|(_, itf)| {
         format!( r###"
             interface {};
-        "###, try_rename( rn, &itf.name ) )
+        "###, foreign.get_name( c, itf.name() ) )
     } ).collect::<Vec<_>>().join( "\n" );
 
     // Define all interfaces.
-    let itfs = r.interfaces.iter().map(|itf| {
+    let itfs = c.interfaces().iter().map(|(_, itf)| {
 
         // Get the method definitions for the current interface.
-        let methods = itf.methods.iter().enumerate().map(|(i,m)| {
+        let methods = itf.methods().iter().enumerate().map(|(i,m)| {
 
             // Construct the argument list.
-            let args = m.arguments.iter().map(|a| {
+            let args = m.raw_com_args().iter().map(|a| {
 
                 // Argument direction affects both the argument attribute and
                 // whether the argument is passed by pointer or value.
                 let ( attrs, out_ptr ) = match a.dir {
-                    ArgDirection::In => ( "in", "" ),
-                    ArgDirection::Out => ( "out", "*" ),
-                    ArgDirection::Return => ( "out, retval", "*" ),
+                    methodinfo::Direction::In => ( "in", "" ),
+                    methodinfo::Direction::Out => ( "out", "*" ),
+                    methodinfo::Direction::Retval => ( "out, retval", "*" ),
                 };
-                format!( "[{}] {}{} {}", attrs, a.ty, out_ptr, a.name )
+                format!( "[{}] {}{} {}",
+                    attrs,
+                    foreign.get_ty( c, &a.arg.ty ).unwrap(), out_ptr,
+                    a.arg.name )
 
             } ).collect::<Vec<_>>().join( ", " );
 
@@ -72,7 +82,11 @@ fn result_to_idl(
             format!( r###"
                 [id({:-X})]
                 {} {}( {} );
-            "###, i, m.rvalue, utils::pascal_case( &m.name ), args )
+            "###,
+            i,
+            foreign.get_ty( c, &m.returnhandler.com_ty() ).unwrap(),
+            utils::pascal_case( m.name.as_ref() ),
+            args )
 
         } ).collect::<Vec<_>>().join( "\n" );
 
@@ -89,7 +103,7 @@ fn result_to_idl(
             {{
                 {}
             }}
-        "###, itf.iid, try_rename( rn, &itf.name ), methods )
+        "###, itf.iid(), foreign.get_name( c, itf.name() ), methods )
 
     } ).collect::<Vec<_>>().join( "\n" );
 
@@ -99,16 +113,16 @@ fn result_to_idl(
     // [com_library] attribute. This is our source for the classes to include
     // in the IDL. r.classes has the actual class details, but might include
     // classes that are not exposed by the library.
-    let classes = r.class_names.iter().map(|class_name| {
+    let classes = c.lib().as_ref().unwrap().coclasses().iter().map(|class_name| {
 
         // Get the class details by matching the name.
-        let coclass = r.classes.iter().find(|cls| &cls.name == class_name )
-                .unwrap();
+        let coclass = &c.structs()[ class_name.as_ref() ];
 
         // Get the interfaces the class implements.
-        let interfaces = coclass.interfaces.iter().map(|itf| {
+        let interfaces = coclass.interfaces().iter().map(|itf_name| {
+            let itf = &c.interfaces()[ itf_name.as_ref() ];
             format!( r###"
-                interface {};"###, try_rename( rn, itf ) )
+                interface {};"###, foreign.get_name( c, itf.name() ) )
         } ).collect::<Vec<_>>().join( "\n" );
 
         // Format the final coclass definition now that we have the class
@@ -121,7 +135,7 @@ fn result_to_idl(
             {{
                 {}
             }}
-        "###, coclass.clsid, coclass.name, interfaces )
+        "###, coclass.clsid().as_ref().unwrap(), coclass.name(), interfaces )
     } ).collect::<Vec<_>>().join( "\n" );
 
     // We got the interfaces and classes. We can format and output the IDL.
@@ -137,8 +151,8 @@ fn result_to_idl(
             {}
         }}
         "###,
-    r.libid.as_ref().unwrap(),
-    utils::pascal_case( &r.libname ),
+    c.lib().as_ref().unwrap().libid(),
+    utils::pascal_case( c.lib().as_ref().unwrap().name() ),
     itf_introductions,
     itfs,
     classes ).unwrap();
