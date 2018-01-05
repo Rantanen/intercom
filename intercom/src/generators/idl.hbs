@@ -1,0 +1,28 @@
+[
+    uuid( {{lib_id}} )
+]
+library {{lib_name}}
+{
+    importlib("stdole2.tlb")
+
+{{#each interfaces}}
+    interface {{name}};
+{{/each}}
+
+{{#each interfaces}}
+    [
+    ]
+    interface {{name}}{{#if base}} : {{base}}{{/if}}
+    {
+    {{#each methods}}
+        [id({{idx}})]
+        {{ret_type}} {{name}}(
+        {{each args}}
+            [{{attributes}}] {{arg_type}} {{name}}{{#unless @last}}, {{/unless}}
+        {{/each}}
+        );
+
+    {{/each}}
+    }
+{{/each}}
+}
