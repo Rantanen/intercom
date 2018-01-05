@@ -13,7 +13,7 @@ use intercom_common::idents;
 use intercom_common::utils;
 use intercom_common::ast_converters::*;
 use intercom_common::error::MacroError;
-use intercom_common::methodinfo::ComMethodInfo;
+use intercom_common::methodinfo::{ComMethodInfo, Direction};
 use intercom_common::model;
 
 extern crate proc_macro;
@@ -165,24 +165,19 @@ fn expand_com_interface(
     for method_info in itf.methods() {
 
         let method_ident = &method_info.name;
-        let in_args = method_info.args
-                .iter()
-                .map( |ca| {
-                    let name = &ca.name;
-                    let com_ty = ca.handler.com_ty();
-                    quote!( #name : #com_ty )
-                } ).collect::<Vec<_>>();
-        let out_args = method_info.returnhandler.com_out_args()
-                .iter()
-                .map( |ca| {
-                    let name = &ca.name;
-                    let com_ty = ca.handler.com_ty();
-                    quote!( #name : *mut #com_ty )
-                } ).collect::<Vec<_>>();
+        let in_out_args = method_info.raw_com_args()
+                .into_iter()
+                .map( |com_arg| {
+                    let name = &com_arg.arg.name;
+                    let com_ty = &com_arg.arg.handler.com_ty();
+                    let dir = match com_arg.dir {
+                        Direction::In => quote!(),
+                        Direction::Out | Direction::Retval => quote!( *mut )
+                    };
+                    quote!( #name : #dir #com_ty )
+                } );
         let self_arg = quote!( self_vtable : ::intercom::RawComPtr );
-        let args = iter::once( self_arg )
-                            .chain( in_args )
-                            .chain( out_args );
+        let args = iter::once( self_arg ).chain( in_out_args );
 
         // Create the vtable field and add it to the vector of fields.
         let ret_ty = method_info.returnhandler.com_ty();
@@ -213,25 +208,24 @@ fn expand_com_interface(
                 } ).collect::<Vec<_>>();
 
         // Format the in and out parameters for the COM call.
-        let in_params = method_info.args
-                .iter()
-                .map( |ca| {
-                    let param = ca.handler.rust_to_com( &ca.name );
-                    quote!( #param )
-                } ).collect::<Vec<_>>();
-        let out_params = method_info.returnhandler.com_out_args()
-                .iter()
-                .map( |ca| {
-                    let name = &ca.name;
-                    quote!( &mut #name )
-                } ).collect::<Vec<_>>();
+        let params = method_info.raw_com_args()
+                .into_iter()
+                .map( |com_arg| {
+                    let name = &com_arg.arg.name;
+                    match com_arg.dir {
+                        Direction::In => {
+                            let param = com_arg.arg.handler.rust_to_com( name );
+                            quote!( #param )
+                        },
+                        Direction::Out | Direction::Retval
+                            => quote!( &mut #name ),
+                    }
+                } );
 
         // Combine the parameters into the final parameter list.
         // This includes the 'this' pointer and both the IN and OUT
         // parameters.
-        let params = iter::once( quote!( comptr ) )
-            .chain( in_params )
-            .chain( out_params );
+        let params = iter::once( quote!( comptr ) ).chain( params );
 
         // Create the return statement. 
         let return_ident = Ident::from( "__result" );
@@ -410,24 +404,19 @@ fn expand_com_impl(
         let method_impl_ident = idents::method_impl(
                 &struct_ident, &itf_ident, &method_ident.as_ref() );
 
-        let in_args = method_info.args
-                .iter()
-                .map( |ca| {
-                    let name = &ca.name;
-                    let com_ty = ca.handler.com_ty();
-                    quote!( #name : #com_ty )
-                } ).collect::<Vec<_>>();
-        let out_args = method_info.returnhandler.com_out_args()
-                .iter()
-                .map( |ca| {
-                    let name = &ca.name;
-                    let com_ty = ca.handler.com_ty();
-                    quote!( #name : *mut #com_ty )
-                } ).collect::<Vec<_>>();
+        let in_out_args = method_info.raw_com_args()
+                .into_iter()
+                .map( |com_arg| {
+                    let name = &com_arg.arg.name;
+                    let com_ty = &com_arg.arg.handler.com_ty();
+                    let dir = match com_arg.dir {
+                        Direction::In => quote!(),
+                        Direction::Out | Direction::Retval => quote!( *mut )
+                    };
+                    quote!( #name : #dir #com_ty )
+                } );
         let self_arg = quote!( self_vtable : ::intercom::RawComPtr );
-        let args = iter::once( self_arg )
-                            .chain( in_args )
-                            .chain( out_args );
+        let args = iter::once( self_arg ).chain( in_out_args );
 
         // Format the in and out parameters for the Rust call.
         let in_params = method_info.args
@@ -435,7 +424,7 @@ fn expand_com_impl(
                 .map( |ca| {
                     let param = ca.handler.com_to_rust( &ca.name );
                     quote!( #param )
-                } ).collect::<Vec<_>>();
+                } );
 
         let return_ident = Ident::from( "__result" );
         let return_statement = method_info

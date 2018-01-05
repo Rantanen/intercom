@@ -1,4 +1,5 @@
 
+use std::rc::Rc;
 use syn::*;
 
 use ast_converters::*;
@@ -14,29 +15,38 @@ pub enum ComMethodInfoError {
     BadReturnTy,
 }
 
-pub struct ComArg {
+#[derive(Clone)]
+pub struct RustArg {
     pub name: Ident,
     pub ty: Ty,
-    pub handler: Box<TyHandler>,
+    pub handler: Rc<TyHandler>,
 }
 
-impl ::std::fmt::Debug for ComArg {
+impl ::std::fmt::Debug for RustArg {
     fn fmt( &self, f: &mut ::std::fmt::Formatter ) -> ::std::fmt::Result {
         write!( f, "{}: {:?}", self.name, self.ty )
     }
 }
 
-impl ComArg {
+impl RustArg {
 
-    pub fn new( name: Ident, ty: Ty ) -> ComArg {
+    pub fn new( name: Ident, ty: Ty ) -> RustArg {
 
         let tyhandler = get_ty_handler( &ty );
-        ComArg {
+        RustArg {
             name: name,
             ty: ty,
             handler: tyhandler,
         }
     }
+}
+
+#[derive(Clone, Copy)]
+pub enum Direction { In, Out, Retval }
+
+pub struct ComArg {
+    pub arg : RustArg,
+    pub dir : Direction
 }
 
 pub struct ComMethodInfo {
@@ -51,7 +61,7 @@ pub struct ComMethodInfo {
     pub return_type: Option<Ty>,
 
     pub returnhandler: Box<ReturnHandler>,
-    pub args: Vec<ComArg>,
+    pub args: Vec<RustArg>,
 }
 
 impl ComMethodInfo {
@@ -92,7 +102,7 @@ impl ComMethodInfo {
                             ComMethodInfoError::BadArg( Box::new( arg.clone() ) )
                         ) )?;
 
-                    Ok( ComArg::new( ident, ty ) )
+                    Ok( RustArg::new( ident, ty ) )
                 } ).collect::<Result<_,_>>()?;
 
                 Ok( ( is_const, rust_self_arg, args ) )
@@ -124,6 +134,28 @@ impl ComMethodInfo {
             returnhandler: returnhandler,
             args: com_args,
         } )
+    }
+
+    pub fn raw_com_args( &self ) -> Vec<ComArg>
+    {
+        let out_dir = if let Some( ::syn::Ty::Tup(_) ) = self.retval_type {
+                            Direction::Out
+                        } else {
+                            Direction::Retval
+                        };
+
+        let in_args = self.args
+                .iter()
+                .map( |ca| {
+                    ComArg { arg: ca.clone(), dir: Direction::In }
+                } );
+        let out_args = self.returnhandler.com_out_args()
+                .into_iter()
+                .map( |ca| {
+                    ComArg { arg: ca, dir: out_dir }
+                } );
+
+        in_args.chain( out_args ).collect()
     }
 }
 

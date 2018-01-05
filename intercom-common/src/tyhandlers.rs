@@ -1,4 +1,5 @@
 
+use std::rc::Rc;
 use syn::*;
 use quote::Tokens;
 
@@ -99,7 +100,7 @@ impl TyHandler for StringParam
 /// Resolves the `TyHandler` to use.
 pub fn get_ty_handler(
     arg_ty : &Ty,
-) -> Box<TyHandler>
+) -> Rc<TyHandler>
 {
     // The ParamHandler needs an owned Ty so clone it here.
     let ty = arg_ty.clone();
@@ -118,15 +119,15 @@ pub fn get_ty_handler(
             let name : &str = p.segments.last().unwrap().ident.as_ref();
             match name {
 
-                "ComItf" => Box::new( ComItfParam( ty ) ),
-                "String" => Box::new( StringParam( ty ) ),
+                "ComItf" => Rc::new( ComItfParam( ty ) ),
+                "String" => Rc::new( StringParam( ty ) ),
 
                 // Unknown. Use IdentityParam.
-                _ => Box::new( IdentityParam( ty ) )
+                _ => Rc::new( IdentityParam( ty ) )
             }
         },
 
         // Default to identity param.
-        _ => Box::new( IdentityParam( ty ) )
+        _ => Rc::new( IdentityParam( ty ) )
     }
 }

@@ -1,7 +1,7 @@
 
 use syn::*;
 use quote::Tokens;
-use methodinfo::ComArg;
+use methodinfo::RustArg;
 use tyhandlers;
 use utils;
 
@@ -26,7 +26,7 @@ pub trait ReturnHandler {
     fn rust_to_com_return( &self, _result : &Ident ) -> Tokens { quote!() }
 
     /// Gets the COM out arguments that result from the Rust return type.
-    fn com_out_args( &self ) -> Vec<ComArg> { vec![] }
+    fn com_out_args( &self ) -> Vec<RustArg> { vec![] }
 }
 
 /// Void return type.
@@ -49,7 +49,7 @@ impl ReturnHandler for ReturnOnlyHandler {
         quote!( #result.into() )
     }
 
-    fn com_out_args( &self ) -> Vec<ComArg> { vec![] }
+    fn com_out_args( &self ) -> Vec<RustArg> { vec![] }
 }
 
 /// Result type that supports error info for the `Err` value. Converted to
@@ -118,12 +118,12 @@ impl ReturnHandler for ErrorResultHandler {
         )
     }
 
-    fn com_out_args( &self ) -> Vec<ComArg> {
+    fn com_out_args( &self ) -> Vec<RustArg> {
         get_out_args_for_result( &self.retval_ty )
     }
 }
 
-fn get_out_args_for_result( retval_ty : &Ty ) -> Vec<ComArg> {
+fn get_out_args_for_result( retval_ty : &Ty ) -> Vec<RustArg> {
 
     match *retval_ty {
 
@@ -131,17 +131,17 @@ fn get_out_args_for_result( retval_ty : &Ty ) -> Vec<ComArg> {
         Ty::Tup( ref v ) =>
             v.iter()
                 .enumerate()
-                .map( |( idx, ty )| ComArg::new(
+                .map( |( idx, ty )| RustArg::new(
                                     Ident::from( format!( "__out{}", idx + 1) ),
                                     ty.clone() ) )
                 .collect::<Vec<_>>(),
-        _ => vec![ ComArg::new( Ident::from( "__out" ), retval_ty.clone() ) ],
+        _ => vec![ RustArg::new( Ident::from( "__out" ), retval_ty.clone() ) ],
     }
 }
 
 fn write_out_values(
     idents : &[Ident],
-    out_args : Vec<ComArg>,
+    out_args : Vec<RustArg>,
 ) -> ( Vec<Tokens>, Vec<Tokens> )
 {
     let mut ok_tokens = vec![];
@@ -159,7 +159,7 @@ fn write_out_values(
 }
 
 fn get_ok_values(
-    out_args : Vec<ComArg>
+    out_args : Vec<RustArg>
 ) -> Vec<Tokens>
 {
     let mut tokens = vec![];
