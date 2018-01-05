@@ -1,64 +1,75 @@
 
-use std::collections::HashMap;
-use parse::*;
+use std::path::Path;
+use std::io;
+
 use clap::ArgMatches;
 use intercom_common::utils;
 use intercom_common::guid::*;
+use intercom_common::model;
+use intercom_common::methodinfo;
+use intercom_common::foreign_ty::*;
 use error::*;
-use std::io;
 
 /// Runs the 'cpp' subcommand.
 pub fn run( cpp_params : &ArgMatches ) -> AppResult {
 
     // Parse the sources and convert the result into an IDL.
-    let ( renames, result ) = parse_crate(
-            cpp_params.value_of( "path" ).unwrap() )?;
-    result_to_cpp( &result, &renames, &mut io::stdout() );
+    let path = Path::new( cpp_params.value_of( "path" ).unwrap() );
+    let krate = if path.is_file() {
+            model::ComCrate::parse_cargo_toml( path )
+        } else {
+            model::ComCrate::parse_cargo_toml( &path.join( "Cargo.toml" ) )
+        }.unwrap();
+    result_to_cpp( &krate, &mut io::stdout() );
 
     Ok(())
 }
 
 /// Converts the parse result into an header  that gets written to stdout.
 fn result_to_cpp(
-    r : &ParseResult,
-    rn : &HashMap<String, String>,
+    c : &model::ComCrate,
     out : &mut io::Write,
 ) {
+    // Unwrap the library. We require one to be specified here.
+    let lib = c.lib().as_ref().unwrap();
+
     // Introduce all interfaces so we don't get errors on undeclared items.
-    let itf_forward_declarations = r.interfaces.iter().map(|itf| {
-        format!( "{}struct {};", get_indentation( 1 ), try_rename( rn, &itf.name ) )
+    let foreign = CTyHandler;
+    let itf_forward_declarations = c.interfaces().iter().map( |( _, itf )| {
+        format!( "{}struct {};",
+                 get_indentation( 1 ), foreign.get_name( c, itf.name() ) )
     } ).collect::<Vec<_>>().join( "\n" );
 
     // Raw interfaces that give direct access to the components implemented in Rust.
-    let itfs = r.interfaces.iter().map(|itf| {
-        generate_raw_interface( rn, itf, 1 )
+    let itfs = c.interfaces().iter().map( |( _, itf )| {
+        generate_raw_interface( c, itf, 1 )
     } ).collect::<Vec<_>>().join( "\n" );
 
     // Generate class descriptors.
-    let class_descriptors = r.class_names.iter().map(|class_name| {
+    let class_descriptors = lib.coclasses().iter().map(| class_name | {
 
         // Get the class details by matching the name.
-        let class  = r.classes.iter().find(|cls| &cls.name == class_name )
-            .unwrap();
+        let class = &c.structs()[ class_name.as_ref() ];
 
-        generate_class_descriptor( rn, &r.libname, class_name, class, 1 )
+        generate_class_descriptor( c, lib.name(), class, 1 )
     } ).collect::<Vec<_>>().join( "\n" );
 
     // Generate using statements that flatten the raw interfaces
     // to mimic the results of a Microsoft MIDL compiler.
-    let flat_interface_declarations = r.interfaces.iter().map(|itf| {
-        flatten_interface( rn, &r.libname, itf, 1 )
+    let flat_interface_declarations = c.interfaces().iter().map(|(_, itf)| {
+        flatten_interface( c, lib.name(), itf, 1 )
     } ).collect::<Vec<_>>().join( "\n" );
 
     // Generate using statements that flatten the class descriptors
     // to mimic the results of a Microsoft MIDL compiler.
-    let flat_class_descriptor_declarations = r.class_names.iter().map(|class_name| {
+    let flat_class_descriptor_declarations = lib.coclasses()
+            .iter()
+            .map(|class_name| {
 
-                // Get the class details by matching the name.
-        let class  = r.classes.iter().find(|cls| &cls.name == class_name )
-            .unwrap();
+        // Get the class details by matching the name.
+        let class  = &c.structs()[ class_name.as_ref() ];
 
-        flatten_class_descriptor( class_name, class, 1 )
+        flatten_class_descriptor( class, 1 )
     } ).collect::<Vec<_>>().join( "\n" );
 
     // We got the interfaces and classes. We can format and output the raw interfaces.
@@ -79,100 +90,109 @@ fn result_to_cpp(
 >       {}
 >       #endif
 >       "###,
-        &r.libname, itf_forward_declarations, itfs, class_descriptors,
+        lib.name(), itf_forward_declarations, itfs, class_descriptors,
         flat_interface_declarations, flat_class_descriptor_declarations );
     let raw_namespace = raw_namespace.replace( ">       ", "" );
     writeln!( out, "{}", raw_namespace ).unwrap();
 }
 
 fn generate_raw_interface(
-    rn : &HashMap<String, String>,
-    interface: &Interface,
+    c : &model::ComCrate,
+    itf: &model::ComInterface,
     base_indentation: usize
 ) -> String {
+    let foreign = CTyHandler;
 
     // Now that we have methods sorted out, we can construct the final
     // interface definition.
     let indentation = get_indentation( base_indentation );
-    let interface_text = format!( "{}struct {} : IUnknown\n{}{{\n{}static constexpr intercom::IID ID = {};\n\n{}\n{}}};\n",
-            indentation, try_rename( rn, &interface.name ), indentation,
-            get_indentation( base_indentation + 1 ), guid_to_binary( &interface.iid ),
-            generate_raw_methods( interface, base_indentation + 1 ), indentation );
-    interface_text
+    let itf_text = format!( "{}struct {} : IUnknown\n{}{{\n{}static constexpr intercom::IID ID = {};\n\n{}\n{}}};\n",
+            indentation, foreign.get_name( c, itf.name() ), indentation,
+            get_indentation( base_indentation + 1 ), guid_to_binary( itf.iid() ),
+            generate_raw_methods( c, itf, base_indentation + 1 ), indentation );
+    itf_text
 }
 
 fn generate_raw_methods(
-    itf: &Interface,
+    c: &model::ComCrate,
+    itf: &model::ComInterface,
     indentation: usize
 ) -> String {
 
     // Get the method definitions for the current interface.
-    itf.methods.iter().enumerate().map(|(_i,m)| {
+    itf.methods().iter().map( |m| {
 
         // Construct the argument list.
-        let args = m.arguments.iter().map(|a| {
+        let args = m.raw_com_args().iter().map(|a| {
 
             // Argument direction affects both the argument attribute and
             // whether the argument is passed by pointer or value.
             let out_ptr = match a.dir {
-                ArgDirection::In => "",
-                ArgDirection::Out | ArgDirection::Return => "*",
+                methodinfo::Direction::In => "",
+                methodinfo::Direction::Out
+                    | methodinfo::Direction::Retval => "*",
             };
-            format!( "{}{} {}", to_cpp_type( &a.ty ), out_ptr, a.name )
+            format!( "{}{} {}", to_cpp_type( c, &a.arg.ty ), out_ptr, a.arg.name )
 
         } ).collect::<Vec<_>>().join( ", " );
 
         // Format the method.
         // To maintain backwards compatibility all new methods should
         // be added to the end of the traits.
-        format!( r###"{}virtual {} INTERCOM_CC {}( {} ) = 0;"###, get_indentation( indentation ), to_cpp_type( &m.rvalue ), utils::pascal_case( &m.name ), args )
+        format!( r###"{}virtual {} INTERCOM_CC {}( {} ) = 0;"###,
+            get_indentation( indentation ),
+            to_cpp_type( c, &m.returnhandler.com_ty() ),
+            utils::pascal_case( m.name.as_ref() ), args )
 
     } ).collect::<Vec<_>>().join( "\n" )
 }
 
 fn flatten_interface(
-    rn : &HashMap<String, String>,
+    c : &model::ComCrate,
     libname: &str,
-    interface: &Interface,
+    interface: &model::ComInterface,
     indentation: usize
 ) -> String {
-    let interface_name = try_rename( rn, &interface.name );
+    let foreign = CTyHandler;
+    let interface_name = foreign.get_name( c, interface.name() );
     let using_iid = format!( "static constexpr intercom::IID IID_{} = {};",
-            utils::pascal_case( &interface_name ), guid_to_binary( &interface.iid ) );
-    let using_interface = format!( "using {} = {}::raw::{};", utils::pascal_case( &interface_name ), libname,  &interface_name );
+            utils::pascal_case( &interface_name ),
+            guid_to_binary( interface.iid() ) );
+    let using_interface = format!( "using {} = {}::raw::{};",
+            utils::pascal_case( &interface_name ), libname,  &interface_name );
     let indentation = get_indentation( indentation );
     format!("{}{}\n{}{}", indentation, using_iid, indentation, using_interface )
 }
 
 fn flatten_class_descriptor(
-    class_name: &str,
-    coclass: &CoClass,
+    coclass: &model::ComStruct,
     indentation: usize
 ) -> String {
     let using_clsid = format!( "static constexpr intercom::CLSID CLSID_{} = {};",
-            utils::pascal_case( class_name ), guid_to_binary( &coclass.clsid ) );
+            utils::pascal_case( coclass.name().as_ref() ),
+            guid_to_binary( coclass.clsid().as_ref().unwrap() ) );
     let indentation = get_indentation( indentation );
     format!("{}{}", indentation, using_clsid )
 }
 
 fn generate_class_descriptor(
-    rn : &HashMap<String, String>,
+    c : &model::ComCrate,
     libname: &str,
-    class_name: &str,
-    coclass: &CoClass,
+    coclass: &model::ComStruct,
     indentation: usize
 ) -> String {
 
     // Create a list of interfaces to be declared in the class descriptor.
-    let interfaces =  coclass.interfaces.iter().map(|itf| {
+    let foreign = CTyHandler;
+    let interfaces =  coclass.interfaces().iter().map(|itf| {
             format!( r###"{}{}::raw::{}::ID"###,
-                &get_indentation( indentation + 2 ), libname, try_rename( rn, itf ) )
+                &get_indentation( indentation + 2 ), libname, foreign.get_name( c, itf ) )
         } ).collect::<Vec<_>>().join( ",\n" );
 
     // Class descriptors hold information about COM classes implemented by the library.
-    let clsid = guid_to_binary( &coclass.clsid );
+    let clsid = guid_to_binary( coclass.clsid().as_ref().unwrap() );
     let class_descriptor: String = format!( r###"
->       class {}Descriptor
+>       class {name}Descriptor
 >       {{
 >           static constexpr intercom::CLSID ID = {};
 
@@ -180,12 +200,12 @@ fn generate_class_descriptor(
 {}
 >           }};
 
->           {}Descriptor() = delete;
->           ~{}Descriptor() = delete;
+>           {name}Descriptor() = delete;
+>           ~{name}Descriptor() = delete;
 
 >       }};
 >       "###,
-    class_name, clsid, coclass.interfaces.len(), interfaces, class_name, class_name );
+    clsid, coclass.interfaces().len(), interfaces, name = coclass.name() );
     class_descriptor.replace( ">       ", &get_indentation( indentation ) )
 }
 
@@ -200,10 +220,13 @@ fn get_indentation(
 
 /// Converts a Rust type into applicable C++ type.
 fn to_cpp_type(
-    ty: &str
-) -> &str {
+    c: &model::ComCrate,
+    ty: &::syn::Ty
+) -> String {
 
-    match ty {
+    let foreign = CTyHandler;
+    let name = foreign.get_ty( c, ty ).unwrap();
+    match name.as_str() {
         "int8" => "int8_t",
         "uint8" => "uint8_t",
         "int16" => "int16_t",
@@ -214,8 +237,8 @@ fn to_cpp_type(
         "uint64" => "uint64_t",
         "BStr" => "intercom::BSTR",
         "HRESULT" => "intercom::HRESULT",
-        _ => ty,
-    }
+        _ => return name,
+    }.to_owned()
 }
 
 /// Converts a guid to binarys representation.

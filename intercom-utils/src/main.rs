@@ -10,7 +10,6 @@ extern crate toml;
 mod idl;
 mod cpp;
 mod manifest;
-mod parse;
 mod error;
 
 use clap::{App, AppSettings, SubCommand, Arg};

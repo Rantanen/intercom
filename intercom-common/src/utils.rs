@@ -7,34 +7,6 @@ use super::*;
 
 use ast_converters::*;
 
-pub fn parse_com_lib_attribute(
-    crate_name : &str,
-    attr : &Attribute,
-) -> Result<( guid::GUID, Vec<String> ), MacroError>
-{
-    let params = get_parameters( attr )
-            .ok_or( "Bad parameters on com_library" )?;
-
-    let ( libid_param, cls_params ) = params.split_first()
-            .ok_or( "Not enough com_library parameters" )?;
-
-
-    Ok( (
-        parameter_to_guid(
-            libid_param,
-            crate_name,
-            "",
-            "LIBID" )?
-            .ok_or( "Library must specify LIBID" )?,
-        cls_params
-            .into_iter()
-            .map( |cls| match *cls {
-                AttrParam::Word( ref w ) => Ok( format!( "{}", w ) ),
-                _ => Err( "Bad interface" ),
-            } ).collect::<Result<_,_>>()?
-    ) )
-}
-
 pub fn parse_attr_tokens(
     attr_name: &str,
     attr_tokens: &str,
@@ -156,37 +128,6 @@ pub fn iter_parameters(
                 }
             } ) ),
     }
-}
-
-pub fn get_parameters(
-    attr : &syn::Attribute
-) -> Option< Vec< AttrParam > >
-{
-    Some( match attr.value {
-
-        // Attributes without parameter lists don't have params.
-        syn::MetaItem::Word(..)
-            | syn::MetaItem::NameValue(..) => return None,
-
-        syn::MetaItem::List( _, ref l ) =>
-            l.to_owned().into_iter().map( |i| {
-
-                match i {
-
-                    syn::NestedMetaItem::MetaItem( mi ) =>
-
-                            AttrParam::Word( match mi {
-                                syn::MetaItem::Word( i )
-                                    | syn::MetaItem::List( i, _ )
-                                    | syn::MetaItem::NameValue( i, _ )
-                                    => i,
-                            } ),
-
-                    syn::NestedMetaItem::Literal( l ) =>
-                            AttrParam::Literal( l ),
-                }
-            } ).collect() ,
-    } )
 }
 
 pub fn get_ty_ident(
