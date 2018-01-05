@@ -3,6 +3,7 @@ extern crate quote;
 extern crate syn;
 extern crate sha1;
 extern crate ordermap;
+extern crate toml;
 
 pub mod guid;
 pub mod error;

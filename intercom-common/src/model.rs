@@ -11,11 +11,12 @@ use ::guid::GUID;
 use ::ast_converters::*;
 use ::methodinfo::ComMethodInfo;
 use ::syn::{Ident, Visibility};
-use ::std::path::Path;
+use ::std::path::{Path, PathBuf};
 use ::std::fs;
 use ::std::io::Read;
 use ::ordermap::OrderMap;
 use ::std::iter::FromIterator;
+use toml;
 
 #[derive(Debug)]
 pub struct ParseError( pub String );
@@ -395,6 +396,52 @@ impl ComCrate
         }
 
         builder.build()
+    }
+
+    pub fn parse_cargo_toml(
+        toml_path : &Path,
+    ) -> ParseResult<ComCrate>
+    {
+        let mut f = fs::File::open( toml_path )
+                .map_err( |_| ParseError::new( "Could not open Cargo toml" ) )?;
+        let mut buf = String::new();
+        f.read_to_string( &mut buf )
+                .map_err( |_| ParseError::new( "Could not read Cargo toml" ) )?;
+
+        let toml = buf.parse::<toml::Value>()
+                .map_err( |_| ParseError::new( "Could not parse Cargo toml" ) )?;
+        let root = match toml {
+            toml::Value::Table( root ) => root,
+            _ => return Err( ParseError::new( "Invalid TOML root element" ) ),
+        };
+
+        let lib_name = match root.get( "package" ) {
+                    Some( &toml::Value::Table( ref package ) )
+                        => match package.get( "name" ) {
+                            Some( &toml::Value::String( ref name ) )
+                                => name,
+                            _ => return Err( ParseError::new(
+                                    "No 'name' parameter under [package]" ) ),
+                        },
+                    _ => return Err( ParseError::new( 
+                            "Could not find [package] in Cargo.toml" ) ),
+                };
+
+        let rel_lib_path = PathBuf::from( &match root.get( "lib" ) {
+                    Some( &toml::Value::Table( ref package ) )
+                        => match package.get( "path" ) {
+                            Some( &toml::Value::String( ref path ) )
+                                => path.clone(),
+                            _ => "src/lib.rs".to_owned(),
+                        },
+                    _ => "src/lib.rs".to_owned(),
+                } );
+        let lib_path = match toml_path.parent() {
+                    Some( p ) => p.join( rel_lib_path ),
+                    _ => rel_lib_path
+                };
+
+        Self::parse_file( lib_name, &lib_path )
     }
 
     pub fn parse_file(
