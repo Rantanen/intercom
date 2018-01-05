@@ -3,7 +3,7 @@
 ]
 library {{lib_name}}
 {
-    importlib("stdole2.tlb")
+    importlib("stdole2.tlb");
 
 {{#each interfaces}}
     interface {{name}};
@@ -11,18 +11,34 @@ library {{lib_name}}
 
 {{#each interfaces}}
     [
+        object,
+        uuid( {{iid}} ),
+        nonextensible,
+        pointer_default(unique)
     ]
     interface {{name}}{{#if base}} : {{base}}{{/if}}
     {
-    {{#each methods}}
+
+    {{~#each methods}}
         [id({{idx}})]
         {{ret_type}} {{name}}(
-        {{each args}}
+        {{~#each args~}}
             [{{attributes}}] {{arg_type}} {{name}}{{#unless @last}}, {{/unless}}
-        {{/each}}
+        {{~/each~}}
         );
-
     {{/each}}
+    }
+{{/each}}
+
+{{#each coclasses}}
+    [
+        uuid( {{clsid}} )
+    ]
+    coclass {{name}}
+    {
+    {{#each interfaces}}
+        interface {{this}};
+    {{~/each}}
     }
 {{/each}}
 }

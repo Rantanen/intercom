@@ -1,9 +1,11 @@
 use std::io::Write;
 use std::path::Path;
+
 use intercom_common::utils;
 use intercom_common::model;
 use intercom_common::methodinfo;
 use intercom_common::foreign_ty::*;
+
 use handlebars::Handlebars;
 
 #[derive(PartialEq, Serialize, Debug)]
@@ -44,8 +46,95 @@ struct IdlCoClass {
     pub interfaces : Vec<String>,
 }
 
+impl IdlModel {
+
+    /// Converts the parse result into an IDL that gets written to stdout.
+    fn from_crate(
+        c : &model::ComCrate
+    ) -> IdlModel {
+        let foreign = CTyHandler;
+
+        // Define all interfaces.
+        let itfs = c.interfaces().iter().map(|(_, itf)| {
+
+            // Get the method definitions for the current interface.
+            let methods = itf.methods().iter().enumerate().map(|(i,m)| {
+
+                // Construct the argument list.
+                let args = m.raw_com_args().iter().map(|a| {
+
+                    // Argument direction affects both the argument attribute and
+                    // whether the argument is passed by pointer or value.
+                    let ( attrs, out_ptr ) = match a.dir {
+                        methodinfo::Direction::In => ( "in", "" ),
+                        methodinfo::Direction::Out => ( "out", "*" ),
+                        methodinfo::Direction::Retval => ( "out, retval", "*" ),
+                    };
+
+                    IdlArg {
+                        name : a.arg.name.to_string(),
+                        arg_type : format!( "{}{}",
+                                 foreign.get_ty( c, &a.arg.ty ).unwrap(),
+                                 out_ptr ),
+                        attributes : attrs.to_owned(),
+                    }
+
+                } ).collect();
+
+                IdlMethod {
+                    name: utils::pascal_case( m.name.as_ref() ),
+                    idx: i,
+                    ret_type: foreign.get_ty( c, &m.returnhandler.com_ty() ).unwrap(),
+                    args: args
+                }
+
+            } ).collect();
+
+            // Now that we have methods sorted out, we can construct the final
+            // interface definition.
+            IdlInterface {
+                name: foreign.get_name( c, itf.name() ),
+                base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, i ) ),
+                iid: format!( "{:-X}", itf.iid() ),
+                methods: methods,
+            }
+
+        } ).collect();
+
+        // Create coclass definitions.
+        //
+        // Here r.class_names contains the class names that were defined in the
+        // [com_library] attribute. This is our source for the classes to include
+        // in the IDL. r.classes has the actual class details, but might include
+        // classes that are not exposed by the library.
+        let classes = c.lib().as_ref().unwrap().coclasses().iter().map(|class_name| {
+
+            // Get the class details by matching the name.
+            let coclass = &c.structs()[ class_name.as_ref() ];
+
+            // Get the interfaces the class implements.
+            let interfaces = coclass.interfaces().iter().map(|itf_name| {
+                foreign.get_name( c, itf_name )
+            } ).collect();
+
+            IdlCoClass {
+                name : coclass.name().to_string(),
+                clsid: format!( "{:-X}", coclass.clsid().as_ref().unwrap() ),
+                interfaces: interfaces
+            }
+        } ).collect();
+
+        IdlModel {
+            lib_id : format!( "{:-X}", c.lib().as_ref().unwrap().libid() ),
+            lib_name : utils::pascal_case( c.lib().as_ref().unwrap().name() ),
+            interfaces : itfs,
+            coclasses : classes,
+        }
+    }
+}
+
 #[allow(dead_code)]
-pub fn create_idl( path : &Path, out : &mut Write ) -> Result<(), ()> {
+pub fn write( path : &Path, out : &mut Write ) -> Result<(), ()> {
 
     // Parse the sources and convert the result into an IDL.
     let krate = if path.is_file() {
@@ -54,96 +143,12 @@ pub fn create_idl( path : &Path, out : &mut Write ) -> Result<(), ()> {
             model::ComCrate::parse_cargo_toml( &path.join( "Cargo.toml" ) )
         }.unwrap();
 
-    let model = result_to_idl( &krate );
+    let model = IdlModel::from_crate( &krate );
     let mut reg = Handlebars::new();
     reg.register_template_string( "idl", include_str!( "idl.hbs" ) ).unwrap();
     write!( out, "{}", reg.render( "idl", &model ).unwrap() ).unwrap();
 
     Ok(())
-}
-
-/// Converts the parse result into an IDL that gets written to stdout.
-fn result_to_idl(
-    c : &model::ComCrate
-) -> IdlModel {
-    let foreign = CTyHandler;
-
-    // Define all interfaces.
-    let itfs = c.interfaces().iter().map(|(_, itf)| {
-
-        // Get the method definitions for the current interface.
-        let methods = itf.methods().iter().enumerate().map(|(i,m)| {
-
-            // Construct the argument list.
-            let args = m.raw_com_args().iter().map(|a| {
-
-                // Argument direction affects both the argument attribute and
-                // whether the argument is passed by pointer or value.
-                let ( attrs, out_ptr ) = match a.dir {
-                    methodinfo::Direction::In => ( "in", "" ),
-                    methodinfo::Direction::Out => ( "out", "*" ),
-                    methodinfo::Direction::Retval => ( "out, retval", "*" ),
-                };
-
-                IdlArg {
-                    name : a.arg.name.to_string(),
-                    arg_type : format!( "{}{}",
-                             foreign.get_ty( c, &a.arg.ty ).unwrap(),
-                             out_ptr ),
-                    attributes : attrs.to_owned(),
-                }
-
-            } ).collect();
-
-            IdlMethod {
-                name: utils::pascal_case( m.name.as_ref() ),
-                idx: i,
-                ret_type: foreign.get_ty( c, &m.returnhandler.com_ty() ).unwrap(),
-                args: args
-            }
-
-        } ).collect();
-
-        // Now that we have methods sorted out, we can construct the final
-        // interface definition.
-        IdlInterface {
-            name: foreign.get_name( c, itf.name() ),
-            base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, i ) ),
-            iid: format!( "{:-X}", itf.iid() ),
-            methods: methods,
-        }
-
-    } ).collect();
-
-    // Create coclass definitions.
-    //
-    // Here r.class_names contains the class names that were defined in the
-    // [com_library] attribute. This is our source for the classes to include
-    // in the IDL. r.classes has the actual class details, but might include
-    // classes that are not exposed by the library.
-    let classes = c.lib().as_ref().unwrap().coclasses().iter().map(|class_name| {
-
-        // Get the class details by matching the name.
-        let coclass = &c.structs()[ class_name.as_ref() ];
-
-        // Get the interfaces the class implements.
-        let interfaces = coclass.interfaces().iter().map(|itf_name| {
-            foreign.get_name( c, itf_name )
-        } ).collect();
-
-        IdlCoClass {
-            name : coclass.name().to_string(),
-            clsid: format!( "{:-X}", coclass.clsid().as_ref().unwrap() ),
-            interfaces: interfaces
-        }
-    } ).collect();
-
-    IdlModel {
-        lib_id : format!( "{:-X}", c.lib().as_ref().unwrap().libid() ),
-        lib_name : utils::pascal_case( c.lib().as_ref().unwrap().name() ),
-        interfaces : itfs,
-        coclasses : classes,
-    }
 }
 
 #[cfg(test)]
@@ -238,7 +243,7 @@ mod test {
             ],
         };
 
-        let actual_idl = result_to_idl( &krate );
+        let actual_idl = IdlModel::from_crate( &krate );
 
         assert_eq!( expected_idl, actual_idl );
     }
