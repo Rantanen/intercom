@@ -3,8 +3,8 @@ members = [
     "intercom-common",
     "intercom-attributes",
     "intercom",
+    "intercom-cli",
     "intercom-utils",
     "intercom-build",
-
 ]
 exclude = [ "test" ]

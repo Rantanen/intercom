@@ -1,0 +1,13 @@
+[package]
+name = "intercom-cli"
+version = "0.1.0"
+authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
+
+[dependencies]
+clap = { version = "2.29" }
+
+[dependencies.intercom]
+version = "0.2"
+path = "../intercom"
+default-features = false
+features = [ "generators" ]
