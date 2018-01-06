@@ -75,6 +75,8 @@ pub mod generators;
 extern crate intercom_attributes;
 pub use intercom_attributes::*;
 
+#[cfg_attr(feature = "cargo-clippy", allow(useless_attribute))]
+#[allow(unused_imports)]
 #[macro_use] extern crate failure;
 
 mod classfactory; pub use classfactory::*;
