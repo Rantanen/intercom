@@ -2,6 +2,8 @@
 use std::io::Write;
 use std::path::Path;
 
+use super::GeneratorError;
+
 use intercom_common::model;
 use intercom_common::utils;
 
@@ -26,44 +28,52 @@ impl ManifestModel {
     /// Prints the manifest based on the parse result.
     fn from_crate(
         c : &model::ComCrate
-    ) -> ManifestModel
+    ) -> Result<ManifestModel, GeneratorError>
     {
-        let lib = c.lib().as_ref().unwrap();
+        let lib = c.lib().as_ref().ok_or( GeneratorError::MissingLibrary )?;
 
         // Gather all the com classes. These need to be declared in the manifest.
         let classes = lib.coclasses().iter().map(|class_name| {
 
             let coclass = &c.structs()[ class_name.as_ref() ];
-            ManifestCoClass {
+            let clsid = coclass.clsid().as_ref()
+                    .ok_or_else( || GeneratorError::MissingClsid(
+                                        coclass.name().to_string() ) )?;
+            Ok( ManifestCoClass {
                 name : coclass.name().to_string(),
-                clsid : format!( "{}", coclass.clsid().as_ref().unwrap() ),
-            }
-        } ).collect();
+                clsid : format!( "{}", clsid ),
+            } )
+        } ).collect::<Result<Vec<_>, GeneratorError>>()?;
 
-        ManifestModel {
+        Ok( ManifestModel {
             lib_name : utils::pascal_case( lib.name() ),
             file_name : lib.name().to_owned(),
             lib_id : format!( "{}", lib.libid() ),
             classes : classes,
-        }
+        } )
     }
 }
 
 /// Run the manifest sub-command.
 #[allow(dead_code)]
-pub fn write( path : &Path, out : &mut Write ) -> Result<(), ()> {
+pub fn write( path : &Path, out : &mut Write ) -> Result<(), GeneratorError> {
 
     // Parse the source files and emit the manifest.
     let krate = if path.is_file() {
             model::ComCrate::parse_cargo_toml( path )
         } else {
             model::ComCrate::parse_cargo_toml( &path.join( "Cargo.toml" ) )
-        }.unwrap();
+        }.map_err( |_| GeneratorError::CrateParseError )?;
 
-    let model = ManifestModel::from_crate( &krate );
+    let model = ManifestModel::from_crate( &krate )?;
     let mut reg = Handlebars::new();
-    reg.register_template_string( "manifest", include_str!( "manifest.hbs" ) ).unwrap();
-    write!( out, "{}", reg.render( "manifest", &model ).unwrap() ).unwrap();
+    reg.register_template_string( "manifest", include_str!( "manifest.hbs" ) )
+            .expect( "Error in the built-in Manifest template." );
+
+    let rendered = reg
+            .render( "manifest", &model )
+            .expect( "Rendering a valid ComCrate to Manifest failed" );
+    write!( out, "{}", rendered )?;
 
     Ok(())
 }
@@ -112,7 +122,7 @@ mod test {
             ],
         };
 
-        let actual_manifest = ManifestModel::from_crate( &krate );
+        let actual_manifest = ManifestModel::from_crate( &krate ).unwrap();
 
         assert_eq!( expected_manifest, actual_manifest );
     }

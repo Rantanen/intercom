@@ -107,6 +107,8 @@ other important feature is `specialization`, which we need for handling
 - `fundamental` - needed for allowing user crates to implement traits on
   `ComItf`, `ComRc`, etc. through attribute expansion.
   Tracking issue: [#29635](https://github.com/rust-lang/rust/issues/29635)
+- `non_exhaustive` - There are some types that we may want to add items to.
+  Tracking issue: [#44109](https://github.com/rust-lang/rust/issues/44109)
 
 Unfortunately the `fundamental` isn't even meant to be stabilized as is. :<
 

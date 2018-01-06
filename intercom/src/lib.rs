@@ -49,7 +49,7 @@
 //! ``` 
 
 #![crate_type="dylib"]
-#![feature(proc_macro, try_from, fundamental, specialization)]
+#![feature(proc_macro, try_from, fundamental, specialization, non_exhaustive)]
 
 #[cfg(feature = "generators")]
 extern crate intercom_common;
@@ -61,15 +61,6 @@ extern crate serde;
 extern crate handlebars;
 #[cfg(feature = "generators")]
 pub mod generators;
-
-mod classfactory; pub use classfactory::*;
-mod combox; pub use combox::*;
-mod comrc; pub use comrc::*;
-mod comitf; pub use comitf::*;
-mod bstr; pub use bstr::*;
-mod guid; pub use guid::GUID;
-mod error; pub use error::{return_hresult, get_last_error, ComError, ErrorInfo};
-pub mod runtime;
 
 // The crate doesn't really need the macros. However Rust will complain that
 // the import does nothing if we don't define #[macro_use]. Once we define
@@ -84,6 +75,17 @@ pub mod runtime;
 #[allow(unused_imports)]
 extern crate intercom_attributes;
 pub use intercom_attributes::*;
+
+#[macro_use] extern crate failure;
+
+mod classfactory; pub use classfactory::*;
+mod combox; pub use combox::*;
+mod comrc; pub use comrc::*;
+mod comitf; pub use comitf::*;
+mod bstr; pub use bstr::*;
+mod guid; pub use guid::GUID;
+mod error; pub use error::{return_hresult, get_last_error, ComError, ErrorInfo};
+pub mod runtime;
 
 // intercom_attributes use "intercom::" to qualify things in this crate.
 // Declare such module here and import everything we have in it to make those

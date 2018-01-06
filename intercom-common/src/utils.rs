@@ -1,6 +1,6 @@
 
 use syn::*;
-use quote::Tokens;
+use quote::{ToTokens, Tokens};
 
 use error::MacroError;
 use super::*;
@@ -299,6 +299,13 @@ pub fn generate_guid(
     }
 }
 
+pub fn ty_to_string( ty : &syn::Ty ) -> String
+{
+    let mut tokens = Tokens::new();
+    ty.to_tokens( &mut tokens );
+    tokens.to_string().replace( " ", "" ).replace( ",", ", " )
+}
+
 pub fn is_unit(
     tk : &Ty
 ) -> bool
@@ -376,3 +383,20 @@ pub fn pascal_case( input : &str ) -> String {
     output
 }
 
+#[cfg(test)]
+mod test
+{
+    use super::*;
+
+    /// Tests the `ty_to_string` by converting parameter to Ty and back to
+    /// String to ensure they equal.
+    fn test_ty( ty_str : &str ) {
+        let ty = parse_type( ty_str ).unwrap();
+        let as_string = ty_to_string( &ty );
+        assert_eq!( ty_str, as_string );
+    }
+
+    #[test] fn path_to_test() { test_ty( "::path::Foo" ) }
+    #[test] fn generics_to_test() { test_ty( "Result<Foo, Bar>" ) }
+    #[test] fn unit_to_test() { test_ty( "()" ) }
+}
