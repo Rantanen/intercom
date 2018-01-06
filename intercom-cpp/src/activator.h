@@ -23,11 +23,11 @@ public:
 public:
 
     Activator(
+        const char* name,
         intercom::REFCLSID classId  //!< Identifies the class constructed with this activator.
     ) :
         m_classId( classId ),
-        m_library( "libtest_lib.so",
-            DlWrapper::rtld::lazy ),
+        m_library( name, DlWrapper::rtld::lazy ),
         m_getClassObjectFunc( nullptr ),
         m_classFactory( nullptr )
     {
