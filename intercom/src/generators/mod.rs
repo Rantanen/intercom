@@ -1,10 +1,12 @@
 
+use intercom_common::model;
+
 #[derive(Fail, Debug)]
 #[non_exhaustive]
 pub enum GeneratorError {
 
-    #[fail( display = "Could not parse crate")]
-    CrateParseError,
+    #[fail( display = "{}", _0 )]
+    CrateParseError( #[cause] model::ParseError ),
 
     #[fail( display = "Missing [com_library] attribute" )]
     MissingLibrary,

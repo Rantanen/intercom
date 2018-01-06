@@ -1,9 +1,13 @@
+#![feature(non_exhaustive)]
+
 #[macro_use]
 extern crate quote;
 extern crate syn;
 extern crate sha1;
 extern crate ordermap;
 extern crate toml;
+#[macro_use] extern crate failure;
+
 
 pub mod guid;
 pub mod error;

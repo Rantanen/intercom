@@ -157,7 +157,7 @@ pub fn write( path : &Path, out : &mut Write ) -> Result<(), GeneratorError> {
             model::ComCrate::parse_cargo_toml( path )
         } else {
             model::ComCrate::parse_cargo_toml( &path.join( "Cargo.toml" ) )
-        }.map_err( |_| GeneratorError::CrateParseError )?;
+        }.map_err( |e| GeneratorError::CrateParseError( e ) )?;
 
     let model = IdlModel::from_crate( &krate )?;
     let mut reg = Handlebars::new();

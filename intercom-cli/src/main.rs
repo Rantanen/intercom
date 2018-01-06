@@ -36,7 +36,7 @@ fn main() {
         .get_matches();
 
     // Match the sub-command and invoke the correct command handler.
-    if let Err(_) = match matches.subcommand() {
+    if let Err( e ) = match matches.subcommand() {
         ( "idl", Some( args ) ) => {
             let path = Path::new( args.value_of( "path" ).unwrap() );
             intercom::generators::idl::write( path, &mut io::stdout() )
@@ -48,6 +48,6 @@ fn main() {
         _ => unreachable!(),
     } {
         // Error occurred in the sub-command. Report it before stopping.
-        eprintln!( "Error" );
+        eprintln!( "{}", e );
     }
 }

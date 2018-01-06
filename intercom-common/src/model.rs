@@ -18,14 +18,29 @@ use ::ordermap::OrderMap;
 use ::std::iter::FromIterator;
 use toml;
 
-#[derive(Debug)]
-pub struct ParseError( pub String );
-type ParseResult<T> = Result< T, ParseError >;
+#[derive(Fail, Debug)]
+#[non_exhaustive]
+pub enum ParseError {
+    #[fail( display = "Parsing [com_library] failed: {}", _0 )]
+    ComLibrary( String ),
 
-impl ParseError
-{
-    pub fn new( s: &str ) -> ParseError { ParseError( s.to_owned() ) }
+    #[fail( display = "Parsing [com_class] item {} failed: {}", _0, _1 )]
+    ComStruct( String, String ),
+
+    #[fail( display = "Parsing [com_interface] item {} failed: {}", _0, _1 )]
+    ComInterface( String, String ),
+
+    #[fail( display = "Parsing [com_impl] {} for {} failed: {}", _0, _1, _2 )]
+    ComImpl( String, String, String ),
+
+    #[fail( display = "Processing crate failed: {}", _0 )]
+    ComCrate( String ),
+
+    #[fail( display = "Reading TOML failed: {}", _0 )]
+    CargoToml( String ),
 }
+
+type ParseResult<T> = Result<T, ParseError>;
 
 /// COM library details derived from the `com_library` attribute.
 pub struct ComLibrary {
@@ -44,7 +59,7 @@ impl ComLibrary
     {
         // Parse the attribute parameters into an iterator.
         let attr = ::utils::parse_attr_tokens( "com_library", attr_params )
-            .map_err( |_| ParseError::new( "Could not parse attribute" ) )?;
+            .map_err( |_| ParseError::ComLibrary( "Syntax error".into() ) )?;
 
         Self::from_ast( crate_name, &attr )
     }
@@ -60,16 +75,17 @@ impl ComLibrary
         // The first parameter is the LIBID of the library.
         let libid = ::utils::parameter_to_guid(
                 &iter.next()
-                    .ok_or_else( || ParseError::new( "No LIBID specified" ) )?,
+                    .ok_or_else( || ParseError::ComLibrary(
+                                        "LIBID required".into() ) )?,
                 crate_name, "", "LIBID" )
-            .map_err( |_| ParseError::new( "Could not parse LIBID" ) )?
-            .ok_or_else( || ParseError::new( "COM library must have a non-zero LIBID" ) )?;
+            .map_err( |_| ParseError::ComLibrary( "Bad LIBID format".into() ) )?
+            .ok_or_else( || ParseError::ComLibrary( "LIBID required".into() ) )?;
 
         // The remaining parameters are coclasses exposed by the library.
         let coclasses : Vec<Ident> = iter
                 .map( |coclass| coclass.get_ident().map( |i| i.clone() ) )
                 .collect::<Result<_,_>>()
-                .map_err( |_| ParseError::new( "Could not parse coclass" ) )?;
+                .map_err( |_| ParseError::ComLibrary( "Bad class name".into() ) )?;
 
         Ok( ComLibrary {
             name: crate_name.to_owned(),
@@ -107,10 +123,14 @@ impl ComStruct
     ) -> ParseResult< ComStruct >
     {
         // Parse the inputs.
-        let attr = ::utils::parse_attr_tokens( "com_class", attr_params )
-            .map_err( |_| ParseError::new( "Could not parse [com_class] attribute" ) )?;
         let item = ::syn::parse_item( item )
-            .map_err( |_| ParseError::new( "Could not parse [com_class] item" ) )?;
+            .map_err( |_| ParseError::ComStruct(
+                    "<Unknown>".into(),
+                    "Item syntax error".into() ) )?;
+        let attr = ::utils::parse_attr_tokens( "com_class", attr_params )
+            .map_err( |_| ParseError::ComStruct(
+                    item.ident.to_string(),
+                    "Attribute syntax error".into() ) )?;
 
         Self::from_ast( crate_name, &attr, &item )
     }
@@ -127,15 +147,21 @@ impl ComStruct
         let mut iter = ::utils::iter_parameters( attr );
         let clsid = ::utils::parameter_to_guid(
                 &iter.next()
-                    .ok_or_else( || ParseError::new( "No CLSID specified" ) )?,
+                    .ok_or_else( || ParseError::ComStruct(
+                            item.ident.to_string(),
+                            "No CLSID specified".into() ) )?,
                 crate_name, item.ident.as_ref(), "CLSID" )
-            .map_err( |_| ParseError::new( "Could not parse CLSID" ) )?;
+            .map_err( |_| ParseError::ComStruct(
+                    item.ident.to_string(),
+                    "Bad CLSID format".into() ) )?;
 
         // Remaining parameters are coclasses.
         let interfaces : Vec<Ident> = iter
                 .map( |itf| itf.get_ident().map( |i| i.clone() ) )
                 .collect::<Result<_,_>>()
-                .map_err( |_| ParseError::new( "Could not parse interface" ) )?;
+                .map_err( |_| ParseError::ComStruct(
+                        item.ident.to_string(),
+                        "Bad interface name".into() ) )?;
 
         Ok( ComStruct {
             name: item.ident.clone(),
@@ -178,10 +204,14 @@ impl ComInterface
     ) -> ParseResult<ComInterface>
     {
         // Parse the input code.
-        let attr = ::utils::parse_attr_tokens( "com_interface", attr_params )
-            .map_err( |_| ParseError::new( "Could not parse [com_interface] attribute" ) )?;
         let item = ::syn::parse_item( item )
-            .map_err( |_| ParseError::new( "Could not parse [com_interface] item" ) )?;
+            .map_err( |_| ParseError::ComInterface(
+                    "<Unknown>".into(),
+                    "Item syntax error".into() ) )?;
+        let attr = ::utils::parse_attr_tokens( "com_interface", attr_params )
+            .map_err( |_| ParseError::ComInterface(
+                    item.ident.to_string(),
+                    "Attribute syntax error".into() ) )?;
 
         Self::from_ast( crate_name, &attr, &item )
     }
@@ -197,18 +227,24 @@ impl ComInterface
         // impls and traits this handles both of those.
         let ( itf_ident, fns, itf_type ) =
                 ::utils::get_ident_and_fns( item )
-                    .ok_or_else( || ParseError::new(
-                            "[com_interface(IID:&str)] must be applied to trait \
-                            or struct impl" ) )?;
+                    .ok_or_else( || ParseError::ComInterface(
+                            item.ident.to_string(),
+                            "Unsupported associated item".into() ) )?;
 
         // The first attribute parameter is the IID. Parse that.
         let mut iter = ::utils::iter_parameters( attr );
         let iid = ::utils::parameter_to_guid(
                     &iter.next()
-                        .ok_or_else( || ParseError::new( "No IID specified" ) )?,
+                        .ok_or_else( || ParseError::ComInterface(
+                                item.ident.to_string(),
+                                "IID required".into() ) )?,
                     crate_name, itf_ident.as_ref(), "IID" )
-                .map_err( |_| ParseError::new( "Could not parse IID" ) )?
-                .ok_or_else( || ParseError::new( "COM interfaces must have non-zero IID" ) )?;
+                .map_err( |_| ParseError::ComInterface(
+                        item.ident.to_string(),
+                        "Bad IID format".into() ) )?
+                .ok_or_else( || ParseError::ComInterface(
+                        item.ident.to_string(),
+                        "IID required".into() ) )?;
 
         // The second argument is the optional base class. If there's no base
         // class defined, use IUnknown as the default. The value of NO_BASE will
@@ -218,7 +254,9 @@ impl ComInterface
         let base = iter.next()
                 .map( |base| base.get_ident()
                     .map( |i| i.clone() )
-                    .map_err( |_| ParseError::new( "Invalid base interface" ) ) )
+                    .map_err( |_| ParseError::ComInterface(
+                            item.ident.to_string(),
+                            "Invalid base interface".into() ) ) )
                 .map_or( Ok(None), |o| o.map(Some) )?
                 .unwrap_or_else( || "IUnknown".into() );
         let base = if base == "NO_BASE" { None } else { Some( base ) };
@@ -243,7 +281,7 @@ impl ComInterface
         //       something smarter.
         let methods = fns.into_iter()
             .map( |( ident, sig )|
-                ComMethodInfo::new( ident, &sig.decl ).map_err( |_| ident ) )
+                ComMethodInfo::new( ident, &sig.decl ) )
             .filter_map( |r| r.ok() )
             .collect::<Vec<_>>();
 
@@ -295,7 +333,10 @@ impl ComImpl
     {
         // Get the item details from the associated item.
         let item = ::syn::parse_item( item )
-                .map_err( |_| ParseError::new( "Could not parse [com_impl]" ) )?;
+                .map_err( |_| ParseError::ComImpl(
+                        "<Unknown>".into(),
+                        "<Unknown>".into(),
+                        "Could not parse [com_impl]".into() ) )?;
 
         Self::from_ast( &item )
     }
@@ -307,8 +348,10 @@ impl ComImpl
     {
         let ( itf_ident_opt, struct_ident, fns ) =
                 ::utils::get_impl_data( item )
-                    .ok_or_else( || ParseError::new(
-                        "[com_impl] must be applied to an impl" ) )?;
+                    .ok_or_else( || ParseError::ComImpl(
+                            item.ident.to_string(),
+                            "<Unknown>".into(),
+                            "Unsupported associated item".into() ) )?;
 
         // Turn the impl methods into MethodInfo.
         //
@@ -362,7 +405,8 @@ impl ComCrateBuilder {
     pub fn build( self ) -> ParseResult<ComCrate>
     {
         if self.libs.len() > 1 {
-            return Err( ParseError::new( "Multiple [com_library] attributes" ) );
+            return Err( ParseError::ComLibrary(
+                    "Multiple [com_library] attributes".into() ) );
         }
 
         Ok( ComCrate {
@@ -387,7 +431,8 @@ impl ComCrate
 
         for src in sources {
             let krate = ::syn::parse_crate( src )
-                .map_err( |_| ParseError::new( "Failed to parse source" ) )?;
+                .map_err( |_| ParseError::ComCrate(
+                        "Failed to parse source".into() ) )?;
 
             Self::collect_items(
                 crate_name,
@@ -403,16 +448,20 @@ impl ComCrate
     ) -> ParseResult<ComCrate>
     {
         let mut f = fs::File::open( toml_path )
-                .map_err( |_| ParseError::new( "Could not open Cargo toml" ) )?;
+                .map_err( |_| ParseError::CargoToml(
+                        "Could not open Cargo toml".into() ) )?;
         let mut buf = String::new();
         f.read_to_string( &mut buf )
-                .map_err( |_| ParseError::new( "Could not read Cargo toml" ) )?;
+                .map_err( |_| ParseError::CargoToml(
+                        "Could not read Cargo toml".into() ) )?;
 
         let toml = buf.parse::<toml::Value>()
-                .map_err( |_| ParseError::new( "Could not parse Cargo toml" ) )?;
+                .map_err( |_| ParseError::CargoToml(
+                        "Could not parse Cargo toml".into() ) )?;
         let root = match toml {
             toml::Value::Table( root ) => root,
-            _ => return Err( ParseError::new( "Invalid TOML root element" ) ),
+            _ => return Err( ParseError::CargoToml(
+                        "Invalid TOML root element".into() ) ),
         };
 
         let lib_name = match root.get( "package" ) {
@@ -420,11 +469,11 @@ impl ComCrate
                         => match package.get( "name" ) {
                             Some( &toml::Value::String( ref name ) )
                                 => name,
-                            _ => return Err( ParseError::new(
-                                    "No 'name' parameter under [package]" ) ),
+                            _ => return Err( ParseError::CargoToml(
+                                    "No 'name' parameter under [package]".into() ) ),
                         },
-                    _ => return Err( ParseError::new( 
-                            "Could not find [package] in Cargo.toml" ) ),
+                    _ => return Err( ParseError::CargoToml( 
+                            "Could not find [package] in Cargo.toml".into() ) ),
                 };
 
         let rel_lib_path = PathBuf::from( &match root.get( "lib" ) {
@@ -461,17 +510,17 @@ impl ComCrate
     ) -> ParseResult<()>
     {
         let mut f = fs::File::open( path )
-                .map_err( |_| ParseError::new( &format!(
-                        "Could not open file {}", path.to_string_lossy() ) ) )?;
+                .map_err( |_| ParseError::ComCrate(
+                        format!( "Could not open file {}", path.to_string_lossy() ) ) )?;
 
         let mut buf = String::new();
         f.read_to_string( &mut buf )
-                .map_err( |_| ParseError::new( &format!(
-                        "Could not read file {}", path.to_string_lossy() ) ) )?;
+                .map_err( |_| ParseError::ComCrate(
+                        format!( "Could not read file {}", path.to_string_lossy() ) ) )?;
 
         let krate = ::syn::parse_crate( &buf )
-                .map_err( |_| ParseError::new( &format!(
-                        "Failed to parse source {}", path.to_string_lossy() ) ) )?;
+                .map_err( |_| ParseError::ComCrate(
+                        format!( "Failed to parse source {}", path.to_string_lossy() ) ) )?;
 
         Self::process_file_items( crate_name, path, &krate.items, b )
     }
@@ -506,14 +555,14 @@ impl ComCrate
                         .filter( |p| p.exists() );
 
                     let mod_path = mod_paths.next()
-                        .ok_or_else( || ParseError::new( &format!(
-                                "Could not find mod {}", item.ident ) ) )?;
+                        .ok_or_else( || ParseError::ComCrate(
+                                format!( "Could not find mod {}", item.ident ) ) )?;
 
                     let more = mod_paths.next();
                     if more.is_some() {
-                        return Err( ParseError::new( &format!( 
-                            "Ambiguous mod, both {0}.rs and {0}/mod.rs present",
-                            item.ident ) ) );
+                        return Err( ParseError::ComCrate(
+                                format!( "Ambiguous mod, both {0}.rs and \
+                                          {0}/mod.rs present", item.ident ) ) );
                     }
 
                     Self::parse_file_internal( crate_name, &mod_path, b )?;

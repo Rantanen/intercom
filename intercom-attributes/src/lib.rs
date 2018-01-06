@@ -12,7 +12,6 @@ extern crate intercom_common;
 use intercom_common::idents;
 use intercom_common::utils;
 use intercom_common::ast_converters::*;
-use intercom_common::error::MacroError;
 use intercom_common::methodinfo::{ComMethodInfo, Direction};
 use intercom_common::model;
 
@@ -53,7 +52,7 @@ pub fn com_interface(
 {
     match expand_com_interface( &attr, tokens ) {
         Ok(t) => t,
-        Err(e) => error(e, &attr),
+        Err(e) => panic!( "{}", e ),
     }
 }
 
@@ -66,7 +65,7 @@ pub fn com_impl(
 {
     match expand_com_impl( &attr, tokens ) {
         Ok(t) => t,
-        Err(e) => error(e, &attr),
+        Err(e) => panic!( "{}", e ),
     }
 }
 
@@ -79,7 +78,7 @@ pub fn com_class(
 {
     match expand_com_class( &attr, tokens ) {
         Ok(t) => t,
-        Err(e) => error(e, &attr),
+        Err(e) => panic!( "{}", e ),
     }
 }
 
@@ -92,7 +91,7 @@ pub fn com_library(
 {
     match expand_com_library( &attr, tokens ) {
         Ok(t) => t,
-        Err(e) => error(e, &attr),
+        Err(e) => panic!( "{}", e ),
     }
 }
 
@@ -107,7 +106,7 @@ pub fn com_library(
 fn expand_com_interface(
     attr_tokens: &TokenStream,
     item_tokens: TokenStream,
-) -> Result<TokenStream, MacroError>
+) -> Result<TokenStream, model::ParseError>
 {
     // Parse the attribute.
     let mut output = vec![];
@@ -289,7 +288,7 @@ fn expand_com_interface(
         ) );
     }
 
-    Ok( tokens_to_tokenstream( item_tokens, output )? )
+    Ok( tokens_to_tokenstream( item_tokens, output ) )
 }
 
 /// Expands the `com_impl` attribute.
@@ -302,7 +301,7 @@ fn expand_com_interface(
 fn expand_com_impl(
     _attr_tokens: &TokenStream,
     item_tokens: TokenStream,
-) -> Result<TokenStream, MacroError>
+) -> Result<TokenStream, model::ParseError>
 {
     // Parse the attribute.
     let mut output = vec![] ;
@@ -475,7 +474,7 @@ fn expand_com_impl(
                     = #vtable_struct_ident { #( #vtable_fields )* };
         ) );
 
-    Ok( tokens_to_tokenstream( item_tokens, output )? )
+    Ok( tokens_to_tokenstream( item_tokens, output ) )
 }
 
 /// Expands the `com_class` attribute.
@@ -488,7 +487,7 @@ fn expand_com_impl(
 fn expand_com_class(
     attr_tokens: &TokenStream,
     item_tokens: TokenStream,
-) -> Result<TokenStream, MacroError>
+) -> Result<TokenStream, model::ParseError>
 {
     // Parse the attribute.
     let mut output = vec![];
@@ -750,7 +749,7 @@ fn expand_com_class(
         output.push( clsid_const );
     }
 
-    Ok( tokens_to_tokenstream( item_tokens, output )? )
+    Ok( tokens_to_tokenstream( item_tokens, output ) )
 }
 
 /// Expands the `com_library` attribute.
@@ -761,7 +760,7 @@ fn expand_com_class(
 fn expand_com_library(
     attr_tokens: &TokenStream,
     item_tokens: TokenStream,
-) -> Result<TokenStream, MacroError>
+) -> Result<TokenStream, model::ParseError>
 {
     let mut output = vec![];
     let lib = model::ComLibrary::parse( &lib_name(), &attr_tokens.to_string() )?;
@@ -823,36 +822,23 @@ fn expand_com_library(
     );
     output.push( dll_get_class_object );
 
-    Ok( tokens_to_tokenstream( item_tokens, output )? )
-}
-
-/// Reports errors during attribute expansion.
-///
-/// The proc macros don't have any sane way to report errors. The "recommended"
-/// way to do this is by panicing during compilation.
-fn error<E,T>(
-    e: E,
-    _attr: &T
-) -> !
-    where MacroError: From<E>
-{
-    panic!( "{}", MacroError::from( e ).msg )
+    Ok( tokens_to_tokenstream( item_tokens, output ) )
 }
 
 fn tokens_to_tokenstream<T: IntoIterator<Item=quote::Tokens>>(
     original : TokenStream,
     tokens : T,
-) -> Result<TokenStream, MacroError>
+) -> TokenStream
 {
-    Ok( TokenStream::from_iter(
+    TokenStream::from_iter(
         std::iter::once( original )
             .chain( std::iter::once(
                 TokenStream::from_str(
                         &tokens.into_iter()
                             .map( |t| t.parse::<String>().unwrap() )
                             .fold( String::new(), |prev, next| prev + &next ) )
-                    .map_err( |_| "Failed to parse generated code." )?
-            ) ) ) )
+                    .expect( "Attribute expansion resulted in invalid syntax" )
+            ) ) )
 }
 
 // https://msdn.microsoft.com/en-us/library/984x0h58.aspx

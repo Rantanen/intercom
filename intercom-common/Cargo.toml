@@ -12,3 +12,4 @@ quote = { version = "0.3" }
 sha1 = "0.3.0"
 ordermap = "0.3"
 toml = "0.4.5"
+failure = "0.1"
