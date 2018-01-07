@@ -1,4 +1,7 @@
 
+//! Enables the generation of manifest file for registration free COM on
+//! Windows.
+
 use std::io::Write;
 use std::path::Path;
 

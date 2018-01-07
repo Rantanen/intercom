@@ -1,4 +1,11 @@
 
+//! The class factory is an infrastructure type used by the COM clients to
+//! create instances of the `#[com_class(..)]`es provided by the intercom
+//! library.
+//!
+//! Intercom implements the class factory infrastructure automatically when the
+//! user specifies the `#[com_library(..)]` -attribute.
+
 use super::*;
 
 #[allow(non_camel_case_types)]

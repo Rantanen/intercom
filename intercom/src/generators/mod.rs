@@ -1,6 +1,12 @@
 
+//! Generators for file formats that can be derived from the intercom
+//! libraries.
+//!
+//! **Requires the optional `generators` feature**
+
 use intercom_common::model;
 
+/// A common error type for all the generators.
 #[derive(Fail, Debug)]
 #[non_exhaustive]
 pub enum GeneratorError {

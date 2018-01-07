@@ -73,6 +73,7 @@ pub mod generators;
 #[cfg_attr(feature = "cargo-clippy", allow(useless_attribute))]
 #[allow(unused_imports)]
 extern crate intercom_attributes;
+/// Foo
 pub use intercom_attributes::*;
 
 #[cfg_attr(feature = "cargo-clippy", allow(useless_attribute))]
@@ -133,48 +134,54 @@ impl HRESULT {
 }
 
 macro_rules! make_hr {
-    ( $hr_name: ident, $hr_value: expr ) => {
+    ( $(#[$attr:meta] )* $hr_name: ident = $hr_value: expr ) => {
+        $(#[$attr])*
         #[allow(overflowing_literals)]
         pub const $hr_name : HRESULT = HRESULT { hr: $hr_value as i32 };
     }
 }
 
-/// `HRESULT` indicating the operation completed successfully.
-make_hr!( S_OK, 0 );
+make_hr!(
+    /// `HRESULT` indicating the operation completed successfully.
+    S_OK = 0 );
 
-/// `HRESULT` indicating the operation completed successfully and returned
-/// `false`.
-make_hr!( S_FALSE, 1 );
+make_hr!(
+    /// `HRESULT` indicating the operation completed successfully and returned
+    /// `false`.
+    S_FALSE = 1 );
 
-/// `HRESULT` for unimplemented functionality.
-make_hr!( E_NOTIMPL, 0x8000_4001 );
+make_hr!(
+    /// `HRESULT` for unimplemented functionality.
+    E_NOTIMPL = 0x8000_4001 );
 
-/// `HRESULT` indicating the type does not support the requested interface.
-make_hr!( E_NOINTERFACE, 0x8000_4002 );
+make_hr!(
+    /// `HRESULT` indicating the type does not support the requested interface.
+    E_NOINTERFACE = 0x8000_4002 );
 
-/// `HRESULT` indicating a pointer parameter was invalid.
-make_hr!( E_POINTER, 0x8000_4003 );
+make_hr!(
+    /// `HRESULT` indicating a pointer parameter was invalid.
+    E_POINTER = 0x8000_4003 );
 
-/// `HRESULT` for aborted operation.
-make_hr!( E_ABORT, 0x8000_4004 );
+make_hr!(
+    /// `HRESULT` for aborted operation.
+    E_ABORT = 0x8000_4004 );
 
-/// `HRESULT` for unspecified failure.
-make_hr!( E_FAIL, 0x8000_4005 );
+make_hr!(
+    /// `HRESULT` for unspecified failure.
+    E_FAIL = 0x8000_4005 );
 
-/// `HRESULT` for invalid argument.
-make_hr!( E_INVALIDARG, 0x8007_0057 );
+make_hr!(
+    /// `HRESULT` for invalid argument.
+    E_INVALIDARG = 0x8007_0057 );
 
-make_hr!( E_ACCESSDENIED, 0x8007_0005 );
-
-make_hr!( STG_E_FILENOTFOUND, 0x8003_0002 );
-
-make_hr!( RPC_E_DISCONNECTED, 0x8001_0108 );
-
-make_hr!( RPC_E_CALL_REJECTED, 0x8001_0001 );
-
-make_hr!( RPC_E_CALL_CANCELED, 0x8001_0002 );
-
-make_hr!( RPC_E_TIMEOUT, 0x8001_011F );
+// These might be deprecated. They are a bit too specific for cross-platform
+// support. We'll just need to ensure the winapi HRESULTs are compatible.
+make_hr!( E_ACCESSDENIED = 0x8007_0005 );
+make_hr!( STG_E_FILENOTFOUND = 0x8003_0002 );
+make_hr!( RPC_E_DISCONNECTED = 0x8001_0108 );
+make_hr!( RPC_E_CALL_REJECTED = 0x8001_0001 );
+make_hr!( RPC_E_CALL_CANCELED = 0x8001_0002 );
+make_hr!( RPC_E_TIMEOUT = 0x8001_011F );
 
 
 /// `IClassFactory` interface ID.

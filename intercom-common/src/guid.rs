@@ -23,6 +23,7 @@ impl GUID {
     /// Parses the given string as a GUID.
     ///
     /// Supported formats include:
+    ///
     /// - Braces and hyphens: {00000000-0000-0000-0000-000000000000}
     /// - Hyphens only: 00000000-0000-0000-0000-000000000000
     /// - Raw hexadecimal: 00000000000000000000000000000000
@@ -30,9 +31,10 @@ impl GUID {
     pub fn parse( guid : &str ) -> Result< GUID, String >
     {
         // We support the following formats:
-        // {00000000-0000-0000-0000-000000000000} (38 chars)
-        // 00000000-0000-0000-0000-000000000000 (36 chars)
-        // 00000000000000000000000000000000 (32 chars)
+        //
+        // - {00000000-0000-0000-0000-000000000000} (38 chars)
+        // - 00000000-0000-0000-0000-000000000000 (36 chars)
+        // - 00000000000000000000000000000000 (32 chars)
         //
         // Use the total length to make the assumption on the format.
         enum GuidFormat { Braces, Hyphens, Raw }

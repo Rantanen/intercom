@@ -1,4 +1,7 @@
 
+//! Enables the generation of header and source files for using intercom
+//! libraries from C++ projects.
+
 extern crate std;
 
 use std::io::Write;

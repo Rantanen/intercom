@@ -1,3 +1,6 @@
+
+//! Enables the generation of IDL file that describes intercom library.
+
 use std::io::Write;
 use std::path::Path;
 
