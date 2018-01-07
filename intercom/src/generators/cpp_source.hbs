@@ -1,0 +1,11 @@
+
+#include "{{lib_name}}.h"
+
+#ifdef _MSC_VER
+    const char test_lib::Descriptor::NAME[] = "{{lib_name}}.dll";
+#else
+    const char test_lib::Descriptor::NAME[] = "lib{{lib_name}}.so";
+#endif
+
+const char test_lib::Descriptor::WINDOWS_NAME[] = "{{lib_name}}.dll";
+const char test_lib::Descriptor::POSIX_NAME[] = "lib{{lib_name}}.so";

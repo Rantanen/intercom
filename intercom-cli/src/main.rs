@@ -33,6 +33,19 @@ fn main() {
                    .index( 1 )
                 )
             )
+            .subcommand( SubCommand::with_name( "cpp" )
+                .about( "Generates C++ header files from the Rust crate" )
+                .arg( Arg::with_name( "path" )
+                   .help( "Path to the crate to process" )
+                   .default_value( "." )
+                   .index( 1 )
+                )
+                .arg( Arg::with_name( "output" )
+                   .help( "Target where the C++ header file and associated library implementation are generated." )
+                   .default_value( "." )
+                   .index( 2 )
+                )
+            )
         .get_matches();
 
     // Match the sub-command and invoke the correct command handler.
@@ -44,6 +57,11 @@ fn main() {
         ( "manifest", Some( args ) ) => {
             let path = Path::new( args.value_of( "path" ).unwrap() );
             intercom::generators::manifest::write( path, &mut io::stdout() )
+        },
+        ( "cpp", Some( args ) ) => {
+            let path = Path::new( args.value_of( "path" ).unwrap() );
+            intercom::generators::cpp::write(
+                path, None, Some( &mut io::stdout() ) )
         },
         _ => unreachable!(),
     } {

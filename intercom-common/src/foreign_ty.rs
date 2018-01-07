@@ -139,3 +139,27 @@ impl CTyHandler
     }
 }
 
+/// Converts a Rust type into applicable C++ type.
+pub fn to_cpp_type(
+    c: &ComCrate,
+    ty: &syn::Ty,
+) -> Option<String> { //, GeneratorError> {
+
+    let foreign = CTyHandler;
+    let name = foreign.get_ty( c, ty )?;
+            
+    Some( match name.as_ref() {
+        "int8" => "int8_t",
+        "uint8" => "uint8_t",
+        "int16" => "int16_t",
+        "uint16" => "uint16_t",
+        "int32" => "int32_t",
+        "uint32" => "uint32_t",
+        "int64" => "int64_t",
+        "uint64" => "uint64_t",
+        "BSTR" => "intercom::BSTR",
+        "HRESULT" => "intercom::HRESULT",
+        _ => return Some( name ),
+    }.to_owned() )
+}
+
