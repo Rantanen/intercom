@@ -57,7 +57,7 @@ fn lib_name() -> String {
 
 /// Defines an intercom interface.
 ///
-/// ```rust
+/// ```rust,no-test
 /// #[com_interface(IID, base?)] <trait|impl struct>
 /// ```
 ///
@@ -86,7 +86,7 @@ pub fn com_interface(
 
 /// Defines an implementation of an intercom interface.
 ///
-/// ```rust
+/// ```rust,no-test
 /// #[com_impl] <impl>
 /// ```
 ///
@@ -108,7 +108,7 @@ pub fn com_impl(
 
 /// Defines a COM class that implements one or more COM interfaces.
 ///
-/// ```rust
+/// ```rust,no-test
 /// #[com_class(CLSID, interfaces...)] <struct|enum>
 /// ```
 ///
@@ -134,7 +134,7 @@ pub fn com_class(
 
 /// Defines the COM library.
 ///
-/// ```rust
+/// ```rust,no-test
 /// #[com_library(LIBID, classes...)]
 /// ```
 ///
