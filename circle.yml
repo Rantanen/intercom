@@ -10,7 +10,7 @@ jobs:
             - checkout
             - run:
                 name: "Cargo test"
-                command: cargo test
+                command: cargo test --all-features
             - run:
                 name: "C++ test"
                 command: |
