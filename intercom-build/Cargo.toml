@@ -4,8 +4,7 @@ version = "0.1.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 
 [dependencies]
-intercom-utils = { version = "0.2", path = "../intercom-utils" }
-intercom = { version = "0.2", path = "../intercom" }
+intercom = { version = "0.2", path = "../intercom", features = [ "generators" ] }
 winapi = { version = "0.3", features = [ "winreg" ] }
 glob = "0.2"
 cc = "1.0"

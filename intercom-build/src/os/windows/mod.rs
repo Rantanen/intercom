@@ -1,5 +1,4 @@
 
-extern crate intercom_utils;
 extern crate cc;
 
 use ::std::env;
@@ -53,7 +52,7 @@ pub fn build() {
     {
         let mut idl = File::create( &idl_path )
                 .expect( &format!( "Could not create file: {:?}", idl_path ) );
-        intercom_utils::create_idl(
+        ::intercom::generators::idl::write(
                     Path::new( &toml_dir ),
                     &mut idl )
                 .expect( "Failed to form IDL" );
