@@ -6,7 +6,7 @@ use tyhandlers;
 use utils;
 
 /// Defines return handler for handling various different return type schemes.
-pub trait ReturnHandler {
+pub trait ReturnHandler : ::std::fmt::Debug {
 
     /// The return type of the original Rust method.
     fn rust_ty( &self ) -> Ty;
@@ -30,12 +30,14 @@ pub trait ReturnHandler {
 }
 
 /// Void return type.
+#[derive(Debug)]
 struct VoidHandler;
 impl ReturnHandler for VoidHandler {
     fn rust_ty( &self ) -> Ty { utils::unit_ty() }
 }
 
 /// Simple return type with the return value as the immediate value.
+#[derive(Debug)]
 struct ReturnOnlyHandler( Ty );
 impl ReturnHandler for ReturnOnlyHandler {
 
@@ -54,6 +56,7 @@ impl ReturnHandler for ReturnOnlyHandler {
 
 /// Result type that supports error info for the `Err` value. Converted to
 /// `[retval]` on success or `HRESULT` + `IErrorInfo` on error.
+#[derive(Debug)]
 struct ErrorResultHandler { retval_ty: Ty, return_ty: Ty }
 impl ReturnHandler for ErrorResultHandler {
 

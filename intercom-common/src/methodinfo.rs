@@ -7,7 +7,7 @@ use tyhandlers::{TyHandler, get_ty_handler};
 use returnhandlers::{ReturnHandler, get_return_handler};
 use utils;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ComMethodInfoError {
     TooFewArguments,
     BadSelfArg,
@@ -20,6 +20,15 @@ pub struct RustArg {
     pub name: Ident,
     pub ty: Ty,
     pub handler: Rc<TyHandler>,
+}
+
+impl PartialEq for RustArg {
+
+    fn eq(&self, other: &RustArg) -> bool
+    {
+        self.name == other.name
+            && self.ty == other.ty
+    }
 }
 
 impl ::std::fmt::Debug for RustArg {
@@ -41,14 +50,16 @@ impl RustArg {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Direction { In, Out, Retval }
 
+#[derive(Debug, PartialEq)]
 pub struct ComArg {
     pub arg : RustArg,
     pub dir : Direction
 }
 
+#[derive(Debug)]
 pub struct ComMethodInfo {
 
     pub name: Ident,
@@ -62,6 +73,20 @@ pub struct ComMethodInfo {
 
     pub returnhandler: Box<ReturnHandler>,
     pub args: Vec<RustArg>,
+}
+
+impl PartialEq for ComMethodInfo {
+
+    fn eq(&self, other: &ComMethodInfo) -> bool
+    {
+        self.name == other.name
+            && self.is_const == other.is_const
+            && self.rust_self_arg == other.rust_self_arg
+            && self.rust_return_ty == other.rust_return_ty
+            && self.retval_type == other.retval_type
+            && self.return_type == other.return_type
+            && self.args == other.args
+    }
 }
 
 impl ComMethodInfo {

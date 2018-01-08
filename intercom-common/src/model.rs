@@ -43,6 +43,7 @@ pub enum ParseError {
 type ParseResult<T> = Result<T, ParseError>;
 
 /// COM library details derived from the `com_library` attribute.
+#[derive(Debug, PartialEq)]
 pub struct ComLibrary {
     name : String,
     libid : GUID,
@@ -105,6 +106,7 @@ impl ComLibrary
 }
 
 /// Details of a struct marked with `#[com_class]` attribute.
+#[derive(Debug, PartialEq)]
 pub struct ComStruct
 {
     name : Ident,
@@ -184,6 +186,7 @@ impl ComStruct
     pub fn interfaces( &self ) -> &[Ident] { &self.interfaces }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct ComInterface
 {
     name : Ident,
@@ -316,6 +319,7 @@ impl ComInterface
     pub fn item_type( &self ) -> ::utils::InterfaceType { self.item_type }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct ComImpl
 {
     struct_name : Ident,
@@ -385,11 +389,13 @@ impl ComImpl
     pub fn methods( &self ) -> &Vec<ComMethodInfo> { &self.methods }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct ComCrate {
     lib : Option<ComLibrary>,
     interfaces : OrderMap<String, ComInterface>,
     structs : OrderMap<String, ComStruct>,
     impls : Vec<ComImpl>,
+    incomplete : bool,
 }
 
 #[derive(Default)]
@@ -398,6 +404,7 @@ struct ComCrateBuilder {
     pub interfaces : Vec<ComInterface>,
     pub structs : Vec<ComStruct>,
     pub impls : Vec<ComImpl>,
+    pub incomplete : bool,
 }
 
 impl ComCrateBuilder {
@@ -416,6 +423,7 @@ impl ComCrateBuilder {
             structs: OrderMap::from_iter(
                 self.structs.into_iter().map( |i| ( i.name().to_string(), i ) ) ),
             impls: self.impls,
+            incomplete: self.incomplete,
         } )
     }
 }
@@ -434,8 +442,9 @@ impl ComCrate
                 .map_err( |_| ParseError::ComCrate(
                         "Failed to parse source".into() ) )?;
 
-            Self::collect_items(
+            Self::process_crate_items(
                 crate_name,
+                None,
                 &krate.items,
                 &mut builder )?;
         }
@@ -533,12 +542,12 @@ impl ComCrate
                 .map_err( |_| ParseError::ComCrate(
                         format!( "Failed to parse source {}", path.to_string_lossy() ) ) )?;
 
-        Self::process_file_items( crate_name, path, &krate.items, b )
+        Self::process_crate_items( crate_name, Some( path ), &krate.items, b )
     }
 
-    fn process_file_items(
+    fn process_crate_items(
         crate_name : &str,
-        path : &Path,
+        path : Option< &Path >,
         items : &[ ::syn::Item ], 
         b : &mut ComCrateBuilder,
     ) -> ParseResult<()>
@@ -556,12 +565,27 @@ impl ComCrate
             match *opt_mod_items {
                 None => {
 
-                    // External mod. Find the file.
+                    // The mod doesn't have immediate items so this is an
+                    // external mod. We need to resolve the file.
+                    let path = if let Some( p ) = path { p } else {
+
+                        // No path given. Mark the crate as incomplete as we
+                        // couldn't resolve all pieces but return with Ok
+                        // result.
+                        //
+                        // This is a case where we were given file contents
+                        // without the caller knowing (or telling) where the
+                        // file was located. We can't resolve relative mod-paths
+                        // in this case.
+                        b.incomplete = true;
+                        return Ok(());
+                    };
+
                     // We have couple of options. Find the first one that
                     // matches an existing file.
                     let mut mod_paths = vec![
-                        path.join( format!( "{}.rs", item.ident ) ),
-                        path.join( format!( "{}/mod.rs", item.ident ) ),
+                        path.parent().unwrap().join( format!( "{}.rs", item.ident ) ),
+                        path.parent().unwrap().join( format!( "{}/mod.rs", item.ident ) ),
                     ].into_iter()
                         .filter( |p| p.exists() );
 
@@ -579,7 +603,7 @@ impl ComCrate
                     Self::parse_file_internal( crate_name, &mod_path, b )?;
                 },
                 Some( ref mod_items )
-                    => Self::process_file_items( crate_name, path, mod_items, b )?
+                    => Self::process_crate_items( crate_name, path, mod_items, b )?
             }
         }
         
@@ -618,6 +642,7 @@ impl ComCrate
     pub fn interfaces( &self ) -> &OrderMap<String, ComInterface> { &self.interfaces }
     pub fn structs( &self ) -> &OrderMap<String, ComStruct> { &self.structs }
     pub fn impls( &self ) -> &Vec<ComImpl> { &self.impls }
+    pub fn is_incomplete( &self ) -> bool { self.incomplete }
 }
 
 #[cfg(test)]
@@ -869,5 +894,16 @@ mod test
         assert_eq!( krate.impls().len(), 1 );
         assert_eq!( krate.impls()[0].struct_name(), "S" );
         assert_eq!( krate.impls()[0].interface_name(), "IFoo" );
+    }
+
+    #[test]
+    fn parse_incomplete_crate() {
+        let krate = ComCrate::parse( "my_crate", &[
+            r#"
+                mod foo;
+            "#,
+        ] ).expect( "Parsing the crate failed" );
+
+        assert!( krate.is_incomplete() );
     }
 }

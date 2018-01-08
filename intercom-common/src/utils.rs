@@ -20,7 +20,7 @@ pub fn parse_attr_tokens(
     } )
 }
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub enum InterfaceType { Trait, Struct }
 
 pub type InterfaceData<'a> = (
