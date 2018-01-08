@@ -52,7 +52,13 @@ after_success: |
     export RUN_KCOV="$KCOV --include-pattern=$KCOV_INCLUDE --exclude-pattern=$KCOV_EXCLUDE $KCOV_FLAGS $KCOV_OUT" &&
 
     # Rust #[test]s.
-    for file in target/debug/intercom*-????????????????;
+    #
+    # Essentially we need all executables that are not [bin] target outputs.
+    #
+    # [bin] target outputs don't have a hash at the end. Library/etc. files
+    # have an extension after the hash. So we need to match all files that end
+    # in a hash with no extension.
+    for file in target/debug/*-[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f];
     do
         ${RUN_KCOV} "$file";
     done &&
