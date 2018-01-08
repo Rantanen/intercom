@@ -3,29 +3,34 @@
 Thank you for showing interest in developing Intercom! There are many ways to
 help in making Intercom better. All the usual things from filing issues to
 improving documentation are appreciated. However as these tasks differ very
-little between various open source projects, this document mostly skips them.
+little between various open source projects, this document doesn't go deeply
+into them.
 
 Instead this document serves as a very high level architectural description for
 developers interested in diving into the Intercom codebase.
 
 ## Sub-crates
 
-Intercom is built from four different crates: `intercom`,
-`intercom-attributes`, `intercom-utils` and `intercom-common`.
+Intercom is built from five different crates: `intercom`,
+`intercom-attributes`, `intercom-common`, `intercom-cli` and `intercom-build`.
 
 ### `intercom`
 
-Intercom is the primary crate that includes the runtime infrastructure as well
-as exports the attributes defined in the `intercom-attributes` crate.
+Intercom is the primary crate that includes the runtime infrastructure, exports
+the procedural macro attributes defined in `intercom-attributes` and includes
+bits of tooling required for processing intercom libraries.
+
+In short, Intercom is the primary crate that should be suitable as the only
+dependency for projects using intercom.
 
 Given `intercom` is a normal runtime crate, it's recommended that as much of
-the Intercom functionality as possible would be included in this crate.
+the runtime functionality as possible would be defined in this crate.
 
 ### `intercom-attributes`
 
-The attributes crate is probably the most importat crate of the four. This
-crate implements the proc-macro attribute magic that is the various `[com_...]`
-attributes which define the COM interfaces.
+The attributes crate is probably technically the most important crate of the
+four. This crate implements the proc-macro attribute magic, which defines the
+various `[com_...]` attributes which are used to implement intercom libraries.
 
 As opposed to the `intercom` crate, the `intercom-attributes` crate is a
 compile-time crate. All the attribute expansion happens during compilation.
@@ -33,11 +38,21 @@ This makes it more difficult to debug and test the functionality. Because of
 this, any functionality that could be implemented in the `intercom` crate
 should be there instead.
 
-### `intercom-utils`
+### `intercom-common`
 
-The utils crate implements the command line utility for working with
-Intercom-libraries. Mostly this involves things like generating cross-language
-headers or bindings for the COM libraries, etc.
+The largest crate of all. The `intercom-common` defines the common
+functionality used by both `intercom` and `intercom-attributes` crates. The
+crate exists mostly because of the restriction on `proc_macro` crates which
+prevents them from exporting anything but procedural macros.
+
+The crate is considered internal and should not be depended upon by projects
+using intercom.
+
+### `intercom-cli`
+
+The CLI crate implements the command line utility for working with intercom
+libraries. The actual functionality of the crate is implemented in `intercom`
+and the `intercom-cli` only implements the command line interface for this.
 
 ### `intercom-build`
 
@@ -45,17 +60,6 @@ Build utilities for working with crates using Intercom. As of now, this is
 meaningful only on Windows, where the build crate is responsible for
 implementing utility method for embedding the TypeLib and the manifest in the
 final dll library file.
-
-### `intercom-common`
-
-The `intercom-common` crate defines common functionality used for processing
-the various attributes. This functionality is needed for both
-`intercom-attributes` and `intercom-utils` crates.
-
-In theory the `intercom-utils` crate could depend on `intercom-attributes` to
-get the functionality, but `intercom-attributes` depends on Rust compiler
-crates which would then prevent `intercom-utils` from being compiled into an
-executable.
 
 ## Runtime models
 
@@ -65,9 +69,9 @@ affect the dependent code.
 
 ### Runtime
 
-Runtime code is the simplest of all. This is the code living in `interop` crate
-which the depending code calls at runtime. Things like `ComBox` constructors or
-`GUID` parsing falls under this category.
+Runtime code is the simplest of all. This is the code living in `intercom`
+crate which the depending code calls at runtime. Things like `ComBox`
+constructors or `GUID` parsing falls under this category.
 
 As the runtime code is compiled separately from the depending code and doesn't
 change afterwards, it's easy to debug and test. The downside with the runtime
@@ -75,49 +79,57 @@ code is that there's no way to inspect the depending code in any way.
 
 ### Compile time
 
-Compile time code is defined in `interop-attributes`. These attributes, such as
-`[com_interface]` or `[com_impl]` get expanded during the compilation of the
-depending code.
+Compile time code is defined in `intercom-attributes` and `intercom-build`.
+The attributes, such as `[com_interface]` or `[com_impl]` get expanded during
+the compilation of the depending code while the build utilities are invoked
+during the build process.
 
-As the compile time code is expanded during compilation, the code is able to
+As the compile time code is executed during compilation, the code is able to
 both inspect the current source being compiled and emit new code to be
 compiled. This enables Intercom to define virtual tables and delegation methods
-for the COM calls.
+for the intercom calls as well as affect the way the final library is
+compiled.
 
-The major disadvantage with the compile time code is that it's complex. The
-code needs to examine the depending code through its AST and make decisions
-based on this. Decisions which result in more code being generated and
-compiled. As a result the code needs to consider not only things that are but
-also things that might be in various different user libraries that use the
-attributes.
+The major disadvantage with the compile time code is that it's complex.
+Especially the attribute code. The code needs to examine the depending code
+through its AST and make decisions based on this. Decisions which result in
+more code being generated and compiled. As a result the code needs to consider
+not only things that are but also things that might be in various different
+user libraries that use the attributes.
 
 ### External
 
-Finally there's the external code in `interop-utils`. This code has no runtime
+Finally there's the external code in `intercom-cli`. This code has no runtime
 dependency on any depending code.
 
 As there's no compile or runtime dependency between the depending code using
-the Intercom library and the `intercom-utils` module, the code in this module
+the Intercom library and the `intercom-cli` module, the code in this module
 has no way to affect the dependent code.
 
 Instead what the code is able to do is to inspect the code base similar to
 compile time code, but instead of emitting new bits of code based on the
-inspection the `intercom-utils` are able to emit various other artifacts such
+inspection the `intercom-cli` are able to emit various other artifacts such
 as IDL files or manifests.
 
 ## Tests
 
-Currently our test harness is quite lacking. The most important tests are the
-integration tests under the [test](test) directory. These tests include a Rust
-test COM server using Intercom and various COM clients implemented in other
-languages.
+Intercom includes two kinds of tests: Rust unit tests and cross-language
+integration tests. The Rust unit tests are very similar to those of other
+crates and usually placed in the source files. Some crates, such as
+`intercom-attributes` define the tests in a separate tests folder.
 
-Unfortunately as the tests are written in other languages, they are not covered
-under `cargo test`. Instead the test projects need to be compiled and executed
-separately.
+The integration tests reside in the [Test](test) directory. These tests include
+a Rust test intercom server called `test_lib` and various intercom clients
+implemented in other languages.
 
-There is a [`test.ps1`](scripts/test.ps1) script for AppVeyor currently. At
-some point we should extend cross-platform testing over to Travis which should
-result in a test.sh script to run the tests. However both of these scripts are
-designed to work on their respective CI servers.
+Unfortunately as the integration tests are written in other languages, they are
+not covered under `cargo test`. Instead the test projects need to be compiled
+and executed separately.
 
+Currently there is no clean way to execute the tests. AppVeyor uses a
+combination of [`ci.bat`](scripts/ci.bat) and [`test.ps1`](scripts/test.ps1) to
+execute these while Travis uses `cmake` and running the resulting `cpp-raw`
+binary manually.
+
+Once the cross-platform support stabilizes a bit, we should implement a simple
+to run test to execute all tests supported on the current platform.
