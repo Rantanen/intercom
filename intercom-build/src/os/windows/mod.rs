@@ -52,10 +52,11 @@ pub fn build() {
     {
         let mut idl = File::create( &idl_path )
                 .expect( &format!( "Could not create file: {:?}", idl_path ) );
-        ::intercom::generators::idl::write(
-                    Path::new( &toml_dir ),
-                    &mut idl )
-                .expect( "Failed to form IDL" );
+        let model = ::intercom::generators::idl::IdlModel::from_path(
+                    Path::new( &toml_dir ) )
+                .expect( "Failed to form IDL from the sources" );
+        model.write( &mut idl )
+                .expect( "Failed to write IDL to file" );
         idl.sync_all()
                 .expect( "Writing IDL failed" );
     }

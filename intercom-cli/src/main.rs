@@ -1,11 +1,15 @@
 use std::io;
 use std::path::Path;
+use std::fs::File;
 
 extern crate intercom;
+extern crate failure;
+
+use intercom::generators;
 
 #[macro_use]
 extern crate clap;
-use clap::{App, AppSettings, SubCommand, Arg};
+use clap::{App, AppSettings, SubCommand, Arg, ArgMatches};
 
 
 /// Main entry point.
@@ -48,24 +52,37 @@ fn main() {
             )
         .get_matches();
 
-    // Match the sub-command and invoke the correct command handler.
-    if let Err( e ) = match matches.subcommand() {
+    // Run the command and report possible errors.
+    if let Err( e ) = run_cmd( &matches ) {
+        eprintln!( "{}", e );
+    }
+}
+
+fn run_cmd( matches : &ArgMatches ) -> Result<(), failure::Error>
+{
+    match matches.subcommand() {
         ( "idl", Some( args ) ) => {
             let path = Path::new( args.value_of( "path" ).unwrap() );
-            intercom::generators::idl::write( path, &mut io::stdout() )
+            let model = generators::idl::IdlModel::from_path( path )?;
+            model.write( &mut io::stdout() )?;
         },
         ( "manifest", Some( args ) ) => {
             let path = Path::new( args.value_of( "path" ).unwrap() );
-            intercom::generators::manifest::write( path, &mut io::stdout() )
+            let model = generators::manifest::ManifestModel::from_path( path )?;
+            model.write( &mut io::stdout() )?;
         },
         ( "cpp", Some( args ) ) => {
             let path = Path::new( args.value_of( "path" ).unwrap() );
-            intercom::generators::cpp::write(
-                path, None, Some( &mut io::stdout() ) )
+            let model = generators::cpp::CppModel::from_path( path )?;
+
+            let output = Path::new( args.value_of( "output" ).unwrap() );
+            model.write_header( &mut File::create(
+                    output.join( format!( "{}.h", model.lib_name ) ) )? )?;
+            model.write_source( &mut File::create(
+                    output.join( format!( "{}.cpp", model.lib_name ) ) )? )?;
         },
         _ => unreachable!(),
-    } {
-        // Error occurred in the sub-command. Report it before stopping.
-        eprintln!( "{}", e );
     }
+
+    Ok(())
 }

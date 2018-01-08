@@ -19,34 +19,34 @@ use handlebars::Handlebars;
 
 #[derive(PartialEq, Serialize, Debug)]
 pub struct CppModel {
-    lib_name : String,
-    interfaces: Vec<CppInterface>,
-    coclasses: Vec<CppCoClass>,
+    pub lib_name : String,
+    pub interfaces: Vec<CppInterface>,
+    pub coclasses: Vec<CppCoClass>,
 }
 
 #[derive(PartialEq, Serialize, Debug)]
 pub struct CppInterface {
-    name : String,
-    iid_struct : String,
-    base : Option<String>,
-    methods : Vec<CppMethod>,
+    pub name : String,
+    pub iid_struct : String,
+    pub base : Option<String>,
+    pub methods : Vec<CppMethod>,
 }
 
 #[derive(PartialEq, Serialize, Debug)]
-struct CppMethod {
+pub struct CppMethod {
     pub name : String,
     pub ret_type : String,
     pub args : Vec<CppArg>,
 }
 
 #[derive(PartialEq, Serialize, Debug)]
-struct CppArg {
+pub struct CppArg {
     pub name : String,
     pub arg_type : String,
 }
 
 #[derive(PartialEq, Serialize, Debug)]
-struct CppCoClass {
+pub struct CppCoClass {
     pub name : String,
     pub clsid_struct : String,
     pub interface_count : usize,
@@ -54,6 +54,18 @@ struct CppCoClass {
 }
 
 impl CppModel {
+
+    /// Generates the model from files in the path.
+    ///
+    /// - `path` - The path must point to a crate root containing Cargo.toml or
+    ///            to the Cargo.toml itself.
+    pub fn from_path( path : &Path,) -> Result<CppModel, GeneratorError>
+    {
+        let krate = model::ComCrate::parse_package( path )
+                .map_err( |e| GeneratorError::CrateParseError( e ) )?;
+        CppModel::from_crate( &krate )
+    }
+
 
     /// Converts the parse result into an header  that gets written to stdout.
     pub fn from_crate(
@@ -144,25 +156,15 @@ impl CppModel {
             coclasses : classes,
         } )
     }
-}
 
-pub fn write(
-    path : &Path,
-    out_header : Option< &mut Write >,
-    out_source : Option< &mut Write >,
-) -> Result<(), GeneratorError>
-{
-    // Parse the sources and convert the result into an IDL.
-    let krate = if path.is_file() {
-            model::ComCrate::parse_cargo_toml( path )
-        } else {
-            model::ComCrate::parse_cargo_toml( &path.join( "Cargo.toml" ) )
-        }.map_err( |e| GeneratorError::CrateParseError( e ) )?;
-
-    let model = CppModel::from_crate( &krate )?;
-
-    if let Some( out ) = out_header {
-
+    /// Generates the C++ header file.
+    ///
+    /// - `out` - The writer to use for output.
+    pub fn write_header(
+        &self,
+        out : &mut Write,
+    ) -> Result<(), GeneratorError>
+    {
         let mut reg = Handlebars::new();
         reg.register_template_string(
                 "cpp_header",
@@ -170,13 +172,21 @@ pub fn write(
             .expect( "Error in the built-in C++ header template." );
 
         let rendered = reg
-                .render( "cpp_header", &model )
+                .render( "cpp_header", self )
                 .expect( "Rendering a valid ComCrate to C++ header failed" );
         write!( out, "{}", rendered )?;
+
+        Ok(())
     }
 
-    if let Some( out ) = out_source {
-
+    /// Generates the C++ source file.
+    ///
+    /// - `out` - The writer to use for output.
+    pub fn write_source(
+        &self,
+        out : &mut Write,
+    ) -> Result<(), GeneratorError>
+    {
         let mut reg = Handlebars::new();
         reg.register_template_string(
                 "cpp_source",
@@ -184,12 +194,12 @@ pub fn write(
             .expect( "Error in the built-in C++ source template." );
 
         let rendered = reg
-                .render( "cpp_source", &model )
+                .render( "cpp_source", self )
                 .expect( "Rendering a valid ComCrate to C++ source failed" );
         write!( out, "{}", rendered )?;
-    }
 
-    Ok(())
+        Ok(())
+    }
 }
 
 /// Converts a guid to binarys representation.

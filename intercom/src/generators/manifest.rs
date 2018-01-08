@@ -28,8 +28,19 @@ pub struct ManifestCoClass {
 
 impl ManifestModel {
 
-    /// Prints the manifest based on the parse result.
-    fn from_crate(
+    /// Generates the model from files in the path.
+    ///
+    /// - `path` - The path must point to a crate root containing Cargo.toml or
+    ///            to the Cargo.toml itself.
+    pub fn from_path( path : &Path,) -> Result<ManifestModel, GeneratorError>
+    {
+        let krate = model::ComCrate::parse_package( path )
+                .map_err( |e| GeneratorError::CrateParseError( e ) )?;
+        ManifestModel::from_crate( &krate )
+    }
+
+    /// Generates the model from an existing Intercom crate model.
+    pub fn from_crate(
         c : &model::ComCrate
     ) -> Result<ManifestModel, GeneratorError>
     {
@@ -55,31 +66,28 @@ impl ManifestModel {
             classes : classes,
         } )
     }
+
+    /// Generates the manifest content.
+    ///
+    /// - `out` - The writer to use for output.
+    pub fn write(
+        &self,
+        out : &mut Write,
+    ) -> Result<(), GeneratorError>
+    {
+        let mut reg = Handlebars::new();
+        reg.register_template_string( "manifest", include_str!( "manifest.hbs" ) )
+                .expect( "Error in the built-in Manifest template." );
+
+        let rendered = reg
+                .render( "manifest", self )
+                .expect( "Rendering a valid ComCrate to Manifest failed" );
+        write!( out, "{}", rendered )?;
+
+        Ok(())
+    }
 }
 
-/// Run the manifest sub-command.
-#[allow(dead_code)]
-pub fn write( path : &Path, out : &mut Write ) -> Result<(), GeneratorError> {
-
-    // Parse the source files and emit the manifest.
-    let krate = if path.is_file() {
-            model::ComCrate::parse_cargo_toml( path )
-        } else {
-            model::ComCrate::parse_cargo_toml( &path.join( "Cargo.toml" ) )
-        }.map_err( |e| GeneratorError::CrateParseError( e ) )?;
-
-    let model = ManifestModel::from_crate( &krate )?;
-    let mut reg = Handlebars::new();
-    reg.register_template_string( "manifest", include_str!( "manifest.hbs" ) )
-            .expect( "Error in the built-in Manifest template." );
-
-    let rendered = reg
-            .render( "manifest", &model )
-            .expect( "Rendering a valid ComCrate to Manifest failed" );
-    write!( out, "{}", rendered )?;
-
-    Ok(())
-}
 
 #[cfg(test)]
 mod test {

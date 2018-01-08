@@ -443,6 +443,17 @@ impl ComCrate
         builder.build()
     }
 
+    pub fn parse_package(
+        crate_path : &Path,
+    ) -> ParseResult<ComCrate>
+    {
+        if crate_path.is_file() {
+            Self::parse_cargo_toml( crate_path )
+        } else {
+            Self::parse_cargo_toml( &crate_path.join( "Cargo.toml" ) )
+        }
+    }
+
     pub fn parse_cargo_toml(
         toml_path : &Path,
     ) -> ParseResult<ComCrate>

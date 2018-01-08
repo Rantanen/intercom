@@ -14,7 +14,7 @@ use intercom_common::foreign_ty::*;
 use handlebars::Handlebars;
 
 #[derive(PartialEq, Serialize, Debug)]
-struct IdlModel {
+pub struct IdlModel {
     pub lib_id : String,
     pub lib_name : String,
     pub interfaces : Vec<IdlInterface>,
@@ -22,7 +22,7 @@ struct IdlModel {
 }
 
 #[derive(PartialEq, Serialize, Debug)]
-struct IdlInterface {
+pub struct IdlInterface {
     pub name : String,
     pub base : Option<String>,
     pub iid : String,
@@ -30,7 +30,7 @@ struct IdlInterface {
 }
 
 #[derive(PartialEq, Serialize, Debug)]
-struct IdlMethod {
+pub struct IdlMethod {
     pub name : String,
     pub idx : usize,
     pub ret_type : String,
@@ -38,14 +38,14 @@ struct IdlMethod {
 }
 
 #[derive(PartialEq, Serialize, Debug)]
-struct IdlArg {
+pub struct IdlArg {
     pub name : String,
     pub arg_type : String,
     pub attributes : String,
 }
 
 #[derive(PartialEq, Serialize, Debug)]
-struct IdlCoClass {
+pub struct IdlCoClass {
     pub name : String,
     pub clsid : String,
     pub interfaces : Vec<String>,
@@ -53,8 +53,19 @@ struct IdlCoClass {
 
 impl IdlModel {
 
+    /// Generates the model from files in the path.
+    ///
+    /// - `path` - The path must point to a crate root containing Cargo.toml or
+    ///            to the Cargo.toml itself.
+    pub fn from_path( path : &Path,) -> Result<IdlModel, GeneratorError>
+    {
+        let krate = model::ComCrate::parse_package( path )
+                .map_err( |e| GeneratorError::CrateParseError( e ) )?;
+        IdlModel::from_crate( &krate )
+    }
+
     /// Converts the parse result into an IDL that gets written to stdout.
-    fn from_crate(
+    pub fn from_crate(
         c : &model::ComCrate
     ) -> Result<IdlModel, GeneratorError> {
 
@@ -150,29 +161,26 @@ impl IdlModel {
             coclasses : classes,
         } )
     }
-}
 
-#[allow(dead_code)]
-pub fn write( path : &Path, out : &mut Write ) -> Result<(), GeneratorError> {
+    /// Generates the manifest content.
+    ///
+    /// - `out` - The writer to use for output.
+    pub fn write(
+        &self,
+        out : &mut Write
+    ) -> Result<(), GeneratorError> {
 
-    // Parse the sources and convert the result into an IDL.
-    let krate = if path.is_file() {
-            model::ComCrate::parse_cargo_toml( path )
-        } else {
-            model::ComCrate::parse_cargo_toml( &path.join( "Cargo.toml" ) )
-        }.map_err( |e| GeneratorError::CrateParseError( e ) )?;
+        let mut reg = Handlebars::new();
+        reg.register_template_string( "idl", include_str!( "idl.hbs" ) )
+                .expect( "Error in the built-in IDL template." );
 
-    let model = IdlModel::from_crate( &krate )?;
-    let mut reg = Handlebars::new();
-    reg.register_template_string( "idl", include_str!( "idl.hbs" ) )
-            .expect( "Error in the built-in IDL template." );
+        let rendered = reg
+                .render( "idl", self )
+                .expect( "Rendering a valid ComCrate to IDL failed" );
+        write!( out, "{}", rendered )?;
 
-    let rendered = reg
-            .render( "idl", &model )
-            .expect( "Rendering a valid ComCrate to IDL failed" );
-    write!( out, "{}", rendered )?;
-
-    Ok(())
+        Ok(())
+    }
 }
 
 #[cfg(test)]
