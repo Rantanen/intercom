@@ -35,7 +35,7 @@ impl ManifestModel {
     pub fn from_path( path : &Path,) -> Result<ManifestModel, GeneratorError>
     {
         let krate = model::ComCrate::parse_package( path )
-                .map_err( |e| GeneratorError::CrateParseError( e ) )?;
+                .map_err( GeneratorError::CrateParseError )?;
         ManifestModel::from_crate( &krate )
     }
 

@@ -62,7 +62,7 @@ impl CppModel {
     pub fn from_path( path : &Path,) -> Result<CppModel, GeneratorError>
     {
         let krate = model::ComCrate::parse_package( path )
-                .map_err( |e| GeneratorError::CrateParseError( e ) )?;
+                .map_err( GeneratorError::CrateParseError )?;
         CppModel::from_crate( &krate )
     }
 

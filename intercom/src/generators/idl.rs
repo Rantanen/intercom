@@ -60,7 +60,7 @@ impl IdlModel {
     pub fn from_path( path : &Path,) -> Result<IdlModel, GeneratorError>
     {
         let krate = model::ComCrate::parse_package( path )
-                .map_err( |e| GeneratorError::CrateParseError( e ) )?;
+                .map_err( GeneratorError::CrateParseError )?;
         IdlModel::from_crate( &krate )
     }
 
