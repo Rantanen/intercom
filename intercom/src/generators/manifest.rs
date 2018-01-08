@@ -17,7 +17,7 @@ pub struct ManifestModel {
     pub lib_name : String,
     pub lib_id : String,
     pub file_name : String,
-    pub classes : Vec<ManifestCoClass>,
+    pub coclasses : Vec<ManifestCoClass>,
 }
 
 #[derive(PartialEq, Debug, Serialize)]
@@ -63,7 +63,7 @@ impl ManifestModel {
             lib_name : utils::pascal_case( lib.name() ),
             file_name : lib.name().to_owned(),
             lib_id : format!( "{}", lib.libid() ),
-            classes : classes,
+            coclasses : classes,
         } )
     }
 
@@ -125,7 +125,7 @@ mod test {
             lib_name : "ComLibrary".to_owned(),
             lib_id : "{11112222-3333-4444-5555-666677778888}".to_owned(),
             file_name : "com_library".to_owned(),
-            classes : vec![
+            coclasses : vec![
                 ManifestCoClass {
                     name : "CoClass".to_owned(),
                     clsid : "{33334444-5555-6666-7777-888899990000}".to_owned(),

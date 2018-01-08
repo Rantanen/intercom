@@ -2,11 +2,12 @@
 <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
     <assemblyIdentity type="win32" name="{{lib_name}}.Assembly" version="1.0.0.0" />
     <file name="{{file_name}}.dll">
-        <typelib tlbid="\{{{lib_id}}}"
+        <typelib tlbid="{{lib_id}}}"
             version="1.0"
             helpdir="" />
-{{#each coclass}}
-            <comClass progid="{{lib_name}}.{{name}}" clsid="{{clsid}}" />
+{{#each coclasses}}
+        <comClass progid="{{../lib_name}}.{{name}}"
+            clsid="{{clsid}}" />
 {{/each}}
     </file>
 </assembly>
