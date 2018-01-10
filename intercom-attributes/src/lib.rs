@@ -861,6 +861,16 @@ fn expand_com_library(
         ) );
     }
 
+    // Generate allocator CLSID.
+    let allocator_clsid_tokens = utils::get_guid_tokens( lib.allocator_clsid() );
+    let allocator_clsid_doc = "Built-in intercom allocator class ID.";
+    output.push( quote!(
+        #[allow(non_upper_case_globals)]
+        #[doc = #allocator_clsid_doc ]
+        pub const CLSID_IntercomAllocator : ::intercom::CLSID
+                = #allocator_clsid_tokens;
+    ) );
+
     // Implement DllGetClassObject.
     //
     // This is more or less the only symbolic entry point that the COM
@@ -884,9 +894,12 @@ fn expand_com_library(
             // contained coclasses.
             let mut com_struct = ::intercom::ComStruct::new(
                 ::intercom::ClassFactory::new( rclsid, | clsid | {
-
                     match *clsid {
                         #( #match_arms, )*
+                        self::CLSID_IntercomAllocator => Ok(
+                                ::intercom::ComBox::new(
+                                    ::intercom::alloc::Allocator::default() )
+                                as ::intercom::RawComPtr ),
                         _ => Err( ::intercom::E_NOINTERFACE ),
                     }
                 } ) );

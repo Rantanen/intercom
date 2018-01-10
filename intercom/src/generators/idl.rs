@@ -19,6 +19,7 @@ pub struct IdlModel {
     pub lib_name : String,
     pub interfaces : Vec<IdlInterface>,
     pub coclasses : Vec<IdlCoClass>,
+    pub allocator_clsid: String,
 }
 
 #[derive(PartialEq, Serialize, Debug)]
@@ -159,6 +160,7 @@ impl IdlModel {
             lib_name : utils::pascal_case( lib.name() ),
             interfaces : itfs,
             coclasses : classes,
+            allocator_clsid : format!( "{:-X}", lib.allocator_clsid() ),
         } )
     }
 

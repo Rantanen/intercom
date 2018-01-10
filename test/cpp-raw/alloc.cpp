@@ -1,0 +1,60 @@
+#include "os.h"
+#include "catch.hpp"
+
+TEST_CASE( "Library supports allocator" )
+{
+	// Initialize COM.
+	InitializeRuntime();
+
+	// Get the error source interface.
+	IAllocator* pAllocator = nullptr;
+	HRESULT hr = CreateInstance(
+		CLSID_IntercomAllocator,
+		IID_IAllocator,
+		&pAllocator );
+	REQUIRE( hr == S_OK );
+	REQUIRE( pAllocator != nullptr );
+
+	IAllocTests* pAllocTests = nullptr;
+	hr = CreateInstance(
+		CLSID_AllocTests,
+		IID_IAllocTests,
+		&pAllocTests );
+	REQUIRE( hr == S_OK );
+	REQUIRE( pAllocTests != nullptr );
+
+	SECTION( "Dealloc BSTR return value" )
+	{
+		BSTR bstr = nullptr;
+		bstr = pAllocTests->GetBstr( 123 );
+
+		REQUIRE( bstr != nullptr );
+		REQUIRE( bstr[ 0 ] == L'1' );
+		REQUIRE( bstr[ 1 ] == L'2' );
+		REQUIRE( bstr[ 2 ] == L'3' );
+		REQUIRE( bstr[ 3 ] == 0 );
+
+		// Nothing to assert after this. :<
+		pAllocator->FreeBSTR( bstr );
+	}
+
+	SECTION( "Dealloc BSTR result" )
+	{
+		BSTR bstr = nullptr;
+		hr = pAllocTests->GetBstrResult( 999, OUT &bstr );
+		REQUIRE( hr == S_OK );
+
+		REQUIRE( bstr != nullptr );
+		REQUIRE( bstr[ 0 ] == L'9' );
+		REQUIRE( bstr[ 1 ] == L'9' );
+		REQUIRE( bstr[ 2 ] == L'9' );
+		REQUIRE( bstr[ 3 ] == 0 );
+
+		// Nothing to assert after this. :<
+		pAllocator->FreeBSTR( bstr );
+	}
+
+	pAllocator->Release();
+
+	UninitializeRuntime();
+}

@@ -48,6 +48,7 @@ pub struct ComLibrary {
     name : String,
     libid : GUID,
     coclasses : Vec<Ident>,
+    allocator_clsid : GUID,
 }
 
 impl ComLibrary
@@ -91,7 +92,11 @@ impl ComLibrary
         Ok( ComLibrary {
             name: crate_name.to_owned(),
             libid,
-            coclasses
+            coclasses,
+            allocator_clsid: ::utils::generate_guid(
+                    crate_name,
+                    "intercom::alloc::Allocator",
+                    "CLSID" )
         } )
     }
 
@@ -103,6 +108,9 @@ impl ComLibrary
 
     /// CoClasses exposed by the library.
     pub fn coclasses( &self ) -> &[Ident] { &self.coclasses }
+
+    /// Library LIBID.
+    pub fn allocator_clsid( &self ) -> &GUID { &self.allocator_clsid }
 }
 
 /// Details of a struct marked with `#[com_class]` attribute.
@@ -368,7 +376,7 @@ impl ComImpl
         //       something smarter.
         let methods = fns.into_iter()
             .map( |( ident, sig )|
-                ComMethodInfo::new( ident, &sig.decl ).map_err( |_| ident ) )
+                ComMethodInfo::new( ident, &sig ).map_err( |_| ident ) )
             .filter_map( |r| r.ok() )
             .collect::<Vec<_>>();
 

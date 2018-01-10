@@ -16,6 +16,7 @@ extern crate winapi;
     CreatedClass,
     SharedImplementation,
     ErrorSource,
+    AllocTests,
 )]
 
 #[com_interface( AUTO_GUID )]
@@ -243,5 +244,23 @@ impl From<intercom::ComError> for TestError
         TestError(
             source.hresult,
             source.description().unwrap_or( "" ).to_owned() )
+    }
+}
+
+#[com_class( AUTO_GUID, AllocTests)]
+pub struct AllocTests;
+
+#[com_interface( AUTO_GUID )]
+#[com_impl]
+impl AllocTests
+{
+    pub fn new() -> AllocTests { AllocTests }
+
+    pub fn get_bstr( &self, value: u32 ) -> String {
+        format!( "{}", value )
+    }
+
+    pub fn get_bstr_result( &self, value: u32 ) -> ComResult<String> {
+        Ok( format!( "{}", value ) )
     }
 }
