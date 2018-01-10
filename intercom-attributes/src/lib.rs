@@ -720,8 +720,8 @@ fn expand_com_class(
             // ComBox already derefs into the struct so we'll just get the
             // ComBox here and deref that.
             output.push( quote!(
-                impl ::std::ops::Deref for ::intercom::ComItf< #itf > {
-                    type Target = #itf;
+                impl ::std::ops::Deref for ::intercom::ComItf< #struct_ident > {
+                    type Target = #struct_ident;
                     fn deref( &self ) -> &Self::Target {
                         unsafe {
                             let self_combox =
