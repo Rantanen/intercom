@@ -30,21 +30,6 @@ library {{lib_name}}
     }
 {{/each}}
 
-    // Built-in allocator interface
-    [
-        object,
-        uuid( 18ee22b3-b0c6-44a5-a94a-7a417676fb66 ),
-        nonextensible,
-        pointer_default(unique)
-    ]
-    interface IAllocator : IUnknown
-    {
-        [id(0)] BSTR AllocBSTR( wchar_t* text, uint32 length );
-        [id(1)] void FreeBSTR( BSTR bstr );
-        [id(2)] void* Alloc( uint32 length );
-        [id(3)] void Free( void* ptr );
-    }
-
 {{#each coclasses}}
     [
         uuid( {{clsid}} )
@@ -56,12 +41,4 @@ library {{lib_name}}
     {{~/each}}
     }
 {{/each}}
-
-    [
-        uuid( {{allocator_clsid}} )
-    ]
-    coclass IntercomAllocator
-    {
-        interface IAllocator;
-    }
 }

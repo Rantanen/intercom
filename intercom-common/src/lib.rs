@@ -18,4 +18,5 @@ pub mod utils;
 pub mod ast_converters;
 pub mod methodinfo;
 pub mod model;
+pub mod builtin_model;
 pub mod foreign_ty;

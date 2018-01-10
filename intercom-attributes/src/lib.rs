@@ -26,6 +26,7 @@ use intercom_common::utils;
 use intercom_common::ast_converters::*;
 use intercom_common::methodinfo::{ComMethodInfo, Direction};
 use intercom_common::model;
+use intercom_common::builtin_model;
 
 extern crate proc_macro;
 use proc_macro::{TokenStream, LexError};
@@ -861,15 +862,27 @@ fn expand_com_library(
         ) );
     }
 
-    // Generate allocator CLSID.
-    let allocator_clsid_tokens = utils::get_guid_tokens( lib.allocator_clsid() );
-    let allocator_clsid_doc = "Built-in intercom allocator class ID.";
-    output.push( quote!(
-        #[allow(non_upper_case_globals)]
-        #[doc = #allocator_clsid_doc ]
-        pub const CLSID_IntercomAllocator : ::intercom::CLSID
-                = #allocator_clsid_tokens;
-    ) );
+    // Generate built-in type data.
+    for bti in builtin_model::builtin_intercom_types( lib.name() ) {
+
+        // CLSID
+        let clsid_tokens = utils::get_guid_tokens(
+                bti.class.clsid().as_ref().unwrap() );
+        let clsid_doc = format!( "Built-in {} class ID.", bti.class.name() );
+        let builtin_clsid = idents::clsid( bti.class.name() );
+        output.push( quote!(
+            #[allow(non_upper_case_globals)]
+            #[doc = #clsid_doc ]
+            pub const #builtin_clsid : ::intercom::CLSID = #clsid_tokens;
+        ) );
+
+        // Match arm
+        let ctor = bti.ctor;
+        match_arms.push( quote!(
+            self::#builtin_clsid =>
+                Ok( ::intercom::ComBox::new( #ctor ) as ::intercom::RawComPtr )
+        ) );
+    }
 
     // Implement DllGetClassObject.
     //
@@ -896,10 +909,6 @@ fn expand_com_library(
                 ::intercom::ClassFactory::new( rclsid, | clsid | {
                     match *clsid {
                         #( #match_arms, )*
-                        self::CLSID_IntercomAllocator => Ok(
-                                ::intercom::ComBox::new(
-                                    ::intercom::alloc::Allocator::default() )
-                                as ::intercom::RawComPtr ),
                         _ => Err( ::intercom::E_NOINTERFACE ),
                     }
                 } ) );
@@ -916,7 +925,6 @@ fn expand_com_library(
         }
     );
     output.push( dll_get_class_object );
-
     Ok( tokens_to_tokenstream( item_tokens, output ) )
 }
 

@@ -10,6 +10,7 @@
 use ::guid::GUID;
 use ::ast_converters::*;
 use ::methodinfo::ComMethodInfo;
+use ::builtin_model;
 use ::syn::{Ident, Visibility, Unsafety};
 use ::std::path::{Path, PathBuf};
 use ::std::fs;
@@ -48,7 +49,6 @@ pub struct ComLibrary {
     name : String,
     libid : GUID,
     coclasses : Vec<Ident>,
-    allocator_clsid : GUID,
 }
 
 impl ComLibrary
@@ -93,10 +93,6 @@ impl ComLibrary
             name: crate_name.to_owned(),
             libid,
             coclasses,
-            allocator_clsid: ::utils::generate_guid(
-                    crate_name,
-                    "intercom::alloc::Allocator",
-                    "CLSID" )
         } )
     }
 
@@ -108,9 +104,6 @@ impl ComLibrary
 
     /// CoClasses exposed by the library.
     pub fn coclasses( &self ) -> &[Ident] { &self.coclasses }
-
-    /// Library LIBID.
-    pub fn allocator_clsid( &self ) -> &GUID { &self.allocator_clsid }
 }
 
 /// Details of a struct marked with `#[com_class]` attribute.
@@ -177,7 +170,7 @@ impl ComStruct
             name: item.ident.clone(),
             visibility: item.vis.clone(),
             clsid,
-            interfaces
+            interfaces,
         } )
     }
 
@@ -228,7 +221,7 @@ impl ComInterface
         Self::from_ast( crate_name, &attr, &item )
     }
 
-    /// Creates ComStruct from AST elements.
+    /// Creates ComInterface from AST elements.
     pub fn from_ast(
         crate_name : &str,
         attr : &::syn::Attribute,
@@ -358,7 +351,7 @@ impl ComImpl
         Self::from_ast( &item )
     }
 
-    /// Creates ComStruct from AST elements.
+    /// Creates ComImpl from AST elements.
     pub fn from_ast(
         item : &::syn::Item,
     ) -> ParseResult< ComImpl >
@@ -448,7 +441,13 @@ impl ComCrate
         sources : &[&str]
     ) -> ParseResult<ComCrate>
     {
-        let mut builder = Default::default();
+        let mut builder : ComCrateBuilder = Default::default();
+
+        for bti in builtin_model::builtin_intercom_types( crate_name ) {
+            builder.structs.push( bti.class );
+            builder.interfaces.push( bti.interface );
+            builder.impls.push( bti.implementation );
+        }
 
         for src in sources {
             let krate = ::syn::parse_crate( src )
