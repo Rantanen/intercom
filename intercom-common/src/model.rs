@@ -10,7 +10,7 @@
 use ::guid::GUID;
 use ::ast_converters::*;
 use ::methodinfo::ComMethodInfo;
-use ::syn::{Ident, Visibility};
+use ::syn::{Ident, Visibility, Unsafety};
 use ::std::path::{Path, PathBuf};
 use ::std::fs;
 use ::std::io::Read;
@@ -195,6 +195,7 @@ pub struct ComInterface
     base_interface : Option<Ident>,
     methods : Vec<ComMethodInfo>,
     item_type: ::utils::InterfaceType,
+    is_unsafe : bool,
 }
 
 impl ComInterface
@@ -228,7 +229,7 @@ impl ComInterface
     {
         // Get the interface details. As [com_interface] can be applied to both
         // impls and traits this handles both of those.
-        let ( itf_ident, fns, itf_type ) =
+        let ( itf_ident, fns, itf_type, unsafety ) =
                 ::utils::get_ident_and_fns( item )
                     .ok_or_else( || ParseError::ComInterface(
                             item.ident.to_string(),
@@ -284,7 +285,7 @@ impl ComInterface
         //       something smarter.
         let methods = fns.into_iter()
             .map( |( ident, sig )|
-                ComMethodInfo::new( ident, &sig.decl ) )
+                ComMethodInfo::new( ident, &sig ) )
             .filter_map( |r| r.ok() )
             .collect::<Vec<_>>();
 
@@ -295,6 +296,7 @@ impl ComInterface
             base_interface: base,
             methods: methods,
             item_type: itf_type,
+            is_unsafe : unsafety == Unsafety::Unsafe,
         } )
     }
 
@@ -317,6 +319,9 @@ impl ComInterface
     ///
     /// Either an impl or a trait.
     pub fn item_type( &self ) -> ::utils::InterfaceType { self.item_type }
+
+    /// True, if the interface requires unsafe impl.
+    pub fn is_unsafe( &self ) -> bool { self.is_unsafe }
 }
 
 #[derive(Debug, PartialEq)]

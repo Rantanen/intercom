@@ -26,7 +26,8 @@ pub enum InterfaceType { Trait, Struct }
 pub type InterfaceData<'a> = (
     Ident,
     Vec< ( &'a Ident, &'a MethodSig ) >,
-    InterfaceType
+    InterfaceType,
+    syn::Unsafety,
 );
 
 pub fn get_ident_and_fns(
@@ -34,12 +35,12 @@ pub fn get_ident_and_fns(
 ) -> Option< InterfaceData >
 {
     match item.node {
-        ItemKind::Impl( .., ref trait_ref, ref ty, ref items ) => {
+        ItemKind::Impl( unsafety, .., ref trait_ref, ref ty, ref items ) => {
             let ( _, struct_ident, items ) =
                     get_impl_data_raw( trait_ref, ty, items );
-            Some( ( struct_ident, items, InterfaceType::Struct ) )
+            Some( ( struct_ident, items, InterfaceType::Struct, unsafety ) )
         },
-        ItemKind::Trait( .., ref items ) => {
+        ItemKind::Trait( unsafety, .., ref items ) => {
 
             let methods : Option< Vec< (&Ident, &MethodSig) > > = items
                     .into_iter()
@@ -47,7 +48,12 @@ pub fn get_ident_and_fns(
                     .collect();
 
             match methods {
-                Some( m ) => Some( ( item.ident.clone(), m, InterfaceType::Trait ) ),
+                Some( m ) => Some( (
+                        item.ident.clone(),
+                        m,
+                        InterfaceType::Trait,
+                        unsafety,
+                    ) ),
                 None => None
             }
         },

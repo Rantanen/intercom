@@ -310,10 +310,16 @@ fn expand_com_interface(
         // Create the method implementation using the bits defined above.
         let self_arg = &method_info.rust_self_arg;
         let return_ty = &method_info.rust_return_ty;
+        let unsafety = if method_info.is_unsafe { quote!( unsafe ) } else { quote!() };
         impls.push( quote!(
-            fn #method_ident( #self_arg, #( #impl_args ),* ) -> #return_ty {
+            #unsafety fn #method_ident(
+                #self_arg, #( #impl_args ),*
+            ) -> #return_ty
+            {
                 let comptr = ::intercom::ComItf::ptr( self );
                 let vtbl = comptr as *const *const #vtable_ident;
+
+                #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
                 unsafe {
                     #( #out_arg_declarations )*;
                     let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
@@ -339,8 +345,9 @@ fn expand_com_interface(
     // `impl StructName for intercom::ComItf<StructName>`, which is invalid
     // syntax when `StructName` is struct instead of a trait.
     if itf.item_type() == utils::InterfaceType::Trait {
+        let unsafety = if itf.is_unsafe() { quote!( unsafe ) } else { quote!() };
         output.push( quote!(
-            impl #itf_ident for ::intercom::ComItf< #itf_ident > {
+            #unsafety impl #itf_ident for ::intercom::ComItf< #itf_ident > {
                 #( #impls )*
             }
         ) );

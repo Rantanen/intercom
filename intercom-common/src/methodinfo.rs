@@ -73,6 +73,8 @@ pub struct ComMethodInfo {
 
     pub returnhandler: Box<ReturnHandler>,
     pub args: Vec<RustArg>,
+
+    pub is_unsafe: bool,
 }
 
 impl PartialEq for ComMethodInfo {
@@ -94,15 +96,14 @@ impl ComMethodInfo {
     /// Constructs new COM method info from a Rust method signature.
     pub fn new(
         n: &Ident,
-        m : &FnDecl
+        m : &MethodSig
     ) -> Result<ComMethodInfo, ComMethodInfoError>
     {
-
         // Process all the function arguments.
         // In Rust this includes the 'self' argument and the actual function
         // arguments. For COM the self is implicit so we'll handle it
         // separately.
-        let ( is_const, rust_self_arg, com_args ) = m.inputs
+        let ( is_const, rust_self_arg, com_args ) = m.decl.inputs
             .split_first()
             .ok_or( ComMethodInfoError::TooFewArguments )
             .and_then( | ( self_arg, other_args ) | {
@@ -134,7 +135,7 @@ impl ComMethodInfo {
             } )?;
 
         // Get the output.
-        let output = &m.output;
+        let output = &m.decl.output;
         let rust_return_ty = output.get_ty()
                 .or( Err( ComMethodInfoError::BadReturnTy ) )?;
 
@@ -158,12 +159,13 @@ impl ComMethodInfo {
             return_type: return_type,
             returnhandler: returnhandler,
             args: com_args,
+            is_unsafe: m.unsafety == Unsafety::Unsafe,
         } )
     }
 
     pub fn raw_com_args( &self ) -> Vec<ComArg>
     {
-        let out_dir = if let Some( ::syn::Ty::Tup(_) ) = self.retval_type {
+        let out_dir = if let Some( Ty::Tup(_) ) = self.retval_type {
                             Direction::Out
                         } else {
                             Direction::Retval
