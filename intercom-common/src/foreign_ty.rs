@@ -34,13 +34,13 @@ impl ForeignTyHandler for CTyHandler
 
             // Pointer types.
             syn::Ty::Slice( ref ty )
-                => format!( "*{}", self.get_ty( krate, ty )? ),
+                => format!( "{}*", self.get_ty( krate, ty )? ),
             syn::Ty::Ptr( ref mutty ) | syn::Ty::Rptr( .., ref mutty )
                 => match mutty.mutability {
                     syn::Mutability::Mutable
-                        => format!( "*{}", self.get_ty( krate, &mutty.ty )? ),
+                        => format!( "{}*", self.get_ty( krate, &mutty.ty )? ),
                     syn::Mutability::Immutable
-                        => format!( "*const {}", self.get_ty( krate, &mutty.ty )? ),
+                        => format!( "const {}*", self.get_ty( krate, &mutty.ty )? ),
                 },
 
             // This is quite experimental. Do IDLs even support staticly sized
@@ -101,6 +101,7 @@ impl CTyHandler
                 => format!( "{}*", self.get_ty( krate, &args[0] )? ),
             "RawComPtr" => "*void".to_owned(),
             "String" => "BSTR".to_owned(),
+            "BStr" => "BSTR".to_owned(),
             "usize" => "size_t".to_owned(),
             "u64" => "uint64".to_owned(),
             "i64" => "int64".to_owned(),
@@ -112,6 +113,7 @@ impl CTyHandler
             "i8" => "int8".to_owned(),
             "f64" => "double".to_owned(),
             "f32" => "float".to_owned(),
+            "c_void" => "void".to_owned(),
 
             // Default handling checks if we need to rename the type, such as
             // Foo -> IFoo for implicit interfaces.
@@ -153,6 +155,7 @@ pub fn to_cpp_type(
         "uint8" => "uint8_t",
         "int16" => "int16_t",
         "uint16" => "uint16_t",
+        "uint16*" => "uint16_t*",
         "int32" => "int32_t",
         "uint32" => "uint32_t",
         "int64" => "int64_t",

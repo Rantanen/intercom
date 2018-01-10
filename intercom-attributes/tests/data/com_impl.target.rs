@@ -185,7 +185,7 @@ impl ::intercom::CoClass for Foo {
 // Class ID.
 #[allow(non_upper_case_globals)]
 #[doc = "`Foo` class ID."]
-const CLSID_Foo: ::intercom::CLSID =
+pub const CLSID_Foo: ::intercom::CLSID =
     ::intercom::GUID {
         data1: 0u32, data2: 0u16, data3: 0u16,
         data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8]

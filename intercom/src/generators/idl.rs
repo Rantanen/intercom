@@ -261,7 +261,67 @@ mod test {
                             ]
                         }
                     ]
-                }
+                },
+                IdlInterface {
+                    name : "IAllocator".to_owned(),
+                    base : Some( "IUnknown".to_owned() ),
+                    iid : "18EE22B3-B0C6-44A5-A94A-7A417676FB66".to_owned(),
+                    methods : vec![
+                        IdlMethod {
+                            name : "AllocBstr".to_owned(),
+                            idx : 0,
+                            ret_type : "BSTR".to_owned(),
+                            args : vec![
+                                IdlArg { 
+                                    name : "text".to_owned(),
+                                    arg_type : "BSTR".to_owned(),
+                                    attributes : "in".to_owned(),
+                                },
+                                IdlArg { 
+                                    name : "len".to_owned(),
+                                    arg_type : "uint32".to_owned(),
+                                    attributes : "in".to_owned(),
+                                },
+                            ]
+                        },
+                        IdlMethod {
+                            name : "FreeBstr".to_owned(),
+                            idx : 1,
+                            ret_type : "void".to_owned(),
+                            args : vec![
+                                IdlArg { 
+                                    name : "bstr".to_owned(),
+                                    arg_type : "BSTR".to_owned(),
+                                    attributes : "in".to_owned(),
+                                },
+                            ]
+                        },
+                        IdlMethod {
+                            name : "Alloc".to_owned(),
+                            idx : 2,
+                            ret_type : "void*".to_owned(),
+                            args : vec![
+                                IdlArg { 
+                                    name : "len".to_owned(),
+                                    arg_type : "size_t".to_owned(),
+                                    attributes : "in".to_owned(),
+                                },
+                            ]
+                        },
+                        IdlMethod {
+                            name : "Free".to_owned(),
+                            idx : 3,
+                            ret_type : "void".to_owned(),
+                            args : vec![
+                                IdlArg { 
+                                    name : "ptr".to_owned(),
+                                    arg_type : "void*".to_owned(),
+                                    attributes : "in".to_owned(),
+                                },
+                            ]
+                        },
+                    ]
+                },
             ],
             coclasses : vec![
                 IdlCoClass {
@@ -271,7 +331,14 @@ mod test {
                         "ICoClass".to_owned(),
                         "IInterface".to_owned(),
                     ],
-                }
+                },
+                IdlCoClass {
+                    name : "Allocator".to_owned(),
+                    clsid : "EC444090-9CDC-31A4-4023-D0458C5CD45C".to_owned(),
+                    interfaces : vec![
+                        "IAllocator".to_owned(),
+                    ]
+                },
             ],
         };
 

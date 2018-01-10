@@ -78,20 +78,24 @@ pub mod os {
 
 #[cfg(not(windows))]
 pub mod os {
-    use std::libc;
+    use std::os::raw;
+    use libc;
 
     pub unsafe fn alloc_bstr(
         psz: *const u16,
         len: u32
     ) -> *mut u16
     {
+        // text size in bytes.
+        let text_size : usize = ( len * 2 ) as usize;
+
         // BSTR layout:
         //
         // | Length:u32 | Text data...:[u16] | Zero termiantion:u16 |
         //
         // As bytes this is 4 + len * 2 + 2, or:
-        let ptr = libc::malloc( len * 2 + 6 );
-        let text_data = ( ptr + 4 ) as *mut u16;
+        let ptr = libc::malloc( text_size + 6 );
+        let text_data = ( ptr as usize + 4 ) as *mut u16;
 
         // Store the length.
         *( ptr as *mut u32 ) = len;
@@ -99,12 +103,12 @@ pub mod os {
         // Copy text data to the buffer. Size is indicates as bytes, so
         // double the amount of u16-chars.
         libc::memcpy(
-                text_data as *mut c_void,
-                psz as *mut c_void,
-                len * 2 );
+                text_data as *mut _,
+                psz as *mut _,
+                text_size );
 
         // Zero termination.
-        *( text_data + len ) = 0;
+        *(( text_data as usize + text_size ) as *mut _ ) = 0u16;
 
         // Return a pointer to the text data as per BSTR spec.
         text_data
@@ -112,23 +116,23 @@ pub mod os {
 
     pub unsafe fn free_bstr(
         bstr : *mut u16
-    ) -> *mut u16 {
+    ) {
 
         // Offset the ptr back to the start of the reserved memory and free it.
-        let ptr = bstr - 2;
-        libc::free( ptr as *mut c_void );
+        let ptr = ( bstr as usize - 2 ) as *mut _;
+        libc::free( ptr )
     }
 
     pub unsafe fn alloc(
         len: usize
-    ) -> *mut libc::c_void {
-        libc::malloc( len )
+    ) -> *mut raw::c_void {
+        libc::malloc( len ) as *mut _
     }
 
     pub unsafe fn free(
-        ptr : *mut libc::c_void
+        ptr : *mut raw::c_void
     ) {
-        libc::free( ptr as *mut c_void )
+        libc::free( ptr as *mut _ )
     }
 }
 

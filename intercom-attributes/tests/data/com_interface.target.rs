@@ -109,6 +109,8 @@ impl Foo for ::intercom::ComItf<Foo>
     {
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
+        
+        #[allow(unused_unsafe)]
         unsafe {
             let __result = ((**vtbl).simple_method)(comptr);
         }
@@ -119,6 +121,7 @@ impl Foo for ::intercom::ComItf<Foo>
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
+        #[allow(unused_unsafe)]
         unsafe {
             let __result = ((**vtbl).arg_method)(comptr, a.into());
         }
@@ -129,6 +132,7 @@ impl Foo for ::intercom::ComItf<Foo>
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
+        #[allow(unused_unsafe)]
         unsafe {
             let __result = ((**vtbl).simple_result_method)(comptr);
 
@@ -142,6 +146,7 @@ impl Foo for ::intercom::ComItf<Foo>
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
+        #[allow(unused_unsafe)]
         unsafe {
             let mut __out: u16 = Default::default();
             let __result = ((**vtbl).com_result_method)(comptr, &mut __out);
@@ -164,6 +169,7 @@ impl Foo for ::intercom::ComItf<Foo>
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
+        #[allow(unused_unsafe)]
         unsafe {
             let mut __out: u16 = Default::default();
             let __result = ((**vtbl).rust_result_method)(comptr, &mut __out);
@@ -188,6 +194,8 @@ impl Foo for ::intercom::ComItf<Foo>
     {
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
+
+        #[allow(unused_unsafe)]
         unsafe {
 
             let mut __out: bool = Default::default();
@@ -207,6 +215,7 @@ impl Foo for ::intercom::ComItf<Foo>
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
+        #[allow(unused_unsafe)]
         unsafe {
             let __result = ((**vtbl).string_method)( comptr, msg.into() );
             __result.into()
@@ -218,6 +227,7 @@ impl Foo for ::intercom::ComItf<Foo>
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
+        #[allow(unused_unsafe)]
         unsafe {
             let mut __out: ComItf<IUnknown> = ComItf::null_itf();
             let __result = ((**vtbl).comitf_method)(comptr, itf.into(), &mut __out);

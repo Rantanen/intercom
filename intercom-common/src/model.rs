@@ -432,6 +432,29 @@ impl ComCrateBuilder {
             incomplete: self.incomplete,
         } )
     }
+
+    pub fn include_builtin( &mut self, crate_name : &str ) {
+
+        let built_in_types = builtin_model::builtin_intercom_types( crate_name );
+        for bti in built_in_types {
+            self.structs.push( bti.class );
+            self.interfaces.push( bti.interface );
+            self.impls.push( bti.implementation );
+        }
+
+        let built_in_types = builtin_model::builtin_intercom_types( crate_name );
+        for lib in self.libs.iter_mut() {
+            for clsid in built_in_types.iter().filter_map( |bti|
+                    if bti.class.clsid.is_some() {
+                        Some( bti.class.name().clone() )
+                    } else {
+                        None
+                    } ) {
+
+                lib.coclasses.push( clsid )
+            }
+        }
+    }
 }
 
 impl ComCrate
@@ -442,12 +465,6 @@ impl ComCrate
     ) -> ParseResult<ComCrate>
     {
         let mut builder : ComCrateBuilder = Default::default();
-
-        for bti in builtin_model::builtin_intercom_types( crate_name ) {
-            builder.structs.push( bti.class );
-            builder.interfaces.push( bti.interface );
-            builder.impls.push( bti.implementation );
-        }
 
         for src in sources {
             let krate = ::syn::parse_crate( src )
@@ -461,6 +478,7 @@ impl ComCrate
                 &mut builder )?;
         }
 
+        builder.include_builtin( crate_name );
         builder.build()
     }
 
@@ -530,8 +548,11 @@ impl ComCrate
         path : &Path
     ) -> ParseResult<ComCrate>
     {
-        let mut builder = Default::default();
+        let mut builder : ComCrateBuilder = Default::default();
+
         Self::parse_file_internal( crate_name, path, &mut builder )?;
+
+        builder.include_builtin( crate_name );
         builder.build()
     }
 
@@ -895,17 +916,25 @@ mod test
         assert!( krate.lib.is_some() );
         assert_eq!( krate.lib.as_ref().unwrap().libid(),
             &GUID::parse( "12345678-1234-1234-1234-567890000000" ).unwrap() );
-        assert_eq!( krate.interfaces().len(), 1 );
+        
+        // The interfaces should contain the built-in interface.
+        assert_eq!( krate.interfaces().len(), 2 );
         assert_eq!( krate.interfaces()[ "IFoo" ].iid(),
             &GUID::parse( "12345678-1234-1234-1234-567890000001" ).unwrap() );
+        assert_eq!( krate.interfaces()[ "Allocator" ].iid(),
+            &GUID::parse( "18EE22B3-B0C6-44A5-A94A-7A417676FB66" ).unwrap() );
 
-        assert_eq!( krate.structs().len(), 1 );
+        assert_eq!( krate.structs().len(), 2 );
         assert_eq!( krate.structs()[ "S" ].clsid().as_ref().unwrap(),
             &GUID::parse( "12345678-1234-1234-1234-567890000002" ).unwrap() );
+        assert_eq!( krate.structs()[ "Allocator" ].clsid().as_ref().unwrap(),
+            &GUID::parse( "1582F0E9-9CAB-3E18-7F37-0CF2CD9DA33A" ).unwrap() );
 
-        assert_eq!( krate.impls().len(), 1 );
+        assert_eq!( krate.impls().len(), 2 );
         assert_eq!( krate.impls()[0].struct_name(), "S" );
         assert_eq!( krate.impls()[0].interface_name(), "IFoo" );
+        assert_eq!( krate.impls()[1].struct_name(), "Allocator" );
+        assert_eq!( krate.impls()[1].interface_name(), "Allocator" );
     }
 
     #[test]

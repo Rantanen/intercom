@@ -285,7 +285,58 @@ mod test {
                             ]
                         }
                     ]
-                }
+                },
+                CppInterface {
+                    name : "IAllocator".to_owned(),
+                    base : Some( "IUnknown".to_owned() ),
+                    iid_struct : "{0x18ee22b3,0xb0c6,0x44a5,{0xa9,0x4a,0x7a,0x41,0x76,0x76,0xfb,0x66}}".to_owned(),
+                    methods : vec![
+                        CppMethod {
+                            name : "AllocBstr".to_owned(),
+                            ret_type : "intercom::BSTR".to_owned(),
+                            args : vec![
+                                CppArg { 
+                                    name : "text".to_owned(),
+                                    arg_type : "intercom::BSTR".to_owned(),
+                                },
+                                CppArg { 
+                                    name : "len".to_owned(),
+                                    arg_type : "uint32_t".to_owned(),
+                                },
+                            ]
+                        },
+                        CppMethod {
+                            name : "FreeBstr".to_owned(),
+                            ret_type : "void".to_owned(),
+                            args : vec![
+                                CppArg { 
+                                    name : "bstr".to_owned(),
+                                    arg_type : "intercom::BSTR".to_owned(),
+                                },
+                            ]
+                        },
+                        CppMethod {
+                            name : "Alloc".to_owned(),
+                            ret_type : "void*".to_owned(),
+                            args : vec![
+                                CppArg { 
+                                    name : "len".to_owned(),
+                                    arg_type : "size_t".to_owned(),
+                                },
+                            ]
+                        },
+                        CppMethod {
+                            name : "Free".to_owned(),
+                            ret_type : "void".to_owned(),
+                            args : vec![
+                                CppArg { 
+                                    name : "ptr".to_owned(),
+                                    arg_type : "void*".to_owned(),
+                                },
+                            ]
+                        },
+                    ]
+                },
             ],
             coclasses : vec![
                 CppCoClass {
@@ -296,12 +347,63 @@ mod test {
                         "ICoClass".to_owned(),
                         "IInterface".to_owned(),
                     ],
-                }
+                },
+                CppCoClass {
+                    name : "Allocator".to_owned(),
+                    clsid_struct : "{0xec444090,0x9cdc,0x31a4,{0x40,0x23,0xd0,0x45,0x8c,0x5c,0xd4,0x5c}}".to_owned(),
+                    interface_count: 1,
+                    interfaces : vec![
+                        "IAllocator".to_owned(),
+                    ],
+                },
             ],
         };
 
         let actual_cpp = CppModel::from_crate( &krate ).unwrap();
 
         assert_eq!( expected_cpp, actual_cpp );
+    }
+
+    #[test]
+    fn bstr_method() {
+
+        let krate = model::ComCrate::parse( "com_library", &[ r#"
+            #[com_library( "11112222-3333-4444-5555-666677778888", CoClass )]
+            #[com_class( "33334444-5555-6666-7777-888899990000", CoClass )]
+            struct CoClass;
+
+            #[com_interface( "44445555-6666-7777-8888-99990000AAAA" )]
+            #[com_impl]
+            impl CoClass {
+                pub fn new() -> CoClass { CoClass }
+                pub fn bstr_method( &self, b : String ) -> String {}
+            }
+        "# ] ).expect( "Could not parse test crate" );
+
+        let expected_method = 
+            CppMethod {
+                name : "BstrMethod".to_owned(),
+                ret_type : "intercom::BSTR".to_owned(),
+                args : vec![
+                    CppArg { 
+                        name : "b".to_owned(),
+                        arg_type : "intercom::BSTR".to_owned(),
+                    },
+                ]
+            };
+
+        let actual_model = CppModel::from_crate( &krate ).unwrap();
+        let actual_method =
+                actual_model
+                    .interfaces
+                        .iter()
+                        .find( |c| c.name == "ICoClass" )
+                        .unwrap()
+                    .methods
+                        .iter()
+                        .find( |m| m.name == "BstrMethod" )
+                        .unwrap();
+
+        assert_eq!( &expected_method, actual_method );
     }
 }

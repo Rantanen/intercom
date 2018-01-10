@@ -37,6 +37,8 @@ impl IFoo for ::intercom::ComItf<IFoo> {
     fn trait_method(&self) -> () {
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __IFooVtbl;
+
+        #[allow(unused_unsafe)]
         unsafe {
             let __result = ((**vtbl).trait_method)(comptr);
         }
@@ -183,7 +185,7 @@ impl ::intercom::CoClass for Foo {
 
 #[allow(non_upper_case_globals)]
 #[doc = "`Foo` class ID."]
-const CLSID_Foo: ::intercom::CLSID = ::intercom::GUID {
+pub const CLSID_Foo: ::intercom::CLSID = ::intercom::GUID {
     data1: 0u32,
     data2: 0u16,
     data3: 0u16,

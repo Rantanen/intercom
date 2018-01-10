@@ -6,12 +6,18 @@ use super::*;
 
 /// Binary GUID format as defined for the COM interfaces.
 #[repr(C)]
-#[derive(Eq, PartialEq, Debug, Clone)]
+#[derive(Eq, PartialEq, Clone)]
 pub struct GUID {
     pub data1: u32,
     pub data2: u16,
     pub data3: u16,
     pub data4: [ u8; 8 ],
+}
+
+impl std::fmt::Debug for GUID {
+    fn fmt( &self, f: &mut std::fmt::Formatter ) -> Result<(), std::fmt::Error> {
+        write!( f, "{}", self )
+    }
 }
 
 impl GUID {

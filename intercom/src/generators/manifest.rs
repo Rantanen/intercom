@@ -129,6 +129,10 @@ mod test {
                 ManifestCoClass {
                     name : "CoClass".to_owned(),
                     clsid : "{33334444-5555-6666-7777-888899990000}".to_owned(),
+                },
+                ManifestCoClass {
+                    name : "Allocator".to_owned(),
+                    clsid : "{EC444090-9CDC-31A4-4023-D0458C5CD45C}".to_owned(),
                 }
             ],
         };

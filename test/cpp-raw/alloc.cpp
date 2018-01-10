@@ -1,6 +1,8 @@
 #include "os.h"
 #include "catch.hpp"
 
+#include "testlib.h"
+
 TEST_CASE( "Library supports allocator" )
 {
 	// Initialize COM.
@@ -9,7 +11,7 @@ TEST_CASE( "Library supports allocator" )
 	// Get the error source interface.
 	IAllocator* pAllocator = nullptr;
 	HRESULT hr = CreateInstance(
-		CLSID_IntercomAllocator,
+		CLSID_Allocator,
 		IID_IAllocator,
 		&pAllocator );
 	REQUIRE( hr == S_OK );
@@ -35,7 +37,7 @@ TEST_CASE( "Library supports allocator" )
 		REQUIRE( bstr[ 3 ] == 0 );
 
 		// Nothing to assert after this. :<
-		pAllocator->FreeBSTR( bstr );
+		pAllocator->FreeBstr( bstr );
 	}
 
 	SECTION( "Dealloc BSTR result" )
@@ -51,7 +53,7 @@ TEST_CASE( "Library supports allocator" )
 		REQUIRE( bstr[ 3 ] == 0 );
 
 		// Nothing to assert after this. :<
-		pAllocator->FreeBSTR( bstr );
+		pAllocator->FreeBstr( bstr );
 	}
 
 	pAllocator->Release();

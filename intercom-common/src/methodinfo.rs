@@ -99,11 +99,20 @@ impl ComMethodInfo {
         m : &MethodSig
     ) -> Result<ComMethodInfo, ComMethodInfoError>
     {
+        Self::new_from_parts( n, &m.decl, &m.unsafety )
+    }
+
+    pub fn new_from_parts(
+        n: &Ident,
+        decl: &FnDecl,
+        unsafety: &Unsafety
+    ) -> Result<ComMethodInfo, ComMethodInfoError>
+    {
         // Process all the function arguments.
         // In Rust this includes the 'self' argument and the actual function
         // arguments. For COM the self is implicit so we'll handle it
         // separately.
-        let ( is_const, rust_self_arg, com_args ) = m.decl.inputs
+        let ( is_const, rust_self_arg, com_args ) = decl.inputs
             .split_first()
             .ok_or( ComMethodInfoError::TooFewArguments )
             .and_then( | ( self_arg, other_args ) | {
@@ -135,7 +144,7 @@ impl ComMethodInfo {
             } )?;
 
         // Get the output.
-        let output = &m.decl.output;
+        let output = &decl.output;
         let rust_return_ty = output.get_ty()
                 .or( Err( ComMethodInfoError::BadReturnTy ) )?;
 
@@ -159,7 +168,7 @@ impl ComMethodInfo {
             return_type: return_type,
             returnhandler: returnhandler,
             args: com_args,
-            is_unsafe: m.unsafety == Unsafety::Unsafe,
+            is_unsafe: unsafety == &Unsafety::Unsafe,
         } )
     }
 
@@ -314,11 +323,10 @@ mod tests {
     fn test_info( code : &str ) -> ComMethodInfo {
 
         let item = parse_item( code ).unwrap();
-        ComMethodInfo::new(
-            &item.ident,
-            match item.node {
-                ItemKind::Fn( ref fn_decl, .. ) => fn_decl,
-                _ => panic!( "Code isn't function" ),
-            } ).unwrap()
+        let ( decl, unsafety ) = match item.node {
+            ItemKind::Fn( ref fn_decl, ref unsafety, .. ) => ( fn_decl, unsafety ),
+            _ => panic!( "Code isn't function" ),
+        };
+        ComMethodInfo::new_from_parts( &item.ident, decl, unsafety ).unwrap()
     }
 }

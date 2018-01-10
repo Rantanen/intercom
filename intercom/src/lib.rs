@@ -61,6 +61,9 @@ extern crate handlebars;
 #[cfg(feature = "generators")]
 pub mod generators;
 
+#[cfg(not(windows))]
+extern crate libc;
+
 // The crate doesn't really need the macros. However Rust will complain that
 // the import does nothing if we don't define #[macro_use]. Once we define
 // #[macro_use] to get rid of that warning, Rust will complain that the
