@@ -819,7 +819,7 @@ fn expand_com_class(
         let clsid_const = quote!(
             #[allow(non_upper_case_globals)]
             #[doc = #clsid_doc ]
-            const #clsid_ident : ::intercom::CLSID = #clsid_guid_tokens;
+            pub const #clsid_ident : ::intercom::CLSID = #clsid_guid_tokens;
         );
         output.push( clsid_const );
     }
