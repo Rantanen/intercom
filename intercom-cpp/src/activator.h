@@ -10,10 +10,9 @@
 using intercom::cpp::posix::DlWrapper;
 
 #include "cominterop.h"
+#include "raw_interface.h"
 
 namespace intercom
-{
-namespace cpp
 {
 
 class Activator
@@ -26,7 +25,7 @@ public:
 
     Activator(
         const char* name,
-        intercom::REFCLSID classId  //!< Identifies the class constructed with this activator.
+        const intercom::CLSID& classId  //!< Identifies the class constructed with this activator.
     ) :
         m_classId( classId ),
         m_library( name, DlWrapper::rtld::lazy ),
@@ -44,18 +43,25 @@ public:
             m_classFactory->Release();
     }
 
-    void create(
-        intercom::REFIID riid,
-        void** ppv
-    )
+    template< typename TInterface >
+    intercom::RawInterface<TInterface> create()
     {
-        intercom::HRESULT error = m_classFactory->CreateInstance( nullptr, riid, ppv );
+        intercom::RawInterface< TInterface > interface;
+        intercom::HRESULT error = m_classFactory->CreateInstance( nullptr, TInterface::ID, interface.out() );
         if( error != S_OK )
-		{
+        {
             throw std::runtime_error( "Could not create instance" );
-		}
+        }
+        return interface;
     }
 
+    intercom::HRESULT create(
+        intercom::REFIID riid,
+        void** interface
+    )
+    {
+        return m_classFactory->CreateInstance( nullptr, riid, (void**) interface );
+    }
 private:
 
     void init_class_factory()
@@ -76,6 +82,6 @@ private:
 };
 
 }
-}
+
 
 #endif

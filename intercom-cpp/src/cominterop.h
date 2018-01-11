@@ -5,7 +5,7 @@
 #include "comdef.h"
 #include "error_codes.h"
 
-HRESULT DllGetClassObject(
+intercom::HRESULT DllGetClassObject(
   intercom::REFCLSID rclsid,
   intercom::REFIID riid,
   void** ppv
