@@ -2,6 +2,8 @@ project (cpp-raw)
 
 set (PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
 set (PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set (INTERCOM_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
+set (TESTLIB_DIR ${INTERCOM_ROOT}/test/testlib)
 
 # C++14 support
 set(CMAKE_CXX_STANDARD 14)
@@ -28,6 +30,14 @@ set(PROJECT_COMPILER_SPECIFIC_SRC
     ${PROJECT_SOURCE_DIR}/gcc/test_lib.cpp
 )
 endif()
+
+# Use the intercom-cli as code generator for test_lib.h/test_lib.cpp
+file(GLOB testlib_sources ${TESTLIB_DIR}/src)
+add_custom_command(
+    OUTPUT ${PROJECT_SOURCE_DIR}/gcc/test_lib.h ${PROJECT_SOURCE_DIR}/gcc/test_lib.cpp
+    COMMAND cargo run cpp ${TESTLIB_DIR} ${PROJECT_SOURCE_DIR}/gcc
+    WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
+    DEPENDS ${testlib_sources})
 
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_INCLUDE_DIR}")
