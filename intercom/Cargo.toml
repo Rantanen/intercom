@@ -29,3 +29,7 @@ libc = "0.2"
 [features]
 default = []
 generators = [ "serde", "serde_derive", "intercom-common", "handlebars" ]
+
+[dev-dependencies]
+difference = "1.0.0"
+intercom-common = { version = "0.2", path = "../intercom-common" }
