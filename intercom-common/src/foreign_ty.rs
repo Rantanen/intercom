@@ -100,8 +100,7 @@ impl CTyHandler
             "ComRc" | "ComItf"
                 => format!( "{}*", self.get_ty( krate, &args[0] )? ),
             "RawComPtr" => "*void".to_owned(),
-            "String" => "BSTR".to_owned(),
-            "BStr" => "BSTR".to_owned(),
+            "String" | "BStr" => "BSTR".to_owned(),
             "usize" => "size_t".to_owned(),
             "u64" => "uint64".to_owned(),
             "i64" => "int64".to_owned(),

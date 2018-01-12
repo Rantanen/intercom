@@ -286,7 +286,7 @@ impl ComInterface
         //       something smarter.
         let methods = fns.into_iter()
             .map( |( ident, sig )|
-                ComMethodInfo::new( ident, &sig ) )
+                ComMethodInfo::new( ident, sig ) )
             .filter_map( |r| r.ok() )
             .collect::<Vec<_>>();
 
@@ -369,7 +369,7 @@ impl ComImpl
         //       something smarter.
         let methods = fns.into_iter()
             .map( |( ident, sig )|
-                ComMethodInfo::new( ident, &sig ).map_err( |_| ident ) )
+                ComMethodInfo::new( ident, sig ).map_err( |_| ident ) )
             .filter_map( |r| r.ok() )
             .collect::<Vec<_>>();
 
@@ -443,7 +443,7 @@ impl ComCrateBuilder {
         }
 
         let built_in_types = builtin_model::builtin_intercom_types( crate_name );
-        for lib in self.libs.iter_mut() {
+        for lib in &mut self.libs {
             for clsid in built_in_types.iter().filter_map( |bti|
                     if bti.class.clsid.is_some() {
                         Some( bti.class.name().clone() )
