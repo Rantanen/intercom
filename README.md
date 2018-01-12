@@ -2,7 +2,7 @@
 ### Utilities for writing COM components in Rust
 
 [![crates.io](https://img.shields.io/crates/v/intercom.svg)](https://crates.io/crates/intercom)
-[![Build status](https://ci.appveyor.com/api/projects/status/q88b7xk6l72kup0y?svg=true)](https://ci.appveyor.com/project/Rantanen/intercom)
+[![Build status](https://ci.appveyor.com/api/projects/status/q88b7xk6l72kup0y/branch/master?svg=true)](https://ci.appveyor.com/project/Rantanen/intercom/branch/master)
 [![Build Status](https://travis-ci.org/Rantanen/intercom.svg?branch=master)](https://travis-ci.org/Rantanen/intercom)
 [![codecov](https://codecov.io/gh/Rantanen/intercom/branch/master/graph/badge.svg)](https://codecov.io/gh/Rantanen/intercom)
 
