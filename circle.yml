@@ -5,6 +5,8 @@ jobs:
     build:
         docker:
             - image: rustlang/rust:nightly
+              environment:
+                  RUSTFLAGS: -C link-dead-code
           
         steps:
             - checkout
@@ -59,6 +61,11 @@ jobs:
                     for file in target/debug/*-[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f];
                     do
                         ${RUN_KCOV} "$file"
+                    done
+
+                    for file in intercom-attributes/tests/data/*.source.rs;
+                    do
+                        CARGO_PKG_NAME="source" ${RUN_KCOV} rustc --crate-name source --crate-type lib "$file" --out-dir target/test_out -L dependency=target/debug/deps --extern intercom=target/debug/libintercom.rlib --pretty=expanded -Z unstable-options > /dev/null;
                     done
 
                     # C++ tests
