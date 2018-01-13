@@ -4,6 +4,7 @@
 
 #include <dlfcn.h>
 #include <string>
+#include <stdexcept>
 
 namespace intercom
 {
@@ -118,7 +119,7 @@ private:
     {
         std::string error;
         if( try_get_error( &error ) )
-            throw std::exception();
+            throw std::runtime_error( error );
     }
 
     //! Attempts to get an

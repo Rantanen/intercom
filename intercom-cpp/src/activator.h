@@ -2,6 +2,8 @@
 #ifndef INTERCOM_CPP_ACTIVATOR_H
 #define INTERCOM_CPP_ACTIVATOR_H
 
+#include <stdexcept>
+
 #include "posix/iclassfactory.h"
 #include "posix/dlwrapper.h"
 
@@ -49,7 +51,9 @@ public:
     {
         intercom::HRESULT error = m_classFactory->CreateInstance( nullptr, riid, ppv );
         if( error != S_OK )
-            throw std::exception();
+		{
+            throw std::runtime_error( "Could not create instance" );
+		}
     }
 
 private:
@@ -59,7 +63,7 @@ private:
         intercom::HRESULT error = m_getClassObjectFunc( m_classId, IID_IClassFactory,
                 (void**) &m_classFactory );
         if( error != S_OK )
-            throw std::exception();
+            throw std::runtime_error( "Could not acquire class factory" );
     }
 
 private:
