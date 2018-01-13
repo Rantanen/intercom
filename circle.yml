@@ -45,8 +45,7 @@ jobs:
                 command: |
                     # Set up the environment. We need LD_LIBRARY_PATH to include rust libs for
                     # the rust tests to execute without cargo.
-                    export LD_LIBRARY_PATH=/usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib
-                    ls $LD_LIBRARY_PATH
+                    export LD_LIBRARY_PATH=/usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib:${PWD}/build/bin/lib
 
                     export KCOV=${PWD}/kcov-build/usr/local/bin/kcov
                     export KCOV_OUT=${PWD}/target/cov
