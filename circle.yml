@@ -52,7 +52,7 @@ jobs:
                     export KCOV_INCLUDE=${PWD}
                     export KCOV_EXCLUDE=${PWD}/test
                     export KCOV_FLAGS=--verify
-                    export RUN_KCOV="$KCOV --include-pattern=$KCOV_INCLUDE --exclude-pattern=$KCOV_EXCLDUE $KCOV_FLAGS $KCOV_OUT"
+                    export RUN_KCOV="$KCOV --include-pattern=$KCOV_INCLUDE --exclude-pattern=$KCOV_EXCLUDE $KCOV_FLAGS $KCOV_OUT"
                     mkdir -p $KCOV_OUT
 
                     # Rust tests
