@@ -10,7 +10,8 @@ jobs:
             - checkout
             - run:
                 name: "Cargo test"
-                command: cargo test --all-features
+                command: |
+                    cargo test --all-features
             - run:
                 name: "C++ test"
                 command: |
@@ -25,4 +26,44 @@ jobs:
                     make
                     cd bin
                     ./cpp-raw
+            - run:
+                name: "Build kcov"
+                command: |
+                    apt-get install libcurl4-openssl-dev libelf-dev libdw-dev cmake binutils-dev libiberty-dev -y
+                    wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz
+                    tar xzf master.tar.gz
+                    cd kcov-master
+                    mkdir build
+                    cd build
+                    cmake ..
+                    make
+                    make install DESTDIR=../../kcov-build
+                    cd ../..
+                    rm -rf kcov-master
+            - run:
+                name: "Run kcov"
+                command: |
+                    # Set up the environment. We need LD_LIBRARY_PATH to include rust libs for
+                    # the rust tests to execute without cargo.
+                    export LD_LIBRARY_PATH=/usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib
+                    ls $LD_LIBRARY_PATH
+
+                    export KCOV=${PWD}/kcov-build/usr/local/bin/kcov
+                    export KCOV_OUT=${PWD}/target/cov
+                    export KCOV_INCLUDE=${PWD}
+                    export KCOV_EXCLUDE=${PWD}/test
+                    export KCOV_FLAGS=--verify
+                    export RUN_KCOV="$KCOV --include-pattern=$KCOV_INCLUDE --exclude-pattern=$KCOV_EXCLDUE $KCOV_FLAGS $KCOV_OUT"
+                    mkdir -p $KCOV_OUT
+
+                    # Rust tests
+                    for file in target/debug/*-[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f];
+                    do
+                        ${RUN_KCOV} "$file"
+                    done
+
+                    # C++ tests
+                    ( cd build/bin && ${RUN_KCOV} cpp-raw )
+
+                    bash <( curl -s https://codecov.io/bash )
 
