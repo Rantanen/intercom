@@ -18,7 +18,7 @@ install:
     - ps: Start-FileDownload "https://static.rust-lang.org/dist/rust-${env:TARGET}.exe" -FileName "rust-install.exe"
     - ps: .\rust-install.exe /VERYSILENT /NORESTART /DIR="C:\rust" | Out-Null
     - ps: $env:PATH="$env:PATH;C:\rust\bin"
-      # - cargo install clippy
+    - cargo install clippy
     - rustc -vV
     - cargo -vV
 
@@ -32,6 +32,6 @@ build_script:
     - cmd: .\scripts\ci.bat
 
 test_script:
-    # - cargo clippy --all -- -D warnings
-    - cargo test
+    - cargo clippy --all -- -D warnings
+    - cargo test --all-features
     - ps: .\scripts\test.ps1
