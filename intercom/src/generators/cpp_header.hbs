@@ -24,7 +24,7 @@ namespace raw
 {{~#each interfaces}}
     struct {{name}}{{#if base}} : {{base}}{{/if}}
     {
-        static constexpr intercom::IID ID = {{iid_struct}};
+        static const intercom::IID ID;
 
     {{~#each methods}}
         virtual {{ret_type}} INTERCOM_CC {{name}}(
@@ -40,13 +40,9 @@ namespace raw
     class {{name}}Descriptor
     {
     public:
-        static constexpr intercom::CLSID ID = {{clsid_struct}};
+        static const intercom::CLSID ID;
 
-        static constexpr std::array<intercom::IID, {{interface_count}}> INTERFACES = {
-    {{~#each interfaces}}
-            {{../../lib_name}}::raw::{{this}}::ID{{#unless @last}},{{/unless}}
-    {{~/each}}
-        };
+        static const std::array<intercom::IID, {{interface_count}}> INTERFACES;
 
         using Library = {{../lib_name}}::Descriptor;
 

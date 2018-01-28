@@ -11,12 +11,12 @@ public:
 
     virtual intercom::HRESULT INTERCOM_CC CreateInstance(
         IUnknown *pUnkOuter,
-        REFIID riid,
+        intercom::REFIID riid,
         void **ppvObject
     ) = 0;
 
     virtual intercom::HRESULT INTERCOM_CC LockServer(
-        BOOL fLock
+        int fLock
     ) = 0;
 
 };

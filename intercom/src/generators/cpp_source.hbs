@@ -9,3 +9,15 @@
 
 const char test_lib::Descriptor::WINDOWS_NAME[] = "{{lib_name}}.dll";
 const char test_lib::Descriptor::POSIX_NAME[] = "lib{{lib_name}}.so";
+{{#each interfaces}}
+const intercom::IID {{../../lib_name}}::raw::{{name}}::ID = {{iid_struct}};
+{{~/each}}
+{{#each coclasses}}
+
+const intercom::CLSID {{../../lib_name}}::raw::{{name}}Descriptor::ID = {{clsid_struct}};
+const std::array<intercom::IID, {{interface_count}}> {{../../lib_name}}::raw::{{name}}Descriptor::INTERFACES = {
+    {{~#each interfaces}}
+            {{../../lib_name}}::raw::{{this}}::ID{{#unless @last}},{{/unless}}
+    {{~/each}}
+};
+{{~/each}}

@@ -19,6 +19,7 @@ ${PROJECT_SOURCE_DIR}/primitive_tests.cpp
 ${PROJECT_SOURCE_DIR}/result.cpp
 ${PROJECT_SOURCE_DIR}/return_interfaces.cpp
 ${PROJECT_SOURCE_DIR}/stateful.cpp
+${PROJECT_SOURCE_DIR}/interface_wrappers.cpp
 )
 
 # Specify additional compiler specific helpers.
@@ -63,5 +64,10 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 # Link to dl, support for loading dynamic libraries.
 find_library(DL_LOCATION dl)
 target_link_libraries(${PROJECT_NAME} ${DL_LOCATION})
+
+# Link to "pthread", otherwise std::call_once used by ClassFactory does not work.
+# See the comments around "__gthread_active" in gthr-default.h
+find_library(PTHREAD_LOCATION pthread)
+target_link_libraries(${PROJECT_NAME} ${PTHREAD_LOCATION})
 
 endif()
