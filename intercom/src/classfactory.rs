@@ -139,9 +139,7 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
         ((**iunk_ptr).query_interface)(
             iunk_ptr as RawComPtr,
             riid,
-            out );
-
-        S_OK
+            out )
     }
 
     unsafe fn lock_server_agnostic(
