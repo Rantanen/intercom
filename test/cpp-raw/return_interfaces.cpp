@@ -80,10 +80,10 @@ TEST_CASE( "Methods accept and return COM objects" )
 			pChild->Release();
 		}
 
-		pParent->Release();
+		REQUIRE( pParent->Release() == 0 );
 	}
 
-	pOps->Release();
+	REQUIRE( pOps->Release() == 0 );
 
 	UninitializeRuntime();
 }

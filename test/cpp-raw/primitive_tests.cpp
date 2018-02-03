@@ -133,6 +133,8 @@ TEST_CASE( "Primitive types are supported" )
 		REQUIRE( pOps->F64( 3.0 ) == ( 1.0 / 3.0 ) );
 	}
 
+	REQUIRE( pOps->Release() == 0 );
+
 	UninitializeRuntime();
 }
 

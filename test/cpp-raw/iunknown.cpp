@@ -22,7 +22,6 @@ TEST_CASE( "Basic IUnknown implementation works" )
 		{
 
 			REQUIRE( pRefCount->GetRefCount() == 1 );
-			REQUIRE( pRefCount->Release() == 0 );
 		}
 		SECTION( "AddRef increments reference count" )
 		{
@@ -42,7 +41,6 @@ TEST_CASE( "Basic IUnknown implementation works" )
 				REQUIRE( pRefCount->GetRefCount() == 2 );
 				REQUIRE( pRefCount->Release() == 1 );
 				REQUIRE( pRefCount->GetRefCount() == 1 );
-				REQUIRE( pRefCount->Release() == 0 );
 			}
 		}
 		SECTION( "QueryInterface produces a new interface" )
@@ -85,8 +83,6 @@ TEST_CASE( "Basic IUnknown implementation works" )
 
 				REQUIRE( pUnknownCopy->Release() == 1 );
 				REQUIRE( pRefCount->GetRefCount() == 1 );
-
-				REQUIRE( pRefCount->Release() == 0 );
 			}
 		}
 
@@ -103,8 +99,13 @@ TEST_CASE( "Basic IUnknown implementation works" )
 				pAnotherRefCount->AddRef();
 				REQUIRE( pAnotherRefCount->GetRefCount() == 2 );
 				REQUIRE( pRefCount->GetRefCount() == 1 );
+				REQUIRE( pAnotherRefCount->Release() == 1 );
 			}
+
+			REQUIRE( pAnotherRefCount->Release() == 0 );
 		}
+
+		REQUIRE( pRefCount->Release() == 0 );
 	}
 
 	// Uninitialize COM.
