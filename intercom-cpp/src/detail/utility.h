@@ -21,6 +21,7 @@ namespace detail
      */
     inline bool is_little_endian()
     {
+        static_assert( sizeof( unsigned char ) < sizeof( int ), "" );
         int test_value = 1;
         unsigned char* asBytes = reinterpret_cast< unsigned char* >( &test_value );
         return asBytes[ 0 ] == 1;
@@ -33,7 +34,7 @@ namespace detail
      * @param converter The binary data to write.
      * @return std::ostream& Returns the stream.
      */
-    template< typename TData >
+    template< typename TData, typename = typename std::enable_if< std::is_unsigned< TData >::value, void >::type >
     inline std::ostream& write_as_hex(
         std::ostream& stream,
         TData data
