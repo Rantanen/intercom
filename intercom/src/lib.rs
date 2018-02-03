@@ -45,10 +45,10 @@
 //!     var calculator = new CalculatorLib.Calculator();
 //!     Console.WriteLine( calculator.Add( 1, 2 ) );
 //! }
-//! ``` 
+//! ```
 
 #![crate_type="dylib"]
-#![feature(proc_macro, try_from, fundamental, specialization, non_exhaustive)]
+#![feature(proc_macro, try_from, fundamental, specialization, non_exhaustive, integer_atomics)]
 
 #[cfg(feature = "generators")]
 extern crate intercom_common;

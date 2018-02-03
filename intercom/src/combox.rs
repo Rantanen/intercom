@@ -1,5 +1,6 @@
 
 use super::*;
+use std::sync::atomic::{ AtomicU32, Ordering };
 
 /// Trait required by any COM coclass type.
 ///
@@ -95,7 +96,7 @@ impl<T: CoClass> AsRef<ComBox<T>> for ComStruct<T>
 #[repr(C)]
 pub struct ComBox< T: CoClass > {
     vtable_list : T::VTableList,
-    ref_count : u32,
+    ref_count : AtomicU32,
     value: T,
 }
 
@@ -114,7 +115,7 @@ impl<T: CoClass> ComBox<T> {
         // no need to construct and immediately detach a Box.
         Box::into_raw( Box::new( ComBox {
             vtable_list: T::create_vtable_list(),
-            ref_count: 0,
+            ref_count: AtomicU32::new( 0 ),
             value: value,
         } ) )
     }
@@ -150,13 +151,13 @@ impl<T: CoClass> ComBox<T> {
     /// it's marked as unsafe to discourage it's use due to high risks of
     /// memory leaks.
     pub unsafe fn add_ref( this : &mut Self ) -> u32 {
-        this.ref_count += 1;
-        this.ref_count
+        let previous_value = this.ref_count.fetch_add( 1, Ordering::Relaxed );
+        ( previous_value + 1 )
     }
 
     /// Gets the reference count of the object.
     pub fn get_ref_count( &self ) -> u32 {
-        self.ref_count
+        self.ref_count.load( Ordering::Relaxed )
     }
 
     /// Decrements the reference count. Destroys the object if the count reaches
@@ -177,15 +178,15 @@ impl<T: CoClass> ComBox<T> {
         //
         // It might not be deterministic, but in the cases where it triggers
         // it's way better than the access violation error we'd otherwise get.
-        if (*this).ref_count == 0 {
+        if (*this).ref_count.load( Ordering::Relaxed ) == 0 {
             panic!( "Attempt to release pointer with no references." );
         }
 
         // Decrease the ref count and store a copy of it. We'll need a local
         // copy for a return value in case we end up dropping the ComBox
         // instance. after the drop referencing *this would be undeterministic.
-        (*this).ref_count -= 1;
-        let rc = (*this).ref_count;
+        let previous_value = (*this).ref_count.fetch_sub( 1, Ordering::Relaxed );
+        let rc = previous_value - 1;
 
         // If that was the last reference we can drop self. Do this by giving
         // it back to a box and then dropping the box. This should reverse the
@@ -211,7 +212,7 @@ impl<T: CoClass> ComBox<T> {
     /// - There is no way for the method to ensure the RawComPtr points to
     ///   a valid ComBox<T> instance. It's the caller's responsibility to
     ///   ensure the method is not called with invalid pointers.
-    ///   
+    ///
     /// - As the pointers have no lifetime tied to them, the borrow checker
     ///   is unable to enforce the lifetime of the ComBox reference. If the
     ///   ComBox is free'd by calling release on the pointer, the ComBox
@@ -329,7 +330,7 @@ impl<T: CoClass> ComBox<T> {
 
         // Resolve the offset of the 'value' field.
         let null_combox = std::ptr::null() as *const ComBox<T>;
-        let value_offset = 
+        let value_offset =
             &( (*null_combox).value ) as *const _ as usize;
 
         let combox_loc = value as *const T as usize - value_offset;
@@ -355,7 +356,7 @@ impl<T: CoClass> ComBox<T> {
 
         // Resolve the offset of the 'value' field.
         let null_combox = std::ptr::null() as *const ComBox<T>;
-        let value_offset = 
+        let value_offset =
             &( (*null_combox).value ) as *const _ as usize;
 
         let combox_loc = value as *mut T as usize - value_offset;
