@@ -93,6 +93,20 @@ TEST_CASE( "Using interface wrappers works" )
         REQUIRE_THROWS_AS( refCountFactory.create< cppraw::utility::IDummyInterface >(), intercom::NoSuchInterface );
     }
 
+    SECTION( "Requesting unimplemented interface in creation fails appropriately." )
+    {
+        try
+        {
+            intercom::RawInterface<ISharedInterface> wrongInterface =
+                    std::move( refCountFactory.create< test_lib::raw::ISharedInterface >() );
+            FAIL( "Requesting invalid interface succeeded." );
+        }
+        catch( intercom::NoSuchInterface& ex )
+        {
+            REQUIRE( ex.error_code() == intercom::E_NOINTERFACE );
+        }
+    }
+
 	UninitializeRuntime();
 }
 
