@@ -5,6 +5,7 @@
 #include "catch.hpp"
 
 #include "testlib.h"
+#include "utility/dummy_interface.h"
 
  #ifdef __GNUC__
 
@@ -86,6 +87,25 @@ TEST_CASE( "Using interface wrappers works" )
         REQUIRE( expectedRefCount == refCountOps.get() );
         REQUIRE( anotherCounter->GetRefCount() == 1 );
         REQUIRE( refCountOps->GetRefCount() == 1 );
+    }
+
+    SECTION( "Creating an object with non-existant interface throws correct exception." )
+    {
+        REQUIRE_THROWS_AS( refCountFactory.create< cppraw::utility::IDummyInterface >(), intercom::NoSuchInterface );
+    }
+
+    SECTION( "Requesting unimplemented interface in creation fails appropriately." )
+    {
+        try
+        {
+            intercom::RawInterface<ISharedInterface> wrongInterface =
+                    std::move( refCountFactory.create< test_lib::raw::ISharedInterface >() );
+            FAIL( "Requesting invalid interface succeeded." );
+        }
+        catch( intercom::NoSuchInterface& ex )
+        {
+            REQUIRE( ex.error_code() == intercom::E_NOINTERFACE );
+        }
     }
 
 	UninitializeRuntime();

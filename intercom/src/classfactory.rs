@@ -136,12 +136,16 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
             Err( hr ) => return hr,
         } as *const *const IUnknownVtbl;
 
-        ((**iunk_ptr).query_interface)(
+        let query_result = ((**iunk_ptr).query_interface)(
             iunk_ptr as RawComPtr,
             riid,
             out );
 
-        S_OK
+        // Avoid leaking memory in case query_interface fails.
+        if query_result != S_OK {
+            drop( Box::from_raw( iunk_ptr as RawComPtr ) );
+        }
+        query_result
     }
 
     unsafe fn lock_server_agnostic(

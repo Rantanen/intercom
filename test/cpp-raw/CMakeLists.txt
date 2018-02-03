@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Define source files.
 set(PROJECT_SRCS
+${PROJECT_SOURCE_DIR}/exceptions.cpp
 ${PROJECT_SOURCE_DIR}/error_info.cpp
 ${PROJECT_SOURCE_DIR}/interface_params.cpp
 ${PROJECT_SOURCE_DIR}/iunknown.cpp
@@ -20,6 +21,7 @@ ${PROJECT_SOURCE_DIR}/result.cpp
 ${PROJECT_SOURCE_DIR}/return_interfaces.cpp
 ${PROJECT_SOURCE_DIR}/stateful.cpp
 ${PROJECT_SOURCE_DIR}/interface_wrappers.cpp
+${PROJECT_SOURCE_DIR}/utility/dummy_interface.cpp
 )
 
 # Specify additional compiler specific helpers.

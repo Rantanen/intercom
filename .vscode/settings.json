@@ -40,6 +40,16 @@
         "streambuf": "cpp",
         "system_error": "cpp",
         "thread": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "__config": "cpp",
+        "atomic": "cpp",
+        "strstream": "cpp",
+        "codecvt": "cpp",
+        "complex": "cpp",
+        "csignal": "cpp",
+        "cstdarg": "cpp",
+        "future": "cpp",
+        "valarray": "cpp",
+        "*.ipp": "cpp"
     }
 }
