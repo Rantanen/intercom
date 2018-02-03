@@ -119,6 +119,7 @@ reasons and could be worked around if we needed to get to stable quickly:
 - `try_from`, tracking issue: [#33417](https://github.com/rust-lang/rust/issues/33417)
 - `try_trait`, tracking issue: [#42327](https://github.com/rust-lang/rust/issues/42327)
 - `catch_expr`, tracking issue: [#31436](https://github.com/rust-lang/rust/issues/31436)
+- `integer_atomics`, tracking issue: [#32976](https://github.com/rust-lang/rust/issues/32976)
 
 
 ## Technical details
