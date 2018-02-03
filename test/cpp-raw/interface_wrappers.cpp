@@ -5,6 +5,7 @@
 #include "catch.hpp"
 
 #include "testlib.h"
+#include "utility/dummy_interface.h"
 
  #ifdef __GNUC__
 
@@ -85,6 +86,11 @@ TEST_CASE( "Using interface wrappers works" )
         REQUIRE( expectedRefCount == refCountOps.get() );
         REQUIRE( anotherCounter->GetRefCount() == 1 );
         REQUIRE( refCountOps->GetRefCount() == 1 );
+    }
+
+    SECTION( "Creating an object with non-existant interface throws correct exception." )
+    {
+        REQUIRE_THROWS_AS( refCountFactory.create< cppraw::utility::IDummyInterface >(), intercom::NoSuchInterface );
     }
 
 	UninitializeRuntime();

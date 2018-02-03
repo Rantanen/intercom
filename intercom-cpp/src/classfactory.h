@@ -41,7 +41,11 @@ namespace intercom
             // Need an activator to create objects.
             intercom::HRESULT preparation = prepare_activator();
             if( preparation != S_OK )
-                throw std::exception();
+            {
+                throw intercom::RuntimeError( preparation,
+                        std::stringstream() << "Preparing activator for the class factory of class \""
+                        << TClass::ID << "\" failed." );
+            }
 
             return m_activator->create<TInterface>();
         }
@@ -79,6 +83,10 @@ namespace intercom
             {
                 std::call_once(m_initializationGuard, [&](){
                         this->m_activator = std::make_unique< Activator >( TClass::Library::NAME, TClass::ID ); } );
+            }
+            catch( std::bad_alloc )
+            {
+                return E_OUTOFMEMORY;
             }
             catch( ... )
             {

@@ -48,7 +48,7 @@ namespace hresult
         {
         }
 
-        constexpr uint8_t error_code() const noexcept { return m_error_code; }
+        constexpr uint16_t error_code() const noexcept { return m_error_code; }
 
     private:
         uint16_t m_error_code;
@@ -88,7 +88,7 @@ namespace hresult
          return ((HRESULT)
                 ( static_cast< uint32_t >( intercom::detail::hresult::SEVERITY_ERROR ) << 31) |
                 ( static_cast< uint32_t >( facility ) << 16) |
-                ( static_cast< uint32_t >( error_code ) ) );
+                ( static_cast< uint16_t >( error_code ) ) );
      }
 
     /**
@@ -126,7 +126,7 @@ namespace hresult
      */
     constexpr bool succeeded(
          intercom::HRESULT error_code
-     )
+     ) noexcept
      {
          // The first bit of HRESULT codes is always '1' if the error code indicates a failure.
          return static_cast< int32_t >( error_code ) >= 0;
@@ -141,7 +141,7 @@ namespace hresult
      */
      constexpr bool failed(
          intercom::HRESULT error_code
-     )
+     ) noexcept
      {
          // The first bit of HRESULT codes is always '1' if the error code indicates a failure.
          return static_cast< int32_t >( error_code ) < 0;

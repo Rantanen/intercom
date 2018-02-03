@@ -10,7 +10,9 @@
 using intercom::cpp::posix::DlWrapper;
 
 #include "cominterop.h"
+#include "no_such_interface.h"
 #include "raw_interface.h"
+#include "runtime_error.h"
 
 namespace intercom
 {
@@ -48,9 +50,18 @@ public:
     {
         intercom::RawInterface< TInterface > interface;
         intercom::HRESULT error = m_classFactory->CreateInstance( nullptr, TInterface::ID, interface.out() );
-        if( error != S_OK )
+        switch( error )
         {
-            throw std::runtime_error( "Could not create instance" );
+        case intercom::S_OK:
+            break;
+
+        case intercom::E_NOINTERFACE:
+            throw intercom::NoSuchInterface( m_classId, TInterface::ID );
+
+        // Unspecified error.
+        default:
+            throw intercom::RuntimeError( error, std::stringstream() << "Creating instance of class \""
+                    << m_classId << "\" with interface \"" << TInterface::ID << "\" failed." );
         }
         return interface;
     }
@@ -69,7 +80,10 @@ private:
         intercom::HRESULT error = m_getClassObjectFunc( m_classId, IID_IClassFactory,
                 (void**) &m_classFactory );
         if( error != S_OK )
-            throw std::runtime_error( "Could not acquire class factory" );
+        {
+            throw intercom::RuntimeError( error, std::stringstream() << "Creating class factory for class \""
+                    << m_classId << "\" failed." );
+        }
     }
 
 private:
