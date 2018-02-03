@@ -16,6 +16,7 @@ addons:
             - g++-5
             - binutils-dev
             - libiberty-dev
+            - valgrind
 env:
     - CC=gcc-5 CXX=g++-5 RUSTFLAGS='-C link-dead-code'
 
@@ -24,4 +25,4 @@ script:
     - cargo test --all-features
     - mkdir build
     - ( cd build && cmake .. && make )
-    - ( cd build/bin && ./cpp-raw )
+    - ( cd build/bin && valgrind --error-exitcode=1 ./cpp-raw )
