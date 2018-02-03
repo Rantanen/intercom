@@ -29,5 +29,7 @@ TEST_CASE( "Objects maintain their state" )
 		REQUIRE( pOps->GetValue() == 55555 );
 	}
 
+	REQUIRE( pOps->Release() == 0 );
+
 	UninitializeRuntime();
 }

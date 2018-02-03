@@ -43,6 +43,7 @@ TEST_CASE( "Using interface wrappers works" )
         IRefCountOperations* released = refCountOps.release();
         REQUIRE( static_cast< bool >( refCountOps ) == false );
         REQUIRE( released->GetRefCount() == 1 );
+        REQUIRE( released->Release() == 0 );
     }
 
     SECTION( "Reseting a variable to nullptr succeeds." )

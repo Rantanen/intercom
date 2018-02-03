@@ -56,5 +56,7 @@ TEST_CASE( "Results can be returned" )
 		}
 	}
 
+	REQUIRE( pOps->Release() == 0 );
+
 	UninitializeRuntime();
 }
