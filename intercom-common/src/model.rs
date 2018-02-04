@@ -571,7 +571,7 @@ impl ComCrate
                 .map_err( |_| ParseError::ComCrate(
                         format!( "Could not read file {}", path.to_string_lossy() ) ) )?;
 
-        let krate : ::syn::File = ::syn::parse_str( &buf )
+        let krate = ::syn::parse_file( &buf )
                 .map_err( |_| ParseError::ComCrate(
                         format!( "Failed to parse source {}", path.to_string_lossy() ) ) )?;
 
