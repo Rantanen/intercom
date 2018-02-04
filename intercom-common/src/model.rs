@@ -827,7 +827,9 @@ mod test
         assert_eq!( itf.name(), "IAutoGuid" );
         assert_eq!( itf.iid(),
             &GUID::parse( "11BA222D-A34B-32BC-4A1F-77157F37803A" ).unwrap() );
-        assert_eq!( itf.visibility(), parse_quote!( pub ) );
+
+        let pub_visibility : Visibility = parse_quote!( pub );
+        assert_eq!( itf.visibility(), &pub_visibility );
         assert_eq!( itf.base_interface().as_ref().unwrap(), "IUnknown" );
         assert_eq!( itf.methods.len(), 2 );
         assert_eq!( itf.methods[0].name, "one" );
@@ -846,7 +848,9 @@ mod test
         assert_eq!( itf.name(), "IAutoGuid" );
         assert_eq!( itf.iid(),
             &GUID::parse( "11BA222D-A34B-32BC-4A1F-77157F37803A" ).unwrap() );
-        assert_eq!( itf.visibility(), parse_quote!( pub ) );
+
+        let pub_visibility : Visibility = parse_quote!( pub );
+        assert_eq!( itf.visibility(), &pub_visibility );
         assert_eq!( itf.base_interface().as_ref().unwrap(), "IBase" );
         assert_eq!( itf.methods.len(), 2 );
         assert_eq!( itf.methods[0].name, "one" );
@@ -864,7 +868,9 @@ mod test
         assert_eq!( itf.name(), "IAutoGuid" );
         assert_eq!( itf.iid(),
             &GUID::parse( "11BA222D-A34B-32BC-4A1F-77157F37803A" ).unwrap() );
-        assert_eq!( itf.visibility(), parse_quote!( pub ) );
+
+        let pub_visibility : Visibility = parse_quote!( pub );
+        assert_eq!( itf.visibility(), &pub_visibility );
         assert_eq!( itf.base_interface(), &None );
         assert_eq!( itf.methods.len(), 2 );
         assert_eq!( itf.methods[0].name, "one" );

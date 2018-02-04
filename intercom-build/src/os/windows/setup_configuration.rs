@@ -309,44 +309,46 @@ mod test
     #[test]
     fn get_vs_2017_details() {
         intercom::runtime::initialize().unwrap();
+		{
 
-        let setup_conf = ComRc::<ISetupConfiguration2>
-                ::create( CLSID_SetupConfiguration ).unwrap();
-        let instances = setup_conf.enum_instances().unwrap();
+			let setup_conf = ComRc::<ISetupConfiguration2>
+					::create( CLSID_SetupConfiguration ).unwrap();
+			let instances = setup_conf.enum_instances().unwrap();
 
-        let ( next, _ ) = instances.next( 1 ).unwrap();
-        let installation_name = next.get_installation_name().unwrap();
-        let installation_path = next.get_installation_path().unwrap();
-        let installation_version = next.get_installation_version().unwrap();
+			let ( next, _ ) = instances.next( 1 ).unwrap();
+			let installation_name = next.get_installation_name().unwrap();
+			let installation_path = next.get_installation_path().unwrap();
+			let installation_version = next.get_installation_version().unwrap();
 
-        let vswhere_path = get_intercom_root().join( "scripts/vswhere.exe" );
-        let installation_name_output = Command::new( &vswhere_path )
-                .arg( "/nologo" )
-                .arg( "-property" ).arg( "installationName" )
-                .output()
-                .unwrap();
-        let installation_path_output = Command::new( &vswhere_path )
-                .arg( "/nologo" )
-                .arg( "-property" ).arg( "installationPath" )
-                .output()
-                .unwrap();
-        let installation_version_output = Command::new( &vswhere_path )
-                .arg( "/nologo" )
-                .arg( "-property" ).arg( "installationVersion" )
-                .output()
-                .unwrap();
+			let vswhere_path = get_intercom_root().join( "scripts/vswhere.exe" );
+			let installation_name_output = Command::new( &vswhere_path )
+					.arg( "/nologo" )
+					.arg( "-property" ).arg( "installationName" )
+					.output()
+					.unwrap();
+			let installation_path_output = Command::new( &vswhere_path )
+					.arg( "/nologo" )
+					.arg( "-property" ).arg( "installationPath" )
+					.output()
+					.unwrap();
+			let installation_version_output = Command::new( &vswhere_path )
+					.arg( "/nologo" )
+					.arg( "-property" ).arg( "installationVersion" )
+					.output()
+					.unwrap();
 
-        let installation_name_actual = String::from_utf8_lossy(
-                &installation_name_output.stdout );
-        let installation_path_actual = String::from_utf8_lossy(
-                &installation_path_output.stdout );
-        let installation_version_actual = String::from_utf8_lossy(
-                &installation_version_output.stdout );
+			let installation_name_actual = String::from_utf8_lossy(
+					&installation_name_output.stdout );
+			let installation_path_actual = String::from_utf8_lossy(
+					&installation_path_output.stdout );
+			let installation_version_actual = String::from_utf8_lossy(
+					&installation_version_output.stdout );
 
-        assert_eq!( installation_name_actual.trim(), installation_name );
-        assert_eq!( installation_path_actual.trim(), installation_path );
-        assert_eq!( installation_version_actual.trim(), installation_version );
+			assert_eq!( installation_name_actual.trim(), installation_name );
+			assert_eq!( installation_path_actual.trim(), installation_path );
+			assert_eq!( installation_version_actual.trim(), installation_version );
 
+		}
         intercom::runtime::uninitialize();
     }
 

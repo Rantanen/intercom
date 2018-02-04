@@ -15,7 +15,7 @@ pub fn parse_attr_tokens(
 {
     let attr_rendered = format!( "#[{}{}]", attr_name, attr_tokens );
     match attr_rendered.parse() {
-        Ok( tt ) => match Attribute::parse_outer.parse( tt ) {
+        Ok( tt ) => match Attribute::parse_outer.parse2( tt ) {
             Ok( t ) => return Ok( t ),
             _ => {}
         },
@@ -347,7 +347,7 @@ mod test
     /// Tests the `ty_to_string` by converting parameter to Type and back to
     /// String to ensure they equal.
     fn test_ty( ty_str : &str ) {
-        let ty = parse_type( ty_str ).unwrap();
+        let ty = parse_str( ty_str ).unwrap();
         let as_string = ty_to_string( &ty );
         assert_eq!( ty_str, as_string );
     }
