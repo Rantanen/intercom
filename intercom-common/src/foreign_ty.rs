@@ -1,18 +1,18 @@
 use model::ComCrate;
 use syn;
 
-pub trait ForeignTyHandler
+pub trait ForeignTypeHandler
 {
     /// Gets the name for the 'ty'.
     fn get_name( &self, krate : &ComCrate, ty : &syn::Ident ) -> String;
 
     /// Gets the COM type for a Rust type.
-    fn get_ty( &self, krate : &ComCrate, ty : &syn::Ty ) -> Option< String >;
+    fn get_ty( &self, krate : &ComCrate, ty : &syn::Type ) -> Option< String >;
 }
 
-pub struct CTyHandler;
+pub struct CTypeHandler;
 
-impl ForeignTyHandler for CTyHandler
+impl ForeignTypeHandler for CTypeHandler
 {
     /// Tries to apply renaming to the name.
     fn get_name(
@@ -27,51 +27,52 @@ impl ForeignTyHandler for CTyHandler
     fn get_ty(
         &self,
         krate : &ComCrate,
-        ty : &syn::Ty,
+        ty : &syn::Type,
     ) -> Option< String >
     {
         Some( match *ty {
 
             // Pointer types.
-            syn::Ty::Slice( ref ty )
-                => format!( "{}*", self.get_ty( krate, ty )? ),
-            syn::Ty::Ptr( ref mutty ) | syn::Ty::Rptr( .., ref mutty )
-                => match mutty.mutability {
-                    syn::Mutability::Mutable
-                        => format!( "{}*", self.get_ty( krate, &mutty.ty )? ),
-                    syn::Mutability::Immutable
-                        => format!( "const {}*", self.get_ty( krate, &mutty.ty )? ),
+            syn::Type::Slice( ref slice )
+                => format!( "{}*", self.get_ty( krate, &slice.elem )? ),
+            syn::Type::Reference( syn::TypeReference { ref mutability, ref elem, .. } )
+                | syn::Type::Ptr( syn::TypePtr { ref mutability, ref elem, .. } )
+                => match *mutability {
+                    Some(_) => format!( "{}*", self.get_ty( krate, &elem )? ),
+                    None => format!( "const {}*", self.get_ty( krate, &elem )? ),
                 },
 
             // This is quite experimental. Do IDLs even support staticly sized
             // arrays? Currently this turns [u8; 3] into "uint8[3]" IDL type.
-            syn::Ty::Array( ref ty, ref count )
-                => format!( "{}[{:?}]", self.get_ty( krate, ty.as_ref() )?, count ),
+            syn::Type::Array( ref arr )
+                => format!( "{}[{:?}]", self.get_ty( krate, &arr.elem )?, arr.len ),
 
             // Normal Rust struct/trait type.
-            syn::Ty::Path( .., ref path )
-                => self.segment_to_ty( krate, path.segments.last().unwrap() )?,
+            syn::Type::Path( ref p )
+                => self.segment_to_ty( krate, p.path.segments.last().unwrap().value() )?,
 
             // Tuple with length 0, ie. Unit tuple: (). This is void-equivalent.
-            syn::Ty::Tup( ref l ) if l.is_empty()
+            syn::Type::Tuple( ref t ) if t.elems.is_empty()
                 => "void".to_owned(),
 
-            syn::Ty::BareFn(..)
-                | syn::Ty::Never
-                | syn::Ty::Tup(..)
-                | syn::Ty::TraitObject(..)
-                | syn::Ty::ImplTrait(..)
-                | syn::Ty::Paren(..)
-                | syn::Ty::Infer
-                | syn::Ty::Mac(..)
+            syn::Type::BareFn(..)
+                | syn::Type::Never(..)
+                | syn::Type::Tuple(..)
+                | syn::Type::TraitObject(..)
+                | syn::Type::ImplTrait(..)
+                | syn::Type::Paren(..)
+                | syn::Type::Infer(..)
+                | syn::Type::Macro(..)
+                | syn::Type::Verbatim(..)
+                | syn::Type::Group(..)
                 => return None,
         } )
     }
 }
 
-impl CTyHandler
+impl CTypeHandler
 {
-    /// Converts a path segment to a Ty.
+    /// Converts a path segment to a Type.
     ///
     /// The path segment should be the last segment for this to make any sense.
     fn segment_to_ty(
@@ -84,21 +85,29 @@ impl CTyHandler
         let ty = format!( "{}", segment.ident );
 
         // Get the type information.
-        let args = match segment.parameters {
-            syn::PathParameters::AngleBracketed( ref data )
-                    => &data.types,
+        let args = match segment.arguments {
+            syn::PathArguments::None
+                    => None,
+
+            syn::PathArguments::AngleBracketed( ref data )
+                    => Some( &data.args ),
 
             // Parenthesized path parameters should be valid only for Fn-types.
             // These types are unsupported, but we'll match for them here anyway.
-            syn::PathParameters::Parenthesized( ref data )
-                    => &data.inputs,
+            syn::PathArguments::Parenthesized( .. )
+                    => panic!( "Fn-types are unsupported." ),
         };
 
         Some( match ty.as_str() {
             
             // Hardcoded handling for parameter types.
             "ComRc" | "ComItf"
-                => format!( "{}*", self.get_ty( krate, &args[0] )? ),
+                => format!( "{}*", self.get_ty(
+                        krate,
+                        match **args.unwrap().first().unwrap().value() {
+                            syn::GenericArgument::Type( ref t ) => t,
+                            _ => return None,
+                        } )? ),
             "RawComPtr" => "*void".to_owned(),
             "String" | "BStr" => "BSTR".to_owned(),
             "usize" => "size_t".to_owned(),
@@ -143,10 +152,10 @@ impl CTyHandler
 /// Converts a Rust type into applicable C++ type.
 pub fn to_cpp_type(
     c: &ComCrate,
-    ty: &syn::Ty,
+    ty: &syn::Type,
 ) -> Option<String> { //, GeneratorError> {
 
-    let foreign = CTyHandler;
+    let foreign = CTypeHandler;
     let name = foreign.get_ty( c, ty )?;
             
     Some( match name.as_ref() {

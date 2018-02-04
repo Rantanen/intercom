@@ -1,6 +1,7 @@
 
 use syn::*;
-use quote::{ToTokens, Tokens};
+use syn::synom::Parser;
+use quote::{Tokens};
 
 use error::MacroError;
 use super::*;
@@ -13,10 +14,16 @@ pub fn parse_attr_tokens(
 ) -> Result< Attribute, MacroError >
 {
     let attr_rendered = format!( "#[{}{}]", attr_name, attr_tokens );
-    Ok( match syn::parse_outer_attr( &attr_rendered ) {
-        Ok(t) => t,
-        Err(_) => Err(
-                format!( "Could not parse [{}] attribute", attr_name ) )?,
+    match attr_rendered.parse() {
+        Ok( tt ) => match Attribute::parse_outer.parse( tt ) {
+            Ok( t ) => return Ok( t ),
+            _ => {}
+        },
+        _ => {}
+    }
+
+    Err( MacroError {
+        msg: format!( "Could not parse [{}] attribute", attr_name )
     } )
 }
 
@@ -25,31 +32,46 @@ pub enum InterfaceType { Trait, Struct }
 
 pub type InterfaceData<'a> = (
     Ident,
-    Vec< ( &'a Ident, &'a MethodSig ) >,
+    Vec< &'a MethodSig >,
     InterfaceType,
-    syn::Unsafety,
+    Option<Token!(unsafe)>,
 );
 
 pub fn get_ident_and_fns(
     item : &Item
 ) -> Option< InterfaceData >
 {
-    match item.node {
-        ItemKind::Impl( unsafety, .., ref trait_ref, ref ty, ref items ) => {
-            let ( _, struct_ident, items ) =
-                    get_impl_data_raw( trait_ref, ty, items );
-            Some( ( struct_ident, items, InterfaceType::Struct, unsafety ) )
-        },
-        ItemKind::Trait( unsafety, .., ref items ) => {
+    match *item {
+        Item::Impl( ItemImpl {
+                ref unsafety,
+                ref trait_,
+                ref self_ty,
+                ref items,
+                .. } )
+            => {
+                let ( _, struct_ident, items ) =
+                        get_impl_data_raw( trait_, self_ty, items );
+                Some( (
+                        struct_ident,
+                        items,
+                        InterfaceType::Struct,
+                        unsafety.clone() ) )
+            },
+        Item::Trait( ItemTrait {
+                ident,
+                unsafety,
+                ref items,
+                .. } )
+            => {
 
-            let methods : Option< Vec< (&Ident, &MethodSig) > > = items
+            let methods : Option< Vec< &MethodSig > > = items
                     .into_iter()
-                    .map( |i| get_trait_method( i ).map( |m| ( &i.ident, m ) ) )
+                    .map( |i| get_trait_method( i ) )
                     .collect();
 
             match methods {
                 Some( m ) => Some( (
-                        item.ident.clone(),
+                        ident.clone(),
                         m,
                         InterfaceType::Trait,
                         unsafety,
@@ -64,35 +86,35 @@ pub fn get_ident_and_fns(
 pub type ImplData<'a> = (
     Option<Ident>,
     Ident,
-    Vec< ( &'a Ident, &'a MethodSig ) >
+    Vec< &'a MethodSig >
 );
 
 pub fn get_impl_data(
     item : &Item
 ) -> Option< ImplData >
 {
-    if let ItemKind::Impl( .., ref trait_ref, ref ty, ref items ) = item.node {
-        return Some( get_impl_data_raw( trait_ref, ty, items ) );
+    if let &Item::Impl( ItemImpl { ref trait_, ref self_ty, ref items, .. } ) = item {
+        return Some( get_impl_data_raw( &trait_, &self_ty, &items ) );
     }
     None
 }
 
 fn get_impl_data_raw<'a>(
-    trait_ref : &'a Option<Path>,
-    struct_ty : &'a Ty,
+    trait_ref : &'a Option<( Option<Token!(!)>, Path, Token!(for) )>,
+    struct_ty : &'a Type,
     items : &'a [ImplItem]
 ) -> ImplData<'a>
 {
 
     let struct_ident = struct_ty.get_ident().unwrap();
     let trait_ident = match *trait_ref {
-        Some( ref tr ) => tr.get_ident().ok(),
+        Some( ( _, ref path, _ ) ) => path.get_ident().ok(),
         None => None
     };
 
-    let methods_opt : Option< Vec< (&Ident, &MethodSig) > > = items
+    let methods_opt : Option< Vec< &MethodSig > > = items
             .into_iter()
-            .map( |i| get_impl_method( i ).map( |m| ( &i.ident, m ) ) )
+            .map( |i| get_impl_method( i ) )
             .collect();
     let methods = methods_opt.unwrap_or_else( || vec![] );
 
@@ -101,49 +123,38 @@ fn get_impl_data_raw<'a>(
 
 #[derive(PartialEq, Eq, Debug)]
 pub enum AttrParam {
-    Literal( syn::Lit ),
-    Word( syn::Ident ),
+    Literal( Lit ),
+    Word( Ident ),
 }
 
 pub fn iter_parameters(
     attr : &syn::Attribute
 ) -> Box< Iterator<Item = AttrParam > >
 {
-    match attr.value {
+    match attr.interpret_meta() {
 
-        // Attributes without parameter lists don't have params.
-        syn::MetaItem::Word(..)
-            | syn::MetaItem::NameValue(..) => Box::new( std::iter::empty() ),
-
-        syn::MetaItem::List( _, ref l ) =>
-            Box::new( l.to_owned().into_iter().map( |i| {
+        Some( Meta::List( MetaList { ref nested, .. } ) ) =>
+            Box::new( nested.to_owned().into_iter().map( |i| {
 
                 match i {
 
-                    syn::NestedMetaItem::MetaItem( mi ) =>
+                    NestedMeta::Meta( meta ) =>
+                        AttrParam::Word( match meta {
+                            Meta::Word( i ) => i,
+                            Meta::List( l ) => l.ident,
+                            Meta::NameValue( nv ) => nv.ident,
+                        } ),
 
-                            AttrParam::Word( match mi {
-                                syn::MetaItem::Word( i )
-                                    | syn::MetaItem::List( i, _ )
-                                    | syn::MetaItem::NameValue( i, _ )
-                                    => i,
-                            } ),
-
-                    syn::NestedMetaItem::Literal( l ) =>
+                    syn::NestedMeta::Literal( l ) =>
                             AttrParam::Literal( l ),
                 }
             } ) ),
-    }
-}
 
-pub fn get_ty_ident(
-    ty : &Ty
-) -> Option<&Ident>
-{
-    match *ty {
-        Ty::Path( _, ref p ) =>
-            p.segments.last().map( |l| &l.ident ),
-        _ => None
+        // Attributes without parameter lists don't have params.
+        None
+            | Some( Meta::Word(..) )
+            | Some( Meta::NameValue(..) ) => Box::new( std::iter::empty() ),
+
     }
 }
 
@@ -151,20 +162,20 @@ pub fn get_impl_method(
     i : &ImplItem
 ) -> Option< &MethodSig >
 {
-    if let ImplItemKind::Method( ref method_sig, _ ) = i.node {
-        return Some( method_sig );
+    match *i {
+        ImplItem::Method( ref itm ) => Some( &itm.sig ),
+        _ => None
     }
-    None
 }
 
 pub fn get_trait_method(
     i : &TraitItem
 ) -> Option< &MethodSig >
 {
-    if let TraitItemKind::Method( ref method_sig, _ ) = i.node {
-        return Some( method_sig );
+    match *i {
+        TraitItem::Method( ref tim ) => Some( &tim.sig ),
+        _ => None
     }
-    None
 }
 
 const AUTO_GUID_BASE : guid::GUID = guid::GUID {
@@ -191,8 +202,8 @@ pub fn parameter_to_guid(
         } );
     }
 
-    if let AttrParam::Literal( Lit::Str( ref s, _ ) ) = *p {
-        return Ok( Some( guid::GUID::parse( s.as_str() )? ) );
+    if let AttrParam::Literal( Lit::Str( ref s ) ) = *p {
+        return Ok( Some( guid::GUID::parse( &s.value() )? ) );
     }
 
     Err( "GUID parameter must be literal string".to_owned() )
@@ -246,27 +257,25 @@ pub fn generate_guid(
     }
 }
 
-pub fn ty_to_string( ty : &syn::Ty ) -> String
+pub fn ty_to_string( ty : &syn::Type ) -> String
 {
-    let mut tokens = Tokens::new();
-    ty.to_tokens( &mut tokens );
-    tokens.to_string().replace( " ", "" ).replace( ",", ", " )
+    quote!( #ty ).to_string().replace( " ", "" ).replace( ",", ", " )
 }
 
 pub fn is_unit(
-    tk : &Ty
+    tk : &Type
 ) -> bool
 {
-    if let Ty::Tup( ref v ) = *tk {
-        v.is_empty()
+    if let Type::Tuple( ref t ) = *tk {
+        t.elems.is_empty()
     } else {
         false
     }
 }
 
-pub fn unit_ty() -> Ty
+pub fn unit_ty() -> Type
 {
-    Ty::Tup( vec![] )
+    parse_quote!( () )
 }
 
 pub fn get_guid_tokens(
@@ -335,7 +344,7 @@ mod test
 {
     use super::*;
 
-    /// Tests the `ty_to_string` by converting parameter to Ty and back to
+    /// Tests the `ty_to_string` by converting parameter to Type and back to
     /// String to ensure they equal.
     fn test_ty( ty_str : &str ) {
         let ty = parse_type( ty_str ).unwrap();

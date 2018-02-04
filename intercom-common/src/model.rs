@@ -11,7 +11,7 @@ use ::guid::GUID;
 use ::ast_converters::*;
 use ::methodinfo::ComMethodInfo;
 use ::builtin_model;
-use ::syn::{Ident, Visibility, Unsafety};
+use ::syn::{Ident, Visibility};
 use ::std::path::{Path, PathBuf};
 use ::std::fs;
 use ::std::io::Read;
@@ -126,7 +126,7 @@ impl ComStruct
     ) -> ParseResult< ComStruct >
     {
         // Parse the inputs.
-        let item = ::syn::parse_item( item )
+        let item : ::syn::ItemStruct = ::syn::parse_str( item )
             .map_err( |_| ParseError::ComStruct(
                     "<Unknown>".into(),
                     "Item syntax error".into() ) )?;
@@ -142,7 +142,7 @@ impl ComStruct
     pub fn from_ast(
         crate_name : &str,
         attr : &::syn::Attribute,
-        item : &::syn::Item,
+        item : &::syn::ItemStruct,
     ) -> ParseResult< ComStruct >
     {
 
@@ -209,13 +209,13 @@ impl ComInterface
     ) -> ParseResult<ComInterface>
     {
         // Parse the input code.
-        let item = ::syn::parse_item( item )
+        let item : ::syn::Item = ::syn::parse_str( item )
             .map_err( |_| ParseError::ComInterface(
                     "<Unknown>".into(),
                     "Item syntax error".into() ) )?;
         let attr = ::utils::parse_attr_tokens( "com_interface", attr_params )
             .map_err( |_| ParseError::ComInterface(
-                    item.ident.to_string(),
+                    item.get_ident().unwrap().to_string(),
                     "Attribute syntax error".into() ) )?;
 
         Self::from_ast( crate_name, &attr, &item )
@@ -233,7 +233,7 @@ impl ComInterface
         let ( itf_ident, fns, itf_type, unsafety ) =
                 ::utils::get_ident_and_fns( item )
                     .ok_or_else( || ParseError::ComInterface(
-                            item.ident.to_string(),
+                            item.get_ident().unwrap().to_string(),
                             "Unsupported associated item".into() ) )?;
 
         // The first attribute parameter is the IID. Parse that.
@@ -241,14 +241,14 @@ impl ComInterface
         let iid = ::utils::parameter_to_guid(
                     &iter.next()
                         .ok_or_else( || ParseError::ComInterface(
-                                item.ident.to_string(),
+                                item.get_ident().unwrap().to_string(),
                                 "IID required".into() ) )?,
                     crate_name, itf_ident.as_ref(), "IID" )
                 .map_err( |_| ParseError::ComInterface(
-                        item.ident.to_string(),
+                        item.get_ident().unwrap().to_string(),
                         "Bad IID format".into() ) )?
                 .ok_or_else( || ParseError::ComInterface(
-                        item.ident.to_string(),
+                        item.get_ident().unwrap().to_string(),
                         "IID required".into() ) )?;
 
         // The second argument is the optional base class. If there's no base
@@ -260,7 +260,7 @@ impl ComInterface
                 .map( |base| base.get_ident()
                     .map( |i| i.clone() )
                     .map_err( |_| ParseError::ComInterface(
-                            item.ident.to_string(),
+                            item.get_ident().unwrap().to_string(),
                             "Invalid base interface".into() ) ) )
                 .map_or( Ok(None), |o| o.map(Some) )?
                 .unwrap_or_else( || "IUnknown".into() );
@@ -274,10 +274,10 @@ impl ComInterface
         //
         // Note this may conflict with visibility of the actual [com_class], but
         // nothing we can do for this really.
-        let visibility = if itf_type == ::utils::InterfaceType::Trait {
-                item.vis.clone()
+        let visibility = if let &::syn::Item::Trait( ref t ) = item {
+                t.vis.clone()
             } else {
-                Visibility::Public
+                parse_quote!( pub )
             };
 
         // Read the method details.
@@ -285,8 +285,8 @@ impl ComInterface
         // TODO: Currently we ignore invalid methods. We should probably do
         //       something smarter.
         let methods = fns.into_iter()
-            .map( |( ident, sig )|
-                ComMethodInfo::new( ident, sig ) )
+            .map( | sig |
+                ComMethodInfo::new( sig ) )
             .filter_map( |r| r.ok() )
             .collect::<Vec<_>>();
 
@@ -297,7 +297,7 @@ impl ComInterface
             base_interface: base,
             methods: methods,
             item_type: itf_type,
-            is_unsafe : unsafety == Unsafety::Unsafe,
+            is_unsafe : unsafety.is_some(),
         } )
     }
 
@@ -342,7 +342,7 @@ impl ComImpl
     ) -> ParseResult<ComImpl>
     {
         // Get the item details from the associated item.
-        let item = ::syn::parse_item( item )
+        let item : ::syn::Item = ::syn::parse_str( item )
                 .map_err( |_| ParseError::ComImpl(
                         "<Unknown>".into(),
                         "<Unknown>".into(),
@@ -359,7 +359,7 @@ impl ComImpl
         let ( itf_ident_opt, struct_ident, fns ) =
                 ::utils::get_impl_data( item )
                     .ok_or_else( || ParseError::ComImpl(
-                            item.ident.to_string(),
+                            item.get_ident().unwrap().to_string(),
                             "<Unknown>".into(),
                             "Unsupported associated item".into() ) )?;
 
@@ -368,8 +368,8 @@ impl ComImpl
         // TODO: Currently we ignore invalid methods. We should probably do
         //       something smarter.
         let methods = fns.into_iter()
-            .map( |( ident, sig )|
-                ComMethodInfo::new( ident, sig ).map_err( |_| ident ) )
+            .map( | sig |
+                ComMethodInfo::new( sig ).map_err( |_| sig.ident ) )
             .filter_map( |r| r.ok() )
             .collect::<Vec<_>>();
 
@@ -467,7 +467,7 @@ impl ComCrate
         let mut builder : ComCrateBuilder = Default::default();
 
         for src in sources {
-            let krate = ::syn::parse_crate( src )
+            let krate : ::syn::File = ::syn::parse_str( src )
                 .map_err( |_| ParseError::ComCrate(
                         "Failed to parse source".into() ) )?;
 
@@ -571,7 +571,7 @@ impl ComCrate
                 .map_err( |_| ParseError::ComCrate(
                         format!( "Could not read file {}", path.to_string_lossy() ) ) )?;
 
-        let krate = ::syn::parse_crate( &buf )
+        let krate : ::syn::File = ::syn::parse_str( &buf )
                 .map_err( |_| ParseError::ComCrate(
                         format!( "Failed to parse source {}", path.to_string_lossy() ) ) )?;
 
@@ -588,14 +588,14 @@ impl ComCrate
         Self::collect_items( crate_name, items, b )?;
 
         for item in items {
-            let opt_mod_items =
-                    if let ::syn::ItemKind::Mod( ref items ) = item.node {
-                        items
+            let mod_item =
+                    if let &::syn::Item::Mod( ref m ) = item {
+                        m
                     } else {
                         continue;
                     };
 
-            match *opt_mod_items {
+            match mod_item.content {
                 None => {
 
                     // The mod doesn't have immediate items so this is an
@@ -617,25 +617,25 @@ impl ComCrate
                     // We have couple of options. Find the first one that
                     // matches an existing file.
                     let mut mod_paths = vec![
-                        path.parent().unwrap().join( format!( "{}.rs", item.ident ) ),
-                        path.parent().unwrap().join( format!( "{}/mod.rs", item.ident ) ),
+                        path.parent().unwrap().join( format!( "{}.rs", mod_item.ident ) ),
+                        path.parent().unwrap().join( format!( "{}/mod.rs", mod_item.ident ) ),
                     ].into_iter()
                         .filter( |p| p.exists() );
 
                     let mod_path = mod_paths.next()
                         .ok_or_else( || ParseError::ComCrate(
-                                format!( "Could not find mod {}", item.ident ) ) )?;
+                                format!( "Could not find mod {}", mod_item.ident ) ) )?;
 
                     let more = mod_paths.next();
                     if more.is_some() {
                         return Err( ParseError::ComCrate(
                                 format!( "Ambiguous mod, both {0}.rs and \
-                                          {0}/mod.rs present", item.ident ) ) );
+                                          {0}/mod.rs present", mod_item.ident ) ) );
                     }
 
                     Self::parse_file_internal( crate_name, &mod_path, b )?;
                 },
-                Some( ref mod_items )
+                Some( ( _, ref mod_items ) )
                     => Self::process_crate_items( crate_name, path, mod_items, b )?
             }
         }
@@ -650,16 +650,22 @@ impl ComCrate
     ) -> ParseResult<()>
     {
         for item in items {
-            for attr in &item.attrs {
-                match attr.value.name() {
+            for attr in &item.get_attributes().unwrap() {
+                match attr.path.get_ident().unwrap().as_ref() {
                     "com_library" =>
                         b.libs.push( ComLibrary::from_ast( crate_name, attr )? ),
                     "com_interface" =>
                         b.interfaces.push( ComInterface::from_ast(
                                 crate_name, attr, item )? ),
                     "com_class" =>
-                        b.structs.push( ComStruct::from_ast(
-                                crate_name, attr, item )? ),
+                        if let &::syn::Item::Struct( ref s ) = item {
+                            b.structs.push( ComStruct::from_ast(
+                                    crate_name, attr, s )? )
+                        } else {
+                            return Err( ParseError::ComStruct(
+                                    item.get_ident().unwrap().to_string(),
+                                    "Only structs may be COM classes".to_string() ) );
+                        },
                     "com_impl" =>
                         b.impls.push( ComImpl::from_ast( item )? ),
                     _ => { }
@@ -821,7 +827,7 @@ mod test
         assert_eq!( itf.name(), "IAutoGuid" );
         assert_eq!( itf.iid(),
             &GUID::parse( "11BA222D-A34B-32BC-4A1F-77157F37803A" ).unwrap() );
-        assert_eq!( itf.visibility(), &Visibility::Public );
+        assert_eq!( itf.visibility(), parse_quote!( pub ) );
         assert_eq!( itf.base_interface().as_ref().unwrap(), "IUnknown" );
         assert_eq!( itf.methods.len(), 2 );
         assert_eq!( itf.methods[0].name, "one" );
@@ -840,7 +846,7 @@ mod test
         assert_eq!( itf.name(), "IAutoGuid" );
         assert_eq!( itf.iid(),
             &GUID::parse( "11BA222D-A34B-32BC-4A1F-77157F37803A" ).unwrap() );
-        assert_eq!( itf.visibility(), &Visibility::Public );
+        assert_eq!( itf.visibility(), parse_quote!( pub ) );
         assert_eq!( itf.base_interface().as_ref().unwrap(), "IBase" );
         assert_eq!( itf.methods.len(), 2 );
         assert_eq!( itf.methods[0].name, "one" );
@@ -858,7 +864,7 @@ mod test
         assert_eq!( itf.name(), "IAutoGuid" );
         assert_eq!( itf.iid(),
             &GUID::parse( "11BA222D-A34B-32BC-4A1F-77157F37803A" ).unwrap() );
-        assert_eq!( itf.visibility(), &Visibility::Public );
+        assert_eq!( itf.visibility(), parse_quote!( pub ) );
         assert_eq!( itf.base_interface(), &None );
         assert_eq!( itf.methods.len(), 2 );
         assert_eq!( itf.methods[0].name, "one" );

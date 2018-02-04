@@ -9,10 +9,10 @@ use utils;
 pub trait ReturnHandler : ::std::fmt::Debug {
 
     /// The return type of the original Rust method.
-    fn rust_ty( &self ) -> Ty;
+    fn rust_ty( &self ) -> Type;
 
     /// The return type for COM implementation.
-    fn com_ty( &self ) -> Ty
+    fn com_ty( &self ) -> Type
     {
         tyhandlers::get_ty_handler( &self.rust_ty() ).com_ty()
     }
@@ -33,15 +33,15 @@ pub trait ReturnHandler : ::std::fmt::Debug {
 #[derive(Debug)]
 struct VoidHandler;
 impl ReturnHandler for VoidHandler {
-    fn rust_ty( &self ) -> Ty { utils::unit_ty() }
+    fn rust_ty( &self ) -> Type { utils::unit_ty() }
 }
 
 /// Simple return type with the return value as the immediate value.
 #[derive(Debug)]
-struct ReturnOnlyHandler( Ty );
+struct ReturnOnlyHandler( Type );
 impl ReturnHandler for ReturnOnlyHandler {
 
-    fn rust_ty( &self ) -> Ty { self.0.clone() }
+    fn rust_ty( &self ) -> Type { self.0.clone() }
 
     fn com_to_rust_return( &self, result : &Ident ) -> Tokens {
         quote!( #result.into() )
@@ -57,11 +57,11 @@ impl ReturnHandler for ReturnOnlyHandler {
 /// Result type that supports error info for the `Err` value. Converted to
 /// `[retval]` on success or `HRESULT` + `IErrorInfo` on error.
 #[derive(Debug)]
-struct ErrorResultHandler { retval_ty: Ty, return_ty: Ty }
+struct ErrorResultHandler { retval_ty: Type, return_ty: Type }
 impl ReturnHandler for ErrorResultHandler {
 
-    fn rust_ty( &self ) -> Ty { self.return_ty.clone() }
-    fn com_ty( &self ) -> Ty { parse_type( "::intercom::HRESULT" ).unwrap() }
+    fn rust_ty( &self ) -> Type { self.return_ty.clone() }
+    fn com_ty( &self ) -> Type { parse_quote!( ::intercom::HRESULT ) }
 
     fn com_to_rust_return( &self, result : &Ident ) -> Tokens {
 
@@ -100,7 +100,7 @@ impl ReturnHandler for ErrorResultHandler {
             // by reference here.
             let rok_idents = &ok_idents;
             match self.retval_ty {
-                Ty::Tup( _ ) => quote!( ( #( #rok_idents ),* ) ),
+                Type::Tuple( _ ) => quote!( ( #( #rok_idents ),* ) ),
 
                 // Non-tuples should have only one ident. Concatenate the vector.
                 _ => quote!( #( #rok_idents )* ),
@@ -126,13 +126,13 @@ impl ReturnHandler for ErrorResultHandler {
     }
 }
 
-fn get_out_args_for_result( retval_ty : &Ty ) -> Vec<RustArg> {
+fn get_out_args_for_result( retval_ty : &Type ) -> Vec<RustArg> {
 
     match *retval_ty {
 
         // Tuples map to multiple out args, no [retval].
-        Ty::Tup( ref v ) =>
-            v.iter()
+        Type::Tuple( ref t ) =>
+            t.elems.iter()
                 .enumerate()
                 .map( |( idx, ty )| RustArg::new(
                                     Ident::from( format!( "__out{}", idx + 1) ),
@@ -176,8 +176,8 @@ fn get_ok_values(
 
 /// Resolves the correct return handler to use.
 pub fn get_return_handler(
-    retval_ty : &Option< Ty >,
-    return_ty : &Option< Ty >
+    retval_ty : &Option< Type >,
+    return_ty : &Option< Type >
 ) -> Result< Box<ReturnHandler>, () >
 {
     Ok( match ( retval_ty, return_ty ) {
