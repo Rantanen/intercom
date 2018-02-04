@@ -13,3 +13,9 @@ sha1 = "0.3.0"
 ordermap = "0.3"
 toml = "0.4.5"
 failure = "0.1"
+serde = "1.0"
+serde_derive = "1.0"
+handlebars = "0.29"
+
+[dev-dependencies]
+difference = "1.0.0"

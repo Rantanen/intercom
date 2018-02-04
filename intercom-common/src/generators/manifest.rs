@@ -7,8 +7,8 @@ use std::path::Path;
 
 use super::GeneratorError;
 
-use intercom_common::model;
-use intercom_common::utils;
+use model;
+use utils;
 
 use handlebars::Handlebars;
 

@@ -9,11 +9,11 @@ use std::path::Path;
 
 use super::GeneratorError;
 
-use intercom_common::foreign_ty::*;
-use intercom_common::guid::*;
-use intercom_common::methodinfo;
-use intercom_common::model;
-use intercom_common::utils;
+use foreign_ty::*;
+use guid::*;
+use methodinfo;
+use model;
+use utils;
 
 use handlebars::Handlebars;
 

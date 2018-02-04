@@ -50,17 +50,6 @@
 #![crate_type="dylib"]
 #![feature(proc_macro, try_from, fundamental, specialization, non_exhaustive, integer_atomics)]
 
-#[cfg(feature = "generators")]
-extern crate intercom_common;
-#[cfg(feature = "generators")]
-extern crate serde;
-#[cfg(feature = "generators")]
-#[macro_use] extern crate serde_derive;
-#[cfg(feature = "generators")]
-extern crate handlebars;
-#[cfg(feature = "generators")]
-pub mod generators;
-
 #[cfg(not(windows))]
 extern crate libc;
 

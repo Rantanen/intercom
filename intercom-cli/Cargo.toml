@@ -4,11 +4,7 @@ version = "0.1.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 
 [dependencies]
+intercom-common = { path = "../intercom-common", version = "0.2.0" }
 clap = { version = "2.27.1", default-features = false }
 failure = "0.1"
 
-[dependencies.intercom]
-version = "0.2"
-path = "../intercom"
-default-features = false
-features = [ "generators" ]
