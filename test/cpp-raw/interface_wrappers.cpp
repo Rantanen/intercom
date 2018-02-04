@@ -1,4 +1,6 @@
 
+#ifdef __GNUC__
+
 #include <functional>
 
 #include "os.h"
@@ -6,8 +8,6 @@
 
 #include "testlib.h"
 #include "utility/dummy_interface.h"
-
- #ifdef __GNUC__
 
 TEST_CASE( "Using interface wrappers works" )
 {
