@@ -252,7 +252,7 @@ mod tests {
         assert_eq!( info.retval_type.is_none(), true );
         assert_eq!(
                 info.return_type,
-                parse_type( "bool" ).ok() );
+                Some( parse_quote!( bool ) ) );
     }
 
     #[test]
@@ -265,10 +265,10 @@ mod tests {
         assert_eq!( info.args.len(), 0 );
         assert_eq!(
                 info.retval_type,
-                parse_type( "String" ).ok() );
+                Some( parse_quote!( String ) ) );
         assert_eq!(
                 info.return_type,
-                parse_type( "f32" ).ok() );
+                Some( parse_quote!( f32 ) ) );
     }
 
     #[test]
@@ -281,10 +281,10 @@ mod tests {
         assert_eq!( info.args.len(), 0 );
         assert_eq!(
                 info.retval_type,
-                parse_type( "String" ).ok() );
+                Some( parse_quote!( String ) ) );
         assert_eq!(
                 info.return_type,
-                parse_type( "::intercom::HRESULT" ).ok() );
+                Some( parse_quote!( ::intercom::HRESULT ) ) );
     }
 
     #[test]
@@ -300,19 +300,19 @@ mod tests {
         assert_eq!( info.args.len(), 2 );
 
         assert_eq!( info.args[0].name, Ident::from( "a" ) );
-        assert_eq!( info.args[0].ty, parse_type( "u32" ).unwrap() );
+        assert_eq!( info.args[0].ty, parse_quote!( u32 ) );
 
         assert_eq!( info.args[1].name, Ident::from( "b" ) );
-        assert_eq!( info.args[1].ty, parse_type( "f32" ).unwrap() );
+        assert_eq!( info.args[1].ty, parse_quote!( f32 ) );
     }
 
     fn test_info( code : &str ) -> ComMethodInfo {
 
-        let item = parse_item( code ).unwrap();
-        let ( decl, unsafety ) = match item.node {
-            ItemKind::Fn( ref fn_decl, ref unsafety, .. ) => ( fn_decl, unsafety ),
+        let item = parse_str( code ).unwrap();
+        let ( ident, decl, unsafety ) = match item {
+            Item::Fn( ref f ) => ( f.ident, f.decl.as_ref(), f.unsafety.is_some() ),
             _ => panic!( "Code isn't function" ),
         };
-        ComMethodInfo::new_from_parts( &item.ident, decl, unsafety ).unwrap()
+        ComMethodInfo::new_from_parts( &ident, decl, unsafety ).unwrap()
     }
 }
