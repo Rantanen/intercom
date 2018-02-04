@@ -1,6 +1,5 @@
 
 extern crate difference;
-extern crate intercom;
 extern crate intercom_common;
 
 #[cfg(feature = "generators")]
@@ -8,9 +7,9 @@ mod generator_tests {
 
     use difference::Changeset;
 
-    use intercom::generators;
-    use intercom::generators::GeneratorError;
     use intercom_common::model;
+    use itnercom_common::generators;
+    use itnercom_common::generators::GeneratorError;
 
     use std;
     use std::fs;

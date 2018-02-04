@@ -6,10 +6,10 @@ use std::path::Path;
 
 use super::GeneratorError;
 
-use intercom_common::utils;
-use intercom_common::model;
-use intercom_common::methodinfo;
-use intercom_common::foreign_ty::*;
+use utils;
+use model;
+use methodinfo;
+use foreign_ty::*;
 
 use handlebars::Handlebars;
 

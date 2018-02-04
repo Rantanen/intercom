@@ -7,7 +7,11 @@ extern crate ordermap;
 extern crate toml;
 #[macro_use] extern crate failure;
 
+extern crate serde;
+#[macro_use] extern crate serde_derive;
+extern crate handlebars;
 
+pub mod generators;
 pub mod guid;
 pub mod error;
 pub mod idents;

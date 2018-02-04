@@ -2,10 +2,10 @@ use std::io;
 use std::path::Path;
 use std::fs::File;
 
-extern crate intercom;
+extern crate intercom_common;
 extern crate failure;
 
-use intercom::generators;
+use intercom_common::generators;
 
 #[macro_use]
 extern crate clap;

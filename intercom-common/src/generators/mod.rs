@@ -4,7 +4,7 @@
 //!
 //! **Requires the optional `generators` feature**
 
-use intercom_common::model;
+use model;
 
 /// A common error type for all the generators.
 #[derive(Fail, Debug)]
