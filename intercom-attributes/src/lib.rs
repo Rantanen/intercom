@@ -935,13 +935,7 @@ fn tokens_to_tokenstream<T: IntoIterator<Item=quote::Tokens>>(
 {
     TokenStream::from_iter(
         std::iter::once( original )
-            .chain( std::iter::once(
-                TokenStream::from_str(
-                        &tokens.into_iter()
-                            .map( |t| t.parse::<String>().unwrap() )
-                            .fold( String::new(), |prev, next| prev + &next ) )
-                    .expect( "Attribute expansion resulted in invalid syntax" )
-            ) ) )
+            .chain( tokens.into_iter().map( |t| t.into() ) ) )
 }
 
 // https://msdn.microsoft.com/en-us/library/984x0h58.aspx
