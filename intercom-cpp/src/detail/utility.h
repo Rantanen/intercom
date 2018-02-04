@@ -21,11 +21,9 @@ namespace detail
      */
     inline bool is_little_endian()
     {
-        // Create a copy of the data with memcpy.
-        // Directly casting with e.g. reinterpret_cast will lead to UB.
+        static_assert( sizeof( unsigned char ) < sizeof( int ), "" );
         int test_value = 1;
-        std::array< uint8_t, sizeof( int ) > asBytes;
-        std::memcpy( &asBytes, &test_value, sizeof( int ) );
+        unsigned char* asBytes = reinterpret_cast< unsigned char* >( &test_value );
         return asBytes[ 0 ] == 1;
     }
 
@@ -36,23 +34,21 @@ namespace detail
      * @param converter The binary data to write.
      * @return std::ostream& Returns the stream.
      */
-    template< typename TData >
+    template< typename TData, typename = typename std::enable_if< std::is_unsigned< TData >::value, void >::type >
     inline std::ostream& write_as_hex(
         std::ostream& stream,
         TData data
     )
     {
-        // Create a copy of the data with memcpy.
-        // Directly casting with e.g. reinterpret_cast will lead to UB.
-        std::array< uint8_t, sizeof(TData) > asBytes;
-        std::memcpy( &asBytes, &data, sizeof( TData ) );
-
         // Determine the order in which we need to print the data.
         stream << std::hex << std::uppercase;
+        unsigned char* asBytes = reinterpret_cast< unsigned char* >( &data );
         if( is_little_endian() )
         {
             // On little-endian machine the bytes are on reverse order.
-            for( auto byte = asBytes.rbegin(); byte != asBytes.rend(); ++byte )
+            unsigned char* rbegin = asBytes + sizeof( TData ) - 1;
+            unsigned char* rend = asBytes - 1;
+            for( auto byte = rbegin; byte != rend; --byte )
             {
                 // Explicit cast required, otherwise byte is treated as unsigned char.
                 stream << static_cast< unsigned int >( ( *byte & 0xF0 ) >> 4 );
@@ -61,7 +57,9 @@ namespace detail
         }
         else
         {
-            for( auto byte = asBytes.begin(); byte != asBytes.end(); ++byte )
+            unsigned char* begin = asBytes;
+            unsigned char* end = asBytes + sizeof( TData );
+            for( auto byte = begin; byte != end; ++byte )
             {
                 // Explicit cast required, otherwise byte is treated as unsigned char.
                 stream << static_cast< unsigned int >( ( *byte & 0xF0 ) >> 4 );
