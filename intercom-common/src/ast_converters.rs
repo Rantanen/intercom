@@ -1,40 +1,53 @@
 
 use syn::*;
 
-/// Extract the underlying Ty from various AST types.
-pub trait GetTy {
+/// Extract the underlying Type from various AST types.
+pub trait GetType {
 
-    /// Gets the Ty from the AST element.
-    fn get_ty( &self ) -> Result<Ty, String>;
+    /// Gets the Type from the AST element.
+    fn get_ty( &self ) -> Result<Type, String>;
 }
 
-impl GetTy for FnArg {
+impl GetType for FnArg {
 
-    fn get_ty( &self ) -> Result<Ty, String>
+    fn get_ty( &self ) -> Result<Type, String>
     {
         Ok( match *self {
-            FnArg::Captured( _, ref ty )
-                | FnArg::Ignored( ref ty )
-                => ty.clone(),
-            FnArg::SelfRef( ref life, m )
-                => Ty::Rptr( life.clone(), Box::new( MutTy {
-                    mutability: m,
-                    ty: self_ty()
-                } ) ),
-            FnArg::SelfValue(_)
-                => self_ty(),
+            FnArg::Captured( ref c ) => c.ty.clone(),
+            FnArg::Ignored( ref ty ) => ty.clone(),
+            FnArg::SelfRef( ref s )
+                => Type::Reference( TypeReference {
+                        and_token: parse_quote!( & ),
+                        lifetime: s.lifetime.clone(),
+                        mutability: s.mutability.clone(),
+                        elem: Box::new( parse_quote!( Self ) )
+                } ),
+            FnArg::SelfValue(_) => self_ty(),
+            FnArg::Inferred(_)
+                => return Err( "Inferred arguments not supported".to_string() ),
         } )
     }
 }
 
-impl GetTy for FunctionRetTy {
+impl GetType for ReturnType {
 
-    fn get_ty( &self ) -> Result<Ty, String>
+    fn get_ty( &self ) -> Result<Type, String>
     {
         Ok( match *self {
-            FunctionRetTy::Ty( ref ty ) => ty.clone(),
-            FunctionRetTy::Default => unit_ty(),
+            ReturnType::Type( _, ref ty ) => (**ty).clone(),
+            ReturnType::Default => unit_ty(),
         } )
+    }
+}
+
+impl GetType for GenericArgument {
+
+    fn get_ty( &self ) -> Result<Type, String>
+    {
+        match *self {
+            GenericArgument::Type( ref ty ) => Ok( ty.clone() ),
+            _ => Err( "Expected type parameter".to_string() )
+        }
     }
 }
 
@@ -51,11 +64,13 @@ impl GetIdent for FnArg {
         Ok( match *self {
             FnArg::SelfRef(..) | FnArg::SelfValue(..)
                 => Ident::from( "self" ),
-            FnArg::Captured( ref pat, _ ) => match *pat {
-                Pat::Ident( _, ref i, _ ) => i.clone(),
+            FnArg::Captured( ref c ) => match c.pat {
+                Pat::Ident( ref i ) => i.ident.clone(),
                 _ => Err( format!( "Unsupported argument: {:?}", self ) )?,
             },
             FnArg::Ignored(..) => Ident::from( "_" ),
+            FnArg::Inferred(_)
+                => return Err( "Inferred arguments not supported".to_string() ),
         } )
     }
 }
@@ -64,17 +79,17 @@ impl GetIdent for Path {
 
     fn get_ident( &self ) -> Result<Ident, String> {
 
-        self.segments.last().map( |l| l.ident.clone() )
+        self.segments.last().map( |l| l.value().ident.clone() )
                 .ok_or_else( || "Empty path".to_owned() )
     }
 }
 
-impl GetIdent for Ty {
+impl GetIdent for Type {
 
     fn get_ident( &self ) -> Result<Ident, String> {
 
         match *self {
-            Ty::Path( _, ref p ) => p.get_ident(),
+            Type::Path( ref p ) => p.path.get_ident(),
             _ => Err( format!( "Cannot get Ident for {:?}", self ) )
         }
     }
@@ -93,36 +108,89 @@ impl<'a> GetIdent for ::utils::AttrParam {
     }
 }
 
-impl GetIdent for NestedMetaItem {
+impl GetIdent for NestedMeta {
 
     fn get_ident( &self ) -> Result<Ident, String>
     {
         match *self {
-            NestedMetaItem::MetaItem( ref mi ) => mi.get_ident(),
+            NestedMeta::Meta( ref m ) => m.get_ident(),
             _ => Err( format!( "Unsupported meta item kind: {:?}", self ) ),
         }
     }
 }
 
-impl GetIdent for MetaItem {
+impl GetIdent for Meta {
     fn get_ident( &self ) -> Result<Ident, String>
     {
-        match *self {
-            MetaItem::Word( ref i )
-                | MetaItem::List( ref i, .. )
-                | MetaItem::NameValue( ref i, .. )
-                => Ok( i.clone() )
-        }
+        Ok( match *self {
+            Meta::Word( ref i ) => i.clone(),
+            Meta::List( ref ml ) => ml.ident.clone(),
+            Meta::NameValue( ref nv ) => nv.ident.clone(),
+        } )
     }
 }
 
-fn self_ty() -> Ty {
-    Ty::Path(
-        None,
-        Path::from( PathSegment::from( Ident::from( "Self" ) ) )
-    )
+impl GetIdent for Item {
+    fn get_ident( &self ) -> Result<Ident, String>
+    {
+        Ok( match *self {
+            Item::ExternCrate( ref i ) => i.ident.clone(),
+            Item::Static( ref i ) => i.ident.clone(),
+            Item::Const( ref i ) => i.ident.clone(),
+            Item::Fn( ref i ) => i.ident.clone(),
+            Item::Mod( ref i ) => i.ident.clone(),
+            Item::Type( ref i ) => i.ident.clone(),
+            Item::Struct( ref i ) => i.ident.clone(),
+            Item::Enum( ref i ) => i.ident.clone(),
+            Item::Union( ref i ) => i.ident.clone(),
+            Item::Trait( ref i ) => i.ident.clone(),
+            Item::Impl( ref i ) => return i.self_ty.get_ident(),
+            Item::Macro( ref m ) => return m.mac.path.get_ident(),
+            Item::Macro2( ref i ) => i.ident.clone(),
+
+            Item::Use( .. )
+                | Item::ForeignMod( .. )
+                | Item::Verbatim( .. )
+                => return Err( "Item type not supported for Ident".to_string() ),
+        } )
+    }
 }
 
-fn unit_ty() -> Ty {
-    Ty::Tup( vec![] )
+pub trait GetAttributes {
+
+    /// Gets the Attributes from the AST element.
+    fn get_attributes( &self ) -> Result<Vec<Attribute>, String>;
+}
+
+impl GetAttributes for Item {
+
+    fn get_attributes( &self ) -> Result<Vec<Attribute>, String>
+    {
+        Ok( match *self {
+            Item::ExternCrate( ref i ) => i.attrs.clone(),
+            Item::Static( ref i ) => i.attrs.clone(),
+            Item::Const( ref i ) => i.attrs.clone(),
+            Item::Fn( ref i ) => i.attrs.clone(),
+            Item::Mod( ref i ) => i.attrs.clone(),
+            Item::Type( ref i ) => i.attrs.clone(),
+            Item::Struct( ref i ) => i.attrs.clone(),
+            Item::Enum( ref i ) => i.attrs.clone(),
+            Item::Union( ref i ) => i.attrs.clone(),
+            Item::Trait( ref i ) => i.attrs.clone(),
+            Item::Impl( ref i ) => i.attrs.clone(),
+            Item::Macro( ref i ) => i.attrs.clone(),
+            Item::Macro2( ref i ) => i.attrs.clone(),
+            Item::Use( ref i ) => i.attrs.clone(),
+            Item::ForeignMod( ref i ) => i.attrs.clone(),
+            Item::Verbatim( .. ) => vec![],
+        } )
+    }
+}
+
+fn self_ty() -> Type {
+    parse_quote!( Self )
+}
+
+fn unit_ty() -> Type {
+    parse_quote!( () )
 }

@@ -1,8 +1,7 @@
 #![feature(non_exhaustive)]
 
-#[macro_use]
-extern crate quote;
-extern crate syn;
+#[macro_use] extern crate quote;
+#[macro_use] extern crate syn;
 extern crate sha1;
 extern crate ordermap;
 extern crate toml;

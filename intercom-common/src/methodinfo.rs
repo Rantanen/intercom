@@ -3,7 +3,7 @@ use std::rc::Rc;
 use syn::*;
 
 use ast_converters::*;
-use tyhandlers::{TyHandler, get_ty_handler};
+use tyhandlers::{TypeHandler, get_ty_handler};
 use returnhandlers::{ReturnHandler, get_return_handler};
 use utils;
 
@@ -12,14 +12,14 @@ pub enum ComMethodInfoError {
     TooFewArguments,
     BadSelfArg,
     BadArg(Box<FnArg>),
-    BadReturnTy,
+    BadReturnType,
 }
 
 #[derive(Clone)]
 pub struct RustArg {
     pub name: Ident,
-    pub ty: Ty,
-    pub handler: Rc<TyHandler>,
+    pub ty: Type,
+    pub handler: Rc<TypeHandler>,
 }
 
 impl PartialEq for RustArg {
@@ -39,7 +39,7 @@ impl ::std::fmt::Debug for RustArg {
 
 impl RustArg {
 
-    pub fn new( name: Ident, ty: Ty ) -> RustArg {
+    pub fn new( name: Ident, ty: Type ) -> RustArg {
 
         let tyhandler = get_ty_handler( &ty );
         RustArg {
@@ -65,11 +65,11 @@ pub struct ComMethodInfo {
     pub name: Ident,
 
     pub is_const: bool,
-    pub rust_self_arg: FnArg,
-    pub rust_return_ty: Ty,
+    pub rust_self_arg: ArgSelfRef,
+    pub rust_return_ty: Type,
 
-    pub retval_type: Option<Ty>,
-    pub return_type: Option<Ty>,
+    pub retval_type: Option<Type>,
+    pub return_type: Option<Type>,
 
     pub returnhandler: Box<ReturnHandler>,
     pub args: Vec<RustArg>,
@@ -95,58 +95,53 @@ impl ComMethodInfo {
 
     /// Constructs new COM method info from a Rust method signature.
     pub fn new(
-        n: &Ident,
         m : &MethodSig
     ) -> Result<ComMethodInfo, ComMethodInfoError>
     {
-        Self::new_from_parts( n, &m.decl, &m.unsafety )
+        Self::new_from_parts( &m.ident, &m.decl, m.unsafety.is_some() )
     }
 
     pub fn new_from_parts(
         n: &Ident,
         decl: &FnDecl,
-        unsafety: &Unsafety
+        unsafety: bool,
     ) -> Result<ComMethodInfo, ComMethodInfoError>
     {
         // Process all the function arguments.
         // In Rust this includes the 'self' argument and the actual function
         // arguments. For COM the self is implicit so we'll handle it
         // separately.
-        let ( is_const, rust_self_arg, com_args ) = decl.inputs
-            .split_first()
-            .ok_or( ComMethodInfoError::TooFewArguments )
-            .and_then( | ( self_arg, other_args ) | {
+        let mut iter = decl.inputs.iter();
+        let rust_self_arg = iter.next()
+                .ok_or_else( || ComMethodInfoError::TooFewArguments )?;
 
-                // Resolve the self argument.
-                let ( is_const, rust_self_arg ) = match *self_arg {
-                    FnArg::SelfRef(.., m) => (
-                        m == Mutability::Immutable,
-                        self_arg.clone(),
-                    ),
-                    _ => return Err( ComMethodInfoError::BadSelfArg ),
-                };
+        let ( is_const, rust_self_arg ) = match *rust_self_arg {
+            FnArg::SelfRef( ref self_arg ) => (
+                self_arg.mutability.is_none(),
+                self_arg.clone()
+            ),
+            _ => return Err( ComMethodInfoError::BadSelfArg ),
+        } ;
+                
+        // Process other arguments.
+        let args = iter.map( | arg | {
+            let ty = arg.get_ty()
+                .or_else( |_| Err(
+                    ComMethodInfoError::BadArg( Box::new( arg.clone() ) )
+                ) )?;
+            let ident = arg.get_ident()
+                .or_else( |_| Err(
+                    ComMethodInfoError::BadArg( Box::new( arg.clone() ) )
+                ) )?;
 
-                // Process other arguments.
-                let args = other_args.iter().map( | arg | {
-                    let ty = arg.get_ty()
-                        .or_else( |_| Err(
-                            ComMethodInfoError::BadArg( Box::new( arg.clone() ) )
-                        ) )?;
-                    let ident = arg.get_ident()
-                        .or_else( |_| Err(
-                            ComMethodInfoError::BadArg( Box::new( arg.clone() ) )
-                        ) )?;
-
-                    Ok( RustArg::new( ident, ty ) )
-                } ).collect::<Result<_,_>>()?;
-
-                Ok( ( is_const, rust_self_arg, args ) )
-            } )?;
+            Ok( RustArg::new( ident, ty ) )
+        } ).collect::<Result<_,_>>()?;
 
         // Get the output.
-        let output = &decl.output;
-        let rust_return_ty = output.get_ty()
-                .or( Err( ComMethodInfoError::BadReturnTy ) )?;
+        let rust_return_ty = match decl.output {
+            ReturnType::Default => parse_quote!( () ),
+            ReturnType::Type( _, ref ty ) => (**ty).clone(),
+        };
 
         // Resolve the return type and retval type.
         let ( retval_type, return_type ) = if utils::is_unit( &rust_return_ty ) {
@@ -158,7 +153,7 @@ impl ComMethodInfo {
         };
 
         let returnhandler = get_return_handler( &retval_type, &return_type )
-                .or( Err( ComMethodInfoError::BadReturnTy ) )?;
+                .or( Err( ComMethodInfoError::BadReturnType ) )?;
         Ok( ComMethodInfo {
             name: n.clone(),
             is_const: is_const,
@@ -167,14 +162,14 @@ impl ComMethodInfo {
             retval_type: retval_type,
             return_type: return_type,
             returnhandler: returnhandler,
-            args: com_args,
-            is_unsafe: unsafety == &Unsafety::Unsafe,
+            args: args,
+            is_unsafe: unsafety,
         } )
     }
 
     pub fn raw_com_args( &self ) -> Vec<ComArg>
     {
-        let out_dir = if let Some( Ty::Tup(_) ) = self.retval_type {
+        let out_dir = if let Some( Type::Tuple(_) ) = self.retval_type {
                             Direction::Out
                         } else {
                             Direction::Retval
@@ -195,10 +190,10 @@ impl ComMethodInfo {
     }
 }
 
-fn try_parse_result( ty : &Ty ) -> Option<( Ty, Ty )>
+fn try_parse_result( ty : &Type ) -> Option<( Type, Type )>
 {
     let path = match *ty {
-        Ty::Path( _, ref p ) => p,
+        Type::Path( ref p ) => &p.path,
         _ => return None,
     };
 
@@ -206,18 +201,18 @@ fn try_parse_result( ty : &Ty ) -> Option<( Ty, Ty )>
     // good ways to ensure it is an actual Result type but at least we can
     // use this to discount things like Option<>, etc.
     let last_segment = path.segments.last()?;
-    if ! last_segment.ident.to_string().contains( "Result" ) {
+    if ! last_segment.value().ident.to_string().contains( "Result" ) {
         return None;
     }
 
     // Ensure the Result has angle bracket arguments.
-    if let PathParameters::AngleBracketed( ref data )
-            = last_segment.parameters {
+    if let PathArguments::AngleBracketed( ref data )
+            = last_segment.value().arguments {
 
         // The returned types depend on how many arguments the Result has.
-        return Some( match data.types.len() {
-            1 => ( data.types[ 0 ].clone(), hresult_ty() ),
-            2 => ( data.types[ 0 ].clone(), data.types[ 1 ].clone() ),
+        return Some( match data.args.len() {
+            1 => ( data.args[ 0 ].get_ty().ok()?, hresult_ty() ),
+            2 => ( data.args[ 0 ].get_ty().ok()?, data.args[ 1 ].get_ty().ok()? ),
             _ => return None,
         } )
     }
@@ -226,17 +221,8 @@ fn try_parse_result( ty : &Ty ) -> Option<( Ty, Ty )>
     None
 }
 
-fn hresult_ty() -> Ty {
-    Ty::Path(
-        None,
-        Path {
-            global: true,
-            segments: vec![
-                PathSegment::from( Ident::from( "intercom" ) ),
-                PathSegment::from( Ident::from( "HRESULT" ) ),
-            ]
-        }
-    )
+fn hresult_ty() -> Type {
+    parse_quote!( ::intercom::HRESULT )
 }
 
 #[cfg(test)]

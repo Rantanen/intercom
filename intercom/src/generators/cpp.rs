@@ -72,7 +72,7 @@ impl CppModel {
         c : &model::ComCrate,
     ) -> Result<CppModel, GeneratorError> {
 
-        let foreign = CTyHandler;
+        let foreign = CTypeHandler;
         let lib = c.lib().as_ref().ok_or( GeneratorError::MissingLibrary )?;
 
         // Introduce all interfaces so we don't get errors on undeclared items.
