@@ -155,7 +155,7 @@ impl ComMethodInfo {
         let returnhandler = get_return_handler( &retval_type, &return_type )
                 .or( Err( ComMethodInfoError::BadReturnType ) )?;
         Ok( ComMethodInfo {
-            name: n.clone(),
+            name: *n,
             is_const: is_const,
             rust_self_arg: rust_self_arg,
             rust_return_ty: rust_return_ty,

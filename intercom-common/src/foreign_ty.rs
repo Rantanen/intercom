@@ -38,8 +38,8 @@ impl ForeignTypeHandler for CTypeHandler
             syn::Type::Reference( syn::TypeReference { ref mutability, ref elem, .. } )
                 | syn::Type::Ptr( syn::TypePtr { ref mutability, ref elem, .. } )
                 => match *mutability {
-                    Some(_) => format!( "{}*", self.get_ty( krate, &elem )? ),
-                    None => format!( "const {}*", self.get_ty( krate, &elem )? ),
+                    Some(_) => format!( "{}*", self.get_ty( krate, elem )? ),
+                    None => format!( "const {}*", self.get_ty( krate, elem )? ),
                 },
 
             // This is quite experimental. Do IDLs even support staticly sized
