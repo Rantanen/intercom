@@ -1,11 +1,11 @@
-///
-/// COM library parse model.
-///
-/// Defines the items constructed from the various COM attributes.
-///
-/// Should unify COM attribute expansion and crate parsing for IDL/Manifest/etc.
-/// purposes in the future.
-///
+//!
+//! COM library parse model.
+//!
+//! Defines the items constructed from the various COM attributes.
+//!
+//! Should unify COM attribute expansion and crate parsing for IDL/Manifest/etc.
+//! purposes in the future.
+//!
 
 use ::guid::GUID;
 use ::ast_converters::*;
@@ -85,7 +85,7 @@ impl ComLibrary
 
         // The remaining parameters are coclasses exposed by the library.
         let coclasses : Vec<Ident> = iter
-                .map( |coclass| coclass.get_ident().map( |i| i.clone() ) )
+                .map( |coclass| coclass.get_ident() )
                 .collect::<Result<_,_>>()
                 .map_err( |_| ParseError::ComLibrary( "Bad class name".into() ) )?;
 
@@ -160,14 +160,14 @@ impl ComStruct
 
         // Remaining parameters are coclasses.
         let interfaces : Vec<Ident> = iter
-                .map( |itf| itf.get_ident().map( |i| i.clone() ) )
+                .map( |itf| itf.get_ident() )
                 .collect::<Result<_,_>>()
                 .map_err( |_| ParseError::ComStruct(
                         item.ident.to_string(),
                         "Bad interface name".into() ) )?;
 
         Ok( ComStruct {
-            name: item.ident.clone(),
+            name: item.ident,
             visibility: item.vis.clone(),
             clsid,
             interfaces,
@@ -258,7 +258,6 @@ impl ComInterface
         // In practice the NO_BASE should be used ONLY for the IUnknown itself.
         let base = iter.next()
                 .map( |base| base.get_ident()
-                    .map( |i| i.clone() )
                     .map_err( |_| ParseError::ComInterface(
                             item.get_ident().unwrap().to_string(),
                             "Invalid base interface".into() ) ) )
@@ -274,7 +273,7 @@ impl ComInterface
         //
         // Note this may conflict with visibility of the actual [com_class], but
         // nothing we can do for this really.
-        let visibility = if let &::syn::Item::Trait( ref t ) = item {
+        let visibility = if let ::syn::Item::Trait( ref t ) = *item {
                 t.vis.clone()
             } else {
                 parse_quote!( pub )
@@ -291,7 +290,7 @@ impl ComInterface
             .collect::<Vec<_>>();
 
         Ok( ComInterface {
-            name: itf_ident.clone(),
+            name: itf_ident,
             iid: iid,
             visibility: visibility,
             base_interface: base,
@@ -374,10 +373,10 @@ impl ComImpl
             .collect::<Vec<_>>();
 
         Ok( ComImpl {
-            struct_name: struct_ident.clone(),
+            struct_name: struct_ident,
             is_trait_impl: itf_ident_opt.is_some(),
             interface_name: itf_ident_opt
-                    .unwrap_or_else( || struct_ident.clone() ),
+                    .unwrap_or_else( || struct_ident ),
             methods: methods,
         } )
     }
@@ -446,7 +445,7 @@ impl ComCrateBuilder {
         for lib in &mut self.libs {
             for clsid in built_in_types.iter().filter_map( |bti|
                     if bti.class.clsid.is_some() {
-                        Some( bti.class.name().clone() )
+                        Some( *bti.class.name() )
                     } else {
                         None
                     } ) {
@@ -589,7 +588,7 @@ impl ComCrate
 
         for item in items {
             let mod_item =
-                    if let &::syn::Item::Mod( ref m ) = item {
+                    if let ::syn::Item::Mod( ref m ) = *item {
                         m
                     } else {
                         continue;
@@ -658,7 +657,7 @@ impl ComCrate
                         b.interfaces.push( ComInterface::from_ast(
                                 crate_name, attr, item )? ),
                     "com_class" =>
-                        if let &::syn::Item::Struct( ref s ) = item {
+                        if let ::syn::Item::Struct( ref s ) = *item {
                             b.structs.push( ComStruct::from_ast(
                                     crate_name, attr, s )? )
                         } else {

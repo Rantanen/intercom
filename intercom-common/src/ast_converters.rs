@@ -18,8 +18,8 @@ impl GetType for FnArg {
             FnArg::SelfRef( ref s )
                 => Type::Reference( TypeReference {
                         and_token: parse_quote!( & ),
-                        lifetime: s.lifetime.clone(),
-                        mutability: s.mutability.clone(),
+                        lifetime: s.lifetime,
+                        mutability: s.mutability,
                         elem: Box::new( parse_quote!( Self ) )
                 } ),
             FnArg::SelfValue(_) => self_ty(),
@@ -65,7 +65,7 @@ impl GetIdent for FnArg {
             FnArg::SelfRef(..) | FnArg::SelfValue(..)
                 => Ident::from( "self" ),
             FnArg::Captured( ref c ) => match c.pat {
-                Pat::Ident( ref i ) => i.ident.clone(),
+                Pat::Ident( ref i ) => i.ident,
                 _ => Err( format!( "Unsupported argument: {:?}", self ) )?,
             },
             FnArg::Ignored(..) => Ident::from( "_" ),
@@ -79,7 +79,7 @@ impl GetIdent for Path {
 
     fn get_ident( &self ) -> Result<Ident, String> {
 
-        self.segments.last().map( |l| l.value().ident.clone() )
+        self.segments.last().map( |l| l.value().ident )
                 .ok_or_else( || "Empty path".to_owned() )
     }
 }
@@ -102,7 +102,7 @@ impl<'a> GetIdent for ::utils::AttrParam {
     {
         match *self {
             ::utils::AttrParam::Word( ref ident )
-                => Ok( ident.clone() ),
+                => Ok( *ident ),
             _ => Err( format!( "Unsupported AttrParam kind: {:?}", self ) ),
         }
     }
@@ -123,9 +123,9 @@ impl GetIdent for Meta {
     fn get_ident( &self ) -> Result<Ident, String>
     {
         Ok( match *self {
-            Meta::Word( ref i ) => i.clone(),
-            Meta::List( ref ml ) => ml.ident.clone(),
-            Meta::NameValue( ref nv ) => nv.ident.clone(),
+            Meta::Word( ref i ) => *i,
+            Meta::List( ref ml ) => ml.ident,
+            Meta::NameValue( ref nv ) => nv.ident,
         } )
     }
 }
@@ -134,19 +134,19 @@ impl GetIdent for Item {
     fn get_ident( &self ) -> Result<Ident, String>
     {
         Ok( match *self {
-            Item::ExternCrate( ref i ) => i.ident.clone(),
-            Item::Static( ref i ) => i.ident.clone(),
-            Item::Const( ref i ) => i.ident.clone(),
-            Item::Fn( ref i ) => i.ident.clone(),
-            Item::Mod( ref i ) => i.ident.clone(),
-            Item::Type( ref i ) => i.ident.clone(),
-            Item::Struct( ref i ) => i.ident.clone(),
-            Item::Enum( ref i ) => i.ident.clone(),
-            Item::Union( ref i ) => i.ident.clone(),
-            Item::Trait( ref i ) => i.ident.clone(),
+            Item::ExternCrate( ref i ) => i.ident,
+            Item::Static( ref i ) => i.ident,
+            Item::Const( ref i ) => i.ident,
+            Item::Fn( ref i ) => i.ident,
+            Item::Mod( ref i ) => i.ident,
+            Item::Type( ref i ) => i.ident,
+            Item::Struct( ref i ) => i.ident,
+            Item::Enum( ref i ) => i.ident,
+            Item::Union( ref i ) => i.ident,
+            Item::Trait( ref i ) => i.ident,
             Item::Impl( ref i ) => return i.self_ty.get_ident(),
             Item::Macro( ref m ) => return m.mac.path.get_ident(),
-            Item::Macro2( ref i ) => i.ident.clone(),
+            Item::Macro2( ref i ) => i.ident,
 
             Item::Use( .. )
                 | Item::ForeignMod( .. )

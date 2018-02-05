@@ -14,12 +14,10 @@ pub fn parse_attr_tokens(
 ) -> Result< Attribute, MacroError >
 {
     let attr_rendered = format!( "#[{}{}]", attr_name, attr_tokens );
-    match attr_rendered.parse() {
-        Ok( tt ) => match Attribute::parse_outer.parse2( tt ) {
-            Ok( t ) => return Ok( t ),
-            _ => {}
-        },
-        _ => {}
+    if let Ok( tt ) = attr_rendered.parse() {
+        if let Ok( t ) = Attribute::parse_outer.parse2( tt ) {
+            return Ok( t )
+        }
     }
 
     Err( MacroError {
@@ -55,7 +53,7 @@ pub fn get_ident_and_fns(
                         struct_ident,
                         items,
                         InterfaceType::Struct,
-                        unsafety.clone() ) )
+                        *unsafety ) )
             },
         Item::Trait( ItemTrait {
                 ident,
@@ -71,7 +69,7 @@ pub fn get_ident_and_fns(
 
             match methods {
                 Some( m ) => Some( (
-                        ident.clone(),
+                        ident,
                         m,
                         InterfaceType::Trait,
                         unsafety,
@@ -93,8 +91,8 @@ pub fn get_impl_data(
     item : &Item
 ) -> Option< ImplData >
 {
-    if let &Item::Impl( ItemImpl { ref trait_, ref self_ty, ref items, .. } ) = item {
-        return Some( get_impl_data_raw( &trait_, &self_ty, &items ) );
+    if let Item::Impl( ItemImpl { ref trait_, ref self_ty, ref items, .. } ) = *item {
+        return Some( get_impl_data_raw( trait_, self_ty, items ) );
     }
     None
 }
