@@ -46,7 +46,7 @@ pub fn expand_com_impl(
     // QueryInterface
     let calling_convetion = get_calling_convetion();
     let query_interface_ident = idents::method_impl(
-            &struct_ident, &itf_ident, "query_interface" );
+            struct_ident, itf_ident, "query_interface" );
     output.push( quote!(
             #[allow(non_snake_case)]
             #[doc(hidden)]
@@ -68,7 +68,7 @@ pub fn expand_com_impl(
 
     // AddRef
     let add_ref_ident = idents::method_impl(
-            &struct_ident, &itf_ident, "add_ref" );
+            struct_ident, itf_ident, "add_ref" );
     output.push( quote!(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
@@ -83,7 +83,7 @@ pub fn expand_com_impl(
 
     // Release
     let release_ident = idents::method_impl(
-            &struct_ident, &itf_ident, "release" );
+            struct_ident, itf_ident, "release" );
     output.push( quote!(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
@@ -121,7 +121,7 @@ pub fn expand_com_impl(
 
         let method_ident = &method_info.name;
         let method_impl_ident = idents::method_impl(
-                &struct_ident, &itf_ident, &method_ident.as_ref() );
+                struct_ident, itf_ident, method_ident.as_ref() );
 
         let in_out_args = method_info.raw_com_args()
                 .into_iter()

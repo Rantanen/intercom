@@ -57,7 +57,7 @@ pub fn expand_com_interface(
     // Create a vector for the virtual table fields and insert the base
     // interface virtual table in it if required.
     let mut fields = vec![];
-    if let &Some( ref base ) = itf.base_interface() {
+    if let Some( ref base ) = *itf.base_interface() {
         let vtbl = match base.as_ref() {
             "IUnknown" => quote!( ::intercom::IUnknownVtbl ),
             _ => { let vtbl = idents::vtable_struct( base ); quote!( #vtbl ) }

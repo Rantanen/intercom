@@ -14,8 +14,8 @@ use syn::*;
 /// The attribute expansion results in the following items:
 ///
 /// - Virtual table offset values for the different interfaces.
-/// - IUnknown virtual table instance.
-/// - CoClass trait implementation.
+/// - `IUnknown` virtual table instance.
+/// - `CoClass` trait implementation.
 pub fn expand_com_class(
     attr_tokens: &TokenStream,
     item_tokens: TokenStream,
@@ -58,7 +58,7 @@ pub fn expand_com_class(
     // ISupportErrorInfo virtual table and having that at the beginning.
     let isupporterrorinfo_ident = Ident::from( "ISupportErrorInfo".to_owned() );
     let isupporterrorinfo_vtable_instance_ident =
-            idents::vtable_instance( &struct_ident, &isupporterrorinfo_ident );
+            idents::vtable_instance( struct_ident, &isupporterrorinfo_ident );
     let mut vtable_list_field_decls = vec![
         quote!( _ISupportErrorInfo : &'static ::intercom::ISupportErrorInfoVtbl ) ];
     let mut vtable_list_field_values = vec![
@@ -70,10 +70,10 @@ pub fn expand_com_class(
     for itf in cls.interfaces() {
 
         // Various idents.
-        let offset_ident = idents::vtable_offset( &struct_ident, &itf );
-        let iid_ident = idents::iid( &itf );
-        let vtable_struct_ident = idents::vtable_struct( &itf );
-        let vtable_instance_ident = idents::vtable_instance( &struct_ident, &itf );
+        let offset_ident = idents::vtable_offset( struct_ident, itf );
+        let iid_ident = idents::iid( itf );
+        let vtable_struct_ident = idents::vtable_struct( itf );
+        let vtable_instance_ident = idents::vtable_instance( struct_ident, itf );
 
         // Store the field offset globally. We need this offset when implementing
         // the delegating query_interface methods. The only place where we know
@@ -166,7 +166,7 @@ pub fn expand_com_class(
         ) );
 
         // Check if the current interface is the implicit struct interface.
-        if struct_ident == &itf {
+        if struct_ident == itf {
 
             // Implicit interface.
             //
@@ -226,7 +226,7 @@ pub fn expand_com_class(
     // interfaces that the coclass implements.
 
     // VTableList struct definition.
-    let vtable_list_ident = idents::vtable_list( &struct_ident );
+    let vtable_list_ident = idents::vtable_list( struct_ident );
     let visibility = cls.visibility();
     output.push( quote!(
             #[allow(non_snake_case)]
@@ -269,8 +269,8 @@ pub fn expand_com_class(
         ) );
 
     // CLSID constant for the class.
-    let clsid_ident = idents::clsid( &struct_ident );
-    if let &Some( ref guid ) = cls.clsid() {
+    let clsid_ident = idents::clsid( struct_ident );
+    if let Some( ref guid ) = *cls.clsid() {
         let clsid_guid_tokens = utils::get_guid_tokens( guid );
         let clsid_doc = format!( "`{}` class ID.", struct_ident );
         let clsid_const = quote!(

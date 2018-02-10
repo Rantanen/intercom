@@ -13,7 +13,7 @@ use self::proc_macro::TokenStream;
 ///
 /// The attribute expansion results in the following items:
 ///
-/// - DllGetClassObject extern function implementation.
+/// - `DllGetClassObject` extern function implementation.
 pub fn expand_com_library(
     attr_tokens: &TokenStream,
     item_tokens: TokenStream,
@@ -27,7 +27,7 @@ pub fn expand_com_library(
     for struct_ident in lib.coclasses() {
 
         // Construct the match pattern.
-        let clsid_name = idents::clsid( &struct_ident );
+        let clsid_name = idents::clsid( struct_ident );
         match_arms.push( quote!(
             self::#clsid_name =>
                 Ok( ::intercom::ComBox::new(
