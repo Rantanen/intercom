@@ -80,6 +80,7 @@ mod error; pub use error::{return_hresult, get_last_error, ComError, ErrorInfo, 
 mod interfaces;
 pub mod runtime;
 pub mod alloc;
+pub mod variant;
 
 // intercom_attributes use "intercom::" to qualify things in this crate.
 // Declare such module here and import everything we have in it to make those
