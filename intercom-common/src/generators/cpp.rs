@@ -96,8 +96,12 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
         &self
     ) -> String {
 
+        // TODO: Enable once verified that the "const" works.
+        // We want to enable if for interface methods and parameters.
+        // let const_specifier = if self.is_mutable || self.pass_by != PassBy::Reference { "" } else { "const " };
+        let const_specifier = "";
+
         let type_name = self.get_cpp_type_name();
-        let const_specifier = if self.is_mutable || self.pass_by != PassBy::Reference { "" } else { "" };
         let ptr = match self.pass_by {
             PassBy::Value => "",
             PassBy::Reference | PassBy::Ptr => "*",
