@@ -11,7 +11,7 @@ pub enum RustType<'e>
 }
 
 /// Defines how a value is passed to/from Rust function.
-#[derive(PartialEq, PartialOrd, Clone)]
+#[derive(PartialEq, PartialOrd, Clone, Copy)]
 pub enum PassBy
 {
     Value,
@@ -89,11 +89,9 @@ impl ForeignTypeHandler for CTypeHandler
         ty: &'b syn::Type,
     ) -> Option<TypeInfo<'a>>
     {
-        match TypeInfoResolver::from_type( krate, ty )
-        {
-            Some( resolver ) => Some( TypeInfo::from_resolver( resolver ) ),
-            None => None,
-        }
+        let resolver = TypeInfoResolver::from_type( krate, ty )?;
+
+        Some( TypeInfo::from_resolver( resolver ) )
     }
 }
 
@@ -115,24 +113,13 @@ impl<'s, 'p: 's> TypeInfo<'s> {
         // Resolve default values.
         // NOTE: The existence of the array length value identifies an array type and
         // is therefor passed as-is here.
-        let pass_by;
-        let is_mutable;
-        {
-            pass_by = match resolver.pass_by {
-                Some( ref v ) => v,
-                None => &PassBy::Value,
-            };
-
-            is_mutable = match resolver.is_mutable {
-                Some( ref v ) => v.clone(),
-                None => false,
-            };
-        };
+        let pass_by = resolver.pass_by.unwrap_or( PassBy::Value );
+        let is_mutable = resolver.is_mutable.unwrap_or( false );
 
         TypeInfo{
             krate: resolver.krate,
             rust_type: resolver.rust_type,
-            pass_by: pass_by.clone(),
+            pass_by: pass_by,
             is_mutable: is_mutable,
             array_length: resolver.array_length,
         }
@@ -145,9 +132,9 @@ impl<'s> std::fmt::Display for RustType<'s> {
         &self,
         f: &mut std::fmt::Formatter
     ) -> std::fmt::Result {
-        match self {
-            &RustType::Ident( syn_ident ) => write!( f, "{}", syn_ident ),
-            &RustType::Void => write!( f, "void" ),
+        match *self {
+            RustType::Ident( syn_ident ) => write!( f, "{}", syn_ident ),
+            RustType::Void => write!( f, "void" ),
         }
     }
 }
@@ -205,25 +192,13 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         TypeInfoResolver::new( krate, RustType::Void )
     }
 
-    fn pass_by_option(
-        resolver: Option<TypeInfoResolver<'s>>,
-        pass_by: PassBy,
-    ) -> Option<TypeInfoResolver<'s>>
-    {
-        match resolver {
-            Some( r ) => Some( TypeInfoResolver::pass_by( r, pass_by ) ),
-            None => None,
-        }
-    }
-
     fn pass_by(
         resolver: TypeInfoResolver<'s>,
         pass_by: PassBy,
     ) -> TypeInfoResolver<'s>
     {
-        match resolver.pass_by {
-            Some( _ ) => panic!("Cannot set pass_by twice."),
-            None => {},
+        if resolver.pass_by.is_some() {
+            panic!("Cannot set pass_by twice.")
         }
 
         TypeInfoResolver {
@@ -235,25 +210,13 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         }
     }
 
-    fn mutable_option(
-        resolver: Option<TypeInfoResolver<'s>>,
-        is_mutable: bool,
-    ) -> Option<TypeInfoResolver<'s>>
-    {
-        match resolver {
-            Some( r ) => Some( TypeInfoResolver::mutable( r, is_mutable ) ),
-            None => None,
-        }
-    }
-
     fn mutable(
         resolver: TypeInfoResolver<'s>,
         is_mutable: bool,
     ) -> TypeInfoResolver<'s>
     {
-        match resolver.is_mutable {
-            Some(_) => panic!("Cannot set is_mutable twice."),
-            None => {}
+        if resolver.is_mutable.is_some() {
+            panic!("Cannot set is_mutable twice.")
         }
 
         TypeInfoResolver {
@@ -265,25 +228,13 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         }
     }
 
-    fn array_option(
-        resolver: Option<TypeInfoResolver<'s>>,
-        array_length: &'p syn::Expr,
-    ) -> Option<TypeInfoResolver<'s>>
-    {
-        match resolver {
-            Some( r ) => Some( TypeInfoResolver::array( r, array_length ) ),
-            None => None,
-        }
-    }
-
     fn array(
         resolver: TypeInfoResolver<'s>,
         array_length: &'p syn::Expr,
     ) -> TypeInfoResolver<'s>
     {
-        match resolver.array_length {
-            Some(_) => panic!("Cannot set array_length twice."),
-            None => {}
+        if resolver.array_length.is_some() {
+            panic!("Cannot set array_length twice.")
         }
 
         TypeInfoResolver {
@@ -300,10 +251,9 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         array: &'p syn::TypeArray,
     ) -> Option<TypeInfoResolver<'s>>
     {
-        TypeInfoResolver::array_option(
-            TypeInfoResolver::from_type( krate, &array.elem ),
-            &array.len,
-        )
+        let resolver = TypeInfoResolver::from_type( krate, &array.elem )?;
+
+        Some( TypeInfoResolver::array( resolver, &array.len ) )
     }
 
     fn from_slice(
@@ -319,13 +269,11 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         reference : &'p syn::TypeReference,
     ) -> Option<TypeInfoResolver<'s>>
     {
-        TypeInfoResolver::pass_by_option(
-                TypeInfoResolver::mutable_option(
-                            TypeInfoResolver::from_type( krate, &reference.elem ),
-                            TypeInfoResolver::is_mutable( &reference.mutability )
-                        ),
-                PassBy::Reference,
-        )
+        let resolver = TypeInfoResolver::from_type( krate, &reference.elem )?;
+        let resolver = TypeInfoResolver::mutable( resolver,
+                TypeInfoResolver::is_mutable( &reference.mutability ) );
+
+        Some( TypeInfoResolver::pass_by( resolver, PassBy::Reference ) )
     }
 
     fn from_pointer(
@@ -333,13 +281,11 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         ptr : &'p syn::TypePtr,
     ) -> Option<TypeInfoResolver<'s>>
     {
-        TypeInfoResolver::pass_by_option(
-            TypeInfoResolver::mutable_option(
-                TypeInfoResolver::from_type( krate, &ptr.elem ),
-                TypeInfoResolver::is_mutable( &ptr.mutability ),
-            ),
-            PassBy::Ptr,
-        )
+        let resolver = TypeInfoResolver::from_type( krate, &ptr.elem )?;
+        let resolver = TypeInfoResolver::mutable( resolver,
+                TypeInfoResolver::is_mutable( &ptr.mutability ) );
+
+        Some( TypeInfoResolver::pass_by( resolver, PassBy::Ptr ) )
     }
 
     fn from_path(
@@ -376,12 +322,12 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
 
             // Extract a wrapped type.
             "ComRc" | "ComItf" | "ComResult"
-                => TypeInfoResolver::pass_by_option( TypeInfoResolver::from_type(
+                => Some( TypeInfoResolver::pass_by( TypeInfoResolver::from_type(
                         krate,
                         match **args.unwrap().first().unwrap().value() {
                             syn::GenericArgument::Type( ref t ) => t,
                             _ => return None,
-                        } ), PassBy::Ptr ),
+                        } )?, PassBy::Ptr ) ),
 
             // Bare type.
             _t => Some( TypeInfoResolver::new( krate, RustType::Ident( &segment.ident ) ) ),
@@ -393,10 +339,7 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         mutability: &Option<syn::token::Mut>
     ) -> bool
     {
-        match mutability {
-            &Some( _ ) => true,
-            &None => false,
-        }
+        mutability.is_some()
     }
 }
 
