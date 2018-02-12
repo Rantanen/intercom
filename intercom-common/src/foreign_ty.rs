@@ -1,5 +1,44 @@
+extern crate std;
+
 use model::ComCrate;
 use syn;
+
+/// Detailed information of a Rust type.
+pub enum RustType<'e>
+{
+    Ident( &'e syn::Ident ),
+    Void,
+}
+
+/// Defines how a value is passed to/from Rust function.
+#[derive(PartialEq, PartialOrd, Clone, Copy)]
+pub enum PassBy
+{
+    Value,
+
+    Reference,
+
+    Ptr,
+}
+
+/// Details of a Rust type. Used for translation to other programming languages.
+pub struct TypeInfo<'s>
+{
+    /// The crate this type is associated with.
+    pub krate: &'s ComCrate,
+
+    /// The type in rust.
+    pub rust_type: RustType<'s>,
+
+    /// Specifies how the value is passed to/from a function. Default: PassBy::Value
+    pub pass_by: PassBy,
+
+    /// Is the Rust type defined as mutable? Default: false
+    pub is_mutable: bool,
+
+    /// The length of the array if the Rust type denotes an array.
+    pub array_length: Option<&'s syn::Expr>
+}
 
 pub trait ForeignTypeHandler
 {
@@ -7,53 +46,116 @@ pub trait ForeignTypeHandler
     fn get_name( &self, krate : &ComCrate, ty : &syn::Ident ) -> String;
 
     /// Gets the COM type for a Rust type.
-    fn get_ty( &self, krate : &ComCrate, ty : &syn::Type ) -> Option< String >;
+    fn get_ty<'a, 'b: 'a>( &self, krate : &'b ComCrate, ty : &'b syn::Type ) -> Option< TypeInfo<'a> >;
 }
 
 pub struct CTypeHandler;
+
+/// Collects details of a Rust type when the Rust crate is parsed.
+struct TypeInfoResolver<'s>
+{
+    /// The crate this type is associated with.
+    krate: &'s ComCrate,
+
+    /// The type in rust.
+    rust_type: RustType<'s>,
+
+    /// Specifies how the value is passed. Default: PassBy::Value
+    pass_by: Option<PassBy>,
+
+    /// Is the Rust type defined as mutable? Default: false
+    is_mutable: Option<bool>,
+
+    /// The length of the array if the Rust type denotes an array.
+    array_length: Option<&'s syn::Expr>
+}
+
 
 impl ForeignTypeHandler for CTypeHandler
 {
     /// Tries to apply renaming to the name.
     fn get_name(
         &self,
-        krate : &ComCrate,
-        ident : &syn::Ident,
+        krate: &ComCrate,
+        ident: &syn::Ident,
     ) -> String
     {
         self.get_name_for_ty( krate, ident.as_ref() )
     }
 
-    fn get_ty(
+    fn get_ty<'a, 'b: 'a>(
         &self,
-        krate : &ComCrate,
-        ty : &syn::Type,
-    ) -> Option< String >
+        krate: &'b ComCrate,
+        ty: &'b syn::Type,
+    ) -> Option<TypeInfo<'a>>
     {
-        Some( match *ty {
+        let resolver = TypeInfoResolver::from_type( krate, ty )?;
 
-            // Pointer types.
-            syn::Type::Slice( ref slice )
-                => format!( "{}*", self.get_ty( krate, &slice.elem )? ),
-            syn::Type::Reference( syn::TypeReference { ref mutability, ref elem, .. } )
-                | syn::Type::Ptr( syn::TypePtr { ref mutability, ref elem, .. } )
-                => match *mutability {
-                    Some(_) => format!( "{}*", self.get_ty( krate, elem )? ),
-                    None => format!( "const {}*", self.get_ty( krate, elem )? ),
-                },
+        Some( TypeInfo::from_resolver( resolver ) )
+    }
+}
 
-            // This is quite experimental. Do IDLs even support staticly sized
-            // arrays? Currently this turns [u8; 3] into "uint8[3]" IDL type.
-            syn::Type::Array( ref arr )
-                => format!( "{}[{:?}]", self.get_ty( krate, &arr.elem )?, arr.len ),
+impl<'s, 'p: 's> TypeInfo<'s> {
 
-            // Normal Rust struct/trait type.
-            syn::Type::Path( ref p )
-                => self.segment_to_ty( krate, p.path.segments.last().unwrap().value() )?,
+    /// Gets the name of the type in Rust.
+    pub fn get_name(
+        &self
+    ) -> String
+    {
+        format!( "{}", self.rust_type )
+    }
 
-            // Tuple with length 0, ie. Unit tuple: (). This is void-equivalent.
-            syn::Type::Tuple( ref t ) if t.elems.is_empty()
-                => "void".to_owned(),
+    /// Initializes the type info from resolver which has resolved the type.
+    fn from_resolver(
+        resolver: TypeInfoResolver<'p>
+    ) -> TypeInfo<'s>
+    {
+        // Resolve default values.
+        // NOTE: The existence of the array length value identifies an array type and
+        // is therefor passed as-is here.
+        let pass_by = resolver.pass_by.unwrap_or( PassBy::Value );
+        let is_mutable = resolver.is_mutable.unwrap_or( false );
+
+        TypeInfo{
+            krate: resolver.krate,
+            rust_type: resolver.rust_type,
+            pass_by: pass_by,
+            is_mutable: is_mutable,
+            array_length: resolver.array_length,
+        }
+    }
+}
+
+impl<'s> std::fmt::Display for RustType<'s> {
+
+    fn fmt(
+        &self,
+        f: &mut std::fmt::Formatter
+    ) -> std::fmt::Result {
+        match *self {
+            RustType::Ident( syn_ident ) => write!( f, "{}", syn_ident ),
+            RustType::Void => write!( f, "void" ),
+        }
+    }
+}
+
+impl<'s, 'p: 's> TypeInfoResolver<'s> {
+
+    /// Parses the type info from the specified Type.
+    fn from_type(
+        krate: &'p ComCrate,
+        syn_type: &'p syn::Type,
+    ) -> Option<TypeInfoResolver<'s>>
+    {
+        match *syn_type {
+
+            // Delegate to appropriate conversion.
+            syn::Type::Slice( ref slice ) => TypeInfoResolver::from_slice( krate, slice ),
+            syn::Type::Reference( ref reference ) => TypeInfoResolver::from_reference( krate, reference ),
+            syn::Type::Ptr( ref ptr ) => TypeInfoResolver::from_pointer( krate, ptr ),
+            syn::Type::Array( ref arr ) => TypeInfoResolver::from_array( krate, arr ),
+            syn::Type::Path( ref p ) => TypeInfoResolver::from_path( krate, p ),
+            syn::Type::Tuple( ref t ) if t.elems.is_empty() => Some( TypeInfoResolver::void( krate ) ),
 
             syn::Type::BareFn(..)
                 | syn::Type::Never(..)
@@ -65,24 +167,142 @@ impl ForeignTypeHandler for CTypeHandler
                 | syn::Type::Macro(..)
                 | syn::Type::Verbatim(..)
                 | syn::Type::Group(..)
-                => return None,
-        } )
+                => None,
+        }
     }
-}
 
-impl CTypeHandler
-{
-    /// Converts a path segment to a Type.
-    ///
-    /// The path segment should be the last segment for this to make any sense.
-    fn segment_to_ty(
-        &self,
-        krate : &ComCrate,
-        segment : &syn::PathSegment,
-    ) -> Option<String>
+    fn new(
+        krate: &'p ComCrate,
+        rust_type: RustType<'s>
+    ) -> TypeInfoResolver<'s>
+    {
+        TypeInfoResolver {
+            krate: krate,
+            rust_type: rust_type,
+            pass_by: None,
+            is_mutable: None,
+            array_length: None,
+        }
+    }
+
+    fn void(
+        krate: &'p ComCrate,
+    ) -> TypeInfoResolver<'s>
+    {
+        TypeInfoResolver::new( krate, RustType::Void )
+    }
+
+    fn pass_by(
+        resolver: TypeInfoResolver<'s>,
+        pass_by: PassBy,
+    ) -> TypeInfoResolver<'s>
+    {
+        if resolver.pass_by.is_some() {
+            panic!("Cannot set pass_by twice.")
+        }
+
+        TypeInfoResolver {
+            krate: resolver.krate,
+            rust_type: resolver.rust_type,
+            pass_by: Some( pass_by ),
+            is_mutable: resolver.is_mutable,
+            array_length: resolver.array_length,
+        }
+    }
+
+    fn mutable(
+        resolver: TypeInfoResolver<'s>,
+        is_mutable: bool,
+    ) -> TypeInfoResolver<'s>
+    {
+        if resolver.is_mutable.is_some() {
+            panic!("Cannot set is_mutable twice.")
+        }
+
+        TypeInfoResolver {
+            krate: resolver.krate,
+            rust_type: resolver.rust_type,
+            pass_by: resolver.pass_by,
+            is_mutable: Some( is_mutable ),
+            array_length: resolver.array_length,
+        }
+    }
+
+    fn array(
+        resolver: TypeInfoResolver<'s>,
+        array_length: &'p syn::Expr,
+    ) -> TypeInfoResolver<'s>
+    {
+        if resolver.array_length.is_some() {
+            panic!("Cannot set array_length twice.")
+        }
+
+        TypeInfoResolver {
+            krate: resolver.krate,
+            rust_type: resolver.rust_type,
+            pass_by: resolver.pass_by,
+            is_mutable: resolver.is_mutable,
+            array_length: Some( array_length ),
+        }
+    }
+
+    fn from_array(
+        krate : &'p ComCrate,
+        array: &'p syn::TypeArray,
+    ) -> Option<TypeInfoResolver<'s>>
+    {
+        let resolver = TypeInfoResolver::from_type( krate, &array.elem )?;
+
+        Some( TypeInfoResolver::array( resolver, &array.len ) )
+    }
+
+    fn from_slice(
+        krate : &'p ComCrate,
+        slice: &'p syn::TypeSlice,
+    ) -> Option<TypeInfoResolver<'s>>
+    {
+        TypeInfoResolver::from_type( krate, &slice.elem )
+    }
+
+    fn from_reference(
+        krate : &'p ComCrate,
+        reference : &'p syn::TypeReference,
+    ) -> Option<TypeInfoResolver<'s>>
+    {
+        let resolver = TypeInfoResolver::from_type( krate, &reference.elem )?;
+        let resolver = TypeInfoResolver::mutable( resolver,
+                TypeInfoResolver::is_mutable( &reference.mutability ) );
+
+        Some( TypeInfoResolver::pass_by( resolver, PassBy::Reference ) )
+    }
+
+    fn from_pointer(
+        krate : &'p ComCrate,
+        ptr : &'p syn::TypePtr,
+    ) -> Option<TypeInfoResolver<'s>>
+    {
+        let resolver = TypeInfoResolver::from_type( krate, &ptr.elem )?;
+        let resolver = TypeInfoResolver::mutable( resolver,
+                TypeInfoResolver::is_mutable( &ptr.mutability ) );
+
+        Some( TypeInfoResolver::pass_by( resolver, PassBy::Ptr ) )
+    }
+
+    fn from_path(
+        krate: &'p ComCrate,
+        type_path: &'p syn::TypePath,
+    ) -> Option<TypeInfoResolver<'s>>
+    {
+        TypeInfoResolver::from_segment( krate, type_path.path.segments.last().unwrap().value() )
+    }
+
+    fn from_segment(
+        krate: &'p ComCrate,
+        segment: &'p syn::PathSegment,
+    ) -> Option<TypeInfoResolver<'s>>
     {
         // Get the segment as a string.
-        let ty = format!( "{}", segment.ident );
+        let rust_type = format!( "{}", segment.ident );
 
         // Get the type information.
         let args = match segment.arguments {
@@ -98,38 +318,34 @@ impl CTypeHandler
                     => panic!( "Fn-types are unsupported." ),
         };
 
-        Some( match ty.as_str() {
-            
-            // Hardcoded handling for parameter types.
-            "ComRc" | "ComItf"
-                => format!( "{}*", self.get_ty(
+        match rust_type.as_str() {
+
+            // Extract a wrapped type.
+            "ComRc" | "ComItf" | "ComResult"
+                => Some( TypeInfoResolver::pass_by( TypeInfoResolver::from_type(
                         krate,
                         match **args.unwrap().first().unwrap().value() {
                             syn::GenericArgument::Type( ref t ) => t,
                             _ => return None,
-                        } )? ),
-            "RawComPtr" => "*void".to_owned(),
-            "String" | "BStr" => "BSTR".to_owned(),
-            "usize" => "size_t".to_owned(),
-            "u64" => "uint64".to_owned(),
-            "i64" => "int64".to_owned(),
-            "u32" => "uint32".to_owned(),
-            "i32" => "int32".to_owned(),
-            "u16" => "uint16".to_owned(),
-            "i16" => "int16".to_owned(),
-            "u8" => "uint8".to_owned(),
-            "i8" => "int8".to_owned(),
-            "f64" => "double".to_owned(),
-            "f32" => "float".to_owned(),
-            "c_void" => "void".to_owned(),
+                        } )?, PassBy::Ptr ) ),
 
-            // Default handling checks if we need to rename the type, such as
-            // Foo -> IFoo for implicit interfaces.
-            t => self.get_name_for_ty( krate, t ),
-        } )
+            // Bare type.
+            _t => Some( TypeInfoResolver::new( krate, RustType::Ident( &segment.ident ) ) ),
+        }
     }
 
-    fn get_name_for_ty(
+    /// Determines if the given type is mutable
+    fn is_mutable(
+        mutability: &Option<syn::token::Mut>
+    ) -> bool
+    {
+        mutability.is_some()
+    }
+}
+
+impl CTypeHandler
+{
+     fn get_name_for_ty(
         &self,
         krate : &ComCrate,
         ty_name : &str
@@ -148,29 +364,3 @@ impl CTypeHandler
         }
     }
 }
-
-/// Converts a Rust type into applicable C++ type.
-pub fn to_cpp_type(
-    c: &ComCrate,
-    ty: &syn::Type,
-) -> Option<String> { //, GeneratorError> {
-
-    let foreign = CTypeHandler;
-    let name = foreign.get_ty( c, ty )?;
-            
-    Some( match name.as_ref() {
-        "int8" => "int8_t",
-        "uint8" => "uint8_t",
-        "int16" => "int16_t",
-        "uint16" => "uint16_t",
-        "uint16*" => "uint16_t*",
-        "int32" => "int32_t",
-        "uint32" => "uint32_t",
-        "int64" => "int64_t",
-        "uint64" => "uint64_t",
-        "BSTR" => "intercom::BSTR",
-        "HRESULT" => "intercom::HRESULT",
-        _ => return Some( name ),
-    }.to_owned() )
-}
-

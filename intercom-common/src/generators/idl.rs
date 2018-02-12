@@ -8,6 +8,7 @@ use super::GeneratorError;
 
 use utils;
 use model;
+use model::ComCrate;
 use methodinfo;
 use foreign_ty::*;
 
@@ -51,6 +52,20 @@ pub struct IdlCoClass {
     pub interfaces : Vec<String>,
 }
 
+/// Types that can have IDL representaion can implement this to allow code generation.
+trait IdlTypeInfo<'s> {
+
+    /// Gets full type for IDL.
+    fn to_idl(
+        &self
+    ) -> String;
+
+    /// Gets the IDL compatile type name for this type.
+    fn get_idl_type_name(
+        &self
+    ) -> String;
+}
+
 impl IdlModel {
 
     /// Generates the model from files in the path.
@@ -90,28 +105,28 @@ impl IdlModel {
                     };
 
                     // Get the foreign type for the arg type.
-                    let ty_name = foreign
+                    let idl_type = foreign
                         .get_ty( c, &a.arg.ty )
                         .ok_or_else( || GeneratorError::UnsupportedType(
                                         utils::ty_to_string( &a.arg.ty ) ) )?;
 
                     Ok( IdlArg {
                         name : a.arg.name.to_string(),
-                        arg_type : format!( "{}{}", ty_name, out_ptr ),
+                        arg_type : format!( "{}{}", idl_type.to_idl(), out_ptr ),
                         attributes : attrs.to_owned(),
                     } )
 
                 } ).collect::<Result<Vec<_>, GeneratorError>>()?;
 
                 let ret_ty = m.returnhandler.com_ty();
-                let ret_ty_name = foreign
+                let ret_ty = foreign
                         .get_ty( c, &ret_ty )
                         .ok_or_else( || GeneratorError::UnsupportedType(
                                         utils::ty_to_string( &ret_ty ) ) )?;
                 Ok( IdlMethod {
                     name: utils::pascal_case( m.name.as_ref() ),
                     idx: i,
-                    ret_type: ret_ty_name,
+                    ret_type: ret_ty.to_idl(),
                     args: args
                 } )
 
@@ -183,6 +198,73 @@ impl IdlModel {
     }
 }
 
+impl<'s> IdlTypeInfo<'s> {
+
+    /// Gets the name of a custom type for IDL.
+    fn get_idl_name_for_custom_type(
+        krate : &ComCrate,
+        ty_name : &str
+    ) -> String {
+
+        let itf = if let Some( itf ) = krate.interfaces().get( ty_name ) {
+            itf
+        } else {
+            return ty_name.to_owned()
+        };
+
+        if itf.item_type() == ::utils::InterfaceType::Struct {
+            format!( "I{}", itf.name() )
+        } else {
+            ty_name.to_owned()
+        }
+    }
+}
+
+impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
+
+    fn to_idl(
+        &self
+    ) -> String {
+
+        // TODO: Enable once verified that the "const" works.
+        // We want to enable if for interface methods and parameters.
+        // let const_specifier = if self.is_mutable || self.pass_by != PassBy::Reference { "" } else { "const " };
+        let const_specifier = "";
+
+        let type_name = self.get_idl_type_name();
+        let ptr = match self.pass_by {
+            PassBy::Value => "",
+            PassBy::Reference | PassBy::Ptr => "*",
+        };
+        format!("{}{}{}", const_specifier, type_name, ptr )
+    }
+
+    /// Gets the name of the IDL type for this type.
+    fn get_idl_type_name(
+        &self
+    ) -> String {
+
+        let type_name = self.get_name();
+        match type_name.as_str() {
+            "RawComPtr" => "*void".to_owned(),
+            "String" | "BStr" => "BSTR".to_owned(),
+            "usize" => "size_t".to_owned(),
+            "u64" => "uint64".to_owned(),
+            "i64" => "int64".to_owned(),
+            "u32" => "uint32".to_owned(),
+            "i32" => "int32".to_owned(),
+            "u16" => "uint16".to_owned(),
+            "i16" => "int16".to_owned(),
+            "u8" => "uint8".to_owned(),
+            "i8" => "int8".to_owned(),
+            "f64" => "double".to_owned(),
+            "f32" => "float".to_owned(),
+            "c_void" => "void".to_owned(),
+            t => IdlTypeInfo::get_idl_name_for_custom_type( self.krate, t ),
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -229,12 +311,12 @@ mod test {
                             idx : 0,
                             ret_type : "HRESULT".to_owned(),
                             args : vec![
-                                IdlArg { 
+                                IdlArg {
                                     name : "a".to_owned(),
                                     arg_type : "uint32".to_owned(),
                                     attributes : "in".to_owned(),
                                 },
-                                IdlArg { 
+                                IdlArg {
                                     name : "__out".to_owned(),
                                     arg_type : "bool*".to_owned(),
                                     attributes : "out, retval".to_owned(),
@@ -253,7 +335,7 @@ mod test {
                             idx : 0,
                             ret_type : "void".to_owned(),
                             args : vec![
-                                IdlArg { 
+                                IdlArg {
                                     name : "b".to_owned(),
                                     arg_type : "uint32".to_owned(),
                                     attributes : "in".to_owned(),
@@ -272,12 +354,12 @@ mod test {
                             idx : 0,
                             ret_type : "BSTR".to_owned(),
                             args : vec![
-                                IdlArg { 
+                                IdlArg {
                                     name : "text".to_owned(),
                                     arg_type : "BSTR".to_owned(),
                                     attributes : "in".to_owned(),
                                 },
-                                IdlArg { 
+                                IdlArg {
                                     name : "len".to_owned(),
                                     arg_type : "uint32".to_owned(),
                                     attributes : "in".to_owned(),
@@ -289,7 +371,7 @@ mod test {
                             idx : 1,
                             ret_type : "void".to_owned(),
                             args : vec![
-                                IdlArg { 
+                                IdlArg {
                                     name : "bstr".to_owned(),
                                     arg_type : "BSTR".to_owned(),
                                     attributes : "in".to_owned(),
@@ -301,7 +383,7 @@ mod test {
                             idx : 2,
                             ret_type : "void*".to_owned(),
                             args : vec![
-                                IdlArg { 
+                                IdlArg {
                                     name : "len".to_owned(),
                                     arg_type : "size_t".to_owned(),
                                     attributes : "in".to_owned(),
@@ -313,7 +395,7 @@ mod test {
                             idx : 3,
                             ret_type : "void".to_owned(),
                             args : vec![
-                                IdlArg { 
+                                IdlArg {
                                     name : "ptr".to_owned(),
                                     arg_type : "void*".to_owned(),
                                     attributes : "in".to_owned(),

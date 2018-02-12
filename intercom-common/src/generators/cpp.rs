@@ -13,6 +13,7 @@ use foreign_ty::*;
 use guid::*;
 use methodinfo;
 use model;
+use model::ComCrate;
 use utils;
 
 use handlebars::Handlebars;
@@ -53,6 +54,87 @@ pub struct CppCoClass {
     pub interfaces : Vec<String>,
 }
 
+/// Types that can have C++ representaion can implement this to allow code generation.
+trait CppTypeInfo<'s> {
+
+    /// Gets full type for C++.
+    fn to_cpp(
+        &self
+    ) -> String;
+
+    /// Gets the C++ compatile type name for this type.
+    fn get_cpp_type_name(
+        &self
+    ) -> String;
+}
+
+impl<'s> CppTypeInfo<'s> {
+
+    /// Gets the name of a custom type for C++.
+    fn get_cpp_name_for_custom_type(
+        krate : &ComCrate,
+        ty_name : &str
+    ) -> String {
+
+        let itf = if let Some( itf ) = krate.interfaces().get( ty_name ) {
+            itf
+        } else {
+            return ty_name.to_owned()
+        };
+
+        if itf.item_type() == ::utils::InterfaceType::Struct {
+            format!( "I{}", itf.name() )
+        } else {
+            ty_name.to_owned()
+        }
+    }
+}
+
+impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
+
+    fn to_cpp(
+        &self
+    ) -> String {
+
+        // TODO: Enable once verified that the "const" works.
+        // We want to enable if for interface methods and parameters.
+        // let const_specifier = if self.is_mutable || self.pass_by != PassBy::Reference { "" } else { "const " };
+        let const_specifier = "";
+
+        let type_name = self.get_cpp_type_name();
+        let ptr = match self.pass_by {
+            PassBy::Value => "",
+            PassBy::Reference | PassBy::Ptr => "*",
+        };
+        format!("{}{}{}", const_specifier, type_name, ptr )
+    }
+
+    fn get_cpp_type_name(
+        &self
+    ) -> String {
+
+        let type_name = self.get_name();
+        match type_name.as_str() {
+            "RawComPtr" => "*void".to_owned(),
+            "BSTR" | "String" | "BStr" => "intercom::BSTR".to_owned(),
+            "usize" => "size_t".to_owned(),
+            "i8" => "int8_t".to_owned(),
+            "u8" => "uint8_t".to_owned(),
+            "i16" => "int16_t".to_owned(),
+            "u16" => "uint16_t".to_owned(),
+            "i32" => "int32_t".to_owned(),
+            "u32" => "uint32_t".to_owned(),
+            "i64" => "int64_t".to_owned(),
+            "u64" => "uint64_t".to_owned(),
+            "HRESULT" => "intercom::HRESULT".to_owned(),
+            "f64" => "double".to_owned(),
+            "f32" => "float".to_owned(),
+            "c_void" => "void".to_owned(),
+            t => CppTypeInfo::get_cpp_name_for_custom_type( self.krate, t ),
+        }
+    }
+}
+
 impl CppModel {
 
     /// Generates the model from files in the path.
@@ -89,29 +171,29 @@ impl CppModel {
                     let out_ptr = match a.dir {
                         methodinfo::Direction::In
                             => "",
-                        methodinfo::Direction::Out 
+                        methodinfo::Direction::Out
                             | methodinfo::Direction::Retval
                             => "*",
                     };
 
                     // Get the foreign type for the arg type in C++ format.
-                    let ty_name = to_cpp_type( c, &a.arg.ty )
+                    let type_info = foreign.get_ty( c, &a.arg.ty )
                             .ok_or_else( || GeneratorError::UnsupportedType(
                                             utils::ty_to_string( &a.arg.ty ) ) )?;
                     Ok( CppArg {
                         name : a.arg.name.to_string(),
-                        arg_type : format!( "{}{}", ty_name, out_ptr ),
+                        arg_type : format!( "{}{}", type_info.to_cpp(), out_ptr ),
                     } )
 
                 } ).collect::<Result<Vec<_>, GeneratorError>>()?;
 
                 let ret_ty = m.returnhandler.com_ty();
-                let ret_ty_name = to_cpp_type( c, &ret_ty )
+                let ret_ty = foreign.get_ty( c, &ret_ty )
                         .ok_or_else( || GeneratorError::UnsupportedType(
                                         utils::ty_to_string( &ret_ty ) ) )?;
                 Ok( CppMethod {
                     name: utils::pascal_case( m.name.as_ref() ),
-                    ret_type: ret_ty_name,
+                    ret_type: ret_ty.to_cpp(),
                     args: args
                 } )
 
@@ -257,11 +339,11 @@ mod test {
                             name : "Method".to_owned(),
                             ret_type : "intercom::HRESULT".to_owned(),
                             args : vec![
-                                CppArg { 
+                                CppArg {
                                     name : "a".to_owned(),
                                     arg_type : "uint32_t".to_owned(),
                                 },
-                                CppArg { 
+                                CppArg {
                                     name : "__out".to_owned(),
                                     arg_type : "bool*".to_owned(),
                                 },
@@ -278,7 +360,7 @@ mod test {
                             name : "ComMethod".to_owned(),
                             ret_type : "void".to_owned(),
                             args : vec![
-                                CppArg { 
+                                CppArg {
                                     name : "b".to_owned(),
                                     arg_type : "uint32_t".to_owned(),
                                 },
@@ -295,11 +377,11 @@ mod test {
                             name : "AllocBstr".to_owned(),
                             ret_type : "intercom::BSTR".to_owned(),
                             args : vec![
-                                CppArg { 
+                                CppArg {
                                     name : "text".to_owned(),
                                     arg_type : "intercom::BSTR".to_owned(),
                                 },
-                                CppArg { 
+                                CppArg {
                                     name : "len".to_owned(),
                                     arg_type : "uint32_t".to_owned(),
                                 },
@@ -309,7 +391,7 @@ mod test {
                             name : "FreeBstr".to_owned(),
                             ret_type : "void".to_owned(),
                             args : vec![
-                                CppArg { 
+                                CppArg {
                                     name : "bstr".to_owned(),
                                     arg_type : "intercom::BSTR".to_owned(),
                                 },
@@ -319,7 +401,7 @@ mod test {
                             name : "Alloc".to_owned(),
                             ret_type : "void*".to_owned(),
                             args : vec![
-                                CppArg { 
+                                CppArg {
                                     name : "len".to_owned(),
                                     arg_type : "size_t".to_owned(),
                                 },
@@ -329,7 +411,7 @@ mod test {
                             name : "Free".to_owned(),
                             ret_type : "void".to_owned(),
                             args : vec![
-                                CppArg { 
+                                CppArg {
                                     name : "ptr".to_owned(),
                                     arg_type : "void*".to_owned(),
                                 },
@@ -380,12 +462,12 @@ mod test {
             }
         "# ] ).expect( "Could not parse test crate" );
 
-        let expected_method = 
+        let expected_method =
             CppMethod {
                 name : "BstrMethod".to_owned(),
                 ret_type : "intercom::BSTR".to_owned(),
                 args : vec![
-                    CppArg { 
+                    CppArg {
                         name : "b".to_owned(),
                         arg_type : "intercom::BSTR".to_owned(),
                     },
