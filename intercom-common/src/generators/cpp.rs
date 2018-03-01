@@ -61,7 +61,8 @@ trait CppTypeInfo<'s> {
     /// Gets full type for C++.
     fn to_cpp(
         &self,
-        krate : &ComCrate,
+        direction: methodinfo::Direction,
+        krate : &ComCrate
     ) -> String;
 
     /// Gets the C++ compatile type name for this type.
@@ -102,8 +103,17 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
 
     fn to_cpp(
         &self,
+        direction: methodinfo::Direction,
         krate : &ComCrate,
-    ) -> String {
+    ) -> String
+    {
+        // Argument direction affects both the argument attribute and
+        // whether the argument is passed by pointer or value.
+        let out_ptr = match direction {
+            methodinfo::Direction::In
+            | methodinfo::Direction::Retval => "",
+            methodinfo::Direction::Out => "*",
+        };
 
         // TODO: Enable once verified that the "const" works.
         // We want to enable if for interface methods and parameters.
@@ -112,6 +122,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
 
         let type_name = self.get_cpp_type_name( krate );
         let ptr = if self.is_pointer() { "*" } else { "" };
+        let ptr = format!( "{}{}", ptr, out_ptr );
         format!("{}{}{}", const_specifier, type_name, ptr )
     }
 
@@ -123,7 +134,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
         let type_name = self.get_leaf().get_name();
         match type_name.as_str() {
             "RawComPtr" => "*void".to_owned(),
-            "BSTR" | "String" | "BStr" => "intercom::BSTR".to_owned(),
+            "BSTR" | "String" | "BStr" | "str" => "intercom::BSTR".to_owned(),
             "usize" => "size_t".to_owned(),
             "i8" => "int8_t".to_owned(),
             "u8" => "uint8_t".to_owned(),
@@ -152,8 +163,9 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
         }
 
         match self.pass_by {
-            PassBy::Value => false,
-            PassBy::Reference | PassBy::Ptr => true,
+            PassBy::Value
+            | PassBy::Reference => false,
+            PassBy::Ptr => true,
         }
     }
 }
@@ -189,14 +201,10 @@ impl CppModel {
                 // Construct the argument list.
                 let args = m.raw_com_args().iter().map( |a| {
 
-                    // Argument direction affects both the argument attribute and
-                    // whether the argument is passed by pointer or value.
-                    let out_ptr = match a.dir {
-                        methodinfo::Direction::In
-                            => "",
-                        methodinfo::Direction::Out
-                            | methodinfo::Direction::Retval
-                            => "*",
+                    // Redirect return values converted out arguments.
+                    let dir = match a.dir {
+                            methodinfo::Direction::Retval => methodinfo::Direction::Out,
+                            d => d,
                     };
 
                     // Get the foreign type for the arg type in C++ format.
@@ -205,7 +213,7 @@ impl CppModel {
                                             utils::ty_to_string( &a.arg.ty ) ) )?;
                     Ok( CppArg {
                         name : a.arg.name.to_string(),
-                        arg_type : format!( "{}{}", type_info.to_cpp( c ), out_ptr ),
+                        arg_type : type_info.to_cpp( dir, c ),
                     } )
 
                 } ).collect::<Result<Vec<_>, GeneratorError>>()?;
@@ -216,7 +224,7 @@ impl CppModel {
                                         utils::ty_to_string( &ret_ty ) ) )?;
                 Ok( CppMethod {
                     name: utils::pascal_case( m.name.as_ref() ),
-                    ret_type: ret_ty.to_cpp( c ),
+                    ret_type: ret_ty.to_cpp( methodinfo::Direction::Retval, c ),
                     args
                 } )
 

@@ -17,10 +17,11 @@ extern crate winapi;
     SharedImplementation,
     ErrorSource,
     AllocTests,
+    StringTests,
 )]
 
 #[com_interface( AUTO_GUID )]
-trait IRefCount 
+trait IRefCount
 {
     fn get_ref_count( &self ) -> u32;
 }
@@ -262,5 +263,26 @@ impl AllocTests
 
     pub fn get_bstr_result( &self, value: u32 ) -> ComResult<String> {
         Ok( format!( "{}", value ) )
+    }
+}
+
+#[com_class( AUTO_GUID, StringTests)]
+pub struct StringTests
+{
+     value: String
+}
+
+#[com_interface( AUTO_GUID )]
+#[com_impl]
+impl StringTests
+{
+    pub fn new() -> StringTests { StringTests { value: "".to_owned() } }
+
+    pub fn get_value( &self ) -> ComResult<String> {
+        Ok( self.value.clone() )
+    }
+
+    pub fn put_value( &mut self, value: &str ) {
+        self.value = value.to_owned();
     }
 }

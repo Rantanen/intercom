@@ -21,6 +21,7 @@ ${PROJECT_SOURCE_DIR}/result.cpp
 ${PROJECT_SOURCE_DIR}/return_interfaces.cpp
 ${PROJECT_SOURCE_DIR}/stateful.cpp
 ${PROJECT_SOURCE_DIR}/interface_wrappers.cpp
+${PROJECT_SOURCE_DIR}/strings.cpp
 ${PROJECT_SOURCE_DIR}/utility/dummy_interface.cpp
 )
 
