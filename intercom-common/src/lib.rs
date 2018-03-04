@@ -25,3 +25,4 @@ pub mod model;
 pub mod builtin_model;
 pub mod foreign_ty;
 pub mod attributes;
+pub mod type_parser;

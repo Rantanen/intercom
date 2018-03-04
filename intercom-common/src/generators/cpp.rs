@@ -10,6 +10,7 @@ use std::path::Path;
 use super::GeneratorError;
 
 use foreign_ty::*;
+use type_parser::*;
 use guid::*;
 use methodinfo;
 use model;

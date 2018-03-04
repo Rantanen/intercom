@@ -11,6 +11,7 @@ use model;
 use model::ComCrate;
 use methodinfo;
 use foreign_ty::*;
+use type_parser::*;
 
 use handlebars::Handlebars;
 
