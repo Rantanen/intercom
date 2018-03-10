@@ -10,7 +10,10 @@ pub trait ForeignTypeHandler
     fn get_name( &self, krate : &ComCrate, ty : &syn::Ident ) -> String;
 
     /// Gets the COM type for a Rust type.
-    fn get_ty<'a, 'b: 'a>( &self, krate : &'b ComCrate, ty : &'b syn::Type ) -> Option< TypeInfo<'a> >;
+    fn get_ty<'a, 'b: 'a>(
+        &self,
+        ty : &'b syn::Type,
+    ) -> Option< TypeInfo<'a> >;
 }
 
 pub struct CTypeHandler;
@@ -29,11 +32,10 @@ impl ForeignTypeHandler for CTypeHandler
 
     fn get_ty<'a, 'b: 'a>(
         &self,
-        krate: &'b ComCrate,
         ty: &'b syn::Type,
     ) -> Option<TypeInfo<'a>>
     {
-        ::type_parser::parse_type( krate, ty )
+        ::type_parser::parse( ty )
     }
 }
 

@@ -60,13 +60,20 @@ trait CppTypeInfo<'s> {
 
     /// Gets full type for C++.
     fn to_cpp(
-        &self
+        &self,
+        krate : &ComCrate,
     ) -> String;
 
     /// Gets the C++ compatile type name for this type.
     fn get_cpp_type_name(
-        &self
+        &self,
+        krate : &ComCrate,
     ) -> String;
+
+    /// Determines whether this type should be passed as a pointer.
+    fn is_pointer(
+        &self
+    ) -> bool;
 }
 
 impl<'s> CppTypeInfo<'s> {
@@ -94,7 +101,8 @@ impl<'s> CppTypeInfo<'s> {
 impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
 
     fn to_cpp(
-        &self
+        &self,
+        krate : &ComCrate,
     ) -> String {
 
         // TODO: Enable once verified that the "const" works.
@@ -102,19 +110,17 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
         // let const_specifier = if self.is_mutable || self.pass_by != PassBy::Reference { "" } else { "const " };
         let const_specifier = "";
 
-        let type_name = self.get_cpp_type_name();
-        let ptr = match self.pass_by {
-            PassBy::Value => "",
-            PassBy::Reference | PassBy::Ptr => "*",
-        };
+        let type_name = self.get_cpp_type_name( krate );
+        let ptr = if self.is_pointer() { "*" } else { "" };
         format!("{}{}{}", const_specifier, type_name, ptr )
     }
 
     fn get_cpp_type_name(
-        &self
+        &self,
+        krate : &ComCrate,
     ) -> String {
 
-        let type_name = self.get_name();
+        let type_name = self.get_leaf().get_name();
         match type_name.as_str() {
             "RawComPtr" => "*void".to_owned(),
             "BSTR" | "String" | "BStr" => "intercom::BSTR".to_owned(),
@@ -131,7 +137,23 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
             "f64" => "double".to_owned(),
             "f32" => "float".to_owned(),
             "c_void" => "void".to_owned(),
-            t => CppTypeInfo::get_cpp_name_for_custom_type( self.krate, t ),
+            t => CppTypeInfo::get_cpp_name_for_custom_type( krate, t ),
+        }
+    }
+
+    fn is_pointer(
+        &self
+    ) -> bool
+    {
+        // Rust wrappers represent reference counted objects
+        // so they are always passed as a pointer.
+        if let RustType::Wrapper( _, _ ) = self.rust_type {
+            return true;
+        }
+
+        match self.pass_by {
+            PassBy::Value => false,
+            PassBy::Reference | PassBy::Ptr => true,
         }
     }
 }
@@ -178,23 +200,23 @@ impl CppModel {
                     };
 
                     // Get the foreign type for the arg type in C++ format.
-                    let type_info = foreign.get_ty( c, &a.arg.ty )
+                    let type_info = foreign.get_ty( &a.arg.ty )
                             .ok_or_else( || GeneratorError::UnsupportedType(
                                             utils::ty_to_string( &a.arg.ty ) ) )?;
                     Ok( CppArg {
                         name : a.arg.name.to_string(),
-                        arg_type : format!( "{}{}", type_info.to_cpp(), out_ptr ),
+                        arg_type : format!( "{}{}", type_info.to_cpp( c ), out_ptr ),
                     } )
 
                 } ).collect::<Result<Vec<_>, GeneratorError>>()?;
 
                 let ret_ty = m.returnhandler.com_ty();
-                let ret_ty = foreign.get_ty( c, &ret_ty )
+                let ret_ty = foreign.get_ty( &ret_ty )
                         .ok_or_else( || GeneratorError::UnsupportedType(
                                         utils::ty_to_string( &ret_ty ) ) )?;
                 Ok( CppMethod {
                     name: utils::pascal_case( m.name.as_ref() ),
-                    ret_type: ret_ty.to_cpp(),
+                    ret_type: ret_ty.to_cpp( c ),
                     args
                 } )
 

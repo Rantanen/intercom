@@ -1,17 +1,19 @@
 extern crate std;
 
-use model::ComCrate;
+use std::rc::Rc;
 use syn;
 
 /// Detailed information of a Rust type.
+#[derive(Clone, Debug)]
 pub enum RustType<'e>
 {
     Ident( &'e syn::Ident ),
     Void,
+    Wrapper( &'e syn::Ident, Rc< TypeInfo<'e> > ),
 }
 
 /// Defines how a value is passed to/from Rust function.
-#[derive(PartialEq, PartialOrd, Clone, Copy)]
+#[derive(PartialEq, PartialOrd, Clone, Copy, Debug)]
 pub enum PassBy
 {
     Value,
@@ -22,11 +24,9 @@ pub enum PassBy
 }
 
 /// Details of a Rust type. Used for translation to other programming languages.
+#[derive(Clone, Debug)]
 pub struct TypeInfo<'s>
 {
-    /// The crate this type is associated with.
-    pub krate: &'s ComCrate,
-
     /// The type in rust.
     pub rust_type: RustType<'s>,
 
@@ -37,25 +37,24 @@ pub struct TypeInfo<'s>
     pub is_mutable: bool,
 
     /// The length of the array if the Rust type denotes an array.
-    pub array_length: Option<&'s syn::Expr>
+    pub array_length: Option<&'s syn::Expr>,
+
+    /// Reference to the original type that this type info represents.
+    pub original: &'s syn::Type,
 }
 
-pub fn parse_type<'a, 'b: 'a>(
-        krate: &'b ComCrate,
+pub fn parse<'a, 'b: 'a>(
         ty: &'b syn::Type,
 ) -> Option<TypeInfo<'a>>
 {
-    let resolver = TypeInfoResolver::from_type( krate, ty )?;
+    let resolver = TypeInfoResolver::from_type( ty )?;
 
-    Some( TypeInfo::from_resolver( resolver ) )
+    Some( TypeInfo::from_resolver( resolver, ty ) )
 }
 
 /// Collects details of a Rust type when the Rust crate is parsed.
 struct TypeInfoResolver<'s>
 {
-    /// The crate this type is associated with.
-    krate: &'s ComCrate,
-
     /// The type in rust.
     rust_type: RustType<'s>,
 
@@ -77,12 +76,28 @@ impl<'s, 'p: 's> TypeInfo<'s> {
         &self
     ) -> String
     {
-        format!( "{}", self.rust_type )
+        // Exclude the wrappee from the name.
+        match self.rust_type {
+            RustType::Wrapper( wrapper, _ ) => format!( "{}", wrapper ),
+            ref t => format!( "{}", t ),
+        }
+    }
+
+    /// Returns the nested type info or self.
+    pub fn get_leaf(
+        &self
+    ) -> &TypeInfo<'s>
+    {
+        match self.rust_type {
+            RustType::Wrapper( _, ref wrappee ) => wrappee.get_leaf(),
+            _ => self
+        }
     }
 
     /// Initializes the type info from resolver which has resolved the type.
     fn from_resolver(
-        resolver: TypeInfoResolver<'p>
+        resolver: TypeInfoResolver<'p>,
+        original: &'p syn::Type,
     ) -> TypeInfo<'s>
     {
         // Resolve default values.
@@ -92,13 +107,15 @@ impl<'s, 'p: 's> TypeInfo<'s> {
         let is_mutable = resolver.is_mutable.unwrap_or( false );
 
         TypeInfo{
-            krate: resolver.krate,
             rust_type: resolver.rust_type,
             pass_by,
             is_mutable,
             array_length: resolver.array_length,
+            original,
         }
     }
+
+
 }
 
 impl<'s> std::fmt::Display for RustType<'s> {
@@ -110,6 +127,8 @@ impl<'s> std::fmt::Display for RustType<'s> {
         match *self {
             RustType::Ident( syn_ident ) => write!( f, "{}", syn_ident ),
             RustType::Void => write!( f, "void" ),
+            RustType::Wrapper( wrapper, ref wrapped ) => write!( f, "{}<{}>",
+                    wrapper, wrapped.rust_type )
         }
     }
 }
@@ -118,19 +137,18 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
 
     /// Parses the type info from the specified Type.
     fn from_type(
-        krate: &'p ComCrate,
         syn_type: &'p syn::Type,
     ) -> Option<TypeInfoResolver<'s>>
     {
         match *syn_type {
 
             // Delegate to appropriate conversion.
-            syn::Type::Slice( ref slice ) => TypeInfoResolver::from_slice( krate, slice ),
-            syn::Type::Reference( ref reference ) => TypeInfoResolver::from_reference( krate, reference ),
-            syn::Type::Ptr( ref ptr ) => TypeInfoResolver::from_pointer( krate, ptr ),
-            syn::Type::Array( ref arr ) => TypeInfoResolver::from_array( krate, arr ),
-            syn::Type::Path( ref p ) => TypeInfoResolver::from_path( krate, p ),
-            syn::Type::Tuple( ref t ) if t.elems.is_empty() => Some( TypeInfoResolver::void( krate ) ),
+            syn::Type::Slice( ref slice ) => TypeInfoResolver::from_slice( slice ),
+            syn::Type::Reference( ref reference ) => TypeInfoResolver::from_reference( reference ),
+            syn::Type::Ptr( ref ptr ) => TypeInfoResolver::from_pointer( ptr ),
+            syn::Type::Array( ref arr ) => TypeInfoResolver::from_array( arr ),
+            syn::Type::Path( ref p ) => TypeInfoResolver::from_path( p ),
+            syn::Type::Tuple( ref t ) if t.elems.is_empty() => Some( TypeInfoResolver::void() ),
 
             syn::Type::BareFn(..)
                 | syn::Type::Never(..)
@@ -147,12 +165,10 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
     }
 
     fn new(
-        krate: &'p ComCrate,
         rust_type: RustType<'s>
     ) -> TypeInfoResolver<'s>
     {
         TypeInfoResolver {
-            krate,
             rust_type,
             pass_by: None,
             is_mutable: None,
@@ -160,11 +176,9 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         }
     }
 
-    fn void(
-        krate: &'p ComCrate,
-    ) -> TypeInfoResolver<'s>
+    fn void() -> TypeInfoResolver<'s>
     {
-        TypeInfoResolver::new( krate, RustType::Void )
+        TypeInfoResolver::new( RustType::Void )
     }
 
     fn pass_by(
@@ -177,7 +191,6 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         }
 
         TypeInfoResolver {
-            krate: resolver.krate,
             rust_type: resolver.rust_type,
             pass_by: Some( pass_by ),
             is_mutable: resolver.is_mutable,
@@ -195,7 +208,6 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         }
 
         TypeInfoResolver {
-            krate: resolver.krate,
             rust_type: resolver.rust_type,
             pass_by: resolver.pass_by,
             is_mutable: Some( is_mutable ),
@@ -213,7 +225,6 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         }
 
         TypeInfoResolver {
-            krate: resolver.krate,
             rust_type: resolver.rust_type,
             pass_by: resolver.pass_by,
             is_mutable: resolver.is_mutable,
@@ -221,30 +232,53 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         }
     }
 
+    fn wrapped(
+        resolver: &TypeInfoResolver<'s>,
+        args: &'p syn::punctuated::Punctuated< syn::GenericArgument, syn::token::Comma >,
+    ) -> Option<TypeInfoResolver<'s>>
+    {
+        if let RustType::Wrapper( _, _ ) = resolver.rust_type {
+            panic!("Nested wrappers are not allowed.")
+        }
+
+        // Determine the TypeInfo of the nested type.
+        let nested_type = match **args.first().unwrap().value() {
+                                    syn::GenericArgument::Type( ref t ) => t,
+                                    _ => return None,
+                            };
+        let nested_type = TypeInfo::from_resolver(
+                        TypeInfoResolver::from_type( nested_type )?, nested_type );
+
+        Some( TypeInfoResolver {
+            rust_type: RustType::Wrapper(
+                    resolver.get_ident_for_wrapping(), Rc::new( nested_type ) ),
+            pass_by: resolver.pass_by,
+            is_mutable: resolver.is_mutable,
+            array_length: resolver.array_length,
+        } )
+    }
+
     fn from_array(
-        krate : &'p ComCrate,
         array: &'p syn::TypeArray,
     ) -> Option<TypeInfoResolver<'s>>
     {
-        let resolver = TypeInfoResolver::from_type( krate, &array.elem )?;
+        let resolver = TypeInfoResolver::from_type( &array.elem )?;
 
         Some( TypeInfoResolver::array( resolver, &array.len ) )
     }
 
     fn from_slice(
-        krate : &'p ComCrate,
         slice: &'p syn::TypeSlice,
     ) -> Option<TypeInfoResolver<'s>>
     {
-        TypeInfoResolver::from_type( krate, &slice.elem )
+        TypeInfoResolver::from_type( &slice.elem )
     }
 
     fn from_reference(
-        krate : &'p ComCrate,
         reference : &'p syn::TypeReference,
     ) -> Option<TypeInfoResolver<'s>>
     {
-        let resolver = TypeInfoResolver::from_type( krate, &reference.elem )?;
+        let resolver = TypeInfoResolver::from_type( &reference.elem )?;
         let resolver = TypeInfoResolver::mutable( resolver,
                 TypeInfoResolver::is_mutable( &reference.mutability ) );
 
@@ -252,11 +286,10 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
     }
 
     fn from_pointer(
-        krate : &'p ComCrate,
         ptr : &'p syn::TypePtr,
     ) -> Option<TypeInfoResolver<'s>>
     {
-        let resolver = TypeInfoResolver::from_type( krate, &ptr.elem )?;
+        let resolver = TypeInfoResolver::from_type( &ptr.elem )?;
         let resolver = TypeInfoResolver::mutable( resolver,
                 TypeInfoResolver::is_mutable( &ptr.mutability ) );
 
@@ -264,15 +297,13 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
     }
 
     fn from_path(
-        krate: &'p ComCrate,
         type_path: &'p syn::TypePath,
     ) -> Option<TypeInfoResolver<'s>>
     {
-        TypeInfoResolver::from_segment( krate, type_path.path.segments.last().unwrap().value() )
+        TypeInfoResolver::from_segment( type_path.path.segments.last().unwrap().value() )
     }
 
     fn from_segment(
-        krate: &'p ComCrate,
         segment: &'p syn::PathSegment,
     ) -> Option<TypeInfoResolver<'s>>
     {
@@ -297,15 +328,13 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
 
             // Extract a wrapped type.
             "ComRc" | "ComItf" | "ComResult"
-                => Some( TypeInfoResolver::pass_by( TypeInfoResolver::from_type(
-                        krate,
-                        match **args.unwrap().first().unwrap().value() {
-                            syn::GenericArgument::Type( ref t ) => t,
-                            _ => return None,
-                        } )?, PassBy::Ptr ) ),
+                => TypeInfoResolver::wrapped(
+                        &TypeInfoResolver::new( RustType::Ident( &segment.ident ) ),
+                        args.expect( "Wrapper types requires valid wrappee.")
+                    ),
 
             // Bare type.
-            _t => Some( TypeInfoResolver::new( krate, RustType::Ident( &segment.ident ) ) ),
+            _t => Some( TypeInfoResolver::new( RustType::Ident( &segment.ident ) ) ),
         }
     }
 
@@ -315,5 +344,17 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
     ) -> bool
     {
         mutability.is_some()
+    }
+
+    /// Gets the identifier used to wrap another type.
+    fn get_ident_for_wrapping(
+        &self
+    ) -> &'s syn::Ident
+    {
+        match self.rust_type
+        {
+            RustType::Ident( ident ) => ident,
+            _ => panic!( "Only identifiers can wrap other rust types." ),
+        }
     }
 }

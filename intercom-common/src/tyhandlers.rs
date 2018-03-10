@@ -105,33 +105,25 @@ pub fn get_ty_handler(
     arg_ty : &Type,
 ) -> Rc<TypeHandler>
 {
-    // The ParamHandler needs an owned Type so clone it here.
-    let ty = arg_ty.clone();
+    let type_info = ::type_parser::parse( arg_ty )
+            .expect( &format!( "Type {:?} could not be parsed.", arg_ty  ) );
 
-    // The match is done using the original ty so we can borrow it while we
-    // yield ownership to the cloned 'ty'.
-    match *arg_ty {
+    map_by_name( type_info.get_name().as_ref(), type_info.original.clone() )
+}
 
-        // Type::Path represents various qualified type names, such as structs
-        // and traits.
-        Type::Path( .., ref p ) => {
+/// Selects type handler based on the name of the type.
+fn map_by_name(
+    name: &str,
+    original_type: Type
+) -> Rc<TypeHandler> {
 
-            // Match based on the last segment. We can't rely on the fully
-            // qualified name to be in the previous segments thanks to use-
-            // statements.
-            let ident = p.path.get_ident().unwrap();
-            let name = ident.as_ref();
-            match name {
+    match name {
 
-                "ComItf" => Rc::new( ComItfParam( ty ) ),
-                "String" => Rc::new( StringParam( ty ) ),
+        "ComItf" => Rc::new( ComItfParam( original_type ) ),
+        "String" => Rc::new( StringParam( original_type ) ),
 
-                // Unknown. Use IdentityParam.
-                _ => Rc::new( IdentityParam( ty ) )
-            }
-        },
-
-        // Default to identity param.
-        _ => Rc::new( IdentityParam( ty ) )
+        // Unknown. Use IdentityParam.
+        _ => Rc::new( IdentityParam( original_type ) )
     }
+
 }
