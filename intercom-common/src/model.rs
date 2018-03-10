@@ -291,10 +291,10 @@ impl ComInterface
 
         Ok( ComInterface {
             name: itf_ident,
-            iid: iid,
-            visibility: visibility,
+            iid,
+            visibility,
             base_interface: base,
-            methods: methods,
+            methods,
             item_type: itf_type,
             is_unsafe : unsafety.is_some(),
         } )
@@ -377,7 +377,7 @@ impl ComImpl
             is_trait_impl: itf_ident_opt.is_some(),
             interface_name: itf_ident_opt
                     .unwrap_or_else( || struct_ident ),
-            methods: methods,
+            methods,
         } )
     }
 
@@ -521,7 +521,7 @@ impl ComCrate
                             _ => return Err( ParseError::CargoToml(
                                     "No 'name' parameter under [package]".into() ) ),
                         },
-                    _ => return Err( ParseError::CargoToml( 
+                    _ => return Err( ParseError::CargoToml(
                             "Could not find [package] in Cargo.toml".into() ) ),
                 };
 
@@ -580,7 +580,7 @@ impl ComCrate
     fn process_crate_items(
         crate_name : &str,
         path : Option< &Path >,
-        items : &[ ::syn::Item ], 
+        items : &[ ::syn::Item ],
         b : &mut ComCrateBuilder,
     ) -> ParseResult<()>
     {
@@ -638,13 +638,13 @@ impl ComCrate
                     => Self::process_crate_items( crate_name, path, mod_items, b )?
             }
         }
-        
+
         Ok(())
     }
 
     fn collect_items(
         crate_name : &str,
-        items : &[ ::syn::Item ], 
+        items : &[ ::syn::Item ],
         b : &mut ComCrateBuilder,
     ) -> ParseResult<()>
     {
@@ -927,7 +927,7 @@ mod test
         assert!( krate.lib.is_some() );
         assert_eq!( krate.lib.as_ref().unwrap().libid(),
             &GUID::parse( "12345678-1234-1234-1234-567890000000" ).unwrap() );
-        
+
         // The interfaces should contain the built-in interface.
         assert_eq!( krate.interfaces().len(), 2 );
         assert_eq!( krate.interfaces()[ "IFoo" ].iid(),

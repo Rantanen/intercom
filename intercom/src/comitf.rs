@@ -27,7 +27,7 @@ impl<T: ?Sized> ComItf<T> {
     /// of type `T`.
     pub unsafe fn wrap( ptr : RawComPtr ) -> ComItf<T> {
         ComItf {
-            ptr: ptr,
+            ptr,
             phantom: PhantomData,
         }
     }

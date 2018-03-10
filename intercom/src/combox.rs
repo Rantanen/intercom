@@ -116,7 +116,7 @@ impl<T: CoClass> ComBox<T> {
         Box::into_raw( Box::new( ComBox {
             vtable_list: T::create_vtable_list(),
             ref_count: AtomicU32::new( 0 ),
-            value: value,
+            value,
         } ) )
     }
 

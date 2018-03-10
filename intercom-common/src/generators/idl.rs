@@ -11,6 +11,7 @@ use model;
 use model::ComCrate;
 use methodinfo;
 use foreign_ty::*;
+use type_parser::*;
 
 use handlebars::Handlebars;
 
@@ -57,13 +58,20 @@ trait IdlTypeInfo<'s> {
 
     /// Gets full type for IDL.
     fn to_idl(
-        &self
+        &self,
+        krate : &ComCrate,
     ) -> String;
 
     /// Gets the IDL compatile type name for this type.
     fn get_idl_type_name(
-        &self
+        &self,
+        krate: &model::ComCrate,
     ) -> String;
+
+    /// Determines whether this type should be passed as a pointer.
+    fn is_pointer(
+        &self
+    ) -> bool;
 }
 
 impl IdlModel {
@@ -106,13 +114,13 @@ impl IdlModel {
 
                     // Get the foreign type for the arg type.
                     let idl_type = foreign
-                        .get_ty( c, &a.arg.ty )
+                        .get_ty( &a.arg.ty )
                         .ok_or_else( || GeneratorError::UnsupportedType(
                                         utils::ty_to_string( &a.arg.ty ) ) )?;
 
                     Ok( IdlArg {
                         name : a.arg.name.to_string(),
-                        arg_type : format!( "{}{}", idl_type.to_idl(), out_ptr ),
+                        arg_type : format!( "{}{}", idl_type.to_idl( c ), out_ptr ),
                         attributes : attrs.to_owned(),
                     } )
 
@@ -120,14 +128,14 @@ impl IdlModel {
 
                 let ret_ty = m.returnhandler.com_ty();
                 let ret_ty = foreign
-                        .get_ty( c, &ret_ty )
+                        .get_ty( &ret_ty )
                         .ok_or_else( || GeneratorError::UnsupportedType(
                                         utils::ty_to_string( &ret_ty ) ) )?;
                 Ok( IdlMethod {
                     name: utils::pascal_case( m.name.as_ref() ),
                     idx: i,
-                    ret_type: ret_ty.to_idl(),
-                    args: args
+                    ret_type: ret_ty.to_idl( c ),
+                    args
                 } )
 
             } ).collect::<Result<Vec<_>, GeneratorError>>()?;
@@ -138,7 +146,7 @@ impl IdlModel {
                 name: foreign.get_name( c, itf.name() ),
                 base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, i ) ),
                 iid: format!( "{:-X}", itf.iid() ),
-                methods: methods,
+                methods,
             } )
 
         } ).collect::<Result<Vec<_>, GeneratorError>>()?;
@@ -165,7 +173,7 @@ impl IdlModel {
             Ok( IdlCoClass {
                 name : coclass.name().to_string(),
                 clsid: format!( "{:-X}", clsid ),
-                interfaces: interfaces
+                interfaces
             } )
         } ).collect::<Result<_,GeneratorError>>()?;
 
@@ -223,7 +231,8 @@ impl<'s> IdlTypeInfo<'s> {
 impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
 
     fn to_idl(
-        &self
+        &self,
+        krate : &ComCrate,
     ) -> String {
 
         // TODO: Enable once verified that the "const" works.
@@ -231,17 +240,15 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
         // let const_specifier = if self.is_mutable || self.pass_by != PassBy::Reference { "" } else { "const " };
         let const_specifier = "";
 
-        let type_name = self.get_idl_type_name();
-        let ptr = match self.pass_by {
-            PassBy::Value => "",
-            PassBy::Reference | PassBy::Ptr => "*",
-        };
+        let type_name = self.get_leaf().get_idl_type_name( krate );
+        let ptr = if self.is_pointer() { "*" } else { "" };
         format!("{}{}{}", const_specifier, type_name, ptr )
     }
 
     /// Gets the name of the IDL type for this type.
     fn get_idl_type_name(
-        &self
+        &self,
+        krate : &ComCrate,
     ) -> String {
 
         let type_name = self.get_name();
@@ -260,7 +267,23 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
             "f64" => "double".to_owned(),
             "f32" => "float".to_owned(),
             "c_void" => "void".to_owned(),
-            t => IdlTypeInfo::get_idl_name_for_custom_type( self.krate, t ),
+            t => IdlTypeInfo::get_idl_name_for_custom_type( krate, t ),
+        }
+    }
+
+    fn is_pointer(
+        &self
+    ) -> bool
+    {
+        // Rust wrappers represent reference counted objects
+        // so they are always passed as a pointer.
+        if let RustType::Wrapper( _, _ ) = self.rust_type {
+            return true;
+        }
+
+        match self.pass_by {
+            PassBy::Value => false,
+            PassBy::Reference | PassBy::Ptr => true,
         }
     }
 }
