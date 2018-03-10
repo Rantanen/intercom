@@ -119,8 +119,8 @@ impl<'s, 'p: 's> TypeInfo<'s> {
         TypeInfo{
             krate: resolver.krate,
             rust_type: resolver.rust_type,
-            pass_by: pass_by,
-            is_mutable: is_mutable,
+            pass_by,
+            is_mutable,
             array_length: resolver.array_length,
         }
     }
@@ -177,8 +177,8 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
     ) -> TypeInfoResolver<'s>
     {
         TypeInfoResolver {
-            krate: krate,
-            rust_type: rust_type,
+            krate,
+            rust_type,
             pass_by: None,
             is_mutable: None,
             array_length: None,

@@ -43,8 +43,8 @@ impl RustArg {
 
         let tyhandler = get_ty_handler( &ty );
         RustArg {
-            name: name,
-            ty: ty,
+            name,
+            ty,
             handler: tyhandler,
         }
     }
@@ -122,7 +122,7 @@ impl ComMethodInfo {
             ),
             _ => return Err( ComMethodInfoError::BadSelfArg ),
         } ;
-                
+
         // Process other arguments.
         let args = iter.map( | arg | {
             let ty = arg.get_ty()
@@ -156,13 +156,13 @@ impl ComMethodInfo {
                 .or( Err( ComMethodInfoError::BadReturnType ) )?;
         Ok( ComMethodInfo {
             name: *n,
-            is_const: is_const,
-            rust_self_arg: rust_self_arg,
-            rust_return_ty: rust_return_ty,
-            retval_type: retval_type,
-            return_type: return_type,
-            returnhandler: returnhandler,
-            args: args,
+            is_const,
+            rust_self_arg,
+            rust_return_ty,
+            retval_type,
+            return_type,
+            returnhandler,
+            args,
             is_unsafe: unsafety,
         } )
     }

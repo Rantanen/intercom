@@ -127,7 +127,7 @@ impl IdlModel {
                     name: utils::pascal_case( m.name.as_ref() ),
                     idx: i,
                     ret_type: ret_ty.to_idl(),
-                    args: args
+                    args
                 } )
 
             } ).collect::<Result<Vec<_>, GeneratorError>>()?;
@@ -138,7 +138,7 @@ impl IdlModel {
                 name: foreign.get_name( c, itf.name() ),
                 base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, i ) ),
                 iid: format!( "{:-X}", itf.iid() ),
-                methods: methods,
+                methods,
             } )
 
         } ).collect::<Result<Vec<_>, GeneratorError>>()?;
@@ -165,7 +165,7 @@ impl IdlModel {
             Ok( IdlCoClass {
                 name : coclass.name().to_string(),
                 clsid: format!( "{:-X}", clsid ),
-                interfaces: interfaces
+                interfaces
             } )
         } ).collect::<Result<_,GeneratorError>>()?;
 

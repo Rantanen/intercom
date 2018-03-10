@@ -194,7 +194,7 @@ impl CppModel {
                 Ok( CppMethod {
                     name: utils::pascal_case( m.name.as_ref() ),
                     ret_type: ret_ty.to_cpp(),
-                    args: args
+                    args
                 } )
 
             } ).collect::<Result<Vec<_>, GeneratorError>>()?;
@@ -203,7 +203,7 @@ impl CppModel {
                 name: foreign.get_name( c, itf.name() ),
                 iid_struct: guid_as_struct( itf.iid() ),
                 base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, i ) ),
-                methods : methods,
+                methods,
             } )
 
         } ).collect::<Result<Vec<_>, GeneratorError>>()?;
@@ -227,14 +227,14 @@ impl CppModel {
                 name : class_name.to_string(),
                 clsid_struct : guid_as_struct( clsid ),
                 interface_count : coclass.interfaces().len(),
-                interfaces : interfaces,
+                interfaces,
             } )
 
         } ).collect::<Result<Vec<_>, GeneratorError>>()?;
 
         Ok( CppModel {
             lib_name : lib.name().to_owned(),
-            interfaces : interfaces,
+            interfaces,
             coclasses : classes,
         } )
     }
