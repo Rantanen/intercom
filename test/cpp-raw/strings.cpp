@@ -45,32 +45,57 @@ TEST_CASE( "Manipulating BSTR succeeds" )
 TEST_CASE( "Using BSTR in interface works" )
 {
     // Initialize COM.
-	InitializeRuntime();
+    InitializeRuntime();
 
-    intercom::ClassFactory< test_lib::raw::StringTestsDescriptor> stringTestFactory;
-    intercom::RawInterface<IStringTests> stringStore;
-    HRESULT created = stringTestFactory.create( IStringTests::ID, stringStore.out() );
-    REQUIRE( S_OK == created );
-    REQUIRE( static_cast< bool >( stringStore ) );
+    // Construct string storage.
+    IStringTests* pStringTests = nullptr;
+    HRESULT hr = CreateInstance(
+        CLSID_StringTests,
+        IID_IStringTests,
+        &pStringTests );
+    REQUIRE( hr == S_OK );
 
-    SECTION( "Setting and reading a value succeeds" )
+    SECTION( "Default value is nullptr" )
+    {
+        intercom::BSTR test_value_get;
+        intercom::HRESULT get = pStringTests->GetValue( &test_value_get );
+        REQUIRE( get == intercom::S_OK );
+        REQUIRE( test_value_get == nullptr );
+    }
+
+    SECTION( "Manipulating a value succeeds" )
     {
         intercom::BSTR test_value_put;
         intercom::utf8_to_bstr( u8"Test", &test_value_put );
 
-        stringStore->PutValue( test_value_put );
+        pStringTests->PutValue( test_value_put );
         intercom::free_bstr( test_value_put );
 
-        intercom::BSTR test_value_get;
-        intercom::HRESULT get = stringStore->GetValue( &test_value_get );
-        REQUIRE( get == intercom::S_OK );
+        SECTION( "Reading the value succeeds" )
+        {
+            intercom::BSTR test_value_get;
+            intercom::HRESULT get = pStringTests->GetValue( &test_value_get );
+            REQUIRE( get == intercom::S_OK );
 
-        char* test_value;
-        intercom::bstr_to_utf8( test_value_get, &test_value );
-        REQUIRE( u8"Test" == std::string( test_value ) );
-        intercom::free_bstr( test_value_get );
-        std::free( test_value );
+            char* test_value;
+            intercom::bstr_to_utf8( test_value_get, &test_value );
+            REQUIRE( u8"Test" == std::string( test_value ) );
+            intercom::free_bstr( test_value_get );
+            std::free( test_value );
+        }
+
+        SECTION( "Clearing the value with a nullptr succeeds" )
+        {
+            pStringTests->PutValue( nullptr );
+
+            intercom::BSTR test_value_get;
+            intercom::HRESULT get = pStringTests->GetValue( &test_value_get );
+            REQUIRE( get == intercom::S_OK );
+            REQUIRE( test_value_get == nullptr );
+        }
     }
+
+    REQUIRE( pStringTests->Release() == 0 );
 }
 
 // #endif

@@ -137,12 +137,22 @@ pub fn expand_com_impl(
         let self_arg = quote!( self_vtable : ::intercom::RawComPtr );
         let args = iter::once( self_arg ).chain( in_out_args );
 
+        // Format stack variables if the conversion requires
+        // temporary variable.
+        let stack_variables = method_info.args
+                .iter()
+                .filter( |ca| ca.handler.com_to_rust( &ca.name ).stack.is_some() )
+                .map( |ca| {
+                    let stack_variable = ca.handler.com_to_rust( &ca.name ).stack.unwrap();
+                    quote!( #stack_variable )
+                } );
+
         // Format the in and out parameters for the Rust call.
         let in_params = method_info.args
                 .iter()
                 .map( |ca| {
-                    let param = ca.handler.com_to_rust( &ca.name );
-                    quote!( #param )
+                    let conversion = ca.handler.com_to_rust( &ca.name ).conversion;
+                    quote!( #conversion )
                 } );
 
         let return_ident = Ident::from( "__result" );
@@ -174,6 +184,12 @@ pub fn expand_com_impl(
                 // to offset the current 'self_vtable' vtable pointer.
                 let self_combox = ( self_vtable as usize - #vtable_offset() )
                         as *mut ::intercom::ComBox< #struct_ident >;
+
+                // Store stack variables required by some conversions.
+                // For example, to convert a COM type to "str" we may need to
+                // convert the COM type into "String" first and then pass
+                // this "String" to the Rust method as "str".
+                #( #stack_variables )*
 
                 #self_struct_stmt;
                 let #return_ident = self_struct.#method_ident( #( #in_params ),* );

@@ -254,7 +254,7 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
         let type_name = self.get_name();
         match type_name.as_str() {
             "RawComPtr" => "*void".to_owned(),
-            "String" | "BStr" => "BSTR".to_owned(),
+            "String" | "BStr" | "str" => "BSTR".to_owned(),
             "usize" => "size_t".to_owned(),
             "u64" => "uint64".to_owned(),
             "i64" => "int64".to_owned(),
