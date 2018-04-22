@@ -87,7 +87,7 @@ pub fn expand_com_class(
                 #[inline(always)]
                 #[allow(non_snake_case)]
                 fn #offset_ident() -> usize {
-                    unsafe { 
+                    unsafe {
                         &::intercom::ComBox::< #struct_ident >::null_vtable().#itf
                                 as *const _ as usize
                     }

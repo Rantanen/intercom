@@ -115,7 +115,7 @@ impl ::intercom::CoClass for Foo {
     // Virtual table list.
     type VTableList = __FooVtblList;
 
-    // The virtual table list constructor. 
+    // The virtual table list constructor.
     //
     // Each ComBox instance will have a virtual table list embedded in it.
     // Note that each virtual table WITHIN the list is a pointer to a static
@@ -158,7 +158,7 @@ impl ::intercom::CoClass for Foo {
             // We are using "qualified" version of the IID. This ensures
             // that missing IID declarations are reported as compilation
             // errors.
-            // 
+            //
             // Using just "IID_Foo" would consider bad IID name as a pattern
             // binding that matches anything.
             self::IID_Foo =>
