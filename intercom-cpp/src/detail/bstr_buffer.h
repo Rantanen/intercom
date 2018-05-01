@@ -43,12 +43,17 @@ public:
     }
 
     /**
-     * @brief Casts the
+     * @brief Casts the BstrBuffer into BSTR.
      *
      * @return operator const intercom::Bstr const
      */
     operator const intercom::BSTR() const noexcept { return m_value; }
 
+    /**
+     * @brief Returns the address of the internal buffer.
+     *
+     * @return intercom::BSTR*
+     */
     intercom::BSTR* operator&() { return &m_value; }
 
     /**
