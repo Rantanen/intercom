@@ -139,12 +139,10 @@ pub fn expand_com_impl(
 
         // Format stack variables if the conversion requires
         // temporary variable.
-        let stack_variables = method_info.args
-                .iter()
-                .filter( |ca| ca.handler.com_to_rust( &ca.name ).stack.is_some() )
-                .map( |ca| {
-                    let stack_variable = ca.handler.com_to_rust( &ca.name ).stack.unwrap();
-                    quote!( #stack_variable )
+        let stack_variables = method_info.args.iter()
+                .filter_map( |ca| match ca.handler.com_to_rust( &ca.name ).stack {
+                    Some( stack ) => Some( quote!( #stack ) ),
+                    None => None
                 } );
 
         // Format the in and out parameters for the Rust call.
