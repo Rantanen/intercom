@@ -1,6 +1,8 @@
 #ifndef INTERCOM_CPP_MSVC_DATATYPES_H
 #define INTERCOM_CPP_MSVC_DATATYPES_H
 
+#include <cstdint>
+
 // Use predefined set if available.
 #include<WinDef.h>
 
@@ -22,7 +24,10 @@ namespace intercom
     typedef DWORD DWORD;
     typedef WORD WORD;
 
+    typedef OLECHAR OLECHAR;
     typedef BSTR BSTR;
+
+    typedef HRESULT HRESULT;
 }
 
 #endif

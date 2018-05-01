@@ -28,6 +28,17 @@
             ]
         },
         {
+            "name": "(Windows) Cpp-Raw",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/test/cpp-raw/msvc/x64/Debug/cpp.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/test/cpp-raw/msvc/x64/Debug/",
+            "environment": [],
+            "externalConsole": true
+        },
+        {
             "type": "lldb",
             "request": "launch",
             "name": "Generate C++ Headers",

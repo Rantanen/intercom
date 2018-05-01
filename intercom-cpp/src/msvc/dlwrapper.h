@@ -1,17 +1,20 @@
 
-#ifndef INTERCOM_CPP_POSIX_DLOPENWRAPPER_H
-#define INTERCOM_CPP_POSIX_DLOPENWRAPPER_H
+#ifndef INTERCOM_CPP_MSVC_DLWRAPPER_H
+#define INTERCOM_CPP_MSVC_DLWRAPPER_H
 
-#include <dlfcn.h>
 #include <string>
 #include <stdexcept>
 
+#include <Windows.h>
+
+#include "utility.h"
+
 namespace intercom
 {
-namespace posix
+namespace msvc
 {
 
-//!
+//! Manages the looading of dynamic libraries.
 class DlWrapper
 {
 public:
@@ -81,18 +84,17 @@ public:
         m_flags( flags ),
         m_handle( nullptr )
     {
-        reset_error_status();
-        m_handle = dlopen( m_file.c_str(), ( int ) m_flags );
+        m_handle = ::LoadLibraryA( m_file.c_str() );
         if( m_handle == nullptr )
-            throw_if_failed();
+            intercom::msvc::throw_win32_error();
     }
 
     //! Decrements the reference count of the dynamic shared object.
     ~DlWrapper()
     {
-        // Proper lifetime management has not been implemented for dlopen_wrapper.
+        // Proper lifetime management has not been implemented for DlWrapper.
         //if( m_handle != nullptr )
-        //    dlclose( m_handle );
+        //    ::FreeLibrary( m_handle );
     }
 
     //! Loads an address of a function in the library.
@@ -101,51 +103,22 @@ public:
         const char* name
     )
     {
-        // Process errors as describe in the man page of dlsym.
-        // https://linux.die.net/man/3/dlsym
-        reset_error_status();
-        void* function = dlsym( m_handle, name );
-        throw_if_failed();
+        void* function = ::GetProcAddress( m_handle, name );
+        if( function == nullptr )
+            intercom::msvc::throw_win32_error();
 
         return ( TFunction ) function;
     }
 
 private:
 
-    //! Throws an exception if last call to dl* failed.
-    void throw_if_failed()
-    {
-        std::string error;
-        if( try_get_error( &error ) )
-            throw std::runtime_error( error );
-    }
 
-    //! Attempts to get an
-    bool try_get_error(
-        std::string* error
-    ) const
-    {
-        char* errorLocal = dlerror();
-        if( errorLocal != nullptr )
-        {
-            (*error) = errorLocal;
-            return true;
-        }
-        else
-        {
-            error->clear();
-            return false;
-        }
-    }
-
-    //! Resets any previous error f
-    void reset_error_status() const { dlerror(); }
 
 private:
 
     std::string m_file;  //!< The library load with the wrapper.
     rtld m_flags;  //!< Flags used to load the library.
-    void* m_handle;  //!< Handle to a library opened wiht dlopen.
+    HMODULE m_handle;  //!< Handle to a library opened wiht dlopen.
 };
 
 }

@@ -15,7 +15,7 @@ void UninitializeRuntime()
 
 HRESULT CreateInstance( REFCLSID clsid, REFIID iid, void** pout )
 {
-	return CoCreateInstance(
+	return ::CoCreateInstance(
 			clsid,
 			nullptr,
 			CLSCTX_INPROC_SERVER,

@@ -30,9 +30,9 @@ public:
      * @param interface
      */
     explicit constexpr RawInterface(
-        TInterface* interface
+        TInterface* itf
     ) noexcept :
-        m_interface( interface )
+        m_interface( itf )
     {
         if( m_interface != nullptr )
             m_interface->AddRef();
@@ -45,10 +45,10 @@ public:
      * @returns Returns a reference to this object.
      */
     RawInterface& operator=(
-        TInterface* interface
+        TInterface* itf
     ) noexcept
     {
-        this->reset( interface );
+        this->reset( itf );
         return *this;
     }
 
@@ -128,11 +128,11 @@ public:
      * @param interface Replacement.
      */
     void reset(
-        TInterface* interface = nullptr
+        TInterface* itf = nullptr
     ) noexcept
     {
         // No-op?
-        if( m_interface == interface )
+        if( m_interface == itf )
             return;
 
         // Release previous reference.
@@ -140,7 +140,7 @@ public:
             m_interface->Release();
 
         // Store the new reference.
-        m_interface = interface;
+        m_interface = itf;
         if( m_interface != nullptr )
             m_interface->AddRef();
     }

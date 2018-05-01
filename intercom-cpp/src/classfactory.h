@@ -4,10 +4,7 @@
 #include <memory>
 #include <mutex>
 
-#include "posix/iclassfactory.h"
-#include "posix/dlwrapper.h"
-
-using intercom::cpp::posix::DlWrapper;
+#include "iclassfactory.h"
 
 #include "activator.h"
 #include "cominterop.h"

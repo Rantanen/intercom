@@ -1,5 +1,5 @@
 
-// #ifdef __GNUC__
+#ifdef __GNUC__
 
 #include <functional>
 
@@ -98,4 +98,4 @@ TEST_CASE( "Using BSTR in interface works" )
     REQUIRE( pStringTests->Release() == 0 );
 }
 
-// #endif
+#endif

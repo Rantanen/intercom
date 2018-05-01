@@ -2,6 +2,7 @@
 #ifndef CPPRAW_DUMMYINTERFACE_H
 #define CPPRAW_DUMMYINTERFACE_H
 
+#include <array>
 #include <intercom.h>
 
 namespace cppraw
