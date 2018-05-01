@@ -130,9 +130,12 @@ impl TypeHandler for StringRefParam
 
     fn com_to_rust( &self, ident : &Ident ) -> ComToRust
     {
+        // Generate unique name for each stack variable to avoid conflicts with function
+        // thay may have multiple parameters.
+        let as_string_ident = Ident::from( format!( "{}_as_string", ident ) );
         ComToRust {
-            stack: Some( quote!( let as_string: String = #ident.into(); ) ),
-            conversion: quote!( as_string.as_ref() )
+            stack: Some( quote!( let #as_string_ident: String = #ident.into(); ) ),
+            conversion: quote!( #as_string_ident.as_ref() )
         }
     }
 
