@@ -52,10 +52,10 @@ public:
         intercom::HRESULT error = m_classFactory->CreateInstance( nullptr, TInterface::ID, interface.out() );
         switch( error )
         {
-        case intercom::S_OK:
+        case intercom::SC_OK:
             break;
 
-        case intercom::E_NOINTERFACE:
+        case intercom::EC_NOINTERFACE:
             throw intercom::NoSuchInterface( m_classId, TInterface::ID );
 
         // Unspecified error.
@@ -79,7 +79,7 @@ private:
     {
         intercom::HRESULT error = m_getClassObjectFunc( m_classId, IID_IClassFactory,
                 (void**) &m_classFactory );
-        if( error != S_OK )
+        if( error != SC_OK )
         {
             throw intercom::RuntimeError( error, std::stringstream() << "Creating class factory for class \""
                     << m_classId << "\" failed." );

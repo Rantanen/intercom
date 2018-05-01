@@ -24,14 +24,14 @@ namespace hresult
     typedef uint16_t HRESULT_CODE;
 
     // Source: https://blogs.msdn.microsoft.com/heaths/2005/07/21/deciphering-an-hresult/
-    static const uint8_t SEVERITY_SUCCESS = 0b0;
-    static const uint8_t SEVERITY_INFORMATIONAL = 0b01;
-    static const uint8_t SEVERITY_WARNING = 0b10;
-    static const uint8_t SEVERITY_ERROR = 0b11;
+    static const uint8_t SEVERITY_CLASS_SUCCESS = 0b0;
+    static const uint8_t SEVERITY_CLASS_INFORMATIONAL = 0b01;
+    static const uint8_t SEVERITY_CLASS_WARNING = 0b10;
+    static const uint8_t SEVERITY_CLASS_ERROR = 0b11;
 
     // Source: https://msdn.microsoft.com/en-us/library/windows/desktop/ms690088(v=vs.85).aspx
-    static const uint8_t FACILITY_NULL = 0;
-    static const uint8_t FACILITY_WIN32 = 7;
+    static const uint8_t ERROR_FACILITY_NULL = 0;
+    static const uint8_t ERROR_FACILITY_WIN32 = 7;
 
     /**
      * @brief Error type for defining error codes.
@@ -86,7 +86,7 @@ namespace hresult
      ) noexcept
      {
          return ((HRESULT)
-                ( static_cast< uint32_t >( intercom::detail::hresult::SEVERITY_ERROR ) << 31) |
+                ( static_cast< uint32_t >( intercom::detail::hresult::SEVERITY_CLASS_ERROR ) << 31) |
                 ( static_cast< uint32_t >( facility ) << 16) |
                 ( static_cast< uint16_t >( error_code ) ) );
      }
@@ -98,10 +98,10 @@ namespace hresult
      * @return constexpr HRESULT
      */
      constexpr ::intercom::HRESULT null_error(
-         NullError null_error
+         uint16_t error_code
      ) noexcept
      {
-         return error( intercom::detail::hresult::FACILITY_NULL, null_error.error_code() );
+         return error( intercom::detail::hresult::ERROR_FACILITY_NULL, NullError( error_code ).error_code() );
      }
 
      /**
@@ -111,10 +111,10 @@ namespace hresult
      * @return constexpr HRESULT
      */
      constexpr ::intercom::HRESULT win32_error(
-         Win32Error win32_error
+         uint16_t error_code
      ) noexcept
      {
-         return error( intercom::detail::hresult::FACILITY_WIN32, win32_error.error_code() );
+         return error( intercom::detail::hresult::ERROR_FACILITY_WIN32, Win32Error( error_code ).error_code() );
      }
 
     /**

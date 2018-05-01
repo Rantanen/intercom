@@ -104,7 +104,7 @@ TEST_CASE( "Using interface wrappers works" )
         }
         catch( intercom::NoSuchInterface& ex )
         {
-            REQUIRE( ex.error_code() == intercom::E_NOINTERFACE );
+            REQUIRE( ex.error_code() == intercom::EC_NOINTERFACE );
         }
     }
 

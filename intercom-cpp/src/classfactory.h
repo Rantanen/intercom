@@ -33,14 +33,14 @@ namespace intercom
          *
          * @param iid  Identifies the interface.
          * @param instance  Receives a pointer to specified interface of the new object.
-         * @return intercom::HRESULT Returns S_OK on success.
+         * @return intercom::HRESULT Returns SC_OK on success.
          */
         template< typename TInterface >
         intercom::RawInterface<TInterface> create()
         {
             // Need an activator to create objects.
             intercom::HRESULT preparation = prepare_activator();
-            if( preparation != S_OK )
+            if( preparation != SC_OK )
             {
                 throw intercom::RuntimeError( preparation,
                         std::stringstream() << "Preparing activator for the class factory of class \""
@@ -55,7 +55,7 @@ namespace intercom
          *
          * @param iid  Identifies the interface.
          * @param instance  Receives a pointer to specified interface of the new object.
-         * @return intercom::HRESULT Returns S_OK on success.
+         * @return intercom::HRESULT Returns SC_OK on success.
          */
         intercom::HRESULT create(
             const intercom::IID& iid,
@@ -64,7 +64,7 @@ namespace intercom
         {
             // Need an activator to create objects.
             intercom::HRESULT preparation = prepare_activator();
-            if( preparation != S_OK )
+            if( preparation != SC_OK )
                 return preparation;
 
             return m_activator->create( iid, instance );
@@ -86,13 +86,13 @@ namespace intercom
             }
             catch( std::bad_alloc )
             {
-                return E_OUTOFMEMORY;
+                return EC_OUTOFMEMORY;
             }
             catch( ... )
             {
-                return E_FAIL;
+                return EC_FAIL;
             }
-            return S_OK;
+            return SC_OK;
         }
 
         std::once_flag m_initializationGuard;

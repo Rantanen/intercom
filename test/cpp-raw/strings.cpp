@@ -59,7 +59,7 @@ TEST_CASE( "Using BSTR in interface works" )
     {
         intercom::BSTR test_value_get;
         intercom::HRESULT get = pStringTests->GetValue( &test_value_get );
-        REQUIRE( get == intercom::S_OK );
+        REQUIRE( get == intercom::SC_OK );
         REQUIRE( test_value_get == nullptr );
     }
 
@@ -75,7 +75,7 @@ TEST_CASE( "Using BSTR in interface works" )
         {
             intercom::BSTR test_value_get;
             intercom::HRESULT get = pStringTests->GetValue( &test_value_get );
-            REQUIRE( get == intercom::S_OK );
+            REQUIRE( get == intercom::SC_OK );
 
             char* test_value;
             intercom::bstr_to_utf8( test_value_get, &test_value );
@@ -90,7 +90,7 @@ TEST_CASE( "Using BSTR in interface works" )
 
             intercom::BSTR test_value_get;
             intercom::HRESULT get = pStringTests->GetValue( &test_value_get );
-            REQUIRE( get == intercom::S_OK );
+            REQUIRE( get == intercom::SC_OK );
             REQUIRE( test_value_get == nullptr );
         }
     }

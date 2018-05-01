@@ -45,7 +45,7 @@ TEST_CASE( "Exceptions have correct error message." )
     {
         try
         {
-            throw intercom::RuntimeError( intercom::E_FAIL, "This message is preserved." );
+            throw intercom::RuntimeError( intercom::EC_FAIL, "This message is preserved." );
             FAIL( "Exception not thrown." );
         }
         catch( intercom::RuntimeError& ex )
@@ -74,7 +74,7 @@ TEST_CASE( "Exception specific data is passed correctly." )
     {
         try
         {
-            throw intercom::RuntimeError( intercom::E_INVALIDARG, "This message is preserved." );
+            throw intercom::RuntimeError( intercom::EC_INVALIDARG, "This message is preserved." );
             FAIL( "Exception not thrown." );
         }
         catch( intercom::RuntimeError& ex )
