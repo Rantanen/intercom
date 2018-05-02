@@ -798,6 +798,20 @@ mod test
     }
 
     #[test]
+    fn parse_com_class_with_no_guid_with_interface() {
+
+        let cls = ComStruct::parse(
+            "not used",
+            r#"NO_GUID, ITestInterface"#,
+            "struct EmptyType;" )
+                .expect( "com_class attribute parsing failed" );
+
+        assert_eq!( cls.name(), "EmptyType" );
+        assert_eq!( cls.clsid(), &None );
+        assert_eq!( cls.interfaces().len(), 1 );
+    }
+
+    #[test]
     fn parse_com_interface() {
         let itf = ComInterface::parse(
             "not used",
