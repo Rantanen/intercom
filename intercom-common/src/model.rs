@@ -693,7 +693,7 @@ mod test
 
         let lib = ComLibrary::parse(
             "library_name".into(),
-            r#"( "12345678-1234-1234-1234-567890ABCDEF", Foo, Bar )"# )
+            r#""12345678-1234-1234-1234-567890ABCDEF", Foo, Bar"# )
                 .expect( "com_library attribute parsing failed" );
 
         assert_eq!( lib.name(), "library_name" );
@@ -718,7 +718,7 @@ mod test
         // name stays the same.
         let lib = ComLibrary::parse(
             "another_library".into(),
-            "( AUTO_GUID, One, Two )" )
+            "AUTO_GUID, One, Two" )
                 .expect( "com_library attribute parsing failed" );
 
         assert_eq!( lib.name(), "another_library" );
@@ -733,7 +733,7 @@ mod test
     #[test]
     fn parse_com_library_without_coclasses() {
 
-        let lib = ComLibrary::parse( "lib".into(), "( AUTO_GUID )" ).unwrap();
+        let lib = ComLibrary::parse( "lib".into(), "AUTO_GUID" ).unwrap();
         assert_eq!( lib.coclasses().len(), 0 );
     }
 
@@ -748,7 +748,7 @@ mod test
     fn parse_com_class() {
         let cls = ComStruct::parse(
             "not used",
-            r#"( "12345678-1234-1234-1234-567890ABCDEF", Foo, Bar )"#,
+            r#""12345678-1234-1234-1234-567890ABCDEF", Foo, Bar"#,
             "struct S;" )
                 .expect( "com_class attribute parsing failed" );
 
@@ -770,7 +770,7 @@ mod test
         // name stays the same.
         let cls = ComStruct::parse(
             "not used",
-            r#"( AUTO_GUID, MyStruct, IThings, IStuff )"#,
+            r#"AUTO_GUID, MyStruct, IThings, IStuff"#,
             "struct MyStruct { a: u32 }" )
                 .expect( "com_class attribute parsing failed" );
 
@@ -788,7 +788,7 @@ mod test
 
         let cls = ComStruct::parse(
             "not used",
-            r#"( NO_GUID )"#,
+            r#"NO_GUID"#,
             "struct EmptyType;" )
                 .expect( "com_class attribute parsing failed" );
 
@@ -801,7 +801,7 @@ mod test
     fn parse_com_interface() {
         let itf = ComInterface::parse(
             "not used",
-            r#"( "12345678-1234-1234-1234-567890ABCDEF" )"#,
+            r#""12345678-1234-1234-1234-567890ABCDEF""#,
             "trait ITrait { fn foo( &self ); fn bar( &self ); }" )
                 .expect( "com_interface attribute parsing failed" );
 
@@ -819,7 +819,7 @@ mod test
     fn parse_com_interface_with_auto_guid() {
         let itf = ComInterface::parse(
             "not used",
-            r#"( AUTO_GUID )"#,
+            r#"AUTO_GUID"#,
             "pub trait IAutoGuid { fn one( &self ); fn two( &self ); }" )
                 .expect( "com_interface attribute parsing failed" );
 
@@ -840,7 +840,7 @@ mod test
     fn parse_com_interface_with_base_interface() {
         let itf = ComInterface::parse(
             "not used",
-            r#"( AUTO_GUID, IBase )"#,
+            r#"AUTO_GUID, IBase"#,
             "pub trait IAutoGuid { fn one( &self ); fn two( &self ); }" )
                 .expect( "com_interface attribute parsing failed" );
 
@@ -860,7 +860,7 @@ mod test
     fn parse_com_interface_with_no_base_interface() {
         let itf = ComInterface::parse(
             "not used",
-            r#"( AUTO_GUID, NO_BASE )"#,
+            r#"AUTO_GUID, NO_BASE"#,
             "pub trait IAutoGuid { fn one( &self ); fn two( &self ); }" )
                 .expect( "com_interface attribute parsing failed" );
 
