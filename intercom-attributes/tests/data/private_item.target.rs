@@ -3,9 +3,9 @@
 #![feature(proc_macro)]
 #[prelude_import]
 use std::prelude::v1::*;
-extern crate intercom;
 #[macro_use]
-extern crate std as std;
+extern crate std;
+extern crate intercom;
 use intercom::*;
 trait IFoo {
     fn trait_method(&self);
