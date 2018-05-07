@@ -13,7 +13,7 @@ pub fn parse_attr_tokens(
     attr_tokens: &str,
 ) -> Result< Attribute, MacroError >
 {
-    let attr_rendered = format!( "#[{}{}]", attr_name, attr_tokens );
+    let attr_rendered = format!( "#[{}({})]", attr_name, attr_tokens );
     if let Ok( tt ) = attr_rendered.parse() {
         if let Ok( t ) = Attribute::parse_outer.parse2( tt ) {
             return Ok( t )
@@ -291,7 +291,7 @@ pub fn get_guid_tokens(
     let d4_5 = g.data4[ 5 ];
     let d4_6 = g.data4[ 6 ];
     let d4_7 = g.data4[ 7 ];
-    quote!( 
+    quote!(
         ::intercom::GUID {
             data1: #d1, data2: #d2, data3: #d3,
             data4: [ #d4_0, #d4_1, #d4_2, #d4_3, #d4_4, #d4_5, #d4_6, #d4_7 ]

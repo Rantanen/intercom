@@ -4,7 +4,7 @@
 #[prelude_import]
 use std::prelude::v1::*;
 #[macro_use]
-extern crate std as std;
+extern crate std;
 extern crate intercom;
 use intercom::*;
 
@@ -109,7 +109,7 @@ impl Foo for ::intercom::ComItf<Foo>
     {
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
-        
+
         #[allow(unused_unsafe)]
         unsafe {
             let __result = ((**vtbl).simple_method)(comptr);
