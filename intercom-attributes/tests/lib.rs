@@ -157,7 +157,7 @@ fn format( code : &str ) -> String {
     // Use default config but instead of altering the source/target files just
     // "display" the formatted code. This results in the output being available
     // in the 'out' parameter.
-    let mut config = rustfmt::config::Config::default();
+    let mut config = rustfmt::Config::default();
     config.override_value( "write_mode", "Display" );
 
     let mut out : Vec<u8> = vec![];

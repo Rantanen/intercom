@@ -4,6 +4,8 @@
 mod itfs;
 mod cls1;
 mod cls2;
+mod no_guid;
 
 use cls1::Class1;
 use cls2::Class2;
+use no_guid::NoGuid;
