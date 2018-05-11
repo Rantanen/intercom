@@ -323,16 +323,19 @@ mod test
 			let vswhere_path = get_intercom_root().join( "scripts/vswhere.exe" );
 			let installation_name_output = Command::new( &vswhere_path )
 					.arg( "/nologo" )
+                    .arg( "-products").arg( "*" )  // Required to locate Visual Studio Build Tools
 					.arg( "-property" ).arg( "installationName" )
 					.output()
 					.unwrap();
 			let installation_path_output = Command::new( &vswhere_path )
 					.arg( "/nologo" )
+                    .arg( "-products").arg( "*" )  // Required to locate Visual Studio Build Tools
 					.arg( "-property" ).arg( "installationPath" )
 					.output()
 					.unwrap();
 			let installation_version_output = Command::new( &vswhere_path )
 					.arg( "/nologo" )
+                    .arg( "-products").arg( "*" )  // Required to locate Visual Studio Build Tools
 					.arg( "-property" ).arg( "installationVersion" )
 					.output()
 					.unwrap();
