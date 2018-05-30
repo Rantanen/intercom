@@ -26,3 +26,4 @@ script:
     - mkdir build
     - ( cd build && cmake .. && make )
     - ( cd build/bin && valgrind --error-exitcode=1 ./cpp-raw )
+    - ( cd build/bin && valgrind --error-exitcode=1 ./cpp-wrapper )
