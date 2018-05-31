@@ -154,11 +154,10 @@ fn format( code : &str ) -> String {
     let code = strip_comments( code );
     let code = strip_empty_lines( &code );
 
-    // Use default config but instead of altering the source/target files just
-    // "display" the formatted code. This results in the output being available
-    // in the 'out' parameter.
+    // Emit in "stdout" mode as otherwise rustfmt will panick with the error:
+    // "'cannot format `stdin` and emit to files'".
     let mut config = rustfmt::Config::default();
-    config.override_value( "write_mode", "Display" );
+    config.set().emit_mode(rustfmt::EmitMode::Stdout);
 
     let mut out : Vec<u8> = vec![];
     rustfmt::format_input(
