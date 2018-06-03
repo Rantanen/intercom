@@ -1,5 +1,4 @@
 
-#ifdef __GNUC__
 
 #include <functional>
 
@@ -83,5 +82,3 @@ TEST_CASE( "Exception specific data is passed correctly." )
         }
     }
 }
-
-#endif

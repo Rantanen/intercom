@@ -1,5 +1,4 @@
 
-#ifdef __GNUC__
 
 #include <functional>
 
@@ -110,5 +109,3 @@ TEST_CASE( "Using interface wrappers works" )
 
 	UninitializeRuntime();
 }
-
-#endif
