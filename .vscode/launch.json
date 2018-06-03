@@ -28,6 +28,17 @@
             ]
         },
         {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Cpp-Ld",
+            "program": "${workspaceRoot}/build/bin/cpp-dl",
+            "cwd": "${workspaceRoot}/build/bin",
+            "sourceLanguages": [
+                "rust",
+                "cpp"
+            ]
+        },
+        {
             "name": "(Windows) Cpp-Raw",
             "type": "cppvsdbg",
             "request": "launch",

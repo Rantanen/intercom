@@ -31,7 +31,8 @@
                 "/usr/include",
                 "/usr/local/include",
                 "${workspaceFolder}",
-                "${workspaceFolder}/intercom-cpp"
+                "${workspaceFolder}/intercom-cpp",
+                "/usr/include/c++/v1"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
