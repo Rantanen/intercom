@@ -17,6 +17,7 @@ namespace intercom
     static const intercom::HRESULT EC_NOINTERFACE = intercom::detail::hresult::EC_NOINTERFACE;
     static const intercom::HRESULT EC_OUTOFMEMORY = intercom::detail::hresult::EC_OUTOFMEMORY;
     static const intercom::HRESULT EC_INVALIDARG = intercom::detail::hresult::EC_INVALIDARG;
+    static const intercom::HRESULT EC_POINTER = intercom::detail::hresult::EC_POINTER;
     static_assert( EC_FAIL == 0x80004005, "Internal check failed: Invalid error code structure." );
 }
 

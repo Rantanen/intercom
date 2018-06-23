@@ -14,6 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(PROJECT_SRCS
 ${PROJECT_SOURCE_DIR}/main.cpp
 ${PROJECT_SOURCE_DIR}/generated/multi_lib.cpp
+${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
+${PROJECT_SOURCE_DIR}/shared_functions.cpp
 )
 # Use the intercom-cli as code generator for multi_lib.h/multi_lib.cpp
 file(GLOB multilib_sources ${MULTILIB_DIR}/src)

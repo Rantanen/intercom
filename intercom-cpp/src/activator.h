@@ -22,6 +22,8 @@ public:
 
     typedef intercom::HRESULT ( *GetClassObjectFunc ) ( REFCLSID, REFIID, void** );
 
+    typedef intercom::HRESULT ( *IntercomListClassObjectsFunc ) ( size_t*, intercom::CLSID** );
+
 public:
 
     Activator(
