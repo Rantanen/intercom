@@ -23,6 +23,7 @@ use handlebars::Handlebars;
 pub struct CppModel {
     pub lib_name : String,
     pub interfaces: Vec<CppInterface>,
+    pub coclass_count : usize,
     pub coclasses: Vec<CppCoClass>,
 }
 
@@ -266,6 +267,7 @@ impl CppModel {
         Ok( CppModel {
             lib_name : lib.name().to_owned(),
             interfaces,
+            coclass_count: classes.len(),
             coclasses : classes,
         } )
     }
@@ -451,6 +453,7 @@ mod test {
                     ]
                 },
             ],
+            coclass_count: 2,
             coclasses : vec![
                 CppCoClass {
                     name : "CoClass".to_owned(),
