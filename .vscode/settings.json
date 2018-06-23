@@ -63,6 +63,8 @@
         "vector": "cpp",
         "deque": "cpp",
         "unordered_map": "cpp",
-        "__nullptr": "cpp"
+        "__nullptr": "cpp",
+        "ios": "cpp",
+        "algorithm": "cpp"
     }
 }

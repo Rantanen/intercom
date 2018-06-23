@@ -56,6 +56,28 @@ namespace intercom
     {
         return memcmp( &lhs, &rhs, sizeof( intercom::IID ) ) == 0;
     }
+
+    //! Declaration for a generic hash function for intercom types.
+    template< typename THashed >
+    struct hash;
+
+    //! Calculates a hash code for a IID.
+    template<>
+    struct hash<intercom::IID>
+    {
+        inline size_t operator()(
+            const intercom::IID& guid
+        ) const noexcept
+        {
+            size_t hash_code = 0;
+            intercom::detail::hash_combine( hash_code, guid.Data1 );
+            intercom::detail::hash_combine( hash_code, guid.Data2 );
+            intercom::detail::hash_combine( hash_code, guid.Data3 );
+            for( uint8_t b : guid.Data4 )
+                intercom::detail::hash_combine( hash_code, b );
+            return hash_code;
+        }
+    };
 }
 
 #endif

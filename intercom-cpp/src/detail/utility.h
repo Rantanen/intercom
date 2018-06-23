@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <sstream>
 #include <type_traits>
+#include <functional>
+
 
 namespace intercom
 {
@@ -68,6 +70,18 @@ namespace detail
         }
 
         return stream;
+    }
+
+    //! Hashes a value to an existing hash.
+    template< typename TValue >
+    inline void hash_combine(
+        size_t& seed,
+        const TValue& value
+    ) noexcept
+    {
+        // Implemenation copied from boost.
+        std::hash< TValue > hasher;
+        seed ^= hasher( value ) + 0x9e3779b9 + (seed<<6) + (seed>>2);
     }
 }
 }
