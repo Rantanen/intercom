@@ -5,6 +5,7 @@
 #include "../cpp-utility/os.h"
 #include "../cpp-utility/catch.hpp"
 
+#define INTERCOM_FLATTEN_DECLARATIONS
 #include "testlib.h"
 #include "../cpp-utility/dummy_interface.h"
 
@@ -15,8 +16,8 @@ TEST_CASE( "Using interface wrappers works" )
 
     intercom::ClassFactory< test_lib::raw::RefCountOperationsDescriptor > refCountFactory;
     intercom::RawInterface<IRefCountOperations> refCountOps;
-    HRESULT created = refCountFactory.create( IRefCountOperations::ID, refCountOps.out() );
-    REQUIRE( S_OK == created );
+    intercom::HRESULT created = refCountFactory.create( IRefCountOperations::ID, refCountOps.out() );
+    REQUIRE( intercom::SC_OK == created );
     REQUIRE( static_cast< bool >( refCountOps ) );
     REQUIRE( refCountOps->GetRefCount() == 1 );
 

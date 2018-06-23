@@ -11,12 +11,12 @@ TEST_CASE( "Methods accept and return COM objects" )
 
 	// Get the IPrimitiveOperations interface.
 	IClassCreator* pOps = nullptr;
-	HRESULT hr = CreateInstance(
+	intercom::HRESULT hr = CreateInstance(
 			CLSID_ClassCreator,
 			IID_IClassCreator,
 			&pOps );
 
-	REQUIRE( hr == S_OK );
+	REQUIRE( hr == intercom::SC_OK );
 	REQUIRE( pOps != nullptr );
 
 	SECTION( "Return new object" )
@@ -24,13 +24,13 @@ TEST_CASE( "Methods accept and return COM objects" )
 		ICreatedClass* pParent = nullptr;
 		hr = pOps->CreateRoot( 10, OUT &pParent );
 
-		REQUIRE( hr == S_OK );
+		REQUIRE( hr == intercom::SC_OK );
 		REQUIRE( pParent != nullptr );
 
 		int32_t id;
 		hr = pParent->GetId( OUT &id );
 
-		REQUIRE( hr == S_OK );
+		REQUIRE( hr == intercom::SC_OK );
 		REQUIRE( id == 10 );
 
 		SECTION( "New objects have correct reference count" )
@@ -51,15 +51,15 @@ TEST_CASE( "Methods accept and return COM objects" )
 			hr = pParent->QueryInterface( IID_IParent, reinterpret_cast< void** >( &pParentItf ) );
 			hr = pOps->CreateChild( 20, pParentItf, &pChild );
 
-			REQUIRE( hr == S_OK );
+			REQUIRE( hr == intercom::SC_OK );
 			REQUIRE( pChild != nullptr );
 
 			hr = pChild->GetId( &id );
-			REQUIRE( hr == S_OK );
+			REQUIRE( hr == intercom::SC_OK );
 			REQUIRE( id == 20 );
 
 			hr = pChild->GetParentId( &id );
-			REQUIRE( hr == S_OK );
+			REQUIRE( hr == intercom::SC_OK );
 			REQUIRE( id == 10 );
 
 			SECTION( "Parameter reference count stays same." )

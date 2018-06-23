@@ -2,6 +2,7 @@
 #include "../cpp-utility/os.h"
 #include "../cpp-utility/catch.hpp"
 
+#define INTERCOM_FLATTEN_DECLARATIONS
 #include "testlib.h"
 
 #include <intercom.h>
@@ -12,11 +13,11 @@ class CppImplementation : public ISharedInterface
 
 	// These two are not used.
 	void INTERCOM_CC SetValue( unsigned int v ) { }
-	intercom::HRESULT INTERCOM_CC DivideBy( ISharedInterface* divisor, OUT unsigned int* result ) { return E_NOTIMPL; }
+	intercom::HRESULT INTERCOM_CC DivideBy( ISharedInterface* divisor, OUT unsigned int* result ) { return intercom::EC_NOTIMPL; }
 
-	HRESULT INTERCOM_CC QueryInterface( const IID& riid, void** out ) { return E_NOTIMPL; }
-	ULONG INTERCOM_CC AddRef() { return 1; }
-	ULONG INTERCOM_CC Release() { return 1; }
+	intercom::HRESULT INTERCOM_CC QueryInterface( const intercom::IID& riid, void** out ) { return intercom::EC_NOTIMPL; }
+	uint32_t INTERCOM_CC AddRef() { return 1; }
+	uint32_t INTERCOM_CC Release() { return 1; }
 };
 
 TEST_CASE( "Methods accept COM interfaces as parameters." )
@@ -26,11 +27,11 @@ TEST_CASE( "Methods accept COM interfaces as parameters." )
 
 	// Get the first SharedImplementation object.
 	ISharedInterface* pItf1 = nullptr;
-	HRESULT hr = CreateInstance(
+	intercom::HRESULT hr = CreateInstance(
 		CLSID_SharedImplementation,
 		IID_ISharedInterface,
 		&pItf1 );
-	REQUIRE( hr == S_OK );
+	REQUIRE( hr == intercom::SC_OK );
 
 	// Get the second SharedImplementation object.
 	ISharedInterface* pItf2 = nullptr;
@@ -38,7 +39,7 @@ TEST_CASE( "Methods accept COM interfaces as parameters." )
 		CLSID_SharedImplementation,
 		IID_ISharedInterface,
 		&pItf2 );
-	REQUIRE( hr == S_OK );
+	REQUIRE( hr == intercom::SC_OK );
 
 	REQUIRE( pItf1 != nullptr );
 	REQUIRE( pItf2 != nullptr );
@@ -50,7 +51,7 @@ TEST_CASE( "Methods accept COM interfaces as parameters." )
 
 		unsigned int value = 0;
 		hr = pItf1->DivideBy( pItf2, OUT &value );
-		REQUIRE( hr == S_OK );
+		REQUIRE( hr == intercom::SC_OK );
 		REQUIRE( value == 5 );
 	}
 
@@ -61,7 +62,7 @@ TEST_CASE( "Methods accept COM interfaces as parameters." )
 
 		unsigned int value = 0;
 		hr = pItf1->DivideBy( &cppImpl, OUT &value );
-		REQUIRE( hr == S_OK );
+		REQUIRE( hr == intercom::SC_OK );
 		REQUIRE( value == 2 );
 	}
 

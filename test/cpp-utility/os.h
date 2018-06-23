@@ -5,7 +5,6 @@
 #else
 
 // Include declarations on non-Windows platforms.
-#define INTERCOM_FLATTEN_DECLARATIONS
 #include <intercom.h>
 #include "../../intercom-cpp/src/msdef.h"
 
@@ -18,11 +17,13 @@ void InitializeRuntime();
 void UninitializeRuntime();
 
 // Create Intercom object instance.
-HRESULT CreateInstance( const CLSID& clsid, const IID& iid, void** pout );
+intercom::HRESULT CreateInstance( const intercom::CLSID& clsid, const intercom::IID& iid, void** pout );
 
 // Create Intercom object instance.
 template <class TInterface>
-HRESULT CreateInstance( REFCLSID clsid, REFIID iid, TInterface** pout )
+intercom::HRESULT CreateInstance(
+	intercom::REFCLSID clsid,
+	intercom::REFIID iid, TInterface** pout )
 {
 	return CreateInstance( clsid, iid, reinterpret_cast< void** >( pout ) );
 }
