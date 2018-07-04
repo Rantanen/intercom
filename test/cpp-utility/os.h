@@ -24,5 +24,5 @@ HRESULT CreateInstance( const CLSID& clsid, const IID& iid, void** pout );
 template <class TInterface>
 HRESULT CreateInstance( REFCLSID clsid, REFIID iid, TInterface** pout )
 {
-	return CreateInstance( clsid, iid, reinterpret_cast< void** >( pout ) );
+    return CreateInstance( clsid, iid, reinterpret_cast< void** >( pout ) );
 }

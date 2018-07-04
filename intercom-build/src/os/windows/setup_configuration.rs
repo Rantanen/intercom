@@ -309,26 +309,26 @@ mod test
     #[test]
     fn get_vs_2017_details() {
         intercom::runtime::initialize().unwrap();
-		{
+        {
 
-			let setup_conf = ComRc::<ISetupConfiguration2>
-					::create( CLSID_SetupConfiguration ).unwrap();
-			let instances = setup_conf.enum_instances().unwrap();
+            let setup_conf = ComRc::<ISetupConfiguration2>
+                    ::create( CLSID_SetupConfiguration ).unwrap();
+            let instances = setup_conf.enum_instances().unwrap();
 
-			let ( next, _ ) = instances.next( 1 ).unwrap();
-			let installation_name = next.get_installation_name().unwrap();
-			let installation_path = next.get_installation_path().unwrap();
-			let installation_version = next.get_installation_version().unwrap();
+            let ( next, _ ) = instances.next( 1 ).unwrap();
+            let installation_name = next.get_installation_name().unwrap();
+            let installation_path = next.get_installation_path().unwrap();
+            let installation_version = next.get_installation_version().unwrap();
 
-			let installation_name_actual = get_vswhere_property( "installationName" );
-			let installation_path_actual = get_vswhere_property( "installationPath" );
-			let installation_version_actual = get_vswhere_property( "installationVersion" );
+            let installation_name_actual = get_vswhere_property( "installationName" );
+            let installation_path_actual = get_vswhere_property( "installationPath" );
+            let installation_version_actual = get_vswhere_property( "installationVersion" );
 
-			assert_eq!( installation_name_actual.trim(), installation_name );
-			assert_eq!( installation_path_actual.trim(), installation_path );
-			assert_eq!( installation_version_actual.trim(), installation_version );
+            assert_eq!( installation_name_actual.trim(), installation_name );
+            assert_eq!( installation_path_actual.trim(), installation_path );
+            assert_eq!( installation_version_actual.trim(), installation_version );
 
-		}
+        }
         intercom::runtime::uninitialize();
     }
 

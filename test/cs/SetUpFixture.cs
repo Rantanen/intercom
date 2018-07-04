@@ -12,40 +12,40 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace cs
 {
-	[TestClass]
-	public class SetUpFixture
-	{
-		private static IntPtr hActCtx;
-		private static IntPtr cookie;
+    [TestClass]
+    public class SetUpFixture
+    {
+        private static IntPtr hActCtx;
+        private static IntPtr cookie;
 
-		[AssemblyInitialize]
-		public static void SetUp( TestContext testContext )
-		{
-			UnsafeNativeMethods.ACTCTX context = new UnsafeNativeMethods.ACTCTX();
-			context.cbSize = Marshal.SizeOf( typeof( UnsafeNativeMethods.ACTCTX ) );
-			var manifest = Path.Combine( Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ), "test_lib.dll" );
-			context.dwFlags = 0x008;
-			context.lpSource = manifest;
-			context.lpResourceName = new IntPtr( 1 );
+        [AssemblyInitialize]
+        public static void SetUp( TestContext testContext )
+        {
+            UnsafeNativeMethods.ACTCTX context = new UnsafeNativeMethods.ACTCTX();
+            context.cbSize = Marshal.SizeOf( typeof( UnsafeNativeMethods.ACTCTX ) );
+            var manifest = Path.Combine( Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ), "test_lib.dll" );
+            context.dwFlags = 0x008;
+            context.lpSource = manifest;
+            context.lpResourceName = new IntPtr( 1 );
 
-			hActCtx = UnsafeNativeMethods.CreateActCtx( ref context );
-			if( hActCtx == ( IntPtr ) ( -1 ) )
-				throw new Win32Exception( Marshal.GetLastWin32Error() );
+            hActCtx = UnsafeNativeMethods.CreateActCtx( ref context );
+            if( hActCtx == ( IntPtr ) ( -1 ) )
+                throw new Win32Exception( Marshal.GetLastWin32Error() );
 
-			cookie = IntPtr.Zero;
-			if( !UnsafeNativeMethods.ActivateActCtx( hActCtx, out cookie ) )
-				throw new Win32Exception( Marshal.GetLastWin32Error() );
-		}
+            cookie = IntPtr.Zero;
+            if( !UnsafeNativeMethods.ActivateActCtx( hActCtx, out cookie ) )
+                throw new Win32Exception( Marshal.GetLastWin32Error() );
+        }
 
-		[AssemblyCleanup]
-		public static void TearDown()
-		{
-			UnsafeNativeMethods.DeactivateActCtx( 0, cookie );
-			UnsafeNativeMethods.ReleaseActCtx( hActCtx );
-		}
-	}
+        [AssemblyCleanup]
+        public static void TearDown()
+        {
+            UnsafeNativeMethods.DeactivateActCtx( 0, cookie );
+            UnsafeNativeMethods.ReleaseActCtx( hActCtx );
+        }
+    }
 
-	[SuppressUnmanagedCodeSecurity]
+    [SuppressUnmanagedCodeSecurity]
     internal static class UnsafeNativeMethods
     {
         // Activation Context API Functions

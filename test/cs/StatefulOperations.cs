@@ -7,20 +7,20 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace cs
 {
-	[TestClass]
-	public class StatefulOperations
-	{
-		[TestMethod]
-		public void StateIsStored()
-		{
-			var lib = new TestLib.Interop.StatefulOperations();
+    [TestClass]
+    public class StatefulOperations
+    {
+        [TestMethod]
+        public void StateIsStored()
+        {
+            var lib = new TestLib.Interop.StatefulOperations();
 
-			var value = new Random().Next();
-			lib.PutValue( value );
-			Assert.AreEqual( value, lib.GetValue() );
+            var value = new Random().Next();
+            lib.PutValue( value );
+            Assert.AreEqual( value, lib.GetValue() );
 
-			lib.PutValue( 0 );
-			Assert.AreEqual( 0, lib.GetValue() );
-		}
-	}
+            lib.PutValue( 0 );
+            Assert.AreEqual( 0, lib.GetValue() );
+        }
+    }
 }

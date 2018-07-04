@@ -6,84 +6,84 @@
 
 TEST_CASE( "Methods accept and return COM objects" )
 {
-	// Initialize COM.
-	InitializeRuntime();
+    // Initialize COM.
+    InitializeRuntime();
 
-	// Get the IPrimitiveOperations interface.
-	IClassCreator* pOps = nullptr;
-	HRESULT hr = CreateInstance(
-			CLSID_ClassCreator,
-			IID_IClassCreator,
-			&pOps );
+    // Get the IPrimitiveOperations interface.
+    IClassCreator* pOps = nullptr;
+    HRESULT hr = CreateInstance(
+            CLSID_ClassCreator,
+            IID_IClassCreator,
+            &pOps );
 
-	REQUIRE( hr == S_OK );
-	REQUIRE( pOps != nullptr );
+    REQUIRE( hr == S_OK );
+    REQUIRE( pOps != nullptr );
 
-	SECTION( "Return new object" )
-	{
-		ICreatedClass* pParent = nullptr;
-		hr = pOps->CreateRoot( 10, OUT &pParent );
+    SECTION( "Return new object" )
+    {
+        ICreatedClass* pParent = nullptr;
+        hr = pOps->CreateRoot( 10, OUT &pParent );
 
-		REQUIRE( hr == S_OK );
-		REQUIRE( pParent != nullptr );
+        REQUIRE( hr == S_OK );
+        REQUIRE( pParent != nullptr );
 
-		int32_t id;
-		hr = pParent->GetId( OUT &id );
+        int32_t id;
+        hr = pParent->GetId( OUT &id );
 
-		REQUIRE( hr == S_OK );
-		REQUIRE( id == 10 );
+        REQUIRE( hr == S_OK );
+        REQUIRE( id == 10 );
 
-		SECTION( "New objects have correct reference count" )
-		{
-			IRefCount* pRefCount = nullptr;
-			hr = pParent->QueryInterface( IID_IRefCount, reinterpret_cast< void** >( &pRefCount ) );
+        SECTION( "New objects have correct reference count" )
+        {
+            IRefCount* pRefCount = nullptr;
+            hr = pParent->QueryInterface( IID_IRefCount, reinterpret_cast< void** >( &pRefCount ) );
 
-			// We have two references now: pParent and pRefCount.
-			REQUIRE( pRefCount->GetRefCount() == 2 );
+            // We have two references now: pParent and pRefCount.
+            REQUIRE( pRefCount->GetRefCount() == 2 );
 
-			pRefCount->Release();
-		}
+            pRefCount->Release();
+        }
 
-		SECTION( "Objects can be used as parameters" )
-		{
-			ICreatedClass* pChild = nullptr;
-			IParent* pParentItf = nullptr;
-			hr = pParent->QueryInterface( IID_IParent, reinterpret_cast< void** >( &pParentItf ) );
-			hr = pOps->CreateChild( 20, pParentItf, &pChild );
+        SECTION( "Objects can be used as parameters" )
+        {
+            ICreatedClass* pChild = nullptr;
+            IParent* pParentItf = nullptr;
+            hr = pParent->QueryInterface( IID_IParent, reinterpret_cast< void** >( &pParentItf ) );
+            hr = pOps->CreateChild( 20, pParentItf, &pChild );
 
-			REQUIRE( hr == S_OK );
-			REQUIRE( pChild != nullptr );
+            REQUIRE( hr == S_OK );
+            REQUIRE( pChild != nullptr );
 
-			hr = pChild->GetId( &id );
-			REQUIRE( hr == S_OK );
-			REQUIRE( id == 20 );
+            hr = pChild->GetId( &id );
+            REQUIRE( hr == S_OK );
+            REQUIRE( id == 20 );
 
-			hr = pChild->GetParentId( &id );
-			REQUIRE( hr == S_OK );
-			REQUIRE( id == 10 );
+            hr = pChild->GetParentId( &id );
+            REQUIRE( hr == S_OK );
+            REQUIRE( id == 10 );
 
-			SECTION( "Parameter reference count stays same." )
-			{
-				IRefCount* pRefCountParent = nullptr;
-				hr = pParent->QueryInterface( IID_IRefCount, reinterpret_cast< void** >( &pRefCountParent ) );
+            SECTION( "Parameter reference count stays same." )
+            {
+                IRefCount* pRefCountParent = nullptr;
+                hr = pParent->QueryInterface( IID_IRefCount, reinterpret_cast< void** >( &pRefCountParent ) );
 
-				// Three references:
-				// - pParent
-				// - pParentItf
-				// - pRefCountParent
-				REQUIRE( pRefCountParent->GetRefCount() == 3 );
+                // Three references:
+                // - pParent
+                // - pParentItf
+                // - pRefCountParent
+                REQUIRE( pRefCountParent->GetRefCount() == 3 );
 
-				pRefCountParent->Release();
-			}
+                pRefCountParent->Release();
+            }
 
-			pParentItf->Release();
-			pChild->Release();
-		}
+            pParentItf->Release();
+            pChild->Release();
+        }
 
-		REQUIRE( pParent->Release() == 0 );
-	}
+        REQUIRE( pParent->Release() == 0 );
+    }
 
-	REQUIRE( pOps->Release() == 0 );
+    REQUIRE( pOps->Release() == 0 );
 
-	UninitializeRuntime();
+    UninitializeRuntime();
 }

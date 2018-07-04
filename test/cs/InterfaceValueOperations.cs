@@ -8,32 +8,32 @@ using TestLib.Interop;
 
 namespace cs
 {
-	[TestClass]
-	public class InterfaceValueOperations
-	{
-		[TestMethod]
-		public void ComInterfaceAsReturnValue()
-		{
-			var creator = new TestLib.Interop.ClassCreator();
-			var root = creator.CreateRoot( 1 );
+    [TestClass]
+    public class InterfaceValueOperations
+    {
+        [TestMethod]
+        public void ComInterfaceAsReturnValue()
+        {
+            var creator = new TestLib.Interop.ClassCreator();
+            var root = creator.CreateRoot( 1 );
 
-			Assert.IsNotNull( root );
-			Assert.AreEqual( 1, root.GetId() );
-		}
+            Assert.IsNotNull( root );
+            Assert.AreEqual( 1, root.GetId() );
+        }
 
-		[TestMethod]
-		public void ComInterfaceAsParameter()
-		{
-			var creator = new TestLib.Interop.ClassCreator();
-			var root = creator.CreateRoot( 1 );
+        [TestMethod]
+        public void ComInterfaceAsParameter()
+        {
+            var creator = new TestLib.Interop.ClassCreator();
+            var root = creator.CreateRoot( 1 );
 
-			Assert.IsNotNull( root );
-			Assert.AreEqual( 1, root.GetId() );
+            Assert.IsNotNull( root );
+            Assert.AreEqual( 1, root.GetId() );
 
-			var child = creator.CreateChild( 2, ( IParent ) root );
+            var child = creator.CreateChild( 2, ( IParent ) root );
 
-			Assert.AreEqual( 2, child.GetId() );
-			Assert.AreEqual( 1, child.GetParentId() );
-		}
-	}
+            Assert.AreEqual( 2, child.GetId() );
+            Assert.AreEqual( 1, child.GetParentId() );
+        }
+    }
 }
