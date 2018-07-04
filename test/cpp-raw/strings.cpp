@@ -3,11 +3,11 @@
 
 #include <functional>
 
-#include "os.h"
-#include "catch.hpp"
+#include "../cpp-utility/os.h"
+#include "../cpp-utility/catch.hpp"
 
 #include "testlib.h"
-#include "utility/dummy_interface.h"
+
 
 TEST_CASE( "Manipulating BSTR succeeds" )
 {

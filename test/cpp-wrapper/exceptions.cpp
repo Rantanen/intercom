@@ -1,13 +1,12 @@
 
-#ifdef __GNUC__
 
 #include <functional>
 
-#include "os.h"
-#include "catch.hpp"
+#include "../cpp-utility/os.h"
+#include "../cpp-utility/catch.hpp"
 
 #include "testlib.h"
-#include "utility/dummy_interface.h"
+#include "../cpp-utility/dummy_interface.h"
 
 TEST_CASE( "Exceptions have correct error message." )
 {
@@ -83,5 +82,3 @@ TEST_CASE( "Exception specific data is passed correctly." )
         }
     }
 }
-
-#endif

@@ -1,7 +1,7 @@
 
 // Interface definitions.
 #ifdef _MSC_VER
-#include "msvc/import.h"
+#include <Windows.h>
 #else
 
 // Include declarations on non-Windows platforms.

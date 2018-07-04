@@ -2,8 +2,8 @@
 #define NOMINMAX
 #include <limits>
 
-#include "os.h"
-#include "catch.hpp"
+#include "../cpp-utility/os.h"
+#include "../cpp-utility/catch.hpp"
 
 #include "testlib.h"
 
