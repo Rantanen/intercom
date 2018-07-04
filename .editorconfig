@@ -1,0 +1,28 @@
+
+root = true
+
+# Defaults
+[*]
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+charset = utf-8
+
+# End of line should be LF in the repository - but we'll use gitattributes
+# for this instead of editorconfig. This allows Windows editors to use CRLF
+# instead.
+
+# For XML files we use indent size of 2 as these files often have deeper
+# nesting within the elements.
+#
+# ... Fine, the real reason is because that's the default for Visual Studio
+# project files - but the above excuse is good as well.
+[*.{csproj,config,manifest,vcxproj}]
+indent_size = 2
+
+# Visual Studio solutions are a bit special.
+[*.sln]
+charset = utf-8-bom
+insert_final_newline = false
+indent_style = tab
+indent_size = 4
