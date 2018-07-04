@@ -4,12 +4,11 @@
 
 #include <stdexcept>
 
-#include "posix/iclassfactory.h"
-#include "posix/dlwrapper.h"
-
-using intercom::cpp::posix::DlWrapper;
-
+#include "iclassfactory.h"
+#include "detail/dlwrapper.h"
 #include "cominterop.h"
+#include "datatypes.h"
+#include "error_codes.h"
 #include "no_such_interface.h"
 #include "raw_interface.h"
 #include "runtime_error.h"
@@ -30,7 +29,7 @@ public:
         const intercom::CLSID& classId  //!< Identifies the class constructed with this activator.
     ) :
         m_classId( classId ),
-        m_library( name, DlWrapper::rtld::lazy ),
+        m_library( name, intercom::detail::DlWrapper::rtld::lazy ),
         m_getClassObjectFunc( nullptr ),
         m_classFactory( nullptr )
     {
@@ -52,10 +51,10 @@ public:
         intercom::HRESULT error = m_classFactory->CreateInstance( nullptr, TInterface::ID, interface.out() );
         switch( error )
         {
-        case intercom::S_OK:
+        case intercom::SC_OK:
             break;
 
-        case intercom::E_NOINTERFACE:
+        case intercom::EC_NOINTERFACE:
             throw intercom::NoSuchInterface( m_classId, TInterface::ID );
 
         // Unspecified error.
@@ -67,11 +66,11 @@ public:
     }
 
     intercom::HRESULT create(
-        intercom::REFIID riid,
-        void** interface
+        const intercom::IID& riid,
+        void** itf
     )
     {
-        return m_classFactory->CreateInstance( nullptr, riid, (void**) interface );
+        return m_classFactory->CreateInstance( nullptr, riid, (void**) itf );
     }
 private:
 
@@ -79,7 +78,7 @@ private:
     {
         intercom::HRESULT error = m_getClassObjectFunc( m_classId, IID_IClassFactory,
                 (void**) &m_classFactory );
-        if( error != S_OK )
+        if( error != intercom::SC_OK )
         {
             throw intercom::RuntimeError( error, std::stringstream() << "Creating class factory for class \""
                     << m_classId << "\" failed." );
@@ -89,7 +88,7 @@ private:
 private:
 
     intercom::CLSID m_classId;
-    DlWrapper m_library;
+    intercom::detail::DlWrapper m_library;
     GetClassObjectFunc m_getClassObjectFunc;
     IClassFactory* m_classFactory;
 

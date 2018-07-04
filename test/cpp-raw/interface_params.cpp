@@ -4,17 +4,19 @@
 
 #include "testlib.h"
 
+#include <intercom.h>
+
 class CppImplementation : public ISharedInterface
 {
-	unsigned int GetValue() { return 5; }
+	unsigned int INTERCOM_CC GetValue() { return 5; }
 
 	// These two are not used.
-	void SetValue( unsigned int v ) { }
-	HRESULT DivideBy( ISharedInterface* divisor, OUT unsigned int* result ) { return E_NOTIMPL; }
+	void INTERCOM_CC SetValue( unsigned int v ) { }
+	intercom::HRESULT INTERCOM_CC DivideBy( ISharedInterface* divisor, OUT unsigned int* result ) { return E_NOTIMPL; }
 
-	HRESULT QueryInterface( const IID& riid, void** out ) { return E_NOTIMPL; }
-	ULONG AddRef() { return 1; }
-	ULONG Release() { return 1; }
+	HRESULT INTERCOM_CC QueryInterface( const IID& riid, void** out ) { return E_NOTIMPL; }
+	ULONG INTERCOM_CC AddRef() { return 1; }
+	ULONG INTERCOM_CC Release() { return 1; }
 };
 
 TEST_CASE( "Methods accept COM interfaces as parameters." )

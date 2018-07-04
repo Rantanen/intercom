@@ -18,7 +18,7 @@ void InitializeRuntime();
 void UninitializeRuntime();
 
 // Create Intercom object instance.
-HRESULT CreateInstance( REFCLSID clsid, REFIID iid, void** pout );
+HRESULT CreateInstance( const CLSID& clsid, const IID& iid, void** pout );
 
 // Create Intercom object instance.
 template <class TInterface>

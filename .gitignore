@@ -18,3 +18,5 @@ Makefile
 # CMakeTools plugin, may contain full paths
 .vscode/.cmaketools.json
 
+# MSVC artifacts
+Debug

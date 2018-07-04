@@ -32,7 +32,7 @@ popd
 REM Build C++ test suite
 pushd test\cpp-raw\msvc
 
-devenv cpp.sln /Build "Release|x64"
+msbuild /p:Platform=x64 /p:Configuration=Release
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 popd
@@ -42,7 +42,7 @@ pushd test\cs
 
 tlbimp ..\testlib\target\debug\test_lib.dll /MACHINE:X64 /out:TestLib.Interop.dll
 
-devenv cs.sln /Build "Release|x64"
+msbuild /p:Platform=x64 /p:Configuration=Release
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 popd

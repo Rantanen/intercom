@@ -22,7 +22,8 @@ namespace intercom
     typedef uint32_t DWORD;
     typedef uint16_t WORD;
 
-    typedef wchar_t* BSTR;
+    typedef char16_t OLECHAR;
+    typedef OLECHAR* BSTR;
 
     typedef uint32_t HRESULT;
 }

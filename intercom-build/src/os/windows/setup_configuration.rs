@@ -320,29 +320,9 @@ mod test
 			let installation_path = next.get_installation_path().unwrap();
 			let installation_version = next.get_installation_version().unwrap();
 
-			let vswhere_path = get_intercom_root().join( "scripts/vswhere.exe" );
-			let installation_name_output = Command::new( &vswhere_path )
-					.arg( "/nologo" )
-					.arg( "-property" ).arg( "installationName" )
-					.output()
-					.unwrap();
-			let installation_path_output = Command::new( &vswhere_path )
-					.arg( "/nologo" )
-					.arg( "-property" ).arg( "installationPath" )
-					.output()
-					.unwrap();
-			let installation_version_output = Command::new( &vswhere_path )
-					.arg( "/nologo" )
-					.arg( "-property" ).arg( "installationVersion" )
-					.output()
-					.unwrap();
-
-			let installation_name_actual = String::from_utf8_lossy(
-					&installation_name_output.stdout );
-			let installation_path_actual = String::from_utf8_lossy(
-					&installation_path_output.stdout );
-			let installation_version_actual = String::from_utf8_lossy(
-					&installation_version_output.stdout );
+			let installation_name_actual = get_vswhere_property( "installationName" );
+			let installation_path_actual = get_vswhere_property( "installationPath" );
+			let installation_version_actual = get_vswhere_property( "installationVersion" );
 
 			assert_eq!( installation_name_actual.trim(), installation_name );
 			assert_eq!( installation_path_actual.trim(), installation_path );
@@ -362,6 +342,69 @@ mod test
         }
 
         root_path
+    }
+
+    /// Gets the specified vswhere property.
+    fn get_vswhere_property(
+        property: &str,
+    ) -> String {
+
+        // First attempt to get the property without the "BuildTools" product.
+        // If we don't get a result then try "BuildTools" explicitly.
+        // We do this in two steps to avoid issues when the developer has both the Visual Studio and the BuildTools installed.
+        match get_vswhere_property_for_products( property, &[] )
+        {
+            Ok( value ) => value,
+            Err( _ ) => get_vswhere_property_for_products(
+                    property, &[ "Microsoft.VisualStudio.Product.BuildTools" ] ).unwrap(),
+        }
+    }
+
+    /// Gets the specified vswhere property for the specified products.
+    fn get_vswhere_property_for_products(
+        property: &str,
+        products: &[&str],
+    ) -> Result<String, String>
+    {
+        let vswhere_path = get_intercom_root().join( "scripts/vswhere.exe" );
+        let property_from_output =
+                if products.len() == 0
+                {
+                    // No products where specified so we use the defaults which are
+                    // Community, Professional and Enterprise.
+                    Command::new( &vswhere_path )
+                            .arg( "/nologo" )
+                            .arg( "-property" ).arg( property )
+                            .output()
+                            .unwrap()
+                            .stdout
+                }
+                else
+                {
+                    Command::new( &vswhere_path )
+                            .arg( "/nologo" )
+                            .arg( "-products").args( products )
+                            .arg( "-property" ).arg( property )
+                            .output()
+                            .unwrap()
+                            .stdout
+                };
+
+        // Ensure we got exactly one result.
+        let property_from_output: String = String::from_utf8_lossy( &property_from_output ).to_owned().to_string();
+        let values: Vec<&str> = property_from_output
+                .split( "\r\n" )
+                .filter_map( |s| { if s.is_empty() { None } else { Some( s ) } } )
+                .collect();
+        if values.len() != 1
+        {
+            Err( format!( "Found multiple products with the property: {}. Properties: {}",
+                            property, values.join( ", " ) ) )
+        }
+        else
+        {
+            Ok( values[ 0 ].to_string() )
+        }
     }
 
     #[test]

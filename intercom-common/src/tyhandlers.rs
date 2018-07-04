@@ -5,6 +5,17 @@ use quote::Tokens;
 
 use ast_converters::*;
 
+/// Defines tokens for converting COM types into Rust types
+pub struct ComToRust
+{
+    /// Optional expression for storing a temporary value in the stack
+    /// for the duration of the Rust call.
+    pub stack: Option<Tokens>,
+
+    /// Expression that converts the COM type into Rust type.
+    pub conversion: Tokens
+}
+
 /// Defines Type-specific logic for handling the various parameter types in the
 /// Rust/COM interface.
 pub trait TypeHandler {
@@ -21,9 +32,12 @@ pub trait TypeHandler {
     /// Converts a COM parameter named by the ident into a Rust type.
     fn com_to_rust(
         &self, ident : &Ident
-    ) -> Tokens
+    ) -> ComToRust
     {
-        quote!( #ident.into() )
+        ComToRust {
+            stack: None,
+            conversion: quote!( #ident.into() )
+        }
     }
 
     /// Converts a Rust parameter named by the ident into a COM type.
@@ -89,9 +103,40 @@ impl TypeHandler for StringParam
         parse_quote!( ::intercom::BStr )
     }
 
-    fn com_to_rust( &self, ident : &Ident ) -> Tokens
+    fn com_to_rust( &self, ident : &Ident ) -> ComToRust
+    {
+        ComToRust {
+            stack: None,
+            conversion: quote!( #ident.into() )
+        }
+    }
+
+    fn rust_to_com( &self, ident : &Ident ) -> Tokens
     {
         quote!( #ident.into() )
+    }
+}
+
+/// String parameter handler. Converts between Rust &str and COM BSTR types.
+struct StringRefParam( Type );
+impl TypeHandler for StringRefParam
+{
+    fn rust_ty( &self ) -> Type { self.0.clone() }
+
+    fn com_ty( &self ) -> Type
+    {
+        parse_quote!( ::intercom::BStr )
+    }
+
+    fn com_to_rust( &self, ident : &Ident ) -> ComToRust
+    {
+        // Generate unique name for each stack variable to avoid conflicts with function
+        // thay may have multiple parameters.
+        let as_string_ident = Ident::from( format!( "{}_as_string", ident ) );
+        ComToRust {
+            stack: Some( quote!( let #as_string_ident: String = #ident.into(); ) ),
+            conversion: quote!( #as_string_ident.as_ref() )
+        }
     }
 
     fn rust_to_com( &self, ident : &Ident ) -> Tokens
@@ -121,6 +166,7 @@ fn map_by_name(
 
         "ComItf" => Rc::new( ComItfParam( original_type ) ),
         "String" => Rc::new( StringParam( original_type ) ),
+        "str" => Rc::new( StringRefParam( original_type ) ),
 
         // Unknown. Use IdentityParam.
         _ => Rc::new( IdentityParam( original_type ) )

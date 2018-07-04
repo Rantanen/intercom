@@ -84,6 +84,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\intercom-cpp</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
@@ -95,11 +96,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\test_lib.dll</Command>
+      <Command>copy $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\test_lib.dll</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\intercom-cpp</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
@@ -111,11 +113,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\test_lib.dll</Command>
+      <Command>copy $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\test_lib.dll</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\intercom-cpp</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
@@ -131,11 +134,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\test_lib.dll</Command>
+      <Command>copy $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\test_lib.dll</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\intercom-cpp</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
@@ -151,7 +155,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>cp $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\test_lib.dll</Command>
+      <Command>copy $(ProjectDir)..\..\testlib\target\debug\test_lib.dll $(OutDir)\test_lib.dll</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

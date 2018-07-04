@@ -23,7 +23,7 @@ public:
      * @brief Error code associated with the exception.
      *
      */
-    static const HRESULT ERROR_CODE = intercom::E_NOINTERFACE;
+    static const HRESULT ERROR_CODE = intercom::EC_NOINTERFACE;
 
     explicit NoSuchInterface(
         const intercom::IID& interface_id
