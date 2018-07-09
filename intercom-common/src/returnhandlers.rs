@@ -65,14 +65,18 @@ impl ReturnHandler for ErrorResultHandler {
 
     fn com_to_rust_return( &self, result : &Ident ) -> Tokens {
 
-        // Return statement checks for S_OK (should be is_success) HRESULT and
-        // yields either Ok or Err Result based on that.
-        let ok_values = get_ok_values( self.com_out_args() );
+        // Quote the OK values.
+        // If there is only one, it should be a raw value;
+        // If there are multiple value quote them as a tuple.
+        let ok_values = get_rust_ok_values( self.com_out_args() );
         let ok_tokens = if ok_values.len() != 1 {
                 quote!( ( #( #ok_values ),* ) )
             } else {
                 quote!( #( #ok_values )* )
             };
+
+        // Return statement checks for S_OK (should be is_success) HRESULT and
+        // yields either Ok or Err Result based on that.
         quote!(
             if #result == ::intercom::S_OK {
                 Ok( #ok_tokens )
@@ -161,14 +165,19 @@ fn write_out_values(
     ( ok_tokens, err_tokens )
 }
 
-fn get_ok_values(
+/// Gets the result as Rust types for a success return value.
+fn get_rust_ok_values(
     out_args : Vec<RustArg>
 ) -> Vec<Tokens>
 {
     let mut tokens = vec![];
     for out_arg in out_args {
 
-        let arg_value = out_arg.handler.rust_to_com( &out_arg.name );
+        let arg_conversion = out_arg.handler.com_to_rust( out_arg.name );
+        if arg_conversion.stack.is_some() {
+            panic!( "Return values must be owned" );
+        }
+        let arg_value = arg_conversion.conversion;
         tokens.push( quote!( #arg_value ) );
     }
     tokens
