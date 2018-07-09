@@ -139,6 +139,10 @@ pub struct BString(
 
 impl BString {
 
+    pub fn from_ptr( ptr : *mut u16 ) -> BString {
+        BString( ptr )
+    }
+
     /// Converts a C-string into a `BString`.
     pub fn from_cstr( s : &ffi::CStr ) -> Result<BString, Utf8Error> {
         Ok( Self::from_str( s.to_str()? ).expect( "Error type is never type" ) )
@@ -248,66 +252,70 @@ impl Drop for BString {
     }
 }
 
-pub trait FromBstr<'a> {
+pub trait FromWithTemporary<'a, TSource> {
     type Temporary;
-    fn to_temporary( bstr : &'a BStr ) -> Self::Temporary;
-    fn from_temporary( temp : &'a Self::Temporary ) -> Self;
+    fn to_temporary( source : TSource ) -> Self::Temporary;
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self;
 }
 
-impl<'a> FromBstr<'a> for &'a BStr {
+impl<'a, T: Copy> FromWithTemporary<'a, T> for T {
+
+    type Temporary = T;
+    fn to_temporary( source : T ) -> Self::Temporary { source }
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { ( *temp ) }
+}
+
+impl<'a> FromWithTemporary<'a, &'a BStr > 
+        for BString {
+
     type Temporary = &'a BStr;
     fn to_temporary( bstr : &'a BStr ) -> Self::Temporary { bstr }
-    fn from_temporary( temp : &'a Self::Temporary ) -> Self { temp.as_ref() }
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { (*temp).to_owned() }
 }
 
-impl<'a> FromBstr<'a> for BString {
-    type Temporary = &'a BStr;
-    fn to_temporary( bstr : &'a BStr ) -> Self::Temporary { bstr }
-    fn from_temporary( temp : &'a Self::Temporary ) -> Self { (*temp).to_owned() }
-}
+impl<'a> FromWithTemporary<'a, &'a BStr>
+        for &'a str {
 
-impl<'a> FromBstr<'a> for &'a str {
     type Temporary = String;
-
     fn to_temporary( bstr : &'a BStr ) -> Self::Temporary { bstr.to_string().unwrap() }
-    fn from_temporary( temp : &'a Self::Temporary ) -> Self { temp.as_ref() }
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { &**temp }
 }
 
-impl<'a> FromBstr<'a> for String {
+impl<'a> FromWithTemporary<'a, &'a BStr>
+        for String {
+
     type Temporary = &'a BStr;
     fn to_temporary( bstr : &'a BStr ) -> Self::Temporary { bstr }
-    fn from_temporary( temp : &'a Self::Temporary ) -> Self { temp.to_string().unwrap() }
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { temp.to_string().unwrap() }
 }
 
-pub trait IntoBstr<'a> {
-    type Temporary;
-    fn to_temporary( self ) -> Self::Temporary;
-    fn from_temporary( temp : &'a Self::Temporary ) -> &'a BStr;
+impl<'a> FromWithTemporary<'a, BString > 
+        for &'a BStr {
+
+    type Temporary = BString;
+    fn to_temporary( source : BString ) -> Self::Temporary { source }
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { &**temp }
 }
 
-impl<'a> IntoBstr<'a> for &'a BStr {
-    type Temporary = Self;
-    fn to_temporary( self ) -> Self::Temporary { self }
-    fn from_temporary( temp : &'a Self::Temporary ) -> &'a BStr { temp.as_ref() }
-}
+impl<'a> FromWithTemporary<'a, &'a str>
+        for &'a BStr {
 
-impl<'a> IntoBstr<'a> for BString {
-    type Temporary = Self;
-    fn to_temporary( self ) -> Self::Temporary { self }
-    fn from_temporary( temp : &'a Self::Temporary ) -> &'a BStr { temp.as_ref() }
-}
-
-impl<'a> IntoBstr<'a> for &'a str {
     type Temporary = BString;
 
-    fn to_temporary( self ) -> Self::Temporary { BString::from_str( self ).unwrap() }
-    fn from_temporary( temp : &'a Self::Temporary ) -> &'a BStr { temp.as_ref() }
+    fn to_temporary( source : &'a str ) -> Self::Temporary {
+        BString::from_str( source ).unwrap()
+    }
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { &**temp }
 }
 
-impl<'a> IntoBstr<'a> for String {
+impl<'a> FromWithTemporary<'a, String>
+        for &'a BStr {
+
     type Temporary = BString;
-    fn to_temporary( self ) -> Self::Temporary { BString::from_str( &self ).unwrap() }
-    fn from_temporary( temp : &'a Self::Temporary ) -> &'a BStr { temp.as_ref() }
+    fn to_temporary( source : String ) -> Self::Temporary {
+        BString::from_str( &source ).unwrap()
+    }
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { &**temp }
 }
 
 //////////////////////////////////////////
