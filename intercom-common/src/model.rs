@@ -175,7 +175,7 @@ impl ComStruct
     }
 
     /// Struct name.
-    pub fn name( &self ) -> &Ident { &self.name }
+    pub fn name( &self ) -> Ident { self.name }
 
     /// Struct CLSID.
     pub fn clsid( &self ) -> &Option<GUID> { &self.clsid }
@@ -301,7 +301,7 @@ impl ComInterface
     }
 
     /// Interface name.
-    pub fn name( &self ) -> &Ident { &self.name }
+    pub fn name( &self ) -> Ident { self.name }
 
     /// Interface IID.
     pub fn iid( &self ) -> &GUID { &self.iid }
@@ -382,10 +382,10 @@ impl ComImpl
     }
 
     /// Struct name that the trait is implemented for.
-    pub fn struct_name( &self ) -> &Ident { &self.struct_name }
+    pub fn struct_name( &self ) -> Ident { self.struct_name }
 
     /// Trait name that is implemented. Struct name if this is an implicit impl.
-    pub fn interface_name( &self ) -> &Ident { &self.interface_name }
+    pub fn interface_name( &self ) -> Ident { self.interface_name }
 
     /// True if a valid trait is implemented, false for implicit impls.
     pub fn is_trait_impl( &self ) -> bool { self.is_trait_impl }
@@ -445,7 +445,7 @@ impl ComCrateBuilder {
         for lib in &mut self.libs {
             for clsid in built_in_types.iter().filter_map( |bti|
                     if bti.class.clsid.is_some() {
-                        Some( *bti.class.name() )
+                        Some( bti.class.name() )
                     } else {
                         None
                     } ) {
