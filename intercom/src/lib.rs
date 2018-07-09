@@ -76,7 +76,7 @@ mod classfactory; pub use classfactory::*;
 mod combox; pub use combox::*;
 mod comrc; pub use comrc::*;
 mod comitf; pub use comitf::*;
-mod bstr; pub use bstr::*;
+mod strings; pub use strings::*;
 mod guid; pub use guid::GUID;
 mod error; pub use error::{return_hresult, get_last_error, ComError, ErrorInfo};
 mod interfaces;
@@ -108,6 +108,10 @@ pub type CLSID = GUID;
 
 /// A reference to a class ID.
 pub type REFCLSID = *const IID;
+
+pub mod raw {
+    pub type BSTR = *const u16;
+}
 
 /// COM method status code.
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy)]

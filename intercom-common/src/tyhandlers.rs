@@ -58,6 +58,7 @@ pub trait TypeHandler {
                 match name {
                     "c_void"
                         | "RawComPtr"
+                        | "String"
                         => quote!( ::std::ptr::null_mut() ),
                     _ => quote!( Default::default() )
                 }
@@ -100,20 +101,20 @@ impl TypeHandler for StringParam
 
     fn com_ty( &self ) -> Type
     {
-        parse_quote!( ::intercom::BStr )
+        parse_quote!( ::intercom::raw::BSTR )
     }
 
     fn com_to_rust( &self, ident : Ident ) -> ComToRust
     {
         ComToRust {
             stack: None,
-            conversion: quote!( #ident.into() )
+            conversion: quote!( BStr::from_ptr( #ident ).to_string().unwrap() )
         }
     }
 
     fn rust_to_com( &self, ident : Ident ) -> Tokens
     {
-        quote!( #ident.into() )
+        quote!( BString::from( #ident ).as_ptr() )
     }
 }
 
@@ -125,7 +126,7 @@ impl TypeHandler for StringRefParam
 
     fn com_ty( &self ) -> Type
     {
-        parse_quote!( ::intercom::BStr )
+        parse_quote!( ::intercom::raw::BSTR )
     }
 
     fn com_to_rust( &self, ident : Ident ) -> ComToRust
@@ -134,14 +135,14 @@ impl TypeHandler for StringRefParam
         // thay may have multiple parameters.
         let as_string_ident = Ident::from( format!( "{}_as_string", ident ) );
         ComToRust {
-            stack: Some( quote!( let #as_string_ident: String = #ident.into(); ) ),
+            stack: Some( quote!( let #as_string_ident: String = #ident.to_string().unwrap(); ) ),
             conversion: quote!( #as_string_ident.as_ref() )
         }
     }
 
     fn rust_to_com( &self, ident : Ident ) -> Tokens
     {
-        quote!( #ident.into() )
+        quote!( BString::from( #ident ).as_ptr() )
     }
 }
 
