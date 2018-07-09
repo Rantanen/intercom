@@ -89,8 +89,8 @@ pub struct __FooVtbl {
 
     pub string_method: unsafe extern "stdcall" fn(
         self_vtable: ::intercom::RawComPtr,
-        msg: ::intercom::raw::BSTR
-    ) -> ::intercom::raw::BSTR,
+        msg: ::intercom::raw::InBSTR
+    ) -> ::intercom::raw::OutBSTR,
 
     pub comitf_method: unsafe extern "stdcall" fn (
         self_vtable: ::intercom::RawComPtr,
@@ -217,8 +217,15 @@ impl Foo for ::intercom::ComItf<Foo>
 
         #[allow(unused_unsafe)]
         unsafe {
-            let __result = ((**vtbl).string_method)( comptr, BString::from(msg).as_ptr() );
-            __result.into()
+            let __result = ((**vtbl).string_method)(
+                    comptr,
+                    <&::intercom::BStr as ::intercom::FromWithTemporary<String>>::from_temporary(
+                        &mut <&::intercom::BStr as ::intercom::FromWithTemporary<String>>::to_temporary(
+                            msg,
+                        ),
+                    ).as_ptr(),
+                );
+            ::intercom::BString::from_ptr( __result ).into()
         }
     }
 

@@ -405,15 +405,21 @@ unsafe extern "stdcall" fn __Foo_Foo_tuple_result_method(
 #[doc(hidden)]
 unsafe extern "stdcall" fn __Foo_Foo_string_method(
     self_vtable: ::intercom::RawComPtr,
-    input: ::intercom::raw::BSTR,
-) -> ::intercom::raw::BSTR {
+    input: ::intercom::raw::InBSTR,
+) -> ::intercom::raw::OutBSTR {
     let self_combox =
         (self_vtable as usize - __Foo_FooVtbl_offset()) as
             *mut ::intercom::ComBox<Foo>;
 
     let self_struct : &Foo = &**self_combox;
-    let __result = self_struct.string_method(BStr::from_ptr(input).to_string().unwrap());
-    __result.into()
+    let __result = self_struct.string_method(
+            <String as ::intercom::FromWithTemporary<&::intercom::BStr>>::from_temporary(
+                &mut <String as ::intercom::FromWithTemporary<&::intercom::BStr>>::to_temporary(
+                    ::intercom::BStr::from_ptr(input)
+                )
+            ),
+        );
+    ::intercom::BString::from(__result).into_ptr()
 }
 
 #[allow(non_snake_case)]
