@@ -168,7 +168,7 @@ fn get_ok_values(
     let mut tokens = vec![];
     for out_arg in out_args {
 
-        let arg_value = out_arg.handler.rust_to_com( &out_arg.name );
+        let arg_value = out_arg.handler.rust_to_com( out_arg.name );
         tokens.push( quote!( #arg_value ) );
     }
     tokens
