@@ -58,7 +58,7 @@ pub fn expand_com_class(
     // ISupportErrorInfo virtual table and having that at the beginning.
     let isupporterrorinfo_ident = Ident::from( "ISupportErrorInfo".to_owned() );
     let isupporterrorinfo_vtable_instance_ident =
-            idents::vtable_instance( struct_ident, &isupporterrorinfo_ident );
+            idents::vtable_instance( struct_ident, isupporterrorinfo_ident );
     let mut vtable_list_field_decls = vec![
         quote!( _ISupportErrorInfo : &'static ::intercom::ISupportErrorInfoVtbl ) ];
     let mut vtable_list_field_values = vec![
@@ -70,10 +70,10 @@ pub fn expand_com_class(
     for itf in cls.interfaces() {
 
         // Various idents.
-        let offset_ident = idents::vtable_offset( struct_ident, itf );
-        let iid_ident = idents::iid( itf );
-        let vtable_struct_ident = idents::vtable_struct( itf );
-        let vtable_instance_ident = idents::vtable_instance( struct_ident, itf );
+        let offset_ident = idents::vtable_offset( struct_ident, *itf );
+        let iid_ident = idents::iid( *itf );
+        let vtable_struct_ident = idents::vtable_struct( *itf );
+        let vtable_instance_ident = idents::vtable_instance( struct_ident, *itf );
 
         // Store the field offset globally. We need this offset when implementing
         // the delegating query_interface methods. The only place where we know

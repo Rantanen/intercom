@@ -280,7 +280,7 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
     {
         let resolver = TypeInfoResolver::from_type( &reference.elem )?;
         let resolver = TypeInfoResolver::mutable( resolver,
-                TypeInfoResolver::is_mutable( &reference.mutability ) );
+                TypeInfoResolver::is_mutable( reference.mutability ) );
 
         Some( TypeInfoResolver::pass_by( resolver, PassBy::Reference ) )
     }
@@ -291,7 +291,7 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
     {
         let resolver = TypeInfoResolver::from_type( &ptr.elem )?;
         let resolver = TypeInfoResolver::mutable( resolver,
-                TypeInfoResolver::is_mutable( &ptr.mutability ) );
+                TypeInfoResolver::is_mutable( ptr.mutability ) );
 
         Some( TypeInfoResolver::pass_by( resolver, PassBy::Ptr ) )
     }
@@ -340,7 +340,7 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
 
     /// Determines if the given type is mutable
     fn is_mutable(
-        mutability: &Option<syn::token::Mut>
+        mutability: Option<syn::token::Mut>
     ) -> bool
     {
         mutability.is_some()

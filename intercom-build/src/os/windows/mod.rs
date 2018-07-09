@@ -51,7 +51,7 @@ pub fn build() {
     // Generate IDL using intercom_utils.
     {
         let mut idl = File::create( &idl_path )
-                .expect( &format!( "Could not create file: {:?}", idl_path ) );
+                .unwrap_or_else( |_| panic!( "Could not create file: {:?}", idl_path ) );
         let model = ::intercom_common::generators::idl::IdlModel::from_path(
                     Path::new( &toml_dir ) )
                 .expect( "Failed to form IDL from the sources" );
@@ -142,7 +142,7 @@ pub fn build() {
             // 'rc.exe' will result in 'foo.res'. We'll need 'foo.res.lib' as
             // rustc will insist on '.lib' extension.
             ::std::fs::rename( &res_path, &lib_path )
-                    .expect( &format!(
+                    .unwrap_or_else( |_| panic!(
                             "Failed to rename {:?} to {:?}",
                             res_path, lib_path ) );
 
