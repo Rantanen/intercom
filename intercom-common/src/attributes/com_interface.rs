@@ -84,8 +84,8 @@ pub fn expand_com_interface(
         let in_out_args = method_info.raw_com_args()
                 .into_iter()
                 .map( |com_arg| {
-                    let name = &com_arg.arg.name;
-                    let com_ty = &com_arg.arg.handler.com_ty();
+                    let name = &com_arg.name;
+                    let com_ty = &com_arg.handler.com_ty();
                     let dir = match com_arg.dir {
                         Direction::In => quote!(),
                         Direction::Out | Direction::Retval => quote!( *mut )
@@ -127,10 +127,10 @@ pub fn expand_com_interface(
         let params = method_info.raw_com_args()
                 .into_iter()
                 .map( |com_arg| {
-                    let name = com_arg.arg.name;
+                    let name = com_arg.name;
                     match com_arg.dir {
                         Direction::In => {
-                            let param = com_arg.arg.handler.rust_to_com( name );
+                            let param = com_arg.handler.rust_to_com( name );
                             quote!( #param )
                         },
                         Direction::Out | Direction::Retval
@@ -147,7 +147,7 @@ pub fn expand_com_interface(
         let return_ident = Ident::from( "__result" );
         let return_statement = method_info
                 .returnhandler
-                .com_to_rust_return( &return_ident );
+                .com_to_rust_return( return_ident );
 
         // Create the method implementation using the bits defined above.
         let self_arg = &method_info.rust_self_arg;

@@ -3,17 +3,31 @@ use std::rc::Rc;
 use syn::*;
 use quote::Tokens;
 
+use methodinfo::Direction;
+
 use ast_converters::*;
 
-/// Defines tokens for converting COM types into Rust types
-pub struct ComToRust
-{
-    /// Optional expression for storing a temporary value in the stack
-    /// for the duration of the Rust call.
-    pub stack: Option<Tokens>,
+/// Type usage context.
+pub struct TypeContext {
+    dir: Direction,
+}
 
-    /// Expression that converts the COM type into Rust type.
-    pub conversion: Tokens
+impl TypeContext {
+    pub fn new( dir : Direction ) -> TypeContext {
+        TypeContext { dir }
+    }
+
+    pub fn input() -> TypeContext {
+        TypeContext { dir: Direction::In }
+    }
+
+    pub fn output() -> TypeContext {
+        TypeContext { dir: Direction::Out }
+    }
+
+    pub fn retval() -> TypeContext {
+        TypeContext { dir: Direction::Retval }
+    }
 }
 
 /// Defines Type-specific logic for handling the various parameter types in the
@@ -32,12 +46,9 @@ pub trait TypeHandler {
     /// Converts a COM parameter named by the ident into a Rust type.
     fn com_to_rust(
         &self, ident : Ident
-    ) -> ComToRust
+    ) -> Tokens
     {
-        ComToRust {
-            stack: None,
-            conversion: quote!( #ident.into() )
-        }
+        quote!( #ident.into() )
     }
 
     /// Converts a Rust parameter named by the ident into a COM type.
@@ -94,80 +105,85 @@ impl TypeHandler for ComItfParam {
 }
 
 /// String parameter handler. Converts between Rust String and COM BSTR types.
-struct StringParam( Type );
+struct StringParam { ty: Type, context: TypeContext }
 impl TypeHandler for StringParam
 {
-    fn rust_ty( &self ) -> Type { self.0.clone() }
+    fn rust_ty( &self ) -> Type { self.ty.clone() }
 
     fn com_ty( &self ) -> Type
     {
-        parse_quote!( ::intercom::raw::BSTR )
+        match self.context.dir {
+            Direction::In => parse_quote!( ::intercom::raw::InBSTR ),
+            Direction::Out | Direction::Retval => parse_quote!( ::intercom::raw::OutBSTR ),
+        }
     }
 
-    fn com_to_rust( &self, ident : Ident ) -> ComToRust
+    fn com_to_rust( &self, ident : Ident ) -> Tokens
     {
-        ComToRust {
-            stack: None,
-            conversion: quote!( BStr::from_ptr( #ident ).to_string().unwrap() )
+        match self.context.dir {
+
+            Direction::In => {
+
+                let rust_ty = self.rust_ty();
+
+                quote!(
+                    < #rust_ty as ::intercom::FromBstr >::from_temporary(
+                        &< #rust_ty as ::intercom::FromBstr >::to_temporary(
+                            BStr::from_ptr( #ident ) ) )
+                )
+            },
+            Direction::Out | Direction::Retval =>
+                quote!( BString::from( #ident ).into_ptr() ),
         }
     }
 
     fn rust_to_com( &self, ident : Ident ) -> Tokens
     {
-        quote!( BString::from( #ident ).as_ptr() )
-    }
-}
+        match self.context.dir {
 
-/// String parameter handler. Converts between Rust &str and COM BSTR types.
-struct StringRefParam( Type );
-impl TypeHandler for StringRefParam
-{
-    fn rust_ty( &self ) -> Type { self.0.clone() }
+            Direction::In => {
 
-    fn com_ty( &self ) -> Type
-    {
-        parse_quote!( ::intercom::raw::BSTR )
-    }
+                let rust_ty = self.rust_ty();
 
-    fn com_to_rust( &self, ident : Ident ) -> ComToRust
-    {
-        // Generate unique name for each stack variable to avoid conflicts with function
-        // thay may have multiple parameters.
-        let as_string_ident = Ident::from( format!( "{}_as_string", ident ) );
-        ComToRust {
-            stack: Some( quote!( let #as_string_ident: String = #ident.to_string().unwrap(); ) ),
-            conversion: quote!( #as_string_ident.as_ref() )
+                quote!(
+                    < #rust_ty as ::intercom::IntoBstr >::from_temporary(
+                        &< #rust_ty as ::intercom::IntoBstr >::to_temporary( #ident )
+                    ).as_ptr()
+                )
+            },
+            Direction::Out | Direction::Retval =>
+                quote!( BString::from( #ident ).into_ptr() ),
         }
-    }
-
-    fn rust_to_com( &self, ident : Ident ) -> Tokens
-    {
-        quote!( BString::from( #ident ).as_ptr() )
     }
 }
 
 /// Resolves the `TypeHandler` to use.
 pub fn get_ty_handler(
     arg_ty : &Type,
+    context : TypeContext,
 ) -> Rc<TypeHandler>
 {
     let type_info = ::type_parser::parse( arg_ty )
             .unwrap_or_else( || panic!( "Type {:?} could not be parsed.", arg_ty ) );
 
-    map_by_name( type_info.get_name().as_ref(), type_info.original.clone() )
+    map_by_name(
+            type_info.get_name().as_ref(), type_info.original.clone(),
+            context )
 }
 
 /// Selects type handler based on the name of the type.
 fn map_by_name(
     name: &str,
-    original_type: Type
+    original_type: Type,
+    context: TypeContext,
 ) -> Rc<TypeHandler> {
 
     match name {
 
         "ComItf" => Rc::new( ComItfParam( original_type ) ),
-        "String" => Rc::new( StringParam( original_type ) ),
-        "str" => Rc::new( StringRefParam( original_type ) ),
+        "BString" | "BStr" | "String" | "str" =>
+            Rc::new( StringParam { ty: original_type, context } ),
+        // "str" => Rc::new( StringRefParam( original_type ) ),
 
         // Unknown. Use IdentityParam.
         _ => Rc::new( IdentityParam( original_type ) )

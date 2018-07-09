@@ -126,8 +126,8 @@ pub fn expand_com_impl(
         let in_out_args = method_info.raw_com_args()
                 .into_iter()
                 .map( |com_arg| {
-                    let name = &com_arg.arg.name;
-                    let com_ty = &com_arg.arg.handler.com_ty();
+                    let name = &com_arg.name;
+                    let com_ty = &com_arg.handler.com_ty();
                     let dir = match com_arg.dir {
                         Direction::In => quote!(),
                         Direction::Out | Direction::Retval => quote!( *mut )
@@ -137,26 +137,18 @@ pub fn expand_com_impl(
         let self_arg = quote!( self_vtable : ::intercom::RawComPtr );
         let args = iter::once( self_arg ).chain( in_out_args );
 
-        // Format stack variables if the conversion requires
-        // temporary variable.
-        let stack_variables = method_info.args.iter()
-                .filter_map( |ca| match ca.handler.com_to_rust( ca.name ).stack {
-                    Some( stack ) => Some( quote!( #stack ) ),
-                    None => None
-                } );
-
         // Format the in and out parameters for the Rust call.
         let in_params = method_info.args
                 .iter()
                 .map( |ca| {
-                    let conversion = ca.handler.com_to_rust( ca.name ).conversion;
+                    let conversion = ca.handler.com_to_rust( ca.name );
                     quote!( #conversion )
                 } );
 
         let return_ident = Ident::from( "__result" );
         let return_statement = method_info
                 .returnhandler
-                .rust_to_com_return( &return_ident );
+                .rust_to_com_return( return_ident );
 
         // Define the delegating method implementation.
         //
@@ -182,12 +174,6 @@ pub fn expand_com_impl(
                 // to offset the current 'self_vtable' vtable pointer.
                 let self_combox = ( self_vtable as usize - #vtable_offset() )
                         as *mut ::intercom::ComBox< #struct_ident >;
-
-                // Store stack variables required by some conversions.
-                // For example, to convert a COM type to "str" we may need to
-                // convert the COM type into "String" first and then pass
-                // this "String" to the Rust method as "str".
-                #( #stack_variables )*
 
                 #self_struct_stmt;
                 let #return_ident = self_struct.#method_ident( #( #in_params ),* );

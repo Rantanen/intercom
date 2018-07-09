@@ -1,7 +1,7 @@
 
 use syn::*;
 use quote::Tokens;
-use methodinfo::RustArg;
+use methodinfo::{ComArg, Direction};
 use tyhandlers;
 use utils;
 
@@ -14,19 +14,21 @@ pub trait ReturnHandler : ::std::fmt::Debug {
     /// The return type for COM implementation.
     fn com_ty( &self ) -> Type
     {
-        tyhandlers::get_ty_handler( &self.rust_ty() ).com_ty()
+        tyhandlers::get_ty_handler(
+                &self.rust_ty(),
+                tyhandlers::TypeContext::retval() ).com_ty()
     }
 
     /// Gets the return statement for converting the COM result into Rust
     /// return.
-    fn com_to_rust_return( &self, _result : &Ident ) -> Tokens { quote!() }
+    fn com_to_rust_return( &self, _result : Ident ) -> Tokens { quote!() }
 
     /// Gets the return statement for converting the Rust result into COM
     /// outputs.
-    fn rust_to_com_return( &self, _result : &Ident ) -> Tokens { quote!() }
+    fn rust_to_com_return( &self, _result : Ident ) -> Tokens { quote!() }
 
     /// Gets the COM out arguments that result from the Rust return type.
-    fn com_out_args( &self ) -> Vec<RustArg> { vec![] }
+    fn com_out_args( &self ) -> Vec<ComArg> { vec![] }
 }
 
 /// Void return type.
@@ -43,15 +45,19 @@ impl ReturnHandler for ReturnOnlyHandler {
 
     fn rust_ty( &self ) -> Type { self.0.clone() }
 
-    fn com_to_rust_return( &self, result : &Ident ) -> Tokens {
-        quote!( #result.into() )
+    fn com_to_rust_return( &self, result : Ident ) -> Tokens {
+        tyhandlers::get_ty_handler(
+                &self.rust_ty(),
+                tyhandlers::TypeContext::retval() ).com_to_rust( result )
     }
 
-    fn rust_to_com_return( &self, result : &Ident ) -> Tokens {
-        quote!( #result.into() )
+    fn rust_to_com_return( &self, result : Ident ) -> Tokens {
+        tyhandlers::get_ty_handler(
+                &self.rust_ty(),
+                tyhandlers::TypeContext::retval() ).rust_to_com( result )
     }
 
-    fn com_out_args( &self ) -> Vec<RustArg> { vec![] }
+    fn com_out_args( &self ) -> Vec<ComArg> { vec![] }
 }
 
 /// Result type that supports error info for the `Err` value. Converted to
@@ -63,7 +69,7 @@ impl ReturnHandler for ErrorResultHandler {
     fn rust_ty( &self ) -> Type { self.return_ty.clone() }
     fn com_ty( &self ) -> Type { parse_quote!( ::intercom::HRESULT ) }
 
-    fn com_to_rust_return( &self, result : &Ident ) -> Tokens {
+    fn com_to_rust_return( &self, result : Ident ) -> Tokens {
 
         // Quote the OK values.
         // If there is only one, it should be a raw value;
@@ -86,7 +92,7 @@ impl ReturnHandler for ErrorResultHandler {
         )
     }
 
-    fn rust_to_com_return( &self, result : &Ident ) -> Tokens {
+    fn rust_to_com_return( &self, result : Ident ) -> Tokens {
 
         // Get the OK idents. We'll use v0, v1, v2, ... depending on the amount
         // of patterns we need for possible tuples.
@@ -125,12 +131,12 @@ impl ReturnHandler for ErrorResultHandler {
         )
     }
 
-    fn com_out_args( &self ) -> Vec<RustArg> {
+    fn com_out_args( &self ) -> Vec<ComArg> {
         get_out_args_for_result( &self.retval_ty )
     }
 }
 
-fn get_out_args_for_result( retval_ty : &Type ) -> Vec<RustArg> {
+fn get_out_args_for_result( retval_ty : &Type ) -> Vec<ComArg> {
 
     match *retval_ty {
 
@@ -138,17 +144,21 @@ fn get_out_args_for_result( retval_ty : &Type ) -> Vec<RustArg> {
         Type::Tuple( ref t ) =>
             t.elems.iter()
                 .enumerate()
-                .map( |( idx, ty )| RustArg::new(
-                                    Ident::from( format!( "__out{}", idx + 1) ),
-                                    ty.clone() ) )
+                .map( |( idx, ty )| ComArg::new(
+                            Ident::from( format!( "__out{}", idx + 1) ),
+                            ty.clone(),
+                            Direction::Out ) )
                 .collect::<Vec<_>>(),
-        _ => vec![ RustArg::new( Ident::from( "__out" ), retval_ty.clone() ) ],
+        _ => vec![ ComArg::new(
+                Ident::from( "__out" ),
+                retval_ty.clone(),
+                Direction::Retval ) ],
     }
 }
 
 fn write_out_values(
     idents : &[Ident],
-    out_args : Vec<RustArg>,
+    out_args : Vec<ComArg>,
 ) -> ( Vec<Tokens>, Vec<Tokens> )
 {
     let mut ok_tokens = vec![];
@@ -167,17 +177,13 @@ fn write_out_values(
 
 /// Gets the result as Rust types for a success return value.
 fn get_rust_ok_values(
-    out_args : Vec<RustArg>
+    out_args : Vec<ComArg>
 ) -> Vec<Tokens>
 {
     let mut tokens = vec![];
     for out_arg in out_args {
 
-        let arg_conversion = out_arg.handler.com_to_rust( out_arg.name );
-        if arg_conversion.stack.is_some() {
-            panic!( "Return values must be owned" );
-        }
-        let arg_value = arg_conversion.conversion;
+        let arg_value = out_arg.handler.com_to_rust( out_arg.name );
         tokens.push( quote!( #arg_value ) );
     }
     tokens

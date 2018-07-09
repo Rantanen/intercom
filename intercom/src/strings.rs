@@ -51,24 +51,20 @@ impl BStr {
         &*( slice as *const [u8] as *const BStr )
     }
 
-    /// Returns the pointer.
-    pub fn as_u8_ptr( &self ) -> *const u8 {
+    /// Returns the pointer as a 16-bit wide character pointer.
+    pub fn as_ptr( &self ) -> *const u16 {
+
+        // The BStr invariant 1 states the ptr must be valid BSTR pointer,
+        // which is u32-aligned.
+        #![allow(cast_ptr_alignment)]
 
         // 0x1 is a marker pointer
         let ptr = self.0.as_ptr();
         if self.0.is_empty() && ptr as usize == 0x1 {
             std::ptr::null()
         } else {
-            ptr
+            ptr as *const u16
         }
-    }
-
-    /// Returns the pointer as a 16-bit wide character pointer.
-    pub fn as_ptr( &self ) -> *const u16 {
-        // The BStr invariant 1 states the ptr must be valid BSTR pointer,
-        // which is u32-aligned.
-        #![allow(cast_ptr_alignment)]
-        self.as_u8_ptr() as *const u16
     }
 
     /// Returns the string length in bytes.
@@ -149,12 +145,12 @@ impl BString {
     }
 
     /// Returns the pointer as a 16-bit wide character pointer.
-    pub fn as_mut_u16_ptr( &mut self ) -> *mut u16 {
+    pub fn as_mut_ptr( &mut self ) -> *mut u16 {
         self.0 as *mut u16
     }
 
     /// Converts the `BString` into a raw pointer.
-    pub fn into_u16_ptr( self ) -> *mut u16 {
+    pub fn into_ptr( self ) -> *mut u16 {
         let ptr = self.0;
         std::mem::forget( self );
         ptr as *mut u16
@@ -196,6 +192,12 @@ impl Deref for BString {
 }
 
 // AsRef/Borrow/ToOwned implementations.
+
+impl AsRef<BStr> for BStr {
+    fn as_ref( &self ) -> &BStr {
+        self
+    }
+}
 
 impl AsRef<BStr> for BString {
     fn as_ref( &self ) -> &BStr {
@@ -240,10 +242,72 @@ impl Default for BString {
 impl Drop for BString {
     fn drop( &mut self ) {
         unsafe {
-            os::SysFreeString( self.as_mut_u16_ptr() );
+            os::SysFreeString( self.as_mut_ptr() );
             self.0 = std::ptr::null_mut();
         }
     }
+}
+
+pub trait FromBstr<'a> {
+    type Temporary;
+    fn to_temporary( bstr : &'a BStr ) -> Self::Temporary;
+    fn from_temporary( temp : &'a Self::Temporary ) -> Self;
+}
+
+impl<'a> FromBstr<'a> for &'a BStr {
+    type Temporary = &'a BStr;
+    fn to_temporary( bstr : &'a BStr ) -> Self::Temporary { bstr }
+    fn from_temporary( temp : &'a Self::Temporary ) -> Self { temp.as_ref() }
+}
+
+impl<'a> FromBstr<'a> for BString {
+    type Temporary = &'a BStr;
+    fn to_temporary( bstr : &'a BStr ) -> Self::Temporary { bstr }
+    fn from_temporary( temp : &'a Self::Temporary ) -> Self { (*temp).to_owned() }
+}
+
+impl<'a> FromBstr<'a> for &'a str {
+    type Temporary = String;
+
+    fn to_temporary( bstr : &'a BStr ) -> Self::Temporary { bstr.to_string().unwrap() }
+    fn from_temporary( temp : &'a Self::Temporary ) -> Self { temp.as_ref() }
+}
+
+impl<'a> FromBstr<'a> for String {
+    type Temporary = &'a BStr;
+    fn to_temporary( bstr : &'a BStr ) -> Self::Temporary { bstr }
+    fn from_temporary( temp : &'a Self::Temporary ) -> Self { temp.to_string().unwrap() }
+}
+
+pub trait IntoBstr<'a> {
+    type Temporary;
+    fn to_temporary( self ) -> Self::Temporary;
+    fn from_temporary( temp : &'a Self::Temporary ) -> &'a BStr;
+}
+
+impl<'a> IntoBstr<'a> for &'a BStr {
+    type Temporary = Self;
+    fn to_temporary( self ) -> Self::Temporary { self }
+    fn from_temporary( temp : &'a Self::Temporary ) -> &'a BStr { temp.as_ref() }
+}
+
+impl<'a> IntoBstr<'a> for BString {
+    type Temporary = Self;
+    fn to_temporary( self ) -> Self::Temporary { self }
+    fn from_temporary( temp : &'a Self::Temporary ) -> &'a BStr { temp.as_ref() }
+}
+
+impl<'a> IntoBstr<'a> for &'a str {
+    type Temporary = BString;
+
+    fn to_temporary( self ) -> Self::Temporary { BString::from_str( self ).unwrap() }
+    fn from_temporary( temp : &'a Self::Temporary ) -> &'a BStr { temp.as_ref() }
+}
+
+impl<'a> IntoBstr<'a> for String {
+    type Temporary = BString;
+    fn to_temporary( self ) -> Self::Temporary { BString::from_str( &self ).unwrap() }
+    fn from_temporary( temp : &'a Self::Temporary ) -> &'a BStr { temp.as_ref() }
 }
 
 //////////////////////////////////////////

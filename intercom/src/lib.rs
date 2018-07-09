@@ -110,7 +110,8 @@ pub type CLSID = GUID;
 pub type REFCLSID = *const IID;
 
 pub mod raw {
-    pub type BSTR = *const u16;
+    pub type InBSTR = *const u16;
+    pub type OutBSTR = *mut u16;
 }
 
 /// COM method status code.
