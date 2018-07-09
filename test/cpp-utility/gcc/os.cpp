@@ -20,8 +20,8 @@ void UninitializeRuntime()
 
 intercom::HRESULT CreateInstance( intercom::REFCLSID clsid, intercom::REFIID iid, void** pout )
 {
-	Activator activate( test_lib::Descriptor::NAME, clsid );
-	activate.create( iid, pout );
+    Activator activate( test_lib::Descriptor::NAME, clsid );
+    activate.create( iid, pout );
 
-	return intercom::SC_OK;
+    return intercom::SC_OK;
 }

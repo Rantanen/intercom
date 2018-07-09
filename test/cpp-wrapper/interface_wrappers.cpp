@@ -12,7 +12,7 @@
 TEST_CASE( "Using interface wrappers works" )
 {
     // Initialize COM.
-	InitializeRuntime();
+    InitializeRuntime();
 
     intercom::ClassFactory< test_lib::raw::RefCountOperationsDescriptor > refCountFactory;
     intercom::RawInterface<IRefCountOperations> refCountOps;
@@ -108,5 +108,5 @@ TEST_CASE( "Using interface wrappers works" )
         }
     }
 
-	UninitializeRuntime();
+    UninitializeRuntime();
 }

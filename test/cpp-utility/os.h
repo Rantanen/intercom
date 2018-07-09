@@ -29,5 +29,5 @@ intercom::HRESULT CreateInstance(
 	TInterface** pout
 )
 {
-	return CreateInstance( clsid, iid, reinterpret_cast< void** >( pout ) );
+    return CreateInstance( clsid, iid, reinterpret_cast< void** >( pout ) );
 }

@@ -9,9 +9,9 @@ using NUnit.Framework;
 
 namespace cs
 {
-	[TestFixture, Apartment( ApartmentState.STA )]
-	class PrimitiveTests
-	{
+    [TestFixture, Apartment( ApartmentState.STA )]
+    class PrimitiveTests
+    {
 
-	}
+    }
 }
