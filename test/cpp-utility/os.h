@@ -1,3 +1,6 @@
+#pragma once
+
+#include <intercom.h>
 
 // Interface definitions.
 #ifdef _MSC_VER
@@ -5,7 +8,6 @@
 #else
 
 // Include declarations on non-Windows platforms.
-#include <intercom.h>
 #include "../../intercom-cpp/src/msdef.h"
 
 #endif
@@ -22,8 +24,10 @@ intercom::HRESULT CreateInstance( const intercom::CLSID& clsid, const intercom::
 // Create Intercom object instance.
 template <class TInterface>
 intercom::HRESULT CreateInstance(
-	intercom::REFCLSID clsid,
-	intercom::REFIID iid, TInterface** pout )
+	const intercom::CLSID& clsid,
+	const intercom::IID& iid,
+	TInterface** pout
+)
 {
 	return CreateInstance( clsid, iid, reinterpret_cast< void** >( pout ) );
 }

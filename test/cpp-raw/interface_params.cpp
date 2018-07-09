@@ -9,15 +9,16 @@
 
 class CppImplementation : public ISharedInterface
 {
-	unsigned int INTERCOM_CC GetValue() { return 5; }
+	virtual unsigned int INTERCOM_CC GetValue() { return 5; }
 
 	// These two are not used.
-	void INTERCOM_CC SetValue( unsigned int v ) { }
-	intercom::HRESULT INTERCOM_CC DivideBy( ISharedInterface* divisor, OUT unsigned int* result ) { return intercom::EC_NOTIMPL; }
+	virtual void INTERCOM_CC SetValue( unsigned int v ) { }
+	virtual intercom::HRESULT INTERCOM_CC DivideBy( ISharedInterface* divisor, OUT unsigned int* result )
+	{ return intercom::EC_NOTIMPL; }
 
-	intercom::HRESULT INTERCOM_CC QueryInterface( const intercom::IID& riid, void** out ) { return intercom::EC_NOTIMPL; }
-	uint32_t INTERCOM_CC AddRef() { return 1; }
-	uint32_t INTERCOM_CC Release() { return 1; }
+	virtual intercom::HRESULT INTERCOM_CC QueryInterface( const intercom::IID& riid, void** out ) { return intercom::EC_NOTIMPL; }
+	virtual intercom::REF_COUNT_32 INTERCOM_CC AddRef() { return 1; }
+	virtual intercom::REF_COUNT_32 INTERCOM_CC Release() { return 1; }
 };
 
 TEST_CASE( "Methods accept COM interfaces as parameters." )

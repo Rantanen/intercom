@@ -75,7 +75,8 @@
                     "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/um",
                     "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/ucrt",
                     "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/shared",
-                    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/winrt"
+                    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/winrt",
+                    "${workspaceFolder}/intercom-cpp"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
