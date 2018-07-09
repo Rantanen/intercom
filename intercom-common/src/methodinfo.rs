@@ -313,6 +313,6 @@ mod tests {
             Item::Fn( ref f ) => ( f.ident, f.decl.as_ref(), f.unsafety.is_some() ),
             _ => panic!( "Code isn't function" ),
         };
-        ComMethodInfo::new_from_parts( &ident, decl, unsafety ).unwrap()
+        ComMethodInfo::new_from_parts( ident, decl, unsafety ).unwrap()
     }
 }
