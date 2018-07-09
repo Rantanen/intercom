@@ -290,12 +290,8 @@ pub fn get_tool_paths() -> Result<ToolPaths, String> {
     Ok( ToolPaths {
         mt: kitroot.join( format!( r"bin\{}\x64\mt.exe", kitversion ) ),
         midl: kitroot.join( format!( r"bin\{}\x64\midl.exe", kitversion ) ),
-        rc: rc,
 
-        vs_bin: vs_bin,
-
-        libs: libs,
-        incs: incs,
+        rc, vs_bin, libs, incs
     } )
 }
 

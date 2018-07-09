@@ -98,11 +98,11 @@ impl ComMethodInfo {
         m : &MethodSig
     ) -> Result<ComMethodInfo, ComMethodInfoError>
     {
-        Self::new_from_parts( &m.ident, &m.decl, m.unsafety.is_some() )
+        Self::new_from_parts( m.ident, &m.decl, m.unsafety.is_some() )
     }
 
     pub fn new_from_parts(
-        n: &Ident,
+        n: Ident,
         decl: &FnDecl,
         unsafety: bool,
     ) -> Result<ComMethodInfo, ComMethodInfoError>
@@ -155,7 +155,7 @@ impl ComMethodInfo {
         let returnhandler = get_return_handler( &retval_type, &return_type )
                 .or( Err( ComMethodInfoError::BadReturnType ) )?;
         Ok( ComMethodInfo {
-            name: *n,
+            name: n,
             is_const,
             rust_self_arg,
             rust_return_ty,
