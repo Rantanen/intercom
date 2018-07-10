@@ -128,7 +128,7 @@ impl TypeHandler for StringParam
                 quote!(
                     < #rust_ty as ::intercom::FromWithTemporary<&::intercom::BStr> >::from_temporary(
                         &mut < #rust_ty as ::intercom::FromWithTemporary<&::intercom::BStr> >::to_temporary(
-                            ::intercom::BStr::from_ptr( #ident ) ) )
+                            ::intercom::BStr::from_ptr( #ident ) )? )?
                 )
             },
             Direction::Out | Direction::Retval => {
@@ -146,8 +146,8 @@ impl TypeHandler for StringParam
                 let rust_ty = self.rust_ty();
                 quote!(
                     < &::intercom::BStr as ::intercom::FromWithTemporary<#rust_ty> >::from_temporary(
-                        &mut < &::intercom::BStr as ::intercom::FromWithTemporary<#rust_ty> >::to_temporary( #ident )
-                    ).as_ptr()
+                        &mut < &::intercom::BStr as ::intercom::FromWithTemporary<#rust_ty> >::to_temporary( #ident ) ?
+                    )?.as_ptr()
                 )
             },
             Direction::Out | Direction::Retval => {

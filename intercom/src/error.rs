@@ -272,3 +272,15 @@ pub fn get_last_error< E >( last_hr : HRESULT ) -> E
 
     E::from( com_error )
 }
+
+pub trait ReturnError {
+    fn handle( HRESULT ) -> Self;
+}
+
+impl<T> ReturnError for T {
+    default fn handle( _ : HRESULT ) -> Self { panic!() }
+}
+
+impl ReturnError for HRESULT {
+    fn handle( hr : HRESULT ) -> Self { hr }
+}

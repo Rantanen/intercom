@@ -252,49 +252,77 @@ impl Drop for BString {
     }
 }
 
-pub trait FromWithTemporary<'a, TSource> {
+use intercom::ComError;
+pub trait FromWithTemporary<'a, TSource>
+    where Self: Sized
+{
     type Temporary;
-    fn to_temporary( source : TSource ) -> Self::Temporary;
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self;
+    fn to_temporary( source : TSource ) -> Result<Self::Temporary, ComError>;
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError>;
 }
 
 impl<'a, T: Copy> FromWithTemporary<'a, T> for T {
 
     type Temporary = T;
-    fn to_temporary( source : T ) -> Self::Temporary { source }
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { ( *temp ) }
+
+    fn to_temporary( source : T ) -> Result<Self::Temporary, ComError> { Ok(source) }
+
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
+        Ok( *temp )
+    }
 }
 
 impl<'a> FromWithTemporary<'a, &'a BStr > 
         for BString {
 
     type Temporary = &'a BStr;
-    fn to_temporary( bstr : &'a BStr ) -> Self::Temporary { bstr }
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { (*temp).to_owned() }
+
+    fn to_temporary( bstr : &'a BStr ) -> Result<Self::Temporary, ComError> { Ok(bstr) }
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
+        Ok( (*temp).to_owned() )
+    }
 }
 
 impl<'a> FromWithTemporary<'a, &'a BStr>
         for &'a str {
 
     type Temporary = String;
-    fn to_temporary( bstr : &'a BStr ) -> Self::Temporary { bstr.to_string().unwrap() }
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { &**temp }
+
+    fn to_temporary( bstr : &'a BStr ) -> Result<Self::Temporary, ComError> {
+        Ok( bstr.to_string().unwrap() )
+    }
+
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
+        Ok( &**temp ) 
+    }
 }
 
 impl<'a> FromWithTemporary<'a, &'a BStr>
         for String {
 
     type Temporary = &'a BStr;
-    fn to_temporary( bstr : &'a BStr ) -> Self::Temporary { bstr }
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { temp.to_string().unwrap() }
+
+    fn to_temporary( bstr : &'a BStr ) -> Result<Self::Temporary, ComError> {
+        Ok( bstr )
+    }
+
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
+        Ok( temp.to_string().unwrap() )
+    }
 }
 
 impl<'a> FromWithTemporary<'a, BString > 
         for &'a BStr {
 
     type Temporary = BString;
-    fn to_temporary( source : BString ) -> Self::Temporary { source }
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { &**temp }
+
+    fn to_temporary( source : BString ) -> Result<Self::Temporary, ComError> {
+        Ok( source )
+    }
+
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
+        Ok( &**temp )
+    }
 }
 
 impl<'a> FromWithTemporary<'a, &'a str>
@@ -302,20 +330,27 @@ impl<'a> FromWithTemporary<'a, &'a str>
 
     type Temporary = BString;
 
-    fn to_temporary( source : &'a str ) -> Self::Temporary {
-        BString::from_str( source ).unwrap()
+    fn to_temporary( source : &'a str ) -> Result<Self::Temporary, ComError> {
+        Ok( BString::from_str( source ).unwrap() )
     }
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { &**temp }
+
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
+        Ok( &**temp )
+    }
 }
 
 impl<'a> FromWithTemporary<'a, String>
         for &'a BStr {
 
     type Temporary = BString;
-    fn to_temporary( source : String ) -> Self::Temporary {
-        BString::from_str( &source ).unwrap()
+
+    fn to_temporary( source : String ) -> Result<Self::Temporary, ComError> {
+        Ok( BString::from_str( &source ).unwrap() )
     }
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Self { &**temp }
+
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
+        Ok( &**temp )
+    }
 }
 
 //////////////////////////////////////////
