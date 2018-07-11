@@ -1,4 +1,4 @@
-﻿#![crate_type="dylib"]
+#![crate_type="dylib"]
 #![feature(type_ascription, proc_macro, try_from)]
 
 extern crate intercom;
@@ -284,5 +284,21 @@ impl StringTests
 
     pub fn put_value( &mut self, value: &str ) {
         self.value = value.to_owned();
+    }
+
+    pub fn roundtrip_str<'a>( &self, value: &str ) -> ComResult<String> {
+        Ok( value.to_owned() )
+    }
+
+    pub fn roundtrip_string( &self, value: String ) -> ComResult<String> {
+        Ok( value )
+    }
+
+    pub fn roundtrip_bstr( &self, value: &BStr ) -> ComResult<BString> {
+        Ok( value.to_owned() )
+    }
+
+    pub fn roundtrip_bstring( &self, value: BString ) -> ComResult<BString> {
+        Ok( value )
     }
 }
