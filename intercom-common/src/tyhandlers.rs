@@ -69,7 +69,6 @@ pub trait TypeHandler {
                 match name {
                     "c_void"
                         | "RawComPtr"
-                        | "String"
                         => quote!( ::std::ptr::null_mut() ),
                     _ => quote!( Default::default() )
                 }
@@ -154,6 +153,12 @@ impl TypeHandler for StringParam
                 quote!( ::intercom::BString::from( #ident ).into_ptr() )
             },
         }
+    }
+
+    /// Gets the default value for the type.
+    fn default_value( &self ) -> Tokens
+    {
+        quote!( ::std::ptr::null_mut() )
     }
 }
 
