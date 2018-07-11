@@ -182,7 +182,7 @@ pub fn expand_com_impl(
                     Ok( { #return_statement } )
                 } )();
 
-                use ::intercom::error::ReturnError;
+                use ::intercom::ReturnError;
                 match result {
                     Ok( v ) => v,
                     Err( err ) => < #ret_ty as ReturnError >::handle(

@@ -78,7 +78,7 @@ mod comrc; pub use comrc::*;
 mod comitf; pub use comitf::*;
 mod strings; pub use strings::*;
 mod guid; pub use guid::GUID;
-mod error; pub use error::{return_hresult, get_last_error, ComError, ErrorInfo};
+mod error; pub use error::{return_hresult, get_last_error, ComError, ErrorInfo, ReturnError};
 mod interfaces;
 pub mod runtime;
 pub mod alloc;
