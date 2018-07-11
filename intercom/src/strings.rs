@@ -9,6 +9,11 @@ use std::{
     str::{ FromStr, Utf8Error }
 };
 
+use intercom::{
+    self,
+    ComError,
+};
+
 #[derive(Debug)]
 pub struct FormatError;
 
@@ -252,7 +257,6 @@ impl Drop for BString {
     }
 }
 
-use intercom::ComError;
 pub trait FromWithTemporary<'a, TSource>
     where Self: Sized
 {
@@ -289,7 +293,7 @@ impl<'a> FromWithTemporary<'a, &'a BStr>
     type Temporary = String;
 
     fn to_temporary( bstr : &'a BStr ) -> Result<Self::Temporary, ComError> {
-        Ok( bstr.to_string().unwrap() )
+        bstr.to_string().map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
@@ -307,7 +311,7 @@ impl<'a> FromWithTemporary<'a, &'a BStr>
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( temp.to_string().unwrap() )
+        temp.to_string().map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
     }
 }
 
@@ -331,7 +335,7 @@ impl<'a> FromWithTemporary<'a, &'a str>
     type Temporary = BString;
 
     fn to_temporary( source : &'a str ) -> Result<Self::Temporary, ComError> {
-        Ok( BString::from_str( source ).unwrap() )
+        BString::from_str( source ).map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
@@ -345,7 +349,7 @@ impl<'a> FromWithTemporary<'a, String>
     type Temporary = BString;
 
     fn to_temporary( source : String ) -> Result<Self::Temporary, ComError> {
-        Ok( BString::from_str( &source ).unwrap() )
+        BString::from_str( &source ).map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
