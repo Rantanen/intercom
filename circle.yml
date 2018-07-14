@@ -7,9 +7,13 @@ jobs:
             - image: rustlang/rust:nightly
               environment:
                   RUSTFLAGS: -C link-dead-code
-          
+
         steps:
             - checkout
+            - run:
+                name: "Install rustfmt-nightly"
+                command: |
+                    cargo install rustfmt-nightly --force
             - run:
                 name: "Cargo test"
                 command: |
