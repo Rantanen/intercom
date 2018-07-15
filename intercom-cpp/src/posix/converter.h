@@ -14,7 +14,6 @@
 #include "datatypes.h"
 #include "../detail/utility.h"
 
-
 namespace intercom
 {
 namespace posix
@@ -27,8 +26,6 @@ namespace posix
 class Converter
 {
 public:
-
-    static constexpr iconv_t INVALID_HANDLE = (iconv_t) -1;
 
     /**
      * @brief Specifies the encodings available for the conversion.
@@ -50,10 +47,10 @@ public:
         Encoding fromcode,
         Encoding tocode
     ) :
-    m_state( INVALID_HANDLE )
+    m_state( reinterpret_cast< iconv_t >( -1 ) )
     {
         m_state = iconv_open( get_encoding( tocode ), get_encoding( fromcode ) );
-        if( m_state == INVALID_HANDLE )
+        if( m_state == reinterpret_cast< iconv_t >( -1 ) )
             throw std::runtime_error( std::strerror( errno ) );
     }
 
