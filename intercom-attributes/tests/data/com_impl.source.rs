@@ -1,4 +1,5 @@
-#![feature(proc_macro)]
+#![feature(use_extern_macros, attr_literals)]
+
 extern crate intercom;
 use intercom::*;
 
