@@ -28,8 +28,6 @@ class Converter
 {
 public:
 
-    static constexpr iconv_t INVALID_HANDLE = (iconv_t) -1;
-
     /**
      * @brief Specifies the encodings available for the conversion.
      *
@@ -50,10 +48,10 @@ public:
         Encoding fromcode,
         Encoding tocode
     ) :
-    m_state( INVALID_HANDLE )
+    m_state( get_invalid_handle() )
     {
         m_state = iconv_open( get_encoding( tocode ), get_encoding( fromcode ) );
-        if( m_state == INVALID_HANDLE )
+        if( m_state == get_invalid_handle() )
             throw std::runtime_error( std::strerror( errno ) );
     }
 
@@ -219,6 +217,18 @@ private:
         }
         assert( false );
         return "";
+    }
+
+    /**
+     * @brief Get the invalid handle value.
+     *
+     * @return iconv_t Returns a handle which represents an invalid handle.
+     */
+    static iconv_t get_invalid_handle()
+    {
+        iconv_t invalid_handle;
+        std::memset( &invalid_handle, 0xFF, sizeof( iconv_t ) );
+        return invalid_handle;
     }
 
 private:

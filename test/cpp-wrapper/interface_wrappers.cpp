@@ -56,7 +56,7 @@ TEST_CASE( "Using interface wrappers works" )
     SECTION( "Reseting a variable to another variable succeeds." )
     {
         intercom::RawInterface<IRefCountOperations> anotherCounter =
-                std::move( refCountFactory.create< test_lib::raw::IRefCountOperations >() );
+                refCountFactory.create< test_lib::raw::IRefCountOperations >();
         REQUIRE( anotherCounter->GetRefCount() == 1 );
         REQUIRE( refCountOps.get() != anotherCounter.get() );
         refCountOps.reset( anotherCounter.get() );
@@ -75,7 +75,7 @@ TEST_CASE( "Using interface wrappers works" )
     SECTION( "Swapping variables succeeds." )
     {
         intercom::RawInterface<IRefCountOperations> anotherCounter =
-                std::move( refCountFactory.create< test_lib::raw::IRefCountOperations >() );
+                refCountFactory.create< test_lib::raw::IRefCountOperations >();
 
         // Determine expected values after the swap operation.
         IRefCountOperations* expectedAnother = refCountOps.get();
@@ -99,7 +99,7 @@ TEST_CASE( "Using interface wrappers works" )
         try
         {
             intercom::RawInterface<ISharedInterface> wrongInterface =
-                    std::move( refCountFactory.create< test_lib::raw::ISharedInterface >() );
+                    refCountFactory.create< test_lib::raw::ISharedInterface >();
             FAIL( "Requesting invalid interface succeeded." );
         }
         catch( intercom::NoSuchInterface& ex )

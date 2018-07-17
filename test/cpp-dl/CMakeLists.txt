@@ -58,7 +58,7 @@ target_link_libraries(${PROJECT_NAME} test_lib multi_lib )
 # target_link_libraries(${PROJECT_NAME} ${TESTLIB_LOCATION} ${MULTILIB_LOCATION} )
 
 # Compile specific linking.
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if( NOT WIN32 )
 
 # Link to dl, support for loading dynamic libraries.
 find_library(DL_LOCATION dl)
