@@ -47,8 +47,9 @@ target_link_libraries(${PROJECT_NAME} runpath)
 # Link to static dependencies
 target_link_libraries(${PROJECT_NAME} cpp-utility)
 
-# Add dynamic dependencies
+# Link to test libraries.
 add_dependencies(${PROJECT_NAME} test_lib)
+target_link_libraries(${PROJECT_NAME} test_lib)
 
 # Compile specific linking.
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")

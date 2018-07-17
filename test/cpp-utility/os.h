@@ -19,9 +19,6 @@ void InitializeRuntime();
 void UninitializeRuntime();
 
 // Create Intercom object instance.
-intercom::HRESULT CreateInstance( const intercom::CLSID& clsid, const intercom::IID& iid, void** pout );
-
-// Create Intercom object instance.
 template <class TInterface>
 intercom::HRESULT CreateInstance(
 	const intercom::CLSID& clsid,
@@ -29,5 +26,5 @@ intercom::HRESULT CreateInstance(
 	TInterface** pout
 )
 {
-    return CreateInstance( clsid, iid, reinterpret_cast< void** >( pout ) );
+    return intercom::create_instance( clsid, iid, reinterpret_cast< void** >( pout ) );
 }

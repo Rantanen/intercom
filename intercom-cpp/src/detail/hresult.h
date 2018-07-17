@@ -31,6 +31,7 @@ namespace hresult
 
     // Source: https://msdn.microsoft.com/en-us/library/windows/desktop/ms690088(v=vs.85).aspx
     static const uint8_t ERROR_FACILITY_NULL = 0;
+    static const uint8_t ERROR_FACILITY_ITF = 4;
     static const uint8_t ERROR_FACILITY_WIN32 = 7;
 
     /**
@@ -59,6 +60,15 @@ namespace hresult
      *
      */
     class NullError : public Error
+    {
+        using Error::Error;
+    };
+
+    /**
+     * @brief Error type for FACILITY_ITF errors.
+     *
+     */
+    class ItfError : public Error
     {
         using Error::Error;
     };
@@ -110,41 +120,24 @@ namespace hresult
      * @param win32_error The actual error code.
      * @return constexpr HRESULT
      */
+     constexpr ::intercom::HRESULT itf_error(
+         uint16_t error_code
+     ) noexcept
+     {
+         return error( intercom::detail::hresult::ERROR_FACILITY_ITF, ItfError( error_code ).error_code() );
+     }
+
+     /**
+     * @brief Creates HRESULT error code from the specified values.
+     *
+     * @param win32_error The actual error code.
+     * @return constexpr HRESULT
+     */
      constexpr ::intercom::HRESULT win32_error(
          uint16_t error_code
      ) noexcept
      {
          return error( intercom::detail::hresult::ERROR_FACILITY_WIN32, Win32Error( error_code ).error_code() );
-     }
-
-    /**
-     * @brief Checks whether the error represents success.
-     *
-     * @param error_code Specifies the error code.
-     * @return true If the error code represents success.
-     * @return false If the error code represents failure.
-     */
-    constexpr bool succeeded(
-         intercom::HRESULT error_code
-     ) noexcept
-     {
-         // The first bit of HRESULT codes is always '1' if the error code indicates a failure.
-         return static_cast< int32_t >( error_code ) >= 0;
-     }
-
-    /**
-     * @brief Checks whether the error represents failure.
-     *
-     * @param error_code
-     * @return true If the error code represents failure.
-     * @return false If the error code represents success.
-     */
-     constexpr bool failed(
-         intercom::HRESULT error_code
-     ) noexcept
-     {
-         // The first bit of HRESULT codes is always '1' if the error code indicates a failure.
-         return static_cast< int32_t >( error_code ) < 0;
      }
 }
 }

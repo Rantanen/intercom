@@ -65,6 +65,15 @@
         "unordered_map": "cpp",
         "__nullptr": "cpp",
         "ios": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "__functional_base": "cpp",
+        "bitset": "cpp",
+        "locale": "cpp",
+        "hash_map": "cpp",
+        "unordered_set": "cpp",
+        "numeric": "cpp",
+        "cinttypes": "cpp",
+        "typeindex": "cpp",
+        "__functional_03": "cpp"
     }
 }

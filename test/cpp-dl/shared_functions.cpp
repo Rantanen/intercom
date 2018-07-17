@@ -23,8 +23,8 @@ TEST_CASE( "IntercomListClassObjects" )
 
 
         // Fetch the class ids of classes that are creatable in test_lib.
-        intercom::Activator::IntercomListClassObjectsFunc listClassObjectsFunc =
-                library.load_function< intercom::Activator::IntercomListClassObjectsFunc >( "IntercomListClassObjects" );
+        intercom::detail::IntercomListClassObjectsFunc listClassObjectsFunc =
+                library.load_function< intercom::detail::IntercomListClassObjectsFunc >( "IntercomListClassObjects" );
         REQUIRE( listClassObjectsFunc != nullptr );
         size_t class_count = 0;
         intercom::CLSID* classes = nullptr;
@@ -50,8 +50,8 @@ TEST_CASE( "IntercomListClassObjects" )
                 intercom::detail::DlWrapper::rtld::lazy );
 
         // Fetch the class ids of classes that are creatable in multi_lib.
-        intercom::Activator::IntercomListClassObjectsFunc listClassObjectsFunc =
-                library.load_function< intercom::Activator::IntercomListClassObjectsFunc >( "IntercomListClassObjects" );
+        intercom::detail::IntercomListClassObjectsFunc listClassObjectsFunc =
+                library.load_function< intercom::detail::IntercomListClassObjectsFunc >( "IntercomListClassObjects" );
         REQUIRE( listClassObjectsFunc != nullptr );
         size_t class_count = 0;
         intercom::CLSID* classes = nullptr;
@@ -77,8 +77,8 @@ TEST_CASE( "IntercomListClassObjects" )
         intercom::detail::DlWrapper library(
                 test_lib::Descriptor::NAME,
                 intercom::detail::DlWrapper::rtld::lazy );
-        intercom::Activator::IntercomListClassObjectsFunc listClassObjectsFunc =
-                library.load_function< intercom::Activator::IntercomListClassObjectsFunc >( "IntercomListClassObjects" );
+        intercom::detail::IntercomListClassObjectsFunc listClassObjectsFunc =
+                library.load_function< intercom::detail::IntercomListClassObjectsFunc >( "IntercomListClassObjects" );
         REQUIRE( listClassObjectsFunc != nullptr );
 
         {

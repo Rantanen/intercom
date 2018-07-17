@@ -6,8 +6,6 @@
 #include <iomanip>
 #include <sstream>
 
-#include "../detail/utility.h"
-
 namespace intercom
 {
 
