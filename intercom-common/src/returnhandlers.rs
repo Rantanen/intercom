@@ -152,7 +152,7 @@ fn write_out_values(
     for ( ident, out_arg ) in idents.iter().zip( out_args ) {
 
         let arg_name = out_arg.name;
-        let ok_value = out_arg.handler.rust_to_com( ident );
+        let ok_value = out_arg.handler.rust_to_com( *ident );
         let err_value = out_arg.handler.default_value();
         ok_tokens.push( quote!( *#arg_name = #ok_value ) );
         err_tokens.push( quote!( *#arg_name = #err_value ) );
@@ -168,7 +168,7 @@ fn get_ok_values(
     let mut tokens = vec![];
     for out_arg in out_args {
 
-        let arg_value = out_arg.handler.rust_to_com( &out_arg.name );
+        let arg_value = out_arg.handler.rust_to_com( out_arg.name );
         tokens.push( quote!( #arg_value ) );
     }
     tokens

@@ -31,7 +31,7 @@ pub trait TypeHandler {
 
     /// Converts a COM parameter named by the ident into a Rust type.
     fn com_to_rust(
-        &self, ident : &Ident
+        &self, ident : Ident
     ) -> ComToRust
     {
         ComToRust {
@@ -42,7 +42,7 @@ pub trait TypeHandler {
 
     /// Converts a Rust parameter named by the ident into a COM type.
     fn rust_to_com(
-        &self, ident : &Ident
+        &self, ident : Ident
     ) -> Tokens
     {
         quote!( #ident.into() )
@@ -103,7 +103,7 @@ impl TypeHandler for StringParam
         parse_quote!( ::intercom::BStr )
     }
 
-    fn com_to_rust( &self, ident : &Ident ) -> ComToRust
+    fn com_to_rust( &self, ident : Ident ) -> ComToRust
     {
         ComToRust {
             stack: None,
@@ -111,7 +111,7 @@ impl TypeHandler for StringParam
         }
     }
 
-    fn rust_to_com( &self, ident : &Ident ) -> Tokens
+    fn rust_to_com( &self, ident : Ident ) -> Tokens
     {
         quote!( #ident.into() )
     }
@@ -128,7 +128,7 @@ impl TypeHandler for StringRefParam
         parse_quote!( ::intercom::BStr )
     }
 
-    fn com_to_rust( &self, ident : &Ident ) -> ComToRust
+    fn com_to_rust( &self, ident : Ident ) -> ComToRust
     {
         // Generate unique name for each stack variable to avoid conflicts with function
         // thay may have multiple parameters.
@@ -139,7 +139,7 @@ impl TypeHandler for StringRefParam
         }
     }
 
-    fn rust_to_com( &self, ident : &Ident ) -> Tokens
+    fn rust_to_com( &self, ident : Ident ) -> Tokens
     {
         quote!( #ident.into() )
     }
@@ -151,7 +151,7 @@ pub fn get_ty_handler(
 ) -> Rc<TypeHandler>
 {
     let type_info = ::type_parser::parse( arg_ty )
-            .expect( &format!( "Type {:?} could not be parsed.", arg_ty  ) );
+            .unwrap_or_else( || panic!( "Type {:?} could not be parsed.", arg_ty ) );
 
     map_by_name( type_info.get_name().as_ref(), type_info.original.clone() )
 }

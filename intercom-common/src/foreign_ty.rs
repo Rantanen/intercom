@@ -7,7 +7,7 @@ use type_parser::*;
 pub trait ForeignTypeHandler
 {
     /// Gets the name for the 'ty'.
-    fn get_name( &self, krate : &ComCrate, ty : &syn::Ident ) -> String;
+    fn get_name( &self, krate : &ComCrate, ty : syn::Ident ) -> String;
 
     /// Gets the COM type for a Rust type.
     fn get_ty<'a, 'b: 'a>(
@@ -24,7 +24,7 @@ impl ForeignTypeHandler for CTypeHandler
     fn get_name(
         &self,
         krate: &ComCrate,
-        ident: &syn::Ident,
+        ident: syn::Ident,
     ) -> String
     {
         self.get_name_for_ty( krate, ident.as_ref() )
