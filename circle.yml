@@ -11,6 +11,11 @@ jobs:
         steps:
             - checkout
             - run:
+                name: "Report versions"
+                command: |
+                    rustc -vV
+                    cargo -vV
+            - run:
                 name: "Install rustfmt-nightly"
                 command: |
                     cargo install rustfmt-nightly --force
