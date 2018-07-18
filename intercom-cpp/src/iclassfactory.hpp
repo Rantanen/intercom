@@ -6,7 +6,7 @@
 #ifdef _MSC_VER
 #include <Unknwn.h>
 #else
-#include "posix/iclassfactory.h"
+#include "posix/iclassfactory.hpp"
 #endif
 
 

@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include "../detail/utility.h"
+#include "../detail/utility.hpp"
 
 namespace intercom
 {

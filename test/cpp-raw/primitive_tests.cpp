@@ -2,10 +2,10 @@
 #define NOMINMAX
 #include <limits>
 
-#include "../cpp-utility/os.h"
+#include "../cpp-utility/os.hpp"
 #include "../cpp-utility/catch.hpp"
 
-#include "testlib.h"
+#include "testlib.hpp"
 
 TEST_CASE( "Primitive types are supported" )
 {

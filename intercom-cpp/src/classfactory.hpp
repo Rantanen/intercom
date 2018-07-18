@@ -4,10 +4,10 @@
 #include <memory>
 #include <mutex>
 
-#include "iclassfactory.h"
+#include "iclassfactory.hpp"
 
-#include "activator.h"
-#include "cominterop.h"
+#include "activator.hpp"
+#include "cominterop.hpp"
 
 namespace intercom
 {

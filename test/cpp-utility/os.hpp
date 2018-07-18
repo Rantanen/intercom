@@ -6,8 +6,8 @@
 
 // Include declarations on non-Windows platforms.
 #define INTERCOM_FLATTEN_DECLARATIONS
-#include <intercom.h>
-#include "../../intercom-cpp/src/msdef.h"
+#include <intercom.hpp>
+#include "../../intercom-cpp/src/msdef.hpp"
 
 #endif
 

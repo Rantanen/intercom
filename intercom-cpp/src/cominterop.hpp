@@ -6,10 +6,10 @@
 #include <Objbase.h>
 #else
 
-#include "comdef.h"
-#include "datatypes.h"
-#include "error_codes.h"
-#include "guiddef.h"
+#include "comdef.hpp"
+#include "datatypes.hpp"
+#include "error_codes.hpp"
+#include "guiddef.hpp"
 
 intercom::HRESULT DllGetClassObject(
   intercom::REFCLSID rclsid,

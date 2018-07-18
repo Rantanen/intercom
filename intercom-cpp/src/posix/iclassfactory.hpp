@@ -1,8 +1,8 @@
 #ifndef INTERCOM_CPP_POSIX_ICLASSFACTORY_H
 #define INTERCOM_CPP_POSIX_ICLASSFACTORY_H
 
-#include "../callingconvention.h"
-#include "iunknown.h"
+#include "../callingconvention.hpp"
+#include "iunknown.hpp"
 
 // MIDL_INTERFACE("00000001-0000-0000-C000-000000000046")
 struct IClassFactory : public IUnknown

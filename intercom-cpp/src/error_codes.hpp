@@ -3,7 +3,7 @@
 #define INTERCOM_CPP_ERRORCODES_H
 
 #include <inttypes.h>
-#include "detail/hresult_errors.h"
+#include "detail/hresult_errors.hpp"
 
 /**
  * @brief Defines the error codes use by "intercom".
@@ -27,7 +27,7 @@ namespace intercom
 static_assert( E_FAIL == intercom::EC_FAIL, "Definition of intercom errors are invalid." );
 
 #else
-#include "posix/error_codes.h"
+#include "posix/error_codes.hpp"
 #endif
 
 

@@ -4,10 +4,10 @@
 
 #include <cstdlib>
 
-#include "converter.h"
-#include "memory.h"
-#include "../detail/bstr_buffer.h"
-#include "../detail/char_buffer.h"
+#include "converter.hpp"
+#include "memory.hpp"
+#include "../detail/bstr_buffer.hpp"
+#include "../detail/char_buffer.hpp"
 
 namespace intercom
 {

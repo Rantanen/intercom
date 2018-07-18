@@ -2,8 +2,8 @@
 #ifndef INTERCOM_CPP_DETAIL_CHARBUFFER_H
 #define INTERCOM_CPP_DETAIL_CHARBUFFER_H
 
-#include "../datatypes.h"
-#include "../memory.h"
+#include "../datatypes.hpp"
+#include "../memory.hpp"
 
 #include <cassert>
 #include <cstring>

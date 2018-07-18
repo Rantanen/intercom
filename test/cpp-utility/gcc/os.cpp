@@ -2,10 +2,10 @@
 #include <unordered_map>
 #include <mutex>
 
-#include "../os.h"
-#include "test_lib.h"
-#include "../../../intercom-cpp/src/cominterop.h"
-#include "../../../intercom-cpp/src/activator.h"
+#include "../os.hpp"
+#include "test_lib.hpp"
+#include "../../../intercom-cpp/src/cominterop.hpp"
+#include "../../../intercom-cpp/src/activator.hpp"
 
 using intercom::Activator;
 

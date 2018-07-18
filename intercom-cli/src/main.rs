@@ -77,7 +77,7 @@ fn run_cmd( matches : &ArgMatches ) -> Result<(), failure::Error>
 
             let output = Path::new( args.value_of( "output" ).unwrap() );
             model.write_header( &mut File::create(
-                    output.join( format!( "{}.h", model.lib_name ) ) )? )?;
+                    output.join( format!( "{}.hpp", model.lib_name ) ) )? )?;
             model.write_source( &mut File::create(
                     output.join( format!( "{}.cpp", model.lib_name ) ) )? )?;
         },

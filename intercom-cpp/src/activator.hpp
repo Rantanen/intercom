@@ -4,14 +4,14 @@
 
 #include <stdexcept>
 
-#include "iclassfactory.h"
-#include "detail/dlwrapper.h"
-#include "cominterop.h"
-#include "datatypes.h"
-#include "error_codes.h"
-#include "no_such_interface.h"
-#include "raw_interface.h"
-#include "runtime_error.h"
+#include "iclassfactory.hpp"
+#include "detail/dlwrapper.hpp"
+#include "cominterop.hpp"
+#include "datatypes.hpp"
+#include "error_codes.hpp"
+#include "no_such_interface.hpp"
+#include "raw_interface.hpp"
+#include "runtime_error.hpp"
 
 namespace intercom
 {
