@@ -33,6 +33,22 @@ namespace intercom
         return factory->CreateInstance( nullptr, riid, itf );
     }
 
+    /**
+     * @brief Attempts to register a library for the "intercom".
+     *
+     * @param library_name The name of the library to register
+     * @tparam TArray The classes the caller expects the library to implement.
+     * @return Returns true if registering the library succeed and all the expected classes are availab.e.
+     */
+    template< typename TArray >
+    inline bool try_register_library(
+        const char* library_name,
+        TArray& expected_classes
+    )
+    {
+        return ::intercom::detail::try_register_library( library_name,
+            expected_classes.begin(), expected_classes.end() );
+    }
 }
 
 

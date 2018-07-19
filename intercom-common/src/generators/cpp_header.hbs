@@ -14,6 +14,8 @@ namespace {{lib_name}}
         static const char WINDOWS_NAME[];
         static const char POSIX_NAME[];
         static const std::array< intercom::CLSID, {{coclass_count}} > CLASSES;
+
+        static bool is_available();
     };
 
 namespace raw

@@ -14,6 +14,7 @@
 #include "../declarations.hpp"
 #include "../../runtime_error.h"
 #include "../dlwrapper.h"
+#include "../utility.h"
 
 namespace intercom
 {
@@ -56,7 +57,7 @@ public:
         const intercom::CLSID& class_id
     ) const
     {
-         std::unique_lock< std::mutex > lock( m_guard );
+        std::unique_lock< std::mutex > lock( m_guard );
 
         // Refresh the list of libraries the class is unknonw.
         ASSOCIATED_CLASSES::const_iterator library = m_associated_classes.find( class_id );
@@ -70,7 +71,13 @@ public:
             // Assume something has gone wrong if the caller wants to find a library
             // but none are available / linked to the executable.
             if( m_associated_classes.empty() )
+            {
                 std::cerr << "WARNING: None of the libraries linked to the application expose COM classes." << std::endl;
+
+                std::cerr << "WARNING: Only the following libraries were identified:" << std::endl;
+                for( const std::string& library_name : m_libraries )
+                    std::cerr << "    " << library_name << std::endl;
+            }
 
             library = m_associated_classes.find( class_id );
         }
@@ -79,6 +86,61 @@ public:
             return nullptr;
         else
             return library->second;
+    }
+
+    /**
+     * @brief Attempts to register a library for the "intercom".
+     *
+     * @param library_name The name of the library to register
+     * @param expected_classes_begin A pointer to the beginning of an array of classes the library is expected to implement.
+     * @param expected_classes_end A pointer to the end of an array of classes the library is expected to implement.
+     * @return Returns true if registering the library succeed and all the expected classes are availab.e.
+     */
+    inline bool try_register_library(
+        const char* library_name,
+        const intercom::CLSID* expected_classes_begin,
+        const intercom::CLSID* expected_classes_end
+    )
+    {
+        // Try loading the library.
+        // This function is called during static initialization.
+        // We want to avoid throwing exceptions at that time.
+        try
+        {
+            intercom::posix::DlWrapper library( library_name,
+                    intercom::posix::DlWrapper::rtld::lazy );
+
+            refresh_associations();
+
+            // Ensure that the library implements each class the caller expects.
+            // It is possible that the application has been compiled against a newer
+            // version of the Rust COM library than what is available on the system.
+
+            std::unique_lock< std::mutex > lock( m_guard );
+
+            bool all_expected_classes_found = true;
+            for( const intercom::CLSID* current = expected_classes_begin;
+                current != expected_classes_end; ++current )
+            {
+                if( m_associated_classes.find( *current ) == m_associated_classes.end() )
+                {
+                    std::cerr << "WARNING: The library \"" << library_name << "\" does not implement the class \"";
+                    ::intercom::operator<<( std::cerr, *current );
+                    std::cerr << "\"" << std::endl;
+                    all_expected_classes_found = false;
+
+                    // Do not break the loop here to ensure each missing class gets reported.
+                }
+            }
+
+            return all_expected_classes_found;
+        }
+        catch( ... )
+        {
+            std::cerr << "WARNING: Registering the library \"" << library_name << "\" failed." << std::endl;
+
+            return false;
+        }
     }
 
 private:
