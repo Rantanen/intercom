@@ -20,6 +20,7 @@ install:
     - ps: $env:PATH="$env:PATH;C:\rust\bin"
     - rustc -vV
     - cargo -vV
+    - cargo install rustfmt-nightly --force
 
 before_build:
     - nuget restore test\cs\cs.sln

@@ -17,7 +17,7 @@ including C++, C# and VB.Net.
 Rust COM server:
 
 ```rust
-#![feature(proc_macro)]
+#![feature(use_extern_macros, attr_literals)]
 
 pub use intercom::*;
 
@@ -93,14 +93,14 @@ and deallocated using [`IIntercomAllocator`]
 ## Nightly requirement
 
 Intercom requires nightly Rust version for few unstable features. By far the
-most important of these is the `proc_macro` attribute. The critical features
+most important of these is the `use_extern_macro` attribute. The critical features
 are listed below:
 primary reason for this is the
-`proc_macro` feature, which Intercom relies heavily on with its attributes.The
+`use_extern_macro` feature, which Intercom relies heavily on with its attributes.The
 other important feature is `specialization`, which we need for handling
 `ComItf` that may point to a Trait interface or a Rust object:
 
-- `proc_macro` - needed for the Intercom attributes.
+- `use_extern_macro` and `attr_literals` - needed for the Intercom attributes.
   Tracking issue: [#38356](https://github.com/rust-lang/rust/issues/38356)
 - `specialization` - needed for handling `ComItf`, which may refer to an
   interface that might or might not be a concrete struct interface.

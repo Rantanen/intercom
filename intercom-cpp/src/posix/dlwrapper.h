@@ -110,6 +110,25 @@ public:
         return ( TFunction ) function;
     }
 
+    //! Loads an address of a function in the library.
+    template< typename TFunction >
+    bool try_load_function(
+        const char* name,  //!< Identifies the function.
+        TFunction* function  //!< Receives the function.
+    )
+    {
+        // Process errors as describe in the man page of dlsym.
+        // https://linux.die.net/man/3/dlsym
+        reset_error_status();
+        void* function_candidate = dlsym( m_handle, name );
+        std::string error;
+        if( try_get_error( &error ) )
+            return false;
+
+        *function = reinterpret_cast< TFunction >( function_candidate );
+        return true;
+    }
+
 private:
 
     //! Throws an exception if last call to dl* failed.

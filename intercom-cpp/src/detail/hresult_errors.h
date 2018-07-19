@@ -20,6 +20,7 @@ namespace hresult
     static const HRESULT EC_POINTER = null_error( 0x4003 );
     static const HRESULT EC_ABORT = null_error( 0x4003 );
     static const HRESULT EC_FAIL = null_error( 0x4005 );
+    static const HRESULT EC_CLASSNOTREG = itf_error( 0x0154 );
     static_assert( NullError( 0x4005 ).error_code() == 0x4005, "Internal check failed: Invalid error code storage." );
 
     static const HRESULT EC_OUTOFMEMORY = win32_error( 0x000E );

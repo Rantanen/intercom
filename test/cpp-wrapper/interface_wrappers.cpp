@@ -5,6 +5,7 @@
 #include "../cpp-utility/os.h"
 #include "../cpp-utility/catch.hpp"
 
+#define INTERCOM_FLATTEN_DECLARATIONS
 #include "testlib.h"
 #include "../cpp-utility/dummy_interface.h"
 
@@ -15,8 +16,8 @@ TEST_CASE( "Using interface wrappers works" )
 
     intercom::ClassFactory< test_lib::raw::RefCountOperationsDescriptor > refCountFactory;
     intercom::RawInterface<IRefCountOperations> refCountOps;
-    HRESULT created = refCountFactory.create( IRefCountOperations::ID, refCountOps.out() );
-    REQUIRE( S_OK == created );
+    intercom::HRESULT created = refCountFactory.create( IRefCountOperations::ID, refCountOps.out() );
+    REQUIRE( intercom::SC_OK == created );
     REQUIRE( static_cast< bool >( refCountOps ) );
     REQUIRE( refCountOps->GetRefCount() == 1 );
 
@@ -55,7 +56,7 @@ TEST_CASE( "Using interface wrappers works" )
     SECTION( "Reseting a variable to another variable succeeds." )
     {
         intercom::RawInterface<IRefCountOperations> anotherCounter =
-                std::move( refCountFactory.create< test_lib::raw::IRefCountOperations >() );
+                refCountFactory.create< test_lib::raw::IRefCountOperations >();
         REQUIRE( anotherCounter->GetRefCount() == 1 );
         REQUIRE( refCountOps.get() != anotherCounter.get() );
         refCountOps.reset( anotherCounter.get() );
@@ -74,7 +75,7 @@ TEST_CASE( "Using interface wrappers works" )
     SECTION( "Swapping variables succeeds." )
     {
         intercom::RawInterface<IRefCountOperations> anotherCounter =
-                std::move( refCountFactory.create< test_lib::raw::IRefCountOperations >() );
+                refCountFactory.create< test_lib::raw::IRefCountOperations >();
 
         // Determine expected values after the swap operation.
         IRefCountOperations* expectedAnother = refCountOps.get();
@@ -98,7 +99,7 @@ TEST_CASE( "Using interface wrappers works" )
         try
         {
             intercom::RawInterface<ISharedInterface> wrongInterface =
-                    std::move( refCountFactory.create< test_lib::raw::ISharedInterface >() );
+                    refCountFactory.create< test_lib::raw::ISharedInterface >();
             FAIL( "Requesting invalid interface succeeded." );
         }
         catch( intercom::NoSuchInterface& ex )

@@ -1,3 +1,8 @@
+
+#ifndef INTERCOM_CPP_RAWINTERFACE_H
+#define INTERCOM_CPP_RAWINTERFACE_H
+
+
 #include <cassert>
 #include <type_traits>
 
@@ -261,3 +266,5 @@ namespace std
         rhs.m_interface = temp;
     }
 }
+
+#endif

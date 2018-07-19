@@ -16,6 +16,7 @@ public:
     static const char NAME[];
     static const char WINDOWS_NAME[];
     static const char POSIX_NAME[];
+    static inline bool is_available() { return false; }
 };
 
 /**

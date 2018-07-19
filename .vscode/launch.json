@@ -28,6 +28,17 @@
             ]
         },
         {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Cpp-Ld",
+            "program": "${workspaceRoot}/build/bin/cpp-dl",
+            "cwd": "${workspaceRoot}/build/bin",
+            "sourceLanguages": [
+                "rust",
+                "cpp"
+            ]
+        },
+        {
             "name": "(Windows) Cpp-Raw",
             "type": "cppvsdbg",
             "request": "launch",
@@ -48,6 +59,20 @@
                 "test/testlib"
             ],
             "cwd": "${workspaceRoot}",
+            "sourceLanguages": [
+                "rust",
+                "cpp"
+            ]
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug intercom-fmt",
+            "program": "${workspaceRoot}/target/debug/intercom-fmt",
+            "args": [
+                "${workspaceRoot}/intercom-attributes/tests/data/com_impl.source.rs"
+            ],
+            "cwd": "${workspaceRoot}/target/debug/",
             "sourceLanguages": [
                 "rust",
                 "cpp"

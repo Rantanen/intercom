@@ -22,14 +22,6 @@ ${PROJECT_SOURCE_DIR}/stateful.cpp
 ${PROJECT_SOURCE_DIR}/strings.cpp
 )
 
-# Use the intercom-cli as code generator for test_lib.h/test_lib.cpp
-file(GLOB testlib_sources ${TESTLIB_DIR}/src)
-add_custom_command(
-    OUTPUT ${PROJECT_SOURCE_DIR}/gcc/test_lib.h ${PROJECT_SOURCE_DIR}/gcc/test_lib.cpp
-    COMMAND cargo run cpp ${TESTLIB_DIR} ${PROJECT_SOURCE_DIR}/gcc
-    WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
-    DEPENDS ${testlib_sources})
-
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_INCLUDE_DIR}")
 
@@ -38,28 +30,8 @@ include_directories("${PROJECT_INCLUDE_DIR}/../../intercom-cpp")
 
 add_executable(${PROJECT_NAME} ${PROJECT_SRCS})
 
-# Linking to "runpath" library ensures that RUNPATH is set for ELF executables.
-# All the test libraries built with Rust are copied into this location as well.
-# Forcing the RUNPATH with the help of a dummy library ensures we can
-# dynamically load the libraries with their name alone.
-target_link_libraries(${PROJECT_NAME} runpath)
-
 # Link to static dependencies
-target_link_libraries(${PROJECT_NAME} cpp-utility)
+target_link_libraries(${PROJECT_NAME} PRIVATE  cpp-utility)
 
-# Add dynamic dependencies
-add_dependencies(${PROJECT_NAME} test_lib)
-
-# Compile specific linking.
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-
-# Link to dl, support for loading dynamic libraries.
-find_library(DL_LOCATION dl)
-target_link_libraries(${PROJECT_NAME} ${DL_LOCATION})
-
-# Link to "pthread", otherwise std::call_once used by ClassFactory does not work.
-# See the comments around "__gthread_active" in gthr-default.h
-find_library(PTHREAD_LOCATION pthread)
-target_link_libraries(${PROJECT_NAME} ${PTHREAD_LOCATION})
-
-endif()
+# Link to test libraries.
+target_link_libraries(${PROJECT_NAME} PRIVATE test_lib)

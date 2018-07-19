@@ -28,6 +28,9 @@ namespace intercom
     typedef BSTR BSTR;
 
     typedef HRESULT HRESULT;
+
+    //! 32-bit reference counter. unsigned long is 32-bit in Windows and 64-bit on Unix.
+    typedef unsigned long REF_COUNT_32;
 }
 
 #endif
