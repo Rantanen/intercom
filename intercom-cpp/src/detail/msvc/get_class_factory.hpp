@@ -90,6 +90,28 @@ namespace detail
 
         return class_factory;
     }
+
+    /**
+     * @brief Attempts to register a library for the "intercom".
+     *
+     * @param library_name The name of the library to register
+     * @param expected_classes_begin A pointer to the beginning of an array of classes the library is expected to implement.
+     * @param expected_classes_end A pointer to the end of an array of classes the library is expected to implement.
+     * @return Returns true if registering the library succeed and all the expected classes are availab.e.
+     */
+    inline bool try_register_library(
+        const char* library_name,
+        const intercom::CLSID* expected_classes_begin,
+        const intercom::CLSID* expected_classes_end
+    )
+    {
+        // On Windows platform the COM runtime handles the discovery of the classes.
+        // This is a no-op for now.
+        // NOTE: We could do a sanity check here to ensure that the classes are actually available on Windows platform.
+        // If implemented, it is important to check that acquiring the global "loader lock" does not cause problems
+        // when "static" variables are being initialized.
+        return true;
+    }
 }
 }
 

@@ -110,6 +110,23 @@ namespace detail
 
         return class_factory;
     }
+
+    /**
+     * @brief Attempts to register a library for the "intercom".
+     *
+     * @param library_name The name of the library to register
+     * @param expected_classes_begin A pointer to the beginning of an array of classes the library is expected to implement.
+     * @param expected_classes_end A pointer to the end of an array of classes the library is expected to implement.
+     * @return Returns true if registering the library succeed and all the expected classes are availab.e.
+     */
+    inline bool try_register_library(
+        const char* library_name,
+        const intercom::CLSID* expected_classes_begin,
+        const intercom::CLSID* expected_classes_end
+    )
+    {
+        return LIBRARY_INDEX->try_register_library( library_name, expected_classes_begin, expected_classes_end );
+    }
 }
 }
 
