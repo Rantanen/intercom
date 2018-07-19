@@ -47,7 +47,7 @@ namespace intercom
     )
     {
         return ::intercom::detail::try_register_library( library_name,
-            expected_classes.begin(), expected_classes.end() );
+            expected_classes.data(), expected_classes.data() + expected_classes.size() );
     }
 }
 

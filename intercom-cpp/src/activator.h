@@ -43,8 +43,8 @@ public:
     template< typename TInterface >
     intercom::RawInterface<TInterface> create()
     {
-        intercom::RawInterface< TInterface > interface;
-        intercom::HRESULT error = m_classFactory->CreateInstance( nullptr, TInterface::ID, interface.out() );
+        intercom::RawInterface< TInterface > itf;
+        intercom::HRESULT error = m_classFactory->CreateInstance( nullptr, TInterface::ID, itf.out() );
         switch( error )
         {
         case intercom::SC_OK:
@@ -58,7 +58,7 @@ public:
             throw intercom::RuntimeError( error, std::stringstream() << "Creating instance of class \""
                     << m_classId << "\" with interface \"" << TInterface::ID << "\" failed." );
         }
-        return interface;
+        return itf;
     }
 
     intercom::HRESULT create(
