@@ -64,7 +64,7 @@ impl ComArg {
 
     pub fn new( name: Ident, ty: Type, dir: Direction ) -> ComArg {
 
-        let tyhandler = get_ty_handler( &ty, TypeContext::input() );
+        let tyhandler = get_ty_handler( &ty, TypeContext::new( dir ) );
         ComArg {
             name,
             ty,
