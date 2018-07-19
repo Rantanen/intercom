@@ -131,7 +131,7 @@ impl TypeHandler for StringParam
                 )
             },
             Direction::Out | Direction::Retval => {
-                quote!( ::intercom::BString::from_ptr( #ident ).into() )
+                quote!( ::intercom::BString::from_ptr( #ident ).com_into()? )
             },
         }
     }
