@@ -1,5 +1,5 @@
 #![crate_type="dylib"]
-#![feature(type_ascription, proc_macro, try_from)]
+#![feature(type_ascription, use_extern_macros, try_from, attr_literals)]
 
 extern crate intercom;
 use intercom::*;
