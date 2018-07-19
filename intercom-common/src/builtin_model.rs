@@ -1,3 +1,6 @@
+//!
+//! Defines the default Intercom type model.
+//!
 
 use model::{ ComInterface, ComStruct, ComImpl };
 

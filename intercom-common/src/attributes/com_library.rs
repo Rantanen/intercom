@@ -27,7 +27,7 @@ pub fn expand_com_library(
     for struct_ident in lib.coclasses() {
 
         // Construct the match pattern.
-        let clsid_name = idents::clsid( struct_ident );
+        let clsid_name = idents::clsid( *struct_ident );
         match_arms.push( quote!(
             self::#clsid_name =>
                 Ok( ::intercom::ComBox::new(

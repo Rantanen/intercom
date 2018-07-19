@@ -233,7 +233,7 @@ impl CppModel {
             Ok( CppInterface {
                 name: foreign.get_name( c, itf.name() ),
                 iid_struct: guid_as_struct( itf.iid() ),
-                base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, i ) ),
+                base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, *i ) ),
                 methods,
             } )
 
@@ -247,7 +247,7 @@ impl CppModel {
 
             // Create a list of interfaces to be declared in the class descriptor.
             let interfaces = coclass.interfaces().iter().map(|itf_name| {
-                foreign.get_name( c, itf_name )
+                foreign.get_name( c, *itf_name )
             } ).collect();
 
             let clsid = coclass.clsid().as_ref()

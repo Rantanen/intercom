@@ -119,7 +119,7 @@ pub fn expand_com_impl(
     // method to the vtable fields.
     for method_info in imp.methods() {
 
-        let method_ident = &method_info.name;
+        let method_ident = method_info.name;
         let method_impl_ident = idents::method_impl(
                 struct_ident, itf_ident, method_ident.as_ref() );
 
@@ -140,7 +140,7 @@ pub fn expand_com_impl(
         // Format stack variables if the conversion requires
         // temporary variable.
         let stack_variables = method_info.args.iter()
-                .filter_map( |ca| match ca.handler.com_to_rust( &ca.name ).stack {
+                .filter_map( |ca| match ca.handler.com_to_rust( ca.name ).stack {
                     Some( stack ) => Some( quote!( #stack ) ),
                     None => None
                 } );
@@ -149,7 +149,7 @@ pub fn expand_com_impl(
         let in_params = method_info.args
                 .iter()
                 .map( |ca| {
-                    let conversion = ca.handler.com_to_rust( &ca.name ).conversion;
+                    let conversion = ca.handler.com_to_rust( ca.name ).conversion;
                     quote!( #conversion )
                 } );
 

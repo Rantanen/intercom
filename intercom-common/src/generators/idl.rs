@@ -144,7 +144,7 @@ impl IdlModel {
             // interface definition.
             Ok( IdlInterface {
                 name: foreign.get_name( c, itf.name() ),
-                base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, i ) ),
+                base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, *i ) ),
                 iid: format!( "{:-X}", itf.iid() ),
                 methods,
             } )
@@ -164,7 +164,7 @@ impl IdlModel {
 
             // Get the interfaces the class implements.
             let interfaces = coclass.interfaces().iter().map(|itf_name| {
-                foreign.get_name( c, itf_name )
+                foreign.get_name( c, *itf_name )
             } ).collect();
 
             let clsid = coclass.clsid().as_ref()
@@ -254,7 +254,7 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
         let type_name = self.get_name();
         match type_name.as_str() {
             "RawComPtr" => "*void".to_owned(),
-            "String" | "BStr" | "str" => "BSTR".to_owned(),
+            "String" | "BString" | "BStr" | "str" => "BSTR".to_owned(),
             "usize" => "size_t".to_owned(),
             "u64" => "uint64".to_owned(),
             "i64" => "int64".to_owned(),
