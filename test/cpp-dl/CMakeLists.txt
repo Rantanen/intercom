@@ -47,26 +47,10 @@ add_executable(${PROJECT_NAME} ${PROJECT_SRCS} ${PROJECT_COMPILER_SPECIFIC_SRC})
 # All the test libraries built with Rust are copied into this location as well.
 # Forcing the RUNPATH with the help of a dummy library ensures we can
 # dynamically load the libraries with their name alone.
-target_link_libraries(${PROJECT_NAME} runpath)
+target_link_libraries(${PROJECT_NAME} PRIVATE runpath)
 
 # Link to static dependencies
-target_link_libraries(${PROJECT_NAME} cpp-utility)
+target_link_libraries(${PROJECT_NAME} PRIVATE cpp-utility)
 
 # Link to test libraries.
-add_dependencies(${PROJECT_NAME} test_lib multi_lib)
-target_link_libraries(${PROJECT_NAME} test_lib multi_lib )
-# target_link_libraries(${PROJECT_NAME} ${TESTLIB_LOCATION} ${MULTILIB_LOCATION} )
-
-# Compile specific linking.
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-
-# Link to dl, support for loading dynamic libraries.
-find_library(DL_LOCATION dl)
-target_link_libraries(${PROJECT_NAME} ${DL_LOCATION})
-
-# Link to "pthread", otherwise std::call_once used by ClassFactory does not work.
-# See the comments around "__gthread_active" in gthr-default.h
-find_library(PTHREAD_LOCATION pthread)
-target_link_libraries(${PROJECT_NAME} ${PTHREAD_LOCATION})
-
-endif()
+target_link_libraries(${PROJECT_NAME} PRIVATE test_lib PRIVATE multi_lib )
