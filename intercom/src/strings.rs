@@ -357,6 +357,17 @@ impl<'a> FromWithTemporary<'a, String>
     }
 }
 
+pub trait ComInto<TTarget> {
+    fn com_into( self ) -> Result<TTarget, ComError>;
+}
+
+impl ComInto<String> for BString {
+    fn com_into( self ) -> Result<String, ComError> {
+        let mut bstr : &BStr = &self;
+        String::from_temporary( &mut bstr )
+    }
+}
+
 //////////////////////////////////////////
 // OS specific string allocation.
 
@@ -432,7 +443,7 @@ mod os {
     pub unsafe fn SysFreeString(
         pbstr: *mut u16
     ) {
-        if pbstr.is_null() {
+        if ! pbstr.is_null() {
             libc::free( pbstr.offset( -2 ) as *mut libc::c_void );
         }
     }
