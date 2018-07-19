@@ -15,6 +15,17 @@ const std::array< intercom::CLSID, {{coclass_count}} > {{lib_name}}::Descriptor:
     intercom::CLSID{{clsid_struct}}{{#unless @last}},{{/unless}}
 {{~/each}}
 };
+
+bool {{lib_name}}::Descriptor::is_available()
+{
+    // Espace the "static initialization order fiasco".
+    // This static variable is not initialized until this method is called which
+    // should guarantee that the ::intercom::detail::LIBRARY_INDEX has been initialized.
+    static bool available = ::intercom::try_register_library(
+            {{lib_name}}::Descriptor::NAME, {{lib_name}}::Descriptor::CLASSES );
+
+    return available;
+}
 {{#each interfaces}}
 const intercom::IID {{../../lib_name}}::raw::{{name}}::ID = {{iid_struct}};
 {{~/each}}

@@ -1,8 +1,11 @@
 #ifndef INTERCOM_CPP_POSIX_ICLASSFACTORY_H
 #define INTERCOM_CPP_POSIX_ICLASSFACTORY_H
 
-#include "../callingconvention.h"
-#include "iunknown.h"
+#include "../../callingconvention.h"
+#include "../../posix/iunknown.h"
+
+namespace intercom
+{
 
 // MIDL_INTERFACE("00000001-0000-0000-C000-000000000046")
 struct IClassFactory : public IUnknown
@@ -22,5 +25,7 @@ public:
 };
 
 static const intercom::IID IID_IClassFactory = { 0x00000001, 0x0000, 0x0000, { 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  0x46 } };
+
+}
 
 #endif
