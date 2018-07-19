@@ -78,7 +78,7 @@ TEST_CASE( "Exception specific data is passed correctly." )
         }
         catch( intercom::RuntimeError& ex )
         {
-            CHECK( E_INVALIDARG == ex.error_code() );
+            CHECK( intercom::EC_INVALIDARG == ex.error_code() );
         }
     }
 }

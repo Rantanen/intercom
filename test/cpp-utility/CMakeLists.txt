@@ -16,19 +16,19 @@ ${PROJECT_SOURCE_DIR}/dummy_interface.cpp
 
 # Specify additional compiler specific helpers.
 set(PROJECT_COMPILER_SPECIFIC_SRC)
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if( NOT WIN32 )
 
 set(PROJECT_COMPILER_SPECIFIC_SRC
-    ${PROJECT_SOURCE_DIR}/gcc/os.cpp
-    ${PROJECT_SOURCE_DIR}/gcc/test_lib.cpp
+    ${PROJECT_SOURCE_DIR}/posix/os.cpp
+    ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
 )
 endif()
 
 # Use the intercom-cli as code generator for test_lib.h/test_lib.cpp
 file(GLOB testlib_sources ${TESTLIB_DIR}/src)
 add_custom_command(
-    OUTPUT ${PROJECT_SOURCE_DIR}/gcc/test_lib.h ${PROJECT_SOURCE_DIR}/gcc/test_lib.cpp
-    COMMAND cargo run cpp ${TESTLIB_DIR} ${PROJECT_SOURCE_DIR}/gcc
+    OUTPUT ${PROJECT_SOURCE_DIR}/generated/test_lib.h ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
+    COMMAND cargo run cpp ${TESTLIB_DIR} ${PROJECT_SOURCE_DIR}/generated
     WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
     DEPENDS ${testlib_sources})
 
@@ -40,16 +40,25 @@ include_directories("${PROJECT_INCLUDE_DIR}/../../intercom-cpp")
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SRCS} ${PROJECT_COMPILER_SPECIFIC_SRC})
 
+# Testlib required to generate the test_lib.h and test_lib.cpp
+add_dependencies(${PROJECT_NAME} testlib)
+
+# Linking to "runpath" library ensures that RUNPATH is set for ELF executables.
+# All the test libraries built with Rust are copied into this location as well.
+# Forcing the RUNPATH with the help of a dummy library ensures we can
+# dynamically load the libraries with their name alone.
+target_link_libraries(${PROJECT_NAME} PUBLIC runpath)
+
 # Compile specific linking.
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if( NOT WIN32 )
 
 # Link to dl, support for loading dynamic libraries.
 find_library(DL_LOCATION dl)
-target_link_libraries(${PROJECT_NAME} ${DL_LOCATION})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${DL_LOCATION})
 
 # Link to "pthread", otherwise std::call_once used by ClassFactory does not work.
 # See the comments around "__gthread_active" in gthr-default.h
 find_library(PTHREAD_LOCATION pthread)
-target_link_libraries(${PROJECT_NAME} ${PTHREAD_LOCATION})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${PTHREAD_LOCATION})
 
 endif()

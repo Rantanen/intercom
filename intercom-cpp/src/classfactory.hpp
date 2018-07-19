@@ -4,7 +4,7 @@
 #include <memory>
 #include <mutex>
 
-#include "iclassfactory.hpp"
+#include "detail/iclassfactory.hpp"
 
 #include "activator.hpp"
 #include "cominterop.hpp"

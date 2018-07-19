@@ -14,12 +14,12 @@ TEST_CASE( "Primitive types are supported" )
 
     // Get the IPrimitiveOperations interface.
     IPrimitiveOperations* pOps = nullptr;
-    HRESULT hr = CreateInstance(
+    intercom::HRESULT hr = CreateInstance(
             CLSID_PrimitiveOperations,
             IID_IPrimitiveOperations,
             &pOps );
 
-    REQUIRE( hr == S_OK );
+    REQUIRE( hr == intercom::SC_OK );
     REQUIRE( pOps != nullptr );
 
     #define PRIMITIVE_TEST( F, T, V ) REQUIRE( pOps->F( ((T)V) ) == ((T)~( ((T)V) + ((T)1) ) ))

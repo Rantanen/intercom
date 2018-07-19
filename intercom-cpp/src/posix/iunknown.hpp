@@ -18,10 +18,10 @@ public:
         void **ppvObject
     ) = 0;
 
-    virtual uint32_t INTERCOM_CC AddRef() = 0;
+    virtual intercom::REF_COUNT_32 INTERCOM_CC AddRef() = 0;
 
 
-    virtual uint32_t INTERCOM_CC Release() = 0;
+    virtual intercom::REF_COUNT_32 INTERCOM_CC Release() = 0;
 };
 
 static const intercom::IID IID_IUnknown = { 0x00000000, 0x0000, 0x0000, { 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  0x46 } };

@@ -26,6 +26,9 @@ namespace intercom
     typedef OLECHAR* BSTR;
 
     typedef uint32_t HRESULT;
+
+    //! 32-bit reference counter. unsigned long is 32-bit in Windows and 64-bit on Unix.
+    typedef uint32_t REF_COUNT_32;
 }
 
 // Visual C++ does not declare the data types in their own namespace.

@@ -76,6 +76,7 @@ fn run_cmd( matches : &ArgMatches ) -> Result<(), failure::Error>
             let model = generators::cpp::CppModel::from_path( path )?;
 
             let output = Path::new( args.value_of( "output" ).unwrap() );
+            std::fs::create_dir_all( output ).expect( "Preparing output failed." );
             model.write_header( &mut File::create(
                     output.join( format!( "{}.hpp", model.lib_name ) ) )? )?;
             model.write_source( &mut File::create(

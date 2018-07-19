@@ -1,4 +1,4 @@
 
 // Include declarations required to test "testlib".
- #include "../cpp-utility/gcc/test_lib.hpp"
+ #include "../cpp-utility/generated/test_lib.hpp"
 

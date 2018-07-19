@@ -4,9 +4,9 @@
 
 #include <stdexcept>
 
-#include "iclassfactory.hpp"
-#include "detail/dlwrapper.hpp"
-#include "cominterop.hpp"
+#include "detail/iclassfactory.hpp"
+#include "detail/declarations.hpp"
+#include "detail/get_class_factory.hpp"
 #include "datatypes.hpp"
 #include "error_codes.hpp"
 #include "no_such_interface.hpp"
@@ -20,28 +20,23 @@ class Activator
 {
 public:
 
-    typedef intercom::HRESULT ( *GetClassObjectFunc ) ( REFCLSID, REFIID, void** );
-
 public:
 
     Activator(
-        const char* name,
+        const char* library_name,
         const intercom::CLSID& classId  //!< Identifies the class constructed with this activator.
     ) :
         m_classId( classId ),
-        m_library( name, intercom::detail::DlWrapper::rtld::lazy ),
-        m_getClassObjectFunc( nullptr ),
-        m_classFactory( nullptr )
+        m_classFactory( intercom::detail::get_class_factory( library_name, classId ) )
     {
-        m_getClassObjectFunc = m_library.load_function< GetClassObjectFunc >( "DllGetClassObject" );
-
-        init_class_factory();
     }
 
-    ~Activator()
+    Activator(
+        const intercom::CLSID& classId  //!< Identifies the class constructed with this activator.
+    ) :
+        m_classId( classId ),
+        m_classFactory( intercom::detail::get_class_factory( classId ) )
     {
-        if( m_classFactory != nullptr )
-            m_classFactory->Release();
     }
 
     template< typename TInterface >
@@ -72,25 +67,11 @@ public:
     {
         return m_classFactory->CreateInstance( nullptr, riid, (void**) itf );
     }
-private:
-
-    void init_class_factory()
-    {
-        intercom::HRESULT error = m_getClassObjectFunc( m_classId, IID_IClassFactory,
-                (void**) &m_classFactory );
-        if( error != intercom::SC_OK )
-        {
-            throw intercom::RuntimeError( error, std::stringstream() << "Creating class factory for class \""
-                    << m_classId << "\" failed." );
-        }
-    }
 
 private:
 
     intercom::CLSID m_classId;
-    intercom::detail::DlWrapper m_library;
-    GetClassObjectFunc m_getClassObjectFunc;
-    IClassFactory* m_classFactory;
+    intercom::RawInterface< IClassFactory > m_classFactory;
 
 };
 

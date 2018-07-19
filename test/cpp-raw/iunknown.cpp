@@ -13,9 +13,9 @@ TEST_CASE( "Basic IUnknown implementation works" )
     {
 
         IRefCountOperations* pRefCount = nullptr;
-        HRESULT hr = CreateInstance( CLSID_RefCountOperations, IID_IRefCountOperations, &pRefCount );
+        intercom::HRESULT hr = CreateInstance( CLSID_RefCountOperations, IID_IRefCountOperations, &pRefCount );
 
-        REQUIRE( hr == S_OK );
+        REQUIRE( hr == intercom::SC_OK );
         REQUIRE( pRefCount != nullptr );
 
         SECTION( "create instance produces one reference." )
@@ -51,7 +51,7 @@ TEST_CASE( "Basic IUnknown implementation works" )
                     IID_IUnknown,
                     reinterpret_cast< void** >( &pUnknownCopy ) );
 
-            REQUIRE( hr == S_OK );
+            REQUIRE( hr == intercom::SC_OK );
             REQUIRE( pUnknownCopy != nullptr );
 
             SECTION( "reference count was incremented" )
@@ -89,7 +89,7 @@ TEST_CASE( "Basic IUnknown implementation works" )
         SECTION( "COM interface returned from function has proper ref count" )
         {
             IRefCountOperations* pAnotherRefCount = nullptr;
-            REQUIRE( pRefCount->GetNew( OUT &pAnotherRefCount ) == S_OK );
+            REQUIRE( pRefCount->GetNew( OUT &pAnotherRefCount ) == intercom::SC_OK );
 
             REQUIRE( pAnotherRefCount->GetRefCount() == 1 );
             REQUIRE( pRefCount->GetRefCount() == 1 );

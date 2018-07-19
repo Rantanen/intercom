@@ -7,7 +7,7 @@
     #import "..\testlib\target\debug\test_lib.dll" raw_interfaces_only named_guids
     using namespace TestLib;
 #elif __GNUC__
-    #include "../cpp-utility/gcc/test_lib.hpp"
+    #include "../cpp-utility/generated/test_lib.hpp"
 #else
     #error Architecture not supported
  #endif

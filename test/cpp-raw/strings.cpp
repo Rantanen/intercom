@@ -49,11 +49,11 @@ TEST_CASE( "Using BSTR in interface works" )
 
     // Construct string storage.
     IStringTests* pStringTests = nullptr;
-    HRESULT hr = CreateInstance(
+    intercom::HRESULT hr = CreateInstance(
         CLSID_StringTests,
         IID_IStringTests,
         &pStringTests );
-    REQUIRE( hr == S_OK );
+    REQUIRE( hr == intercom::SC_OK );
 
     SECTION( "Default value is nullptr" )
     {

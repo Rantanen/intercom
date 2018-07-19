@@ -3,6 +3,7 @@
 #include "src/comdef.hpp"
 #include "src/classfactory.hpp"
 #include "src/conversions.hpp"
+#include "src/functions.hpp"
 #include "src/memory.hpp"
 
 // Exceptions.
