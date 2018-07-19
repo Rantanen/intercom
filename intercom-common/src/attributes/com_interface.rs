@@ -158,14 +158,24 @@ pub fn expand_com_interface(
                 #self_arg, #( #impl_args ),*
             ) -> #return_ty
             {
+                use ::intercom::ComInto;
+
                 let comptr = ::intercom::ComItf::ptr( self );
                 let vtbl = comptr as *const *const #vtable_ident;
 
                 #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
-                unsafe {
+                let result : Result< #return_ty, ComError > = ( || unsafe {
                     #( #out_arg_declarations )*;
                     let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
-                    #return_statement
+
+                    Ok( { #return_statement } )
+                } )();
+
+                use ::intercom::ReturnError;
+                match result {
+                    Ok( v ) => v,
+                    Err( err ) => < #return_ty as ReturnError >::handle(
+                            ::intercom::return_hresult( err ) ),
                 }
             }
         ) );
