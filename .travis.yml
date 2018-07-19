@@ -26,6 +26,6 @@ script:
     - cargo test --all-features
     - mkdir build
     - ( cd build && cmake .. && make )
-    - ( cd build/bin && valgrind --error-exitcode=1 ./cpp-raw )
-    - ( cd build/bin && valgrind --error-exitcode=1 ./cpp-wrapper )
-    - ( cd build/bin && valgrind --error-exitcode=1 ./cpp-dl )
+    - ( cd build/bin && ldd ./cpp-raw && valgrind --error-exitcode=1 ./cpp-raw )
+    - ( cd build/bin && ldd ./cpp-wrapper && valgrind --error-exitcode=1 ./cpp-wrapper )
+    - ( cd build/bin && ldd ./cpp-dl && valgrind --error-exitcode=1 ./cpp-dl )

@@ -70,7 +70,13 @@ public:
             // Assume something has gone wrong if the caller wants to find a library
             // but none are available / linked to the executable.
             if( m_associated_classes.empty() )
+            {
                 std::cerr << "WARNING: None of the libraries linked to the application expose COM classes." << std::endl;
+
+                std::cerr << "WARNING: Only the following libraries were identified:" << std::endl;
+                for( const std::string& library_name : m_libraries )
+                    std::cerr << "    " << library_name << std::endl;
+            }
 
             library = m_associated_classes.find( class_id );
         }
