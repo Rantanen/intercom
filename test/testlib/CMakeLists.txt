@@ -7,15 +7,17 @@ set(TESTLIB_BINARY_BUILD_NAME "${CMAKE_SHARED_LIBRARY_PREFIX}test_lib${CMAKE_SHA
 
 # Determine the parameters based on the build type.
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" )
-    set(TESTLIB_BINARY_BUILD_PATH "${CMAKE_CURRENT_SOURCE_DIR}/target/release/${TESTLIB_BINARY_BUILD_NAME}" )
-    set(TESTLIB_BUILD_ARGUMENT_RELEASE "--release")
+        set(TESTLIB_BINARY_BUILD_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/target/release" )
+        set(TESTLIB_BUILD_ARGUMENT_RELEASE "--release")
 else()
-    set(TESTLIB_BINARY_BUILD_PATH "${CMAKE_CURRENT_SOURCE_DIR}/target/debug/${TESTLIB_BINARY_BUILD_NAME}" )
-    set(TESTLIB_BUILD_ARGUMENT_RELEASE "")
+        set(TESTLIB_BINARY_BUILD_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/target/debug" )
+        set(TESTLIB_BUILD_ARGUMENT_RELEASE "")
 endif()
+set(TESTLIB_BINARY_BUILD_PATH "${TESTLIB_BINARY_BUILD_DIRECTORY}/${TESTLIB_BINARY_BUILD_NAME}" )
+set(TESTLIB_IMPORT_BUILD_PATH "${TESTLIB_BINARY_BUILD_PATH}.lib" )
 
-set(TESTLIB_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${TESTLIB_BINARY_BUILD_NAME}" )
-set(TESTLIB_LOCATION "${TESTLIB_LOCATION}" PARENT_SCOPE )
+set(TESTLIB_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${TESTLIB_BINARY_BUILD_NAME}" )
+set(TESTLIB_IMPORT_LOCATION "${TESTLIB_LOCATION}.lib" )
 
 # Build instructions for the library.
 add_custom_command(
@@ -28,12 +30,34 @@ add_custom_command(
                 ${TESTLIB_BINARY_BUILD_PATH}
                 ${TESTLIB_LOCATION}
         DEPENDS ${TESTLIB_BINARY_BUILD_PATH} )
-add_custom_target( testlib DEPENDS ${TESTLIB_LOCATION} )
 
+# On Windows the DLLs are linked with the help of an import library.
+# Carge sets the name of the import library to "<library>.dll.lib".
+if( WIN32 )
+
+        # Import library is required.
+        add_custom_command(
+                OUTPUT ${TESTLIB_IMPORT_LOCATION}
+                COMMAND ${CMAKE_COMMAND} -E copy
+                        ${TESTLIB_IMPORT_BUILD_PATH}
+                        ${TESTLIB_IMPORT_LOCATION}
+                DEPENDS ${TESTLIB_BINARY_BUILD_PATH} )
+        add_custom_target( testlib DEPENDS ${TESTLIB_LOCATION} ${TESTLIB_IMPORT_LOCATION} )
+
+else()
+
+        # No need to depend on the import library.
+        add_custom_target( testlib DEPENDS ${TESTLIB_LOCATION} )
+
+endif()
+
+
+message( "${TESTLIB_IMPORT_LOCATION}" )
 # Publish as a library.
 add_library(test_lib SHARED IMPORTED GLOBAL)
 add_dependencies(test_lib testlib)
 set_target_properties(test_lib PROPERTIES IMPORTED_LOCATION "${TESTLIB_LOCATION}")
+set_target_properties(test_lib PROPERTIES IMPORTED_IMPLIB "${TESTLIB_IMPORT_LOCATION}")
 
 # Unfortunately Rust has a poor support for "soname".
 # See the following discussions

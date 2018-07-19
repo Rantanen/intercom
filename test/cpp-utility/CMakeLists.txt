@@ -11,17 +11,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Define source files.
 set(PROJECT_SRCS
-${PROJECT_SOURCE_DIR}/dummy_interface.cpp
+    ${PROJECT_SOURCE_DIR}/dummy_interface.cpp
+    ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
 )
 
 # Specify additional compiler specific helpers.
-set(PROJECT_COMPILER_SPECIFIC_SRC)
-if( NOT WIN32 )
-
-set(PROJECT_COMPILER_SPECIFIC_SRC
-    ${PROJECT_SOURCE_DIR}/posix/os.cpp
-    ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
-)
+if( WIN32 )
+    set(PROJECT_COMPILER_SPECIFIC_SRC
+        ${PROJECT_SOURCE_DIR}/msvc/os.cpp
+    )
+else()
+    set(PROJECT_COMPILER_SPECIFIC_SRC
+        ${PROJECT_SOURCE_DIR}/posix/os.cpp
+    )
 endif()
 
 # Use the intercom-cli as code generator for test_lib.h/test_lib.cpp
