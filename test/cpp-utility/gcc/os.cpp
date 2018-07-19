@@ -23,5 +23,5 @@ intercom::HRESULT CreateInstance( intercom::REFCLSID clsid, intercom::REFIID iid
     Activator activate( test_lib::Descriptor::NAME, clsid );
     activate.create( iid, pout );
 
-    return S_OK;
+    return intercom::SC_OK;
 }

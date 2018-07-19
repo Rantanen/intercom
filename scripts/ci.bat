@@ -18,6 +18,15 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 popd
 
+REM Build multilib
+pushd test\multilib
+
+cargo build
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+popd
+
+
 REM Generate IDL and Manifest for the testlib.
 pushd intercom-cli
 

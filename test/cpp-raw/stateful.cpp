@@ -11,12 +11,12 @@ TEST_CASE( "Objects maintain their state" )
 
     // Get the IResultOperations interface.
     IStatefulOperations* pOps = nullptr;
-    HRESULT hr = CreateInstance(
+    intercom::HRESULT hr = CreateInstance(
             CLSID_StatefulOperations,
             IID_IStatefulOperations,
             &pOps );
 
-    REQUIRE( hr == S_OK );
+    REQUIRE( hr == intercom::SC_OK );
     REQUIRE( pOps != nullptr );
 
     SECTION( "State is stored" )

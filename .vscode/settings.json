@@ -50,6 +50,21 @@
         "cstdarg": "cpp",
         "future": "cpp",
         "valarray": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "__bit_reference": "cpp",
+        "__split_buffer": "cpp",
+        "__tree": "cpp",
+        "iterator": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "vector": "cpp",
+        "deque": "cpp",
+        "unordered_map": "cpp",
+        "__nullptr": "cpp",
+        "ios": "cpp",
+        "algorithm": "cpp"
     }
 }

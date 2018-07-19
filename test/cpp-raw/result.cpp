@@ -10,36 +10,36 @@ TEST_CASE( "Results can be returned" )
 
     // Get the IResultOperations interface.
     IResultOperations* pOps = nullptr;
-    HRESULT hr = CreateInstance(
+    intercom::HRESULT hr = CreateInstance(
             CLSID_ResultOperations,
             IID_IResultOperations,
             &pOps );
 
-    REQUIRE( hr == S_OK );
+    REQUIRE( hr == intercom::SC_OK );
     REQUIRE( pOps != nullptr );
 
     SECTION( "HRESULT is returned with no OUT parameters" )
     {
-        REQUIRE( pOps->SOk() == S_OK );
-        REQUIRE( pOps->NotImpl() == E_NOTIMPL );
+        REQUIRE( pOps->SOk() == intercom::SC_OK );
+        REQUIRE( pOps->NotImpl() == intercom::EC_NOTIMPL );
     }
 
     SECTION( "Rust results are converted to [retval] and HRESULT" )
     {
         double out = -1;
 
-        SECTION( "Success yields S_OK and [retval]" )
+        SECTION( "Success yields intercom::SC_OK and [retval]" )
         {
-            // Success case. Returns S_OK and value.
-            REQUIRE( pOps->Sqrt( 16.0, OUT &out ) == S_OK );
+            // Success case. Returns intercom::SC_OK and value.
+            REQUIRE( pOps->Sqrt( 16.0, OUT &out ) == intercom::SC_OK );
             REQUIRE( out == 4.0 );
         }
 
         SECTION( "Failure yields error value and resets [retval]" )
         {
             // Fail case. Returns error and sets value to 0.
-            HRESULT error = pOps->Sqrt( -1.0, OUT &out );
-            REQUIRE( error == E_INVALIDARG );
+            intercom::HRESULT error = pOps->Sqrt( -1.0, OUT &out );
+            REQUIRE( error == intercom::EC_INVALIDARG );
             REQUIRE( out == 0 );
         }
 
@@ -50,7 +50,7 @@ TEST_CASE( "Results can be returned" )
 
             hr = pOps->Tuple( 0xABBA0CD0, OUT &left, OUT &right );
 
-            REQUIRE( hr == S_OK );
+            REQUIRE( hr == intercom::SC_OK );
             REQUIRE( left == 0xABBA );
             REQUIRE( right == 0x0CD0 );
         }

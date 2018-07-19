@@ -2,13 +2,19 @@
 #include "{{lib_name}}.h"
 
 #ifdef _MSC_VER
-    const char test_lib::Descriptor::NAME[] = "{{lib_name}}.dll";
+    const char {{lib_name}}::Descriptor::NAME[] = "{{lib_name}}.dll";
 #else
-    const char test_lib::Descriptor::NAME[] = "lib{{lib_name}}.so";
+    const char {{lib_name}}::Descriptor::NAME[] = "lib{{lib_name}}.so";
 #endif
 
-const char test_lib::Descriptor::WINDOWS_NAME[] = "{{lib_name}}.dll";
-const char test_lib::Descriptor::POSIX_NAME[] = "lib{{lib_name}}.so";
+const char {{lib_name}}::Descriptor::WINDOWS_NAME[] = "{{lib_name}}.dll";
+const char {{lib_name}}::Descriptor::POSIX_NAME[] = "lib{{lib_name}}.so";
+
+const std::array< intercom::CLSID, {{coclass_count}} > {{lib_name}}::Descriptor::CLASSES = {
+{{#each coclasses}}
+    intercom::CLSID{{clsid_struct}}{{#unless @last}},{{/unless}}
+{{~/each}}
+};
 {{#each interfaces}}
 const intercom::IID {{../../lib_name}}::raw::{{name}}::ID = {{iid_struct}};
 {{~/each}}

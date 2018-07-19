@@ -8,10 +8,14 @@
 // The generated C++ headers and classes expect the IID, GUID and CLSID in intercom namespace.
 namespace intercom
 {
-    typedef GUID GUID;
 
-    typedef GUID IID;
-    typedef IID CLSID;
+
+
+
+    typedef ::GUID GUID;
+
+    typedef ::IID IID;
+    typedef ::IID CLSID;
 }
 
 #endif
