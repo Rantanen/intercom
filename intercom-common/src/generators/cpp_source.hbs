@@ -10,11 +10,11 @@
 const char {{lib_name}}::Descriptor::WINDOWS_NAME[] = "{{lib_name}}.dll";
 const char {{lib_name}}::Descriptor::POSIX_NAME[] = "lib{{lib_name}}.so";
 
-const std::array< intercom::CLSID, {{coclass_count}} > {{lib_name}}::Descriptor::CLASSES = {
+const std::array< intercom::CLSID, {{coclass_count}} > {{lib_name}}::Descriptor::CLASSES = { {
 {{#each coclasses}}
     intercom::CLSID{{clsid_struct}}{{#unless @last}},{{/unless}}
 {{~/each}}
-};
+} };
 
 bool {{lib_name}}::Descriptor::is_available()
 {
@@ -32,9 +32,9 @@ const intercom::IID {{../../lib_name}}::raw::{{name}}::ID = {{iid_struct}};
 {{#each coclasses}}
 
 const intercom::CLSID {{../../lib_name}}::raw::{{name}}Descriptor::ID = {{clsid_struct}};
-const std::array<intercom::IID, {{interface_count}}> {{../../lib_name}}::raw::{{name}}Descriptor::INTERFACES = {
+const std::array<intercom::IID, {{interface_count}}> {{../../lib_name}}::raw::{{name}}Descriptor::INTERFACES = { {
     {{~#each interfaces}}
-            {{../../lib_name}}::raw::{{this}}::ID{{#unless @last}},{{/unless}}
+             {{../../lib_name}}::raw::{{this}}::ID{{#unless @last}},{{/unless}}
     {{~/each}}
-};
+} };
 {{~/each}}

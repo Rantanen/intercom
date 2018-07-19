@@ -16,14 +16,6 @@ ${PROJECT_SOURCE_DIR}/exceptions.cpp
 ${PROJECT_SOURCE_DIR}/interface_wrappers.cpp
 )
 
-# Use the intercom-cli as code generator for test_lib.h/test_lib.cpp
-file(GLOB testlib_sources ${TESTLIB_DIR}/src)
-add_custom_command(
-    OUTPUT ${PROJECT_SOURCE_DIR}/gcc/test_lib.h ${PROJECT_SOURCE_DIR}/gcc/test_lib.cpp
-    COMMAND cargo run cpp ${TESTLIB_DIR} ${PROJECT_SOURCE_DIR}/gcc
-    WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
-    DEPENDS ${testlib_sources})
-
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_INCLUDE_DIR}")
 

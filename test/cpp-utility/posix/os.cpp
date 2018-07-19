@@ -4,8 +4,8 @@
 
 #include "catch.hpp"
 #include "../os.h"
+#include "../generated/test_lib.h"
 #include "../../runpath/init.h"
-#include "test_lib.h"
 #include "../../../intercom-cpp/src/cominterop.h"
 #include "../../../intercom-cpp/src/activator.h"
 
