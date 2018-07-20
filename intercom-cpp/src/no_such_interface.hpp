@@ -5,8 +5,8 @@
 #include <stdexcept>
 #include <sstream>
 
-#include "guiddef.h"
-#include "error_codes.h"
+#include "guiddef.hpp"
+#include "error_codes.hpp"
 
 namespace intercom
 {

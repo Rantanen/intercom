@@ -1,11 +1,11 @@
 
-#include "../cpp-utility/os.h"
+#include "../cpp-utility/os.hpp"
 #include "../cpp-utility/catch.hpp"
 
 #define INTERCOM_FLATTEN_DECLARATIONS
-#include "testlib.h"
+#include "testlib.hpp"
 
-#include <intercom.h>
+#include <intercom.hpp>
 
 class CppImplementation : public ISharedInterface
 {

@@ -1,9 +1,9 @@
 #ifndef INTERCOM_CPP_FUNCTIONS_H
 #define INTERCOM_CPP_FUNCTIONS_H
 
-#include "guiddef.h"
-#include "datatypes.h"
-#include "raw_interface.h"
+#include "guiddef.hpp"
+#include "datatypes.hpp"
+#include "raw_interface.hpp"
 #include "detail/get_class_factory.hpp"
 #include "detail/iclassfactory.hpp"
 

@@ -37,7 +37,7 @@ add_custom_command(
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_INCLUDE_DIR}")
 
-# Ensure "intercom.h" is visible.
+# Ensure "intercom.hpp" is visible.
 include_directories("${PROJECT_INCLUDE_DIR}/../../intercom-cpp")
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SRCS} ${PROJECT_COMPILER_SPECIFIC_SRC})

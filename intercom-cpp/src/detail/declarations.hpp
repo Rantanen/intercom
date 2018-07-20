@@ -3,8 +3,8 @@
 #define INTERCOM_CPP_DETAIL_DECLARATIONS_H
 
 
-#include "../guiddef.h"
-#include "../datatypes.h"
+#include "../guiddef.hpp"
+#include "../datatypes.hpp"
 
 namespace intercom
 {

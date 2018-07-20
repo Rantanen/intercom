@@ -9,7 +9,7 @@
 namespace intercom { using IClassFactory = ::IClassFactory; }
 
 #else
-#include "posix/iclassfactory.h"
+#include "posix/iclassfactory.hpp"
 #endif
 
 

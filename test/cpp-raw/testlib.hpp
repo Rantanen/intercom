@@ -11,7 +11,7 @@
     using namespace TestLib;
 
 #elif __GNUC__
-    #include "../cpp-utility/generated/test_lib.h"
+    #include "../cpp-utility/generated/test_lib.hpp"
 #else
     #error Architecture not supported
  #endif

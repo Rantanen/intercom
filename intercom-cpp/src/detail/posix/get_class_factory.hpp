@@ -9,9 +9,9 @@
 #include <type_traits>
 #include <functional>
 
-#include "../../guiddef.h"
+#include "../../guiddef.hpp"
 #include "../declarations.hpp"
-#include "../../raw_interface.h"
+#include "../../raw_interface.hpp"
 #include "library_index.hpp"
 
 namespace intercom { struct IClassFactory; }

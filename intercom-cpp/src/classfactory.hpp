@@ -6,8 +6,8 @@
 
 #include "detail/iclassfactory.hpp"
 
-#include "activator.h"
-#include "cominterop.h"
+#include "activator.hpp"
+#include "cominterop.hpp"
 
 namespace intercom
 {

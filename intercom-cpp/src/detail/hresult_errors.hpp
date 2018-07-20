@@ -2,7 +2,7 @@
 #ifndef INTERCOM_CPP_DETAIL_HRESULTERRORS_H
 #define INTERCOM_CPP_DETAIL_HRESULTERRORS_H
 
-#include "hresult.h"
+#include "hresult.hpp"
 
 namespace intercom
 {

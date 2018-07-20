@@ -2,11 +2,11 @@
 
 #include <functional>
 
-#include "../cpp-utility/os.h"
+#include "../cpp-utility/os.hpp"
 #include "../cpp-utility/catch.hpp"
 
-#include "testlib.h"
-#include "../cpp-utility/dummy_interface.h"
+#include "testlib.hpp"
+#include "../cpp-utility/dummy_interface.hpp"
 
 TEST_CASE( "Exceptions have correct error message." )
 {

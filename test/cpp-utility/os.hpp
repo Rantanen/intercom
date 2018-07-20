@@ -1,6 +1,6 @@
 #pragma once
 
-#include <intercom.h>
+#include <intercom.hpp>
 
 // Interface definitions.
 #ifdef _MSC_VER
@@ -8,7 +8,7 @@
 #else
 
 // Include declarations on non-Windows platforms.
-#include "../../intercom-cpp/src/msdef.h"
+#include "../../intercom-cpp/src/msdef.hpp"
 
 #endif
 

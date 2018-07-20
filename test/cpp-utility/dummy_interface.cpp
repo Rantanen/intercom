@@ -1,5 +1,5 @@
 
-#include "dummy_interface.h"
+#include "dummy_interface.hpp"
 
 #ifdef _MSC_VER
     const char cppraw::utility::DummyLibDescriptor::NAME[] = "dummy_lib.dll";
