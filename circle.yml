@@ -35,7 +35,7 @@ jobs:
                     cd build
                     cmake ..
                     make
-                    cd bin
+                    cd ../bin/x86_64
                     ./cpp-raw
             - run:
                 name: "Build kcov"
@@ -56,7 +56,7 @@ jobs:
                 command: |
                     # Set up the environment. We need LD_LIBRARY_PATH to include rust libs for
                     # the rust tests to execute without cargo.
-                    export LD_LIBRARY_PATH=/usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib:${PWD}/build/bin/lib
+                    export LD_LIBRARY_PATH=/usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib:${PWD}/bin/AMD64/lib
 
                     export KCOV=${PWD}/kcov-build/usr/local/bin/kcov
                     export KCOV_OUT=${PWD}/target/cov
@@ -78,7 +78,7 @@ jobs:
                     done
 
                     # C++ tests
-                    ( cd build/bin && ${RUN_KCOV} cpp-raw )
+                    ( cd bin/x86_64 && ${RUN_KCOV} cpp-raw )
 
                     bash <( curl -s https://codecov.io/bash )
 

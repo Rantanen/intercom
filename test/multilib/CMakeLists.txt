@@ -7,14 +7,17 @@ set(LIB_BINARY_BUILD_NAME "${CMAKE_SHARED_LIBRARY_PREFIX}multi_lib${CMAKE_SHARED
 
 # Determine the parameters based on the build type.
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    set(LIB_BINARY_BUILD_PATH "${CMAKE_CURRENT_SOURCE_DIR}/target/release/${LIB_BINARY_BUILD_NAME}")
+    set(LIB_BINARY_BUILD_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/target/release")
     set(LIB_BUILD_ARGUMENT_RELEASE "--release")
 else()
-    set(LIB_BINARY_BUILD_PATH "${CMAKE_CURRENT_SOURCE_DIR}/target/debug/${LIB_BINARY_BUILD_NAME}")
+    set(LIB_BINARY_BUILD_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/target/debug")
     set(LIB_BUILD_ARGUMENT_RELEASE "")
 endif()
-set(LIB_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${LIB_BINARY_BUILD_NAME}")
+set(LIB_BINARY_BUILD_PATH "${LIB_BINARY_BUILD_DIRECTORY}/${LIB_BINARY_BUILD_NAME}")
+set(LIB_IMPORT_BUILD_PATH "${LIB_BINARY_BUILD_PATH}.lib")
 
+set(LIB_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${LIB_BINARY_BUILD_NAME}")
+set(LIB_IMPORT_LOCATION "${LIB_LOCATION}.lib")
 
 # Build instructions for the library.
 add_custom_command(
@@ -29,12 +32,32 @@ add_custom_command(
                 ${LIB_LOCATION}
         DEPENDS ${LIB_BINARY_BUILD_PATH}
 )
-add_custom_target(multilib DEPENDS ${LIB_LOCATION})
+
+# On Windows the DLLs are linked with the help of an import library.
+# Carge sets the name of the import library to "<library>.dll.lib".
+if( WIN32 )
+
+        # Import library is required.
+        add_custom_command(
+                OUTPUT ${LIB_IMPORT_LOCATION}
+                COMMAND ${CMAKE_COMMAND} -E copy
+                        ${LIB_IMPORT_BUILD_PATH}
+                        ${LIB_IMPORT_LOCATION}
+                DEPENDS ${LIB_IMPORT_BINARY_BUILD_PATH} )
+        add_custom_target(multilib DEPENDS ${LIB_LOCATION} ${LIB_IMPORT_LOCATION})
+
+else()
+
+        # No need to depend on the import library.
+        add_custom_target(multilib DEPENDS ${LIB_LOCATION})
+
+endif()
 
 # Publish as a library.
 add_library(multi_lib SHARED IMPORTED GLOBAL)
 add_dependencies(multi_lib multilib)
 set_target_properties(multi_lib PROPERTIES IMPORTED_LOCATION "${LIB_LOCATION}")
+set_target_properties(multi_lib PROPERTIES IMPORTED_IMPLIB "${LIB_IMPORT_LOCATION}")
 
 # Unfortunately Rust has a poor support for "soname".
 # See the following discussions
