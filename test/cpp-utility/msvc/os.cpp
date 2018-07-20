@@ -1,13 +1,14 @@
 
 #include <unordered_map>
 #include <mutex>
+#include <Objbase.h>
 
-#include "catch.hpp"
-#include "../os.h"
-#include "../generated/test_lib.h"
+#include "../catch.hpp"
+#include "../os.hpp"
+#include "../generated/test_lib.hpp"
 #include "../../runpath/init.h"
-#include "../../../intercom-cpp/src/cominterop.h"
-#include "../../../intercom-cpp/src/activator.h"
+#include "../../../intercom-cpp/src/cominterop.hpp"
+#include "../../../intercom-cpp/src/activator.hpp"
 
 using intercom::Activator;
 
