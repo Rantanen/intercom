@@ -1,8 +1,8 @@
 #ifndef INTERCOM_CPP_POSIX_ICLASSFACTORY_H
 #define INTERCOM_CPP_POSIX_ICLASSFACTORY_H
 
-#include "../../callingconvention.h"
-#include "../../posix/iunknown.h"
+#include "../../callingconvention.hpp"
+#include "../../posix/iunknown.hpp"
 
 namespace intercom
 {

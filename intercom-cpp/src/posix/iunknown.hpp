@@ -2,10 +2,10 @@
 #ifndef INTERCOM_CPP_POSIX_IUNKNOWN_H
 #define INTERCOM_CPP_POSIX_IUNKNOWN_H
 
-#include "../callingconvention.h"
-#include "../datatypes.h"
-#include "../error_codes.h"
-#include "../guiddef.h"
+#include "../callingconvention.hpp"
+#include "../datatypes.hpp"
+#include "../error_codes.hpp"
+#include "../guiddef.hpp"
 
 
 // MIDL_INTERFACE("00000000-0000-0000-C000-000000000046")

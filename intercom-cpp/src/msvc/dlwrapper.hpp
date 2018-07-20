@@ -7,7 +7,7 @@
 
 #include <Windows.h>
 
-#include "utility.h"
+#include "utility.hpp"
 
 namespace intercom
 {

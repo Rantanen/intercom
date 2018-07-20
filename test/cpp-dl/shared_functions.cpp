@@ -1,12 +1,12 @@
 
-#include "../cpp-utility/os.h"
+#include "../cpp-utility/os.hpp"
 #include "../cpp-utility/catch.hpp"
 
-#include "libraries.h"
-#include "generated/test_lib.h"
+#include "libraries.hpp"
+#include "generated/test_lib.hpp"
 
-#include <intercom.h>
-#include <src/detail/dlwrapper.h>
+#include <intercom.hpp>
+#include <src/detail/dlwrapper.hpp>
 
 #include <unordered_set>
 

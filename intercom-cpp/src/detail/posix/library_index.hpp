@@ -10,11 +10,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../../guiddef.h"
+#include "../../guiddef.hpp"
 #include "../declarations.hpp"
-#include "../../runtime_error.h"
-#include "../dlwrapper.h"
-#include "../utility.h"
+#include "../../runtime_error.hpp"
+#include "../dlwrapper.hpp"
+#include "../utility.hpp"
 
 namespace intercom
 {

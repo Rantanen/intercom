@@ -3,7 +3,7 @@
 #define CPPRAW_DUMMYINTERFACE_H
 
 #include <array>
-#include <intercom.h>
+#include <intercom.hpp>
 
 namespace cppraw
 {

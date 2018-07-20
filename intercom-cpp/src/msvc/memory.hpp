@@ -8,7 +8,7 @@
 #include <new>
 #include <stdexcept>
 
-#include "datatypes.h"
+#include "datatypes.hpp"
 
 
 namespace intercom

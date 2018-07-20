@@ -4,12 +4,12 @@
 
 
 #ifdef _MSC_VER
-#include "msvc/guiddef.h"
+#include "msvc/guiddef.hpp"
 #else
-#include "posix/guiddef.h"
+#include "posix/guiddef.hpp"
 #endif
 
-#include "detail/utility.h"
+#include "detail/utility.hpp"
 
 namespace intercom
 {

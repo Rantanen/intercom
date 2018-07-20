@@ -1,5 +1,5 @@
 
-#include "../../cpp-utility/os.h"
+#include "../../cpp-utility/os.hpp"
 
 #pragma comment(linker, "\"/manifestdependency:name='test_lib' type='win32' version='1.0.0.0'\"" )
 
