@@ -39,9 +39,16 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 popd
 
 REM Build C++ test suite
-pushd test\cpp-raw\msvc
+del /s /q build\x64
+mkdir build
+mkdir build\x64
+pushd build\x64
+if %errorlevel% neq 0 exit /b %errorlevel%
 
-msbuild /p:Platform=x64 /p:Configuration=Release
+cmake "..\.." -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=Release
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+msbuild intercom.sln /p:Platform=x64 /p:Configuration=Release
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 popd
