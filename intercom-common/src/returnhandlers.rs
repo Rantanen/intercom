@@ -71,9 +71,9 @@ impl ReturnHandler for ErrorResultHandler {
 
     fn com_to_rust_return( &self, result : Ident ) -> Tokens {
 
-        // Quote the OK values.
+        // Format the final Ok value.
         // If there is only one, it should be a raw value;
-        // If there are multiple value quote them as a tuple.
+        // If there are multiple value turn them into a tuple.
         let ok_values = get_rust_ok_values( self.com_out_args() );
         let ok_tokens = if ok_values.len() != 1 {
                 quote!( ( #( #ok_values ),* ) )
