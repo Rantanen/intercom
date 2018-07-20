@@ -19,7 +19,7 @@ ${PROJECT_SOURCE_DIR}/interface_wrappers.cpp
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_INCLUDE_DIR}")
 
-# Ensure "intercom.h" is visible.
+# Ensure "intercom.hpp" is visible.
 include_directories("${PROJECT_INCLUDE_DIR}/../../intercom-cpp")
 
 add_executable(${PROJECT_NAME} ${PROJECT_SRCS} ${PROJECT_COMPILER_SPECIFIC_SRC})

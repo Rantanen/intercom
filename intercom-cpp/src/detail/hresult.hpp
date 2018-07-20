@@ -3,7 +3,7 @@
 #define INTERCOM_CPP_DETAIL_HRESULT_H
 
 
-#include "../datatypes.h"
+#include "../datatypes.hpp"
 
 namespace intercom
 {

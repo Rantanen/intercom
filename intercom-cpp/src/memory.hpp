@@ -6,9 +6,9 @@
 
 
 #ifdef _MSC_VER
-#include "msvc/memory.h"
+#include "msvc/memory.hpp"
 #else
-#include "posix/memory.h"
+#include "posix/memory.hpp"
 #endif
 
 

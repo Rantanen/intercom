@@ -5,11 +5,11 @@
 
 #include <Objbase.h>
 
-#include "../../guiddef.h"
-#include "../../error_codes.h"
+#include "../../guiddef.hpp"
+#include "../../error_codes.hpp"
 #include "../declarations.hpp"
-#include "../../raw_interface.h"
-#include "../../runtime_error.h"
+#include "../../raw_interface.hpp"
+#include "../../runtime_error.hpp"
 
 namespace intercom { using IClassFactory = ::IClassFactory; }
 

@@ -9,9 +9,9 @@
 #include <new>
 #include <stdexcept>
 
-#include "converter.h"
-#include "datatypes.h"
-#include "detail/memory.h"
+#include "converter.hpp"
+#include "datatypes.hpp"
+#include "detail/memory.hpp"
 
 
 namespace intercom

@@ -5,9 +5,9 @@
 
 
 #ifdef _MSC_VER
-#include "msvc/datatypes.h"
+#include "msvc/datatypes.hpp"
 #else
-#include "posix/datatypes.h"
+#include "posix/datatypes.hpp"
 #endif
 
 

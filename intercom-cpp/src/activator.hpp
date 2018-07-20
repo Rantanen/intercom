@@ -7,12 +7,11 @@
 #include "detail/iclassfactory.hpp"
 #include "detail/declarations.hpp"
 #include "detail/get_class_factory.hpp"
-#include "cominterop.h"
-#include "datatypes.h"
-#include "error_codes.h"
-#include "no_such_interface.h"
-#include "raw_interface.h"
-#include "runtime_error.h"
+#include "datatypes.hpp"
+#include "error_codes.hpp"
+#include "no_such_interface.hpp"
+#include "raw_interface.hpp"
+#include "runtime_error.hpp"
 
 namespace intercom
 {

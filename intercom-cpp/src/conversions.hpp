@@ -6,9 +6,9 @@
 
 
 #ifdef _MSC_VER
-#include "msvc/conversions.h"
+#include "msvc/conversions.hpp"
 #else
-#include "posix/conversions.h"
+#include "posix/conversions.hpp"
 #endif
 
 

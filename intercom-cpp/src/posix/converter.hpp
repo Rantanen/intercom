@@ -11,8 +11,8 @@
 
 #include <iconv.h>
 
-#include "datatypes.h"
-#include "../detail/utility.h"
+#include "datatypes.hpp"
+#include "../detail/utility.hpp"
 
 namespace intercom
 {
