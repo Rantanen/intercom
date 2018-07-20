@@ -466,13 +466,15 @@ unsafe extern "stdcall" fn __Foo_Foo_string_method(
         let self_combox =
             (self_vtable as usize - __Foo_FooVtbl_offset()) as
                 *mut ::intercom::ComBox<Foo>;
+        let mut __input_temporary =
+                <String as ::intercom::FromWithTemporary<&::intercom::BStr>>::to_temporary(
+                    ::intercom::BStr::from_ptr(input)
+                )?;
 
         let self_struct : &Foo = &**self_combox;
         let __result = self_struct.string_method(
                 <String as ::intercom::FromWithTemporary<&::intercom::BStr>>::from_temporary(
-                    &mut <String as ::intercom::FromWithTemporary<&::intercom::BStr>>::to_temporary(
-                        ::intercom::BStr::from_ptr(input)
-                    )?
+                    &mut __input_temporary
                 )?,
             );
         Ok( { ::intercom::BString::from(__result).into_ptr() } )

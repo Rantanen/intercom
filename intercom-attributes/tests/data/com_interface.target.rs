@@ -297,14 +297,14 @@ impl Foo for ::intercom::ComItf<Foo>
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
+        let mut __msg_temporary =
+                <&::intercom::BStr as ::intercom::FromWithTemporary<String>>::to_temporary(msg)?;
+
         #[allow(unused_unsafe)]
         let result : Result<String, ::intercom::ComError> = (|| unsafe {
             let __result =
                          ((**vtbl).string_method)(comptr,
-                                                  <&::intercom::BStr as
-                                                      ::intercom::FromWithTemporary<String>>::from_temporary(&mut <&::intercom::BStr
-                                                                                                                      as
-                                                                                                                      ::intercom::FromWithTemporary<String>>::to_temporary(msg)?)?.as_ptr());
+                                                  <&::intercom::BStr as ::intercom::FromWithTemporary<String>>::from_temporary(&mut __msg_temporary)?.as_ptr());
             Ok( { ::intercom::BString::from_ptr( __result ).com_into()? } )
         } )();
 

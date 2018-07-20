@@ -7,6 +7,16 @@ use methodinfo::Direction;
 
 use ast_converters::*;
 
+pub struct TypeConversion {
+
+    /// Possible temporary values that need to be kept alive for the duration
+    /// of the conversion result usage.
+    pub temporary: Option<Tokens>,
+
+    /// Conversion result value. Possibly referencing the temporary value.
+    pub value : Tokens,
+}
+
 /// Type usage context.
 pub struct TypeContext {
     dir: Direction,
@@ -46,17 +56,23 @@ pub trait TypeHandler {
     /// Converts a COM parameter named by the ident into a Rust type.
     fn com_to_rust(
         &self, ident : Ident
-    ) -> Tokens
+    ) -> TypeConversion
     {
-        quote!( #ident.into() )
+        TypeConversion {
+            temporary: None,
+            value: quote!( #ident.into() ),
+        }
     }
 
     /// Converts a Rust parameter named by the ident into a COM type.
     fn rust_to_com(
         &self, ident : Ident
-    ) -> Tokens
+    ) -> TypeConversion
     {
-        quote!( #ident.into() )
+        TypeConversion {
+            temporary: None,
+            value: quote!( #ident.into() )
+        }
     }
 
     /// Gets the default value for the type.
@@ -117,40 +133,53 @@ impl TypeHandler for StringParam
         }
     }
 
-    fn com_to_rust( &self, ident : Ident ) -> Tokens
+    fn com_to_rust( &self, ident : Ident ) -> TypeConversion
     {
         match self.context.dir {
 
             Direction::In => {
 
-                let rust_ty = self.rust_ty();
-                quote!(
-                    < #rust_ty as ::intercom::FromWithTemporary<&::intercom::BStr> >::from_temporary(
-                        &mut < #rust_ty as ::intercom::FromWithTemporary<&::intercom::BStr> >::to_temporary(
-                            ::intercom::BStr::from_ptr( #ident ) )? )?
-                )
+                let target_ty = self.rust_ty();
+                let intermediate_ty = quote!( &::intercom::BStr );
+                let to_intermediate = quote!( ::intercom::BStr::from_ptr( #ident ) );
+                let as_trait = quote!( < #target_ty as ::intercom::FromWithTemporary< #intermediate_ty > > );
+
+                let temp_ident = Ident::from( format!( "__{}_temporary", ident ) );
+                TypeConversion {
+                    temporary: Some( quote!( let mut #temp_ident = #as_trait::to_temporary( #to_intermediate )?; ) ),
+                    value: quote!( #as_trait::from_temporary( &mut #temp_ident )? ),
+                }
             },
             Direction::Out | Direction::Retval => {
-                quote!( ::intercom::BString::from_ptr( #ident ).com_into()? )
+                TypeConversion {
+                    temporary: None,
+                    value: quote!( ::intercom::BString::from_ptr( #ident ).com_into()? ),
+                }
             },
         }
     }
 
-    fn rust_to_com( &self, ident : Ident ) -> Tokens
+    fn rust_to_com( &self, ident : Ident ) -> TypeConversion
     {
         match self.context.dir {
 
             Direction::In => {
 
-                let rust_ty = self.rust_ty();
-                quote!(
-                    < &::intercom::BStr as ::intercom::FromWithTemporary<#rust_ty> >::from_temporary(
-                        &mut < &::intercom::BStr as ::intercom::FromWithTemporary<#rust_ty> >::to_temporary( #ident ) ?
-                    )?.as_ptr()
-                )
+                let target_ty = self.rust_ty();
+                let intermediate_ty = quote!( &::intercom::BStr );
+                let as_trait = quote!( < #intermediate_ty as ::intercom::FromWithTemporary< #target_ty > > );
+
+                let temp_ident = Ident::from( format!( "__{}_temporary", ident ) );
+                TypeConversion {
+                    temporary: Some( quote!( let mut #temp_ident = #as_trait::to_temporary( #ident )?; ) ),
+                    value: quote!( #as_trait::from_temporary( &mut #temp_ident )?.as_ptr() ),
+                }
             },
             Direction::Out | Direction::Retval => {
-                quote!( ::intercom::BString::from( #ident ).into_ptr() )
+                TypeConversion {
+                    temporary: None,
+                    value: quote!( ::intercom::BString::from( #ident ).into_ptr() ),
+                }
             },
         }
     }
