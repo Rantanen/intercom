@@ -270,12 +270,22 @@ unsafe extern "stdcall" fn __Foo_Foo_simple_method(
     self_vtable: ::intercom::RawComPtr
 ) -> ()
 {
-    let self_combox =
-        (self_vtable as usize - __Foo_FooVtbl_offset()) as
-            *mut ::intercom::ComBox<Foo>;
+    let result: Result<(), ::intercom::ComError> = (|| {
+        let self_combox =
+            (self_vtable as usize - __Foo_FooVtbl_offset()) as
+                *mut ::intercom::ComBox<Foo>;
 
-    let self_struct : &Foo = &**self_combox;
-    let __result = self_struct.simple_method();
+        let self_struct : &Foo = &**self_combox;
+        let __result = self_struct.simple_method();
+
+        Ok({})
+    })();
+
+    use ::intercom::ReturnError;
+    match result {
+        Ok( v ) => v,
+        Err( err ) => <() as ReturnError>::handle(::intercom::return_hresult(err)),
+    }
 }
 
 #[allow(non_snake_case)]
@@ -286,12 +296,22 @@ unsafe extern "stdcall" fn __Foo_Foo_arg_method(
     a: u16
 ) -> ()
 {
-    let self_combox =
-        (self_vtable as usize - __Foo_FooVtbl_offset()) as
-            *mut ::intercom::ComBox<Foo>;
+    let result: Result<(), ::intercom::ComError> = (|| {
+        let self_combox =
+            (self_vtable as usize - __Foo_FooVtbl_offset()) as
+                *mut ::intercom::ComBox<Foo>;
 
-    let self_struct : &Foo = &**self_combox;
-    let __result = self_struct.arg_method(a.into());
+        let self_struct : &Foo = &**self_combox;
+        let __result = self_struct.arg_method(a.into());
+
+        Ok({})
+    })();
+
+    use ::intercom::ReturnError;
+    match result {
+        Ok( v ) => v,
+        Err( err ) => <() as ReturnError>::handle(::intercom::return_hresult(err)),
+    }
 }
 
 #[allow(non_snake_case)]
@@ -301,13 +321,22 @@ unsafe extern "stdcall" fn __Foo_Foo_simple_result_method(
     self_vtable: ::intercom::RawComPtr
 ) -> u16
 {
-    let self_combox =
-        (self_vtable as usize - __Foo_FooVtbl_offset()) as
-            *mut ::intercom::ComBox<Foo>;
+    let result: Result<u16, ::intercom::ComError> = (|| {
+        let self_combox =
+            (self_vtable as usize - __Foo_FooVtbl_offset()) as
+                *mut ::intercom::ComBox<Foo>;
 
-    let self_struct : &Foo = &**self_combox;
-    let __result = self_struct.simple_result_method();
-    __result.into()
+        let self_struct : &Foo = &**self_combox;
+        let __result = self_struct.simple_result_method();
+
+        Ok( { __result.into() } )
+    })();
+
+    use ::intercom::ReturnError;
+    match result {
+        Ok( v ) => v,
+        Err( err ) => <u16 as ReturnError>::handle(::intercom::return_hresult(err)),
+    }
 }
 
 #[allow(non_snake_case)]
@@ -318,21 +347,29 @@ unsafe extern "stdcall" fn __Foo_Foo_com_result_method(
     __out: *mut u16
 ) -> ::intercom::HRESULT
 {
-    let self_combox =
-        (self_vtable as usize - __Foo_FooVtbl_offset()) as
-            *mut ::intercom::ComBox<Foo>;
+    let result: Result<::intercom::HRESULT, ::intercom::ComError> = (|| {
+        let self_combox =
+            (self_vtable as usize - __Foo_FooVtbl_offset()) as
+                *mut ::intercom::ComBox<Foo>;
 
-    let self_struct : &Foo = &**self_combox;
-    let __result = self_struct.com_result_method();
+        let self_struct : &Foo = &**self_combox;
+        let __result = self_struct.com_result_method();
 
-    // Convert the Rust result into [retval] and HRESULT.
-    // On error we need to reset the [retval] into a "known" value.
-    match __result {
-        Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
-        Err(e) => {
-            *__out = Default::default();
-            ::intercom::return_hresult( e )
-        }
+        // Convert the Rust result into [retval] and HRESULT.
+        // On error we need to reset the [retval] into a "known" value.
+        Ok( { match __result {
+            Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+            Err(e) => {
+                *__out = Default::default();
+                ::intercom::return_hresult( e )
+            }
+        } } )
+    })();
+
+    use ::intercom::ReturnError;
+    match result {
+        Ok( v ) => v,
+        Err( err ) => <::intercom::HRESULT as ReturnError>::handle(::intercom::return_hresult(err)),
     }
 }
 
@@ -344,23 +381,31 @@ unsafe extern "stdcall" fn __Foo_Foo_rust_result_method(
     __out: *mut u16
 ) -> ::intercom::HRESULT
 {
-    let self_combox =
-        (self_vtable as usize - __Foo_FooVtbl_offset()) as
-            *mut ::intercom::ComBox<Foo>;
+    let result: Result<::intercom::HRESULT, ::intercom::ComError> = (|| {
+        let self_combox =
+            (self_vtable as usize - __Foo_FooVtbl_offset()) as
+                *mut ::intercom::ComBox<Foo>;
 
-    let self_struct : &Foo = &**self_combox;
-    let __result = self_struct.rust_result_method();
-    match __result {
-        Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
-        Err(e) => {
-            *__out = Default::default();
+        let self_struct : &Foo = &**self_combox;
+        let __result = self_struct.rust_result_method();
+        Ok( { match __result {
+            Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+            Err(e) => {
+                *__out = Default::default();
 
-            // This is Result<_,_> method instead of ComResult<_>. In this case
-            // the Err value needs to be converted to HRESULT for the COM
-            // return value. The return_hresult also stores the detailed error
-            // description to support IErrorInfo.
-            ::intercom::return_hresult(e)
-        }
+                // This is Result<_,_> method instead of ComResult<_>. In this case
+                // the Err value needs to be converted to HRESULT for the COM
+                // return value. The return_hresult also stores the detailed error
+                // description to support IErrorInfo.
+                ::intercom::return_hresult(e)
+            }
+        } } )
+    })();
+
+    use ::intercom::ReturnError;
+    match result {
+        Ok( v ) => v,
+        Err( err ) => <::intercom::HRESULT as ReturnError>::handle(::intercom::return_hresult(err)),
     }
 }
 
@@ -374,30 +419,39 @@ unsafe extern "stdcall" fn __Foo_Foo_tuple_result_method(
     __out3: *mut u32
 ) -> ::intercom::HRESULT
 {
-    let self_combox =
-        (self_vtable as usize - __Foo_FooVtbl_offset()) as
-            *mut ::intercom::ComBox<Foo>;
+    let result: Result<::intercom::HRESULT, ::intercom::ComError> = (|| {
+        let self_combox =
+            (self_vtable as usize - __Foo_FooVtbl_offset()) as
+                *mut ::intercom::ComBox<Foo>;
 
-    let self_struct : &Foo = &**self_combox;
-    let __result = self_struct.tuple_result_method();
-    match __result {
-        Ok((v1, v2, v3)) => {
-            *__out1 = v1.into();
-            *__out2 = v2.into();
-            *__out3 = v3.into();
-            ::intercom::S_OK
-        },
-        Err(e) => {
-            *__out1 = Default::default();
-            *__out2 = Default::default();
-            *__out3 = Default::default();
+        let self_struct : &Foo = &**self_combox;
+        let __result = self_struct.tuple_result_method();
 
-            // This is Result<_,_> method instead of ComResult<_>. In this case
-            // the Err value needs to be converted to HRESULT for the COM
-            // return value. The return_hresult also stores the detailed error
-            // description to support IErrorInfo.
-            ::intercom::return_hresult(e)
-        }
+        Ok( { match __result {
+            Ok((v1, v2, v3)) => {
+                *__out1 = v1.into();
+                *__out2 = v2.into();
+                *__out3 = v3.into();
+                ::intercom::S_OK
+            },
+            Err(e) => {
+                *__out1 = Default::default();
+                *__out2 = Default::default();
+                *__out3 = Default::default();
+
+                // This is Result<_,_> method instead of ComResult<_>. In this case
+                // the Err value needs to be converted to HRESULT for the COM
+                // return value. The return_hresult also stores the detailed error
+                // description to support IErrorInfo.
+                ::intercom::return_hresult(e)
+            }
+        } } )
+    })();
+
+    use ::intercom::ReturnError;
+    match result {
+        Ok( v ) => v,
+        Err( err ) => <::intercom::HRESULT as ReturnError>::handle(::intercom::return_hresult(err)),
     }
 }
 
@@ -408,19 +462,27 @@ unsafe extern "stdcall" fn __Foo_Foo_string_method(
     self_vtable: ::intercom::RawComPtr,
     input: ::intercom::raw::InBSTR,
 ) -> ::intercom::raw::OutBSTR {
-    let self_combox =
-        (self_vtable as usize - __Foo_FooVtbl_offset()) as
-            *mut ::intercom::ComBox<Foo>;
+    let result: Result<::intercom::raw::OutBSTR, ::intercom::ComError> = (|| {
+        let self_combox =
+            (self_vtable as usize - __Foo_FooVtbl_offset()) as
+                *mut ::intercom::ComBox<Foo>;
 
-    let self_struct : &Foo = &**self_combox;
-    let __result = self_struct.string_method(
-            <String as ::intercom::FromWithTemporary<&::intercom::BStr>>::from_temporary(
-                &mut <String as ::intercom::FromWithTemporary<&::intercom::BStr>>::to_temporary(
-                    ::intercom::BStr::from_ptr(input)
-                )
-            ),
-        );
-    ::intercom::BString::from(__result).into_ptr()
+        let self_struct : &Foo = &**self_combox;
+        let __result = self_struct.string_method(
+                <String as ::intercom::FromWithTemporary<&::intercom::BStr>>::from_temporary(
+                    &mut <String as ::intercom::FromWithTemporary<&::intercom::BStr>>::to_temporary(
+                        ::intercom::BStr::from_ptr(input)
+                    )?
+                )?,
+            );
+        Ok( { ::intercom::BString::from(__result).into_ptr() } )
+    })();
+
+    use ::intercom::ReturnError;
+    match result {
+        Ok( v ) => v,
+        Err( err ) => <::intercom::raw::OutBSTR as ReturnError>::handle(::intercom::return_hresult(err)),
+    }
 }
 
 #[allow(non_snake_case)]
@@ -433,18 +495,26 @@ unsafe extern "stdcall" fn __Foo_Foo_complete_method(
     __out: *mut bool
 ) -> ::intercom::HRESULT
 {
-    let self_combox =
-        (self_vtable as usize - __Foo_FooVtbl_offset()) as
-            *mut ::intercom::ComBox<Foo>;
+    let result: Result<::intercom::HRESULT, ::intercom::ComError> = (|| {
+        let self_combox =
+            (self_vtable as usize - __Foo_FooVtbl_offset()) as
+                *mut ::intercom::ComBox<Foo>;
 
-    let self_struct : &mut Foo = &mut **self_combox;
-    let __result = self_struct.complete_method(a.into(), b.into());
-    match __result {
-        Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
-        Err(e) => {
-            *__out = Default::default();
-            ::intercom::return_hresult( e )
-        }
+        let self_struct : &mut Foo = &mut **self_combox;
+        let __result = self_struct.complete_method(a.into(), b.into());
+        Ok( { match __result {
+            Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+            Err(e) => {
+                *__out = Default::default();
+                ::intercom::return_hresult( e )
+            }
+        } } )
+    })();
+
+    use ::intercom::ReturnError;
+    match result {
+        Ok( v ) => v,
+        Err( err ) => <::intercom::HRESULT as ReturnError>::handle(::intercom::return_hresult(err)),
     }
 }
 

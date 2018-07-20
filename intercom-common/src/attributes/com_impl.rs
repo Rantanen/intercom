@@ -170,7 +170,7 @@ pub fn expand_com_impl(
             unsafe extern #calling_convetion fn #method_impl_ident(
                 #( #args ),*
             ) -> #ret_ty {
-                let result : Result< #ret_ty, ComError > = ( || {
+                let result : Result< #ret_ty, ::intercom::ComError > = ( || {
                     // Acquire the reference to the ComBox. For this we need
                     // to offset the current 'self_vtable' vtable pointer.
                     let self_combox = ( self_vtable as usize - #vtable_offset() )
