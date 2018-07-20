@@ -17,8 +17,14 @@ pub enum ComMethodInfoError {
 
 #[derive(Clone)]
 pub struct RustArg {
+
+    /// Name of the Rust argument.
     pub name: Ident,
+
+    /// Rust type of the COM argument.
     pub ty: Type,
+
+    /// Type handler.
     pub handler: Rc<TypeHandler>,
 }
 
@@ -54,9 +60,17 @@ impl RustArg {
 pub enum Direction { In, Out, Retval }
 
 pub struct ComArg {
+
+    /// Name of the argument.
     pub name: Ident,
+
+    /// Rust type of the raw COM argument.
     pub ty: Type,
+
+    /// Type handler.
     pub handler: Rc<TypeHandler>,
+
+    /// Argument direction. COM uses OUT params while Rust uses return values.
     pub dir : Direction
 }
 
@@ -105,18 +119,31 @@ impl ::std::fmt::Debug for ComArg {
 #[derive(Debug)]
 pub struct ComMethodInfo {
 
+    /// Method name.
     pub name: Ident,
 
+    /// True if the self parameter is not mutable.
     pub is_const: bool,
+
+    /// Rust self argument.
     pub rust_self_arg: ArgSelfRef,
+
+    /// Rust return type.
     pub rust_return_ty: Type,
 
+    /// COM retval out parameter type, such as the value of Result<...>.
     pub retval_type: Option<Type>,
+
+    /// COM return type, such as the error value of Result<...>.
     pub return_type: Option<Type>,
 
+    /// Return value handler.
     pub returnhandler: Box<ReturnHandler>,
+
+    /// Method arguments.
     pub args: Vec<RustArg>,
 
+    /// True if the Rust method is unsafe.
     pub is_unsafe: bool,
 }
 
