@@ -37,15 +37,15 @@ fn __Foo_FooVtbl_offset() -> usize {
     }
 }
 
-impl From<::intercom::ComStruct<Foo>> for ::intercom::ComRc<Foo> {
-    fn from( source: ::intercom::ComStruct<Foo> ) -> Self {
+impl From<::intercom::ComClass<Foo>> for ::intercom::ComRc<Foo> {
+    fn from( source: ::intercom::ComClass<Foo> ) -> Self {
         let itf: ::intercom::ComItf<Foo> = source.into();
         ::intercom::ComRc::attach( itf )
     }
 }
 
-impl From<::intercom::ComStruct<Foo>> for ::intercom::ComItf<Foo> {
-    fn from( source: ::intercom::ComStruct<Foo> ) -> Self {
+impl From<::intercom::ComClass<Foo>> for ::intercom::ComItf<Foo> {
+    fn from( source: ::intercom::ComClass<Foo> ) -> Self {
         unsafe {
 
             // We are using the CoClass::query_interface here. This one

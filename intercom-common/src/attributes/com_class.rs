@@ -23,7 +23,7 @@ pub fn expand_com_class(
 {
     // Parse the attribute.
     let mut output = vec![];
-    let cls = model::ComStruct::parse(
+    let cls = model::ComClass::parse(
             &lib_name(), &attr_tokens.to_string(), &item_tokens.to_string() )?;
     let struct_ident = cls.name();
 
@@ -115,16 +115,16 @@ pub fn expand_com_class(
             self::#iid_ident => true
         ) );
 
-        // ComStruct (which is what the struct should be constructed to)
+        // ComClass (which is what the struct should be constructed to)
         // can be .into()'d into ComRc and ComItf. Generate the impls for this.
         let into_expect_msg = format!(
             "query_interface( {} ) failed for {}",
             iid_ident, itf );
         output.push( quote!(
-            impl From< ::intercom::ComStruct< #struct_ident > > for
+            impl From< ::intercom::ComClass< #struct_ident > > for
                     ::intercom::ComRc< #itf > {
 
-                fn from( source : ::intercom::ComStruct< #struct_ident >) -> Self
+                fn from( source : ::intercom::ComClass< #struct_ident >) -> Self
                 {
                     // into ComItf will leave the ref count dangling.
                     // This means we can just attach to get a proper ComRc.
@@ -134,10 +134,10 @@ pub fn expand_com_class(
             }
         ) );
         output.push( quote!(
-            impl From< ::intercom::ComStruct< #struct_ident > > for
+            impl From< ::intercom::ComClass< #struct_ident > > for
                     ::intercom::ComItf< #itf > {
 
-                fn from( source : ::intercom::ComStruct< #struct_ident >) -> Self
+                fn from( source : ::intercom::ComClass< #struct_ident >) -> Self
                 {
                     unsafe {
 
@@ -156,7 +156,7 @@ pub fn expand_com_class(
 
                         // Forget the source. We did not increment the
                         // reference count when attaching to ComRc so we must
-                        // not decrement when ComStruct drops.
+                        // not decrement when ComClass drops.
                         std::mem::forget( source );
 
                         itf

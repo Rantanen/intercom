@@ -211,7 +211,7 @@ pub fn return_hresult< E >( error : E ) -> HRESULT
 
             // Construct the COM class used for IErrorInfo. The class contains the
             // description in memory.
-            let mut info = ComStruct::< ErrorInfo >::new( error_info );
+            let mut info = ComClass::< ErrorInfo >::new( error_info );
 
             // Get the IErrorInfo interface and set it in thread memory.
             let mut error_ptr : RawComPtr = std::ptr::null_mut();

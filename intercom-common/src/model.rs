@@ -26,7 +26,7 @@ pub enum ParseError {
     ComLibrary( String ),
 
     #[fail( display = "Parsing [com_class] item {} failed: {}", _0, _1 )]
-    ComStruct( String, String ),
+    ComClass( String, String ),
 
     #[fail( display = "Parsing [com_interface] item {} failed: {}", _0, _1 )]
     ComInterface( String, String ),
@@ -66,7 +66,7 @@ impl ComLibrary
         Self::from_ast( crate_name, &attr )
     }
 
-    /// Creates ComStruct from AST elements.
+    /// Creates ComLibrary from AST elements.
     pub fn from_ast(
         crate_name : &str,
         attr : &::syn::Attribute,
@@ -108,7 +108,7 @@ impl ComLibrary
 
 /// Details of a struct marked with `#[com_class]` attribute.
 #[derive(Debug, PartialEq)]
-pub struct ComStruct
+pub struct ComClass
 {
     name : Ident,
     clsid : Option<GUID>,
@@ -116,45 +116,45 @@ pub struct ComStruct
     interfaces : Vec<Ident>,
 }
 
-impl ComStruct
+impl ComClass
 {
     /// Parses a #[com_class] attribute and the associated struct.
     pub fn parse(
         crate_name : &str,
         attr_params : &str,
         item : &str,
-    ) -> ParseResult< ComStruct >
+    ) -> ParseResult< ComClass >
     {
         // Parse the inputs.
         let item : ::syn::ItemStruct = ::syn::parse_str( item )
-            .map_err( |_| ParseError::ComStruct(
+            .map_err( |_| ParseError::ComClass(
                     "<Unknown>".into(),
                     "Item syntax error".into() ) )?;
         let attr = ::utils::parse_attr_tokens( "com_class", attr_params )
-            .map_err( |_| ParseError::ComStruct(
+            .map_err( |_| ParseError::ComClass(
                     item.ident.to_string(),
                     "Attribute syntax error".into() ) )?;
 
         Self::from_ast( crate_name, &attr, &item )
     }
 
-    /// Creates ComStruct from AST elements.
+    /// Creates ComClass from AST elements.
     pub fn from_ast(
         crate_name : &str,
         attr : &::syn::Attribute,
         item : &::syn::ItemStruct,
-    ) -> ParseResult< ComStruct >
+    ) -> ParseResult< ComClass >
     {
 
         // First attribute parameter is the CLSID. Parse it.
         let mut iter = ::utils::iter_parameters( attr );
         let clsid = ::utils::parameter_to_guid(
                 &iter.next()
-                    .ok_or_else( || ParseError::ComStruct(
+                    .ok_or_else( || ParseError::ComClass(
                             item.ident.to_string(),
                             "No CLSID specified".into() ) )?,
                 crate_name, item.ident.as_ref(), "CLSID" )
-            .map_err( |_| ParseError::ComStruct(
+            .map_err( |_| ParseError::ComClass(
                     item.ident.to_string(),
                     "Bad CLSID format".into() ) )?;
 
@@ -162,11 +162,11 @@ impl ComStruct
         let interfaces : Vec<Ident> = iter
                 .map( |itf| itf.get_ident() )
                 .collect::<Result<_,_>>()
-                .map_err( |_| ParseError::ComStruct(
+                .map_err( |_| ParseError::ComClass(
                         item.ident.to_string(),
                         "Bad interface name".into() ) )?;
 
-        Ok( ComStruct {
+        Ok( ComClass {
             name: item.ident,
             visibility: item.vis.clone(),
             clsid,
@@ -398,7 +398,7 @@ impl ComImpl
 pub struct ComCrate {
     lib : Option<ComLibrary>,
     interfaces : OrderMap<String, ComInterface>,
-    structs : OrderMap<String, ComStruct>,
+    classes : OrderMap<String, ComClass>,
     impls : Vec<ComImpl>,
     incomplete : bool,
 }
@@ -407,7 +407,7 @@ pub struct ComCrate {
 struct ComCrateBuilder {
     pub libs : Vec<ComLibrary>,
     pub interfaces : Vec<ComInterface>,
-    pub structs : Vec<ComStruct>,
+    pub classes : Vec<ComClass>,
     pub impls : Vec<ComImpl>,
     pub incomplete : bool,
 }
@@ -425,8 +425,8 @@ impl ComCrateBuilder {
             lib: self.libs.into_iter().next(),
             interfaces: OrderMap::from_iter(
                 self.interfaces.into_iter().map( |i| ( i.name().to_string(), i ) ) ),
-            structs: OrderMap::from_iter(
-                self.structs.into_iter().map( |i| ( i.name().to_string(), i ) ) ),
+            classes: OrderMap::from_iter(
+                self.classes.into_iter().map( |i| ( i.name().to_string(), i ) ) ),
             impls: self.impls,
             incomplete: self.incomplete,
         } )
@@ -436,7 +436,7 @@ impl ComCrateBuilder {
 
         let built_in_types = builtin_model::builtin_intercom_types( crate_name );
         for bti in built_in_types {
-            self.structs.push( bti.class );
+            self.classes.push( bti.class );
             self.interfaces.push( bti.interface );
             self.impls.push( bti.implementation );
         }
@@ -658,10 +658,10 @@ impl ComCrate
                                 crate_name, attr, item )? ),
                     "com_class" =>
                         if let ::syn::Item::Struct( ref s ) = *item {
-                            b.structs.push( ComStruct::from_ast(
+                            b.classes.push( ComClass::from_ast(
                                     crate_name, attr, s )? )
                         } else {
-                            return Err( ParseError::ComStruct(
+                            return Err( ParseError::ComClass(
                                     item.get_ident().unwrap().to_string(),
                                     "Only structs may be COM classes".to_string() ) );
                         },
@@ -678,7 +678,7 @@ impl ComCrate
 
     pub fn lib( &self ) -> &Option<ComLibrary> { &self.lib }
     pub fn interfaces( &self ) -> &OrderMap<String, ComInterface> { &self.interfaces }
-    pub fn structs( &self ) -> &OrderMap<String, ComStruct> { &self.structs }
+    pub fn structs( &self ) -> &OrderMap<String, ComClass> { &self.classes }
     pub fn impls( &self ) -> &Vec<ComImpl> { &self.impls }
     pub fn is_incomplete( &self ) -> bool { self.incomplete }
 }
@@ -746,7 +746,7 @@ mod test
 
     #[test]
     fn parse_com_class() {
-        let cls = ComStruct::parse(
+        let cls = ComClass::parse(
             "not used",
             r#""12345678-1234-1234-1234-567890ABCDEF", Foo, Bar"#,
             "struct S;" )
@@ -768,7 +768,7 @@ mod test
         // What the final GUID is isn't important, what _is_ important however
         // is that the final GUID will not change ever as long as the library
         // name stays the same.
-        let cls = ComStruct::parse(
+        let cls = ComClass::parse(
             "not used",
             r#"AUTO_GUID, MyStruct, IThings, IStuff"#,
             "struct MyStruct { a: u32 }" )
@@ -786,7 +786,7 @@ mod test
     #[test]
     fn parse_com_class_with_no_data() {
 
-        let cls = ComStruct::parse(
+        let cls = ComClass::parse(
             "not used",
             r#"NO_GUID"#,
             "struct EmptyType;" )
@@ -800,7 +800,7 @@ mod test
     #[test]
     fn parse_com_class_with_no_guid_with_interface() {
 
-        let cls = ComStruct::parse(
+        let cls = ComClass::parse(
             "not used",
             r#"NO_GUID, ITestInterface"#,
             "struct EmptyType;" )
