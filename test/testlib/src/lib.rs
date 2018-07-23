@@ -279,6 +279,20 @@ impl StringTests
 {
     pub fn new() -> StringTests { StringTests { value: "".to_owned() } }
 
+    pub fn compare_string( &self, s : &str ) -> ComResult<u32> {
+
+        Ok( match s {
+            "Test" => 0,  // Basic string.
+            "öäå" => 1,  // Multibyte UTF-8
+            "𓇔" => 2,  // Multibyte UTF-16
+            _ => {
+                eprintln!( "Unrecognized string!", s );
+                eprintln!( "Unrecognized string: {}", s );
+                return Err( intercom::E_FAIL );
+            },
+        } )
+    }
+
     pub fn get_value( &self ) -> ComResult<String> {
         Ok( self.value.clone() )
     }

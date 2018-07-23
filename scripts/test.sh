@@ -5,4 +5,4 @@
 ( cd build && rm -f bin/cpp-raw )
 ( cd build && cmake .. )
 ( cd build && make )
-( cd build/bin && ./cpp-raw )
+( cd bin/x86_64 && ./cpp-raw )
