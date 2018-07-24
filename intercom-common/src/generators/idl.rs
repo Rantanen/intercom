@@ -235,10 +235,8 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
         krate : &ComCrate,
     ) -> String {
 
-        // TODO: Enable once verified that the "const" works.
         // We want to enable if for interface methods and parameters.
-        // let const_specifier = if self.is_mutable || self.pass_by != PassBy::Reference { "" } else { "const " };
-        let const_specifier = "";
+        let const_specifier = if self.is_mutable || self.pass_by != PassBy::Reference { "" } else { "const " };
 
         let type_name = self.get_leaf().get_idl_type_name( krate );
         let ptr = if self.is_pointer() { "*" } else { "" };
