@@ -104,7 +104,7 @@ fn get_dll_get_class_object_function(
                 // Create new class factory.
                 // Specify a create function that is able to create all the
                 // contained coclasses.
-                let mut com_struct = ::intercom::ComStruct::new(
+                let mut com_struct = ::intercom::ComClass::new(
                     ::intercom::ClassFactory::new( rclsid, | clsid | {
                         match *clsid {
                             #( #match_arms, )*

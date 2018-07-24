@@ -120,7 +120,7 @@ impl ClassCreator {
     pub fn new() -> ClassCreator { ClassCreator {} }
 
     pub fn create_root( &self, id : i32 ) -> ComResult<ComItf<CreatedClass>> {
-        Ok( ComStruct::new( CreatedClass::new_with_id( id ) ).into() )
+        Ok( ComClass::new( CreatedClass::new_with_id( id ) ).into() )
     }
 
     pub fn create_child(
@@ -129,7 +129,7 @@ impl ClassCreator {
         parent : ComItf<IParent>
     ) -> ComResult<ComItf<CreatedClass>>
     {
-        Ok( ComStruct::new(
+        Ok( ComClass::new(
             CreatedClass::new_child( id, parent.get_id() )
         ).into() )
     }
@@ -169,7 +169,7 @@ impl RefCountOperations {
     pub fn new() -> RefCountOperations { RefCountOperations { } }
 
     pub fn get_new( &self ) -> ComResult<ComItf<RefCountOperations>> {
-        Ok( ComStruct::new( RefCountOperations::new() ).into() )
+        Ok( ComClass::new( RefCountOperations::new() ).into() )
     }
 
     pub fn get_ref_count( &self ) -> u32 {

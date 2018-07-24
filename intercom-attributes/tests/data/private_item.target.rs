@@ -60,15 +60,15 @@ fn __Foo_FooVtbl_offset() -> usize {
     unsafe { &::intercom::ComBox::<Foo>::null_vtable().Foo as *const _ as usize }
 }
 
-impl From<::intercom::ComStruct<Foo>> for ::intercom::ComRc<Foo> {
-    fn from(source: ::intercom::ComStruct<Foo>) -> Self {
+impl From<::intercom::ComClass<Foo>> for ::intercom::ComRc<Foo> {
+    fn from(source: ::intercom::ComClass<Foo>) -> Self {
         let itf: ::intercom::ComItf<Foo> = source.into();
         ::intercom::ComRc::attach(itf)
     }
 }
 
-impl From<::intercom::ComStruct<Foo>> for ::intercom::ComItf<Foo> {
-    fn from(source: ::intercom::ComStruct<Foo>) -> Self {
+impl From<::intercom::ComClass<Foo>> for ::intercom::ComItf<Foo> {
+    fn from(source: ::intercom::ComClass<Foo>) -> Self {
         unsafe {
             let itf = ::intercom::ComItf::wrap(
                 <Foo as ::intercom::CoClass>::query_interface(
@@ -99,15 +99,15 @@ fn __Foo_IFooVtbl_offset() -> usize {
     unsafe { &::intercom::ComBox::<Foo>::null_vtable().IFoo as *const _ as usize }
 }
 
-impl From<::intercom::ComStruct<Foo>> for ::intercom::ComRc<IFoo> {
-    fn from(source: ::intercom::ComStruct<Foo>) -> Self {
+impl From<::intercom::ComClass<Foo>> for ::intercom::ComRc<IFoo> {
+    fn from(source: ::intercom::ComClass<Foo>) -> Self {
         let itf: ::intercom::ComItf<IFoo> = source.into();
         ::intercom::ComRc::attach(itf)
     }
 }
 
-impl From<::intercom::ComStruct<Foo>> for ::intercom::ComItf<IFoo> {
-    fn from(source: ::intercom::ComStruct<Foo>) -> Self {
+impl From<::intercom::ComClass<Foo>> for ::intercom::ComItf<IFoo> {
+    fn from(source: ::intercom::ComClass<Foo>) -> Self {
         unsafe {
             let itf = ::intercom::ComItf::wrap(
                 <Foo as ::intercom::CoClass>::query_interface(

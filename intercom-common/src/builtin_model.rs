@@ -2,11 +2,11 @@
 //! Defines the default Intercom type model.
 //!
 
-use model::{ ComInterface, ComStruct, ComImpl };
+use model::{ ComInterface, ComClass, ComImpl };
 
 pub struct BuiltinTypeInfo {
     pub interface: ComInterface,
-    pub class: ComStruct,
+    pub class: ComClass,
     pub implementation: ComImpl,
     pub ctor : ::quote::Tokens,
 }
@@ -33,8 +33,8 @@ fn allocator_impl() -> ComImpl {
     ComImpl::parse( allocator_impl_code() ).unwrap()
 }
 
-fn allocator_class( lib_name: &str ) -> ComStruct {
-    ComStruct::parse(
+fn allocator_class( lib_name: &str ) -> ComClass {
+    ComClass::parse(
             lib_name,
             "AUTO_GUID, Allocator",
             "pub struct Allocator;" ).unwrap()

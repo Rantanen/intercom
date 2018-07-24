@@ -17,40 +17,40 @@ pub trait CoClass {
     ) -> bool;
 }
 
-/// Pointer to a COM-enabled Rust struct.
+/// Pointer to a COM-enabled Rust struct that implements interfaces for COM..
 ///
 /// Intercom requires a specific memory layout for the COM objects so that it
 /// can implement reference counting and map COM method calls back to the
 /// target struct instance.
 ///
 /// This is done by requiring each COM-enabled Rust object is constructed
-/// through a `ComStruct<T>` type.
+/// through a `ComClass<T>` type.
 ///
 /// Technically the memory layout is specified by the [`ComBox`](struct.ComBox.html)
 /// type, however that type shouldn't be needed by the user. For all intents
-/// the `ComStruct` type is _the_ COM-compatible object handle.
-pub struct ComStruct< T: CoClass > {
+/// the `ComClass` type is _the_ COM-compatible object handle.
+pub struct ComClass< T: CoClass > {
     data : *mut ComBox< T >
 }
 
-impl< T: CoClass > ComStruct<T>
+impl< T: CoClass > ComClass<T>
 {
-    /// Constructs a new `ComStruct` by placing the `value` into reference
+    /// Constructs a new `ComClass` by placing the `value` into reference
     /// counted memory.
     ///
     /// - `value` - The initial state to use for the COM object.
-    pub fn new( value : T ) -> ComStruct< T > {
+    pub fn new( value : T ) -> ComClass< T > {
 
         // Construct a ComBox in memory and track the reference on it.
         let cb = ComBox::new( value );
         unsafe { ComBox::add_ref( &mut *cb ) };
 
         // Return the struct.
-        ComStruct { data: cb }
+        ComClass { data: cb }
     }
 }
 
-impl< T: CoClass > Drop for ComStruct<T>
+impl< T: CoClass > Drop for ComClass<T>
 {
     /// Decreases the reference count by one. If this is the last reference
     /// the memory will be deallocated.
@@ -59,19 +59,19 @@ impl< T: CoClass > Drop for ComStruct<T>
     }
 }
 
-impl<T: CoClass> AsMut<ComBox<T>> for ComStruct<T>
+impl<T: CoClass> AsMut<ComBox<T>> for ComClass<T>
 {
     fn as_mut( &mut self ) -> &mut ComBox<T> {
         // 'data' should always be valid pointer.
-        unsafe { self.data.as_mut().expect( "ComStruct had null reference" ) }
+        unsafe { self.data.as_mut().expect( "ComClass had null reference" ) }
     }
 }
 
-impl<T: CoClass> AsRef<ComBox<T>> for ComStruct<T>
+impl<T: CoClass> AsRef<ComBox<T>> for ComClass<T>
 {
     fn as_ref( &self ) -> &ComBox<T> {
         // 'data' should always be valid pointer.
-        unsafe { self.data.as_ref().expect( "ComStruct had null reference" ) }
+        unsafe { self.data.as_ref().expect( "ComClass had null reference" ) }
     }
 }
 
@@ -307,7 +307,7 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Returns a reference to the virtual on the ComBox.
-    pub unsafe fn vtable( ct : &ComStruct<T> ) -> &T::VTableList {
+    pub unsafe fn vtable( ct : &ComClass<T> ) -> &T::VTableList {
         &(*ct.data).vtable_list
     }
 
