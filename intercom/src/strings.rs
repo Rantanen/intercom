@@ -175,14 +175,12 @@ impl FromStr for BString {
         // Avoid unnecessary allocations when the string is empty.
         // Null and empty BSTRs should be treated as equal.
         // See https://blogs.msdn.microsoft.com/ericlippert/2003/09/12/erics-complete-guide-to-bstr-semantics/
-        let len = s.len() as u32;
-        if len == 0 { return Ok( BString( std::ptr::null_mut() ) ); }
+        if s.is_empty() { return Ok( BString( std::ptr::null_mut() ) ); }
 
         unsafe {
 
-            let bstr = os::SysAllocStringLen(
-                    s.encode_utf16().collect::<Vec<_>>().as_ptr(),
-                    len );
+            let chars = s.encode_utf16().collect::<Vec<_>>();
+            let bstr = os::SysAllocStringLen( chars.as_ptr(), chars.len() as u32 );
 
             // Memory issues are traditionally fatal in Rust and do not cause
             // Err-results.
