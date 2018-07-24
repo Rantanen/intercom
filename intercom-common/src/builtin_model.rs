@@ -43,7 +43,7 @@ fn allocator_class( lib_name: &str ) -> ComStruct {
 fn allocator_impl_code() -> &'static str {
     r#"
     impl Allocator {
-        unsafe fn alloc_bstr( &self, text : &BStr, len : u32 ) -> BString {
+        unsafe fn alloc_bstr( &self, text : *const u16, len : u32 ) -> BString {
             os::alloc_bstr( text, len )
         }
 
