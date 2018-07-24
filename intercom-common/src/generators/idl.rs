@@ -378,7 +378,7 @@ mod test {
                             args : vec![
                                 IdlArg {
                                     name : "text".to_owned(),
-                                    arg_type : "BSTR".to_owned(),
+                                    arg_type : "uint16*".to_owned(),
                                     attributes : "in".to_owned(),
                                 },
                                 IdlArg {

@@ -413,7 +413,7 @@ mod test {
                             args : vec![
                                 CppArg {
                                     name : "text".to_owned(),
-                                    arg_type : "intercom::BSTR".to_owned(),
+                                    arg_type : "uint16_t*".to_owned(),
                                 },
                                 CppArg {
                                     name : "len".to_owned(),
