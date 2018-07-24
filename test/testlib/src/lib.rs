@@ -268,52 +268,53 @@ impl AllocTests
 }
 
 #[com_class( AUTO_GUID, StringTests)]
-pub struct StringTests
-{
-     value: String
-}
+pub struct StringTests;
+
+static STRING_DATA: &[ &str ] = &[
+    "",
+    "Test",
+    "öäå",
+    "\u{1F980}",
+];
 
 #[com_interface( AUTO_GUID )]
 #[com_impl]
 impl StringTests
 {
-    pub fn new() -> StringTests { StringTests { value: "".to_owned() } }
+    pub fn new() -> StringTests { StringTests }
 
-    pub fn compare_string( &self, s : &str ) -> ComResult<u32> {
+    pub fn string_to_index( &self, s : &str ) -> ComResult<u32> {
 
-        Ok( match s {
-            "Test" => 0,  // Basic string.
-            "öäå" => 1,  // Multibyte UTF-8
-            "𓇔" => 2,  // Multibyte UTF-16
-            _ => {
-                eprintln!( "Unrecognized string!", s );
-                eprintln!( "Unrecognized string: {}", s );
-                return Err( intercom::E_FAIL );
-            },
-        } )
+        for candidate in 0..STRING_DATA.len() {
+            if s == STRING_DATA[ candidate ] {
+                return Ok( candidate as u32 )
+            }
+        }
+
+        println!( "Unrecognized string: {}", s );
+        Err( intercom::E_FAIL )
     }
 
-    pub fn get_value( &self ) -> ComResult<String> {
-        Ok( self.value.clone() )
+    pub fn index_to_string( &self, i : u32 ) -> ComResult<String> {
+
+        for candidate in 0..STRING_DATA.len() {
+            if i as usize == candidate {
+                return Ok( STRING_DATA[ candidate ].to_owned() )
+            }
+        }
+
+        println!( "Unrecognized index: {}", i );
+        Err( intercom::E_FAIL )
     }
 
-    pub fn put_value( &mut self, value: &str ) {
-        self.value = value.to_owned();
-    }
+    pub fn invalid_string( &self, s : &str ) -> ComResult<()> {
 
-    pub fn roundtrip_str<'a>( &self, value: &str ) -> ComResult<String> {
-        Ok( value.to_owned() )
-    }
+        // Don't do any validation here.
+        // Intercom should do validation automatically.
+        println!( "String parameter was not invalid: {}", s );
 
-    pub fn roundtrip_string( &self, value: String ) -> ComResult<String> {
-        Ok( value )
-    }
-
-    pub fn roundtrip_bstr( &self, value: &BStr ) -> ComResult<BString> {
-        Ok( value.to_owned() )
-    }
-
-    pub fn roundtrip_bstring( &self, value: BString ) -> ComResult<BString> {
-        Ok( value )
+        // Caller expects E_INVALIDARG, use E_FAIL to indicate something
+        // went wrong.
+        Err( intercom::E_FAIL )
     }
 }
