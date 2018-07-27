@@ -307,6 +307,23 @@ impl StringTests
         Err( intercom::E_FAIL )
     }
 
+    pub fn bstr_parameter( &self, s : &BStr, ptr : usize ) -> ComResult<()> {
+
+        if s.as_ptr() as usize == ptr {
+            Ok(())
+        } else {
+            Err( intercom::E_FAIL )
+        }
+    }
+
+    pub fn bstr_return_value( &self ) -> ComResult<( BString, usize )> {
+
+        let bs : BString = BString::from( "some string" );
+        let ptr = bs.as_ptr() as usize;
+
+        Ok( ( bs, ptr ) )
+    }
+
     pub fn invalid_string( &self, s : &str ) -> ComResult<()> {
 
         // Don't do any validation here.

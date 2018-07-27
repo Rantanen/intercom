@@ -1,5 +1,6 @@
 
 #include <functional>
+#include <cstdint>
 
 #include "../cpp-utility/os.hpp"
 #include "../cpp-utility/catch.hpp"
@@ -105,6 +106,37 @@ TEST_CASE( "Using BSTR in interface works" )
 
                 pAllocator->FreeBstr( test_text );
             }
+        }
+
+        SECTION( "BSTR into &intercom::BStr is not re-allocated" ) {
+
+            intercom::BSTR test_text = pAllocator->AllocBstr(
+                    const_cast< uint16_t* >(
+                        reinterpret_cast< const uint16_t* >( u"Test string" ) ),
+                    11 );
+
+            intercom::HRESULT hr = pStringTests->BstrParameter(
+                    test_text, reinterpret_cast< uintptr_t >( test_text ) );
+
+            pAllocator->FreeBstr( test_text );
+
+            REQUIRE( hr == S_OK );
+        }
+
+        SECTION( "BString return value is not re-allocated" ) {
+
+            intercom::BSTR test_text = nullptr;
+            uintptr_t test_ptr = 0;
+
+            intercom::HRESULT hr = pStringTests->BstrReturnValue(
+                    OUT &test_text,
+                    OUT &test_ptr );
+            REQUIRE( hr == S_OK );
+
+            REQUIRE( test_text != nullptr );
+            REQUIRE( reinterpret_cast< uintptr_t >( test_text ) == test_ptr );
+
+            pAllocator->FreeBstr( test_text );
         }
     }
 
