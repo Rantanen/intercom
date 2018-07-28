@@ -120,7 +120,7 @@ TEST_CASE( "Using BSTR in interface works" )
 
             pAllocator->FreeBstr( test_text );
 
-            REQUIRE( hr == S_OK );
+            REQUIRE( hr == intercom::SC_OK );
         }
 
         SECTION( "BString return value is not re-allocated" ) {
@@ -131,7 +131,7 @@ TEST_CASE( "Using BSTR in interface works" )
             intercom::HRESULT hr = pStringTests->BstrReturnValue(
                     OUT &test_text,
                     OUT &test_ptr );
-            REQUIRE( hr == S_OK );
+            REQUIRE( hr == intercom::SC_OK );
 
             REQUIRE( test_text != nullptr );
             REQUIRE( reinterpret_cast< uintptr_t >( test_text ) == test_ptr );
