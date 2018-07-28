@@ -10,7 +10,6 @@
 
 #include "datatypes.hpp"
 
-
 namespace intercom
 {
     /**
@@ -22,8 +21,7 @@ namespace intercom
         uint32_t character_count
     )
     {
-        // TODO.
-        std::terminate();
+        return SysAllocStringLen( nullptr, character_count );
     }
 
     /**
@@ -35,8 +33,7 @@ namespace intercom
         intercom::BSTR bstr
     ) noexcept
     {
-       // TODO.
-        std::terminate();
+        SysFreeString( bstr );
     }
 
     /**
@@ -46,13 +43,15 @@ namespace intercom
      * @param new_size
      * @return void*
      */
-    inline void* realloc_bstr(
-        void* bstr,
+    inline intercom::BSTR* realloc_bstr(
+        intercom::BSTR* bstr,
         size_t new_size
     )
     {
-        // TODO.
-        std::terminate();
+        int int_size = _internal::checked_cast< int >( new_size );
+        if( ! SysReAllocStringLen( OUT bstr, nullptr, int_size ) )
+            throw std::bad_alloc();
+        return bstr;
     }
 
     /**
@@ -63,8 +62,7 @@ namespace intercom
         const intercom::BSTR bstr
     )
     {
-        // TODO.
-        std::terminate();
+        return SysStringLen( bstr );
     }
 
     /**
@@ -77,8 +75,22 @@ namespace intercom
         uint32_t character_count
     )
     {
-        // TODO.
-        std::terminate();
+        TCharType* string = reinterpret_cast< TCharType* >(
+                CoTaskMemAlloc( sizeof( TCharType ) * ( character_count + 1 ) ) );
+        string[ character_count ] = 0;
+
+        return string;
+    }
+
+    /**
+     * @brief Deallocates the string.
+     */
+    template< typename TCharType >
+    inline void free_string(
+        TCharType* string
+    )
+    {
+        CoTaskMemFree( string );
     }
 
     /**
@@ -94,8 +106,7 @@ namespace intercom
         size_t new_size
     )
     {
-        // TODO.
-        std::terminate();
+        return CoTaskMemRealloc( string, new_size );
     }
 }
 

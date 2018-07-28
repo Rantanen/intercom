@@ -9,6 +9,44 @@
 // The generated C++ headers and classes expect the data types in intercom namespace.
 namespace intercom
 {
+    namespace _internal
+    {
+        template< typename TTarget, typename TSource >
+        TTarget checked_cast( TSource source )
+        {
+			if( std::numeric_limits< TTarget >::is_signed &&
+				! std::numeric_limits< TSource >::is_signed )
+			{
+				// Target signed, Source not signed.
+				// -> No need to check the min bound.
+				//
+				// Min bound check would result in bad checks due to type
+				// conversion to signed, etc.
+				if( source > ( std::numeric_limits< TTarget >::max )() )
+				{
+					_ASSERTE( false );
+					throw std::runtime_error( "Value out of range" );
+				}
+			}
+			else
+			{
+				// Every other case.
+				if( source < ( std::numeric_limits< TTarget >::min )() )
+				{
+					_ASSERTE( false );
+					throw std::runtime_error( "Value out of range" );
+				}
+				if( source > ( std::numeric_limits< TTarget >::max )() )
+				{
+					_ASSERTE( false );
+					throw std::runtime_error( "Value out of range" );
+				}
+			}
+
+            return static_cast< TTarget >( source );
+        }
+    }
+
     typedef INT8 INT8;
     typedef UINT8 UINT8;
     typedef INT16 INT16;
