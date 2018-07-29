@@ -49,10 +49,10 @@ impl IFoo for ::intercom::ComItf<IFoo> {
         } )();
 
         #[allow(unused_imports)]
-        use intercom::ReturnError;
+        use intercom::ErrorValue;
         match result {
             Ok(v) => v,
-            Err(err) => <() as ReturnError>::handle(::intercom::return_hresult(err)),
+            Err(err) => <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
         }
     }
 }
@@ -252,10 +252,10 @@ unsafe extern "stdcall" fn __Foo_Foo_struct_method(self_vtable: ::intercom::RawC
         Ok({})
     })();
 
-    use intercom::ReturnError;
+    use intercom::ErrorValue;
     match result {
         Ok( v ) => v,
-        Err( err ) => <() as ReturnError>::handle( ::intercom::return_hresult( err ) ),
+        Err( err ) => <() as ErrorValue>::from_error( ::intercom::return_hresult( err ) ),
     }
 }
 
@@ -317,10 +317,10 @@ unsafe extern "stdcall" fn __Foo_IFoo_trait_method(self_vtable: ::intercom::RawC
         Ok({})
     })();
 
-    use intercom::ReturnError;
+    use intercom::ErrorValue;
     match result {
         Ok( v ) => v,
-        Err( err ) => <() as ReturnError>::handle( ::intercom::return_hresult( err ) ),
+        Err( err ) => <() as ErrorValue>::from_error( ::intercom::return_hresult( err ) ),
     }
 }
 

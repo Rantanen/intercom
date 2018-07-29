@@ -121,10 +121,10 @@ impl Foo for ::intercom::ComItf<Foo>
         } )();
 
         #[allow(unused_imports)]
-        use ::intercom::ReturnError;
+        use ::intercom::ErrorValue;
         match result {
             Ok( v ) => v,
-            Err( err ) => <() as ReturnError>::handle( ::intercom::return_hresult( err ) ),
+            Err( err ) => <() as ErrorValue>::from_error( ::intercom::return_hresult( err ) ),
         }
     }
 
@@ -143,10 +143,10 @@ impl Foo for ::intercom::ComItf<Foo>
         } )();
 
         #[allow(unused_imports)]
-        use ::intercom::ReturnError;
+        use ::intercom::ErrorValue;
         match result {
             Ok( v ) => v,
-            Err( err ) => <() as ReturnError>::handle(
+            Err( err ) => <() as ErrorValue>::from_error(
                 ::intercom::return_hresult(err),
             ),
         }
@@ -169,10 +169,10 @@ impl Foo for ::intercom::ComItf<Foo>
         } )();
 
         #[allow(unused_imports)]
-        use ::intercom::ReturnError;
+        use ::intercom::ErrorValue;
         match result {
             Ok( v ) => v,
-            Err( err ) => <u16 as ReturnError>::handle(
+            Err( err ) => <u16 as ErrorValue>::from_error(
                 ::intercom::return_hresult(err),
             ),
         }
@@ -206,10 +206,10 @@ impl Foo for ::intercom::ComItf<Foo>
         } )();
 
         #[allow(unused_imports)]
-        use ::intercom::ReturnError;
+        use ::intercom::ErrorValue;
         match result {
             Ok( v ) => v,
-            Err( err ) => <ComResult<u16> as ReturnError>::handle(
+            Err( err ) => <ComResult<u16> as ErrorValue>::from_error(
                 ::intercom::return_hresult(err),
             ),
         }
@@ -242,10 +242,10 @@ impl Foo for ::intercom::ComItf<Foo>
         } )();
 
         #[allow(unused_imports)]
-        use ::intercom::ReturnError;
+        use ::intercom::ErrorValue;
         match result {
             Ok( v ) => v,
-            Err( err ) => <Result<u16, i32> as ReturnError>::handle(
+            Err( err ) => <Result<u16, i32> as ErrorValue>::from_error(
                 ::intercom::return_hresult(err),
             ),
         }
@@ -280,10 +280,10 @@ impl Foo for ::intercom::ComItf<Foo>
         } )();
 
         #[allow(unused_imports)]
-        use ::intercom::ReturnError;
+        use ::intercom::ErrorValue;
         match result {
             Ok( v ) => v,
-            Err( err ) => <ComResult<bool> as ReturnError>::handle(
+            Err( err ) => <ComResult<bool> as ErrorValue>::from_error(
                 ::intercom::return_hresult(err),
             ),
         }
@@ -309,10 +309,10 @@ impl Foo for ::intercom::ComItf<Foo>
         } )();
 
         #[allow(unused_imports)]
-        use ::intercom::ReturnError;
+        use ::intercom::ErrorValue;
         match result {
             Ok( v ) => v,
-            Err( err ) => <String as ReturnError>::handle(
+            Err( err ) => <String as ErrorValue>::from_error(
                 ::intercom::return_hresult(err),
             ),
         }
@@ -345,10 +345,10 @@ impl Foo for ::intercom::ComItf<Foo>
         } )();
 
         #[allow(unused_imports)]
-        use ::intercom::ReturnError;
+        use ::intercom::ErrorValue;
         match result {
             Ok( v ) => v,
-            Err( err ) => <ComResult<ComItf<IUnknown>> as ReturnError>::handle(
+            Err( err ) => <ComResult<ComItf<IUnknown>> as ErrorValue>::from_error(
                 ::intercom::return_hresult(err),
             ),
         }

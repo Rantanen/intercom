@@ -185,10 +185,10 @@ pub fn expand_com_impl(
                     Ok( { #return_statement } )
                 } )();
 
-                use ::intercom::ReturnError;
+                use ::intercom::ErrorValue;
                 match result {
                     Ok( v ) => v,
-                    Err( err ) => < #ret_ty as ReturnError >::handle(
+                    Err( err ) => < #ret_ty as ErrorValue >::from_error(
                             ::intercom::return_hresult( err ) ),
                 }
             }

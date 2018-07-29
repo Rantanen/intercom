@@ -176,10 +176,10 @@ pub fn expand_com_interface(
                 } )();
 
                 #[allow(unused_imports)]
-                use ::intercom::ReturnError;
+                use ::intercom::ErrorValue;
                 match result {
                     Ok( v ) => v,
-                    Err( err ) => < #return_ty as ReturnError >::handle(
+                    Err( err ) => < #return_ty as ErrorValue >::from_error(
                             ::intercom::return_hresult( err ) ),
                 }
             }

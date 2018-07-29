@@ -281,10 +281,10 @@ unsafe extern "stdcall" fn __Foo_Foo_simple_method(
         Ok({})
     })();
 
-    use ::intercom::ReturnError;
+    use ::intercom::ErrorValue;
     match result {
         Ok( v ) => v,
-        Err( err ) => <() as ReturnError>::handle(::intercom::return_hresult(err)),
+        Err( err ) => <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
     }
 }
 
@@ -307,10 +307,10 @@ unsafe extern "stdcall" fn __Foo_Foo_arg_method(
         Ok({})
     })();
 
-    use ::intercom::ReturnError;
+    use ::intercom::ErrorValue;
     match result {
         Ok( v ) => v,
-        Err( err ) => <() as ReturnError>::handle(::intercom::return_hresult(err)),
+        Err( err ) => <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
     }
 }
 
@@ -332,10 +332,10 @@ unsafe extern "stdcall" fn __Foo_Foo_simple_result_method(
         Ok( { __result.into() } )
     })();
 
-    use ::intercom::ReturnError;
+    use ::intercom::ErrorValue;
     match result {
         Ok( v ) => v,
-        Err( err ) => <u16 as ReturnError>::handle(::intercom::return_hresult(err)),
+        Err( err ) => <u16 as ErrorValue>::from_error(::intercom::return_hresult(err)),
     }
 }
 
@@ -366,10 +366,10 @@ unsafe extern "stdcall" fn __Foo_Foo_com_result_method(
         } } )
     })();
 
-    use ::intercom::ReturnError;
+    use ::intercom::ErrorValue;
     match result {
         Ok( v ) => v,
-        Err( err ) => <::intercom::HRESULT as ReturnError>::handle(::intercom::return_hresult(err)),
+        Err( err ) => <::intercom::HRESULT as ErrorValue>::from_error(::intercom::return_hresult(err)),
     }
 }
 
@@ -402,10 +402,10 @@ unsafe extern "stdcall" fn __Foo_Foo_rust_result_method(
         } } )
     })();
 
-    use ::intercom::ReturnError;
+    use ::intercom::ErrorValue;
     match result {
         Ok( v ) => v,
-        Err( err ) => <::intercom::HRESULT as ReturnError>::handle(::intercom::return_hresult(err)),
+        Err( err ) => <::intercom::HRESULT as ErrorValue>::from_error(::intercom::return_hresult(err)),
     }
 }
 
@@ -448,10 +448,10 @@ unsafe extern "stdcall" fn __Foo_Foo_tuple_result_method(
         } } )
     })();
 
-    use ::intercom::ReturnError;
+    use ::intercom::ErrorValue;
     match result {
         Ok( v ) => v,
-        Err( err ) => <::intercom::HRESULT as ReturnError>::handle(::intercom::return_hresult(err)),
+        Err( err ) => <::intercom::HRESULT as ErrorValue>::from_error(::intercom::return_hresult(err)),
     }
 }
 
@@ -480,10 +480,10 @@ unsafe extern "stdcall" fn __Foo_Foo_string_method(
         Ok( { ::intercom::BString::from(__result).into_ptr() } )
     })();
 
-    use ::intercom::ReturnError;
+    use ::intercom::ErrorValue;
     match result {
         Ok( v ) => v,
-        Err( err ) => <::intercom::raw::OutBSTR as ReturnError>::handle(::intercom::return_hresult(err)),
+        Err( err ) => <::intercom::raw::OutBSTR as ErrorValue>::from_error(::intercom::return_hresult(err)),
     }
 }
 
@@ -513,10 +513,10 @@ unsafe extern "stdcall" fn __Foo_Foo_complete_method(
         } } )
     })();
 
-    use ::intercom::ReturnError;
+    use ::intercom::ErrorValue;
     match result {
         Ok( v ) => v,
-        Err( err ) => <::intercom::HRESULT as ReturnError>::handle(::intercom::return_hresult(err)),
+        Err( err ) => <::intercom::HRESULT as ErrorValue>::from_error(::intercom::return_hresult(err)),
     }
 }
 
