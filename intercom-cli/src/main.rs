@@ -5,7 +5,6 @@ use std::fs::File;
 extern crate intercom_common;
 extern crate failure;
 
-use intercom_common::tyhandlers::TypeSystem;
 use intercom_common::generators;
 
 #[macro_use]
