@@ -5,6 +5,7 @@ use std::fs::File;
 extern crate intercom_common;
 extern crate failure;
 
+use intercom_common::tyhandlers::TypeSystem;
 use intercom_common::generators;
 
 #[macro_use]
@@ -26,6 +27,10 @@ fn main() {
                    .help( "Path to the crate to process" )
                    .default_value( "." )
                    .index( 1 )
+                )
+                .arg( Arg::with_name( "all" )
+                    .long( "all" )
+                    .help( "Include all type system interfaces in the IDL" )
                 )
             )
             .subcommand( SubCommand::with_name( "manifest" )
@@ -49,6 +54,10 @@ fn main() {
                    .default_value( "." )
                    .index( 2 )
                 )
+                .arg( Arg::with_name( "all" )
+                    .long( "all" )
+                    .help( "Include all type system interfaces in the IDL" )
+                )
             )
         .get_matches();
 
@@ -63,7 +72,8 @@ fn run_cmd( matches : &ArgMatches ) -> Result<(), failure::Error>
     match matches.subcommand() {
         ( "idl", Some( args ) ) => {
             let path = Path::new( args.value_of( "path" ).unwrap() );
-            let model = generators::idl::IdlModel::from_path( path )?;
+            let all = args.is_present( "all" );
+            let model = generators::idl::IdlModel::from_path( path, all )?;
             model.write( &mut io::stdout() )?;
         },
         ( "manifest", Some( args ) ) => {
@@ -73,7 +83,8 @@ fn run_cmd( matches : &ArgMatches ) -> Result<(), failure::Error>
         },
         ( "cpp", Some( args ) ) => {
             let path = Path::new( args.value_of( "path" ).unwrap() );
-            let model = generators::cpp::CppModel::from_path( path )?;
+            let all = args.is_present( "all" );
+            let model = generators::cpp::CppModel::from_path( path, all )?;
 
             let output = Path::new( args.value_of( "output" ).unwrap() );
             std::fs::create_dir_all( output ).expect( "Preparing output failed." );

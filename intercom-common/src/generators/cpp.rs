@@ -9,12 +9,12 @@ use std::path::Path;
 
 use super::GeneratorError;
 
-use tyhandlers::{Direction};
+use tyhandlers::{Direction, TypeSystem};
 use foreign_ty::*;
 use type_parser::*;
 use guid::*;
 use model;
-use model::ComCrate;
+use model::{ComCrate, ComInterfaceVariant};
 use utils;
 
 use handlebars::Handlebars;
@@ -177,70 +177,97 @@ impl CppModel {
     ///
     /// - `path` - The path must point to a crate root containing Cargo.toml or
     ///            to the Cargo.toml itself.
-    pub fn from_path( path : &Path,) -> Result<CppModel, GeneratorError>
+    pub fn from_path(
+        path : &Path,
+        all_type_systems : bool,
+    ) -> Result<CppModel, GeneratorError>
     {
         let krate = model::ComCrate::parse_package( path )
                 .map_err( GeneratorError::CrateParseError )?;
-        CppModel::from_crate( &krate )
+        CppModel::from_crate( &krate, all_type_systems )
     }
 
 
     /// Converts the parse result into an header  that gets written to stdout.
     pub fn from_crate(
         c : &model::ComCrate,
+        all_type_systems : bool,
     ) -> Result<CppModel, GeneratorError> {
+
+        let itf_variant_filter : Box<Fn( &( &TypeSystem, &ComInterfaceVariant ) ) -> bool> =
+                match all_type_systems {
+                    true => Box::new( | _ | true ),
+                    false => Box::new( | ( ts, _ ) | match ts {
+                        TypeSystem::Raw => true,
+                        _ => false
+                    } ),
+                };
 
         let foreign = CTypeHandler;
         let lib = c.lib().as_ref().ok_or( GeneratorError::MissingLibrary )?;
 
         // Introduce all interfaces so we don't get errors on undeclared items.
-        let interfaces = c.interfaces().iter().map( |(_, itf)| {
+        let interfaces = c.interfaces().iter()
+            .flat_map(|(_, itf)| itf.variants().iter()
+            .filter( itf_variant_filter.as_ref() )
+            .map(|(_, itf_variant)| {
 
-            // Get the method definitions for the current interface.
-            let methods = itf.aut().methods().iter().map( |m| {
+                // Get the method definitions for the current interface.
+                let methods = itf_variant.methods().iter().map( |m| {
 
-                // Construct the argument list.
-                let args = m.raw_com_args().iter().map( |a| {
+                    // Construct the argument list.
+                    let args = m.raw_com_args().iter().map( |a| {
 
-                    // Redirect return values converted out arguments.
-                    let dir = match a.dir {
+                        // Redirect return values converted out arguments.
+                        let dir = match a.dir {
                             Direction::Retval => Direction::Out,
                             d => d,
-                    };
+                        };
 
-                    // Get the foreign type for the arg type in C++ format.
-                    let com_ty = a.handler.com_ty();
-                    let type_info = foreign.get_ty( &com_ty )
+                        // Get the foreign type for the arg type in C++ format.
+                        let com_ty = a.handler.com_ty();
+                        let type_info = foreign.get_ty( &com_ty )
+                                .ok_or_else( || GeneratorError::UnsupportedType(
+                                                utils::ty_to_string( &a.ty ) ) )?;
+                        Ok( CppArg {
+                            name : a.name.to_string(),
+                            arg_type : type_info.to_cpp( dir, c ),
+                        } )
+
+                    } ).collect::<Result<Vec<_>, GeneratorError>>()?;
+
+                    let ret_ty = m.returnhandler.com_ty();
+                    let ret_ty = foreign.get_ty( &ret_ty )
                             .ok_or_else( || GeneratorError::UnsupportedType(
-                                            utils::ty_to_string( &a.ty ) ) )?;
-                    Ok( CppArg {
-                        name : a.name.to_string(),
-                        arg_type : type_info.to_cpp( dir, c ),
+                                            utils::ty_to_string( &ret_ty ) ) )?;
+                    Ok( CppMethod {
+                    name: utils::pascal_case( m.display_name.to_string() ),
+                        ret_type: ret_ty.to_cpp( Direction::Retval, c ),
+                        args
                     } )
 
                 } ).collect::<Result<Vec<_>, GeneratorError>>()?;
 
-                let ret_ty = m.returnhandler.com_ty();
-                let ret_ty = foreign.get_ty( &ret_ty )
-                        .ok_or_else( || GeneratorError::UnsupportedType(
-                                        utils::ty_to_string( &ret_ty ) ) )?;
-                Ok( CppMethod {
-                    name: utils::pascal_case( m.display_name.to_string() ),
-                    ret_type: ret_ty.to_cpp( Direction::Retval, c ),
-                    args
+                let ( itf_name, iid ) = match all_type_systems {
+                    false => (
+                        itf.name(),
+                        itf.variants()[ &TypeSystem::Raw ].iid() ),
+                    true => (
+                        itf_variant.unique_name(),
+                        itf_variant.iid() ),
+                };
+
+                Ok( CppInterface {
+                    name: foreign.get_name( c, itf_name ),
+                    iid_struct: guid_as_struct( iid ),
+                    base: itf.base_interface().as_ref()
+                            .map( |i| foreign.get_name( c, i ) ),
+                    methods,
                 } )
 
-            } ).collect::<Result<Vec<_>, GeneratorError>>()?;
-
-            Ok( CppInterface {
-                name: foreign.get_name( c, itf.name() ),
-                iid_struct: guid_as_struct( itf.aut().iid() ),
-                base: itf.base_interface().as_ref()
-                        .map( |i| foreign.get_name( c, i ) ),
-                methods,
             } )
-
-        } ).collect::<Result<Vec<_>, GeneratorError>>()?;
+            .collect::<Vec<_>>() )
+            .collect::<Result<Vec<_>, GeneratorError>>()?;
 
         // Generate class descriptors.
         let classes = lib.coclasses().iter().map( |class_name| {
@@ -249,9 +276,19 @@ impl CppModel {
             let coclass  = &c.structs()[ &class_name.to_string() ];
 
             // Create a list of interfaces to be declared in the class descriptor.
-            let interfaces = coclass.interfaces().iter().map(|itf_name| {
-                foreign.get_name( c, itf_name )
-            } ).collect();
+            let interfaces = coclass.interfaces().iter()
+                .flat_map(|itf_name| {
+                    let itf = &c.interfaces()[ &itf_name.to_string() ];
+                    itf.variants().iter()
+                        .filter( itf_variant_filter.as_ref() )
+                        .map( |(_, itf_variant)| {
+
+                            foreign.get_name( c, match all_type_systems {
+                                false => itf.name(),
+                                true => itf_variant.unique_name(),
+                            } )
+                        } ).collect::<Vec<_>>()
+                } ).collect();
 
             let clsid = coclass.clsid().as_ref()
                     .ok_or_else( || GeneratorError::MissingClsid(

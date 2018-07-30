@@ -14,6 +14,7 @@ use ::methodinfo::ComMethodInfo;
 use ::builtin_model;
 use ::syn::{Ident, Visibility};
 use ::std::path::{Path, PathBuf};
+use ::std::collections::HashMap;
 use ::std::fs;
 use ::std::io::Read;
 use ::ordermap::OrderMap;
@@ -195,7 +196,7 @@ pub struct ComInterface
     display_name : Ident,
     visibility : Visibility,
     base_interface : Option<Ident>,
-    variants : Vec<ComInterfaceVariant>,
+    variants : HashMap<TypeSystem, ComInterfaceVariant>,
     item_type: ::utils::InterfaceType,
     is_unsafe : bool,
 }
@@ -203,7 +204,9 @@ pub struct ComInterface
 #[derive(Debug, PartialEq)]
 pub struct ComInterfaceVariant
 {
+    display_name : Ident,
     unique_name : Ident,
+    unique_base_interface : Option<Ident>,
     type_system : TypeSystem,
     iid : GUID,
     methods : Vec<ComMethodInfo>,
@@ -283,41 +286,50 @@ impl ComInterface
                     parse_quote!( pub )
                 };
 
-        let variants : Result<Vec<_>, _> =
-                [ TypeSystem::Automation, TypeSystem::Raw ].into_iter().map( |&ts| {
+        let variants = HashMap::from_iter(
+            [ TypeSystem::Automation, TypeSystem::Raw ].into_iter().map( |&ts| {
 
             let itf_unique_ident = Ident::new( 
                     &format!( "{}_{:?}", itf_ident.to_string(), ts ), Span::call_site() );
-            let iid = match ts {
-                TypeSystem::Automation => ::utils::parameter_to_guid(
+
+                // IUnknown interfaces do not have type system variants.
+                let unique_base = match base {
+                    Some( ref iunk ) if iunk == "IUnknown" => base.clone(),
+                    ref b => b.as_ref().map( |b| Ident::new( &format!( "{}_{:?}", b, ts ), Span::call_site() ) )
+                };
+
+                let iid = match ts {
+                    TypeSystem::Automation => ::utils::parameter_to_guid(
                         guid_param, crate_name, &itf_unique_ident.to_string(), "IID" )
-                    .map_err( |_| ParseError::ComInterface(
-                            item.get_ident().unwrap().to_string(),
-                            "Bad IID format".into() ) )?
-                    .ok_or_else( || ParseError::ComInterface(
-                            item.get_ident().unwrap().to_string(),
-                            "IID required".into() ) )?,
-                _ => ::utils::generate_guid(
+                        .map_err( |_| ParseError::ComInterface(
+                                item.get_ident().unwrap().to_string(),
+                                "Bad IID format".into() ) )?
+                        .ok_or_else( || ParseError::ComInterface(
+                                item.get_ident().unwrap().to_string(),
+                                "IID required".into() ) )?,
+                    _ => ::utils::generate_guid(
                         crate_name, &itf_unique_ident.to_string(), "IID" ),
-            };
+                };
 
-            // Read the method details.
-            //
-            // TODO: Currently we ignore invalid methods. We should probably do
-            //       something smarter.
-            let methods = fns.iter()
-                    .map( | sig |
-                        ComMethodInfo::new( sig, ts ) )
-                    .filter_map( |r| r.ok() )
-                    .collect::<Vec<_>>();
+                // Read the method details.
+                //
+                // TODO: Currently we ignore invalid methods. We should probably do
+                //       something smarter.
+                let methods = fns.iter()
+                        .map( | sig |
+                            ComMethodInfo::new( sig, ts ) )
+                        .filter_map( |r| r.ok() )
+                        .collect::<Vec<_>>();
 
-            Ok( ComInterfaceVariant {
-                unique_name : itf_unique_ident,
-                type_system : ts,
-                iid : iid,
-                methods : methods
-            } )
-        } ).collect();
+                Ok( ( ts, ComInterfaceVariant {
+                    display_name: itf_ident.clone(),
+                    unique_name : itf_unique_ident,
+                    unique_base_interface : unique_base,
+                    type_system : ts,
+                    iid : iid,
+                    methods : methods
+                } ) )
+            } ).collect::<Result<Vec<_>,_>>()? );
 
         Ok( ComInterface {
             display_name: itf_ident,
@@ -325,12 +337,14 @@ impl ComInterface
             base_interface: base,
             item_type: itf_type,
             is_unsafe : unsafety.is_some(),
-            variants : variants?,
+            variants : variants,
         } )
     }
 
     /// Temp accessor for the automation variant.
-    pub fn aut( &self ) -> &ComInterfaceVariant { &self.variants[0] }
+    pub fn aut( &self ) -> &ComInterfaceVariant {
+        &self.variants[ &TypeSystem::Automation ]
+    }
 
     /// Interface name.
     pub fn name( &self ) -> &Ident { &self.display_name }
@@ -342,7 +356,7 @@ impl ComInterface
     pub fn base_interface( &self ) -> &Option<Ident> { &self.base_interface }
 
     /// Interface methods.
-    pub fn variants( &self ) -> &Vec<ComInterfaceVariant> { &self.variants }
+    pub fn variants( &self ) -> &HashMap<TypeSystem, ComInterfaceVariant> { &self.variants }
 
     /// The type of the associated item for the #[com_interface] attribute.
     ///
@@ -355,11 +369,20 @@ impl ComInterface
 
 impl ComInterfaceVariant {
 
+    /// Interface unique name.
+    pub fn unique_name( &self ) -> &Ident { &self.unique_name }
+
+    /// Interface base interface variant unique name.
+    pub fn unique_base_interface( &self ) -> &Option<Ident> { &self.unique_base_interface }
+
     /// Implemented methods.
     pub fn methods( &self ) -> &Vec<ComMethodInfo> { &self.methods }
 
     /// Interface IID.
     pub fn iid( &self ) -> &GUID { &self.iid }
+
+    /// Gets the type system this interface variant represents.
+    pub fn type_system( &self ) -> TypeSystem { self.type_system }
 }
 
 #[derive(Debug, PartialEq)]
@@ -465,6 +488,7 @@ impl ComImplVariant
 pub struct ComCrate {
     lib : Option<ComLibrary>,
     interfaces : OrderMap<String, ComInterface>,
+    interfaces_by_variants : OrderMap<String, String>,
     structs : OrderMap<String, ComStruct>,
     impls : Vec<ComImpl>,
     incomplete : bool,
@@ -488,10 +512,18 @@ impl ComCrateBuilder {
                     "Multiple [com_library] attributes".into() ) );
         }
 
+        let interfaces_by_variants = {
+            OrderMap::from_iter( self.interfaces.iter()
+                    .flat_map( |itf| itf.variants().iter().map( |(_, itf_variant)|
+                         ( itf_variant.unique_name.to_string(),
+                            itf.display_name.to_string() ) ).collect::<Vec<_>>() ) )
+        };
+
         Ok( ComCrate {
             lib: self.libs.into_iter().next(),
             interfaces: OrderMap::from_iter(
                 self.interfaces.into_iter().map( |i| ( i.name().to_string(), i ) ) ),
+            interfaces_by_variants,
             structs: OrderMap::from_iter(
                 self.structs.into_iter().map( |i| ( i.name().to_string(), i ) ) ),
             impls: self.impls,
@@ -748,6 +780,13 @@ impl ComCrate
     pub fn structs( &self ) -> &OrderMap<String, ComStruct> { &self.structs }
     pub fn impls( &self ) -> &Vec<ComImpl> { &self.impls }
     pub fn is_incomplete( &self ) -> bool { self.incomplete }
+
+    pub fn interface_by_name( &self, name : &str ) -> Option<&ComInterface> {
+        self.interfaces_by_variants
+                .get( name )
+                .and_then( |itf_name| self.interfaces.get( itf_name ) )
+                .or_else( || self.interfaces.get( name ) )
+    }
 }
 
 #[cfg(test)]

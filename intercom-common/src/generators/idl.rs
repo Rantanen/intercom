@@ -8,8 +8,8 @@ use super::GeneratorError;
 
 use utils;
 use model;
-use model::ComCrate;
-use tyhandlers::{Direction};
+use model::{ComCrate, ComInterfaceVariant};
+use tyhandlers::{Direction, TypeSystem};
 use foreign_ty::*;
 use type_parser::*;
 
@@ -80,77 +80,104 @@ impl IdlModel {
     ///
     /// - `path` - The path must point to a crate root containing Cargo.toml or
     ///            to the Cargo.toml itself.
-    pub fn from_path( path : &Path,) -> Result<IdlModel, GeneratorError>
+    pub fn from_path(
+        path : &Path,
+        all_type_systems : bool,
+    ) -> Result<IdlModel, GeneratorError>
     {
         let krate = model::ComCrate::parse_package( path )
                 .map_err( GeneratorError::CrateParseError )?;
-        IdlModel::from_crate( &krate )
+        IdlModel::from_crate( &krate, all_type_systems )
     }
 
     /// Converts the parse result into an IDL that gets written to stdout.
     pub fn from_crate(
-        c : &model::ComCrate
+        c : &model::ComCrate,
+        all_type_systems : bool,
     ) -> Result<IdlModel, GeneratorError> {
+
+        let itf_variant_filter : Box<Fn( &( &TypeSystem, &ComInterfaceVariant ) ) -> bool> =
+                match all_type_systems {
+                    true => Box::new( | _ | true ),
+                    false => Box::new( | ( ts, _ ) | match ts {
+                        TypeSystem::Automation => true,
+                        _ => false
+                    } ),
+                };
 
         let foreign = CTypeHandler;
         let lib = c.lib().as_ref().ok_or( GeneratorError::MissingLibrary )?;
 
         // Define all interfaces.
-        let itfs = c.interfaces().iter().map(|(_, itf)| {
+        let itfs = c.interfaces().iter()
+            .flat_map(|(_, itf)| itf.variants().iter()
+            .filter( itf_variant_filter.as_ref() )
+            .map(|(_, itf_variant)| {
 
-            // Get the method definitions for the current interface.
-            let methods = itf.aut().methods().iter().enumerate().map(|(i,m)| {
+                // Get the method definitions for the current interface.
+                let methods = itf_variant.methods().iter().enumerate().map(|(i,m)| {
 
-                // Construct the argument list.
-                let args = m.raw_com_args().iter().map(|a| {
+                    // Construct the argument list.
+                    let args = m.raw_com_args().iter().map(|a| {
 
-                    // Argument direction affects both the argument attribute and
-                    // whether the argument is passed by pointer or value.
-                    let ( attrs, out_ptr ) = match a.dir {
-                        Direction::In => ( "in", "" ),
-                        Direction::Out => ( "out", "*" ),
-                        Direction::Retval => ( "out, retval", "*" ),
-                    };
+                        // Argument direction affects both the argument attribute and
+                        // whether the argument is passed by pointer or value.
+                        let ( attrs, out_ptr ) = match a.dir {
+                            Direction::In => ( "in", "" ),
+                            Direction::Out => ( "out", "*" ),
+                            Direction::Retval => ( "out, retval", "*" ),
+                        };
 
-                    // Get the foreign type for the arg type.
-                    let com_ty = a.handler.com_ty();
-                    let idl_type = foreign
-                        .get_ty( &com_ty )
-                        .ok_or_else( || GeneratorError::UnsupportedType(
-                                        utils::ty_to_string( &a.ty ) ) )?;
+                        // Get the foreign type for the arg type.
+                        let com_ty = a.handler.com_ty();
+                        let idl_type = foreign
+                            .get_ty( &com_ty )
+                            .ok_or_else( || GeneratorError::UnsupportedType(
+                                            utils::ty_to_string( &a.ty ) ) )?;
 
-                    Ok( IdlArg {
-                        name : a.name.to_string(),
-                        arg_type : format!( "{}{}", idl_type.to_idl( c ), out_ptr ),
-                        attributes : attrs.to_owned(),
+                        Ok( IdlArg {
+                            name : a.name.to_string(),
+                            arg_type : format!( "{}{}", idl_type.to_idl( c ), out_ptr ),
+                            attributes : attrs.to_owned(),
+                        } )
+
+                    } ).collect::<Result<Vec<_>, GeneratorError>>()?;
+
+                    let ret_ty = m.returnhandler.com_ty();
+                    let ret_ty = foreign
+                            .get_ty( &ret_ty )
+                            .ok_or_else( || GeneratorError::UnsupportedType(
+                                            utils::ty_to_string( &ret_ty ) ) )?;
+                    Ok( IdlMethod {
+                    name: utils::pascal_case( m.display_name.to_string() ),
+                        idx: i,
+                        ret_type: ret_ty.to_idl( c ),
+                        args
                     } )
 
                 } ).collect::<Result<Vec<_>, GeneratorError>>()?;
 
-                let ret_ty = m.returnhandler.com_ty();
-                let ret_ty = foreign
-                        .get_ty( &ret_ty )
-                        .ok_or_else( || GeneratorError::UnsupportedType(
-                                        utils::ty_to_string( &ret_ty ) ) )?;
-                Ok( IdlMethod {
-                    name: utils::pascal_case( m.display_name.to_string() ),
-                    idx: i,
-                    ret_type: ret_ty.to_idl( c ),
-                    args
+                let ( itf_name, base_name ) = match all_type_systems {
+                    false => (
+                        itf.name(),
+                        itf.base_interface() ),
+                    true => (
+                        itf_variant.unique_name(),
+                        itf_variant.unique_base_interface() ),
+                };
+
+                // Now that we have methods sorted out, we can construct the final
+                // interface definition.
+                Ok( IdlInterface {
+                    name: foreign.get_name( c, itf_name ),
+                    base: base_name.as_ref().map( |i| foreign.get_name( c, i ) ),
+                    iid: format!( "{:-X}", itf_variant.iid() ),
+                    methods,
                 } )
 
-            } ).collect::<Result<Vec<_>, GeneratorError>>()?;
-
-            // Now that we have methods sorted out, we can construct the final
-            // interface definition.
-            Ok( IdlInterface {
-                name: foreign.get_name( c, itf.name() ),
-                base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, i ) ),
-                iid: format!( "{:-X}", itf.aut().iid() ),
-                methods,
             } )
-
-        } ).collect::<Result<Vec<_>, GeneratorError>>()?;
+            .collect::<Vec<_>>() )
+            .collect::<Result<Vec<_>, GeneratorError>>()?;
 
         // Create coclass definitions.
         //
@@ -164,9 +191,19 @@ impl IdlModel {
             let coclass = &c.structs()[ &class_name.to_string() ];
 
             // Get the interfaces the class implements.
-            let interfaces = coclass.interfaces().iter().map(|itf_name| {
-                foreign.get_name( c, itf_name )
-            } ).collect();
+            let interfaces = coclass.interfaces().iter()
+                .flat_map(|itf_name| {
+                    let itf = &c.interfaces()[ &itf_name.to_string() ];
+                    itf.variants().iter()
+                        .filter( itf_variant_filter.as_ref() )
+                        .map( |(_, itf_variant)| {
+
+                            foreign.get_name( c, match all_type_systems {
+                                false => itf.name(),
+                                true => itf_variant.unique_name(),
+                            } )
+                        } ).collect::<Vec<_>>()
+                } ).collect();
 
             let clsid = coclass.clsid().as_ref()
                     .ok_or_else( || GeneratorError::MissingClsid(

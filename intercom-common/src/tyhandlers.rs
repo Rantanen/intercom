@@ -18,7 +18,7 @@ pub struct TypeConversion {
     pub value : TokenStream,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum TypeSystem {
 
     /// Invariant type system. There should be no differentiation despite the
