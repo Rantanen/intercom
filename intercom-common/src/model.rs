@@ -18,6 +18,7 @@ use ::std::fs;
 use ::std::io::Read;
 use ::ordermap::OrderMap;
 use ::std::iter::FromIterator;
+use ::tyhandlers::{TypeSystem};
 use toml;
 
 #[derive(Fail, Debug)]
@@ -191,13 +192,21 @@ impl ComStruct
 #[derive(Debug, PartialEq)]
 pub struct ComInterface
 {
-    name : Ident,
-    iid : GUID,
+    display_name : Ident,
     visibility : Visibility,
     base_interface : Option<Ident>,
-    methods : Vec<ComMethodInfo>,
+    variants : Vec<ComInterfaceVariant>,
     item_type: ::utils::InterfaceType,
     is_unsafe : bool,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct ComInterfaceVariant
+{
+    unique_name : Ident,
+    type_system : TypeSystem,
+    iid : GUID,
+    methods : Vec<ComMethodInfo>,
 }
 
 impl ComInterface
@@ -239,15 +248,9 @@ impl ComInterface
 
         // The first attribute parameter is the IID. Parse that.
         let mut iter = ::utils::iter_parameters( attr );
-        let iid = ::utils::parameter_to_guid(
-                    &iter.next()
-                        .ok_or_else( || ParseError::ComInterface(
-                                item.get_ident().unwrap().to_string(),
-                                "IID required".into() ) )?,
-                    crate_name, &itf_ident.to_string(), "IID" )
-                .map_err( |_| ParseError::ComInterface(
-                        item.get_ident().unwrap().to_string(),
-                        "Bad IID format".into() ) )?
+
+        // Get the GUID attribute parameter.
+        let guid_param = &iter.next()
                 .ok_or_else( || ParseError::ComInterface(
                         item.get_ident().unwrap().to_string(),
                         "IID required".into() ) )?;
@@ -275,37 +278,62 @@ impl ComInterface
         // Note this may conflict with visibility of the actual [com_class], but
         // nothing we can do for this really.
         let visibility = if let ::syn::Item::Trait( ref t ) = *item {
-                t.vis.clone()
-            } else {
-                parse_quote!( pub )
+                    t.vis.clone()
+                } else {
+                    parse_quote!( pub )
+                };
+
+        let variants : Result<Vec<_>, _> =
+                [ TypeSystem::Automation, TypeSystem::Raw ].into_iter().map( |&ts| {
+
+            let itf_unique_ident = Ident::new( 
+                    &format!( "{}_{:?}", itf_ident.to_string(), ts ), Span::call_site() );
+            let iid = match ts {
+                TypeSystem::Automation => ::utils::parameter_to_guid(
+                        guid_param, crate_name, &itf_unique_ident.to_string(), "IID" )
+                    .map_err( |_| ParseError::ComInterface(
+                            item.get_ident().unwrap().to_string(),
+                            "Bad IID format".into() ) )?
+                    .ok_or_else( || ParseError::ComInterface(
+                            item.get_ident().unwrap().to_string(),
+                            "IID required".into() ) )?,
+                _ => ::utils::generate_guid(
+                        crate_name, &itf_unique_ident.to_string(), "IID" ),
             };
 
-        // Read the method details.
-        //
-        // TODO: Currently we ignore invalid methods. We should probably do
-        //       something smarter.
-        let methods = fns.into_iter()
-            .map( | sig |
-                ComMethodInfo::new( sig ) )
-            .filter_map( |r| r.ok() )
-            .collect::<Vec<_>>();
+            // Read the method details.
+            //
+            // TODO: Currently we ignore invalid methods. We should probably do
+            //       something smarter.
+            let methods = fns.iter()
+                    .map( | sig |
+                        ComMethodInfo::new( sig, ts ) )
+                    .filter_map( |r| r.ok() )
+                    .collect::<Vec<_>>();
+
+            Ok( ComInterfaceVariant {
+                unique_name : itf_unique_ident,
+                type_system : ts,
+                iid : iid,
+                methods : methods
+            } )
+        } ).collect();
 
         Ok( ComInterface {
-            name: itf_ident,
-            iid,
+            display_name: itf_ident,
             visibility,
             base_interface: base,
-            methods,
             item_type: itf_type,
             is_unsafe : unsafety.is_some(),
+            variants : variants?,
         } )
     }
 
-    /// Interface name.
-    pub fn name( &self ) -> &Ident { &self.name }
+    /// Temp accessor for the automation variant.
+    pub fn aut( &self ) -> &ComInterfaceVariant { &self.variants[0] }
 
-    /// Interface IID.
-    pub fn iid( &self ) -> &GUID { &self.iid }
+    /// Interface name.
+    pub fn name( &self ) -> &Ident { &self.display_name }
 
     /// Interface visibility.
     pub fn visibility( &self ) -> &Visibility { &self.visibility }
@@ -314,7 +342,7 @@ impl ComInterface
     pub fn base_interface( &self ) -> &Option<Ident> { &self.base_interface }
 
     /// Interface methods.
-    pub fn methods( &self ) -> &Vec<ComMethodInfo> { &self.methods }
+    pub fn variants( &self ) -> &Vec<ComInterfaceVariant> { &self.variants }
 
     /// The type of the associated item for the #[com_interface] attribute.
     ///
@@ -325,12 +353,29 @@ impl ComInterface
     pub fn is_unsafe( &self ) -> bool { self.is_unsafe }
 }
 
+impl ComInterfaceVariant {
+
+    /// Implemented methods.
+    pub fn methods( &self ) -> &Vec<ComMethodInfo> { &self.methods }
+
+    /// Interface IID.
+    pub fn iid( &self ) -> &GUID { &self.iid }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct ComImpl
 {
     struct_name : Ident,
-    interface_name : Ident,
+    interface_display_name : Ident,
     is_trait_impl : bool,
+    variants : Vec<ComImplVariant>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct ComImplVariant
+{
+    type_system : TypeSystem,
+    interface_unique_name : Ident,
     methods : Vec<ComMethodInfo>,
 }
 
@@ -356,41 +401,62 @@ impl ComImpl
         item : &::syn::Item,
     ) -> ParseResult< ComImpl >
     {
+        // Resolve the idents and functions.
         let ( itf_ident_opt, struct_ident, fns ) =
                 ::utils::get_impl_data( item )
                     .ok_or_else( || ParseError::ComImpl(
                             item.get_ident().unwrap().to_string(),
                             "<Unknown>".into(),
                             "Unsupported associated item".into() ) )?;
+        let is_trait_impl = itf_ident_opt.is_some();
+        let itf_ident = itf_ident_opt.unwrap_or_else( || struct_ident.clone() );
 
-        // Turn the impl methods into MethodInfo.
-        //
-        // TODO: Currently we ignore invalid methods. We should probably do
-        //       something smarter.
-        let methods = fns.into_iter()
-            .map( | sig |
-                ComMethodInfo::new( sig ).map_err( |_| sig.ident.clone() ) )
-            .filter_map( |r| r.ok() )
-            .collect::<Vec<_>>();
+        let variants : Vec<_> =
+                [ TypeSystem::Automation, TypeSystem::Raw ].into_iter().map( |&ts| {
+
+            let itf_unique_ident = Ident::new(
+                    &format!( "{}_{:?}", itf_ident.to_string(), ts ), Span::call_site() );
+
+            // Turn the impl methods into MethodInfo.
+            //
+            // TODO: Currently we ignore invalid methods. We should probably do
+            //       something smarter.
+            let methods = fns.iter()
+                .map( | sig |
+                    ComMethodInfo::new( sig, ts ).map_err( |_| sig.ident.clone() ) )
+                .filter_map( |r| r.ok() )
+                .collect::<Vec<_>>();
+
+            ComImplVariant {
+                type_system: ts,
+                interface_unique_name: itf_unique_ident,
+                methods: methods
+            }
+        } ).collect();
 
         Ok( ComImpl {
-            is_trait_impl: itf_ident_opt.is_some(),
-            interface_name: itf_ident_opt
-                    .unwrap_or_else( || struct_ident.clone() ),
             struct_name: struct_ident,
-            methods,
+            interface_display_name: itf_ident,
+            variants: variants,
+            is_trait_impl
         } )
     }
+
+    /// Temp accessor for the automation variant.
+    pub fn aut( &self ) -> &ComImplVariant { &self.variants[0] }
 
     /// Struct name that the trait is implemented for.
     pub fn struct_name( &self ) -> &Ident { &self.struct_name }
 
     /// Trait name that is implemented. Struct name if this is an implicit impl.
-    pub fn interface_name( &self ) -> &Ident { &self.interface_name }
+    pub fn interface_name( &self ) -> &Ident { &self.interface_display_name }
 
     /// True if a valid trait is implemented, false for implicit impls.
     pub fn is_trait_impl( &self ) -> bool { self.is_trait_impl }
+}
 
+impl ComImplVariant
+{
     /// Implemented methods.
     pub fn methods( &self ) -> &Vec<ComMethodInfo> { &self.methods }
 }

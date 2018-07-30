@@ -9,7 +9,7 @@ use super::GeneratorError;
 use utils;
 use model;
 use model::ComCrate;
-use methodinfo;
+use tyhandlers::{Direction};
 use foreign_ty::*;
 use type_parser::*;
 
@@ -99,7 +99,7 @@ impl IdlModel {
         let itfs = c.interfaces().iter().map(|(_, itf)| {
 
             // Get the method definitions for the current interface.
-            let methods = itf.methods().iter().enumerate().map(|(i,m)| {
+            let methods = itf.aut().methods().iter().enumerate().map(|(i,m)| {
 
                 // Construct the argument list.
                 let args = m.raw_com_args().iter().map(|a| {
@@ -107,9 +107,9 @@ impl IdlModel {
                     // Argument direction affects both the argument attribute and
                     // whether the argument is passed by pointer or value.
                     let ( attrs, out_ptr ) = match a.dir {
-                        methodinfo::Direction::In => ( "in", "" ),
-                        methodinfo::Direction::Out => ( "out", "*" ),
-                        methodinfo::Direction::Retval => ( "out, retval", "*" ),
+                        Direction::In => ( "in", "" ),
+                        Direction::Out => ( "out", "*" ),
+                        Direction::Retval => ( "out, retval", "*" ),
                     };
 
                     // Get the foreign type for the arg type.
@@ -133,7 +133,7 @@ impl IdlModel {
                         .ok_or_else( || GeneratorError::UnsupportedType(
                                         utils::ty_to_string( &ret_ty ) ) )?;
                 Ok( IdlMethod {
-                    name: utils::pascal_case( m.name.to_string() ),
+                    name: utils::pascal_case( m.display_name.to_string() ),
                     idx: i,
                     ret_type: ret_ty.to_idl( c ),
                     args
@@ -146,7 +146,7 @@ impl IdlModel {
             Ok( IdlInterface {
                 name: foreign.get_name( c, itf.name() ),
                 base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, i ) ),
-                iid: format!( "{:-X}", itf.iid() ),
+                iid: format!( "{:-X}", itf.aut().iid() ),
                 methods,
             } )
 

@@ -6,7 +6,7 @@ use std::iter;
 
 use idents;
 use utils;
-use methodinfo::Direction;
+use tyhandlers::Direction;
 use model;
 
 extern crate proc_macro;
@@ -29,14 +29,16 @@ pub fn expand_com_interface(
     // Parse the attribute.
     let mut output = vec![];
     let itf = model::ComInterface::parse(
-            &lib_name(), &attr_tokens.to_string(), &item_tokens.to_string() )?;
+            &lib_name(),
+            &attr_tokens.to_string(),
+            &item_tokens.to_string() )?;
     let itf_ident = itf.name();
     let visibility = itf.visibility();
     let iid_ident = idents::iid( itf.name() );
     let vtable_ident = idents::vtable_struct( itf.name() );
 
     // IID_IInterface GUID.
-    let iid_tokens = utils::get_guid_tokens( itf.iid() );
+    let iid_tokens = utils::get_guid_tokens( itf.aut().iid() );
     let iid_doc = format!( "`{}` interface ID.", itf_ident );
     output.push( quote!(
         #[doc = #iid_doc]
@@ -79,9 +81,9 @@ pub fn expand_com_interface(
     //       incompatible functions instead.
     let calling_convention = get_calling_convetion();
     let mut impls = vec![];
-    for method_info in itf.methods() {
+    for method_info in itf.aut().methods() {
 
-        let method_ident = &method_info.name;
+        let method_ident = &method_info.display_name;
         let in_out_args = method_info.raw_com_args()
                 .into_iter()
                 .map( |com_arg| {

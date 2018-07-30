@@ -9,10 +9,10 @@ use std::path::Path;
 
 use super::GeneratorError;
 
+use tyhandlers::{Direction};
 use foreign_ty::*;
 use type_parser::*;
 use guid::*;
-use methodinfo;
 use model;
 use model::ComCrate;
 use utils;
@@ -62,7 +62,7 @@ trait CppTypeInfo<'s> {
     /// Gets full type for C++.
     fn to_cpp(
         &self,
-        direction: methodinfo::Direction,
+        direction: Direction,
         krate : &ComCrate
     ) -> String;
 
@@ -104,16 +104,16 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
 
     fn to_cpp(
         &self,
-        direction: methodinfo::Direction,
+        direction: Direction,
         krate : &ComCrate,
     ) -> String
     {
         // Argument direction affects both the argument attribute and
         // whether the argument is passed by pointer or value.
         let out_ptr = match direction {
-            methodinfo::Direction::In
-            | methodinfo::Direction::Retval => "",
-            methodinfo::Direction::Out => "*",
+            Direction::In
+            | Direction::Retval => "",
+            Direction::Out => "*",
         };
 
         // TODO: Enable once verified that the "const" works.
@@ -197,14 +197,14 @@ impl CppModel {
         let interfaces = c.interfaces().iter().map( |(_, itf)| {
 
             // Get the method definitions for the current interface.
-            let methods = itf.methods().iter().map( |m| {
+            let methods = itf.aut().methods().iter().map( |m| {
 
                 // Construct the argument list.
                 let args = m.raw_com_args().iter().map( |a| {
 
                     // Redirect return values converted out arguments.
                     let dir = match a.dir {
-                            methodinfo::Direction::Retval => methodinfo::Direction::Out,
+                            Direction::Retval => Direction::Out,
                             d => d,
                     };
 
@@ -225,8 +225,8 @@ impl CppModel {
                         .ok_or_else( || GeneratorError::UnsupportedType(
                                         utils::ty_to_string( &ret_ty ) ) )?;
                 Ok( CppMethod {
-                    name: utils::pascal_case( m.name.to_string() ),
-                    ret_type: ret_ty.to_cpp( methodinfo::Direction::Retval, c ),
+                    name: utils::pascal_case( m.display_name.to_string() ),
+                    ret_type: ret_ty.to_cpp( Direction::Retval, c ),
                     args
                 } )
 
@@ -234,8 +234,9 @@ impl CppModel {
 
             Ok( CppInterface {
                 name: foreign.get_name( c, itf.name() ),
-                iid_struct: guid_as_struct( itf.iid() ),
-                base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, i ) ),
+                iid_struct: guid_as_struct( itf.aut().iid() ),
+                base: itf.base_interface().as_ref()
+                        .map( |i| foreign.get_name( c, i ) ),
                 methods,
             } )
 

@@ -1,8 +1,8 @@
 
 use prelude::*;
 use syn::*;
-use methodinfo::{ComArg, Direction};
-use tyhandlers;
+use methodinfo::{ComArg};
+use tyhandlers::{self, TypeContext, TypeSystem, Direction};
 use utils;
 
 /// Defines return handler for handling various different return type schemes.
@@ -15,8 +15,9 @@ pub trait ReturnHandler : ::std::fmt::Debug {
     fn com_ty( &self ) -> Type
     {
         tyhandlers::get_ty_handler(
-                &self.rust_ty(),
-                tyhandlers::TypeContext::retval() ).com_ty()
+                    &self.rust_ty(),
+                    TypeContext::new( Direction::Retval, TypeSystem::Invariant ),
+                ).com_ty()
     }
 
     /// Gets the return statement for converting the COM result into Rust
@@ -40,15 +41,16 @@ impl ReturnHandler for VoidHandler {
 
 /// Simple return type with the return value as the immediate value.
 #[derive(Debug)]
-struct ReturnOnlyHandler( Type );
+struct ReturnOnlyHandler( Type, TypeSystem );
 impl ReturnHandler for ReturnOnlyHandler {
 
     fn rust_ty( &self ) -> Type { self.0.clone() }
 
     fn com_to_rust_return( &self, result : &Ident ) -> TokenStream {
         let conversion = tyhandlers::get_ty_handler(
-                &self.rust_ty(),
-                tyhandlers::TypeContext::retval() ).com_to_rust( result );
+                    &self.rust_ty(),
+                    TypeContext::new( Direction::Retval, self.1 )
+                ).com_to_rust( result );
         if conversion.temporary.is_some() {
             panic!( "Return values cannot depend on temporaries" );
         }
@@ -58,8 +60,9 @@ impl ReturnHandler for ReturnOnlyHandler {
 
     fn rust_to_com_return( &self, result : &Ident ) -> TokenStream {
         let conversion = tyhandlers::get_ty_handler(
-                &self.rust_ty(),
-                tyhandlers::TypeContext::retval() ).rust_to_com( result );
+                    &self.rust_ty(),
+                    TypeContext::new( Direction::Retval, self.1 ),
+                ).rust_to_com( result );
         if conversion.temporary.is_some() {
             panic!( "Return values cannot depend on temporaries" );
         }
@@ -73,7 +76,12 @@ impl ReturnHandler for ReturnOnlyHandler {
 /// Result type that supports error info for the `Err` value. Converted to
 /// `[retval]` on success or `HRESULT` + `IErrorInfo` on error.
 #[derive(Debug)]
-struct ErrorResultHandler { retval_ty: Type, return_ty: Type }
+struct ErrorResultHandler {
+    retval_ty: Type,
+    return_ty: Type,
+    type_system: TypeSystem
+}
+
 impl ReturnHandler for ErrorResultHandler {
 
     fn rust_ty( &self ) -> Type { self.return_ty.clone() }
@@ -142,11 +150,14 @@ impl ReturnHandler for ErrorResultHandler {
     }
 
     fn com_out_args( &self ) -> Vec<ComArg> {
-        get_out_args_for_result( &self.retval_ty )
+        get_out_args_for_result( &self.retval_ty, self.type_system )
     }
 }
 
-fn get_out_args_for_result( retval_ty : &Type ) -> Vec<ComArg> {
+fn get_out_args_for_result(
+    retval_ty : &Type,
+    type_system : TypeSystem,
+) -> Vec<ComArg> {
 
     match *retval_ty {
 
@@ -157,12 +168,14 @@ fn get_out_args_for_result( retval_ty : &Type ) -> Vec<ComArg> {
                 .map( |( idx, ty )| ComArg::new(
                             Ident::new( &format!( "__out{}", idx + 1), Span::call_site() ),
                             ty.clone(),
-                            Direction::Out ) )
+                            Direction::Out,
+                            type_system ) )
                 .collect::<Vec<_>>(),
         _ => vec![ ComArg::new(
                 Ident::new( "__out", Span::call_site() ),
                 retval_ty.clone(),
-                Direction::Retval ) ],
+                Direction::Retval,
+                type_system ) ],
     }
 }
 
@@ -212,17 +225,19 @@ fn get_rust_ok_values(
 /// Resolves the correct return handler to use.
 pub fn get_return_handler(
     retval_ty : &Option< Type >,
-    return_ty : &Option< Type >
+    return_ty : &Option< Type >,
+    type_system : TypeSystem,
 ) -> Result< Box<ReturnHandler>, () >
 {
     Ok( match ( retval_ty, return_ty ) {
         ( &None, &None ) => Box::new( VoidHandler ),
         ( &None, &Some( ref ty ) )
-            => Box::new( ReturnOnlyHandler( ty.clone() ) ),
+            => Box::new( ReturnOnlyHandler( ty.clone(), type_system ) ),
         ( &Some( ref rv ), &Some( ref rt ) )
             => Box::new( ErrorResultHandler {
                 retval_ty: rv.clone(),
                 return_ty: rt.clone(),
+                type_system
             } ),
 
         // Unsupported return scheme. Note we are using Result::Err instead of

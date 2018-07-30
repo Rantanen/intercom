@@ -4,8 +4,8 @@ use super::common::*;
 
 use std::iter;
 
+use tyhandlers::Direction;
 use idents;
-use methodinfo::Direction;
 use model;
 
 extern crate proc_macro;
@@ -118,9 +118,9 @@ pub fn expand_com_impl(
     // seem okay. So in case we encounter any errors we'll just skip the method
     // silently. This is done by breaking out of the 'catch' before adding the
     // method to the vtable fields.
-    for method_info in imp.methods() {
+    for method_info in imp.aut().methods() {
 
-        let method_ident = &method_info.name;
+        let method_ident = &method_info.display_name;
         let method_impl_ident = idents::method_impl(
                 &struct_ident, &itf_ident, &method_ident.to_string() );
 
