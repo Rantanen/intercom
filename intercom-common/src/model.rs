@@ -391,7 +391,7 @@ pub struct ComImpl
     struct_name : Ident,
     interface_display_name : Ident,
     is_trait_impl : bool,
-    variants : Vec<ComImplVariant>,
+    variants : HashMap<TypeSystem, ComImplVariant>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -434,8 +434,8 @@ impl ComImpl
         let is_trait_impl = itf_ident_opt.is_some();
         let itf_ident = itf_ident_opt.unwrap_or_else( || struct_ident.clone() );
 
-        let variants : Vec<_> =
-                [ TypeSystem::Automation, TypeSystem::Raw ].into_iter().map( |&ts| {
+        let variants = HashMap::from_iter(
+            [ TypeSystem::Automation, TypeSystem::Raw ].into_iter().map( |&ts| {
 
             let itf_unique_ident = Ident::new(
                     &format!( "{}_{:?}", itf_ident.to_string(), ts ), Span::call_site() );
@@ -450,12 +450,12 @@ impl ComImpl
                 .filter_map( |r| r.ok() )
                 .collect::<Vec<_>>();
 
-            ComImplVariant {
+            ( ts, ComImplVariant {
                 type_system: ts,
                 interface_unique_name: itf_unique_ident,
                 methods: methods
-            }
-        } ).collect();
+            } )
+        } ) );
 
         Ok( ComImpl {
             struct_name: struct_ident,
@@ -466,7 +466,7 @@ impl ComImpl
     }
 
     /// Temp accessor for the automation variant.
-    pub fn aut( &self ) -> &ComImplVariant { &self.variants[0] }
+    pub fn aut( &self ) -> &ComImplVariant { &self.variants[ &TypeSystem::Automation ] }
 
     /// Struct name that the trait is implemented for.
     pub fn struct_name( &self ) -> &Ident { &self.struct_name }
