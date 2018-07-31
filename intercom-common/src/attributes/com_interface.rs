@@ -1,4 +1,5 @@
 
+use prelude::*;
 use super::common::*;
 
 use std::iter;
@@ -57,10 +58,10 @@ pub fn expand_com_interface(
     // Create a vector for the virtual table fields and insert the base
     // interface virtual table in it if required.
     let mut fields = vec![];
-    if let Some( base ) = *itf.base_interface() {
-        let vtbl = match base.as_ref() {
+    if let Some( ref base ) = *itf.base_interface() {
+        let vtbl = match base.to_string().as_ref() {
             "IUnknown" => quote!( ::intercom::IUnknownVtbl ),
-            _ => { let vtbl = idents::vtable_struct( base ); quote!( #vtbl ) }
+            _ => { let vtbl = idents::vtable_struct( &base ); quote!( #vtbl ) }
         };
         fields.push( quote!( pub __base : #vtbl ) );
     }
@@ -130,7 +131,7 @@ pub fn expand_com_interface(
                     let name = com_arg.arg.name;
                     match com_arg.dir {
                         Direction::In => {
-                            let param = com_arg.arg.handler.rust_to_com( name );
+                            let param = com_arg.arg.handler.rust_to_com( &name );
                             quote!( #param )
                         },
                         Direction::Out | Direction::Retval
@@ -144,7 +145,7 @@ pub fn expand_com_interface(
         let params = iter::once( quote!( comptr ) ).chain( params );
 
         // Create the return statement. 
-        let return_ident = Ident::from( "__result" );
+        let return_ident = Ident::new( "__result", Span::call_site() );
         let return_statement = method_info
                 .returnhandler
                 .com_to_rust_return( &return_ident );

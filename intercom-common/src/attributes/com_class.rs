@@ -1,12 +1,11 @@
 
+use prelude::*;
 use super::common::*;
 
 use idents;
 use utils;
 use model;
 
-extern crate proc_macro;
-use self::proc_macro::TokenStream;
 use syn::*;
 
 /// Expands the `com_class` attribute.
@@ -17,9 +16,9 @@ use syn::*;
 /// - `IUnknown` virtual table instance.
 /// - `CoClass` trait implementation.
 pub fn expand_com_class(
-    attr_tokens: &TokenStream,
-    item_tokens: TokenStream,
-) -> Result<TokenStream, model::ParseError>
+    attr_tokens: &TokenStreamNightly,
+    item_tokens: TokenStreamNightly,
+) -> Result<TokenStreamNightly, model::ParseError>
 {
     // Parse the attribute.
     let mut output = vec![];
@@ -56,9 +55,9 @@ pub fn expand_com_class(
     // This is done to ensure the IUnknown pointer matches the ComBox pointer.
     // We ensure this by defining the primary IUnknown methods on the
     // ISupportErrorInfo virtual table and having that at the beginning.
-    let isupporterrorinfo_ident = Ident::from( "ISupportErrorInfo".to_owned() );
+    let isupporterrorinfo_ident = Ident::new( "ISupportErrorInfo", Span::call_site() );
     let isupporterrorinfo_vtable_instance_ident =
-            idents::vtable_instance( struct_ident, isupporterrorinfo_ident );
+            idents::vtable_instance( &struct_ident, &isupporterrorinfo_ident );
     let mut vtable_list_field_decls = vec![
         quote!( _ISupportErrorInfo : &'static ::intercom::ISupportErrorInfoVtbl ) ];
     let mut vtable_list_field_values = vec![
@@ -70,10 +69,10 @@ pub fn expand_com_class(
     for itf in cls.interfaces() {
 
         // Various idents.
-        let offset_ident = idents::vtable_offset( struct_ident, *itf );
-        let iid_ident = idents::iid( *itf );
-        let vtable_struct_ident = idents::vtable_struct( *itf );
-        let vtable_instance_ident = idents::vtable_instance( struct_ident, *itf );
+        let offset_ident = idents::vtable_offset( &struct_ident, itf );
+        let iid_ident = idents::iid( itf );
+        let vtable_struct_ident = idents::vtable_struct( itf );
+        let vtable_instance_ident = idents::vtable_instance( &struct_ident, itf );
 
         // Store the field offset globally. We need this offset when implementing
         // the delegating query_interface methods. The only place where we know
@@ -166,7 +165,7 @@ pub fn expand_com_class(
         ) );
 
         // Check if the current interface is the implicit struct interface.
-        if struct_ident == itf {
+        if struct_ident == &itf.to_string() {
 
             // Implicit interface.
             //
@@ -226,7 +225,7 @@ pub fn expand_com_class(
     // interfaces that the coclass implements.
 
     // VTableList struct definition.
-    let vtable_list_ident = idents::vtable_list( struct_ident );
+    let vtable_list_ident = idents::vtable_list( &struct_ident );
     let visibility = cls.visibility();
     output.push( quote!(
             #[allow(non_snake_case)]

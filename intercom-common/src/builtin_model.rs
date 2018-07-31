@@ -2,13 +2,14 @@
 //! Defines the default Intercom type model.
 //!
 
+use prelude::*;
 use model::{ ComInterface, ComStruct, ComImpl };
 
 pub struct BuiltinTypeInfo {
     pub interface: ComInterface,
     pub class: ComStruct,
     pub implementation: ComImpl,
-    pub ctor : ::quote::Tokens,
+    pub ctor : TokenStream,
 }
 
 pub fn builtin_intercom_types( lib_name: &str ) -> Vec<BuiltinTypeInfo> {

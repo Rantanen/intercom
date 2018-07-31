@@ -132,7 +132,7 @@ impl IdlModel {
                         .ok_or_else( || GeneratorError::UnsupportedType(
                                         utils::ty_to_string( &ret_ty ) ) )?;
                 Ok( IdlMethod {
-                    name: utils::pascal_case( m.name.as_ref() ),
+                    name: utils::pascal_case( m.name.to_string() ),
                     idx: i,
                     ret_type: ret_ty.to_idl( c ),
                     args
@@ -144,7 +144,7 @@ impl IdlModel {
             // interface definition.
             Ok( IdlInterface {
                 name: foreign.get_name( c, itf.name() ),
-                base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, *i ) ),
+                base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, i ) ),
                 iid: format!( "{:-X}", itf.iid() ),
                 methods,
             } )
@@ -160,11 +160,11 @@ impl IdlModel {
         let classes = lib.coclasses().iter().map(|class_name| {
 
             // Get the class details by matching the name.
-            let coclass = &c.structs()[ class_name.as_ref() ];
+            let coclass = &c.structs()[ &class_name.to_string() ];
 
             // Get the interfaces the class implements.
             let interfaces = coclass.interfaces().iter().map(|itf_name| {
-                foreign.get_name( c, *itf_name )
+                foreign.get_name( c, itf_name )
             } ).collect();
 
             let clsid = coclass.clsid().as_ref()
