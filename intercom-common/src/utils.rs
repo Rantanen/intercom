@@ -1,7 +1,7 @@
 
+use prelude::*;
 use syn::*;
 use syn::synom::Parser;
-use quote::{Tokens};
 
 use error::MacroError;
 use super::*;
@@ -56,7 +56,7 @@ pub fn get_ident_and_fns(
                         *unsafety ) )
             },
         Item::Trait( ItemTrait {
-                ident,
+                ref ident,
                 unsafety,
                 ref items,
                 .. } )
@@ -69,7 +69,7 @@ pub fn get_ident_and_fns(
 
             match methods {
                 Some( m ) => Some( (
-                        ident,
+                        ident.clone(),
                         m,
                         InterfaceType::Trait,
                         unsafety,
@@ -191,7 +191,7 @@ pub fn parameter_to_guid(
 ) -> Result< Option< guid::GUID >, String >
 {
     if let AttrParam::Word( ref i ) = *p {
-        return Ok( match i.as_ref() {
+        return Ok( match i.to_string().as_ref() {
             "AUTO_GUID" =>
                 Some( generate_guid( crate_name, item_name, item_type ) ),
             "NO_GUID" =>
@@ -278,7 +278,7 @@ pub fn unit_ty() -> Type
 
 pub fn get_guid_tokens(
     g : &guid::GUID
-) -> Tokens
+) -> TokenStream
 {
     let d1 = g.data1;
     let d2 = g.data2;
@@ -300,7 +300,8 @@ pub fn get_guid_tokens(
 }
 
 /// Convert the Rust identifier from `snake_case` to `PascalCase`
-pub fn pascal_case( input : &str ) -> String {
+pub fn pascal_case<T: AsRef<str>>( input : T ) -> String {
+    let input = input.as_ref();
 
     // Allocate the output string. We'll never increase the amount of
     // characters so we can reserve string buffer using the input string length.

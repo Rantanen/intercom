@@ -98,7 +98,7 @@ impl ComMethodInfo {
         m : &MethodSig
     ) -> Result<ComMethodInfo, ComMethodInfoError>
     {
-        Self::new_from_parts( m.ident, &m.decl, m.unsafety.is_some() )
+        Self::new_from_parts( m.ident.clone(), &m.decl, m.unsafety.is_some() )
     }
 
     pub fn new_from_parts(

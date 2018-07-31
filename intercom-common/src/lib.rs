@@ -3,6 +3,7 @@
 
 #[macro_use] extern crate quote;
 #[macro_use] extern crate syn;
+extern crate proc_macro2;
 extern crate sha1;
 extern crate ordermap;
 extern crate toml;
@@ -26,3 +27,4 @@ pub mod builtin_model;
 pub mod foreign_ty;
 pub mod attributes;
 pub mod type_parser;
+pub mod prelude;

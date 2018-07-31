@@ -7,6 +7,7 @@
 //! purposes in the future.
 //!
 
+use ::prelude::*;
 use ::guid::GUID;
 use ::ast_converters::*;
 use ::methodinfo::ComMethodInfo;
@@ -153,7 +154,7 @@ impl ComStruct
                     .ok_or_else( || ParseError::ComStruct(
                             item.ident.to_string(),
                             "No CLSID specified".into() ) )?,
-                crate_name, item.ident.as_ref(), "CLSID" )
+                crate_name, item.ident.to_string().as_ref(), "CLSID" )
             .map_err( |_| ParseError::ComStruct(
                     item.ident.to_string(),
                     "Bad CLSID format".into() ) )?;
@@ -167,7 +168,7 @@ impl ComStruct
                         "Bad interface name".into() ) )?;
 
         Ok( ComStruct {
-            name: item.ident,
+            name: item.ident.clone(),
             visibility: item.vis.clone(),
             clsid,
             interfaces,
@@ -175,7 +176,7 @@ impl ComStruct
     }
 
     /// Struct name.
-    pub fn name( &self ) -> Ident { self.name }
+    pub fn name( &self ) -> &Ident { &self.name }
 
     /// Struct CLSID.
     pub fn clsid( &self ) -> &Option<GUID> { &self.clsid }
@@ -243,7 +244,7 @@ impl ComInterface
                         .ok_or_else( || ParseError::ComInterface(
                                 item.get_ident().unwrap().to_string(),
                                 "IID required".into() ) )?,
-                    crate_name, itf_ident.as_ref(), "IID" )
+                    crate_name, &itf_ident.to_string(), "IID" )
                 .map_err( |_| ParseError::ComInterface(
                         item.get_ident().unwrap().to_string(),
                         "Bad IID format".into() ) )?
@@ -262,7 +263,7 @@ impl ComInterface
                             item.get_ident().unwrap().to_string(),
                             "Invalid base interface".into() ) ) )
                 .map_or( Ok(None), |o| o.map(Some) )?
-                .unwrap_or_else( || "IUnknown".into() );
+                .unwrap_or_else( || Ident::new( "IUnknown", Span::call_site() ) );
         let base = if base == "NO_BASE" { None } else { Some( base ) };
 
         // Visibility for trait interfaces is the visibility of the trait.
@@ -301,7 +302,7 @@ impl ComInterface
     }
 
     /// Interface name.
-    pub fn name( &self ) -> Ident { self.name }
+    pub fn name( &self ) -> &Ident { &self.name }
 
     /// Interface IID.
     pub fn iid( &self ) -> &GUID { &self.iid }
@@ -368,24 +369,24 @@ impl ComImpl
         //       something smarter.
         let methods = fns.into_iter()
             .map( | sig |
-                ComMethodInfo::new( sig ).map_err( |_| sig.ident ) )
+                ComMethodInfo::new( sig ).map_err( |_| sig.ident.clone() ) )
             .filter_map( |r| r.ok() )
             .collect::<Vec<_>>();
 
         Ok( ComImpl {
-            struct_name: struct_ident,
             is_trait_impl: itf_ident_opt.is_some(),
             interface_name: itf_ident_opt
-                    .unwrap_or_else( || struct_ident ),
+                    .unwrap_or_else( || struct_ident.clone() ),
+            struct_name: struct_ident,
             methods,
         } )
     }
 
     /// Struct name that the trait is implemented for.
-    pub fn struct_name( &self ) -> Ident { self.struct_name }
+    pub fn struct_name( &self ) -> &Ident { &self.struct_name }
 
     /// Trait name that is implemented. Struct name if this is an implicit impl.
-    pub fn interface_name( &self ) -> Ident { self.interface_name }
+    pub fn interface_name( &self ) -> &Ident { &self.interface_name }
 
     /// True if a valid trait is implemented, false for implicit impls.
     pub fn is_trait_impl( &self ) -> bool { self.is_trait_impl }
@@ -445,7 +446,7 @@ impl ComCrateBuilder {
         for lib in &mut self.libs {
             for clsid in built_in_types.iter().filter_map( |bti|
                     if bti.class.clsid.is_some() {
-                        Some( bti.class.name() )
+                        Some( bti.class.name.clone() )
                     } else {
                         None
                     } ) {
@@ -650,7 +651,7 @@ impl ComCrate
     {
         for item in items {
             for attr in &item.get_attributes().unwrap() {
-                match attr.path.get_ident().unwrap().as_ref() {
+                match attr.path.get_ident().unwrap().to_string().as_ref() {
                     "com_library" =>
                         b.libs.push( ComLibrary::from_ast( crate_name, attr )? ),
                     "com_interface" =>

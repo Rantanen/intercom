@@ -1,7 +1,7 @@
 
+use ::prelude::*;
 use std::rc::Rc;
 use syn::*;
-use quote::Tokens;
 
 use ast_converters::*;
 
@@ -10,10 +10,10 @@ pub struct ComToRust
 {
     /// Optional expression for storing a temporary value in the stack
     /// for the duration of the Rust call.
-    pub stack: Option<Tokens>,
+    pub stack: Option<TokenStream>,
 
     /// Expression that converts the COM type into Rust type.
-    pub conversion: Tokens
+    pub conversion: TokenStream
 }
 
 /// Defines Type-specific logic for handling the various parameter types in the
@@ -31,7 +31,7 @@ pub trait TypeHandler {
 
     /// Converts a COM parameter named by the ident into a Rust type.
     fn com_to_rust(
-        &self, ident : Ident
+        &self, ident : &Ident
     ) -> ComToRust
     {
         ComToRust {
@@ -42,20 +42,20 @@ pub trait TypeHandler {
 
     /// Converts a Rust parameter named by the ident into a COM type.
     fn rust_to_com(
-        &self, ident : Ident
-    ) -> Tokens
+        &self, ident : &Ident
+    ) -> TokenStream
     {
         quote!( #ident.into() )
     }
 
     /// Gets the default value for the type.
-    fn default_value( &self ) -> Tokens
+    fn default_value( &self ) -> TokenStream
     {
         match self.rust_ty() {
             Type::Path( ref p ) => {
                 let ident = p.path.get_ident().unwrap();
-                let name = ident.as_ref();
-                match name {
+                let name = ident.to_string();
+                match name.as_ref() {
                     "c_void"
                         | "RawComPtr"
                         => quote!( ::std::ptr::null_mut() ),
@@ -86,7 +86,7 @@ impl TypeHandler for ComItfParam {
     fn rust_ty( &self ) -> Type { self.0.clone() }
 
     /// Gets the default value for the type.
-    fn default_value( &self ) -> Tokens
+    fn default_value( &self ) -> TokenStream
     {
         quote!( ComItf::null_itf() )
     }
@@ -103,7 +103,7 @@ impl TypeHandler for StringParam
         parse_quote!( ::intercom::BStr )
     }
 
-    fn com_to_rust( &self, ident : Ident ) -> ComToRust
+    fn com_to_rust( &self, ident : &Ident ) -> ComToRust
     {
         ComToRust {
             stack: None,
@@ -111,7 +111,7 @@ impl TypeHandler for StringParam
         }
     }
 
-    fn rust_to_com( &self, ident : Ident ) -> Tokens
+    fn rust_to_com( &self, ident : &Ident ) -> TokenStream
     {
         quote!( #ident.into() )
     }
@@ -128,18 +128,18 @@ impl TypeHandler for StringRefParam
         parse_quote!( ::intercom::BStr )
     }
 
-    fn com_to_rust( &self, ident : Ident ) -> ComToRust
+    fn com_to_rust( &self, ident : &Ident ) -> ComToRust
     {
         // Generate unique name for each stack variable to avoid conflicts with function
         // thay may have multiple parameters.
-        let as_string_ident = Ident::from( format!( "{}_as_string", ident ) );
+        let as_string_ident = Ident::new( &format!( "{}_as_string", ident ), Span::call_site() );
         ComToRust {
             stack: Some( quote!( let #as_string_ident: String = #ident.into(); ) ),
             conversion: quote!( #as_string_ident.as_ref() )
         }
     }
 
-    fn rust_to_com( &self, ident : Ident ) -> Tokens
+    fn rust_to_com( &self, ident : &Ident ) -> TokenStream
     {
         quote!( #ident.into() )
     }

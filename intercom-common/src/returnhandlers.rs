@@ -1,6 +1,6 @@
 
+use prelude::*;
 use syn::*;
-use quote::Tokens;
 use methodinfo::RustArg;
 use tyhandlers;
 use utils;
@@ -19,11 +19,11 @@ pub trait ReturnHandler : ::std::fmt::Debug {
 
     /// Gets the return statement for converting the COM result into Rust
     /// return.
-    fn com_to_rust_return( &self, _result : &Ident ) -> Tokens { quote!() }
+    fn com_to_rust_return( &self, _result : &Ident ) -> TokenStream { quote!() }
 
     /// Gets the return statement for converting the Rust result into COM
     /// outputs.
-    fn rust_to_com_return( &self, _result : &Ident ) -> Tokens { quote!() }
+    fn rust_to_com_return( &self, _result : &Ident ) -> TokenStream { quote!() }
 
     /// Gets the COM out arguments that result from the Rust return type.
     fn com_out_args( &self ) -> Vec<RustArg> { vec![] }
@@ -43,11 +43,11 @@ impl ReturnHandler for ReturnOnlyHandler {
 
     fn rust_ty( &self ) -> Type { self.0.clone() }
 
-    fn com_to_rust_return( &self, result : &Ident ) -> Tokens {
+    fn com_to_rust_return( &self, result : &Ident ) -> TokenStream {
         quote!( #result.into() )
     }
 
-    fn rust_to_com_return( &self, result : &Ident ) -> Tokens {
+    fn rust_to_com_return( &self, result : &Ident ) -> TokenStream {
         quote!( #result.into() )
     }
 
@@ -63,7 +63,7 @@ impl ReturnHandler for ErrorResultHandler {
     fn rust_ty( &self ) -> Type { self.return_ty.clone() }
     fn com_ty( &self ) -> Type { parse_quote!( ::intercom::HRESULT ) }
 
-    fn com_to_rust_return( &self, result : &Ident ) -> Tokens {
+    fn com_to_rust_return( &self, result : &Ident ) -> TokenStream {
 
         // Return statement checks for S_OK (should be is_success) HRESULT and
         // yields either Ok or Err Result based on that.
@@ -82,14 +82,14 @@ impl ReturnHandler for ErrorResultHandler {
         )
     }
 
-    fn rust_to_com_return( &self, result : &Ident ) -> Tokens {
+    fn rust_to_com_return( &self, result : &Ident ) -> TokenStream {
 
         // Get the OK idents. We'll use v0, v1, v2, ... depending on the amount
         // of patterns we need for possible tuples.
         let ok_idents = self.com_out_args()
                     .iter()
                     .enumerate()
-                    .map( |(idx, _)| Ident::from( format!( "v{}", idx + 1 ) ) )
+                    .map( |(idx, _)| Ident::new( &format!( "v{}", idx + 1 ), Span::call_site() ) )
                     .collect::<Vec<_>>();
 
         // Generate the pattern for the Ok(..).
@@ -135,24 +135,24 @@ fn get_out_args_for_result( retval_ty : &Type ) -> Vec<RustArg> {
             t.elems.iter()
                 .enumerate()
                 .map( |( idx, ty )| RustArg::new(
-                                    Ident::from( format!( "__out{}", idx + 1) ),
+                                    Ident::new( &format!( "__out{}", idx + 1), Span::call_site() ),
                                     ty.clone() ) )
                 .collect::<Vec<_>>(),
-        _ => vec![ RustArg::new( Ident::from( "__out" ), retval_ty.clone() ) ],
+        _ => vec![ RustArg::new( Ident::new( "__out", Span::call_site() ), retval_ty.clone() ) ],
     }
 }
 
 fn write_out_values(
     idents : &[Ident],
     out_args : Vec<RustArg>,
-) -> ( Vec<Tokens>, Vec<Tokens> )
+) -> ( Vec<TokenStream>, Vec<TokenStream> )
 {
     let mut ok_tokens = vec![];
     let mut err_tokens = vec![];
     for ( ident, out_arg ) in idents.iter().zip( out_args ) {
 
         let arg_name = out_arg.name;
-        let ok_value = out_arg.handler.rust_to_com( *ident );
+        let ok_value = out_arg.handler.rust_to_com( ident );
         let err_value = out_arg.handler.default_value();
         ok_tokens.push( quote!( *#arg_name = #ok_value ) );
         err_tokens.push( quote!( *#arg_name = #err_value ) );
@@ -163,12 +163,12 @@ fn write_out_values(
 
 fn get_ok_values(
     out_args : Vec<RustArg>
-) -> Vec<Tokens>
+) -> Vec<TokenStream>
 {
     let mut tokens = vec![];
     for out_arg in out_args {
 
-        let arg_value = out_arg.handler.rust_to_com( out_arg.name );
+        let arg_value = out_arg.handler.rust_to_com( &out_arg.name );
         tokens.push( quote!( #arg_value ) );
     }
     tokens
