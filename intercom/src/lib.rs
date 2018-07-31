@@ -197,12 +197,12 @@ pub const IID_IErrorInfo : GUID = GUID {
     data4: [ 0x8E, 0x65, 0x08, 0x00, 0x2B, 0x2B, 0xD1, 0x19 ]
 };
 
-pub use interfaces::__IUnknownVtbl as IUnknownVtbl;
-pub use interfaces::IID_IUnknown;
+pub use interfaces::__IUnknown_AutomationVtbl as IUnknownVtbl;
+pub use interfaces::IID_IUnknown_Automation as IID_IUnknown;
 pub use interfaces::IUnknown;
 
-pub use interfaces::__ISupportErrorInfoVtbl as ISupportErrorInfoVtbl;
-pub use interfaces::IID_ISupportErrorInfo;
+pub use interfaces::__ISupportErrorInfo_AutomationVtbl as ISupportErrorInfoVtbl;
+pub use interfaces::IID_ISupportErrorInfo_Automation as IID_ISupportErrorInfo;
 pub use interfaces::ISupportErrorInfo;
 
 // Do we need this? Would rather not export this through an extern crate

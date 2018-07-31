@@ -5,6 +5,6 @@ extern crate intercom_common;
 mod os;
 mod host;
 
-pub fn build() {
-    os::build()
+pub fn build( all_type_systems : bool ) {
+    os::build( all_type_systems )
 }

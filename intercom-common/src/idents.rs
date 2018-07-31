@@ -1,6 +1,15 @@
 
 use prelude::*;
 use syn::*;
+use tyhandlers::TypeSystem;
+
+pub fn with_ts(
+    ident: Ident,
+    ts: TypeSystem,
+) -> Ident
+{
+    Ident::new( &format!( "{}_{:?}", ident, ts ), Span::call_site() )
+}
 
 pub fn clsid(
     struct_name: &Ident

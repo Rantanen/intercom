@@ -6,6 +6,7 @@ use idents;
 use utils;
 use model;
 
+use tyhandlers::{TypeSystem};
 use syn::*;
 
 /// Expands the `com_class` attribute.
@@ -67,12 +68,14 @@ pub fn expand_com_class(
     // The data should include the match-arms for the primary query_interface
     // and the vtable offsets used for the delegating query_interface impls.
     for itf in cls.interfaces() {
+    for &ts in [ TypeSystem::Automation, TypeSystem::Raw ].iter() {
 
         // Various idents.
-        let offset_ident = idents::vtable_offset( &struct_ident, itf );
-        let iid_ident = idents::iid( itf );
-        let vtable_struct_ident = idents::vtable_struct( itf );
-        let vtable_instance_ident = idents::vtable_instance( &struct_ident, itf );
+        let itf_variant = Ident::new( &format!( "{}_{:?}", itf, ts ), Span::call_site() );
+        let offset_ident = idents::vtable_offset( struct_ident, &itf_variant );
+        let iid_ident = idents::iid( &itf_variant );
+        let vtable_struct_ident = idents::vtable_struct( &itf_variant );
+        let vtable_instance_ident = idents::vtable_instance( struct_ident, &itf_variant );
 
         // Store the field offset globally. We need this offset when implementing
         // the delegating query_interface methods. The only place where we know
@@ -87,7 +90,7 @@ pub fn expand_com_class(
                 #[allow(non_snake_case)]
                 fn #offset_ident() -> usize {
                     unsafe {
-                        &::intercom::ComBox::< #struct_ident >::null_vtable().#itf
+                        &::intercom::ComBox::< #struct_ident >::null_vtable().#itf_variant
                                 as *const _ as usize
                     }
                 }
@@ -95,15 +98,15 @@ pub fn expand_com_class(
 
         // Add the interface in the vtable list.
         vtable_list_field_decls.push(
-                quote!( #itf : &'static #vtable_struct_ident ) );
+                quote!( #itf_variant : &'static #vtable_struct_ident ) );
         vtable_list_field_values.push(
-                quote!( #itf : &#vtable_instance_ident ) );
+                quote!( #itf_variant : &#vtable_instance_ident ) );
 
         // Define the query_interface match arm for the current interface.
         // This just gets the correct interface vtable reference from the list
         // of vtables.
         query_interface_match_arms.push( quote!(
-            self::#iid_ident => &vtables.#itf
+            self::#iid_ident => &vtables.#itf_variant
                     as *const &#vtable_struct_ident
                     as *mut &#vtable_struct_ident
                     as ::intercom::RawComPtr
@@ -116,82 +119,84 @@ pub fn expand_com_class(
 
         // ComStruct (which is what the struct should be constructed to)
         // can be .into()'d into ComRc and ComItf. Generate the impls for this.
-        let into_expect_msg = format!(
-            "query_interface( {} ) failed for {}",
-            iid_ident, itf );
-        output.push( quote!(
-            impl From< ::intercom::ComStruct< #struct_ident > > for
-                    ::intercom::ComRc< #itf > {
+        if ts == TypeSystem::Automation {
+            let into_expect_msg = format!(
+                "query_interface( {} ) failed for {}",
+                iid_ident, itf );
+            output.push( quote!(
+                impl From< ::intercom::ComStruct< #struct_ident > > for
+                        ::intercom::ComRc< #itf > {
 
-                fn from( source : ::intercom::ComStruct< #struct_ident >) -> Self
-                {
-                    // into ComItf will leave the ref count dangling.
-                    // This means we can just attach to get a proper ComRc.
-                    let itf : ::intercom::ComItf< #itf > = source.into();
-                    ::intercom::ComRc::attach( itf )
-                }
-            }
-        ) );
-        output.push( quote!(
-            impl From< ::intercom::ComStruct< #struct_ident > > for
-                    ::intercom::ComItf< #itf > {
-
-                fn from( source : ::intercom::ComStruct< #struct_ident >) -> Self
-                {
-                    unsafe {
-
-                        // ComBox::query_interface is contracted to return
-                        // pointer to the correct interface. We can attach
-                        // safely.
-                        let itf = ::intercom::ComItf::wrap(
-
-                            // Query interface the ComBox.
-                            < #struct_ident as ::intercom::CoClass >
-                                ::query_interface(
-                                    ::intercom::ComBox::vtable( &source ),
-                                    &#iid_ident
-                                ).expect( #into_expect_msg )
-                        );
-
-                        // Forget the source. We did not increment the
-                        // reference count when attaching to ComRc so we must
-                        // not decrement when ComStruct drops.
-                        std::mem::forget( source );
-
-                        itf
+                    fn from( source : ::intercom::ComStruct< #struct_ident >) -> Self
+                    {
+                        // into ComItf will leave the ref count dangling.
+                        // This means we can just attach to get a proper ComRc.
+                        let itf : ::intercom::ComItf< #itf > = source.into();
+                        ::intercom::ComRc::attach( itf )
                     }
                 }
-            }
-        ) );
-
-        // Check if the current interface is the implicit struct interface.
-        if struct_ident == &itf.to_string() {
-
-            // Implicit interface.
-            //
-            // This interface is unimplementable from Rust perspective as it
-            // represents a struct instead of a trait. Deref on ComItf will
-            // deref into the struct, which we'll do through the ComBox.
-            //
-            // ComBox already derefs into the struct so we'll just get the
-            // ComBox here and deref that.
+            ) );
             output.push( quote!(
-                impl ::std::ops::Deref for ::intercom::ComItf< #struct_ident > {
-                    type Target = #struct_ident;
-                    fn deref( &self ) -> &Self::Target {
-                        unsafe {
-                            let self_combox =
-                                    ( ::intercom::ComItf::ptr( self ) as usize
-                                            - #offset_ident() )
-                                    as *mut ::intercom::ComBox< #struct_ident >;
+                impl From< ::intercom::ComStruct< #struct_ident > > for
+                        ::intercom::ComItf< #itf > {
 
-                            &**self_combox
+                    fn from( source : ::intercom::ComStruct< #struct_ident >) -> Self
+                    {
+                        unsafe {
+
+                            // ComBox::query_interface is contracted to return
+                            // pointer to the correct interface. We can attach
+                            // safely.
+                            let itf = ::intercom::ComItf::wrap(
+
+                                // Query interface the ComBox.
+                                < #struct_ident as ::intercom::CoClass >
+                                    ::query_interface(
+                                        ::intercom::ComBox::vtable( &source ),
+                                        &#iid_ident
+                                    ).expect( #into_expect_msg )
+                            );
+
+                            // Forget the source. We did not increment the
+                            // reference count when attaching to ComRc so we must
+                            // not decrement when ComStruct drops.
+                            std::mem::forget( source );
+
+                            itf
                         }
                     }
                 }
             ) );
+
+            // Check if the current interface is the implicit struct interface.
+            if struct_ident == &itf.to_string() {
+
+                // Implicit interface.
+                //
+                // This interface is unimplementable from Rust perspective as it
+                // represents a struct instead of a trait. Deref on ComItf will
+                // deref into the struct, which we'll do through the ComBox.
+                //
+                // ComBox already derefs into the struct so we'll just get the
+                // ComBox here and deref that.
+                output.push( quote!(
+                    impl ::std::ops::Deref for ::intercom::ComItf< #struct_ident > {
+                        type Target = #struct_ident;
+                        fn deref( &self ) -> &Self::Target {
+                            unsafe {
+                                let self_combox =
+                                        ( ::intercom::ComItf::ptr( self ) as usize
+                                                - #offset_ident() )
+                                        as *mut ::intercom::ComBox< #struct_ident >;
+
+                                &**self_combox
+                            }
+                        }
+                    }
+                ) );
+            }
         }
-    }
+    } }
 
     /////////////////////
     // ISupportErrorInfo virtual table instance.
@@ -203,17 +208,17 @@ pub fn expand_com_class(
                     : ::intercom::ISupportErrorInfoVtbl
                     = ::intercom::ISupportErrorInfoVtbl {
                         __base : ::intercom::IUnknownVtbl {
-                            query_interface
+                            query_interface_Automation
                                 : ::intercom::ComBox::< #struct_ident >
                                     ::query_interface_ptr,
-                            add_ref
+                            add_ref_Automation
                                 : ::intercom::ComBox::< #struct_ident >
                                     ::add_ref_ptr,
-                            release
+                            release_Automation
                                 : ::intercom::ComBox::< #struct_ident >
                                     ::release_ptr,
                         },
-                        interface_supports_error_info
+                        interface_supports_error_info_Automation
                             : ::intercom::ComBox::< #struct_ident >
                                 ::interface_supports_error_info_ptr,
                     };

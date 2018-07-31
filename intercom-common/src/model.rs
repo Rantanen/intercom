@@ -355,7 +355,7 @@ impl ComInterface
     /// The base interface.
     pub fn base_interface( &self ) -> &Option<Ident> { &self.base_interface }
 
-    /// Interface methods.
+    /// Interface variants.
     pub fn variants( &self ) -> &HashMap<TypeSystem, ComInterfaceVariant> { &self.variants }
 
     /// The type of the associated item for the #[com_interface] attribute.
@@ -471,6 +471,9 @@ impl ComImpl
     /// Struct name that the trait is implemented for.
     pub fn struct_name( &self ) -> &Ident { &self.struct_name }
 
+    /// Interface variants.
+    pub fn variants( &self ) -> &HashMap<TypeSystem, ComImplVariant> { &self.variants }
+
     /// Trait name that is implemented. Struct name if this is an implicit impl.
     pub fn interface_name( &self ) -> &Ident { &self.interface_display_name }
 
@@ -482,6 +485,9 @@ impl ComImplVariant
 {
     /// Implemented methods.
     pub fn methods( &self ) -> &Vec<ComMethodInfo> { &self.methods }
+
+    /// Unique interface name.
+    pub fn interface_unique_name( &self ) -> &Ident { &self.interface_unique_name }
 }
 
 #[derive(Debug, PartialEq)]

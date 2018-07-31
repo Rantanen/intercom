@@ -1,4 +1,5 @@
 
+use prelude::*;
 use std::rc::Rc;
 use syn::*;
 
@@ -158,6 +159,7 @@ pub struct ComMethodInfo {
     /// True if the Rust method is unsafe.
     pub is_unsafe: bool,
 
+    /// Type system.
     pub type_system : TypeSystem,
 }
 
@@ -243,8 +245,8 @@ impl ComMethodInfo {
                     &retval_type, &return_type, type_system )
                 .or( Err( ComMethodInfoError::BadReturnType ) )?;
         Ok( ComMethodInfo {
-            display_name: n.clone(),
-            unique_name: n,
+            unique_name: Ident::new( &format!( "{}_{:?}", n, type_system ), Span::call_site() ),
+            display_name: n,
             is_const,
             rust_self_arg,
             rust_return_ty,
@@ -308,7 +310,6 @@ fn hresult_ty() -> Type {
 #[cfg(test)]
 mod tests {
 
-    use prelude::*;
     use super::*;
 
     #[test]
