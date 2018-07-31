@@ -16,7 +16,8 @@ syn = { version = "0.14", features = [ "full" ] }
 quote = { version = "0.6" }
 
 [dev-dependencies]
-difference = "1.0.0"
+difference = "2"
+term = "0.5"
 intercom-fmt = { version = "0.1.0", path = "../intercom-fmt" }
 intercom = { version = "0.2.0", path = "../intercom" }
 regex = "0.2"

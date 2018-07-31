@@ -227,6 +227,8 @@ fn hresult_ty() -> Type {
 
 #[cfg(test)]
 mod tests {
+
+    use prelude::*;
     use super::*;
 
     #[test]
@@ -299,10 +301,10 @@ mod tests {
 
         assert_eq!( info.args.len(), 2 );
 
-        assert_eq!( info.args[0].name, Ident::from( "a" ) );
+        assert_eq!( info.args[0].name, Ident::new( "a", Span::call_site() ) );
         assert_eq!( info.args[0].ty, parse_quote!( u32 ) );
 
-        assert_eq!( info.args[1].name, Ident::from( "b" ) );
+        assert_eq!( info.args[1].name, Ident::new( "b", Span::call_site() ) );
         assert_eq!( info.args[1].ty, parse_quote!( f32 ) );
     }
 
@@ -310,7 +312,7 @@ mod tests {
 
         let item = parse_str( code ).unwrap();
         let ( ident, decl, unsafety ) = match item {
-            Item::Fn( ref f ) => ( f.ident, f.decl.as_ref(), f.unsafety.is_some() ),
+            Item::Fn( ref f ) => ( f.ident.clone(), f.decl.as_ref(), f.unsafety.is_some() ),
             _ => panic!( "Code isn't function" ),
         };
         ComMethodInfo::new_from_parts( ident, decl, unsafety ).unwrap()

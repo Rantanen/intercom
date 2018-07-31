@@ -5,8 +5,6 @@ use std;
 use std::env;
 use std::iter::FromIterator;
 
-use quote;
-
 /// Resolve the name of the package being compiled.
 pub fn lib_name() -> String {
 
