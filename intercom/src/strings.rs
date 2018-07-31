@@ -451,6 +451,8 @@ mod os {
         pbstr: *const u16,
     ) -> u32 {
 
+        // The BSTR pointers should be u32-aligned.
+        #![cfg_attr( feature = "cargo-clippy", allow(cast_ptr_alignment) )]
         if pbstr.is_null() {
             0
         } else {
