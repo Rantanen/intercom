@@ -1,4 +1,5 @@
 
+use prelude::*;
 use super::common::*;
 
 use idents;
@@ -6,9 +7,7 @@ use utils;
 use model;
 use builtin_model;
 
-extern crate proc_macro;
 extern crate quote;
-use self::proc_macro::TokenStream;
 
 /// Expands the `com_library` attribute.
 ///
@@ -17,9 +16,9 @@ use self::proc_macro::TokenStream;
 /// - `DllGetClassObject` extern function implementation.
 /// - `IntercomListClassObjects` extern function implementation.
 pub fn expand_com_library(
-    attr_tokens: &TokenStream,
-    item_tokens: TokenStream,
-) -> Result<TokenStream, model::ParseError>
+    attr_tokens: &TokenStreamNightly,
+    item_tokens: TokenStreamNightly,
+) -> Result<TokenStreamNightly, model::ParseError>
 {
     let mut output = vec![];
     let lib = model::ComLibrary::parse( &lib_name(), &attr_tokens.to_string() )?;
@@ -30,7 +29,7 @@ pub fn expand_com_library(
     for struct_ident in lib.coclasses() {
 
         // Construct the match pattern.
-        let clsid_name = idents::clsid( *struct_ident );
+        let clsid_name = idents::clsid( struct_ident );
         match_arms.push( quote!(
             self::#clsid_name =>
                 Ok( ::intercom::ComBox::new(
@@ -86,8 +85,8 @@ pub fn expand_com_library(
 }
 
 fn get_dll_get_class_object_function(
-    match_arms: &[quote::Tokens]
-) -> quote::Tokens
+    match_arms: &[TokenStream]
+) -> TokenStream
 {
     let calling_convetion = get_calling_convetion();
     quote!(
@@ -126,8 +125,8 @@ fn get_dll_get_class_object_function(
 }
 
 fn get_intercom_list_class_objects_function(
-    clsid_tokens: &[quote::Tokens]
-) -> quote::Tokens
+    clsid_tokens: &[TokenStream]
+) -> TokenStream
 {
     let calling_convetion = get_calling_convetion();
     let token_count = clsid_tokens.len();

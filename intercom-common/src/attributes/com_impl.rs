@@ -1,4 +1,5 @@
 
+use prelude::*;
 use super::common::*;
 
 use std::iter;
@@ -28,9 +29,9 @@ pub fn expand_com_impl(
     let imp = model::ComImpl::parse( &item_tokens.to_string() )?;
     let struct_ident = imp.struct_name();
     let itf_ident = imp.interface_name();
-    let vtable_struct_ident = idents::vtable_struct( itf_ident );
-    let vtable_instance_ident = idents::vtable_instance( struct_ident, itf_ident );
-    let vtable_offset = idents::vtable_offset( struct_ident, itf_ident );
+    let vtable_struct_ident = idents::vtable_struct( &itf_ident );
+    let vtable_instance_ident = idents::vtable_instance( &struct_ident, &itf_ident );
+    let vtable_offset = idents::vtable_offset( &struct_ident, &itf_ident );
 
     /////////////////////
     // #itf::QueryInterface, AddRef & Release
@@ -46,7 +47,7 @@ pub fn expand_com_impl(
     // QueryInterface
     let calling_convetion = get_calling_convetion();
     let query_interface_ident = idents::method_impl(
-            struct_ident, itf_ident, "query_interface" );
+            &struct_ident, &itf_ident, "query_interface" );
     output.push( quote!(
             #[allow(non_snake_case)]
             #[doc(hidden)]
@@ -68,7 +69,7 @@ pub fn expand_com_impl(
 
     // AddRef
     let add_ref_ident = idents::method_impl(
-            struct_ident, itf_ident, "add_ref" );
+            &struct_ident, &itf_ident, "add_ref" );
     output.push( quote!(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
@@ -83,7 +84,7 @@ pub fn expand_com_impl(
 
     // Release
     let release_ident = idents::method_impl(
-            struct_ident, itf_ident, "release" );
+            &struct_ident, &itf_ident, "release" );
     output.push( quote!(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
@@ -119,9 +120,9 @@ pub fn expand_com_impl(
     // method to the vtable fields.
     for method_info in imp.methods() {
 
-        let method_ident = method_info.name;
+        let method_ident = &method_info.name;
         let method_impl_ident = idents::method_impl(
-                struct_ident, itf_ident, method_ident.as_ref() );
+                &struct_ident, &itf_ident, &method_ident.to_string() );
 
         let in_out_args = method_info.raw_com_args()
                 .into_iter()
@@ -141,15 +142,15 @@ pub fn expand_com_impl(
         let ( in_temporaries, in_params ) : ( Vec<_>, Vec<_> ) = method_info.args
                 .iter()
                 .map( |ca| {
-                    let conversion = ca.handler.com_to_rust( ca.name );
+                    let conversion = ca.handler.com_to_rust( &ca.name );
                     ( conversion.temporary, conversion.value )
                 } )
                 .unzip();
 
-        let return_ident = Ident::from( "__result" );
+        let return_ident = Ident::new( "__result", Span::call_site() );
         let return_statement = method_info
                 .returnhandler
-                .rust_to_com_return( return_ident );
+                .rust_to_com_return( &return_ident );
 
         // Define the delegating method implementation.
         //

@@ -1,8 +1,9 @@
 
 extern crate difference;
 extern crate regex;
+extern crate term;
 
-use difference::Changeset;
+use difference::{Changeset, Difference};
 
 use std::fs;
 use std::path::PathBuf;
@@ -92,7 +93,32 @@ fn check_expansions() {
 
             // Print the changeset for debugging purposes and increment the
             // amount of failed items. By default this prints nice colored diff.
-            println!( "{}", changeset );
+            if let Some( mut t ) = term::stdout() {
+                for i in 0..changeset.diffs.len() {
+                    match changeset.diffs[i] {
+                        Difference::Same(ref x) => {
+                            t.reset().unwrap();
+                            for line in x.lines() {
+                                writeln!(t, "  {}", line);
+                            }
+                        }
+                        Difference::Add(ref x) => {
+                            t.fg(term::color::GREEN).unwrap();
+                            for line in x.lines() {
+                                writeln!(t, "+ {}", line);
+                            }
+                        }
+                        Difference::Rem(ref x) => {
+                            t.fg(term::color::RED).unwrap();
+                            for line in x.lines() {
+                                writeln!(t, "- {}", line);
+                            }
+                        }
+                    }
+                }
+            } else {
+                println!( "{}", changeset );
+            }
             failed += 1;
         }
     }
@@ -140,8 +166,14 @@ fn build( cwd: &str, path : &str ) -> String {
 
 /// Removes comments from the code.
 fn strip_comments( code : &str ) -> String {
-    let re = regex::Regex::new( r"//.*" ).expect( "Bad regex" );
-    re.replace_all( code, "" ).into_owned()
+
+    // Targets include extra comments. Ignore them.
+    let re_comments = regex::Regex::new( r"//.*" ).expect( "Bad regex" );
+    let no_comments = re_comments.replace_all( code, "" );
+
+    // Rustfmt screws with empty lines in some ways so remove those.
+    let re_empty_lines = regex::Regex::new( r"(?m)^\s*$" ).expect( "Bad regex" );
+    re_empty_lines.replace_all( &no_comments, "" ).to_string()
 }
 
 fn strip_empty_lines( code : &str ) -> String {

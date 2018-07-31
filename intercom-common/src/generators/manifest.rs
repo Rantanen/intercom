@@ -49,7 +49,7 @@ impl ManifestModel {
         // Gather all the com classes. These need to be declared in the manifest.
         let classes = lib.coclasses().iter().map(|class_name| {
 
-            let coclass = &c.structs()[ class_name.as_ref() ];
+            let coclass = &c.structs()[ &class_name.to_string() ];
             let clsid = coclass.clsid().as_ref()
                     .ok_or_else( || GeneratorError::MissingClsid(
                                         coclass.name().to_string() ) )?;

@@ -225,7 +225,7 @@ impl CppModel {
                         .ok_or_else( || GeneratorError::UnsupportedType(
                                         utils::ty_to_string( &ret_ty ) ) )?;
                 Ok( CppMethod {
-                    name: utils::pascal_case( m.name.as_ref() ),
+                    name: utils::pascal_case( m.name.to_string() ),
                     ret_type: ret_ty.to_cpp( methodinfo::Direction::Retval, c ),
                     args
                 } )
@@ -235,7 +235,7 @@ impl CppModel {
             Ok( CppInterface {
                 name: foreign.get_name( c, itf.name() ),
                 iid_struct: guid_as_struct( itf.iid() ),
-                base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, *i ) ),
+                base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, i ) ),
                 methods,
             } )
 
@@ -245,11 +245,11 @@ impl CppModel {
         let classes = lib.coclasses().iter().map( |class_name| {
 
             // Get the class details by matching the name.
-            let coclass  = &c.structs()[ class_name.as_ref() ];
+            let coclass  = &c.structs()[ &class_name.to_string() ];
 
             // Create a list of interfaces to be declared in the class descriptor.
             let interfaces = coclass.interfaces().iter().map(|itf_name| {
-                foreign.get_name( c, *itf_name )
+                foreign.get_name( c, itf_name )
             } ).collect();
 
             let clsid = coclass.clsid().as_ref()

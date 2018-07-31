@@ -1,7 +1,7 @@
 
+use ::prelude::*;
 use std::rc::Rc;
 use syn::*;
-use quote::Tokens;
 
 use methodinfo::Direction;
 
@@ -11,10 +11,10 @@ pub struct TypeConversion {
 
     /// Possible temporary values that need to be kept alive for the duration
     /// of the conversion result usage.
-    pub temporary: Option<Tokens>,
+    pub temporary: Option<TokenStream>,
 
     /// Conversion result value. Possibly referencing the temporary value.
-    pub value : Tokens,
+    pub value : TokenStream,
 }
 
 /// Type usage context.
@@ -55,7 +55,7 @@ pub trait TypeHandler {
 
     /// Converts a COM parameter named by the ident into a Rust type.
     fn com_to_rust(
-        &self, ident : Ident
+        &self, ident : &Ident
     ) -> TypeConversion
     {
         TypeConversion {
@@ -66,7 +66,7 @@ pub trait TypeHandler {
 
     /// Converts a Rust parameter named by the ident into a COM type.
     fn rust_to_com(
-        &self, ident : Ident
+        &self, ident : &Ident
     ) -> TypeConversion
     {
         TypeConversion {
@@ -76,13 +76,13 @@ pub trait TypeHandler {
     }
 
     /// Gets the default value for the type.
-    fn default_value( &self ) -> Tokens
+    fn default_value( &self ) -> TokenStream
     {
         match self.rust_ty() {
             Type::Path( ref p ) => {
                 let ident = p.path.get_ident().unwrap();
-                let name = ident.as_ref();
-                match name {
+                let name = ident.to_string();
+                match name.as_ref() {
                     "c_void"
                         | "RawComPtr"
                         => quote!( ::std::ptr::null_mut() ),
@@ -113,7 +113,7 @@ impl TypeHandler for ComItfParam {
     fn rust_ty( &self ) -> Type { self.0.clone() }
 
     /// Gets the default value for the type.
-    fn default_value( &self ) -> Tokens
+    fn default_value( &self ) -> TokenStream
     {
         quote!( ComItf::null_itf() )
     }
@@ -133,7 +133,7 @@ impl TypeHandler for StringParam
         }
     }
 
-    fn com_to_rust( &self, ident : Ident ) -> TypeConversion
+    fn com_to_rust( &self, ident : &Ident ) -> TypeConversion
     {
         match self.context.dir {
 
@@ -144,7 +144,7 @@ impl TypeHandler for StringParam
                 let to_intermediate = quote!( ::intercom::BStr::from_ptr( #ident ) );
                 let as_trait = quote!( < #target_ty as ::intercom::FromWithTemporary< #intermediate_ty > > );
 
-                let temp_ident = Ident::from( format!( "__{}_temporary", ident ) );
+                let temp_ident = Ident::new( &format!( "__{}_temporary", ident.to_string() ), Span::call_site() );
                 TypeConversion {
                     temporary: Some( quote!( let mut #temp_ident = #as_trait::to_temporary( #to_intermediate )?; ) ),
                     value: quote!( #as_trait::from_temporary( &mut #temp_ident )? ),
@@ -159,7 +159,7 @@ impl TypeHandler for StringParam
         }
     }
 
-    fn rust_to_com( &self, ident : Ident ) -> TypeConversion
+    fn rust_to_com( &self, ident : &Ident ) -> TypeConversion
     {
         match self.context.dir {
 
@@ -169,7 +169,7 @@ impl TypeHandler for StringParam
                 let intermediate_ty = quote!( &::intercom::BStr );
                 let as_trait = quote!( < #intermediate_ty as ::intercom::FromWithTemporary< #target_ty > > );
 
-                let temp_ident = Ident::from( format!( "__{}_temporary", ident ) );
+                let temp_ident = Ident::new( &format!( "__{}_temporary", ident.to_string() ), Span::call_site() );
                 TypeConversion {
                     temporary: Some( quote!( let mut #temp_ident = #as_trait::to_temporary( #ident )?; ) ),
                     value: quote!( #as_trait::from_temporary( &mut #temp_ident )?.as_ptr() ),
@@ -185,7 +185,7 @@ impl TypeHandler for StringParam
     }
 
     /// Gets the default value for the type.
-    fn default_value( &self ) -> Tokens
+    fn default_value( &self ) -> TokenStream
     {
         quote!( ::std::ptr::null_mut() )
     }

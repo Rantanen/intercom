@@ -1,11 +1,9 @@
 
+use prelude::*;
+
 use std;
 use std::env;
 use std::iter::FromIterator;
-
-extern crate proc_macro;
-use self::proc_macro::TokenStream;
-use quote;
 
 /// Resolve the name of the package being compiled.
 pub fn lib_name() -> String {
@@ -17,12 +15,12 @@ pub fn lib_name() -> String {
                  Ensure CARGO_PKG_NAME environment variable is defined." )
 }
 
-pub fn tokens_to_tokenstream<T: IntoIterator<Item=quote::Tokens>>(
-    original : TokenStream,
+pub fn tokens_to_tokenstream<T: IntoIterator<Item=TokenStream>>(
+    original : TokenStreamNightly,
     tokens : T,
-) -> TokenStream
+) -> TokenStreamNightly
 {
-    TokenStream::from_iter(
+    TokenStreamNightly::from_iter(
         std::iter::once( original )
             .chain( tokens.into_iter().map( |t| t.into() ) ) )
 }
