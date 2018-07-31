@@ -16,12 +16,13 @@ jobs:
                     rustc -vV
                     cargo -vV
             - run:
-                name: "Install rustfmt-nightly"
+                name: "Install rustfmt"
                 command: |
-                    cargo install rustfmt-nightly --force
+                    rustup component add rustfmt-preview
             - run:
                 name: "Cargo test"
                 command: |
+                    export RUST_BACKTRACE=1
                     cargo test --all-features
             - run:
                 name: "C++ test"

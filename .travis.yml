@@ -21,8 +21,9 @@ env:
     - CC=gcc-5 CXX=g++-5 RUSTFLAGS='-C link-dead-code'
 
 script:
-    - cargo install rustfmt-nightly --force
-    - (! cargo install clippy --force ) || cargo clippy --all-features --all -- -D warnings
+    - rustup component add rustfmt-preview
+    - rustup component add clippy-preview
+    - cargo clippy --all-features --all -- -D warnings
     - cargo test --all-features
     - mkdir build
     - ( cd build && cmake .. && make )
