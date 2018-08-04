@@ -1,44 +1,40 @@
 
-#ifdef __GNUC__
-
 #include <functional>
+#include <cstdint>
 
 #include "../cpp-utility/os.hpp"
 #include "../cpp-utility/catch.hpp"
 
 #include "testlib.hpp"
 
-
-TEST_CASE( "Manipulating BSTR succeeds" )
+void check_equal( uint32_t len, const char16_t* text, intercom::BSTR right )
 {
-    SECTION( "Allocationg BSTR succeeds" )
-    {
-        intercom::BSTR allocated = intercom::allocate_bstr( 10 );
-        REQUIRE( allocated != nullptr );
-
-        intercom::free_bstr( allocated );
+    if( len == 0 ) {
+        REQUIRE( right == nullptr );
+        return;
     }
 
-    SECTION( "Converting UTF-8 string to BSTR and back succeeds" )
-    {
-        // NOTE: 𓇔 is from "Supplementary Multilingual Plane"
-        // and requires 4-bytes in UTF-16 representation.
-        intercom::BSTR converted;
-        intercom::utf8_to_bstr( u8"Test: 𓇔", &converted );
-        REQUIRE( converted != nullptr );
-        REQUIRE( intercom::get_characters_in_bstr( converted ) == 8 );
+    if( len != 0 )
+        REQUIRE( right != nullptr );
 
-        char* utf8_back;
-        intercom::bstr_to_utf8( converted, &utf8_back );
-        REQUIRE( u8"Test: 𓇔" == std::string( utf8_back ) );
+    uint32_t right_len = 0;
+    std::memcpy(
+            reinterpret_cast< char* >( &right_len ),
+            reinterpret_cast< char* >( right ) - 4,
+            4 );
 
-        std::free( utf8_back );
-        intercom::free_bstr( converted );
-    }
+    REQUIRE( len * 2 == right_len );
 
-    SECTION( "Attempting to free null BSTR succeeds" )
-    {
-        intercom::free_bstr( nullptr );
+    uint16_t right_termination = 0xffff;
+    std::memcpy(
+            reinterpret_cast< char* >( &right_termination ),
+            reinterpret_cast< char* >( right ) + right_len,
+            2 );
+
+    REQUIRE( right_termination == 0 );
+
+    for( uint32_t i = 0; i < len; i++ ) {
+        REQUIRE( text[ i ] == right[ i ] );
     }
 }
 
@@ -47,55 +43,114 @@ TEST_CASE( "Using BSTR in interface works" )
     // Initialize COM.
     InitializeRuntime();
 
-    // Construct string storage.
-    IStringTests* pStringTests = nullptr;
+    // Construct allocator.
+    IAllocator* pAllocator = nullptr;
     intercom::HRESULT hr = CreateInstance(
+        CLSID_Allocator,
+        IID_IAllocator,
+        &pAllocator );
+    REQUIRE( hr == intercom::SC_OK );
+
+    // Construct string test interface.
+    IStringTests* pStringTests = nullptr;
+    hr = CreateInstance(
         CLSID_StringTests,
         IID_IStringTests,
         &pStringTests );
     REQUIRE( hr == intercom::SC_OK );
 
-    SECTION( "Default value is nullptr" )
+    SECTION( "String parameters work." )
     {
-        intercom::BSTR test_value_get;
-        intercom::HRESULT get = pStringTests->GetValue( &test_value_get );
-        REQUIRE( get == intercom::SC_OK );
-        REQUIRE( test_value_get == nullptr );
+        uint32_t multibyte_codepoint = 0x131d4;
+        uint32_t multibyte_high = 0xdc00 + ( 0x031d4 >> 10 );
+        uint32_t multibyte_low = 0xdc00 + ( 0x031d4 && 0x3ff );
+        
+
+        std::tuple< uint32_t, const char16_t*, const char* > test_data[] = {
+            std::make_tuple( 0, nullptr, "<empty>" ),
+            std::make_tuple( 4, u"Test", "\"Test\"" ),
+            std::make_tuple( 3, u"\u00f6\u00e4\u00e5", "Multibyte UTF-8" ),  // Scandinavian letters: öäå
+            std::make_tuple( 2, u"\U0001F980", "Multibyte UTF-16" ),  // Crab: 🦀
+        };
+
+        for( uint32_t i = 0; i < sizeof( test_data ) / sizeof( *test_data ); i++ )
+        {
+            auto& pair = test_data[ i ];
+            SECTION( std::string( "Passing BSTR: " ) + std::get<2>( pair ) )
+            {
+                intercom::BSTR test_text = pAllocator->AllocBstr(
+                        const_cast< uint16_t* >(
+                            reinterpret_cast< const uint16_t* >(
+                                std::get<1>( pair ) ) ),
+                        std::get<0>( pair ) );
+
+                REQUIRE( test_text != nullptr );
+                REQUIRE( *reinterpret_cast< uint32_t* >( test_text - 2 ) == std::get<0>( pair ) * 2 );
+
+                uint32_t result;
+                intercom::HRESULT hr = pStringTests->StringToIndex( test_text, OUT &result );
+                REQUIRE( hr == intercom::SC_OK );
+
+                pAllocator->FreeBstr( test_text );
+
+                REQUIRE( result == i );
+            }
+
+            SECTION( std::string( "Receiving BSTR: " ) + std::get<2>( pair ) )
+            {
+                intercom::BSTR test_text = nullptr;
+                intercom::HRESULT hr = pStringTests->IndexToString( i, OUT &test_text );
+                REQUIRE( hr == intercom::SC_OK );
+
+                check_equal( std::get<0>( pair ), std::get<1>( pair ), test_text );
+
+                pAllocator->FreeBstr( test_text );
+            }
+        }
+
+        SECTION( "BSTR into &intercom::BStr is not re-allocated" ) {
+
+            intercom::BSTR test_text = pAllocator->AllocBstr(
+                    const_cast< uint16_t* >(
+                        reinterpret_cast< const uint16_t* >( u"Test string" ) ),
+                    11 );
+
+            intercom::HRESULT hr = pStringTests->BstrParameter(
+                    test_text, reinterpret_cast< uintptr_t >( test_text ) );
+
+            pAllocator->FreeBstr( test_text );
+
+            REQUIRE( hr == intercom::SC_OK );
+        }
+
+        SECTION( "BString return value is not re-allocated" ) {
+
+            intercom::BSTR test_text = nullptr;
+            uintptr_t test_ptr = 0;
+
+            intercom::HRESULT hr = pStringTests->BstrReturnValue(
+                    OUT &test_text,
+                    OUT &test_ptr );
+            REQUIRE( hr == intercom::SC_OK );
+
+            REQUIRE( test_text != nullptr );
+            REQUIRE( reinterpret_cast< uintptr_t >( test_text ) == test_ptr );
+
+            pAllocator->FreeBstr( test_text );
+        }
     }
 
-    SECTION( "Manipulating a value succeeds" )
+    SECTION( "Invalid UTF-16 results in E_INVALIDARG" )
     {
-        intercom::BSTR test_value_put;
-        intercom::utf8_to_bstr( u8"Test", &test_value_put );
+        // Low surrogate followed by high surrogate, ie. reversed order.
+        uint16_t data[] = { 0xdfff, 0xd800 };
+        intercom::BSTR test_text = pAllocator->AllocBstr( data, 2 );
 
-        pStringTests->PutValue( test_value_put );
-        intercom::free_bstr( test_value_put );
+        intercom::HRESULT hr = pStringTests->InvalidString( test_text );
+        REQUIRE( hr == intercom::EC_INVALIDARG );
 
-        SECTION( "Reading the value succeeds" )
-        {
-            intercom::BSTR test_value_get;
-            intercom::HRESULT get = pStringTests->GetValue( &test_value_get );
-            REQUIRE( get == intercom::SC_OK );
-
-            char* test_value;
-            intercom::bstr_to_utf8( test_value_get, &test_value );
-            REQUIRE( u8"Test" == std::string( test_value ) );
-            intercom::free_bstr( test_value_get );
-            std::free( test_value );
-        }
-
-        SECTION( "Clearing the value with a nullptr succeeds" )
-        {
-            pStringTests->PutValue( nullptr );
-
-            intercom::BSTR test_value_get;
-            intercom::HRESULT get = pStringTests->GetValue( &test_value_get );
-            REQUIRE( get == intercom::SC_OK );
-            REQUIRE( test_value_get == nullptr );
-        }
+        pAllocator->FreeBstr( test_text );
     }
 
     REQUIRE( pStringTests->Release() == 0 );
 }
-
-#endif

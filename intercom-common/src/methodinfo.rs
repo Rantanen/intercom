@@ -3,7 +3,7 @@ use std::rc::Rc;
 use syn::*;
 
 use ast_converters::*;
-use tyhandlers::{TypeHandler, get_ty_handler};
+use tyhandlers::{TypeContext, TypeHandler, get_ty_handler};
 use returnhandlers::{ReturnHandler, get_return_handler};
 use utils;
 
@@ -17,8 +17,14 @@ pub enum ComMethodInfoError {
 
 #[derive(Clone)]
 pub struct RustArg {
+
+    /// Name of the Rust argument.
     pub name: Ident,
+
+    /// Rust type of the COM argument.
     pub ty: Type,
+
+    /// Type handler.
     pub handler: Rc<TypeHandler>,
 }
 
@@ -41,7 +47,7 @@ impl RustArg {
 
     pub fn new( name: Ident, ty: Type ) -> RustArg {
 
-        let tyhandler = get_ty_handler( &ty );
+        let tyhandler = get_ty_handler( &ty, TypeContext::input() );
         RustArg {
             name,
             ty,
@@ -53,27 +59,91 @@ impl RustArg {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Direction { In, Out, Retval }
 
-#[derive(Debug, PartialEq)]
 pub struct ComArg {
-    pub arg : RustArg,
+
+    /// Name of the argument.
+    pub name: Ident,
+
+    /// Rust type of the raw COM argument.
+    pub ty: Type,
+
+    /// Type handler.
+    pub handler: Rc<TypeHandler>,
+
+    /// Argument direction. COM uses OUT params while Rust uses return values.
     pub dir : Direction
 }
+
+impl ComArg {
+
+    pub fn new( name: Ident, ty: Type, dir: Direction ) -> ComArg {
+
+        let tyhandler = get_ty_handler( &ty, TypeContext::new( dir ) );
+        ComArg {
+            name,
+            ty,
+            dir,
+            handler: tyhandler,
+        }
+    }
+
+    pub fn from_rustarg( rustarg: RustArg, dir: Direction ) -> ComArg {
+
+        let tyhandler = get_ty_handler( &rustarg.ty, TypeContext::new( dir ) );
+        ComArg {
+            name: rustarg.name,
+            ty: rustarg.ty,
+            dir,
+            handler: tyhandler,
+        }
+    }
+}
+
+impl PartialEq for ComArg {
+
+    fn eq(&self, other: &ComArg) -> bool
+    {
+        self.name == other.name
+            && self.ty == other.ty
+            && self.dir == other.dir
+    }
+}
+
+impl ::std::fmt::Debug for ComArg {
+    fn fmt( &self, f: &mut ::std::fmt::Formatter ) -> ::std::fmt::Result {
+        write!( f, "{}: {:?} {:?}", self.name, self.dir, self.ty )
+    }
+}
+
 
 #[derive(Debug)]
 pub struct ComMethodInfo {
 
+    /// Method name.
     pub name: Ident,
 
+    /// True if the self parameter is not mutable.
     pub is_const: bool,
+
+    /// Rust self argument.
     pub rust_self_arg: ArgSelfRef,
+
+    /// Rust return type.
     pub rust_return_ty: Type,
 
+    /// COM retval out parameter type, such as the value of Result<...>.
     pub retval_type: Option<Type>,
+
+    /// COM return type, such as the error value of Result<...>.
     pub return_type: Option<Type>,
 
+    /// Return value handler.
     pub returnhandler: Box<ReturnHandler>,
+
+    /// Method arguments.
     pub args: Vec<RustArg>,
 
+    /// True if the Rust method is unsafe.
     pub is_unsafe: bool,
 }
 
@@ -169,22 +239,12 @@ impl ComMethodInfo {
 
     pub fn raw_com_args( &self ) -> Vec<ComArg>
     {
-        let out_dir = if let Some( Type::Tuple(_) ) = self.retval_type {
-                            Direction::Out
-                        } else {
-                            Direction::Retval
-                        };
-
         let in_args = self.args
                 .iter()
                 .map( |ca| {
-                    ComArg { arg: ca.clone(), dir: Direction::In }
+                    ComArg::from_rustarg( ca.clone(), Direction::In )
                 } );
-        let out_args = self.returnhandler.com_out_args()
-                .into_iter()
-                .map( |ca| {
-                    ComArg { arg: ca, dir: out_dir }
-                } );
+        let out_args = self.returnhandler.com_out_args();
 
         in_args.chain( out_args ).collect()
     }

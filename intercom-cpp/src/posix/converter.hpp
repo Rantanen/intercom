@@ -14,7 +14,6 @@
 #include "datatypes.hpp"
 #include "../detail/utility.hpp"
 
-
 namespace intercom
 {
 namespace posix

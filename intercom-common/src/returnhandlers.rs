@@ -1,7 +1,7 @@
 
 use prelude::*;
 use syn::*;
-use methodinfo::RustArg;
+use methodinfo::{ComArg, Direction};
 use tyhandlers;
 use utils;
 
@@ -14,7 +14,9 @@ pub trait ReturnHandler : ::std::fmt::Debug {
     /// The return type for COM implementation.
     fn com_ty( &self ) -> Type
     {
-        tyhandlers::get_ty_handler( &self.rust_ty() ).com_ty()
+        tyhandlers::get_ty_handler(
+                &self.rust_ty(),
+                tyhandlers::TypeContext::retval() ).com_ty()
     }
 
     /// Gets the return statement for converting the COM result into Rust
@@ -26,7 +28,7 @@ pub trait ReturnHandler : ::std::fmt::Debug {
     fn rust_to_com_return( &self, _result : &Ident ) -> TokenStream { quote!() }
 
     /// Gets the COM out arguments that result from the Rust return type.
-    fn com_out_args( &self ) -> Vec<RustArg> { vec![] }
+    fn com_out_args( &self ) -> Vec<ComArg> { vec![] }
 }
 
 /// Void return type.
@@ -44,14 +46,28 @@ impl ReturnHandler for ReturnOnlyHandler {
     fn rust_ty( &self ) -> Type { self.0.clone() }
 
     fn com_to_rust_return( &self, result : &Ident ) -> TokenStream {
-        quote!( #result.into() )
+        let conversion = tyhandlers::get_ty_handler(
+                &self.rust_ty(),
+                tyhandlers::TypeContext::retval() ).com_to_rust( result );
+        if conversion.temporary.is_some() {
+            panic!( "Return values cannot depend on temporaries" );
+        }
+
+        conversion.value
     }
 
     fn rust_to_com_return( &self, result : &Ident ) -> TokenStream {
-        quote!( #result.into() )
+        let conversion = tyhandlers::get_ty_handler(
+                &self.rust_ty(),
+                tyhandlers::TypeContext::retval() ).rust_to_com( result );
+        if conversion.temporary.is_some() {
+            panic!( "Return values cannot depend on temporaries" );
+        }
+
+        conversion.value
     }
 
-    fn com_out_args( &self ) -> Vec<RustArg> { vec![] }
+    fn com_out_args( &self ) -> Vec<ComArg> { vec![] }
 }
 
 /// Result type that supports error info for the `Err` value. Converted to
@@ -65,14 +81,18 @@ impl ReturnHandler for ErrorResultHandler {
 
     fn com_to_rust_return( &self, result : &Ident ) -> TokenStream {
 
-        // Return statement checks for S_OK (should be is_success) HRESULT and
-        // yields either Ok or Err Result based on that.
-        let ok_values = get_ok_values( self.com_out_args() );
+        // Format the final Ok value.
+        // If there is only one, it should be a raw value;
+        // If there are multiple value turn them into a tuple.
+        let ok_values = get_rust_ok_values( self.com_out_args() );
         let ok_tokens = if ok_values.len() != 1 {
                 quote!( ( #( #ok_values ),* ) )
             } else {
                 quote!( #( #ok_values )* )
             };
+
+        // Return statement checks for S_OK (should be is_success) HRESULT and
+        // yields either Ok or Err Result based on that.
         quote!(
             if #result == ::intercom::S_OK {
                 Ok( #ok_tokens )
@@ -121,12 +141,12 @@ impl ReturnHandler for ErrorResultHandler {
         )
     }
 
-    fn com_out_args( &self ) -> Vec<RustArg> {
+    fn com_out_args( &self ) -> Vec<ComArg> {
         get_out_args_for_result( &self.retval_ty )
     }
 }
 
-fn get_out_args_for_result( retval_ty : &Type ) -> Vec<RustArg> {
+fn get_out_args_for_result( retval_ty : &Type ) -> Vec<ComArg> {
 
     match *retval_ty {
 
@@ -134,17 +154,21 @@ fn get_out_args_for_result( retval_ty : &Type ) -> Vec<RustArg> {
         Type::Tuple( ref t ) =>
             t.elems.iter()
                 .enumerate()
-                .map( |( idx, ty )| RustArg::new(
-                                    Ident::new( &format!( "__out{}", idx + 1), Span::call_site() ),
-                                    ty.clone() ) )
+                .map( |( idx, ty )| ComArg::new(
+                            Ident::new( &format!( "__out{}", idx + 1), Span::call_site() ),
+                            ty.clone(),
+                            Direction::Out ) )
                 .collect::<Vec<_>>(),
-        _ => vec![ RustArg::new( Ident::new( "__out", Span::call_site() ), retval_ty.clone() ) ],
+        _ => vec![ ComArg::new(
+                Ident::new( "__out", Span::call_site() ),
+                retval_ty.clone(),
+                Direction::Retval ) ],
     }
 }
 
 fn write_out_values(
     idents : &[Ident],
-    out_args : Vec<RustArg>,
+    out_args : Vec<ComArg>,
 ) -> ( Vec<TokenStream>, Vec<TokenStream> )
 {
     let mut ok_tokens = vec![];
@@ -152,8 +176,14 @@ fn write_out_values(
     for ( ident, out_arg ) in idents.iter().zip( out_args ) {
 
         let arg_name = out_arg.name;
-        let ok_value = out_arg.handler.rust_to_com( ident );
+        let ok_conversion = out_arg.handler.rust_to_com( ident );
         let err_value = out_arg.handler.default_value();
+
+        if ok_conversion.temporary.is_some() {
+            panic!( "Return values cannot depend on temporaries" );
+        }
+
+        let ok_value = ok_conversion.value;
         ok_tokens.push( quote!( *#arg_name = #ok_value ) );
         err_tokens.push( quote!( *#arg_name = #err_value ) );
     }
@@ -161,15 +191,20 @@ fn write_out_values(
     ( ok_tokens, err_tokens )
 }
 
-fn get_ok_values(
-    out_args : Vec<RustArg>
+/// Gets the result as Rust types for a success return value.
+fn get_rust_ok_values(
+    out_args : Vec<ComArg>
 ) -> Vec<TokenStream>
 {
     let mut tokens = vec![];
     for out_arg in out_args {
 
-        let arg_value = out_arg.handler.rust_to_com( &out_arg.name );
-        tokens.push( quote!( #arg_value ) );
+        let conversion = out_arg.handler.com_to_rust( &out_arg.name );
+        if conversion.temporary.is_some() {
+            panic!( "Return values cannot depend on temporaries" );
+        }
+
+        tokens.push( conversion.value );
     }
     tokens
 }

@@ -36,12 +36,23 @@ struct __IFooVtbl {
 }
 impl IFoo for ::intercom::ComItf<IFoo> {
     fn trait_method(&self) -> () {
+        #[allow(unused_imports)]
+        use intercom::ComInto;
+
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __IFooVtbl;
 
         #[allow(unused_unsafe)]
-        unsafe {
+        let result: Result<(), ::intercom::ComError> = ( || unsafe {
             let __result = ((**vtbl).trait_method)(comptr);
+            Ok({})
+        } )();
+
+        #[allow(unused_imports)]
+        use intercom::ErrorValue;
+        match result {
+            Ok(v) => v,
+            Err(err) => <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
         }
     }
 }
@@ -233,10 +244,19 @@ unsafe extern "stdcall" fn __Foo_Foo_release(self_vtable: ::intercom::RawComPtr)
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "stdcall" fn __Foo_Foo_struct_method(self_vtable: ::intercom::RawComPtr) -> () {
-    let self_combox =
-        (self_vtable as usize - __Foo_FooVtbl_offset()) as *mut ::intercom::ComBox<Foo>;
-    let self_struct: &Foo = &**self_combox;
-    let __result = self_struct.struct_method();
+    let result: Result<(), ::intercom::ComError> = (|| {
+        let self_combox =
+            (self_vtable as usize - __Foo_FooVtbl_offset()) as *mut ::intercom::ComBox<Foo>;
+        let self_struct: &Foo = &**self_combox;
+        let __result = self_struct.struct_method();
+        Ok({})
+    })();
+
+    use intercom::ErrorValue;
+    match result {
+        Ok( v ) => v,
+        Err( err ) => <() as ErrorValue>::from_error( ::intercom::return_hresult( err ) ),
+    }
 }
 
 #[allow(non_upper_case_globals)]
@@ -289,10 +309,19 @@ unsafe extern "stdcall" fn __Foo_IFoo_release(self_vtable: ::intercom::RawComPtr
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "stdcall" fn __Foo_IFoo_trait_method(self_vtable: ::intercom::RawComPtr) -> () {
-    let self_combox =
-        (self_vtable as usize - __Foo_IFooVtbl_offset()) as *mut ::intercom::ComBox<Foo>;
-    let self_struct: &IFoo = &**self_combox;
-    let __result = self_struct.trait_method();
+    let result: Result<(), ::intercom::ComError> = (|| {
+        let self_combox =
+            (self_vtable as usize - __Foo_IFooVtbl_offset()) as *mut ::intercom::ComBox<Foo>;
+        let self_struct: &IFoo = &**self_combox;
+        let __result = self_struct.trait_method();
+        Ok({})
+    })();
+
+    use intercom::ErrorValue;
+    match result {
+        Ok( v ) => v,
+        Err( err ) => <() as ErrorValue>::from_error( ::intercom::return_hresult( err ) ),
+    }
 }
 
 #[allow(non_upper_case_globals)]

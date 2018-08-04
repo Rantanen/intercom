@@ -113,13 +113,14 @@ impl IdlModel {
                     };
 
                     // Get the foreign type for the arg type.
+                    let com_ty = a.handler.com_ty();
                     let idl_type = foreign
-                        .get_ty( &a.arg.ty )
+                        .get_ty( &com_ty )
                         .ok_or_else( || GeneratorError::UnsupportedType(
-                                        utils::ty_to_string( &a.arg.ty ) ) )?;
+                                        utils::ty_to_string( &a.ty ) ) )?;
 
                     Ok( IdlArg {
-                        name : a.arg.name.to_string(),
+                        name : a.name.to_string(),
                         arg_type : format!( "{}{}", idl_type.to_idl( c ), out_ptr ),
                         attributes : attrs.to_owned(),
                     } )
@@ -252,7 +253,7 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
         let type_name = self.get_name();
         match type_name.as_str() {
             "RawComPtr" => "*void".to_owned(),
-            "String" | "BString" | "BStr" | "str" => "BSTR".to_owned(),
+            "InBSTR" | "OutBSTR" => "BSTR".to_owned(),
             "usize" => "size_t".to_owned(),
             "u64" => "uint64".to_owned(),
             "i64" => "int64".to_owned(),
@@ -377,7 +378,7 @@ mod test {
                             args : vec![
                                 IdlArg {
                                     name : "text".to_owned(),
-                                    arg_type : "BSTR".to_owned(),
+                                    arg_type : "uint16*".to_owned(),
                                     attributes : "in".to_owned(),
                                 },
                                 IdlArg {

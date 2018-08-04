@@ -14,6 +14,7 @@ set(PROJECT_SRCS
 ${PROJECT_SOURCE_DIR}/main.cpp
 ${PROJECT_SOURCE_DIR}/exceptions.cpp
 ${PROJECT_SOURCE_DIR}/interface_wrappers.cpp
+${PROJECT_SOURCE_DIR}/strings.cpp
 )
 
 include_directories("${PROJECT_BINARY_DIR}")

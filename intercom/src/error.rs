@@ -272,3 +272,25 @@ pub fn get_last_error< E >( last_hr : HRESULT ) -> E
 
     E::from( com_error )
 }
+
+/// Defines a way to handle errors based on the method return value type.
+///
+/// The default implementation will terminate the process on the basis that
+/// errors must not silently leak. The specialization for `HRESULT` will return
+/// the `HRESULT`.
+///
+/// The user is free to implement this trait for their own types to handle
+/// custom status codes gracefully.
+pub trait ErrorValue {
+
+    /// Attempts to convert a COM error into a custom status code.
+    fn from_error( HRESULT ) -> Self;
+}
+
+impl<T> ErrorValue for T {
+    default fn from_error( _ : HRESULT ) -> Self { panic!() }
+}
+
+impl ErrorValue for HRESULT {
+    fn from_error( hr : HRESULT ) -> Self { hr }
+}

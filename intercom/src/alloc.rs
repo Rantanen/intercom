@@ -98,7 +98,7 @@ pub mod os {
         let text_data = ( ptr as usize + 4 ) as *mut u16;
 
         // Store the length.
-        *( ptr as *mut u32 ) = len;
+        *( ptr as *mut u32 ) = text_size as u32;
 
         // Copy text data to the buffer. Size is indicates as bytes, so
         // double the amount of u16-chars.
@@ -117,9 +117,14 @@ pub mod os {
     pub unsafe fn free_bstr(
         bstr : *mut u16
     ) {
+        // Ignore null pointers. The offset would make these non-null and crash
+        // the application.
+        if bstr.is_null() {
+            return
+        }
 
         // Offset the ptr back to the start of the reserved memory and free it.
-        let ptr = ( bstr as usize - 2 ) as *mut _;
+        let ptr = ( bstr as usize - 4 ) as *mut _;
         libc::free( ptr )
     }
 

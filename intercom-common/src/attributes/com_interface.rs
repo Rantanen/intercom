@@ -85,8 +85,8 @@ pub fn expand_com_interface(
         let in_out_args = method_info.raw_com_args()
                 .into_iter()
                 .map( |com_arg| {
-                    let name = &com_arg.arg.name;
-                    let com_ty = &com_arg.arg.handler.com_ty();
+                    let name = &com_arg.name;
+                    let com_ty = &com_arg.handler.com_ty();
                     let dir = match com_arg.dir {
                         Direction::In => quote!(),
                         Direction::Out | Direction::Retval => quote!( *mut )
@@ -125,19 +125,20 @@ pub fn expand_com_interface(
                 } ).collect::<Vec<_>>();
 
         // Format the in and out parameters for the COM call.
-        let params = method_info.raw_com_args()
+        let ( temporaries, params ) : ( Vec<_>, Vec<_> ) = method_info.raw_com_args()
                 .into_iter()
                 .map( |com_arg| {
-                    let name = com_arg.arg.name;
+                    let name = com_arg.name;
                     match com_arg.dir {
                         Direction::In => {
-                            let param = com_arg.arg.handler.rust_to_com( &name );
-                            quote!( #param )
+                            let param = com_arg.handler.rust_to_com( &name );
+                            ( param.temporary, param.value )
                         },
                         Direction::Out | Direction::Retval
-                            => quote!( &mut #name ),
+                            => ( None, quote!( &mut #name ) ),
                     }
-                } );
+                } )
+                .unzip();
 
         // Combine the parameters into the final parameter list.
         // This includes the 'this' pointer and both the IN and OUT
@@ -159,14 +160,28 @@ pub fn expand_com_interface(
                 #self_arg, #( #impl_args ),*
             ) -> #return_ty
             {
+                #[allow(unused_imports)]
+                use ::intercom::ComInto;
+
                 let comptr = ::intercom::ComItf::ptr( self );
                 let vtbl = comptr as *const *const #vtable_ident;
 
+                #( #temporaries )*
+
                 #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
-                unsafe {
+                let result : Result< #return_ty, ::intercom::ComError > = ( || unsafe {
                     #( #out_arg_declarations )*;
                     let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
-                    #return_statement
+
+                    Ok( { #return_statement } )
+                } )();
+
+                #[allow(unused_imports)]
+                use ::intercom::ErrorValue;
+                match result {
+                    Ok( v ) => v,
+                    Err( err ) => < #return_ty as ErrorValue >::from_error(
+                            ::intercom::return_hresult( err ) ),
                 }
             }
         ) );

@@ -90,8 +90,8 @@ pub struct __FooVtbl {
 
     pub string_method: unsafe extern "stdcall" fn(
         self_vtable: ::intercom::RawComPtr,
-        msg: ::intercom::BStr
-    ) -> ::intercom::BStr,
+        msg: ::intercom::raw::InBSTR
+    ) -> ::intercom::raw::OutBSTR,
 
     pub comitf_method: unsafe extern "stdcall" fn (
         self_vtable: ::intercom::RawComPtr,
@@ -108,82 +108,146 @@ impl Foo for ::intercom::ComItf<Foo>
 {
     fn simple_method(&self) -> ()
     {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
         #[allow(unused_unsafe)]
-        unsafe {
+        let result : Result< (), ::intercom::ComError > = ( || unsafe {
             let __result = ((**vtbl).simple_method)(comptr);
+            Ok({})
+        } )();
+
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        match result {
+            Ok( v ) => v,
+            Err( err ) => <() as ErrorValue>::from_error( ::intercom::return_hresult( err ) ),
         }
     }
 
     fn arg_method(&self, a: u16) -> ()
     {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
         #[allow(unused_unsafe)]
-        unsafe {
+        let result : Result< (), ::intercom::ComError > = ( || unsafe {
             let __result = ((**vtbl).arg_method)(comptr, a.into());
+            Ok({})
+        } )();
+
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        match result {
+            Ok( v ) => v,
+            Err( err ) => <() as ErrorValue>::from_error(
+                ::intercom::return_hresult(err),
+            ),
         }
     }
 
     fn simple_result_method(&self) -> u16
     {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
         #[allow(unused_unsafe)]
-        unsafe {
+        let result : Result< u16, ::intercom::ComError > = ( || unsafe {
             let __result = ((**vtbl).simple_result_method)(comptr);
 
             // Return the result as is.
-            __result.into()
+            Ok( { __result.into() } )
+        } )();
+
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        match result {
+            Ok( v ) => v,
+            Err( err ) => <u16 as ErrorValue>::from_error(
+                ::intercom::return_hresult(err),
+            ),
         }
     }
 
     fn com_result_method(&self) -> ComResult<u16>
     {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
         #[allow(unused_unsafe)]
-        unsafe {
+        let result : Result< ComResult<u16>, ::intercom::ComError > = ( || unsafe {
             let mut __out: u16 = Default::default();
             let __result = ((**vtbl).com_result_method)(comptr, &mut __out);
 
-            // ComResults convert the __result HRESULT into Err, S_OK gets
-            // converted into Ok.
-            //
-            // TODO: We'll need to support other SUCCESS values in the future
-            //       for Ok(..) as well.
-            if __result == ::intercom::S_OK {
-                Ok(__out.into())
-            } else {
-                Err(::intercom::get_last_error(__result))
-            }
+            Ok( {
+                // ComResults convert the __result HRESULT into Err, S_OK gets
+                // converted into Ok.
+                //
+                // TODO: We'll need to support other SUCCESS values in the future
+                //       for Ok(..) as well.
+                if __result == ::intercom::S_OK {
+                    Ok(__out.into())
+                } else {
+                    Err(::intercom::get_last_error(__result))
+                }
+            } )
+        } )();
+
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        match result {
+            Ok( v ) => v,
+            Err( err ) => <ComResult<u16> as ErrorValue>::from_error(
+                ::intercom::return_hresult(err),
+            ),
         }
     }
 
     fn rust_result_method(&self) -> Result<u16, i32>
     {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
         #[allow(unused_unsafe)]
-        unsafe {
+        let result : Result< Result<u16, i32>, ::intercom::ComError > = ( || unsafe {
             let mut __out: u16 = Default::default();
             let __result = ((**vtbl).rust_result_method)(comptr, &mut __out);
 
-            // Normal Result, not a ComResult. The Ok-case goes as before.
-            //
-            // The Err-case will use IErrorInfo to construct the original
-            // error type.
-            if __result == ::intercom::S_OK {
-                Ok(__out.into())
-            } else {
-                Err(::intercom::get_last_error(__result))
-            }
+            Ok( {
+                // Normal Result, not a ComResult. The Ok-case goes as before.
+                //
+                // The Err-case will use IErrorInfo to construct the original
+                // error type.
+                if __result == ::intercom::S_OK {
+                    Ok(__out.into())
+                } else {
+                    Err(::intercom::get_last_error(__result))
+                }
+            } )
+        } )();
+
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        match result {
+            Ok( v ) => v,
+            Err( err ) => <Result<u16, i32> as ErrorValue>::from_error(
+                ::intercom::return_hresult(err),
+            ),
         }
     }
 
@@ -193,55 +257,100 @@ impl Foo for ::intercom::ComItf<Foo>
         b: i16
     ) -> ComResult<bool>
     {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
         #[allow(unused_unsafe)]
-        unsafe {
+        let result : Result< ComResult<bool>, ::intercom::ComError > = ( || unsafe {
 
             let mut __out: bool = Default::default();
             let __result = ((**vtbl).complete_method)(
                     comptr, a.into(), b.into(), &mut __out);
 
-            if __result == ::intercom::S_OK {
-                Ok(__out.into())
-            } else {
-                Err(::intercom::get_last_error(__result))
-            }
+            Ok( {
+                if __result == ::intercom::S_OK {
+                    Ok(__out.into())
+                } else {
+                    Err(::intercom::get_last_error(__result))
+                }
+            } )
+        } )();
+
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        match result {
+            Ok( v ) => v,
+            Err( err ) => <ComResult<bool> as ErrorValue>::from_error(
+                ::intercom::return_hresult(err),
+            ),
         }
     }
 
     fn string_method(&self, msg: String) -> String
     {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
+        let mut __msg_temporary =
+                <&::intercom::BStr as ::intercom::FromWithTemporary<String>>::to_temporary(msg)?;
+
         #[allow(unused_unsafe)]
-        unsafe {
-            let __result = ((**vtbl).string_method)( comptr, msg.into() );
-            __result.into()
+        let result : Result<String, ::intercom::ComError> = (|| unsafe {
+            let __result =
+                         ((**vtbl).string_method)(comptr,
+                                                  <&::intercom::BStr as ::intercom::FromWithTemporary<String>>::from_temporary(&mut __msg_temporary)?.as_ptr());
+            Ok( { ::intercom::BString::from_ptr( __result ).com_into()? } )
+        } )();
+
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        match result {
+            Ok( v ) => v,
+            Err( err ) => <String as ErrorValue>::from_error(
+                ::intercom::return_hresult(err),
+            ),
         }
     }
 
     fn comitf_method(&self, itf: ComItf<Foo>) -> ComResult<ComItf<IUnknown>>
     {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+
         let comptr = ::intercom::ComItf::ptr(self);
         let vtbl = comptr as *const *const __FooVtbl;
 
         #[allow(unused_unsafe)]
-        unsafe {
+        let result : Result<ComResult<ComItf<IUnknown>>, ::intercom::ComError> = (|| unsafe {
             let mut __out: ComItf<IUnknown> = ComItf::null_itf();
             let __result = ((**vtbl).comitf_method)(comptr, itf.into(), &mut __out);
 
-            // Normal Result, not a ComResult. The Ok-case goes as before.
-            //
-            // The Err-case will use IErrorInfo to construct the original
-            // error type.
-            if __result == ::intercom::S_OK {
-                Ok(__out.into() )
-            } else {
-                Err(::intercom::get_last_error(__result))
-            }
+            Ok( {
+                // Normal Result, not a ComResult. The Ok-case goes as before.
+                //
+                // The Err-case will use IErrorInfo to construct the original
+                // error type.
+                if __result == ::intercom::S_OK {
+                    Ok(__out.into() )
+                } else {
+                    Err(::intercom::get_last_error(__result))
+                } 
+            } )
+        } )();
+
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        match result {
+            Ok( v ) => v,
+            Err( err ) => <ComResult<ComItf<IUnknown>> as ErrorValue>::from_error(
+                ::intercom::return_hresult(err),
+            ),
         }
     }
 }

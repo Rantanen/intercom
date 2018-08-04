@@ -1,4 +1,4 @@
-﻿#![crate_type="dylib"]
+#![crate_type="dylib"]
 #![feature(type_ascription, use_extern_macros, try_from, attr_literals)]
 
 
@@ -268,22 +268,70 @@ impl AllocTests
 }
 
 #[com_class( AUTO_GUID, StringTests)]
-pub struct StringTests
-{
-     value: String
-}
+pub struct StringTests;
+
+static STRING_DATA: &[ &str ] = &[
+    "",
+    "Test",
+    "öäå",
+    "\u{1F980}",
+];
 
 #[com_interface( AUTO_GUID )]
 #[com_impl]
 impl StringTests
 {
-    pub fn new() -> StringTests { StringTests { value: "".to_owned() } }
+    pub fn new() -> StringTests { StringTests }
 
-    pub fn get_value( &self ) -> ComResult<String> {
-        Ok( self.value.clone() )
+    pub fn string_to_index( &self, s : &str ) -> ComResult<u32> {
+
+        for candidate in 0..STRING_DATA.len() {
+            if s == STRING_DATA[ candidate ] {
+                return Ok( candidate as u32 )
+            }
+        }
+
+        println!( "Unrecognized string: {}", s );
+        Err( intercom::E_FAIL )
     }
 
-    pub fn put_value( &mut self, value: &str ) {
-        self.value = value.to_owned();
+    pub fn index_to_string( &self, i : u32 ) -> ComResult<String> {
+
+        for candidate in 0..STRING_DATA.len() {
+            if i as usize == candidate {
+                return Ok( STRING_DATA[ candidate ].to_owned() )
+            }
+        }
+
+        println!( "Unrecognized index: {}", i );
+        Err( intercom::E_FAIL )
+    }
+
+    pub fn bstr_parameter( &self, s : &BStr, ptr : usize ) -> ComResult<()> {
+
+        if s.as_ptr() as usize == ptr {
+            Ok(())
+        } else {
+            Err( intercom::E_FAIL )
+        }
+    }
+
+    pub fn bstr_return_value( &self ) -> ComResult<( BString, usize )> {
+
+        let bs : BString = BString::from( "some string" );
+        let ptr = bs.as_ptr() as usize;
+
+        Ok( ( bs, ptr ) )
+    }
+
+    pub fn invalid_string( &self, s : &str ) -> ComResult<()> {
+
+        // Don't do any validation here.
+        // Intercom should do validation automatically.
+        println!( "String parameter was not invalid: {}", s );
+
+        // Caller expects E_INVALIDARG, use E_FAIL to indicate something
+        // went wrong.
+        Err( intercom::E_FAIL )
     }
 }

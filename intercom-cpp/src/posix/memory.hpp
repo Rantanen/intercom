@@ -89,6 +89,9 @@ namespace intercom
         const intercom::BSTR bstr
     )
     {
+        if( bstr == nullptr )
+            return 0;
+
         const void* buffer = reinterpret_cast< const char* >( bstr ) - 4;
         uint32_t data_length_in_bytes;
         std::memcpy( &data_length_in_bytes, buffer, sizeof( data_length_in_bytes ) );

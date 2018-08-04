@@ -135,7 +135,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
         let type_name = self.get_leaf().get_name();
         match type_name.as_str() {
             "RawComPtr" => "*void".to_owned(),
-            "BSTR" | "String" | "BStr" | "str" => "intercom::BSTR".to_owned(),
+            "InBSTR" | "OutBSTR" => "intercom::BSTR".to_owned(),
             "usize" => "size_t".to_owned(),
             "i8" => "int8_t".to_owned(),
             "u8" => "uint8_t".to_owned(),
@@ -209,11 +209,12 @@ impl CppModel {
                     };
 
                     // Get the foreign type for the arg type in C++ format.
-                    let type_info = foreign.get_ty( &a.arg.ty )
+                    let com_ty = a.handler.com_ty();
+                    let type_info = foreign.get_ty( &com_ty )
                             .ok_or_else( || GeneratorError::UnsupportedType(
-                                            utils::ty_to_string( &a.arg.ty ) ) )?;
+                                            utils::ty_to_string( &a.ty ) ) )?;
                     Ok( CppArg {
-                        name : a.arg.name.to_string(),
+                        name : a.name.to_string(),
                         arg_type : type_info.to_cpp( dir, c ),
                     } )
 
@@ -412,7 +413,7 @@ mod test {
                             args : vec![
                                 CppArg {
                                     name : "text".to_owned(),
-                                    arg_type : "intercom::BSTR".to_owned(),
+                                    arg_type : "uint16_t*".to_owned(),
                                 },
                                 CppArg {
                                     name : "len".to_owned(),

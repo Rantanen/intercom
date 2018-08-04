@@ -127,8 +127,8 @@ pub fn expand_com_impl(
         let in_out_args = method_info.raw_com_args()
                 .into_iter()
                 .map( |com_arg| {
-                    let name = &com_arg.arg.name;
-                    let com_ty = &com_arg.arg.handler.com_ty();
+                    let name = &com_arg.name;
+                    let com_ty = &com_arg.handler.com_ty();
                     let dir = match com_arg.dir {
                         Direction::In => quote!(),
                         Direction::Out | Direction::Retval => quote!( *mut )
@@ -138,21 +138,14 @@ pub fn expand_com_impl(
         let self_arg = quote!( self_vtable : ::intercom::RawComPtr );
         let args = iter::once( self_arg ).chain( in_out_args );
 
-        // Format stack variables if the conversion requires
-        // temporary variable.
-        let stack_variables = method_info.args.iter()
-                .filter_map( |ca| match ca.handler.com_to_rust( &ca.name ).stack {
-                    Some( stack ) => Some( quote!( #stack ) ),
-                    None => None
-                } );
-
         // Format the in and out parameters for the Rust call.
-        let in_params = method_info.args
+        let ( in_temporaries, in_params ) : ( Vec<_>, Vec<_> ) = method_info.args
                 .iter()
                 .map( |ca| {
-                    let conversion = ca.handler.com_to_rust( &ca.name ).conversion;
-                    quote!( #conversion )
-                } );
+                    let conversion = ca.handler.com_to_rust( &ca.name );
+                    ( conversion.temporary, conversion.value )
+                } )
+                .unzip();
 
         let return_ident = Ident::new( "__result", Span::call_site() );
         let return_statement = method_info
@@ -179,21 +172,26 @@ pub fn expand_com_impl(
             unsafe extern #calling_convetion fn #method_impl_ident(
                 #( #args ),*
             ) -> #ret_ty {
-                // Acquire the reference to the ComBox. For this we need
-                // to offset the current 'self_vtable' vtable pointer.
-                let self_combox = ( self_vtable as usize - #vtable_offset() )
-                        as *mut ::intercom::ComBox< #struct_ident >;
+                let result : Result< #ret_ty, ::intercom::ComError > = ( || {
+                    // Acquire the reference to the ComBox. For this we need
+                    // to offset the current 'self_vtable' vtable pointer.
+                    let self_combox = ( self_vtable as usize - #vtable_offset() )
+                            as *mut ::intercom::ComBox< #struct_ident >;
 
-                // Store stack variables required by some conversions.
-                // For example, to convert a COM type to "str" we may need to
-                // convert the COM type into "String" first and then pass
-                // this "String" to the Rust method as "str".
-                #( #stack_variables )*
+                    #( #in_temporaries )*
 
-                #self_struct_stmt;
-                let #return_ident = self_struct.#method_ident( #( #in_params ),* );
+                    #self_struct_stmt;
+                    let #return_ident = self_struct.#method_ident( #( #in_params ),* );
 
-                #return_statement
+                    Ok( { #return_statement } )
+                } )();
+
+                use ::intercom::ErrorValue;
+                match result {
+                    Ok( v ) => v,
+                    Err( err ) => < #ret_ty as ErrorValue >::from_error(
+                            ::intercom::return_hresult( err ) ),
+                }
             }
         ) );
 
