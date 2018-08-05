@@ -7,7 +7,7 @@ use super::*;
 /// and interface discovery.
 ///
 /// For Rust code, Intercom implements the interface automatically.
-#[com_interface( "00000000-0000-0000-C000-000000000046", NO_BASE )]
+#[com_interface( com_iid = "00000000-0000-0000-C000-000000000046", base = NO_BASE )]
 pub trait IUnknown {
 
     /// Tries to get a different COM interface for the current object.
@@ -56,7 +56,7 @@ pub trait IUnknown {
 /// specified interfaces automatically. Only methods that return a
 /// two-parameter `Result<S,E>` value will store the detailed `IErrorInfo`.
 /// Other methods will set a null `IErrorInfo` value.
-#[com_interface( "DF0B3D60-548F-101B-8E65-08002B2BD119" )]
+#[com_interface( com_iid = "DF0B3D60-548F-101B-8E65-08002B2BD119" )]
 pub trait ISupportErrorInfo {
 
     /// Informs the current COM class supports `IErrorInfo` for a specific

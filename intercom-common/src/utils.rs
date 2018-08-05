@@ -1,5 +1,6 @@
 
 use prelude::*;
+use tyhandlers::TypeSystem;
 use syn::*;
 use syn::synom::Parser;
 
@@ -183,6 +184,7 @@ const AUTO_GUID_BASE : guid::GUID = guid::GUID {
     data4: [ 0xB9, 0x57, 0x89, 0xD6, 0x0C, 0xE9, 0x34, 0x77 ]
 };
 
+/*
 pub fn parameter_to_guid(
     p : &AttrParam,
     crate_name : &str,
@@ -206,22 +208,57 @@ pub fn parameter_to_guid(
 
     Err( "GUID parameter must be literal string".to_owned() )
 }
+*/
 
-pub fn generate_guid(
+pub fn generate_iid(
     crate_name : &str,
     item_name : &str,
-    item_type : &str,
+    type_system : TypeSystem,
+) -> guid::GUID
+{
+    generate_guid( &[
+            "IID",
+            crate_name,
+            item_name,
+            match type_system {
+                TypeSystem::Automation => "automation",
+                TypeSystem::Raw => "raw",
+                TypeSystem::Invariant => "invariant",
+            }
+        ].join( ":" ) )
+}
+
+pub fn generate_libid(
+    crate_name : &str,
+) -> guid::GUID
+{
+    generate_guid( &[
+            "LIBID",
+            crate_name,
+        ].join( ":" ) )
+}
+
+pub fn generate_clsid(
+    crate_name : &str,
+    item_name : &str,
+) -> guid::GUID
+{
+    generate_guid( &[
+            "CLSID",
+            crate_name,
+            item_name,
+        ].join( ":" ) )
+}
+
+pub fn generate_guid(
+    key : &str,
 ) -> guid::GUID
 {
     // Hash the name. The name will be hashed in a form similar to:
     // AUTO_GUID_BASE + "CLSID:random_rust_crate:FooBar"
     let mut hash = sha1::Sha1::new();
     hash.update( AUTO_GUID_BASE.as_bytes() );
-    hash.update( item_type.as_bytes() );
-    hash.update( b":" );
-    hash.update( crate_name.as_bytes() );
-    hash.update( b":" );
-    hash.update( item_name.as_bytes() );
+    hash.update( key.as_bytes() );
 
     let digest = hash.digest();
     let bytes = digest.bytes();

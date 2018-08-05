@@ -29,7 +29,7 @@ pub struct FILETIME {
     high_part : u32,
 }
 
-#[com_interface( "B41463C3-8866-43B5-BC33-2B0676F7F42E" )]
+#[com_interface( com_iid = "B41463C3-8866-43B5-BC33-2B0676F7F42E" )]
 pub trait ISetupInstance
 {
     fn get_instance_id( &self ) -> ComResult< String >;
@@ -49,7 +49,7 @@ pub trait ISetupInstance
     fn resolve_path( &self, path : String ) -> ComResult< String >;
 }
 
-#[com_interface( "6380BCFF-41D3-4B2E-8B2E-BF8A6810C848" )]
+#[com_interface( com_iid = "6380BCFF-41D3-4B2E-8B2E-BF8A6810C848" )]
 pub trait IEnumSetupInstances
 {
     fn next(
@@ -64,7 +64,7 @@ pub trait IEnumSetupInstances
     fn clone( &self ) -> ComResult< ComItf< IEnumSetupInstances > >;
 }
 
-#[com_interface( "26AAB78C-4A60-49D6-AF3B-3C35BC93365D" )]
+#[com_interface( com_iid = "26AAB78C-4A60-49D6-AF3B-3C35BC93365D" )]
 pub trait ISetupConfiguration2
 {
     fn enum_instances( &self )

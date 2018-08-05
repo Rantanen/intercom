@@ -16,12 +16,12 @@ extern crate quote;
 /// - `DllGetClassObject` extern function implementation.
 /// - `IntercomListClassObjects` extern function implementation.
 pub fn expand_com_library(
-    attr_tokens: &TokenStreamNightly,
+    attr_tokens: TokenStreamNightly,
     item_tokens: TokenStreamNightly,
 ) -> Result<TokenStreamNightly, model::ParseError>
 {
     let mut output = vec![];
-    let lib = model::ComLibrary::parse( &lib_name(), &attr_tokens.to_string() )?;
+    let lib = model::ComLibrary::parse( &lib_name(), attr_tokens.into() )?;
 
     // Create the match-statmeent patterns for each supposedly visible COM class.
     let mut match_arms = vec![];

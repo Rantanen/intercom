@@ -1,14 +1,35 @@
 
 use ::prelude::*;
 use super::*;
+use super::macros::*;
 
 use ::guid::GUID;
 use ::ast_converters::*;
 use ::methodinfo::ComMethodInfo;
-use ::syn::{Ident, Visibility};
+use ::syn::{ Ident, Visibility, LitStr };
 use ::std::collections::HashMap;
 use ::std::iter::FromIterator;
 use ::tyhandlers::{TypeSystem};
+
+intercom_attribute!(
+    ComInterfaceAttr< ComInterfaceAttrParam, NoParams > {
+        com_iid : LitStr,
+        raw_iid : LitStr,
+        base : Ident,
+    }
+);
+
+impl ComInterfaceAttr {
+
+    pub fn iid( &self, ts : TypeSystem ) -> Result< Option< &LitStr >, String > {
+
+        match ts {
+            TypeSystem::Raw => self.raw_iid(),
+            TypeSystem::Automation => self.com_iid(),
+            TypeSystem::Invariant => self.com_iid(),
+        }
+    }
+}
 
 #[derive(Debug, PartialEq)]
 pub struct ComInterface
@@ -37,7 +58,7 @@ impl ComInterface
     /// Parses a #[com_interface] attribute and the associated item.
     pub fn parse(
         crate_name : &str,
-        attr_params : &str,
+        attr_params : TokenStream,
         item : &str,
     ) -> ParseResult<ComInterface>
     {
@@ -46,21 +67,22 @@ impl ComInterface
             .map_err( |_| ParseError::ComInterface(
                     "<Unknown>".into(),
                     "Item syntax error".into() ) )?;
-        let attr = ::utils::parse_attr_tokens( "com_interface", attr_params )
-            .map_err( |_| ParseError::ComInterface(
-                    item.get_ident().unwrap().to_string(),
-                    "Attribute syntax error".into() ) )?;
 
-        Self::from_ast( crate_name, &attr, &item )
+        Self::from_ast( crate_name, attr_params, &item )
     }
 
     /// Creates ComInterface from AST elements.
     pub fn from_ast(
         crate_name : &str,
-        attr : &::syn::Attribute,
+        attr : TokenStream,
         item : &::syn::Item,
     ) -> ParseResult< ComInterface >
     {
+        let attr : ComInterfaceAttr = ::syn::parse2( attr )
+            .map_err( |_| ParseError::ComInterface(
+                    item.get_ident().unwrap().to_string(),
+                    "Attribute syntax error".into() ) )?;
+
         // Get the interface details. As [com_interface] can be applied to both
         // impls and traits this handles both of those.
         let ( itf_ident, fns, itf_type, unsafety ) =
@@ -69,28 +91,18 @@ impl ComInterface
                             item.get_ident().unwrap().to_string(),
                             "Unsupported associated item".into() ) )?;
 
-        // The first attribute parameter is the IID. Parse that.
-        let mut iter = ::utils::iter_parameters( attr );
-
-        // Get the GUID attribute parameter.
-        let guid_param = &iter.next()
-                .ok_or_else( || ParseError::ComInterface(
-                        item.get_ident().unwrap().to_string(),
-                        "IID required".into() ) )?;
-
         // The second argument is the optional base class. If there's no base
         // class defined, use IUnknown as the default. The value of NO_BASE will
         // construct an interface that has no base class.
         //
         // In practice the NO_BASE should be used ONLY for the IUnknown itself.
-        let base = iter.next()
-                .map( |base| base.get_ident()
-                    .map_err( |_| ParseError::ComInterface(
-                            item.get_ident().unwrap().to_string(),
-                            "Invalid base interface".into() ) ) )
-                .map_or( Ok(None), |o| o.map(Some) )?
-                .unwrap_or_else( || Ident::new( "IUnknown", Span::call_site() ) );
-        let base = if base == "NO_BASE" { None } else { Some( base ) };
+        let base = attr.base()
+                .map_err( |msg| ParseError::ComInterface(
+                    item.get_ident().unwrap().to_string(), msg ) )?;
+        let base = match base {
+            Some( b ) => if b == "NO_BASE" { None } else { Some( b.to_owned() ) },
+            None => Some( Ident::new( "IUnknown", Span::call_site() ) ),
+        };
 
         // Visibility for trait interfaces is the visibility of the trait.
         //
@@ -118,17 +130,16 @@ impl ComInterface
                     ref b => b.as_ref().map( |b| Ident::new( &format!( "{}_{:?}", b, ts ), Span::call_site() ) )
                 };
 
-                let iid = match ts {
-                    TypeSystem::Automation => ::utils::parameter_to_guid(
-                        guid_param, crate_name, &itf_unique_ident.to_string(), "IID" )
+                let iid_attr = attr.iid( ts )
+                        .map_err( |msg| ParseError::ComInterface(
+                            item.get_ident().unwrap().to_string(), msg ) )?;
+                let iid = match iid_attr {
+                    Some( iid ) => GUID::parse( &iid.value() )
                         .map_err( |_| ParseError::ComInterface(
                                 item.get_ident().unwrap().to_string(),
-                                "Bad IID format".into() ) )?
-                        .ok_or_else( || ParseError::ComInterface(
-                                item.get_ident().unwrap().to_string(),
-                                "IID required".into() ) )?,
-                    _ => ::utils::generate_guid(
-                        crate_name, &itf_unique_ident.to_string(), "IID" ),
+                                "Bad IID format".into() ) )?,
+                    None => ::utils::generate_iid(
+                            crate_name, &itf_unique_ident.to_string(), ts )
                 };
 
                 // Read the method details.

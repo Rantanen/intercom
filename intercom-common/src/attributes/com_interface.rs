@@ -22,7 +22,7 @@ use syn::*;
 /// - Implementation for the delegating methods when calling the COM interface
 ///   from Rust.
 pub fn expand_com_interface(
-    attr_tokens: &TokenStream,
+    attr_tokens: TokenStream,
     item_tokens: TokenStream,
 ) -> Result<TokenStream, model::ParseError>
 {
@@ -30,7 +30,7 @@ pub fn expand_com_interface(
     let mut output = vec![];
     let itf = model::ComInterface::parse(
             &lib_name(),
-            &attr_tokens.to_string(),
+            attr_tokens.into(),
             &item_tokens.to_string() )?;
     let visibility = itf.visibility();
     let itf_ident = itf.name();

@@ -291,14 +291,14 @@ impl ComCrate
             for attr in &item.get_attributes().unwrap() {
                 match attr.path.get_ident().unwrap().to_string().as_ref() {
                     "com_library" =>
-                        b.libs.push( ComLibrary::from_ast( crate_name, attr )? ),
+                        b.libs.push( ComLibrary::parse( crate_name, attr.tts.clone() )? ),
                     "com_interface" =>
                         b.interfaces.push( ComInterface::from_ast(
-                                crate_name, attr, item )? ),
+                                crate_name, attr.tts.clone(), item )? ),
                     "com_class" =>
                         if let ::syn::Item::Struct( ref s ) = *item {
                             b.structs.push( ComStruct::from_ast(
-                                    crate_name, attr, s )? )
+                                    crate_name, attr.tts.clone(), s )? )
                         } else {
                             return Err( ParseError::ComStruct(
                                     item.get_ident().unwrap().to_string(),

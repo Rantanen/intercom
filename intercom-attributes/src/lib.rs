@@ -58,7 +58,7 @@ pub fn com_interface(
     tokens: TokenStream,
 ) -> TokenStream
 {
-    match expand_com_interface( &attr, tokens ) {
+    match expand_com_interface( attr, tokens ) {
         Ok(t) => t,
         Err(e) => panic!( "{}", e ),
     }
@@ -114,7 +114,7 @@ pub fn com_class(
     tokens: TokenStream,
 ) -> TokenStream
 {
-    match expand_com_class( &attr, tokens ) {
+    match expand_com_class( attr, tokens ) {
         Ok(t) => t,
         Err(e) => panic!( "{}", e ),
     }
@@ -144,7 +144,7 @@ pub fn com_library(
     tokens: TokenStream,
 ) -> TokenStream
 {
-    match expand_com_library( &attr, tokens ) {
+    match expand_com_library( attr, tokens ) {
         Ok(t) => t,
         Err(e) => panic!( "{}", e ),
     }

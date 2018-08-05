@@ -17,14 +17,14 @@ use syn::*;
 /// - `IUnknown` virtual table instance.
 /// - `CoClass` trait implementation.
 pub fn expand_com_class(
-    attr_tokens: &TokenStreamNightly,
+    attr_tokens: TokenStreamNightly,
     item_tokens: TokenStreamNightly,
 ) -> Result<TokenStreamNightly, model::ParseError>
 {
     // Parse the attribute.
     let mut output = vec![];
     let cls = model::ComStruct::parse(
-            &lib_name(), &attr_tokens.to_string(), &item_tokens.to_string() )?;
+            &lib_name(), attr_tokens.into(), &item_tokens.to_string() )?;
     let struct_ident = cls.name();
 
     // IUnknown vtable match. As the primary query_interface is implemented

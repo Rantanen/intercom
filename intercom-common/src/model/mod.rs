@@ -31,6 +31,9 @@ pub enum ParseError {
 
 pub type ParseResult<T> = Result<T, ParseError>;
 
+#[macro_use]
+mod macros;
+
 mod comlibrary; pub use self::comlibrary::*;
 mod comstruct; pub use self::comstruct::*;
 mod cominterface; pub use self::cominterface::*;
