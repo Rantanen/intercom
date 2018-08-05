@@ -15,15 +15,15 @@
 //! use intercom::{com_library, com_class, com_interface, com_impl, ComResult};
 //!
 //! // Define COM classes to expose from this library.
-//! #[com_library(AUTO_GUID, Calculator)]
+//! #[com_library(Calculator)]
 //!
 //! // Define the COM class and the interfaces it implements.
-//! #[com_class(AUTO_GUID, Calculator)]
+//! #[com_class(Calculator)]
 //! struct Calculator;
 //!
 //! // Define the implementation for the class. The COM interface is defined
 //! // implicitly by the `impl`.
-//! #[com_interface(AUTO_GUID)]
+//! #[com_interface]
 //! #[com_impl]
 //! impl Calculator {
 //!

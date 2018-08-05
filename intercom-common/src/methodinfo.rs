@@ -311,14 +311,16 @@ fn hresult_ty() -> Type {
 mod tests {
 
     use super::*;
+    use tyhandlers::TypeSystem::*;
 
     #[test]
     fn no_args_or_return_value() {
 
-        let info = test_info( "fn foo( &self ) {}" );
+        let info = test_info( "fn foo( &self ) {}", Automation );
 
         assert_eq!( info.is_const, true );
-        assert_eq!( info.name, "foo" );
+        assert_eq!( info.display_name, "foo" );
+        assert_eq!( info.unique_name, "foo_Automation" );
         assert_eq!( info.args.len(), 0 );
         assert_eq!( info.retval_type.is_none(), true );
         assert_eq!( info.return_type.is_none(), true );
@@ -327,10 +329,11 @@ mod tests {
     #[test]
     fn basic_return_value() {
 
-        let info = test_info( "fn foo( &self ) -> bool {}" );
+        let info = test_info( "fn foo( &self ) -> bool {}", Raw );
 
         assert_eq!( info.is_const, true );
-        assert_eq!( info.name, "foo" );
+        assert_eq!( info.display_name, "foo" );
+        assert_eq!( info.unique_name, "foo_Raw" );
         assert_eq!( info.args.len(), 0 );
         assert_eq!( info.retval_type.is_none(), true );
         assert_eq!(
@@ -341,10 +344,11 @@ mod tests {
     #[test]
     fn result_return_value() {
 
-        let info = test_info( "fn foo( &self ) -> Result<String, f32> {}" );
+        let info = test_info( "fn foo( &self ) -> Result<String, f32> {}", Automation );
 
         assert_eq!( info.is_const, true );
-        assert_eq!( info.name, "foo" );
+        assert_eq!( info.display_name, "foo" );
+        assert_eq!( info.unique_name, "foo_Automation" );
         assert_eq!( info.args.len(), 0 );
         assert_eq!(
                 info.retval_type,
@@ -357,10 +361,11 @@ mod tests {
     #[test]
     fn comresult_return_value() {
 
-        let info = test_info( "fn foo( &self ) -> ComResult<String> {}" );
+        let info = test_info( "fn foo( &self ) -> ComResult<String> {}", Automation );
 
         assert_eq!( info.is_const, true );
-        assert_eq!( info.name, "foo" );
+        assert_eq!( info.display_name, "foo" );
+        assert_eq!( info.unique_name, "foo_Automation" );
         assert_eq!( info.args.len(), 0 );
         assert_eq!(
                 info.retval_type,
@@ -373,10 +378,11 @@ mod tests {
     #[test]
     fn basic_arguments() {
 
-        let info = test_info( "fn foo( &self, a : u32, b : f32 ) {}" );
+        let info = test_info( "fn foo( &self, a : u32, b : f32 ) {}", Raw );
 
         assert_eq!( info.is_const, true );
-        assert_eq!( info.name, "foo" );
+        assert_eq!( info.display_name, "foo" );
+        assert_eq!( info.unique_name, "foo_Raw" );
         assert_eq!( info.retval_type.is_none(), true );
         assert_eq!( info.return_type.is_none(), true );
 
@@ -389,13 +395,14 @@ mod tests {
         assert_eq!( info.args[1].ty, parse_quote!( f32 ) );
     }
 
-    fn test_info( code : &str ) -> ComMethodInfo {
+    fn test_info( code : &str, ts : TypeSystem) -> ComMethodInfo {
 
         let item = parse_str( code ).unwrap();
         let ( ident, decl, unsafety ) = match item {
             Item::Fn( ref f ) => ( f.ident.clone(), f.decl.as_ref(), f.unsafety.is_some() ),
             _ => panic!( "Code isn't function" ),
         };
-        ComMethodInfo::new_from_parts( ident, decl, unsafety ).unwrap()
+        ComMethodInfo::new_from_parts(
+                ident, decl, unsafety, ts ).unwrap()
     }
 }

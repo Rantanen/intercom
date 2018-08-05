@@ -44,6 +44,8 @@ fn check_expansions() {
     let mut failed = 0;
     for source_path in source_paths {
 
+        // Get the source and target code.
+
         // Construct the target file path by replacing the ".source.rs" with a
         // ".target.rs". There's a small discrepancy here as the .source.rs had
         // to be at the end for the file to count as source file, but here
@@ -51,19 +53,19 @@ fn check_expansions() {
         //
         // This shouldn't matter in practice as these are test files and we can
         // decide on their naming as we write them.
-        let mut target_file = fs::File::open( source_path.replace(
-                ".source.rs",
-                ".target.rs" ) ).unwrap();
+        let mut target_code = String::new();
+        let target_path = source_path.replace( ".source.rs", ".target.rs" );
+        {
+            // Scope the lifetime of the open file handle.
 
-        // Get the source and target code.
-        //
-        // The source is compiled using rustc and the target is just read
-        // from the disk.
+            let mut target_file = fs::File::open( &target_path ).unwrap();
+            target_file.read_to_string( &mut target_code )
+                        .expect( "Failed to read target" );
+        }
+
+        // The source is compiled using rustc
         let mut source_code = build(
                     crate_path.to_str().unwrap(), &source_path );
-        let mut target_code = String::new();
-        target_file.read_to_string( &mut target_code )
-                    .expect( "Failed to read target" );
 
         // Generate diffs for both sources
         // Ensure the linebreaks are the same for both. This seems to be
@@ -91,33 +93,44 @@ fn check_expansions() {
         // If there is more than one, they differed.
         if changeset.diffs.len() > 1 {
 
-            // Print the changeset for debugging purposes and increment the
-            // amount of failed items. By default this prints nice colored diff.
-            if let Some( mut t ) = term::stdout() {
-                for i in 0..changeset.diffs.len() {
-                    match changeset.diffs[i] {
-                        Difference::Same(ref x) => {
-                            t.reset().unwrap();
-                            for line in x.lines() {
-                                writeln!(t, "  {}", line);
+            if std::env::var( "UPDATE_TARGETS" ).is_ok() {
+
+                // The user wants to update the targets.
+                use std::io::Write;
+                let mut target_file = fs::File::create( &target_path ).unwrap();
+                target_file.write_all( source_code.as_bytes() )
+                        .expect( &format!( "Writing target file {} failed", &target_path ) );
+
+            } else {
+
+                // Print the changeset for debugging purposes and increment the
+                // amount of failed items. By default this prints nice colored diff.
+                if let Some( mut t ) = term::stdout() {
+                    for i in 0..changeset.diffs.len() {
+                        match changeset.diffs[i] {
+                            Difference::Same(ref x) => {
+                                t.reset().unwrap();
+                                for line in x.lines() {
+                                    writeln!(t, "  {}", line);
+                                }
                             }
-                        }
-                        Difference::Add(ref x) => {
-                            t.fg(term::color::GREEN).unwrap();
-                            for line in x.lines() {
-                                writeln!(t, "+ {}", line);
+                            Difference::Add(ref x) => {
+                                t.fg(term::color::GREEN).unwrap();
+                                for line in x.lines() {
+                                    writeln!(t, "+ {}", line);
+                                }
                             }
-                        }
-                        Difference::Rem(ref x) => {
-                            t.fg(term::color::RED).unwrap();
-                            for line in x.lines() {
-                                writeln!(t, "- {}", line);
+                            Difference::Rem(ref x) => {
+                                t.fg(term::color::RED).unwrap();
+                                for line in x.lines() {
+                                    writeln!(t, "- {}", line);
+                                }
                             }
                         }
                     }
+                } else {
+                    println!( "{}", changeset );
                 }
-            } else {
-                println!( "{}", changeset );
             }
             failed += 1;
         }
@@ -164,29 +177,7 @@ fn build( cwd: &str, path : &str ) -> String {
     String::from_utf8( output.stdout ).expect( "Bad output" )
 }
 
-/// Removes comments from the code.
-fn strip_comments( code : &str ) -> String {
-
-    // Targets include extra comments. Ignore them.
-    let re_comments = regex::Regex::new( r"//.*" ).expect( "Bad regex" );
-    let no_comments = re_comments.replace_all( code, "" );
-
-    // Rustfmt screws with empty lines in some ways so remove those.
-    let re_empty_lines = regex::Regex::new( r"(?m)^\s*$" ).expect( "Bad regex" );
-    re_empty_lines.replace_all( &no_comments, "" ).to_string()
-}
-
-fn strip_empty_lines( code : &str ) -> String {
-    let re = regex::Regex::new( r"^\s+$" ).expect( "Bad regex" );
-    re.replace_all( code, "" ).into_owned().replace( "\n\n", "" )
-}
-
 fn format( code : &str ) -> String {
-
-    // Strip comments. This allows us to embed comments in the target files
-    // without requiring the attributes to expand these comments.
-    let code = strip_comments( code );
-    let code = strip_empty_lines( &code );
 
     let intercom_fmt = find_intercom_fmt().unwrap();
     let mut formatter = Command::new( &intercom_fmt )

@@ -100,7 +100,7 @@ mod test
     fn parse_com_class() {
         let cls = ComStruct::parse(
             "not used",
-            quote!( ( clsid = "12345678-1234-1234-1234-567890ABCDEF", Foo, Bar ) ),
+            quote!( clsid = "12345678-1234-1234-1234-567890ABCDEF", Foo, Bar ),
             "struct S;" )
                 .expect( "com_class attribute parsing failed" );
 
@@ -122,7 +122,7 @@ mod test
         // name stays the same.
         let cls = ComStruct::parse(
             "not used",
-            quote!( ( MyStruct, IThings, IStuff ) ),
+            quote!( MyStruct, IThings, IStuff ),
             "struct MyStruct { a: u32 }" )
                 .expect( "com_class attribute parsing failed" );
 
@@ -140,7 +140,7 @@ mod test
 
         let cls = ComStruct::parse(
             "not used",
-            quote!( ( None ) ),
+            quote!( clsid = None ),
             "struct EmptyType;" )
                 .expect( "com_class attribute parsing failed" );
 
@@ -154,7 +154,7 @@ mod test
 
         let cls = ComStruct::parse(
             "not used",
-            quote!( ( None, ITestInterface ) ),
+            quote!( clsid = None, ITestInterface ),
             "struct EmptyType;" )
                 .expect( "com_class attribute parsing failed" );
 

@@ -66,9 +66,18 @@ macro_rules! intercom_attribute {
 
         struct $attr( Vec<$attr_param> );
         impl ::syn::synom::Synom for $attr {
-            named!(parse -> Self, do_parse!(
-                p: call!( ::syn::punctuated::Punctuated::<$attr_param, ::syn::token::Comma>::parse_separated_nonempty ) >>
-                ( $attr( p.into_iter().collect() ) )
+            named!(parse -> Self, alt!(
+                do_parse!(
+                    p: parens!( call!( ::syn::punctuated::Punctuated::<$attr_param, ::syn::token::Comma>::parse_terminated ) ) >>
+                    ( $attr( p.1.into_iter().collect() ) )
+                )
+                |
+                do_parse!(
+                    p: call!( ::syn::punctuated::Punctuated::<$attr_param, ::syn::token::Comma>::parse_terminated ) >>
+                    ( $attr( p.into_iter().collect() ) )
+                )
+                |
+                do_parse!( input_end!() >> ( $attr( vec![] ) ) )
             ) );
         }
 

@@ -327,20 +327,29 @@ impl ComCrate
 mod test
 {
     use super::*;
+    use guid::GUID;
+    use tyhandlers::TypeSystem::*;
 
     #[test]
     fn parse_crate() {
         let krate = ComCrate::parse( "my_crate", &[
             r#"
-                #[com_library( "12345678-1234-1234-1234-567890000000", Foo, Bar )]
+                #[com_library(
+                        libid = "12345678-1234-1234-1234-567890000000",
+                        Foo, Bar )]
 
-                #[com_interface( "12345678-1234-1234-1234-567890000001" )]
+                #[com_interface(
+                        com_iid = "12345678-1234-1234-1234-567890000001",
+                        raw_iid = "12345678-1234-1234-1234-567890000002",
+                )]
                 trait IFoo {}
 
                 trait IBar {}
             "#,
             r#"
-                #[com_class( "12345678-1234-1234-1234-567890000002", IFoo )]
+                #[com_class(
+                        clsid = "12345678-1234-1234-1234-567890000003",
+                        IFoo )]
                 struct S;
 
                 #[com_impl]
@@ -354,14 +363,20 @@ mod test
 
         // The interfaces should contain the built-in interface.
         assert_eq!( krate.interfaces().len(), 2 );
-        assert_eq!( krate.interfaces()[ "IFoo" ].iid(),
+
+        assert_eq!( krate.interfaces()[ "IFoo" ].variants()[ &Automation ].iid(),
             &GUID::parse( "12345678-1234-1234-1234-567890000001" ).unwrap() );
-        assert_eq!( krate.interfaces()[ "Allocator" ].iid(),
+        assert_eq!( krate.interfaces()[ "IFoo" ].variants()[ &Raw ].iid(),
+            &GUID::parse( "12345678-1234-1234-1234-567890000002" ).unwrap() );
+
+        assert_eq!( krate.interfaces()[ "Allocator" ].variants()[ &Automation ].iid(),
             &GUID::parse( "18EE22B3-B0C6-44A5-A94A-7A417676FB66" ).unwrap() );
+        assert_eq!( krate.interfaces()[ "Allocator" ].variants()[ &Raw ].iid(),
+            &GUID::parse( "7A6F6564-04B5-4455-A223-EA0512B8CC63" ).unwrap() );
 
         assert_eq!( krate.structs().len(), 2 );
         assert_eq!( krate.structs()[ "S" ].clsid().as_ref().unwrap(),
-            &GUID::parse( "12345678-1234-1234-1234-567890000002" ).unwrap() );
+            &GUID::parse( "12345678-1234-1234-1234-567890000003" ).unwrap() );
         assert_eq!( krate.structs()[ "Allocator" ].clsid().as_ref().unwrap(),
             &GUID::parse( "1582F0E9-9CAB-3E18-7F37-0CF2CD9DA33A" ).unwrap() );
 

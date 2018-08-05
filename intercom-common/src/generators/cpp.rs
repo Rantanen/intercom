@@ -375,18 +375,18 @@ mod test {
     pub fn crate_to_cpp() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"
-            #[com_library( "11112222-3333-4444-5555-666677778888", CoClass )]
+            #[com_library( libid = "11112222-3333-4444-5555-666677778888", CoClass )]
             struct S;
 
-            #[com_interface( "22223333-4444-5555-6666-777788889999", NO_BASE )]
+            #[com_interface( raw_iid = "22223333-4444-5555-6666-777788889999", base = NO_BASE )]
             trait IInterface {
                 fn method( &self, a : u32 ) -> ComResult<bool>;
             }
 
-            #[com_class( "33334444-5555-6666-7777-888899990000", CoClass, IInterface )]
+            #[com_class( clsid = "33334444-5555-6666-7777-888899990000", CoClass, IInterface )]
             struct CoClass;
 
-            #[com_interface( "44445555-6666-7777-8888-99990000AAAA" )]
+            #[com_interface( raw_iid = "44445555-6666-7777-8888-99990000AAAA" )]
             #[com_impl]
             impl CoClass {
                 pub fn new() -> CoClass { CoClass }
@@ -443,7 +443,7 @@ mod test {
                 CppInterface {
                     name : "IAllocator".to_owned(),
                     base : Some( "IUnknown".to_owned() ),
-                    iid_struct : "{0x18ee22b3,0xb0c6,0x44a5,{0xa9,0x4a,0x7a,0x41,0x76,0x76,0xfb,0x66}}".to_owned(),
+                    iid_struct : "{0x7a6f6564,0x04b5,0x4455,{0xa2,0x23,0xea,0x05,0x12,0xb8,0xcc,0x63}}".to_owned(),
                     methods : vec![
                         CppMethod {
                             name : "AllocBstr".to_owned(),
@@ -514,7 +514,7 @@ mod test {
             ],
         };
 
-        let actual_cpp = CppModel::from_crate( &krate ).unwrap();
+        let actual_cpp = CppModel::from_crate( &krate, false ).unwrap();
 
         assert_eq!( expected_cpp, actual_cpp );
     }
@@ -523,11 +523,11 @@ mod test {
     fn bstr_method() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"
-            #[com_library( "11112222-3333-4444-5555-666677778888", CoClass )]
-            #[com_class( "33334444-5555-6666-7777-888899990000", CoClass )]
+            #[com_library( libid = "11112222-3333-4444-5555-666677778888", CoClass )]
+            #[com_class( clsid = "33334444-5555-6666-7777-888899990000", CoClass )]
             struct CoClass;
 
-            #[com_interface( "44445555-6666-7777-8888-99990000AAAA" )]
+            #[com_interface( raw_iid = "44445555-6666-7777-8888-99990000AAAA" )]
             #[com_impl]
             impl CoClass {
                 pub fn new() -> CoClass { CoClass }
@@ -547,7 +547,7 @@ mod test {
                 ]
             };
 
-        let actual_model = CppModel::from_crate( &krate ).unwrap();
+        let actual_model = CppModel::from_crate( &krate, false ).unwrap();
         let actual_method =
                 actual_model
                     .interfaces

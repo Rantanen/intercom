@@ -7,7 +7,7 @@ use ::guid::GUID;
 use ::ast_converters::*;
 use ::methodinfo::ComMethodInfo;
 use ::syn::{ Ident, Visibility, LitStr };
-use ::std::collections::HashMap;
+use ::ordermap::OrderMap;
 use ::std::iter::FromIterator;
 use ::tyhandlers::{TypeSystem};
 
@@ -37,7 +37,7 @@ pub struct ComInterface
     display_name : Ident,
     visibility : Visibility,
     base_interface : Option<Ident>,
-    variants : HashMap<TypeSystem, ComInterfaceVariant>,
+    variants : OrderMap<TypeSystem, ComInterfaceVariant>,
     item_type: ::utils::InterfaceType,
     is_unsafe : bool,
 }
@@ -118,7 +118,7 @@ impl ComInterface
                     parse_quote!( pub )
                 };
 
-        let variants = HashMap::from_iter(
+        let variants = OrderMap::from_iter(
             [ TypeSystem::Automation, TypeSystem::Raw ].into_iter().map( |&ts| {
 
             let itf_unique_ident = Ident::new( 
@@ -187,7 +187,7 @@ impl ComInterface
     pub fn base_interface( &self ) -> &Option<Ident> { &self.base_interface }
 
     /// Interface variants.
-    pub fn variants( &self ) -> &HashMap<TypeSystem, ComInterfaceVariant> { &self.variants }
+    pub fn variants( &self ) -> &OrderMap<TypeSystem, ComInterfaceVariant> { &self.variants }
 
     /// The type of the associated item for the #[com_interface] attribute.
     ///
@@ -220,43 +220,65 @@ impl ComInterfaceVariant {
 mod test
 {
     use super::*;
+    use tyhandlers::TypeSystem::*;
 
     #[test]
     fn parse_com_interface() {
         let itf = ComInterface::parse(
             "not used",
-            r#""12345678-1234-1234-1234-567890ABCDEF""#,
+            quote!(
+                com_iid = "12345678-1234-1234-1234-567890ABCDEF",
+                raw_iid = "12345678-1234-1234-1234-567890FEDCBA",
+            ),
             "trait ITrait { fn foo( &self ); fn bar( &self ); }" )
                 .expect( "com_interface attribute parsing failed" );
 
         assert_eq!( itf.name(), "ITrait" );
-        assert_eq!( itf.iid(),
-            &GUID::parse( "12345678-1234-1234-1234-567890ABCDEF" ).unwrap() );
         assert_eq!( itf.visibility(), &Visibility::Inherited );
         assert_eq!( itf.base_interface().as_ref().unwrap(), "IUnknown" );
-        assert_eq!( itf.methods.len(), 2 );
-        assert_eq!( itf.methods[0].name, "foo" );
-        assert_eq!( itf.methods[1].name, "bar" );
+
+        let variant = &itf.variants[ &Automation ];
+        assert_eq!( variant.iid(),
+            &GUID::parse( "12345678-1234-1234-1234-567890ABCDEF" ).unwrap() );
+        assert_eq!( variant.methods.len(), 2 );
+        assert_eq!( variant.methods[0].display_name, "foo" );
+        assert_eq!( variant.methods[1].display_name, "bar" );
+
+        let variant = &itf.variants[ &Raw ];
+        assert_eq!( variant.iid(),
+            &GUID::parse( "12345678-1234-1234-1234-567890FEDCBA" ).unwrap() );
+        assert_eq!( variant.methods.len(), 2 );
+        assert_eq!( variant.methods[0].display_name, "foo" );
+        assert_eq!( variant.methods[1].display_name, "bar" );
     }
 
     #[test]
     fn parse_com_interface_with_auto_guid() {
         let itf = ComInterface::parse(
             "not used",
-            r#"AUTO_GUID"#,
+            quote!(),
             "pub trait IAutoGuid { fn one( &self ); fn two( &self ); }" )
                 .expect( "com_interface attribute parsing failed" );
 
         assert_eq!( itf.name(), "IAutoGuid" );
-        assert_eq!( itf.iid(),
-            &GUID::parse( "11BA222D-A34B-32BC-4A1F-77157F37803A" ).unwrap() );
 
         let pub_visibility : Visibility = parse_quote!( pub );
         assert_eq!( itf.visibility(), &pub_visibility );
         assert_eq!( itf.base_interface().as_ref().unwrap(), "IUnknown" );
-        assert_eq!( itf.methods.len(), 2 );
-        assert_eq!( itf.methods[0].name, "one" );
-        assert_eq!( itf.methods[1].name, "two" );
+
+        let variant = &itf.variants[ &Automation ];
+        assert_eq!( variant.iid(),
+            &GUID::parse( "3DC87B73-0998-30B6-75EA-D4F564454D4B" ).unwrap() );
+        assert_eq!( variant.methods.len(), 2 );
+        assert_eq!( variant.methods[0].display_name, "one" );
+        assert_eq!( variant.methods[1].display_name, "two" );
+
+        let variant = &itf.variants[ &Raw ];
+        assert_eq!( variant.iid(),
+            &GUID::parse( "D552E455-9FB2-34A2-61C0-34BDE0A9095D" ).unwrap() );
+        assert_eq!( variant.methods.len(), 2 );
+        assert_eq!( variant.methods[0].display_name, "one" );
+        assert_eq!( variant.methods[1].display_name, "two" );
     }
 
 
@@ -264,40 +286,62 @@ mod test
     fn parse_com_interface_with_base_interface() {
         let itf = ComInterface::parse(
             "not used",
-            r#"AUTO_GUID, IBase"#,
+            quote!( base = IBase ),
             "pub trait IAutoGuid { fn one( &self ); fn two( &self ); }" )
                 .expect( "com_interface attribute parsing failed" );
 
         assert_eq!( itf.name(), "IAutoGuid" );
-        assert_eq!( itf.iid(),
-            &GUID::parse( "11BA222D-A34B-32BC-4A1F-77157F37803A" ).unwrap() );
 
         let pub_visibility : Visibility = parse_quote!( pub );
         assert_eq!( itf.visibility(), &pub_visibility );
         assert_eq!( itf.base_interface().as_ref().unwrap(), "IBase" );
-        assert_eq!( itf.methods.len(), 2 );
-        assert_eq!( itf.methods[0].name, "one" );
-        assert_eq!( itf.methods[1].name, "two" );
+
+        let variant = &itf.variants[ &TypeSystem::Automation];
+        assert_eq!( variant.iid(),
+            &GUID::parse( "3DC87B73-0998-30B6-75EA-D4F564454D4B" ).unwrap() );
+        assert_eq!( variant.methods.len(), 2 );
+        assert_eq!( variant.methods[0].display_name, "one" );
+        assert_eq!( variant.methods[0].unique_name, "one_Automation" );
+        assert_eq!( variant.methods[1].display_name, "two" );
+        assert_eq!( variant.methods[1].unique_name, "two_Automation" );
+
+        let variant = &itf.variants[ &TypeSystem::Raw];
+        assert_eq!( variant.iid(),
+            &GUID::parse( "D552E455-9FB2-34A2-61C0-34BDE0A9095D" ).unwrap() );
+        assert_eq!( variant.methods.len(), 2 );
+        assert_eq!( variant.methods[0].display_name, "one" );
+        assert_eq!( variant.methods[0].unique_name, "one_Raw" );
+        assert_eq!( variant.methods[1].display_name, "two" );
+        assert_eq!( variant.methods[1].unique_name, "two_Raw" );
     }
 
     #[test]
     fn parse_com_interface_with_no_base_interface() {
         let itf = ComInterface::parse(
             "not used",
-            r#"AUTO_GUID, NO_BASE"#,
+            quote!( base = NO_BASE ),
             "pub trait IAutoGuid { fn one( &self ); fn two( &self ); }" )
                 .expect( "com_interface attribute parsing failed" );
 
         assert_eq!( itf.name(), "IAutoGuid" );
-        assert_eq!( itf.iid(),
-            &GUID::parse( "11BA222D-A34B-32BC-4A1F-77157F37803A" ).unwrap() );
 
         let pub_visibility : Visibility = parse_quote!( pub );
         assert_eq!( itf.visibility(), &pub_visibility );
         assert_eq!( itf.base_interface(), &None );
-        assert_eq!( itf.methods.len(), 2 );
-        assert_eq!( itf.methods[0].name, "one" );
-        assert_eq!( itf.methods[1].name, "two" );
+
+        let variant = &itf.variants[ &Automation ];
+        assert_eq!( variant.iid(),
+            &GUID::parse( "3DC87B73-0998-30B6-75EA-D4F564454D4B" ).unwrap() );
+        assert_eq!( variant.methods.len(), 2 );
+        assert_eq!( variant.methods[0].unique_name, "one_Automation" );
+        assert_eq!( variant.methods[1].unique_name, "two_Automation" );
+
+        let variant = &itf.variants[ &Raw ];
+        assert_eq!( variant.iid(),
+            &GUID::parse( "D552E455-9FB2-34A2-61C0-34BDE0A9095D" ).unwrap() );
+        assert_eq!( variant.methods.len(), 2 );
+        assert_eq!( variant.methods[0].unique_name, "one_Raw" );
+        assert_eq!( variant.methods[1].unique_name, "two_Raw" );
     }
 }
 

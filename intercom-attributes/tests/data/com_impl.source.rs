@@ -22,7 +22,7 @@ const IID_Foo_Raw: intercom::IID = intercom::GUID {
     data4: [0, 0, 0, 0, 0, 0, 0, 0],
 };
 
-#[com_class("{00000000-0000-0000-0000-000000000000}", Foo)]
+#[com_class( clsid = "{00000000-0000-0000-0000-000000000000}", Foo)]
 pub struct Foo;
 
 #[com_impl]

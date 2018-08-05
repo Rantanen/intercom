@@ -332,18 +332,18 @@ mod test {
     pub fn crate_to_idl() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"
-            #[com_library( "11112222-3333-4444-5555-666677778888", CoClass )]
+            #[com_library( libid = "11112222-3333-4444-5555-666677778888", CoClass )]
             struct S;
 
-            #[com_interface( "22223333-4444-5555-6666-777788889999", NO_BASE )]
+            #[com_interface( com_iid = "22223333-4444-5555-6666-777788889999", base = NO_BASE )]
             trait IInterface {
                 fn method( &self, a : u32 ) -> ComResult<bool>;
             }
 
-            #[com_class( "33334444-5555-6666-7777-888899990000", CoClass, IInterface )]
+            #[com_class( clsid = "33334444-5555-6666-7777-888899990000", CoClass, IInterface )]
             struct CoClass;
 
-            #[com_interface( "44445555-6666-7777-8888-99990000AAAA" )]
+            #[com_interface( com_iid = "44445555-6666-7777-8888-99990000AAAA" )]
             #[com_impl]
             impl CoClass {
                 pub fn new() -> CoClass { CoClass }
@@ -483,7 +483,7 @@ mod test {
             ],
         };
 
-        let actual_idl = IdlModel::from_crate( &krate ).unwrap();
+        let actual_idl = IdlModel::from_crate( &krate, false ).unwrap();
 
         assert_eq!( expected_idl, actual_idl );
     }

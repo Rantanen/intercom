@@ -27,6 +27,7 @@ impl ComLibrary
         attr_params : TokenStream,
     ) -> ParseResult<ComLibrary>
     {
+        println!( "{} ", attr_params );
         let attr : ComLibraryAttr = ::syn::parse2( attr_params )
             .map_err( |_| ParseError::ComLibrary(
                     "Attribute syntax error".into() ) )?;
@@ -68,7 +69,8 @@ mod test
 
         let lib = ComLibrary::parse(
             "library_name".into(),
-            r#""12345678-1234-1234-1234-567890ABCDEF", Foo, Bar"# )
+            quote!( libid = "12345678-1234-1234-1234-567890ABCDEF",
+                    Foo, Bar ) )
                 .expect( "com_library attribute parsing failed" );
 
         assert_eq!( lib.name(), "library_name" );
@@ -93,29 +95,25 @@ mod test
         // name stays the same.
         let lib = ComLibrary::parse(
             "another_library".into(),
-            "AUTO_GUID, One, Two" )
+            quote!( One, Two ) )
                 .expect( "com_library attribute parsing failed" );
 
         assert_eq!( lib.name(), "another_library" );
         assert_eq!(
                 lib.libid(),
-                &GUID::parse( "6C6AF0CA-89C3-3467-48F3-37466A58CA22" ).unwrap() );
+                &GUID::parse( "696B2FAE-AC56-3E08-7C2C-ABAA8DB8F6E3" ).unwrap() );
         assert_eq!( lib.coclasses().len(), 2 );
         assert_eq!( lib.coclasses()[0], "One" );
         assert_eq!( lib.coclasses()[1], "Two" );
     }
 
     #[test]
-    fn parse_com_library_without_coclasses() {
-
-        let lib = ComLibrary::parse( "lib".into(), "AUTO_GUID" ).unwrap();
-        assert_eq!( lib.coclasses().len(), 0 );
-    }
-
-    #[test]
     fn parse_com_library_with_empty_parameters() {
 
-        let result = ComLibrary::parse( "lib".into(), "()" );
-        assert!( result.is_err() );
+        let lib = ComLibrary::parse( "lib".into(), quote!() ).unwrap();
+        assert_eq!( lib.coclasses().len(), 0 );
+        assert_eq!(
+                lib.libid(),
+                &GUID::parse( "22EC0095-CD17-3AFD-6C4F-531464178911" ).unwrap() );
     }
 }

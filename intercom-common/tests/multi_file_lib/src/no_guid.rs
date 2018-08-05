@@ -2,7 +2,7 @@ use super::itfs;
 
 use super::itfs;
 
-#[com_class( NO_GUID, Interface1, Interface2)]
+#[com_class( clsid = None, Interface1, Interface2)]
 #[derive(Debug)]
 pub struct NoGuid
 {
