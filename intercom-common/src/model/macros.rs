@@ -67,17 +67,28 @@ macro_rules! intercom_attribute {
         struct $attr( Vec<$attr_param> );
         impl ::syn::synom::Synom for $attr {
             named!(parse -> Self, alt!(
+
+                // When parsing #[foo(bar)] attributes with syn, syn will include
+                // the parenthess in the tts:
+                // > ( bar )
                 do_parse!(
                     p: parens!( call!( ::syn::punctuated::Punctuated::<$attr_param, ::syn::token::Comma>::parse_terminated ) ) >>
                     ( $attr( p.1.into_iter().collect() ) )
                 )
+
                 |
+
+                // When the same attribute appears as a proc macro attribute, rustc will omit the
+                // parentheses from the parameter tokens:
+                // > bar
+                //
+                // This also supports empty token streams, which occur with empty parentheses
+                // "#[foo()]" in proc macros or omitting parentheses "#[foo]" in both proc macros
+                // and syn.
                 do_parse!(
                     p: call!( ::syn::punctuated::Punctuated::<$attr_param, ::syn::token::Comma>::parse_terminated ) >>
                     ( $attr( p.into_iter().collect() ) )
                 )
-                |
-                do_parse!( input_end!() >> ( $attr( vec![] ) ) )
             ) );
         }
 
