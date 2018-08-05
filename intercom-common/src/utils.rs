@@ -184,32 +184,6 @@ const AUTO_GUID_BASE : guid::GUID = guid::GUID {
     data4: [ 0xB9, 0x57, 0x89, 0xD6, 0x0C, 0xE9, 0x34, 0x77 ]
 };
 
-/*
-pub fn parameter_to_guid(
-    p : &AttrParam,
-    crate_name : &str,
-    item_name : &str,
-    item_type : &str,
-) -> Result< Option< guid::GUID >, String >
-{
-    if let AttrParam::Word( ref i ) = *p {
-        return Ok( match i.to_string().as_ref() {
-            "AUTO_GUID" =>
-                Some( generate_guid( crate_name, item_name, item_type ) ),
-            "NO_GUID" =>
-                None,
-            _ => return Err( format!( "Invalid GUID: {:?}", i ) ),
-        } );
-    }
-
-    if let AttrParam::Literal( Lit::Str( ref s ) ) = *p {
-        return Ok( Some( guid::GUID::parse( &s.value() )? ) );
-    }
-
-    Err( "GUID parameter must be literal string".to_owned() )
-}
-*/
-
 pub fn generate_iid(
     crate_name : &str,
     item_name : &str,
