@@ -12,8 +12,11 @@ TEST_CASE( "Basic IUnknown implementation works" )
     SECTION( "create instance succeeds" )
     {
 
-        IRefCountOperations* pRefCount = nullptr;
-        intercom::HRESULT hr = CreateInstance( CLSID_RefCountOperations, IID_IRefCountOperations, &pRefCount );
+        IRefCountOperations_Automation* pRefCount = nullptr;
+        intercom::HRESULT hr = CreateInstance(
+                CLSID_RefCountOperations,
+                IID_IRefCountOperations_Automation,
+                &pRefCount );
 
         REQUIRE( hr == intercom::SC_OK );
         REQUIRE( pRefCount != nullptr );
@@ -88,7 +91,7 @@ TEST_CASE( "Basic IUnknown implementation works" )
 
         SECTION( "COM interface returned from function has proper ref count" )
         {
-            IRefCountOperations* pAnotherRefCount = nullptr;
+            IRefCountOperations_Automation* pAnotherRefCount = nullptr;
             REQUIRE( pRefCount->GetNew( OUT &pAnotherRefCount ) == intercom::SC_OK );
 
             REQUIRE( pAnotherRefCount->GetRefCount() == 1 );

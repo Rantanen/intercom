@@ -9,10 +9,10 @@ TEST_CASE( "Results can be returned" )
     InitializeRuntime();
 
     // Get the IResultOperations interface.
-    IResultOperations* pOps = nullptr;
+    IResultOperations_Automation* pOps = nullptr;
     intercom::HRESULT hr = CreateInstance(
             CLSID_ResultOperations,
-            IID_IResultOperations,
+            IID_IResultOperations_Automation,
             &pOps );
 
     REQUIRE( hr == intercom::SC_OK );

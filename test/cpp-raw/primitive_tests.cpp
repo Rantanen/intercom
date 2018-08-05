@@ -12,11 +12,11 @@ TEST_CASE( "Primitive types are supported" )
     // Initialize COM.
     InitializeRuntime();
 
-    // Get the IPrimitiveOperations interface.
-    IPrimitiveOperations* pOps = nullptr;
+    // Get the IPrimitiveOperations_Automation interface.
+    IPrimitiveOperations_Automation* pOps = nullptr;
     intercom::HRESULT hr = CreateInstance(
             CLSID_PrimitiveOperations,
-            IID_IPrimitiveOperations,
+            IID_IPrimitiveOperations_Automation,
             &pOps );
 
     REQUIRE( hr == intercom::SC_OK );

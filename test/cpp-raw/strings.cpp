@@ -44,18 +44,18 @@ TEST_CASE( "Using BSTR in interface works" )
     InitializeRuntime();
 
     // Construct allocator.
-    IAllocator* pAllocator = nullptr;
+    IAllocator_Automation* pAllocator = nullptr;
     intercom::HRESULT hr = CreateInstance(
         CLSID_Allocator,
-        IID_IAllocator,
+        IID_IAllocator_Automation,
         &pAllocator );
     REQUIRE( hr == intercom::SC_OK );
 
     // Construct string test interface.
-    IStringTests* pStringTests = nullptr;
+    IStringTests_Automation* pStringTests = nullptr;
     hr = CreateInstance(
         CLSID_StringTests,
-        IID_IStringTests,
+        IID_IStringTests_Automation,
         &pStringTests );
     REQUIRE( hr == intercom::SC_OK );
 

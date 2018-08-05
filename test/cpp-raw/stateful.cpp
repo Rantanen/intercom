@@ -10,10 +10,10 @@ TEST_CASE( "Objects maintain their state" )
     InitializeRuntime();
 
     // Get the IResultOperations interface.
-    IStatefulOperations* pOps = nullptr;
+    IStatefulOperations_Automation* pOps = nullptr;
     intercom::HRESULT hr = CreateInstance(
             CLSID_StatefulOperations,
-            IID_IStatefulOperations,
+            IID_IStatefulOperations_Automation,
             &pOps );
 
     REQUIRE( hr == intercom::SC_OK );

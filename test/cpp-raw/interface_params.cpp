@@ -7,13 +7,13 @@
 
 #include <intercom.hpp>
 
-class CppImplementation : public ISharedInterface
+class CppImplementation : public ISharedInterface_Automation
 {
     virtual unsigned int INTERCOM_CC GetValue() { return 5; }
 
     // These two are not used.
     virtual void INTERCOM_CC SetValue( unsigned int v ) { }
-    virtual intercom::HRESULT INTERCOM_CC DivideBy( ISharedInterface* divisor, OUT unsigned int* result )
+    virtual intercom::HRESULT INTERCOM_CC DivideBy( ISharedInterface_Automation* divisor, OUT unsigned int* result )
     { return intercom::EC_NOTIMPL; }
 
     virtual intercom::HRESULT INTERCOM_CC QueryInterface( const intercom::IID& riid, void** out ) { return intercom::EC_NOTIMPL; }
@@ -27,18 +27,18 @@ TEST_CASE( "Methods accept COM interfaces as parameters." )
     InitializeRuntime();
 
     // Get the first SharedImplementation object.
-    ISharedInterface* pItf1 = nullptr;
+    ISharedInterface_Automation* pItf1 = nullptr;
     intercom::HRESULT hr = CreateInstance(
         CLSID_SharedImplementation,
-        IID_ISharedInterface,
+        IID_ISharedInterface_Automation,
         &pItf1 );
     REQUIRE( hr == intercom::SC_OK );
 
     // Get the second SharedImplementation object.
-    ISharedInterface* pItf2 = nullptr;
+    ISharedInterface_Automation* pItf2 = nullptr;
     hr = CreateInstance(
         CLSID_SharedImplementation,
-        IID_ISharedInterface,
+        IID_ISharedInterface_Automation,
         &pItf2 );
     REQUIRE( hr == intercom::SC_OK );
 
