@@ -27,7 +27,6 @@ impl ComLibrary
         attr_params : TokenStream,
     ) -> ParseResult<ComLibrary>
     {
-        println!( "{} ", attr_params );
         let attr : ComLibraryAttr = ::syn::parse2( attr_params )
             .map_err( |_| ParseError::ComLibrary(
                     "Attribute syntax error".into() ) )?;
