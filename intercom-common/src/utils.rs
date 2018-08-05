@@ -2,29 +2,10 @@
 use prelude::*;
 use tyhandlers::TypeSystem;
 use syn::*;
-use syn::synom::Parser;
 
-use error::MacroError;
 use super::*;
 
 use ast_converters::*;
-
-pub fn parse_attr_tokens(
-    attr_name: &str,
-    attr_tokens: &str,
-) -> Result< Attribute, MacroError >
-{
-    let attr_rendered = format!( "#[{}({})]", attr_name, attr_tokens );
-    if let Ok( tt ) = attr_rendered.parse() {
-        if let Ok( t ) = Attribute::parse_outer.parse2( tt ) {
-            return Ok( t )
-        }
-    }
-
-    Err( MacroError {
-        msg: format!( "Could not parse [{}] attribute", attr_name )
-    } )
-}
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum InterfaceType { Trait, Struct }
