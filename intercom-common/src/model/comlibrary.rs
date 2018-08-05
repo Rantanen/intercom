@@ -1,10 +1,8 @@
 
 use ::prelude::*;
 use super::*;
-use super::macros::*;
 
 use ::guid::GUID;
-use ::ast_converters::*;
 use ::syn::{ LitStr };
 
 intercom_attribute!(

@@ -7,21 +7,15 @@
 //! purposes in the future.
 //!
 
-use prelude::*;
 use super::*;
 
-use ::guid::GUID;
 use ::ast_converters::*;
-use ::methodinfo::ComMethodInfo;
 use ::builtin_model;
-use ::syn::{Ident, Visibility};
 use ::std::path::{Path, PathBuf};
-use ::std::collections::HashMap;
 use ::std::fs;
 use ::std::io::Read;
 use ::ordermap::OrderMap;
 use ::std::iter::FromIterator;
-use ::tyhandlers::{TypeSystem};
 use toml;
 
 #[derive(Debug, PartialEq)]

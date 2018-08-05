@@ -43,6 +43,7 @@ macro_rules! intercom_attribute {
 
     ( $attr:ident < $attr_param:ident, $params:ident > { $( $name:ident : $type:ident, )* } ) => {
 
+        #[allow(non_camel_case_types)]
         enum $attr_param {
             $( $name ( $type ), )*
             args( $params ),
@@ -53,7 +54,7 @@ macro_rules! intercom_attribute {
                 $(
                     do_parse!(
                         custom_keyword!( $name ) >>
-                        eq : punct!(=) >>
+                        punct!(=) >>
                         value : syn!( $type ) >>
                         ( $attr_param::$name( value ) )
                     )
@@ -71,6 +72,7 @@ macro_rules! intercom_attribute {
             ) );
         }
 
+        #[allow(dead_code)]
         impl $attr {
             $(
                 pub fn $name( &self ) -> Result< Option< &$type >, String >

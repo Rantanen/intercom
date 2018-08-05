@@ -4,7 +4,7 @@ use super::common::*;
 
 use std::iter;
 
-use tyhandlers::{Direction, TypeSystem};
+use tyhandlers::{Direction};
 use idents;
 use model;
 
@@ -30,7 +30,7 @@ pub fn expand_com_impl(
     let struct_ident = imp.struct_name();
     let itf_ident = imp.interface_name();
 
-    for ( &ts, impl_variant ) in imp.variants() {
+    for ( _, impl_variant ) in imp.variants() {
 
         let itf_unique_ident = impl_variant.interface_unique_name();
         let vtable_struct_ident = idents::vtable_struct( &itf_unique_ident );
