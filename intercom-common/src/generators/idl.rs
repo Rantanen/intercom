@@ -9,7 +9,7 @@ use super::GeneratorError;
 use utils;
 use model;
 use model::{ComCrate, ComInterfaceVariant};
-use tyhandlers::{Direction, TypeSystem};
+use tyhandlers::{Direction, TypeSystem, TypeSystemConfig};
 use foreign_ty::*;
 use type_parser::*;
 
@@ -60,12 +60,14 @@ trait IdlTypeInfo<'s> {
     fn to_idl(
         &self,
         krate : &ComCrate,
+        ts_config : &TypeSystemConfig,
     ) -> String;
 
     /// Gets the IDL compatile type name for this type.
     fn get_idl_type_name(
         &self,
         krate: &model::ComCrate,
+        ts_config : &TypeSystemConfig,
     ) -> String;
 
     /// Determines whether this type should be passed as a pointer.
@@ -112,10 +114,16 @@ impl IdlModel {
         let itfs = c.interfaces().iter()
             .flat_map(|(_, itf)| itf.variants().iter()
             .filter( itf_variant_filter.as_ref() )
-            .map(|(_, itf_variant)| {
+            .map(|(&ts, itf_variant)| {
 
                 // Get the method definitions for the current interface.
                 let methods = itf_variant.methods().iter().enumerate().map(|(i,m)| {
+
+                    // Define the config to use when constructing the type names.
+                    let ts_config = TypeSystemConfig {
+                        effective_system: ts,
+                        is_default: ! all_type_systems,
+                    };
 
                     // Construct the argument list.
                     let args = m.raw_com_args().iter().map(|a| {
@@ -137,7 +145,7 @@ impl IdlModel {
 
                         Ok( IdlArg {
                             name : a.name.to_string(),
-                            arg_type : format!( "{}{}", idl_type.to_idl( c ), out_ptr ),
+                            arg_type : format!( "{}{}", idl_type.to_idl( c, &ts_config ), out_ptr ),
                             attributes : attrs.to_owned(),
                         } )
 
@@ -151,7 +159,7 @@ impl IdlModel {
                     Ok( IdlMethod {
                     name: utils::pascal_case( m.display_name.to_string() ),
                         idx: i,
-                        ret_type: ret_ty.to_idl( c ),
+                        ret_type: ret_ty.to_idl( c, &ts_config ),
                         args
                     } )
 
@@ -249,7 +257,8 @@ impl<'s> IdlTypeInfo<'s> {
     /// Gets the name of a custom type for IDL.
     fn get_idl_name_for_custom_type(
         krate : &ComCrate,
-        ty_name : &str
+        ty_name : &str,
+        ts_config : &TypeSystemConfig,
     ) -> String {
 
         let itf = if let Some( itf ) = krate.interfaces().get( ty_name ) {
@@ -258,11 +267,13 @@ impl<'s> IdlTypeInfo<'s> {
             return ty_name.to_owned()
         };
 
-        if itf.item_type() == ::utils::InterfaceType::Struct {
+        let base_name = if itf.item_type() == ::utils::InterfaceType::Struct {
             format!( "I{}", itf.name() )
         } else {
-            ty_name.to_owned()
-        }
+            ty_name.to_string()
+        };
+
+        ts_config.get_unique_name( &base_name )
     }
 }
 
@@ -271,12 +282,13 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
     fn to_idl(
         &self,
         krate : &ComCrate,
+        ts_config : &TypeSystemConfig,
     ) -> String {
 
         // We want to enable if for interface methods and parameters.
         let const_specifier = if self.is_mutable || self.pass_by != PassBy::Reference { "" } else { "const " };
 
-        let type_name = self.get_leaf().get_idl_type_name( krate );
+        let type_name = self.get_leaf().get_idl_type_name( krate, ts_config );
         let ptr = if self.is_pointer() { "*" } else { "" };
         format!("{}{}{}", const_specifier, type_name, ptr )
     }
@@ -285,6 +297,7 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
     fn get_idl_type_name(
         &self,
         krate : &ComCrate,
+        ts_config : &TypeSystemConfig,
     ) -> String {
 
         let type_name = self.get_name();
@@ -303,7 +316,7 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
             "f64" => "double".to_owned(),
             "f32" => "float".to_owned(),
             "c_void" => "void".to_owned(),
-            t => IdlTypeInfo::get_idl_name_for_custom_type( krate, t ),
+            t => IdlTypeInfo::get_idl_name_for_custom_type( krate, t, ts_config ),
         }
     }
 

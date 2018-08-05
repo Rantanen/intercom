@@ -18,6 +18,21 @@ pub struct TypeConversion {
     pub value : TokenStream,
 }
 
+#[derive(PartialEq, Eq, Debug)]
+pub struct TypeSystemConfig {
+    pub effective_system : TypeSystem,
+    pub is_default : bool,
+}
+
+impl TypeSystemConfig {
+    pub fn get_unique_name( &self, base : &str ) -> String {
+        match self.is_default {
+            true => base.to_string(),
+            false => format!( "{}_{:?}", base, self.effective_system ),
+        }
+    }
+}
+
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum TypeSystem {
 

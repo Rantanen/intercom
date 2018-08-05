@@ -8,7 +8,7 @@ use std::convert::TryFrom;
 extern crate winapi;
 
 // Declare available COM classes.
-#[com_library( AUTO_GUID,
+#[com_library(
     RefCountOperations,
     PrimitiveOperations,
     StatefulOperations,
@@ -21,7 +21,7 @@ extern crate winapi;
     StringTests,
 )]
 
-#[com_interface( AUTO_GUID )]
+#[com_interface]
 trait IRefCount
 {
     fn get_ref_count( &self ) -> u32;
@@ -40,10 +40,12 @@ macro_rules! impl_irefcount {
     }
 }
 
-#[com_class("{12341234-1234-1234-1234-123412340001}", PrimitiveOperations )]
+#[com_class( clsid = "{12341234-1234-1234-1234-123412340001}", PrimitiveOperations )]
 pub struct PrimitiveOperations { }
 
-#[com_interface("{12341234-1234-1234-1234-123412340002}")]
+#[com_interface(
+        com_iid = "{12341234-1234-1234-1234-123412340002}",
+        raw_iid = "{12341234-1234-1234-1234-123412340003}")]
 #[com_impl]
 impl PrimitiveOperations
 {
@@ -67,12 +69,12 @@ impl PrimitiveOperations
     pub fn f32( &self, v : f32 ) -> f32 { 1f32 / v }
 }
 
-#[com_class( AUTO_GUID, StatefulOperations )]
+#[com_class(StatefulOperations )]
 pub struct StatefulOperations {
     state : i32
 }
 
-#[com_interface( AUTO_GUID )]
+#[com_interface]
 #[com_impl]
 impl StatefulOperations {
     pub fn new() -> StatefulOperations { StatefulOperations { state : 0xABBACD } }
@@ -82,10 +84,10 @@ impl StatefulOperations {
     pub fn get_value( &mut self ) -> i32 { self.state }
 }
 
-#[com_class( AUTO_GUID, ResultOperations )]
+#[com_class( ResultOperations )]
 pub struct ResultOperations { }
 
-#[com_interface( AUTO_GUID )]
+#[com_interface]
 #[com_impl]
 impl ResultOperations {
     pub fn new() -> ResultOperations { ResultOperations {} }
@@ -111,10 +113,10 @@ impl ResultOperations {
     }
 }
 
-#[com_class( AUTO_GUID, ClassCreator )]
+#[com_class( ClassCreator )]
 pub struct ClassCreator { }
 
-#[com_interface( AUTO_GUID )]
+#[com_interface]
 #[com_impl]
 impl ClassCreator {
     pub fn new() -> ClassCreator { ClassCreator {} }
@@ -135,10 +137,10 @@ impl ClassCreator {
     }
 }
 
-#[com_class( AUTO_GUID, CreatedClass, IParent, IRefCount )]
+#[com_class( CreatedClass, IParent, IRefCount )]
 pub struct CreatedClass { id : i32, parent: i32 }
 
-#[com_interface( AUTO_GUID )]
+#[com_interface]
 #[com_impl]
 impl CreatedClass {
     pub fn new() -> CreatedClass { unreachable!() }
@@ -150,7 +152,7 @@ impl CreatedClass {
 }
 impl_irefcount!( CreatedClass );
 
-#[com_interface( AUTO_GUID )]
+#[com_interface]
 pub trait IParent {
     fn get_id( &self ) -> i32;
 }
@@ -160,10 +162,10 @@ impl IParent for CreatedClass {
     fn get_id( &self ) -> i32 { self.id }
 }
 
-#[com_class( AUTO_GUID, RefCountOperations )]
+#[com_class( RefCountOperations )]
 pub struct RefCountOperations {}
 
-#[com_interface( AUTO_GUID )]
+#[com_interface]
 #[com_impl]
 impl RefCountOperations {
     pub fn new() -> RefCountOperations { RefCountOperations { } }
@@ -178,14 +180,14 @@ impl RefCountOperations {
     }
 }
 
-#[com_interface( AUTO_GUID )]
+#[com_interface]
 pub trait ISharedInterface {
     fn get_value( &self ) -> u32;
     fn set_value( &mut self, v : u32 );
     fn divide_by( &self, divisor: ComItf<ISharedInterface> ) -> ComResult<u32>;
 }
 
-#[com_class( AUTO_GUID, ISharedInterface)]
+#[com_class( ISharedInterface)]
 pub struct SharedImplementation { value: u32 }
 
 impl SharedImplementation {
@@ -205,7 +207,7 @@ impl ISharedInterface for SharedImplementation {
     }
 }
 
-#[com_class( AUTO_GUID, ErrorSource)]
+#[com_class( ErrorSource)]
 pub struct ErrorSource;
 
 #[derive(Debug)]
@@ -221,7 +223,7 @@ impl std::fmt::Display for TestError {
     }
 }
 
-#[com_interface( AUTO_GUID )]
+#[com_interface]
 #[com_impl]
 impl ErrorSource
 {
@@ -249,10 +251,10 @@ impl From<intercom::ComError> for TestError
     }
 }
 
-#[com_class( AUTO_GUID, AllocTests)]
+#[com_class( AllocTests)]
 pub struct AllocTests;
 
-#[com_interface( AUTO_GUID )]
+#[com_interface]
 #[com_impl]
 impl AllocTests
 {
@@ -267,7 +269,7 @@ impl AllocTests
     }
 }
 
-#[com_class( AUTO_GUID, StringTests)]
+#[com_class( StringTests)]
 pub struct StringTests;
 
 static STRING_DATA: &[ &str ] = &[
@@ -277,7 +279,7 @@ static STRING_DATA: &[ &str ] = &[
     "\u{1F980}",
 ];
 
-#[com_interface( AUTO_GUID )]
+#[com_interface]
 #[com_impl]
 impl StringTests
 {
