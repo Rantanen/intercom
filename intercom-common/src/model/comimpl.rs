@@ -76,15 +76,15 @@ impl ComImpl
             ( ts, ComImplVariant {
                 type_system: ts,
                 interface_unique_name: itf_unique_ident,
-                methods: methods
+                methods,
             } )
         } ) );
 
         Ok( ComImpl {
             struct_name: struct_ident,
             interface_display_name: itf_ident,
-            variants: variants,
-            is_trait_impl
+            variants,
+            is_trait_impl,
         } )
     }
 

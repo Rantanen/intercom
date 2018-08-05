@@ -14,7 +14,7 @@ pub enum StrOption {
 }
 impl ::syn::synom::Synom for StrOption {
     named!(parse -> Self, alt!(
-        syn!( ::syn::LitStr ) => { |s| StrOption::Str( s ) }
+        syn!( ::syn::LitStr ) => { StrOption::Str }
         |
         custom_keyword!( None ) => { |_| StrOption::None }
     ) );

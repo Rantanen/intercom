@@ -4,7 +4,7 @@ use syn::*;
 use tyhandlers::TypeSystem;
 
 pub fn with_ts(
-    ident: Ident,
+    ident: &Ident,
     ts: TypeSystem,
 ) -> Ident
 {

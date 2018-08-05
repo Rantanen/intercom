@@ -68,7 +68,7 @@ pub fn expand_com_class(
     // The data should include the match-arms for the primary query_interface
     // and the vtable offsets used for the delegating query_interface impls.
     for itf in cls.interfaces() {
-    for &ts in [ TypeSystem::Automation, TypeSystem::Raw ].iter() {
+    for &ts in &[ TypeSystem::Automation, TypeSystem::Raw ] {
 
         // Various idents.
         let itf_variant = Ident::new( &format!( "{}_{:?}", itf, ts ), Span::call_site() );

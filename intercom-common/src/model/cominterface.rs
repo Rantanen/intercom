@@ -157,18 +157,18 @@ impl ComInterface
                     unique_name : itf_unique_ident,
                     unique_base_interface : unique_base,
                     type_system : ts,
-                    iid : iid,
-                    methods : methods
+                    iid,
+                    methods,
                 } ) )
             } ).collect::<Result<Vec<_>,_>>()? );
 
         Ok( ComInterface {
             display_name: itf_ident,
-            visibility,
             base_interface: base,
             item_type: itf_type,
             is_unsafe : unsafety.is_some(),
-            variants : variants,
+            visibility,
+            variants,
         } )
     }
 

@@ -1,6 +1,8 @@
 #![feature(non_exhaustive)]
 #![recursion_limit="128"]
 
+#![cfg_attr(feature = "cargo-clippy", allow(match_bool))]
+
 #[macro_use] extern crate quote;
 #[macro_use] extern crate syn;
 extern crate proc_macro2;
