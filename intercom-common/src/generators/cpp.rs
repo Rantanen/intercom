@@ -9,7 +9,7 @@ use std::path::Path;
 
 use super::GeneratorError;
 
-use tyhandlers::{Direction, TypeSystem};
+use tyhandlers::{Direction, TypeSystem, TypeSystemConfig};
 use foreign_ty::*;
 use type_parser::*;
 use guid::*;
@@ -63,13 +63,15 @@ trait CppTypeInfo<'s> {
     fn to_cpp(
         &self,
         direction: Direction,
-        krate : &ComCrate
+        krate : &ComCrate,
+        ts_config : &TypeSystemConfig,
     ) -> String;
 
     /// Gets the C++ compatile type name for this type.
     fn get_cpp_type_name(
         &self,
         krate : &ComCrate,
+        ts_config : &TypeSystemConfig,
     ) -> String;
 
     /// Determines whether this type should be passed as a pointer.
@@ -83,7 +85,8 @@ impl<'s> CppTypeInfo<'s> {
     /// Gets the name of a custom type for C++.
     fn get_cpp_name_for_custom_type(
         krate : &ComCrate,
-        ty_name : &str
+        ty_name : &str,
+        ts_config : &TypeSystemConfig,
     ) -> String {
 
         let itf = if let Some( itf ) = krate.interfaces().get( ty_name ) {
@@ -92,11 +95,13 @@ impl<'s> CppTypeInfo<'s> {
             return ty_name.to_owned()
         };
 
-        if itf.item_type() == ::utils::InterfaceType::Struct {
+        let base_name = if itf.item_type() == ::utils::InterfaceType::Struct {
             format!( "I{}", itf.name() )
         } else {
             ty_name.to_owned()
-        }
+        };
+
+        ts_config.get_unique_name( &base_name )
     }
 }
 
@@ -106,6 +111,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
         &self,
         direction: Direction,
         krate : &ComCrate,
+        ts_config : &TypeSystemConfig,
     ) -> String
     {
         // Argument direction affects both the argument attribute and
@@ -121,7 +127,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
         // let const_specifier = if self.is_mutable || self.pass_by != PassBy::Reference { "" } else { "const " };
         let const_specifier = "";
 
-        let type_name = self.get_cpp_type_name( krate );
+        let type_name = self.get_cpp_type_name( krate, ts_config );
         let ptr = if self.is_pointer() { "*" } else { "" };
         let ptr = format!( "{}{}", ptr, out_ptr );
         format!("{}{}{}", const_specifier, type_name, ptr )
@@ -130,6 +136,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
     fn get_cpp_type_name(
         &self,
         krate : &ComCrate,
+        ts_config : &TypeSystemConfig,
     ) -> String {
 
         let type_name = self.get_leaf().get_name();
@@ -149,7 +156,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
             "f64" => "double".to_owned(),
             "f32" => "float".to_owned(),
             "c_void" => "void".to_owned(),
-            t => CppTypeInfo::get_cpp_name_for_custom_type( krate, t ),
+            t => CppTypeInfo::get_cpp_name_for_custom_type( krate, t, ts_config ),
         }
     }
 
@@ -210,7 +217,13 @@ impl CppModel {
         let interfaces = c.interfaces().iter()
             .flat_map(|(_, itf)| itf.variants().iter()
             .filter( itf_variant_filter.as_ref() )
-            .map(|(_, itf_variant)| {
+            .map(|(&ts, itf_variant)| {
+
+                // Define the config to use when constructing the type names.
+                let ts_config = TypeSystemConfig {
+                    effective_system: ts,
+                    is_default: ! all_type_systems,
+                };
 
                 // Get the method definitions for the current interface.
                 let methods = itf_variant.methods().iter().map( |m| {
@@ -231,7 +244,7 @@ impl CppModel {
                                                 utils::ty_to_string( &a.ty ) ) )?;
                         Ok( CppArg {
                             name : a.name.to_string(),
-                            arg_type : type_info.to_cpp( dir, c ),
+                            arg_type : type_info.to_cpp( dir, c, &ts_config ),
                         } )
 
                     } ).collect::<Result<Vec<_>, GeneratorError>>()?;
@@ -242,7 +255,7 @@ impl CppModel {
                                             utils::ty_to_string( &ret_ty ) ) )?;
                     Ok( CppMethod {
                     name: utils::pascal_case( m.display_name.to_string() ),
-                        ret_type: ret_ty.to_cpp( Direction::Retval, c ),
+                        ret_type: ret_ty.to_cpp( Direction::Retval, c, &ts_config ),
                         args
                     } )
 
@@ -288,7 +301,7 @@ impl CppModel {
                                 true => itf_variant.unique_name(),
                             } )
                         } ).collect::<Vec<_>>()
-                } ).collect();
+                } ).collect::<Vec<_>>();
 
             let clsid = coclass.clsid().as_ref()
                     .ok_or_else( || GeneratorError::MissingClsid(
@@ -297,7 +310,7 @@ impl CppModel {
             Ok( CppCoClass {
                 name : class_name.to_string(),
                 clsid_struct : guid_as_struct( clsid ),
-                interface_count : coclass.interfaces().len(),
+                interface_count : interfaces.len(),
                 interfaces,
             } )
 

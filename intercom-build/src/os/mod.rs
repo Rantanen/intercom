@@ -6,4 +6,4 @@ mod windows;
 pub use self::windows::build;
 
 #[cfg(not(windows))]
-pub fn build() {}
+pub fn build(_: bool) {}
