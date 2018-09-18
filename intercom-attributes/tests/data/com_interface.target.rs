@@ -1,6 +1,5 @@
 #![feature(prelude_import)]
 #![no_std]
-#![feature(use_extern_macros, attr_literals)]
 #[prelude_import]
 use std::prelude::v1::*;
 #[macro_use]

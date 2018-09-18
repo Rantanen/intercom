@@ -10,10 +10,8 @@
 //! The split into two crates is an artificial limitation of Rust. The crates
 //! defining procedural macros cannot export anything else than procedural
 //! macros.
-#![feature(use_extern_macros, attr_literals)]
 
 #![allow(unused_imports)]
-#![feature(catch_expr)]
 
 extern crate intercom_common;
 use intercom_common::attributes::*;

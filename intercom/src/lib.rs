@@ -10,8 +10,6 @@
 //! A basic example of a calculator type exposed as a COM object.
 //!
 //! ```
-//! #![feature(use_extern_macros, attr_literals)]
-//!
 //! use intercom::{com_library, com_class, com_interface, com_impl, ComResult};
 //!
 //! // Define COM classes to expose from this library.
@@ -48,7 +46,7 @@
 //! ```
 
 #![crate_type="dylib"]
-#![feature(use_extern_macros, try_from, fundamental, specialization, non_exhaustive, integer_atomics, attr_literals)]
+#![feature(try_from, fundamental, specialization, non_exhaustive, integer_atomics)]
 
 #[cfg(not(windows))]
 extern crate libc;
