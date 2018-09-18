@@ -11,6 +11,13 @@ use ::host;
 
 mod setup_configuration;
 
+/// Executes the Windows-specific build steps.
+///
+/// # Arguments
+///
+/// * `all_type_systems` -
+///     True to include both Automation and Raw type systems in the embedded IDLs. Normally the
+///     build only includes Automation type system in the embedded IDL.
 pub fn build( all_type_systems : bool ) {
 
     // Get the host.

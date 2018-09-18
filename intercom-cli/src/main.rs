@@ -29,7 +29,8 @@ fn main() {
                 )
                 .arg( Arg::with_name( "all" )
                     .long( "all" )
-                    .help( "Include all type system interfaces in the IDL" )
+                    .help( "Include both Automation and Raw type systems in the IDL.{n}\
+                           Normally the IDL only includes the Automation type system interfaces." )
                 )
             )
             .subcommand( SubCommand::with_name( "manifest" )
@@ -55,7 +56,8 @@ fn main() {
                 )
                 .arg( Arg::with_name( "all" )
                     .long( "all" )
-                    .help( "Include all type system interfaces in the IDL" )
+                    .help( "Include both Automation and Raw type systems in the C++ implementation.{n}\
+                           Normally the implementation only includes the Raw type system interfaces." )
                 )
             )
         .get_matches();

@@ -178,6 +178,9 @@ pub fn expand_com_interface(
 
                         #( #temporaries )*
 
+                        // Use an IIFE to act as a try/catch block. The various template
+                        // substitutions might end up using ?'s for error handling. The IIFE allows
+                        // us to handle the results here immediately.
                         #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
                         let result : Result< #return_ty, ::intercom::ComError > = ( || unsafe {
                             #( #out_arg_declarations )*;
