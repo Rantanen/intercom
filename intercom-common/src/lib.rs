@@ -1,7 +1,7 @@
-#![feature(non_exhaustive)]
+#![feature(non_exhaustive, tool_lints)]
 #![recursion_limit="128"]
 
-#![cfg_attr(feature = "cargo-clippy", allow(match_bool))]
+#![allow(clippy::match_bool)]
 
 #[macro_use] extern crate quote;
 #[macro_use] extern crate syn;

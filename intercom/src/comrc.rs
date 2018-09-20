@@ -13,7 +13,7 @@ pub struct ComRc<T : ?Sized> {
 //
 // Various as_ and into_ methods here are properly implemented static methods
 // which is the recommended alternative - compare this to std::Box.
-#[cfg_attr(feature = "cargo-clippy", allow(wrong_self_convention))]
+#[allow(clippy::wrong_self_convention)]
 impl<T : ?Sized> ComRc<T> {
 
     /// Attaches a floating ComItf reference and brings it under managed

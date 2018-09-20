@@ -46,7 +46,7 @@
 //! ```
 
 #![crate_type="dylib"]
-#![feature(try_from, fundamental, specialization, non_exhaustive, integer_atomics)]
+#![feature(try_from, fundamental, specialization, non_exhaustive, integer_atomics, tool_lints)]
 
 #[cfg(not(windows))]
 extern crate libc;
@@ -60,13 +60,13 @@ extern crate libc;
 // Unfortunately clippy disagrees on the macro_use being unused and claims that
 // the unused_imports attribute is useless. So now we also need to tell clippy
 // to ignore useless attributes in this scenario! \:D/
-#[cfg_attr(feature = "cargo-clippy", allow(useless_attribute))]
+#[allow(clippy::useless_attribute)]
 #[allow(unused_imports)]
 extern crate intercom_attributes;
 /// Foo
 pub use intercom_attributes::*;
 
-#[cfg_attr(feature = "cargo-clippy", allow(useless_attribute))]
+#[allow(clippy::useless_attribute)]
 #[allow(unused_imports)]
 #[macro_use] extern crate failure;
 

@@ -27,7 +27,6 @@ impl GUID {
     /// - Braces and hyphens: {00000000-0000-0000-0000-000000000000}
     /// - Hyphens only: 00000000-0000-0000-0000-000000000000
     /// - Raw hexadecimal: 00000000000000000000000000000000
-    #[cfg_attr(feature = "cargo-clippy", allow(explicit_counter_loop))]
     pub fn parse( guid : &str ) -> Result< GUID, String >
     {
         // We support the following formats:
