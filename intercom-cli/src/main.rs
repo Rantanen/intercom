@@ -27,6 +27,11 @@ fn main() {
                    .default_value( "." )
                    .index( 1 )
                 )
+                .arg( Arg::with_name( "all" )
+                    .long( "all" )
+                    .help( "Include both Automation and Raw type systems in the IDL.{n}\
+                           Normally the IDL only includes the Automation type system interfaces." )
+                )
             )
             .subcommand( SubCommand::with_name( "manifest" )
                 .about( "Generates a manifest file for the Rust crate for \
@@ -49,6 +54,11 @@ fn main() {
                    .default_value( "." )
                    .index( 2 )
                 )
+                .arg( Arg::with_name( "all" )
+                    .long( "all" )
+                    .help( "Include both Automation and Raw type systems in the C++ implementation.{n}\
+                           Normally the implementation only includes the Raw type system interfaces." )
+                )
             )
         .get_matches();
 
@@ -63,7 +73,8 @@ fn run_cmd( matches : &ArgMatches ) -> Result<(), failure::Error>
     match matches.subcommand() {
         ( "idl", Some( args ) ) => {
             let path = Path::new( args.value_of( "path" ).unwrap() );
-            let model = generators::idl::IdlModel::from_path( path )?;
+            let all = args.is_present( "all" );
+            let model = generators::idl::IdlModel::from_path( path, all )?;
             model.write( &mut io::stdout() )?;
         },
         ( "manifest", Some( args ) ) => {
@@ -73,7 +84,8 @@ fn run_cmd( matches : &ArgMatches ) -> Result<(), failure::Error>
         },
         ( "cpp", Some( args ) ) => {
             let path = Path::new( args.value_of( "path" ).unwrap() );
-            let model = generators::cpp::CppModel::from_path( path )?;
+            let all = args.is_present( "all" );
+            let model = generators::cpp::CppModel::from_path( path, all )?;
 
             let output = Path::new( args.value_of( "output" ).unwrap() );
             std::fs::create_dir_all( output ).expect( "Preparing output failed." );

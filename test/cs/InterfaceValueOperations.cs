@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,7 +30,7 @@ namespace cs
             Assert.IsNotNull( root );
             Assert.AreEqual( 1, root.GetId() );
 
-            var child = creator.CreateChild( 2, ( IParent ) root );
+            var child = creator.CreateChild( 2, ( IParent_Automation ) root );
 
             Assert.AreEqual( 2, child.GetId() );
             Assert.AreEqual( 1, child.GetParentId() );

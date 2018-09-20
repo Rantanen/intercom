@@ -1,9 +1,10 @@
 
+use prelude::*;
 use std::rc::Rc;
 use syn::*;
 
 use ast_converters::*;
-use tyhandlers::{TypeContext, TypeHandler, get_ty_handler};
+use tyhandlers::{Direction, TypeContext, TypeSystem, TypeHandler, get_ty_handler};
 use returnhandlers::{ReturnHandler, get_return_handler};
 use utils;
 
@@ -45,9 +46,10 @@ impl ::std::fmt::Debug for RustArg {
 
 impl RustArg {
 
-    pub fn new( name: Ident, ty: Type ) -> RustArg {
+    pub fn new( name: Ident, ty: Type, type_system: TypeSystem ) -> RustArg {
 
-        let tyhandler = get_ty_handler( &ty, TypeContext::input() );
+        let tyhandler = get_ty_handler(
+                &ty, TypeContext::new( Direction::In, type_system ) );
         RustArg {
             name,
             ty,
@@ -55,9 +57,6 @@ impl RustArg {
         }
     }
 }
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Direction { In, Out, Retval }
 
 pub struct ComArg {
 
@@ -76,9 +75,15 @@ pub struct ComArg {
 
 impl ComArg {
 
-    pub fn new( name: Ident, ty: Type, dir: Direction ) -> ComArg {
+    pub fn new(
+        name: Ident,
+        ty: Type,
+        dir: Direction,
+        type_system: TypeSystem
+    ) -> ComArg {
 
-        let tyhandler = get_ty_handler( &ty, TypeContext::new( dir ) );
+        let tyhandler = get_ty_handler(
+                &ty, TypeContext::new( dir, type_system ) );
         ComArg {
             name,
             ty,
@@ -87,9 +92,14 @@ impl ComArg {
         }
     }
 
-    pub fn from_rustarg( rustarg: RustArg, dir: Direction ) -> ComArg {
+    pub fn from_rustarg(
+        rustarg: RustArg,
+        dir: Direction,
+        type_system: TypeSystem,
+    ) -> ComArg {
 
-        let tyhandler = get_ty_handler( &rustarg.ty, TypeContext::new( dir ) );
+        let tyhandler = get_ty_handler(
+                &rustarg.ty, TypeContext::new( dir, type_system ) );
         ComArg {
             name: rustarg.name,
             ty: rustarg.ty,
@@ -119,8 +129,11 @@ impl ::std::fmt::Debug for ComArg {
 #[derive(Debug)]
 pub struct ComMethodInfo {
 
-    /// Method name.
-    pub name: Ident,
+    /// The display name used in public places that do not require an unique name.
+    pub display_name: Ident,
+
+    /// Unique name that differentiates between different type systems.
+    pub unique_name: Ident,
 
     /// True if the self parameter is not mutable.
     pub is_const: bool,
@@ -145,13 +158,17 @@ pub struct ComMethodInfo {
 
     /// True if the Rust method is unsafe.
     pub is_unsafe: bool,
+
+    /// Type system.
+    pub type_system : TypeSystem,
 }
 
 impl PartialEq for ComMethodInfo {
 
     fn eq(&self, other: &ComMethodInfo) -> bool
     {
-        self.name == other.name
+        self.display_name == other.display_name
+            && self.unique_name == other.unique_name
             && self.is_const == other.is_const
             && self.rust_self_arg == other.rust_self_arg
             && self.rust_return_ty == other.rust_return_ty
@@ -165,16 +182,18 @@ impl ComMethodInfo {
 
     /// Constructs new COM method info from a Rust method signature.
     pub fn new(
-        m : &MethodSig
+        m : &MethodSig,
+        type_system : TypeSystem,
     ) -> Result<ComMethodInfo, ComMethodInfoError>
     {
-        Self::new_from_parts( m.ident.clone(), &m.decl, m.unsafety.is_some() )
+        Self::new_from_parts( m.ident.clone(), &m.decl, m.unsafety.is_some(), type_system )
     }
 
     pub fn new_from_parts(
         n: Ident,
         decl: &FnDecl,
         unsafety: bool,
+        type_system : TypeSystem,
     ) -> Result<ComMethodInfo, ComMethodInfoError>
     {
         // Process all the function arguments.
@@ -204,7 +223,7 @@ impl ComMethodInfo {
                     ComMethodInfoError::BadArg( Box::new( arg.clone() ) )
                 ) )?;
 
-            Ok( RustArg::new( ident, ty ) )
+            Ok( RustArg::new( ident, ty, type_system ) )
         } ).collect::<Result<_,_>>()?;
 
         // Get the output.
@@ -222,10 +241,12 @@ impl ComMethodInfo {
             ( None, Some( rust_return_ty.clone() ) )
         };
 
-        let returnhandler = get_return_handler( &retval_type, &return_type )
+        let returnhandler = get_return_handler(
+                    &retval_type, &return_type, type_system )
                 .or( Err( ComMethodInfoError::BadReturnType ) )?;
         Ok( ComMethodInfo {
-            name: n,
+            unique_name: Ident::new( &format!( "{}_{:?}", n, type_system ), Span::call_site() ),
+            display_name: n,
             is_const,
             rust_self_arg,
             rust_return_ty,
@@ -234,6 +255,7 @@ impl ComMethodInfo {
             returnhandler,
             args,
             is_unsafe: unsafety,
+            type_system
         } )
     }
 
@@ -242,7 +264,7 @@ impl ComMethodInfo {
         let in_args = self.args
                 .iter()
                 .map( |ca| {
-                    ComArg::from_rustarg( ca.clone(), Direction::In )
+                    ComArg::from_rustarg( ca.clone(), Direction::In, self.type_system )
                 } );
         let out_args = self.returnhandler.com_out_args();
 
@@ -288,16 +310,17 @@ fn hresult_ty() -> Type {
 #[cfg(test)]
 mod tests {
 
-    use prelude::*;
     use super::*;
+    use tyhandlers::TypeSystem::*;
 
     #[test]
     fn no_args_or_return_value() {
 
-        let info = test_info( "fn foo( &self ) {}" );
+        let info = test_info( "fn foo( &self ) {}", Automation );
 
         assert_eq!( info.is_const, true );
-        assert_eq!( info.name, "foo" );
+        assert_eq!( info.display_name, "foo" );
+        assert_eq!( info.unique_name, "foo_Automation" );
         assert_eq!( info.args.len(), 0 );
         assert_eq!( info.retval_type.is_none(), true );
         assert_eq!( info.return_type.is_none(), true );
@@ -306,10 +329,11 @@ mod tests {
     #[test]
     fn basic_return_value() {
 
-        let info = test_info( "fn foo( &self ) -> bool {}" );
+        let info = test_info( "fn foo( &self ) -> bool {}", Raw );
 
         assert_eq!( info.is_const, true );
-        assert_eq!( info.name, "foo" );
+        assert_eq!( info.display_name, "foo" );
+        assert_eq!( info.unique_name, "foo_Raw" );
         assert_eq!( info.args.len(), 0 );
         assert_eq!( info.retval_type.is_none(), true );
         assert_eq!(
@@ -320,10 +344,11 @@ mod tests {
     #[test]
     fn result_return_value() {
 
-        let info = test_info( "fn foo( &self ) -> Result<String, f32> {}" );
+        let info = test_info( "fn foo( &self ) -> Result<String, f32> {}", Automation );
 
         assert_eq!( info.is_const, true );
-        assert_eq!( info.name, "foo" );
+        assert_eq!( info.display_name, "foo" );
+        assert_eq!( info.unique_name, "foo_Automation" );
         assert_eq!( info.args.len(), 0 );
         assert_eq!(
                 info.retval_type,
@@ -336,10 +361,11 @@ mod tests {
     #[test]
     fn comresult_return_value() {
 
-        let info = test_info( "fn foo( &self ) -> ComResult<String> {}" );
+        let info = test_info( "fn foo( &self ) -> ComResult<String> {}", Automation );
 
         assert_eq!( info.is_const, true );
-        assert_eq!( info.name, "foo" );
+        assert_eq!( info.display_name, "foo" );
+        assert_eq!( info.unique_name, "foo_Automation" );
         assert_eq!( info.args.len(), 0 );
         assert_eq!(
                 info.retval_type,
@@ -352,10 +378,11 @@ mod tests {
     #[test]
     fn basic_arguments() {
 
-        let info = test_info( "fn foo( &self, a : u32, b : f32 ) {}" );
+        let info = test_info( "fn foo( &self, a : u32, b : f32 ) {}", Raw );
 
         assert_eq!( info.is_const, true );
-        assert_eq!( info.name, "foo" );
+        assert_eq!( info.display_name, "foo" );
+        assert_eq!( info.unique_name, "foo_Raw" );
         assert_eq!( info.retval_type.is_none(), true );
         assert_eq!( info.return_type.is_none(), true );
 
@@ -368,13 +395,14 @@ mod tests {
         assert_eq!( info.args[1].ty, parse_quote!( f32 ) );
     }
 
-    fn test_info( code : &str ) -> ComMethodInfo {
+    fn test_info( code : &str, ts : TypeSystem) -> ComMethodInfo {
 
         let item = parse_str( code ).unwrap();
         let ( ident, decl, unsafety ) = match item {
             Item::Fn( ref f ) => ( f.ident.clone(), f.decl.as_ref(), f.unsafety.is_some() ),
             _ => panic!( "Code isn't function" ),
         };
-        ComMethodInfo::new_from_parts( ident, decl, unsafety ).unwrap()
+        ComMethodInfo::new_from_parts(
+                ident, decl, unsafety, ts ).unwrap()
     }
 }

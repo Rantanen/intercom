@@ -1,20 +1,26 @@
-#![feature(use_extern_macros, attr_literals)]
-
 extern crate intercom;
 use intercom::*;
 
 // We need the IID and Vtbl to ensure this compiles.
 //
 // Normally these are provided by the [com_interface].
-struct __FooVtbl;
-const IID_Foo: intercom::IID = intercom::GUID {
+struct __Foo_AutomationVtbl;
+const IID_Foo_Automation: intercom::IID = intercom::GUID {
     data1: 0,
     data2: 0,
     data3: 0,
     data4: [0, 0, 0, 0, 0, 0, 0, 0],
 };
 
-#[com_class("{00000000-0000-0000-0000-000000000000}", Foo)]
+struct __Foo_RawVtbl;
+const IID_Foo_Raw: intercom::IID = intercom::GUID {
+    data1: 0,
+    data2: 0,
+    data3: 0,
+    data4: [0, 0, 0, 0, 0, 0, 0, 0],
+};
+
+#[com_class( clsid = "{00000000-0000-0000-0000-000000000000}", Foo)]
 pub struct Foo;
 
 #[com_impl]

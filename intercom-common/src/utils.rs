@@ -1,29 +1,11 @@
 
 use prelude::*;
+use tyhandlers::TypeSystem;
 use syn::*;
-use syn::synom::Parser;
 
-use error::MacroError;
 use super::*;
 
 use ast_converters::*;
-
-pub fn parse_attr_tokens(
-    attr_name: &str,
-    attr_tokens: &str,
-) -> Result< Attribute, MacroError >
-{
-    let attr_rendered = format!( "#[{}({})]", attr_name, attr_tokens );
-    if let Ok( tt ) = attr_rendered.parse() {
-        if let Ok( t ) = Attribute::parse_outer.parse2( tt ) {
-            return Ok( t )
-        }
-    }
-
-    Err( MacroError {
-        msg: format!( "Could not parse [{}] attribute", attr_name )
-    } )
-}
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum InterfaceType { Trait, Struct }
@@ -183,45 +165,55 @@ const AUTO_GUID_BASE : guid::GUID = guid::GUID {
     data4: [ 0xB9, 0x57, 0x89, 0xD6, 0x0C, 0xE9, 0x34, 0x77 ]
 };
 
-pub fn parameter_to_guid(
-    p : &AttrParam,
+pub fn generate_iid(
     crate_name : &str,
     item_name : &str,
-    item_type : &str,
-) -> Result< Option< guid::GUID >, String >
+    type_system : TypeSystem,
+) -> guid::GUID
 {
-    if let AttrParam::Word( ref i ) = *p {
-        return Ok( match i.to_string().as_ref() {
-            "AUTO_GUID" =>
-                Some( generate_guid( crate_name, item_name, item_type ) ),
-            "NO_GUID" =>
-                None,
-            _ => return Err( format!( "Invalid GUID: {:?}", i ) ),
-        } );
-    }
+    generate_guid( &[
+            "IID",
+            crate_name,
+            item_name,
+            match type_system {
+                TypeSystem::Automation => "automation",
+                TypeSystem::Raw => "raw",
+                TypeSystem::Invariant => "invariant",
+            }
+        ].join( ":" ) )
+}
 
-    if let AttrParam::Literal( Lit::Str( ref s ) ) = *p {
-        return Ok( Some( guid::GUID::parse( &s.value() )? ) );
-    }
+pub fn generate_libid(
+    crate_name : &str,
+) -> guid::GUID
+{
+    generate_guid( &[
+            "LIBID",
+            crate_name,
+        ].join( ":" ) )
+}
 
-    Err( "GUID parameter must be literal string".to_owned() )
+pub fn generate_clsid(
+    crate_name : &str,
+    item_name : &str,
+) -> guid::GUID
+{
+    generate_guid( &[
+            "CLSID",
+            crate_name,
+            item_name,
+        ].join( ":" ) )
 }
 
 pub fn generate_guid(
-    crate_name : &str,
-    item_name : &str,
-    item_type : &str,
+    key : &str,
 ) -> guid::GUID
 {
     // Hash the name. The name will be hashed in a form similar to:
     // AUTO_GUID_BASE + "CLSID:random_rust_crate:FooBar"
     let mut hash = sha1::Sha1::new();
     hash.update( AUTO_GUID_BASE.as_bytes() );
-    hash.update( item_type.as_bytes() );
-    hash.update( b":" );
-    hash.update( crate_name.as_bytes() );
-    hash.update( b":" );
-    hash.update( item_name.as_bytes() );
+    hash.update( key.as_bytes() );
 
     let digest = hash.digest();
     let bytes = digest.bytes();

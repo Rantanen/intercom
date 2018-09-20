@@ -10,10 +10,9 @@
 //! The split into two crates is an artificial limitation of Rust. The crates
 //! defining procedural macros cannot export anything else than procedural
 //! macros.
-#![feature(use_extern_macros, attr_literals)]
 
 #![allow(unused_imports)]
-#![feature(catch_expr)]
+#![feature(tool_lints)]
 
 extern crate intercom_common;
 use intercom_common::attributes::*;
@@ -52,13 +51,12 @@ use proc_macro::{TokenStream, LexError};
 /// which provides the clients a way to perform reference counting and the
 /// ability to query for other interfaces the object might implement.
 #[proc_macro_attribute]
-#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub fn com_interface(
     attr: TokenStream,
     tokens: TokenStream,
 ) -> TokenStream
 {
-    match expand_com_interface( &attr, tokens ) {
+    match expand_com_interface( attr, tokens ) {
         Ok(t) => t,
         Err(e) => panic!( "{}", e ),
     }
@@ -78,7 +76,7 @@ pub fn com_interface(
 /// as arguments and return values for the interface methods. The automatic
 /// FFI layer handles conversion between these types and FFI compatible types.
 #[proc_macro_attribute]
-#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
+#[allow(clippy::needless_pass_by_value)]
 pub fn com_impl(
     attr: TokenStream,
     tokens: TokenStream,
@@ -108,13 +106,12 @@ pub fn com_impl(
 /// by the clients. It can still be returned as a return value from other
 /// intercom methods.
 #[proc_macro_attribute]
-#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub fn com_class(
     attr: TokenStream,
     tokens: TokenStream,
 ) -> TokenStream
 {
-    match expand_com_class( &attr, tokens ) {
+    match expand_com_class( attr, tokens ) {
         Ok(t) => t,
         Err(e) => panic!( "{}", e ),
     }
@@ -138,13 +135,12 @@ pub fn com_class(
 /// infrastructure that allows external clients to load the library and
 /// instantiate the specified types.
 #[proc_macro_attribute]
-#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 pub fn com_library(
     attr: TokenStream,
     tokens: TokenStream,
 ) -> TokenStream
 {
-    match expand_com_library( &attr, tokens ) {
+    match expand_com_library( attr, tokens ) {
         Ok(t) => t,
         Err(e) => panic!( "{}", e ),
     }

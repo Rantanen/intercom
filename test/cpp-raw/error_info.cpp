@@ -10,10 +10,10 @@ TEST_CASE( "Interfaces support error info" )
     InitializeRuntime();
 
     // Get the error source interface.
-    IErrorSource* pErrorSource = nullptr;
+    IErrorSource_Automation* pErrorSource = nullptr;
     HRESULT hr = CreateInstance(
         CLSID_ErrorSource,
-        IID_IErrorSource,
+        IID_IErrorSource_Automation,
         &pErrorSource );
     REQUIRE( hr == S_OK );
     REQUIRE( pErrorSource != nullptr );
@@ -29,7 +29,7 @@ TEST_CASE( "Interfaces support error info" )
 
         SECTION( "IErrorSource supports error info" )
         {
-            hr = pSupportErrorInfo->InterfaceSupportsErrorInfo( IID_IErrorSource );
+            hr = pSupportErrorInfo->InterfaceSupportsErrorInfo( IID_IErrorSource_Automation );
             REQUIRE( hr == S_OK );
 
             SECTION( "Errors set error info" )

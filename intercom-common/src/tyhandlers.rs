@@ -3,9 +3,10 @@ use ::prelude::*;
 use std::rc::Rc;
 use syn::*;
 
-use methodinfo::Direction;
-
 use ast_converters::*;
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Direction { In, Out, Retval }
 
 pub struct TypeConversion {
 
@@ -17,26 +18,44 @@ pub struct TypeConversion {
     pub value : TokenStream,
 }
 
+#[derive(PartialEq, Eq, Debug)]
+pub struct TypeSystemConfig {
+    pub effective_system : TypeSystem,
+    pub is_default : bool,
+}
+
+impl TypeSystemConfig {
+    pub fn get_unique_name( &self, base : &str ) -> String {
+        match self.is_default {
+            true => base.to_string(),
+            false => format!( "{}_{:?}", base, self.effective_system ),
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
+pub enum TypeSystem {
+
+    /// Invariant type system. There should be no differentiation despite the
+    /// ability to do so.
+    Invariant,
+
+    /// COM Automation compatible type system.
+    Automation,
+
+    /// Raw type system.
+    Raw,
+}
+
 /// Type usage context.
 pub struct TypeContext {
     dir: Direction,
+    type_system: TypeSystem,
 }
 
 impl TypeContext {
-    pub fn new( dir : Direction ) -> TypeContext {
-        TypeContext { dir }
-    }
-
-    pub fn input() -> TypeContext {
-        TypeContext { dir: Direction::In }
-    }
-
-    pub fn output() -> TypeContext {
-        TypeContext { dir: Direction::Out }
-    }
-
-    pub fn retval() -> TypeContext {
-        TypeContext { dir: Direction::Retval }
+    pub fn new( dir : Direction, type_system : TypeSystem ) -> TypeContext {
+        TypeContext { dir, type_system }
     }
 }
 
@@ -92,6 +111,10 @@ pub trait TypeHandler {
             _ => quote!( Default::default() )
         }
     }
+
+    /// Gets the sype system the handler serves if the handler is type system specific. Returns
+    /// None if the handler is type system agnostic.
+    fn type_system( &self ) -> Option<TypeSystem> { None }
 }
 
 /// Identity parameter handler.
@@ -112,7 +135,6 @@ impl TypeHandler for ComItfParam {
 
     fn rust_ty( &self ) -> Type { self.0.clone() }
 
-    /// Gets the default value for the type.
     fn default_value( &self ) -> TokenStream
     {
         quote!( ComItf::null_itf() )
@@ -184,10 +206,14 @@ impl TypeHandler for StringParam
         }
     }
 
-    /// Gets the default value for the type.
     fn default_value( &self ) -> TokenStream
     {
         quote!( ::std::ptr::null_mut() )
+    }
+
+    /// String parameters differ between the type systems.
+    fn type_system( &self ) -> Option<TypeSystem> {
+        Some( self.context.type_system )
     }
 }
 

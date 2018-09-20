@@ -108,9 +108,9 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
     pub fn create_vtable() -> &'static ClassFactoryVtbl {
         &ClassFactoryVtbl {
             __base : IUnknownVtbl {
-                query_interface : ComBox::< Self >::query_interface_ptr,
-                add_ref : ComBox::< Self >::add_ref_ptr,
-                release : ComBox::< Self >::release_ptr,
+                query_interface_Automation : ComBox::< Self >::query_interface_ptr,
+                add_ref_Automation : ComBox::< Self >::add_ref_ptr,
+                release_Automation : ComBox::< Self >::release_ptr,
             },
             create_instance : Self::create_instance,
             lock_server : Self::lock_server
@@ -136,7 +136,7 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
             Err( hr ) => return hr,
         } as *const *const IUnknownVtbl;
 
-        let query_result = ((**iunk_ptr).query_interface)(
+        let query_result = ((**iunk_ptr).query_interface_Automation)(
             iunk_ptr as RawComPtr,
             riid,
             out );

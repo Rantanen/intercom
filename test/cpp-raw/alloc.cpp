@@ -9,10 +9,10 @@ TEST_CASE( "Library supports allocator" )
     InitializeRuntime();
 
     // Get the error source interface.
-    IAllocator* pAllocator = nullptr;
+    IAllocator_Automation* pAllocator = nullptr;
     HRESULT hr = CreateInstance(
         CLSID_Allocator,
-        IID_IAllocator,
+        IID_IAllocator_Automation,
         &pAllocator );
     REQUIRE( hr == S_OK );
     REQUIRE( pAllocator != nullptr );

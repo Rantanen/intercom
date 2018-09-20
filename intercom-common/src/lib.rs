@@ -1,5 +1,7 @@
-#![feature(non_exhaustive)]
+#![feature(non_exhaustive, tool_lints)]
 #![recursion_limit="128"]
+
+#![allow(clippy::match_bool)]
 
 #[macro_use] extern crate quote;
 #[macro_use] extern crate syn;

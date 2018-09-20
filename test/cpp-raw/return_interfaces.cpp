@@ -10,10 +10,10 @@ TEST_CASE( "Methods accept and return COM objects" )
     InitializeRuntime();
 
     // Get the IPrimitiveOperations interface.
-    IClassCreator* pOps = nullptr;
+    IClassCreator_Automation* pOps = nullptr;
     intercom::HRESULT hr = CreateInstance(
             CLSID_ClassCreator,
-            IID_IClassCreator,
+            IID_IClassCreator_Automation,
             &pOps );
 
     REQUIRE( hr == intercom::SC_OK );
@@ -21,7 +21,7 @@ TEST_CASE( "Methods accept and return COM objects" )
 
     SECTION( "Return new object" )
     {
-        ICreatedClass* pParent = nullptr;
+        ICreatedClass_Automation* pParent = nullptr;
         hr = pOps->CreateRoot( 10, OUT &pParent );
 
         REQUIRE( hr == intercom::SC_OK );
@@ -35,8 +35,8 @@ TEST_CASE( "Methods accept and return COM objects" )
 
         SECTION( "New objects have correct reference count" )
         {
-            IRefCount* pRefCount = nullptr;
-            hr = pParent->QueryInterface( IID_IRefCount, reinterpret_cast< void** >( &pRefCount ) );
+            IRefCount_Automation* pRefCount = nullptr;
+            hr = pParent->QueryInterface( IID_IRefCount_Automation, reinterpret_cast< void** >( &pRefCount ) );
 
             // We have two references now: pParent and pRefCount.
             REQUIRE( pRefCount->GetRefCount() == 2 );
@@ -46,9 +46,9 @@ TEST_CASE( "Methods accept and return COM objects" )
 
         SECTION( "Objects can be used as parameters" )
         {
-            ICreatedClass* pChild = nullptr;
-            IParent* pParentItf = nullptr;
-            hr = pParent->QueryInterface( IID_IParent, reinterpret_cast< void** >( &pParentItf ) );
+            ICreatedClass_Automation* pChild = nullptr;
+            IParent_Automation* pParentItf = nullptr;
+            hr = pParent->QueryInterface( IID_IParent_Automation, reinterpret_cast< void** >( &pParentItf ) );
             hr = pOps->CreateChild( 20, pParentItf, &pChild );
 
             REQUIRE( hr == intercom::SC_OK );
@@ -64,8 +64,8 @@ TEST_CASE( "Methods accept and return COM objects" )
 
             SECTION( "Parameter reference count stays same." )
             {
-                IRefCount* pRefCountParent = nullptr;
-                hr = pParent->QueryInterface( IID_IRefCount, reinterpret_cast< void** >( &pRefCountParent ) );
+                IRefCount_Automation* pRefCountParent = nullptr;
+                hr = pParent->QueryInterface( IID_IRefCount_Automation, reinterpret_cast< void** >( &pRefCountParent ) );
 
                 // Three references:
                 // - pParent

@@ -1,22 +1,20 @@
 #![crate_type="dylib"]
-#![feature(type_ascription, use_extern_macros, try_from, attr_literals)]
+#![feature(type_ascription, try_from)]
 
 extern crate intercom;
 use intercom::*;
 extern crate winapi;
 
 // Declare available COM classes.
-#[com_library( AUTO_GUID,
-    HelloWorld,
-)]
+#[com_library( HelloWorld )]
 
-#[com_interface( AUTO_GUID )]
+#[com_interface]
 trait IHelloWorld
 {
     fn get_hello( &self ) -> String;
 }
 
-#[com_class("{25ccb3f6-b782-4b2d-933e-54ab447da0aa}", IHelloWorld )]
+#[com_class( clsid = "{25ccb3f6-b782-4b2d-933e-54ab447da0aa}", IHelloWorld )]
 pub struct HelloWorld { }
 
 impl HelloWorld

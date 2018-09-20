@@ -10,20 +10,18 @@
 //! A basic example of a calculator type exposed as a COM object.
 //!
 //! ```
-//! #![feature(use_extern_macros, attr_literals)]
-//!
 //! use intercom::{com_library, com_class, com_interface, com_impl, ComResult};
 //!
 //! // Define COM classes to expose from this library.
-//! #[com_library(AUTO_GUID, Calculator)]
+//! #[com_library(Calculator)]
 //!
 //! // Define the COM class and the interfaces it implements.
-//! #[com_class(AUTO_GUID, Calculator)]
+//! #[com_class(Calculator)]
 //! struct Calculator;
 //!
 //! // Define the implementation for the class. The COM interface is defined
 //! // implicitly by the `impl`.
-//! #[com_interface(AUTO_GUID)]
+//! #[com_interface]
 //! #[com_impl]
 //! impl Calculator {
 //!
@@ -48,7 +46,7 @@
 //! ```
 
 #![crate_type="dylib"]
-#![feature(use_extern_macros, try_from, fundamental, specialization, non_exhaustive, integer_atomics, attr_literals)]
+#![feature(try_from, fundamental, specialization, non_exhaustive, integer_atomics, tool_lints)]
 
 #[cfg(not(windows))]
 extern crate libc;
@@ -62,13 +60,13 @@ extern crate libc;
 // Unfortunately clippy disagrees on the macro_use being unused and claims that
 // the unused_imports attribute is useless. So now we also need to tell clippy
 // to ignore useless attributes in this scenario! \:D/
-#[cfg_attr(feature = "cargo-clippy", allow(useless_attribute))]
+#[allow(clippy::useless_attribute)]
 #[allow(unused_imports)]
 extern crate intercom_attributes;
 /// Foo
 pub use intercom_attributes::*;
 
-#[cfg_attr(feature = "cargo-clippy", allow(useless_attribute))]
+#[allow(clippy::useless_attribute)]
 #[allow(unused_imports)]
 #[macro_use] extern crate failure;
 
@@ -197,12 +195,12 @@ pub const IID_IErrorInfo : GUID = GUID {
     data4: [ 0x8E, 0x65, 0x08, 0x00, 0x2B, 0x2B, 0xD1, 0x19 ]
 };
 
-pub use interfaces::__IUnknownVtbl as IUnknownVtbl;
-pub use interfaces::IID_IUnknown;
+pub use interfaces::__IUnknown_AutomationVtbl as IUnknownVtbl;
+pub use interfaces::IID_IUnknown_Automation as IID_IUnknown;
 pub use interfaces::IUnknown;
 
-pub use interfaces::__ISupportErrorInfoVtbl as ISupportErrorInfoVtbl;
-pub use interfaces::IID_ISupportErrorInfo;
+pub use interfaces::__ISupportErrorInfo_AutomationVtbl as ISupportErrorInfoVtbl;
+pub use interfaces::IID_ISupportErrorInfo_Automation as IID_ISupportErrorInfo;
 pub use interfaces::ISupportErrorInfo;
 
 // Do we need this? Would rather not export this through an extern crate

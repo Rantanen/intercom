@@ -37,7 +37,7 @@ impl BStr {
 
         // The BStr invariant 1 states the ptr must be valid BSTR pointer,
         // which is u32-aligned.
-        #![cfg_attr( feature = "cargo-clippy", allow(cast_ptr_alignment) )]
+        #![allow(clippy::cast_ptr_alignment)]
         let ( len, final_ptr ) = match ptr as usize {
             0 => ( 0, 1 as *const u8 ),
             _ => ( *( ptr.offset( -2 ) as *const u32 ), ptr as *const u8 ),
@@ -61,7 +61,7 @@ impl BStr {
 
         // The BStr invariant 1 states the ptr must be valid BSTR pointer,
         // which is u32-aligned.
-        #![cfg_attr( feature = "cargo-clippy", allow(cast_ptr_alignment) )]
+        #![allow(clippy::cast_ptr_alignment)]
 
         // 0x1 is a marker pointer
         let ptr = self.0.as_ptr();
@@ -452,7 +452,7 @@ mod os {
     ) -> u32 {
 
         // The BSTR pointers should be u32-aligned.
-        #![cfg_attr( feature = "cargo-clippy", allow(cast_ptr_alignment) )]
+        #![allow(clippy::cast_ptr_alignment)]
         if pbstr.is_null() {
             0
         } else {

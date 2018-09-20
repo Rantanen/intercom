@@ -130,7 +130,7 @@ mod error_store {
 }
 
 /// Error info COM object data.
-#[com_class( NO_GUID, IErrorInfo )]
+#[com_class( clsid = None, IErrorInfo )]
 #[derive(Debug)]
 pub struct ErrorInfo {
     guid : GUID,
@@ -174,7 +174,7 @@ impl<'a> TryFrom<&'a IErrorInfo> for ErrorInfo {
     }
 }
 
-#[com_interface( "1CF2B120-547D-101B-8E65-08002B2BD119" )]
+#[com_interface( com_iid = "1CF2B120-547D-101B-8E65-08002B2BD119" )]
 trait IErrorInfo
 {
     fn get_guid( &self ) -> ComResult< GUID >;

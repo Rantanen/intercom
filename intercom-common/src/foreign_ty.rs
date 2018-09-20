@@ -48,14 +48,14 @@ impl CTypeHandler
         ty_name : &str
     ) -> String
     {
-        let itf = if let Some( itf ) = krate.interfaces().get( ty_name ) {
+        let itf = if let Some( itf ) = krate.interface_by_name( ty_name ) {
             itf
         } else {
             return ty_name.to_owned()
         };
 
         if itf.item_type() == ::utils::InterfaceType::Struct {
-            format!( "I{}", itf.name() )
+            format!( "I{}", ty_name )
         } else {
             ty_name.to_owned()
         }

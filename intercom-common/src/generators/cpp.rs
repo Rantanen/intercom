@@ -9,12 +9,12 @@ use std::path::Path;
 
 use super::GeneratorError;
 
+use tyhandlers::{Direction, TypeSystem, TypeSystemConfig};
 use foreign_ty::*;
 use type_parser::*;
 use guid::*;
-use methodinfo;
 use model;
-use model::ComCrate;
+use model::{ComCrate, ComInterfaceVariant};
 use utils;
 
 use handlebars::Handlebars;
@@ -62,14 +62,16 @@ trait CppTypeInfo<'s> {
     /// Gets full type for C++.
     fn to_cpp(
         &self,
-        direction: methodinfo::Direction,
-        krate : &ComCrate
+        direction: Direction,
+        krate : &ComCrate,
+        ts_config : &TypeSystemConfig,
     ) -> String;
 
     /// Gets the C++ compatile type name for this type.
     fn get_cpp_type_name(
         &self,
         krate : &ComCrate,
+        ts_config : &TypeSystemConfig,
     ) -> String;
 
     /// Determines whether this type should be passed as a pointer.
@@ -83,7 +85,8 @@ impl<'s> CppTypeInfo<'s> {
     /// Gets the name of a custom type for C++.
     fn get_cpp_name_for_custom_type(
         krate : &ComCrate,
-        ty_name : &str
+        ty_name : &str,
+        ts_config : &TypeSystemConfig,
     ) -> String {
 
         let itf = if let Some( itf ) = krate.interfaces().get( ty_name ) {
@@ -92,11 +95,13 @@ impl<'s> CppTypeInfo<'s> {
             return ty_name.to_owned()
         };
 
-        if itf.item_type() == ::utils::InterfaceType::Struct {
+        let base_name = if itf.item_type() == ::utils::InterfaceType::Struct {
             format!( "I{}", itf.name() )
         } else {
             ty_name.to_owned()
-        }
+        };
+
+        ts_config.get_unique_name( &base_name )
     }
 }
 
@@ -104,16 +109,17 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
 
     fn to_cpp(
         &self,
-        direction: methodinfo::Direction,
+        direction: Direction,
         krate : &ComCrate,
+        ts_config : &TypeSystemConfig,
     ) -> String
     {
         // Argument direction affects both the argument attribute and
         // whether the argument is passed by pointer or value.
         let out_ptr = match direction {
-            methodinfo::Direction::In
-            | methodinfo::Direction::Retval => "",
-            methodinfo::Direction::Out => "*",
+            Direction::In
+            | Direction::Retval => "",
+            Direction::Out => "*",
         };
 
         // TODO: Enable once verified that the "const" works.
@@ -121,7 +127,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
         // let const_specifier = if self.is_mutable || self.pass_by != PassBy::Reference { "" } else { "const " };
         let const_specifier = "";
 
-        let type_name = self.get_cpp_type_name( krate );
+        let type_name = self.get_cpp_type_name( krate, ts_config );
         let ptr = if self.is_pointer() { "*" } else { "" };
         let ptr = format!( "{}{}", ptr, out_ptr );
         format!("{}{}{}", const_specifier, type_name, ptr )
@@ -130,6 +136,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
     fn get_cpp_type_name(
         &self,
         krate : &ComCrate,
+        ts_config : &TypeSystemConfig,
     ) -> String {
 
         let type_name = self.get_leaf().get_name();
@@ -149,7 +156,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
             "f64" => "double".to_owned(),
             "f32" => "float".to_owned(),
             "c_void" => "void".to_owned(),
-            t => CppTypeInfo::get_cpp_name_for_custom_type( krate, t ),
+            t => CppTypeInfo::get_cpp_name_for_custom_type( krate, t, ts_config ),
         }
     }
 
@@ -177,69 +184,103 @@ impl CppModel {
     ///
     /// - `path` - The path must point to a crate root containing Cargo.toml or
     ///            to the Cargo.toml itself.
-    pub fn from_path( path : &Path,) -> Result<CppModel, GeneratorError>
+    pub fn from_path(
+        path : &Path,
+        all_type_systems : bool,
+    ) -> Result<CppModel, GeneratorError>
     {
         let krate = model::ComCrate::parse_package( path )
                 .map_err( GeneratorError::CrateParseError )?;
-        CppModel::from_crate( &krate )
+        CppModel::from_crate( &krate, all_type_systems )
     }
 
 
     /// Converts the parse result into an header  that gets written to stdout.
     pub fn from_crate(
         c : &model::ComCrate,
+        all_type_systems : bool,
     ) -> Result<CppModel, GeneratorError> {
+
+        let itf_variant_filter : Box<Fn( &( &TypeSystem, &ComInterfaceVariant ) ) -> bool> =
+                match all_type_systems {
+                    true => Box::new( | _ | true ),
+                    false => Box::new( | ( ts, _ ) | match ts {
+                        TypeSystem::Raw => true,
+                        _ => false
+                    } ),
+                };
 
         let foreign = CTypeHandler;
         let lib = c.lib().as_ref().ok_or( GeneratorError::MissingLibrary )?;
 
         // Introduce all interfaces so we don't get errors on undeclared items.
-        let interfaces = c.interfaces().iter().map( |(_, itf)| {
+        let interfaces = c.interfaces().iter()
+            .flat_map(|(_, itf)| itf.variants().iter()
+            .filter( itf_variant_filter.as_ref() )
+            .map(|(&ts, itf_variant)| {
 
-            // Get the method definitions for the current interface.
-            let methods = itf.methods().iter().map( |m| {
+                // Define the config to use when constructing the type names.
+                let ts_config = TypeSystemConfig {
+                    effective_system: ts,
+                    is_default: ! all_type_systems,
+                };
 
-                // Construct the argument list.
-                let args = m.raw_com_args().iter().map( |a| {
+                // Get the method definitions for the current interface.
+                let methods = itf_variant.methods().iter().map( |m| {
 
-                    // Redirect return values converted out arguments.
-                    let dir = match a.dir {
-                            methodinfo::Direction::Retval => methodinfo::Direction::Out,
+                    // Construct the argument list.
+                    let args = m.raw_com_args().iter().map( |a| {
+
+                        // Redirect return values converted out arguments.
+                        let dir = match a.dir {
+                            Direction::Retval => Direction::Out,
                             d => d,
-                    };
+                        };
 
-                    // Get the foreign type for the arg type in C++ format.
-                    let com_ty = a.handler.com_ty();
-                    let type_info = foreign.get_ty( &com_ty )
+                        // Get the foreign type for the arg type in C++ format.
+                        let com_ty = a.handler.com_ty();
+                        let type_info = foreign.get_ty( &com_ty )
+                                .ok_or_else( || GeneratorError::UnsupportedType(
+                                                utils::ty_to_string( &a.ty ) ) )?;
+                        Ok( CppArg {
+                            name : a.name.to_string(),
+                            arg_type : type_info.to_cpp( dir, c, &ts_config ),
+                        } )
+
+                    } ).collect::<Result<Vec<_>, GeneratorError>>()?;
+
+                    let ret_ty = m.returnhandler.com_ty();
+                    let ret_ty = foreign.get_ty( &ret_ty )
                             .ok_or_else( || GeneratorError::UnsupportedType(
-                                            utils::ty_to_string( &a.ty ) ) )?;
-                    Ok( CppArg {
-                        name : a.name.to_string(),
-                        arg_type : type_info.to_cpp( dir, c ),
+                                            utils::ty_to_string( &ret_ty ) ) )?;
+                    Ok( CppMethod {
+                    name: utils::pascal_case( m.display_name.to_string() ),
+                        ret_type: ret_ty.to_cpp( Direction::Retval, c, &ts_config ),
+                        args
                     } )
 
                 } ).collect::<Result<Vec<_>, GeneratorError>>()?;
 
-                let ret_ty = m.returnhandler.com_ty();
-                let ret_ty = foreign.get_ty( &ret_ty )
-                        .ok_or_else( || GeneratorError::UnsupportedType(
-                                        utils::ty_to_string( &ret_ty ) ) )?;
-                Ok( CppMethod {
-                    name: utils::pascal_case( m.name.to_string() ),
-                    ret_type: ret_ty.to_cpp( methodinfo::Direction::Retval, c ),
-                    args
+                let ( itf_name, iid ) = match all_type_systems {
+                    false => (
+                        itf.name(),
+                        itf.variants()[ &TypeSystem::Raw ].iid() ),
+                    true => (
+                        itf_variant.unique_name(),
+                        itf_variant.iid() ),
+                };
+
+                Ok( CppInterface {
+                    name: foreign.get_name( c, itf_name ),
+                    iid_struct: guid_as_struct( iid ),
+                    base: itf.base_interface().as_ref()
+                            .map( |i| foreign.get_name( c, i ) ),
+                    methods,
                 } )
 
-            } ).collect::<Result<Vec<_>, GeneratorError>>()?;
-
-            Ok( CppInterface {
-                name: foreign.get_name( c, itf.name() ),
-                iid_struct: guid_as_struct( itf.iid() ),
-                base: itf.base_interface().as_ref().map( |i| foreign.get_name( c, i ) ),
-                methods,
             } )
-
-        } ).collect::<Result<Vec<_>, GeneratorError>>()?;
+            .collect::<Vec<_>>() )
+            .collect::<Result<Vec<_>, GeneratorError>>()?;
 
         // Generate class descriptors.
         let classes = lib.coclasses().iter().map( |class_name| {
@@ -248,9 +289,19 @@ impl CppModel {
             let coclass  = &c.structs()[ &class_name.to_string() ];
 
             // Create a list of interfaces to be declared in the class descriptor.
-            let interfaces = coclass.interfaces().iter().map(|itf_name| {
-                foreign.get_name( c, itf_name )
-            } ).collect();
+            let interfaces = coclass.interfaces().iter()
+                .flat_map(|itf_name| {
+                    let itf = &c.interfaces()[ &itf_name.to_string() ];
+                    itf.variants().iter()
+                        .filter( itf_variant_filter.as_ref() )
+                        .map( |(_, itf_variant)| {
+
+                            foreign.get_name( c, match all_type_systems {
+                                false => itf.name(),
+                                true => itf_variant.unique_name(),
+                            } )
+                        } ).collect::<Vec<_>>()
+                } ).collect::<Vec<_>>();
 
             let clsid = coclass.clsid().as_ref()
                     .ok_or_else( || GeneratorError::MissingClsid(
@@ -259,7 +310,7 @@ impl CppModel {
             Ok( CppCoClass {
                 name : class_name.to_string(),
                 clsid_struct : guid_as_struct( clsid ),
-                interface_count : coclass.interfaces().len(),
+                interface_count : interfaces.len(),
                 interfaces,
             } )
 
@@ -337,18 +388,18 @@ mod test {
     pub fn crate_to_cpp() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"
-            #[com_library( "11112222-3333-4444-5555-666677778888", CoClass )]
+            #[com_library( libid = "11112222-3333-4444-5555-666677778888", CoClass )]
             struct S;
 
-            #[com_interface( "22223333-4444-5555-6666-777788889999", NO_BASE )]
+            #[com_interface( raw_iid = "22223333-4444-5555-6666-777788889999", base = NO_BASE )]
             trait IInterface {
                 fn method( &self, a : u32 ) -> ComResult<bool>;
             }
 
-            #[com_class( "33334444-5555-6666-7777-888899990000", CoClass, IInterface )]
+            #[com_class( clsid = "33334444-5555-6666-7777-888899990000", CoClass, IInterface )]
             struct CoClass;
 
-            #[com_interface( "44445555-6666-7777-8888-99990000AAAA" )]
+            #[com_interface( raw_iid = "44445555-6666-7777-8888-99990000AAAA" )]
             #[com_impl]
             impl CoClass {
                 pub fn new() -> CoClass { CoClass }
@@ -405,7 +456,7 @@ mod test {
                 CppInterface {
                     name : "IAllocator".to_owned(),
                     base : Some( "IUnknown".to_owned() ),
-                    iid_struct : "{0x18ee22b3,0xb0c6,0x44a5,{0xa9,0x4a,0x7a,0x41,0x76,0x76,0xfb,0x66}}".to_owned(),
+                    iid_struct : "{0x7a6f6564,0x04b5,0x4455,{0xa2,0x23,0xea,0x05,0x12,0xb8,0xcc,0x63}}".to_owned(),
                     methods : vec![
                         CppMethod {
                             name : "AllocBstr".to_owned(),
@@ -476,7 +527,7 @@ mod test {
             ],
         };
 
-        let actual_cpp = CppModel::from_crate( &krate ).unwrap();
+        let actual_cpp = CppModel::from_crate( &krate, false ).unwrap();
 
         assert_eq!( expected_cpp, actual_cpp );
     }
@@ -485,11 +536,11 @@ mod test {
     fn bstr_method() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"
-            #[com_library( "11112222-3333-4444-5555-666677778888", CoClass )]
-            #[com_class( "33334444-5555-6666-7777-888899990000", CoClass )]
+            #[com_library( libid = "11112222-3333-4444-5555-666677778888", CoClass )]
+            #[com_class( clsid = "33334444-5555-6666-7777-888899990000", CoClass )]
             struct CoClass;
 
-            #[com_interface( "44445555-6666-7777-8888-99990000AAAA" )]
+            #[com_interface( raw_iid = "44445555-6666-7777-8888-99990000AAAA" )]
             #[com_impl]
             impl CoClass {
                 pub fn new() -> CoClass { CoClass }
@@ -509,7 +560,7 @@ mod test {
                 ]
             };
 
-        let actual_model = CppModel::from_crate( &krate ).unwrap();
+        let actual_model = CppModel::from_crate( &krate, false ).unwrap();
         let actual_method =
                 actual_model
                     .interfaces

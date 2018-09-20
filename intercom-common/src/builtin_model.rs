@@ -26,7 +26,10 @@ pub fn builtin_intercom_types( lib_name: &str ) -> Vec<BuiltinTypeInfo> {
 fn allocator_interface( lib_name: &str ) -> ComInterface {
     ComInterface::parse(
             lib_name,
-            "\"18EE22B3-B0C6-44A5-A94A-7A417676FB66\"",
+            quote!( (
+                com_iid = "18EE22B3-B0C6-44A5-A94A-7A417676FB66",
+                raw_iid = "7A6F6564-04B5-4455-A223-EA0512B8CC63",
+            ) ),
             allocator_impl_code() ).unwrap()
 }
 
@@ -37,7 +40,7 @@ fn allocator_impl() -> ComImpl {
 fn allocator_class( lib_name: &str ) -> ComStruct {
     ComStruct::parse(
             lib_name,
-            "AUTO_GUID, Allocator",
+            quote!( Allocator ),
             "pub struct Allocator;" ).unwrap()
 }
 

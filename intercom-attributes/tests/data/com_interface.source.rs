@@ -1,9 +1,9 @@
-#![feature(use_extern_macros, attr_literals)]
-
 extern crate intercom;
 use intercom::*;
 
-#[com_interface("00000000-0000-0000-0000-000000000000")]
+#[com_interface(
+        com_iid = "00000000-0000-0000-0000-000000000000",
+        raw_iid = "00000000-0000-0000-0000-000000000001")]
 pub trait Foo {
     fn static_method(a: u16, b: i16);
 

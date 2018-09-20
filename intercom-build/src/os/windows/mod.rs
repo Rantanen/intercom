@@ -11,7 +11,14 @@ use ::host;
 
 mod setup_configuration;
 
-pub fn build() {
+/// Executes the Windows-specific build steps.
+///
+/// # Arguments
+///
+/// * `all_type_systems` -
+///     True to include both Automation and Raw type systems in the embedded IDLs. Normally the
+///     build only includes Automation type system in the embedded IDL.
+pub fn build( all_type_systems : bool ) {
 
     // Get the host.
     let host = host::get_host();
@@ -53,7 +60,7 @@ pub fn build() {
         let mut idl = File::create( &idl_path )
                 .unwrap_or_else( |_| panic!( "Could not create file: {:?}", idl_path ) );
         let model = ::intercom_common::generators::idl::IdlModel::from_path(
-                    Path::new( &toml_dir ) )
+                    Path::new( &toml_dir ), all_type_systems )
                 .expect( "Failed to form IDL from the sources" );
         model.write( &mut idl )
                 .expect( "Failed to write IDL to file" );

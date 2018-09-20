@@ -17,8 +17,6 @@ including C++, C# and VB.Net.
 Rust COM server:
 
 ```rust
-#![feature(use_extern_macros, attr_literals)]
-
 pub use intercom::*;
 
 #[com_library(AUTO_GUID, Calculator)]
@@ -100,8 +98,6 @@ primary reason for this is the
 other important feature is `specialization`, which we need for handling
 `ComItf` that may point to a Trait interface or a Rust object:
 
-- `use_extern_macro` and `attr_literals` - needed for the Intercom attributes.
-  Tracking issue: [#38356](https://github.com/rust-lang/rust/issues/38356)
 - `specialization` - needed for handling `ComItf`, which may refer to an
   interface that might or might not be a concrete struct interface.
   Tracking issue: [#31844](https://github.com/rust-lang/rust/issues/31844)
@@ -110,6 +106,8 @@ other important feature is `specialization`, which we need for handling
   Tracking issue: [#29635](https://github.com/rust-lang/rust/issues/29635)
 - `non_exhaustive` - There are some types that we may want to add items to.
   Tracking issue: [#44109](https://github.com/rust-lang/rust/issues/44109)
+- `tool_lints` - Because clippy wants this now.
+  Tracking issue: [#44690](https://github.com/rust-lang/rust/issues/44690)
 
 Unfortunately the `fundamental` isn't even meant to be stabilized as is. :<
 
