@@ -146,7 +146,7 @@ fn process_itf_variant(
             impl ::intercom::IidOf for #itf_ident {
                 #[doc = #iidof_doc]
                 fn iid() -> &'static ::intercom::IID {
-                    & #iid_tokens
+                    & #iid_ident
                 }
             }
         ) );
