@@ -78,9 +78,10 @@ pub struct __Foo_AutomationVtbl {
                                                                  *mut ComItf<IUnknown>)
                                       -> ::intercom::HRESULT,
 }
-impl ::intercom::IidOf for Foo {
+impl ::intercom::ComInterface for Foo {
     #[doc = "Returns `IID_Foo_Automation`."]
     fn iid() -> &'static ::intercom::IID { &IID_Foo_Automation }
+    fn deref(com_itf: &ComItf<Foo>) -> &(Foo + 'static) { com_itf }
 }
 impl Foo for ::intercom::ComItf<Foo> {
     fn simple_method(&self) -> () {
@@ -346,11 +347,4 @@ pub struct __Foo_RawVtbl {
                                                       __out:
                                                           *mut ComItf<IUnknown>)
                                -> ::intercom::HRESULT,
-}
-impl ::std::ops::Deref for ::intercom::ComItf<Foo> {
-    type
-    Target
-    =
-    Foo;
-    fn deref(&self) -> &Self::Target { self }
 }

@@ -4,7 +4,6 @@ use super::*;
 /// Reference counted handle to the `ComBox` data.
 ///
 /// Provides a safe way to handle the unsafe `ComBox` values.
-#[fundamental]
 pub struct ComRc<T : ?Sized> {
     itf : ComItf<T>
 }
@@ -26,7 +25,7 @@ impl<T : ?Sized> ComRc<T> {
 }
 
 #[cfg(windows)]
-impl<T: IidOf + ?Sized> ComRc<T>
+impl<T: ComInterface + ?Sized> ComRc<T>
 {
     pub fn create( clsid : GUID ) -> ::ComResult< ComRc<T> > {
 

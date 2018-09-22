@@ -10,7 +10,6 @@ use std::marker::PhantomData;
 /// This applies only to the pure interfaces.  Implicit interfaces created
 /// through `#[com_interface] impl MyStruct` constructs are not supported for
 /// `ComItf<T>`.
-#[fundamental]
 #[repr(C)]
 pub struct ComItf<T> where T: ?Sized {
     ptr: RawComPtr,
@@ -52,7 +51,7 @@ impl<T: ?Sized> ComItf<T> {
     /// Tries to acquire a different interface from the current COM object.
     ///
     /// Returns a reference counted wrapper around the interface if successful.
-    pub fn try_into< U: IidOf + ?Sized >(
+    pub fn try_into< U: ComInterface + ?Sized >(
         &self
     ) -> Result< ComRc<U>, ::HRESULT >
     {
@@ -66,6 +65,14 @@ impl<T: ?Sized> ComItf<T> {
             },
             Err( e ) => Err( e )
         }
+    }
+}
+
+impl<T: ComInterface + ?Sized> std::ops::Deref for ComItf<T> {
+    type Target = T;
+
+    fn deref( &self ) -> &T {
+        ComInterface::deref( self )
     }
 }
 
