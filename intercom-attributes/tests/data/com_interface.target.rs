@@ -36,10 +36,6 @@ pub const IID_Foo_Automation: ::intercom::IID =
                      data2: 0u16,
                      data3: 0u16,
                      data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
-impl ::intercom::IidOf for Foo {
-    #[doc = "Returns `IID_Foo_Automation`."]
-    fn iid() -> &'static ::intercom::IID { &IID_Foo_Automation }
-}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -82,51 +78,9 @@ pub struct __Foo_AutomationVtbl {
                                                                  *mut ComItf<IUnknown>)
                                       -> ::intercom::HRESULT,
 }
-#[doc = "`Foo` interface ID."]
-#[allow(non_upper_case_globals)]
-pub const IID_Foo_Raw: ::intercom::IID =
-    ::intercom::GUID{data1: 0u32,
-                     data2: 0u16,
-                     data3: 0u16,
-                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
-#[allow(non_camel_case_types)]
-#[repr(C)]
-#[doc(hidden)]
-pub struct __Foo_RawVtbl {
-    pub __base: ::intercom::IUnknownVtbl,
-    pub simple_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                          ::intercom::RawComPtr)
-                               -> (),
-    pub arg_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                       ::intercom::RawComPtr,
-                                                   a: u16) -> (),
-    pub simple_result_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                                 ::intercom::RawComPtr)
-                                      -> u16,
-    pub com_result_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                              ::intercom::RawComPtr,
-                                                          __out: *mut u16)
-                                   -> ::intercom::HRESULT,
-    pub rust_result_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                               ::intercom::RawComPtr,
-                                                           __out: *mut u16)
-                                    -> ::intercom::HRESULT,
-    pub complete_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                            ::intercom::RawComPtr,
-                                                        a: u16, b: i16,
-                                                        __out: *mut bool)
-                                 -> ::intercom::HRESULT,
-    pub string_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                          ::intercom::RawComPtr,
-                                                      msg:
-                                                          ::intercom::raw::InBSTR)
-                               -> ::intercom::raw::OutBSTR,
-    pub comitf_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                          ::intercom::RawComPtr,
-                                                      itf: ComItf<Foo>,
-                                                      __out:
-                                                          *mut ComItf<IUnknown>)
-                               -> ::intercom::HRESULT,
+impl ::intercom::IidOf for Foo {
+    #[doc = "Returns `IID_Foo_Automation`."]
+    fn iid() -> &'static ::intercom::IID { &IID_Foo_Automation }
 }
 impl Foo for ::intercom::ComItf<Foo> {
     fn simple_method(&self) -> () {
@@ -346,6 +300,52 @@ impl Foo for ::intercom::ComItf<Foo> {
                 ErrorValue>::from_error(::intercom::return_hresult(err)),
         }
     }
+}
+#[doc = "`Foo` interface ID."]
+#[allow(non_upper_case_globals)]
+pub const IID_Foo_Raw: ::intercom::IID =
+    ::intercom::GUID{data1: 0u32,
+                     data2: 0u16,
+                     data3: 0u16,
+                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
+#[allow(non_camel_case_types)]
+#[repr(C)]
+#[doc(hidden)]
+pub struct __Foo_RawVtbl {
+    pub __base: ::intercom::IUnknownVtbl,
+    pub simple_method_Raw: unsafe extern "C" fn(self_vtable:
+                                                          ::intercom::RawComPtr)
+                               -> (),
+    pub arg_method_Raw: unsafe extern "C" fn(self_vtable:
+                                                       ::intercom::RawComPtr,
+                                                   a: u16) -> (),
+    pub simple_result_method_Raw: unsafe extern "C" fn(self_vtable:
+                                                                 ::intercom::RawComPtr)
+                                      -> u16,
+    pub com_result_method_Raw: unsafe extern "C" fn(self_vtable:
+                                                              ::intercom::RawComPtr,
+                                                          __out: *mut u16)
+                                   -> ::intercom::HRESULT,
+    pub rust_result_method_Raw: unsafe extern "C" fn(self_vtable:
+                                                               ::intercom::RawComPtr,
+                                                           __out: *mut u16)
+                                    -> ::intercom::HRESULT,
+    pub complete_method_Raw: unsafe extern "C" fn(self_vtable:
+                                                            ::intercom::RawComPtr,
+                                                        a: u16, b: i16,
+                                                        __out: *mut bool)
+                                 -> ::intercom::HRESULT,
+    pub string_method_Raw: unsafe extern "C" fn(self_vtable:
+                                                          ::intercom::RawComPtr,
+                                                      msg:
+                                                          ::intercom::raw::InBSTR)
+                               -> ::intercom::raw::OutBSTR,
+    pub comitf_method_Raw: unsafe extern "C" fn(self_vtable:
+                                                          ::intercom::RawComPtr,
+                                                      itf: ComItf<Foo>,
+                                                      __out:
+                                                          *mut ComItf<IUnknown>)
+                               -> ::intercom::HRESULT,
 }
 impl ::std::ops::Deref for ::intercom::ComItf<Foo> {
     type

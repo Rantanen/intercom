@@ -17,10 +17,6 @@ const IID_IFoo_Automation: ::intercom::IID =
                      data2: 0u16,
                      data3: 0u16,
                      data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
-impl ::intercom::IidOf for IFoo {
-    #[doc = "Returns `IID_IFoo_Automation`."]
-    fn iid() -> &'static ::intercom::IID { &IID_IFoo_Automation }
-}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -30,21 +26,9 @@ struct __IFoo_AutomationVtbl {
                                                                 ::intercom::RawComPtr)
                                      -> (),
 }
-#[doc = "`IFoo` interface ID."]
-#[allow(non_upper_case_globals)]
-const IID_IFoo_Raw: ::intercom::IID =
-    ::intercom::GUID{data1: 0u32,
-                     data2: 0u16,
-                     data3: 0u16,
-                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
-#[allow(non_camel_case_types)]
-#[repr(C)]
-#[doc(hidden)]
-struct __IFoo_RawVtbl {
-    pub __base: ::intercom::IUnknownVtbl,
-    pub trait_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                         ::intercom::RawComPtr)
-                              -> (),
+impl ::intercom::IidOf for IFoo {
+    #[doc = "Returns `IID_IFoo_Automation`."]
+    fn iid() -> &'static ::intercom::IID { &IID_IFoo_Automation }
 }
 impl IFoo for ::intercom::ComItf<IFoo> {
     fn trait_method(&self) -> () {
@@ -68,6 +52,22 @@ impl IFoo for ::intercom::ComItf<IFoo> {
             <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
         }
     }
+}
+#[doc = "`IFoo` interface ID."]
+#[allow(non_upper_case_globals)]
+const IID_IFoo_Raw: ::intercom::IID =
+    ::intercom::GUID{data1: 0u32,
+                     data2: 0u16,
+                     data3: 0u16,
+                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
+#[allow(non_camel_case_types)]
+#[repr(C)]
+#[doc(hidden)]
+struct __IFoo_RawVtbl {
+    pub __base: ::intercom::IUnknownVtbl,
+    pub trait_method_Raw: unsafe extern "C" fn(self_vtable:
+                                                         ::intercom::RawComPtr)
+                              -> (),
 }
 impl ::std::ops::Deref for ::intercom::ComItf<IFoo> {
     type
@@ -387,10 +387,6 @@ pub const IID_Foo_Automation: ::intercom::IID =
                      data2: 0u16,
                      data3: 0u16,
                      data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8],};
-impl ::intercom::IidOf for Foo {
-    #[doc = "Returns `IID_Foo_Automation`."]
-    fn iid() -> &'static ::intercom::IID { &IID_Foo_Automation }
-}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -399,6 +395,10 @@ pub struct __Foo_AutomationVtbl {
     pub struct_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                  ::intercom::RawComPtr)
                                       -> (),
+}
+impl ::intercom::IidOf for Foo {
+    #[doc = "Returns `IID_Foo_Automation`."]
+    fn iid() -> &'static ::intercom::IID { &IID_Foo_Automation }
 }
 #[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
