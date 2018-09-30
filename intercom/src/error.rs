@@ -250,7 +250,8 @@ pub fn get_last_error< E >( last_hr : HRESULT ) -> E
 
             if hr == S_OK {
 
-                let ierrorinfo = ComItf::< IErrorInfo >::wrap( error_ptr );;
+                let ierrorinfo = ComItf::< IErrorInfo >::wrap(
+                        error_ptr, TypeSystem::Automation );
 
                 // Construct a proper ErrorInfo struct from the COM interface.
                 let error_info = ErrorInfo::try_from( &*ierrorinfo ).ok();

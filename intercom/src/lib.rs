@@ -93,7 +93,7 @@ mod intercom {
 pub trait ComInterface {
 
     /// IID of the COM interface.
-    fn iid() -> &'static IID;
+    fn iid( ts : TypeSystem ) -> Option< &'static IID >;
 
     /// Dereferences a `ComItf<T>` into a `&T`.
     ///

@@ -26,7 +26,6 @@ impl ComInterfaceAttr {
         match ts {
             ModelTypeSystem::Raw => self.raw_iid(),
             ModelTypeSystem::Automation => self.com_iid(),
-            ModelTypeSystem::Invariant => self.com_iid(),
         }
     }
 }

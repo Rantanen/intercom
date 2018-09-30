@@ -13,6 +13,12 @@ use methodinfo::ComMethodInfo;
 extern crate proc_macro;
 use syn::*;
 
+/// Interface level output.
+#[derive(Default)]
+struct InterfaceOutput {
+    iid_arms : Vec<TokenStream>,
+}
+
 /// Expands the `com_interface` attribute.
 ///
 /// The attribute expansion results in the following items:
@@ -32,11 +38,32 @@ pub fn expand_com_interface(
             &lib_name(),
             attr_tokens.into(),
             &item_tokens.to_string() )?;
+    let itf_ident = itf.name();
 
-    // Impls for Rust-to-COM calls using Automation type system.
+    let mut itf_output = InterfaceOutput::default();
     for ( &ts, itf_variant ) in itf.variants() {
-        process_itf_variant( &itf, ts, itf_variant, &mut output );
+        process_itf_variant(
+                &itf, ts, itf_variant,
+                &mut output, &mut itf_output );
     }
+
+    // Implement the ComInterface for the trait.
+    let iid_arms = itf_output.iid_arms;
+    output.push( quote!(
+        impl ::intercom::ComInterface for #itf_ident {
+
+            #[doc = "Returns the IID of the requested interface."]
+            fn iid( ts : TypeSystem ) -> Option< &'static ::intercom::IID > {
+                match ts {
+                    #( #iid_arms ),*
+                }
+            }
+
+            fn deref( com_itf : &ComItf< #itf_ident > ) -> &( #itf_ident + 'static ) {
+                com_itf
+            }
+        }
+    ) );
 
     Ok( tokens_to_tokenstream( item_tokens, output ) )
 }
@@ -48,12 +75,14 @@ pub fn expand_com_interface(
 /// * `itf` - Interface details.
 /// * `ts` - Type system the variant represents.
 /// * `itf_variant` - Interface variant details.
-/// * `output` - Output emitted by the attribute macro.
+/// * `output` - Direct output emitted for each interface variant.
+/// * `itf_output` - Interface variant data for the interface level output.
 fn process_itf_variant(
     itf : &model::ComInterface,
     ts : ModelTypeSystem,
     itf_variant : &model::ComInterfaceVariant,
     output : &mut Vec<TokenStream>,
+    itf_output : &mut InterfaceOutput,
 ) {
 
     let itf_ident = itf.name();
@@ -69,6 +98,10 @@ fn process_itf_variant(
         #[allow(non_upper_case_globals)]
         #visibility const #iid_ident : ::intercom::IID = #iid_tokens;
     ) );
+
+    // Construct the iid(ts) match arm for this type system.
+    let ts_match = ts.as_typesystem_tokens();
+    itf_output.iid_arms.push( quote!( #ts_match => Some( & #iid_ident ) ) );
 
     // Create a vector for the virtual table fields and insert the base
     // interface virtual table in it if required.
@@ -123,22 +156,6 @@ fn process_itf_variant(
     // interface.
     if ts == ModelTypeSystem::Automation &&
         itf.item_type() == utils::InterfaceType::Trait {
-
-        // Implement the ComInterface for the trait.
-        let iidof_doc = format!( "Returns `{}`.", iid_ident );
-        output.push( quote!(
-            impl ::intercom::ComInterface for #itf_ident {
-
-                #[doc = #iidof_doc]
-                fn iid() -> &'static ::intercom::IID {
-                    & #iid_ident
-                }
-
-                fn deref( com_itf : &ComItf< #itf_ident > ) -> &( #itf_ident + 'static ) {
-                    com_itf
-                }
-            }
-        ) );
 
 
         // Gather method implementations.
@@ -228,7 +245,7 @@ fn rust_to_com_delegate(
             #[allow(unused_imports)]
             use ::intercom::ComInto;
 
-            let comptr = ::intercom::ComItf::ptr( self );
+            let comptr = ::intercom::ComItf::ptr( self, ::intercom::TypeSystem::Automation );
             let vtbl = comptr as *const *const #vtable_ident;
 
             #( #temporaries )*

@@ -178,7 +178,6 @@ pub fn generate_iid(
             match type_system {
                 ModelTypeSystem::Automation => "automation",
                 ModelTypeSystem::Raw => "raw",
-                ModelTypeSystem::Invariant => "invariant",
             }
         ].join( ":" ) )
 }

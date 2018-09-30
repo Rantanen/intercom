@@ -16,7 +16,9 @@ pub trait ReturnHandler : ::std::fmt::Debug {
     {
         tyhandlers::get_ty_handler(
                     &self.rust_ty(),
-                    TypeContext::new( Direction::Retval, ModelTypeSystem::Invariant ),
+                    TypeContext::new(
+                            Direction::Retval,
+                            ModelTypeSystem::Automation ),
                 ).com_ty()
     }
 

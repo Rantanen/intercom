@@ -36,15 +36,24 @@ impl ModelTypeSystemConfig {
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum ModelTypeSystem {
 
-    /// Invariant type system. There should be no differentiation despite the
-    /// ability to do so.
-    Invariant,
-
     /// COM Automation compatible type system.
     Automation,
 
     /// Raw type system.
     Raw,
+}
+
+impl ModelTypeSystem {
+
+    /// Converts the model type system into public type system tokens.
+    pub fn as_typesystem_tokens( &self ) -> TokenStream {
+        match self {
+            ModelTypeSystem::Automation =>
+                    quote!( ::intercom::TypeSystem::Automation ),
+            ModelTypeSystem::Raw =>
+                    quote!( ::intercom::TypeSystem::Raw ),
+        }
+    }
 }
 
 /// Type usage context.
