@@ -26,23 +26,19 @@ struct __IFoo_AutomationVtbl {
                                                                 ::intercom::RawComPtr)
                                      -> (),
 }
-impl ::intercom::ComInterface for IFoo {
-    #[doc = "Returns `IID_IFoo_Automation`."]
-    fn iid() -> &'static ::intercom::IID { &IID_IFoo_Automation }
-    fn deref(com_itf: &ComItf<IFoo>) -> &(IFoo + 'static) { com_itf }
-}
 impl IFoo for ::intercom::ComItf<IFoo> {
     fn trait_method(&self) -> () {
         #[allow(unused_imports)]
         use ::intercom::ComInto;
-        let comptr = ::intercom::ComItf::ptr(self);
-        let vtbl = comptr as *const *const __IFoo_AutomationVtbl;
+        let comptr =
+            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
+        let vtbl = comptr.ptr as *const *const __IFoo_AutomationVtbl;
         #[allow(unused_unsafe)]
         let result: Result<(), ::intercom::ComError> =
             (||
                  unsafe {
                      let __result =
-                         ((**vtbl).trait_method_Automation)(comptr);
+                         ((**vtbl).trait_method_Automation)(comptr.ptr);
                      Ok({ })
                  })();
         #[allow(unused_imports)]
@@ -69,6 +65,18 @@ struct __IFoo_RawVtbl {
     pub trait_method_Raw: unsafe extern "C" fn(self_vtable:
                                                          ::intercom::RawComPtr)
                               -> (),
+}
+impl ::intercom::ComInterface for IFoo {
+    #[doc = "Returns the IID of the requested interface."]
+    fn iid(ts: ::intercom::TypeSystem) -> Option<&'static ::intercom::IID> {
+        match ts {
+            ::intercom::TypeSystem::Automation => Some(&IID_IFoo_Automation),
+            ::intercom::TypeSystem::Raw => Some(&IID_IFoo_Raw),
+        }
+    }
+    fn deref(com_itf: &::intercom::ComItf<IFoo>) -> &(IFoo + 'static) {
+        com_itf
+    }
 }
 
 struct Foo;
@@ -323,6 +331,7 @@ const __Foo_Foo_RawVtbl_INSTANCE: __Foo_RawVtbl =
                                                release_Automation:
                                                    __Foo_Foo_Raw_release,},
                   struct_method_Raw: __Foo_Foo_Raw_struct_method_Raw,};
+impl ::intercom::HasInterface<Foo> for Foo { }
 #[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
 pub const IID_Foo_Automation: ::intercom::IID =
@@ -355,7 +364,24 @@ pub struct __Foo_RawVtbl {
                                                           ::intercom::RawComPtr)
                                -> (),
 }
+impl ::intercom::ComInterface for Foo {
+    #[doc = "Returns the IID of the requested interface."]
+    fn iid(ts: ::intercom::TypeSystem) -> Option<&'static ::intercom::IID> {
+        match ts {
+            ::intercom::TypeSystem::Automation => Some(&IID_Foo_Automation),
+            ::intercom::TypeSystem::Raw => Some(&IID_Foo_Raw),
+        }
+    }
+    fn deref(com_itf: &::intercom::ComItf<Foo>) -> &Foo {
 
+
+        {
+            ::rt::begin_panic("Cannot deref into struct-interface",
+                              &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\private_item.source.rs",
+                                15u32, 1u32))
+        }
+    }
+}
 impl IFoo for Foo {
     fn trait_method(&self) { }
 }
@@ -495,4 +521,4 @@ const __Foo_IFoo_RawVtbl_INSTANCE: __IFoo_RawVtbl =
                                                 release_Automation:
                                                     __Foo_IFoo_Raw_release,},
                    trait_method_Raw: __Foo_IFoo_Raw_trait_method_Raw,};
-
+impl ::intercom::HasInterface<IFoo> for Foo { }

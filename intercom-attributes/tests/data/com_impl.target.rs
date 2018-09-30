@@ -747,3 +747,4 @@ const __Foo_Foo_RawVtbl_INSTANCE: __Foo_RawVtbl =
                       __Foo_Foo_Raw_tuple_result_method_Raw,
                   string_method_Raw: __Foo_Foo_Raw_string_method_Raw,
                   complete_method_Raw: __Foo_Foo_Raw_complete_method_Raw,};
+impl ::intercom::HasInterface<Foo> for Foo { }
