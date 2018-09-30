@@ -138,15 +138,45 @@ impl TypeHandler for IdentityParam {
 
 /// `ComItf` parameter handler. Supports `ComItf` Rust type and ensures the this
 /// to/from `RawComPtr` COM type.
-struct ComItfParam( Type );
+struct ComItfParam { ty: Type, context: TypeContext }
 
 impl TypeHandler for ComItfParam {
 
-    fn rust_ty( &self ) -> Type { self.0.clone() }
+    fn rust_ty( &self ) -> Type { self.ty.clone() }
+
+    /// The COM type.
+    fn com_ty( &self ) -> Type
+    {
+        parse_quote!( ::intercom::RawComPtr )
+    }
 
     fn default_value( &self ) -> TokenStream
     {
-        quote!( ComItf::null_itf() )
+        quote!( ::std::ptr::null_mut() )
+    }
+
+    /// Converts a COM parameter named by the ident into a Rust type.
+    fn com_to_rust(
+        &self, ident : &Ident
+    ) -> TypeConversion
+    {
+        let ts = self.context.type_system.as_typesystem_tokens();
+        TypeConversion {
+            temporary: None,
+            value: quote!( ::intercom::ComItf::wrap( #ident, #ts ) ),
+        }
+    }
+
+    /// Converts a Rust parameter named by the ident into a COM type.
+    fn rust_to_com(
+        &self, ident : &Ident
+    ) -> TypeConversion
+    {
+        let ts = self.context.type_system.as_typesystem_tokens();
+        TypeConversion {
+            temporary: None,
+            value: quote!( ::intercom::ComItf::ptr( #ident.into(), #ts ) )
+        }
     }
 }
 
@@ -249,7 +279,7 @@ fn map_by_name(
 
     match name {
 
-        "ComItf" => Rc::new( ComItfParam( original_type ) ),
+        "ComItf" => Rc::new( ComItfParam { ty: original_type, context } ),
         "BString" | "BStr" | "String" | "str" =>
             Rc::new( StringParam { ty: original_type, context } ),
         // "str" => Rc::new( StringRefParam( original_type ) ),
