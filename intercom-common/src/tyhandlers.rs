@@ -147,8 +147,10 @@ impl TypeHandler for ComItfParam {
     /// The COM type.
     fn com_ty( &self ) -> Type
     {
-        use syn;
         let rust_ty = self.rust_ty();
+
+        // Extract the interface type T from the ComItf<T> type definition
+        use syn;
         let itf_ty = match rust_ty {
             syn::Type::Path( path ) =>
                 match path.path.segments.last().unwrap().value().arguments {
@@ -161,6 +163,8 @@ impl TypeHandler for ComItfParam {
                 },
             _ => panic!( "ComItf type parameter must be a type path" ),
         };
+
+        // Construct the final InterfacePtr<T> type.
         parse_quote!( ::intercom::raw::InterfacePtr< #itf_ty > )
     }
 
