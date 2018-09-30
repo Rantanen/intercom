@@ -328,7 +328,7 @@ mod test
 {
     use super::*;
     use guid::GUID;
-    use tyhandlers::TypeSystem::*;
+    use tyhandlers::ModelTypeSystem::*;
 
     #[test]
     fn parse_crate() {

@@ -6,7 +6,7 @@ use std::iter;
 
 use idents;
 use utils;
-use tyhandlers::{Direction, TypeSystem};
+use tyhandlers::{Direction, ModelTypeSystem};
 use model;
 use methodinfo::ComMethodInfo;
 
@@ -51,7 +51,7 @@ pub fn expand_com_interface(
 /// * `output` - Output emitted by the attribute macro.
 fn process_itf_variant(
     itf : &model::ComInterface,
-    ts : TypeSystem,
+    ts : ModelTypeSystem,
     itf_variant : &model::ComInterfaceVariant,
     output : &mut Vec<TokenStream>,
 ) {
@@ -121,7 +121,7 @@ fn process_itf_variant(
     //
     // This is done only for the primary interface, whic is currently always the Automation
     // interface.
-    if ts == TypeSystem::Automation &&
+    if ts == ModelTypeSystem::Automation &&
         itf.item_type() == utils::InterfaceType::Trait {
 
         // Implement the ComInterface for the trait.

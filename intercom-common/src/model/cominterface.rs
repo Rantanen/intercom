@@ -9,7 +9,7 @@ use ::methodinfo::ComMethodInfo;
 use ::syn::{ Ident, Visibility, LitStr };
 use ::ordermap::OrderMap;
 use ::std::iter::FromIterator;
-use ::tyhandlers::{TypeSystem};
+use ::tyhandlers::{ModelTypeSystem};
 
 intercom_attribute!(
     ComInterfaceAttr< ComInterfaceAttrParam, NoParams > {
@@ -21,12 +21,12 @@ intercom_attribute!(
 
 impl ComInterfaceAttr {
 
-    pub fn iid( &self, ts : TypeSystem ) -> Result< Option< &LitStr >, String > {
+    pub fn iid( &self, ts : ModelTypeSystem ) -> Result< Option< &LitStr >, String > {
 
         match ts {
-            TypeSystem::Raw => self.raw_iid(),
-            TypeSystem::Automation => self.com_iid(),
-            TypeSystem::Invariant => self.com_iid(),
+            ModelTypeSystem::Raw => self.raw_iid(),
+            ModelTypeSystem::Automation => self.com_iid(),
+            ModelTypeSystem::Invariant => self.com_iid(),
         }
     }
 }
@@ -37,7 +37,7 @@ pub struct ComInterface
     display_name : Ident,
     visibility : Visibility,
     base_interface : Option<Ident>,
-    variants : OrderMap<TypeSystem, ComInterfaceVariant>,
+    variants : OrderMap<ModelTypeSystem, ComInterfaceVariant>,
     item_type: ::utils::InterfaceType,
     is_unsafe : bool,
 }
@@ -48,7 +48,7 @@ pub struct ComInterfaceVariant
     display_name : Ident,
     unique_name : Ident,
     unique_base_interface : Option<Ident>,
-    type_system : TypeSystem,
+    type_system : ModelTypeSystem,
     iid : GUID,
     methods : Vec<ComMethodInfo>,
 }
@@ -119,7 +119,7 @@ impl ComInterface
                 };
 
         let variants = OrderMap::from_iter(
-            [ TypeSystem::Automation, TypeSystem::Raw ].into_iter().map( |&ts| {
+            [ ModelTypeSystem::Automation, ModelTypeSystem::Raw ].into_iter().map( |&ts| {
 
             let itf_unique_ident = Ident::new( 
                     &format!( "{}_{:?}", itf_ident.to_string(), ts ), Span::call_site() );
@@ -174,7 +174,7 @@ impl ComInterface
 
     /// Temp accessor for the automation variant.
     pub fn aut( &self ) -> &ComInterfaceVariant {
-        &self.variants[ &TypeSystem::Automation ]
+        &self.variants[ &ModelTypeSystem::Automation ]
     }
 
     /// Interface name.
@@ -187,7 +187,7 @@ impl ComInterface
     pub fn base_interface( &self ) -> &Option<Ident> { &self.base_interface }
 
     /// Interface variants.
-    pub fn variants( &self ) -> &OrderMap<TypeSystem, ComInterfaceVariant> { &self.variants }
+    pub fn variants( &self ) -> &OrderMap<ModelTypeSystem, ComInterfaceVariant> { &self.variants }
 
     /// The type of the associated item for the #[com_interface] attribute.
     ///
@@ -213,14 +213,14 @@ impl ComInterfaceVariant {
     pub fn iid( &self ) -> &GUID { &self.iid }
 
     /// Gets the type system this interface variant represents.
-    pub fn type_system( &self ) -> TypeSystem { self.type_system }
+    pub fn type_system( &self ) -> ModelTypeSystem { self.type_system }
 }
 
 #[cfg(test)]
 mod test
 {
     use super::*;
-    use tyhandlers::TypeSystem::*;
+    use tyhandlers::ModelTypeSystem::*;
 
     #[test]
     fn parse_com_interface() {
@@ -296,7 +296,7 @@ mod test
         assert_eq!( itf.visibility(), &pub_visibility );
         assert_eq!( itf.base_interface().as_ref().unwrap(), "IBase" );
 
-        let variant = &itf.variants[ &TypeSystem::Automation];
+        let variant = &itf.variants[ &ModelTypeSystem::Automation];
         assert_eq!( variant.iid(),
             &GUID::parse( "3DC87B73-0998-30B6-75EA-D4F564454D4B" ).unwrap() );
         assert_eq!( variant.methods.len(), 2 );
@@ -305,7 +305,7 @@ mod test
         assert_eq!( variant.methods[1].display_name, "two" );
         assert_eq!( variant.methods[1].unique_name, "two_Automation" );
 
-        let variant = &itf.variants[ &TypeSystem::Raw];
+        let variant = &itf.variants[ &ModelTypeSystem::Raw];
         assert_eq!( variant.iid(),
             &GUID::parse( "D552E455-9FB2-34A2-61C0-34BDE0A9095D" ).unwrap() );
         assert_eq!( variant.methods.len(), 2 );

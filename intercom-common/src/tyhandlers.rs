@@ -19,12 +19,12 @@ pub struct TypeConversion {
 }
 
 #[derive(PartialEq, Eq, Debug)]
-pub struct TypeSystemConfig {
-    pub effective_system : TypeSystem,
+pub struct ModelTypeSystemConfig {
+    pub effective_system : ModelTypeSystem,
     pub is_default : bool,
 }
 
-impl TypeSystemConfig {
+impl ModelTypeSystemConfig {
     pub fn get_unique_name( &self, base : &str ) -> String {
         match self.is_default {
             true => base.to_string(),
@@ -34,7 +34,7 @@ impl TypeSystemConfig {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
-pub enum TypeSystem {
+pub enum ModelTypeSystem {
 
     /// Invariant type system. There should be no differentiation despite the
     /// ability to do so.
@@ -50,11 +50,11 @@ pub enum TypeSystem {
 /// Type usage context.
 pub struct TypeContext {
     dir: Direction,
-    type_system: TypeSystem,
+    type_system: ModelTypeSystem,
 }
 
 impl TypeContext {
-    pub fn new( dir : Direction, type_system : TypeSystem ) -> TypeContext {
+    pub fn new( dir : Direction, type_system : ModelTypeSystem ) -> TypeContext {
         TypeContext { dir, type_system }
     }
 }
@@ -114,7 +114,7 @@ pub trait TypeHandler {
 
     /// Gets the sype system the handler serves if the handler is type system specific. Returns
     /// None if the handler is type system agnostic.
-    fn type_system( &self ) -> Option<TypeSystem> { None }
+    fn type_system( &self ) -> Option<ModelTypeSystem> { None }
 }
 
 /// Identity parameter handler.
@@ -212,7 +212,7 @@ impl TypeHandler for StringParam
     }
 
     /// String parameters differ between the type systems.
-    fn type_system( &self ) -> Option<TypeSystem> {
+    fn type_system( &self ) -> Option<ModelTypeSystem> {
         Some( self.context.type_system )
     }
 }

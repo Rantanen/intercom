@@ -4,7 +4,7 @@ use std::rc::Rc;
 use syn::*;
 
 use ast_converters::*;
-use tyhandlers::{Direction, TypeContext, TypeSystem, TypeHandler, get_ty_handler};
+use tyhandlers::{Direction, TypeContext, ModelTypeSystem, TypeHandler, get_ty_handler};
 use returnhandlers::{ReturnHandler, get_return_handler};
 use utils;
 
@@ -46,7 +46,7 @@ impl ::std::fmt::Debug for RustArg {
 
 impl RustArg {
 
-    pub fn new( name: Ident, ty: Type, type_system: TypeSystem ) -> RustArg {
+    pub fn new( name: Ident, ty: Type, type_system: ModelTypeSystem ) -> RustArg {
 
         let tyhandler = get_ty_handler(
                 &ty, TypeContext::new( Direction::In, type_system ) );
@@ -79,7 +79,7 @@ impl ComArg {
         name: Ident,
         ty: Type,
         dir: Direction,
-        type_system: TypeSystem
+        type_system: ModelTypeSystem
     ) -> ComArg {
 
         let tyhandler = get_ty_handler(
@@ -95,7 +95,7 @@ impl ComArg {
     pub fn from_rustarg(
         rustarg: RustArg,
         dir: Direction,
-        type_system: TypeSystem,
+        type_system: ModelTypeSystem,
     ) -> ComArg {
 
         let tyhandler = get_ty_handler(
@@ -160,7 +160,7 @@ pub struct ComMethodInfo {
     pub is_unsafe: bool,
 
     /// Type system.
-    pub type_system : TypeSystem,
+    pub type_system : ModelTypeSystem,
 }
 
 impl PartialEq for ComMethodInfo {
@@ -183,7 +183,7 @@ impl ComMethodInfo {
     /// Constructs new COM method info from a Rust method signature.
     pub fn new(
         m : &MethodSig,
-        type_system : TypeSystem,
+        type_system : ModelTypeSystem,
     ) -> Result<ComMethodInfo, ComMethodInfoError>
     {
         Self::new_from_parts( m.ident.clone(), &m.decl, m.unsafety.is_some(), type_system )
@@ -193,7 +193,7 @@ impl ComMethodInfo {
         n: Ident,
         decl: &FnDecl,
         unsafety: bool,
-        type_system : TypeSystem,
+        type_system : ModelTypeSystem,
     ) -> Result<ComMethodInfo, ComMethodInfoError>
     {
         // Process all the function arguments.
@@ -311,7 +311,7 @@ fn hresult_ty() -> Type {
 mod tests {
 
     use super::*;
-    use tyhandlers::TypeSystem::*;
+    use tyhandlers::ModelTypeSystem::*;
 
     #[test]
     fn no_args_or_return_value() {
@@ -395,7 +395,7 @@ mod tests {
         assert_eq!( info.args[1].ty, parse_quote!( f32 ) );
     }
 
-    fn test_info( code : &str, ts : TypeSystem) -> ComMethodInfo {
+    fn test_info( code : &str, ts : ModelTypeSystem) -> ComMethodInfo {
 
         let item = parse_str( code ).unwrap();
         let ( ident, decl, unsafety ) = match item {

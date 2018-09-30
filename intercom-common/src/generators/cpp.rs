@@ -9,7 +9,7 @@ use std::path::Path;
 
 use super::GeneratorError;
 
-use tyhandlers::{Direction, TypeSystem, TypeSystemConfig};
+use tyhandlers::{Direction, ModelTypeSystem, ModelTypeSystemConfig};
 use foreign_ty::*;
 use type_parser::*;
 use guid::*;
@@ -64,14 +64,14 @@ trait CppTypeInfo<'s> {
         &self,
         direction: Direction,
         krate : &ComCrate,
-        ts_config : &TypeSystemConfig,
+        ts_config : &ModelTypeSystemConfig,
     ) -> String;
 
     /// Gets the C++ compatile type name for this type.
     fn get_cpp_type_name(
         &self,
         krate : &ComCrate,
-        ts_config : &TypeSystemConfig,
+        ts_config : &ModelTypeSystemConfig,
     ) -> String;
 
     /// Determines whether this type should be passed as a pointer.
@@ -86,7 +86,7 @@ impl<'s> CppTypeInfo<'s> {
     fn get_cpp_name_for_custom_type(
         krate : &ComCrate,
         ty_name : &str,
-        ts_config : &TypeSystemConfig,
+        ts_config : &ModelTypeSystemConfig,
     ) -> String {
 
         let itf = if let Some( itf ) = krate.interfaces().get( ty_name ) {
@@ -111,7 +111,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
         &self,
         direction: Direction,
         krate : &ComCrate,
-        ts_config : &TypeSystemConfig,
+        ts_config : &ModelTypeSystemConfig,
     ) -> String
     {
         // Argument direction affects both the argument attribute and
@@ -136,7 +136,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
     fn get_cpp_type_name(
         &self,
         krate : &ComCrate,
-        ts_config : &TypeSystemConfig,
+        ts_config : &ModelTypeSystemConfig,
     ) -> String {
 
         let type_name = self.get_leaf().get_name();
@@ -201,11 +201,11 @@ impl CppModel {
         all_type_systems : bool,
     ) -> Result<CppModel, GeneratorError> {
 
-        let itf_variant_filter : Box<Fn( &( &TypeSystem, &ComInterfaceVariant ) ) -> bool> =
+        let itf_variant_filter : Box<Fn( &( &ModelTypeSystem, &ComInterfaceVariant ) ) -> bool> =
                 match all_type_systems {
                     true => Box::new( | _ | true ),
                     false => Box::new( | ( ts, _ ) | match ts {
-                        TypeSystem::Raw => true,
+                        ModelTypeSystem::Raw => true,
                         _ => false
                     } ),
                 };
@@ -220,7 +220,7 @@ impl CppModel {
             .map(|(&ts, itf_variant)| {
 
                 // Define the config to use when constructing the type names.
-                let ts_config = TypeSystemConfig {
+                let ts_config = ModelTypeSystemConfig {
                     effective_system: ts,
                     is_default: ! all_type_systems,
                 };
@@ -264,7 +264,7 @@ impl CppModel {
                 let ( itf_name, iid ) = match all_type_systems {
                     false => (
                         itf.name(),
-                        itf.variants()[ &TypeSystem::Raw ].iid() ),
+                        itf.variants()[ &ModelTypeSystem::Raw ].iid() ),
                     true => (
                         itf_variant.unique_name(),
                         itf_variant.iid() ),
