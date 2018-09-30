@@ -46,7 +46,7 @@ pub enum ModelTypeSystem {
 impl ModelTypeSystem {
 
     /// Converts the model type system into public type system tokens.
-    pub fn as_typesystem_tokens( &self ) -> TokenStream {
+    pub fn as_typesystem_tokens( self ) -> TokenStream {
         match self {
             ModelTypeSystem::Automation =>
                     quote!( ::intercom::TypeSystem::Automation ),
