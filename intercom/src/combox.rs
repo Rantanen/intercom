@@ -80,30 +80,30 @@ impl<T: CoClass> AsRef<ComBox<T>> for ComStruct<T>
 impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComItf<I> {
     fn from( source : ComStruct<T> ) -> ComItf<I> {
 
-        let mut comitf = None;
-        {
+        let ( automation_ptr, raw_ptr ) = {
             let vtbl = &source.as_ref().vtable_list;
-            for &ts in &[ TypeSystem::Automation, TypeSystem::Raw ] {
-                if let Some( iid ) = I::iid( ts ) {
-                    match <T as CoClass>::query_interface( &vtbl, iid ) {
-                        // 'itf' is guaranteed to be the correct interface.
-                        Ok( itf ) => unsafe {
-                            comitf = Some( ComItf::wrap( itf, ts ) );
-                            break;
-                        },
-                        _ => continue,
-                    }
-                }
-            }
-        }
 
-        match comitf {
-            None => panic!( "Type claimed to implement interface but didn't." ),
-            Some( itf ) => {
-                std::mem::forget( source );
-                itf
-            }
-        }
+            let automation_ptr = match I::iid( TypeSystem::Automation ) {
+                Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
+                    Ok( itf ) => itf,
+                    Err( _ ) => ::std::ptr::null_mut(),
+                },
+                None => ::std::ptr::null_mut(),
+            };
+
+            let raw_ptr = match I::iid( TypeSystem::Raw ) {
+                Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
+                    Ok( itf ) => itf,
+                    Err( _ ) => ::std::ptr::null_mut(),
+                },
+                None => ::std::ptr::null_mut(),
+            };
+
+            ( automation_ptr, raw_ptr )
+        };
+
+        std::mem::forget( source );
+        unsafe { ComItf::new( automation_ptr, raw_ptr ) }
     }
 }
 

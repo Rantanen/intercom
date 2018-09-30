@@ -35,6 +35,20 @@ impl<T: ?Sized> ComItf<T> {
     ///
     /// The `ptr` __must__ be a valid COM interface pointer for an interface
     /// of type `T`.
+    pub unsafe fn new( automation : RawComPtr, raw : RawComPtr ) -> ComItf<T> {
+        ComItf {
+            raw_ptr: raw,
+            automation_ptr: automation,
+            phantom: PhantomData,
+        }
+    }
+
+    /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
+    ///
+    /// # Safety
+    ///
+    /// The `ptr` __must__ be a valid COM interface pointer for an interface
+    /// of type `T`.
     pub unsafe fn wrap( ptr : RawComPtr, ts : TypeSystem ) -> ComItf<T> {
         match ts {
             TypeSystem::Automation => ComItf {

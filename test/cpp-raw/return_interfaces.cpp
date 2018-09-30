@@ -1,6 +1,8 @@
 
 #include "../cpp-utility/os.hpp"
 #include "../cpp-utility/catch.hpp"
+#include <iostream>
+using namespace std;
 
 #include "testlib.hpp"
 
@@ -78,6 +80,95 @@ TEST_CASE( "Methods accept and return COM objects" )
 
             pParentItf->Release();
             pChild->Release();
+        }
+
+        SECTION( "Returned interface corresponds with the type system" )
+        {
+            SECTION( "Automation interface returns automation interface" )
+            {
+                // Create an object through the automation interface.
+                ICreatedClass_Automation* pCreated = nullptr;
+                hr = pOps->CreateRoot( 1, OUT &pCreated );
+                REQUIRE( hr == intercom::SC_OK );
+
+                // Query for the automation interface to be extra sure we get
+                // an interface that represents that one.
+                // 
+                // We are getting this into IUnknown pointer as that's the
+                // only interface we need out of it in the end for release.
+                IUnknown* pCreated_qi = nullptr;
+                hr = pCreated->QueryInterface(
+                        IID_ICreatedClass_Automation,
+                        reinterpret_cast< void** >( &pCreated_qi ) );
+                REQUIRE( hr == intercom::SC_OK );
+
+                // Ensure the two interface pointers point to the same
+                // interface.
+                REQUIRE( pCreated == pCreated_qi );
+
+                pCreated->Release();
+                pCreated_qi->Release();
+            }
+
+            SECTION( "Raw interface returns raw interface" )
+            {
+                // Get a raw interface for the class creator.
+                IClassCreator_Raw* pOpsRaw = nullptr;
+                hr = pOps->QueryInterface(
+                        IID_IClassCreator_Raw,
+                        reinterpret_cast< void** >( &pOpsRaw ) );
+                REQUIRE( hr == intercom::SC_OK );
+
+                // Create an object through the automation interface.
+                ICreatedClass_Raw* pCreated = nullptr;
+                hr = pOpsRaw->CreateRoot( 1, OUT &pCreated );
+                REQUIRE( hr == intercom::SC_OK );
+
+                // Query for the automation interface to be extra sure we get
+                // an interface that represents that one.
+                // 
+                // We are getting this into IUnknown pointer as that's the
+                // only interface we need out of it in the end for release.
+                IUnknown* pCreated_qi = nullptr;
+                hr = pCreated->QueryInterface(
+                        IID_ICreatedClass_Raw,
+                        reinterpret_cast< void** >( &pCreated_qi ) );
+                REQUIRE( hr == intercom::SC_OK );
+
+                // Ensure the two interface pointers point to the same
+                // interface.
+                REQUIRE( pCreated == pCreated_qi );
+
+                pCreated->Release();
+                pCreated_qi->Release();
+                pOpsRaw->Release();
+            }
+
+            SECTION( "Sanity check the two interfaces are not the same" )
+            {
+                // Create an object through the automation interface.
+                ICreatedClass_Automation* pCreated = nullptr;
+                hr = pOps->CreateRoot( 1, OUT &pCreated );
+                REQUIRE( hr == intercom::SC_OK );
+
+                // Query for the automation interface to be extra sure we get
+                // an interface that represents that one.
+                // 
+                // We are getting this into IUnknown pointer as that's the
+                // only interface we need out of it in the end for release.
+                IUnknown* pCreated_qi = nullptr;
+                hr = pCreated->QueryInterface(
+                        IID_ICreatedClass_Raw,
+                        reinterpret_cast< void** >( &pCreated_qi ) );
+                REQUIRE( hr == intercom::SC_OK );
+
+                // Ensure the two interface pointers point to the same
+                // interface.
+                REQUIRE( pCreated != pCreated_qi );
+
+                pCreated->Release();
+                pCreated_qi->Release();
+            }
         }
 
         REQUIRE( pParent->Release() == 0 );
