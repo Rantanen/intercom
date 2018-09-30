@@ -373,15 +373,22 @@ impl ::intercom::ComInterface for Foo {
         }
     }
     fn deref(com_itf: &::intercom::ComItf<Foo>) -> &Foo {
-
-
-        {
-            ::rt::begin_panic("Cannot deref into struct-interface",
-                              &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\private_item.source.rs",
-                                15u32, 1u32))
+        let some_iunk: &::intercom::ComItf<::intercom::IUnknown> =
+            com_itf.as_ref();
+        let iunknown_iid =
+            ::intercom::IUnknown::iid(::intercom::TypeSystem::Automation).expect("IUnknown must have Automation IID");
+        let primary_iunk =
+            some_iunk.query_interface(iunknown_iid).expect("All types must implement IUnknown");
+        let combox: *mut ::intercom::ComBox<Foo> =
+            primary_iunk as *mut ::intercom::ComBox<Foo>;
+        unsafe {
+            ::intercom::ComBox::release(combox);
+            use std::ops::Deref;
+            (*combox).deref()
         }
     }
 }
+
 impl IFoo for Foo {
     fn trait_method(&self) { }
 }
@@ -522,3 +529,4 @@ const __Foo_IFoo_RawVtbl_INSTANCE: __IFoo_RawVtbl =
                                                     __Foo_IFoo_Raw_release,},
                    trait_method_Raw: __Foo_IFoo_Raw_trait_method_Raw,};
 impl ::intercom::HasInterface<IFoo> for Foo { }
+

@@ -50,10 +50,46 @@ pub fn expand_com_interface(
     // Implement the ComInterface for the trait.
     let iid_arms = itf_output.iid_arms;
     let ( deref_impl, deref_ret ) = if itf.item_type() == utils::InterfaceType::Trait {
-        ( quote!( com_itf ), quote!( &( #itf_ident + 'static ) ) )
+        (
+            quote!( com_itf ),
+            quote!( &( #itf_ident + 'static ) )
+        )
     } else {
-        ( quote!( panic!( "Cannot deref into struct-interface" ) ),
-            quote!( & #itf_ident ) )
+
+        // Note this is _extremely_ dangerous.
+        //
+        // Essentially we are assuming here that every #itf_ident pointer represents
+        // a ComBox structure that we have created. This will fail the moment
+        // the user code implements #itf_ident interface on their own and passes
+        // that back to us.
+        //
+        // There's no real way to get this to work and we might want to just remove
+        // the possibility to do 'implicit' interfaces by just impling the struct.
+        (
+            quote!(
+                let some_iunk : &::intercom::ComItf<::intercom::IUnknown> = com_itf.as_ref();
+                let iunknown_iid = ::intercom::IUnknown::iid(
+                        ::intercom::TypeSystem::Automation )
+                            .expect( "IUnknown must have Automation IID" );
+                let primary_iunk = some_iunk.query_interface( iunknown_iid )
+                        .expect( "All types must implement IUnknown" );
+
+                let combox : *mut ::intercom::ComBox< #itf_ident > =
+                        primary_iunk as *mut ::intercom::ComBox< #itf_ident >;
+                unsafe {
+
+                    // We are already holding a reference to the 'self', which should
+                    // keep this alive. We don't need to maintain a lifetime of the
+                    // queried interface.
+                    ::intercom::ComBox::release( combox );
+
+                    // Deref.
+                    use std::ops::Deref;
+                    (*combox).deref()
+                }
+            ),
+            quote!( & #itf_ident )
+        )
     };
     output.push( quote!(
         impl ::intercom::ComInterface for #itf_ident {
