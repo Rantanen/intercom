@@ -147,12 +147,26 @@ impl TypeHandler for ComItfParam {
     /// The COM type.
     fn com_ty( &self ) -> Type
     {
-        parse_quote!( ::intercom::RawComPtr )
+        use syn;
+        let rust_ty = self.rust_ty();
+        let itf_ty = match rust_ty {
+            syn::Type::Path( path ) =>
+                match path.path.segments.last().unwrap().value().arguments {
+                    syn::PathArguments::AngleBracketed( ref ab ) =>
+                            match ab.args.last().unwrap().value() {
+                                syn::GenericArgument::Type( ref t ) => t.clone(),
+                                _ => panic!( "ComItf generic argument must be type" ),
+                            },
+                    _ => panic!( "ComItf type parameter must be angle bracketed" ),
+                },
+            _ => panic!( "ComItf type parameter must be a type path" ),
+        };
+        parse_quote!( ::intercom::raw::InterfacePtr< #itf_ty > )
     }
 
     fn default_value( &self ) -> TokenStream
     {
-        quote!( ::std::ptr::null_mut() )
+        quote!( ::intercom::raw::InterfacePtr::new( ::std::ptr::null_mut() ) )
     }
 
     /// Converts a COM parameter named by the ident into a Rust type.
@@ -163,7 +177,7 @@ impl TypeHandler for ComItfParam {
         let ts = self.context.type_system.as_typesystem_tokens();
         TypeConversion {
             temporary: None,
-            value: quote!( ::intercom::ComItf::wrap( #ident, #ts ) ),
+            value: quote!( ::intercom::ComItf::wrap( #ident.ptr, #ts ) ),
         }
     }
 
@@ -175,7 +189,7 @@ impl TypeHandler for ComItfParam {
         let ts = self.context.type_system.as_typesystem_tokens();
         TypeConversion {
             temporary: None,
-            value: quote!( ::intercom::ComItf::ptr( #ident.into(), #ts ) )
+            value: quote!( ::intercom::ComItf::ptr( &#ident.into(), #ts ) )
         }
     }
 }

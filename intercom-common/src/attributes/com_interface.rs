@@ -49,6 +49,12 @@ pub fn expand_com_interface(
 
     // Implement the ComInterface for the trait.
     let iid_arms = itf_output.iid_arms;
+    let ( deref_impl, deref_ret ) = if itf.item_type() == utils::InterfaceType::Trait {
+        ( quote!( com_itf ), quote!( &( #itf_ident + 'static ) ) )
+    } else {
+        ( quote!( panic!( "Cannot deref into struct-interface" ) ),
+            quote!( & #itf_ident ) )
+    };
     output.push( quote!(
         impl ::intercom::ComInterface for #itf_ident {
 
@@ -59,8 +65,10 @@ pub fn expand_com_interface(
                 }
             }
 
-            fn deref( com_itf : &ComItf< #itf_ident > ) -> &( #itf_ident + 'static ) {
-                com_itf
+            fn deref(
+                com_itf : &ComItf< #itf_ident >
+            ) -> #deref_ret {
+                #deref_impl
             }
         }
     ) );
@@ -157,7 +165,6 @@ fn process_itf_variant(
     if ts == ModelTypeSystem::Automation &&
         itf.item_type() == utils::InterfaceType::Trait {
 
-
         // Gather method implementations.
         let impls = itf_variant.methods().iter()
                 .map( |m| rust_to_com_delegate( m, &vtable_ident ) );
@@ -221,7 +228,7 @@ fn rust_to_com_delegate(
     // Combine the parameters into the final parameter list.
     // This includes the 'this' pointer and both the IN and OUT
     // parameters.
-    let params = iter::once( quote!( comptr ) ).chain( params );
+    let params = iter::once( quote!( comptr.ptr ) ).chain( params );
 
     // Create the return statement. 
     let return_ident = Ident::new( "__result", Span::call_site() );
@@ -246,7 +253,7 @@ fn rust_to_com_delegate(
             use ::intercom::ComInto;
 
             let comptr = ::intercom::ComItf::ptr( self, ::intercom::TypeSystem::Automation );
-            let vtbl = comptr as *const *const #vtable_ident;
+            let vtbl = comptr.ptr as *const *const #vtable_ident;
 
             #( #temporaries )*
 

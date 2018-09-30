@@ -21,7 +21,6 @@ pub enum TypeSystem {
 /// This applies only to the pure interfaces.  Implicit interfaces created
 /// through `#[com_interface] impl MyStruct` constructs are not supported for
 /// `ComItf<T>`.
-#[repr(C)]
 pub struct ComItf<T> where T: ?Sized {
     raw_ptr: RawComPtr,
     automation_ptr: RawComPtr,
@@ -52,11 +51,11 @@ impl<T: ?Sized> ComItf<T> {
     }
 
     /// Gets the raw COM pointer from the `ComItf<T>`.
-    pub fn ptr( this : &Self, ts : TypeSystem ) -> RawComPtr {
-        match ts {
+    pub fn ptr( this : &Self, ts : TypeSystem ) -> raw::InterfacePtr<T> {
+        raw::InterfacePtr::new( match ts {
             TypeSystem::Automation => this.automation_ptr,
             TypeSystem::Raw => this.raw_ptr,
-        }
+        } )
     }
 
     /// Returns a `ComItf<T>` value that references a null pointer.

@@ -122,6 +122,18 @@ pub type REFCLSID = *const IID;
 pub mod raw {
     pub type InBSTR = *const u16;
     pub type OutBSTR = *mut u16;
+    
+    #[repr(C)]
+    pub struct InterfacePtr<I: ?Sized> {
+        pub ptr : super::RawComPtr,
+        phantom : ::std::marker::PhantomData<I>,
+    }
+
+    impl<I: ?Sized> InterfacePtr<I> {
+        pub fn new( ptr : super::RawComPtr ) -> InterfacePtr<I> {
+            InterfacePtr { ptr, phantom: ::std::marker::PhantomData }
+        }
+    }
 }
 
 /// COM method status code.
