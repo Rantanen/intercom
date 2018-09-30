@@ -59,14 +59,14 @@ pub fn expand_com_interface(
         impl ::intercom::ComInterface for #itf_ident {
 
             #[doc = "Returns the IID of the requested interface."]
-            fn iid( ts : TypeSystem ) -> Option< &'static ::intercom::IID > {
+            fn iid( ts : ::intercom::TypeSystem ) -> Option< &'static ::intercom::IID > {
                 match ts {
                     #( #iid_arms ),*
                 }
             }
 
             fn deref(
-                com_itf : &ComItf< #itf_ident >
+                com_itf : &::intercom::ComItf< #itf_ident >
             ) -> #deref_ret {
                 #deref_impl
             }
