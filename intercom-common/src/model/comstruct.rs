@@ -48,9 +48,9 @@ impl ComStruct
     ) -> ParseResult< ComStruct >
     {
         let attr : ComStructAttr = ::syn::parse2( attr_params )
-            .map_err( |_| ParseError::ComStruct(
+            .map_err( |e| ParseError::ComStruct(
                     item.ident.to_string(),
-                    "Attribute syntax error".into() ) )?;
+                    format!( "Attribute syntax error: {}", e ) ) )?;
 
         // First attribute parameter is the CLSID. Parse it.
         let clsid_attr = attr.clsid()
