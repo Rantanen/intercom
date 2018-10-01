@@ -1,23 +1,38 @@
 
-/// Type that implements `Synom` but fails parsing.
+use syn::parse::{Parse, ParseStream, Result};
+
+/// An empty type that cannot be parsed.
 ///
-/// Use this for defining attribute parsing that accepts only named arguments.
+/// Used especially with attributes that don't take positional arguments.
+#[derive(Debug)]
 pub enum NoParams {}
-impl ::syn::synom::Synom for NoParams {
-    named!(parse -> Self, reject!() );
+impl Parse for NoParams {
+    fn parse( input: ParseStream ) -> Result<Self> {
+        Err( input.error( "Attribute does not accept positional parameters" ) )
+    }
 }
 
 /// Literal string or 'None' if there should be no value.
+#[derive(Debug)]
 pub enum StrOption {
     Str( ::syn::LitStr ),
     None
 }
-impl ::syn::synom::Synom for StrOption {
-    named!(parse -> Self, alt!(
-        syn!( ::syn::LitStr ) => { StrOption::Str }
-        |
-        custom_keyword!( None ) => { |_| StrOption::None }
-    ) );
+
+impl Parse for StrOption {
+    fn parse( input: ParseStream ) -> Result<Self> {
+
+        if input.peek( ::syn::LitStr ) {
+            return Ok( StrOption::Str( input.parse()? ) );
+        }
+
+        let ident : ::syn::Ident = input.parse()?;
+        if ident == "None" {
+            return Ok( StrOption::None );
+        }
+
+        Err( input.error( "Expected string or `None`" ) )
+    }
 }
 
 /// Defines intercom attribute parameter parsing.
@@ -44,52 +59,46 @@ macro_rules! intercom_attribute {
     ( $attr:ident < $attr_param:ident, $params:ident > { $( $name:ident : $type:ident, )* } ) => {
 
         #[allow(non_camel_case_types)]
+        #[derive(Debug)]
         enum $attr_param {
             $( $name ( $type ), )*
             args( $params ),
         }
 
-        impl ::syn::synom::Synom for $attr_param {
-            named!( parse -> Self, alt!(
-                $(
-                    do_parse!(
-                        custom_keyword!( $name ) >>
-                        punct!(=) >>
-                        value : syn!( $type ) >>
-                        ( $attr_param::$name( value ) )
-                    )
-                    |
-                )*
-                do_parse!( a : syn!( $params ) >> ( $attr_param::args( a ) ) )
-            ) );
+        impl ::syn::parse::Parse for $attr_param {
+            fn parse( input : ::syn::parse::ParseStream ) -> ::syn::parse::Result<Self> {
+
+                if ! input.peek2( Token![=] ) {
+                    return Ok( $attr_param::args( input.parse()? ) );
+                }
+
+                let ident : ::syn::Ident = input.parse()?;
+                let _punct : Token![=] = input.parse()?;
+                Ok( match ident.to_string().as_ref() {
+                    $(
+                        stringify!( $name ) => $attr_param::$name( input.parse()? ),
+                    )*
+                    other => return Err( input.error( format!( "Unexpected parameter: `{}`", other ) ) )
+                } )
+            }
         }
 
         struct $attr( Vec<$attr_param> );
-        impl ::syn::synom::Synom for $attr {
-            named!(parse -> Self, alt!(
+        impl ::syn::parse::Parse for $attr {
+            fn parse( input : ::syn::parse::ParseStream ) -> ::syn::parse::Result<Self> {
 
                 // When parsing #[foo(bar)] attributes with syn, syn will include
                 // the parenthess in the tts:
                 // > ( bar )
-                do_parse!(
-                    p: parens!( call!( ::syn::punctuated::Punctuated::<$attr_param, ::syn::token::Comma>::parse_terminated ) ) >>
-                    ( $attr( p.1.into_iter().collect() ) )
-                )
+                let params = match ::syn::group::parse_parens( &input ) {
+                    Ok( parens ) => parens.content.call(
+                        ::syn::punctuated::Punctuated::<$attr_param, ::syn::token::Comma>::parse_terminated )?,
+                    Err( _ ) => input.call(
+                        ::syn::punctuated::Punctuated::<$attr_param, ::syn::token::Comma>::parse_terminated )?,
+                };
 
-                |
-
-                // When the same attribute appears as a proc macro attribute, rustc will omit the
-                // parentheses from the parameter tokens:
-                // > bar
-                //
-                // This also supports empty token streams, which occur with empty parentheses
-                // "#[foo()]" in proc macros or omitting parentheses "#[foo]" in both proc macros
-                // and syn.
-                do_parse!(
-                    p: call!( ::syn::punctuated::Punctuated::<$attr_param, ::syn::token::Comma>::parse_terminated ) >>
-                    ( $attr( p.into_iter().collect() ) )
-                )
-            ) );
+                Ok( $attr( params.into_iter().collect() ) )
+            }
         }
 
         #[allow(dead_code)]

@@ -148,6 +148,8 @@ impl GetIdent for Item {
             Item::Impl( ref i ) => return i.self_ty.get_ident(),
             Item::Macro( ref m ) => return m.mac.path.get_ident(),
             Item::Macro2( ref i ) => i.ident.clone(),
+            Item::Existential( ref i ) => i.ident.clone(),
+            Item::TraitAlias( ref i ) => i.ident.clone(),
 
             Item::Use( .. )
                 | Item::ForeignMod( .. )
@@ -183,6 +185,8 @@ impl GetAttributes for Item {
             Item::Macro2( ref i ) => i.attrs.clone(),
             Item::Use( ref i ) => i.attrs.clone(),
             Item::ForeignMod( ref i ) => i.attrs.clone(),
+            Item::Existential( ref i ) => i.attrs.clone(),
+            Item::TraitAlias( ref i ) => i.attrs.clone(),
             Item::Verbatim( .. ) => vec![],
         } )
     }
