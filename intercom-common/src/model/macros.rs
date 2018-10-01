@@ -31,7 +31,7 @@ impl Parse for StrOption {
             return Ok( StrOption::None );
         }
 
-        return Err( input.error( "Expected string or `None`" ) );
+        Err( input.error( "Expected string or `None`" ) )
     }
 }
 
