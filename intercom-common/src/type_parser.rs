@@ -327,7 +327,7 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         match rust_type.as_str() {
 
             // Extract a wrapped type.
-            "ComRc" | "ComItf" | "ComResult"
+            "ComRc" | "ComItf" | "ComResult" | "InterfacePtr"
                 => TypeInfoResolver::wrapped(
                         &TypeInfoResolver::new( RustType::Ident( &segment.ident ) ),
                         args.expect( "Wrapper types requires valid wrappee.")

@@ -26,22 +26,19 @@ struct __IFoo_AutomationVtbl {
                                                                 ::intercom::RawComPtr)
                                      -> (),
 }
-impl ::intercom::IidOf for IFoo {
-    #[doc = "Returns `IID_IFoo_Automation`."]
-    fn iid() -> &'static ::intercom::IID { &IID_IFoo_Automation }
-}
 impl IFoo for ::intercom::ComItf<IFoo> {
     fn trait_method(&self) -> () {
         #[allow(unused_imports)]
         use ::intercom::ComInto;
-        let comptr = ::intercom::ComItf::ptr(self);
-        let vtbl = comptr as *const *const __IFoo_AutomationVtbl;
+        let comptr =
+            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
+        let vtbl = comptr.ptr as *const *const __IFoo_AutomationVtbl;
         #[allow(unused_unsafe)]
         let result: Result<(), ::intercom::ComError> =
             (||
                  unsafe {
                      let __result =
-                         ((**vtbl).trait_method_Automation)(comptr);
+                         ((**vtbl).trait_method_Automation)(comptr.ptr);
                      Ok({ })
                  })();
         #[allow(unused_imports)]
@@ -69,12 +66,17 @@ struct __IFoo_RawVtbl {
                                                          ::intercom::RawComPtr)
                               -> (),
 }
-impl ::std::ops::Deref for ::intercom::ComItf<IFoo> {
-    type
-    Target
-    =
-    IFoo;
-    fn deref(&self) -> &Self::Target { self }
+impl ::intercom::ComInterface for IFoo {
+    #[doc = "Returns the IID of the requested interface."]
+    fn iid(ts: ::intercom::TypeSystem) -> Option<&'static ::intercom::IID> {
+        match ts {
+            ::intercom::TypeSystem::Automation => Some(&IID_IFoo_Automation),
+            ::intercom::TypeSystem::Raw => Some(&IID_IFoo_Raw),
+        }
+    }
+    fn deref(com_itf: &::intercom::ComItf<IFoo>) -> &(IFoo + 'static) {
+        com_itf
+    }
 }
 
 struct Foo;
@@ -84,39 +86,6 @@ fn __Foo_Foo_AutomationVtbl_offset() -> usize {
     unsafe {
         &::intercom::ComBox::<Foo>::null_vtable().Foo_Automation as *const _
             as usize
-    }
-}
-impl From<::intercom::ComStruct<Foo>> for ::intercom::ComRc<Foo> {
-    fn from(source: ::intercom::ComStruct<Foo>) -> Self {
-        let itf: ::intercom::ComItf<Foo> = source.into();
-        ::intercom::ComRc::attach(itf)
-    }
-}
-impl From<::intercom::ComStruct<Foo>> for ::intercom::ComItf<Foo> {
-    fn from(source: ::intercom::ComStruct<Foo>) -> Self {
-        unsafe {
-            let itf =
-                ::intercom::ComItf::wrap(<Foo as
-                                             ::intercom::CoClass>::query_interface(::intercom::ComBox::vtable(&source),
-                                                                                   &IID_Foo_Automation).expect("query_interface( IID_Foo_Automation ) failed for Foo"));
-            std::mem::forget(source);
-            itf
-        }
-    }
-}
-impl ::std::ops::Deref for ::intercom::ComItf<Foo> {
-    type
-    Target
-    =
-    Foo;
-    fn deref(&self) -> &Self::Target {
-        unsafe {
-            let self_combox =
-                (::intercom::ComItf::ptr(self) as usize -
-                     __Foo_Foo_AutomationVtbl_offset()) as
-                    *mut ::intercom::ComBox<Foo>;
-            &**self_combox
-        }
     }
 }
 #[inline(always)]
@@ -132,24 +101,6 @@ fn __Foo_IFoo_AutomationVtbl_offset() -> usize {
     unsafe {
         &::intercom::ComBox::<Foo>::null_vtable().IFoo_Automation as *const _
             as usize
-    }
-}
-impl From<::intercom::ComStruct<Foo>> for ::intercom::ComRc<IFoo> {
-    fn from(source: ::intercom::ComStruct<Foo>) -> Self {
-        let itf: ::intercom::ComItf<IFoo> = source.into();
-        ::intercom::ComRc::attach(itf)
-    }
-}
-impl From<::intercom::ComStruct<Foo>> for ::intercom::ComItf<IFoo> {
-    fn from(source: ::intercom::ComStruct<Foo>) -> Self {
-        unsafe {
-            let itf =
-                ::intercom::ComItf::wrap(<Foo as
-                                             ::intercom::CoClass>::query_interface(::intercom::ComBox::vtable(&source),
-                                                                                   &IID_IFoo_Automation).expect("query_interface( IID_IFoo_Automation ) failed for IFoo"));
-            std::mem::forget(source);
-            itf
-        }
     }
 }
 #[inline(always)]
@@ -380,6 +331,7 @@ const __Foo_Foo_RawVtbl_INSTANCE: __Foo_RawVtbl =
                                                release_Automation:
                                                    __Foo_Foo_Raw_release,},
                   struct_method_Raw: __Foo_Foo_Raw_struct_method_Raw,};
+impl ::intercom::HasInterface<Foo> for Foo { }
 #[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
 pub const IID_Foo_Automation: ::intercom::IID =
@@ -396,10 +348,6 @@ pub struct __Foo_AutomationVtbl {
                                                                  ::intercom::RawComPtr)
                                       -> (),
 }
-impl ::intercom::IidOf for Foo {
-    #[doc = "Returns `IID_Foo_Automation`."]
-    fn iid() -> &'static ::intercom::IID { &IID_Foo_Automation }
-}
 #[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
 pub const IID_Foo_Raw: ::intercom::IID =
@@ -415,6 +363,30 @@ pub struct __Foo_RawVtbl {
     pub struct_method_Raw: unsafe extern "C" fn(self_vtable:
                                                           ::intercom::RawComPtr)
                                -> (),
+}
+impl ::intercom::ComInterface for Foo {
+    #[doc = "Returns the IID of the requested interface."]
+    fn iid(ts: ::intercom::TypeSystem) -> Option<&'static ::intercom::IID> {
+        match ts {
+            ::intercom::TypeSystem::Automation => Some(&IID_Foo_Automation),
+            ::intercom::TypeSystem::Raw => Some(&IID_Foo_Raw),
+        }
+    }
+    fn deref(com_itf: &::intercom::ComItf<Foo>) -> &Foo {
+        let some_iunk: &::intercom::ComItf<::intercom::IUnknown> =
+            com_itf.as_ref();
+        let iunknown_iid =
+            ::intercom::IUnknown::iid(::intercom::TypeSystem::Automation).expect("IUnknown must have Automation IID");
+        let primary_iunk =
+            some_iunk.query_interface(iunknown_iid).expect("All types must implement IUnknown");
+        let combox: *mut ::intercom::ComBox<Foo> =
+            primary_iunk as *mut ::intercom::ComBox<Foo>;
+        unsafe {
+            ::intercom::ComBox::release(combox);
+            use std::ops::Deref;
+            (*combox).deref()
+        }
+    }
 }
 
 impl IFoo for Foo {
@@ -556,4 +528,5 @@ const __Foo_IFoo_RawVtbl_INSTANCE: __IFoo_RawVtbl =
                                                 release_Automation:
                                                     __Foo_IFoo_Raw_release,},
                    trait_method_Raw: __Foo_IFoo_Raw_trait_method_Raw,};
+impl ::intercom::HasInterface<IFoo> for Foo { }
 

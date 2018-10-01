@@ -1,11 +1,11 @@
 
 use prelude::*;
 use syn::*;
-use tyhandlers::TypeSystem;
+use tyhandlers::ModelTypeSystem;
 
 pub fn with_ts(
     ident: &Ident,
-    ts: TypeSystem,
+    ts: ModelTypeSystem,
 ) -> Ident
 {
     Ident::new( &format!( "{}_{:?}", ident, ts ), Span::call_site() )

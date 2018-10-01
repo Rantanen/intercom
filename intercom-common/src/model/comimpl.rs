@@ -6,7 +6,7 @@ use ::ast_converters::*;
 use ::methodinfo::ComMethodInfo;
 use ::ordermap::OrderMap;
 use ::std::iter::FromIterator;
-use ::tyhandlers::{TypeSystem};
+use ::tyhandlers::{ModelTypeSystem};
 
 #[derive(Debug, PartialEq)]
 pub struct ComImpl
@@ -14,13 +14,13 @@ pub struct ComImpl
     struct_name : Ident,
     interface_display_name : Ident,
     is_trait_impl : bool,
-    variants : OrderMap<TypeSystem, ComImplVariant>,
+    variants : OrderMap<ModelTypeSystem, ComImplVariant>,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct ComImplVariant
 {
-    type_system : TypeSystem,
+    type_system : ModelTypeSystem,
     interface_unique_name : Ident,
     methods : Vec<ComMethodInfo>,
 }
@@ -58,7 +58,7 @@ impl ComImpl
         let itf_ident = itf_ident_opt.unwrap_or_else( || struct_ident.clone() );
 
         let variants = OrderMap::from_iter(
-            [ TypeSystem::Automation, TypeSystem::Raw ].into_iter().map( |&ts| {
+            [ ModelTypeSystem::Automation, ModelTypeSystem::Raw ].into_iter().map( |&ts| {
 
             let itf_unique_ident = Ident::new(
                     &format!( "{}_{:?}", itf_ident.to_string(), ts ), Span::call_site() );
@@ -89,13 +89,13 @@ impl ComImpl
     }
 
     /// Temp accessor for the automation variant.
-    pub fn aut( &self ) -> &ComImplVariant { &self.variants[ &TypeSystem::Automation ] }
+    pub fn aut( &self ) -> &ComImplVariant { &self.variants[ &ModelTypeSystem::Automation ] }
 
     /// Struct name that the trait is implemented for.
     pub fn struct_name( &self ) -> &Ident { &self.struct_name }
 
     /// Interface variants.
-    pub fn variants( &self ) -> &OrderMap<TypeSystem, ComImplVariant> { &self.variants }
+    pub fn variants( &self ) -> &OrderMap<ModelTypeSystem, ComImplVariant> { &self.variants }
 
     /// Trait name that is implemented. Struct name if this is an implicit impl.
     pub fn interface_name( &self ) -> &Ident { &self.interface_display_name }
@@ -117,7 +117,7 @@ impl ComImplVariant
 mod test
 {
     use super::*;
-    use tyhandlers::TypeSystem::*;
+    use tyhandlers::ModelTypeSystem::*;
 
     #[test]
     fn parse_com_impl_for_struct() {

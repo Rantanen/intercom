@@ -4,14 +4,21 @@ use std::os::raw;
 
 /// A memory allocator to be used for allocating/deallocating memory shared
 /// with intercom libraries.
-#[com_class( Allocator )]
+#[com_class( IAllocator )]
 pub struct Allocator;
 
 #[com_interface(
         com_iid = "18EE22B3-B0C6-44A5-A94A-7A417676FB66",
         raw_iid = "7A6F6564-04B5-4455-A223-EA0512B8CC63" )]
+pub trait IAllocator {
+    unsafe fn alloc_bstr( &self, text : *const u16, len : u32 ) -> *mut u16;
+    unsafe fn free_bstr( &self, bstr : *mut u16 );
+    unsafe fn alloc( &self, len : usize ) -> *mut raw::c_void;
+    unsafe fn free( &self, ptr : *mut raw::c_void );
+}
+
 #[com_impl]
-impl Allocator {
+impl IAllocator for Allocator {
     unsafe fn alloc_bstr( &self, text : *const u16, len : u32 ) -> *mut u16 {
         os::alloc_bstr( text, len )
     }

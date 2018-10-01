@@ -73,27 +73,25 @@ pub struct __Foo_AutomationVtbl {
                                       -> ::intercom::raw::OutBSTR,
     pub comitf_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                  ::intercom::RawComPtr,
-                                                             itf: ComItf<Foo>,
+                                                             itf:
+                                                                 ::intercom::raw::InterfacePtr<Foo>,
                                                              __out:
-                                                                 *mut ComItf<IUnknown>)
+                                                                 *mut ::intercom::raw::InterfacePtr<IUnknown>)
                                       -> ::intercom::HRESULT,
-}
-impl ::intercom::IidOf for Foo {
-    #[doc = "Returns `IID_Foo_Automation`."]
-    fn iid() -> &'static ::intercom::IID { &IID_Foo_Automation }
 }
 impl Foo for ::intercom::ComItf<Foo> {
     fn simple_method(&self) -> () {
         #[allow(unused_imports)]
         use ::intercom::ComInto;
-        let comptr = ::intercom::ComItf::ptr(self);
-        let vtbl = comptr as *const *const __Foo_AutomationVtbl;
+        let comptr =
+            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
+        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
         #[allow(unused_unsafe)]
         let result: Result<(), ::intercom::ComError> =
             (||
                  unsafe {
                      let __result =
-                         ((**vtbl).simple_method_Automation)(comptr);
+                         ((**vtbl).simple_method_Automation)(comptr.ptr);
                      Ok({ })
                  })();
         #[allow(unused_imports)]
@@ -107,14 +105,16 @@ impl Foo for ::intercom::ComItf<Foo> {
     fn arg_method(&self, a: u16) -> () {
         #[allow(unused_imports)]
         use ::intercom::ComInto;
-        let comptr = ::intercom::ComItf::ptr(self);
-        let vtbl = comptr as *const *const __Foo_AutomationVtbl;
+        let comptr =
+            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
+        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
         #[allow(unused_unsafe)]
         let result: Result<(), ::intercom::ComError> =
             (||
                  unsafe {
                      let __result =
-                         ((**vtbl).arg_method_Automation)(comptr, a.into());
+                         ((**vtbl).arg_method_Automation)(comptr.ptr,
+                                                          a.into());
                      Ok({ })
                  })();
         #[allow(unused_imports)]
@@ -128,14 +128,15 @@ impl Foo for ::intercom::ComItf<Foo> {
     fn simple_result_method(&self) -> u16 {
         #[allow(unused_imports)]
         use ::intercom::ComInto;
-        let comptr = ::intercom::ComItf::ptr(self);
-        let vtbl = comptr as *const *const __Foo_AutomationVtbl;
+        let comptr =
+            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
+        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
         #[allow(unused_unsafe)]
         let result: Result<u16, ::intercom::ComError> =
             (||
                  unsafe {
                      let __result =
-                         ((**vtbl).simple_result_method_Automation)(comptr);
+                         ((**vtbl).simple_result_method_Automation)(comptr.ptr);
                      Ok({ __result.into() })
                  })();
         #[allow(unused_imports)]
@@ -149,15 +150,16 @@ impl Foo for ::intercom::ComItf<Foo> {
     fn com_result_method(&self) -> ComResult<u16> {
         #[allow(unused_imports)]
         use ::intercom::ComInto;
-        let comptr = ::intercom::ComItf::ptr(self);
-        let vtbl = comptr as *const *const __Foo_AutomationVtbl;
+        let comptr =
+            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
+        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
         #[allow(unused_unsafe)]
         let result: Result<ComResult<u16>, ::intercom::ComError> =
             (||
                  unsafe {
                      let mut __out: u16 = Default::default();
                      let __result =
-                         ((**vtbl).com_result_method_Automation)(comptr,
+                         ((**vtbl).com_result_method_Automation)(comptr.ptr,
                                                                  &mut __out);
                      Ok({
                             if __result == ::intercom::S_OK {
@@ -179,15 +181,16 @@ impl Foo for ::intercom::ComItf<Foo> {
     fn rust_result_method(&self) -> Result<u16, i32> {
         #[allow(unused_imports)]
         use ::intercom::ComInto;
-        let comptr = ::intercom::ComItf::ptr(self);
-        let vtbl = comptr as *const *const __Foo_AutomationVtbl;
+        let comptr =
+            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
+        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
         #[allow(unused_unsafe)]
         let result: Result<Result<u16, i32>, ::intercom::ComError> =
             (||
                  unsafe {
                      let mut __out: u16 = Default::default();
                      let __result =
-                         ((**vtbl).rust_result_method_Automation)(comptr,
+                         ((**vtbl).rust_result_method_Automation)(comptr.ptr,
                                                                   &mut __out);
                      Ok({
                             if __result == ::intercom::S_OK {
@@ -209,15 +212,16 @@ impl Foo for ::intercom::ComItf<Foo> {
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
         #[allow(unused_imports)]
         use ::intercom::ComInto;
-        let comptr = ::intercom::ComItf::ptr(self);
-        let vtbl = comptr as *const *const __Foo_AutomationVtbl;
+        let comptr =
+            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
+        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
         #[allow(unused_unsafe)]
         let result: Result<ComResult<bool>, ::intercom::ComError> =
             (||
                  unsafe {
                      let mut __out: bool = Default::default();
                      let __result =
-                         ((**vtbl).complete_method_Automation)(comptr,
+                         ((**vtbl).complete_method_Automation)(comptr.ptr,
                                                                a.into(),
                                                                b.into(),
                                                                &mut __out);
@@ -241,8 +245,9 @@ impl Foo for ::intercom::ComItf<Foo> {
     fn string_method(&self, msg: String) -> String {
         #[allow(unused_imports)]
         use ::intercom::ComInto;
-        let comptr = ::intercom::ComItf::ptr(self);
-        let vtbl = comptr as *const *const __Foo_AutomationVtbl;
+        let comptr =
+            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
+        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
         let mut __msg_temporary =
             <&::intercom::BStr as
                 ::intercom::FromWithTemporary<String>>::to_temporary(msg)?;
@@ -251,7 +256,7 @@ impl Foo for ::intercom::ComItf<Foo> {
             (||
                  unsafe {
                      let __result =
-                         ((**vtbl).string_method_Automation)(comptr,
+                         ((**vtbl).string_method_Automation)(comptr.ptr,
                                                              <&::intercom::BStr
                                                                  as
                                                                  ::intercom::FromWithTemporary<String>>::from_temporary(&mut __msg_temporary)?.as_ptr());
@@ -271,21 +276,25 @@ impl Foo for ::intercom::ComItf<Foo> {
     fn comitf_method(&self, itf: ComItf<Foo>) -> ComResult<ComItf<IUnknown>> {
         #[allow(unused_imports)]
         use ::intercom::ComInto;
-        let comptr = ::intercom::ComItf::ptr(self);
-        let vtbl = comptr as *const *const __Foo_AutomationVtbl;
+        let comptr =
+            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
+        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
         #[allow(unused_unsafe)]
         let result:
                 Result<ComResult<ComItf<IUnknown>>, ::intercom::ComError> =
             (||
                  unsafe {
-                     let mut __out: ComItf<IUnknown> = ComItf::null_itf();
+                     let mut __out: ::intercom::raw::InterfacePtr<IUnknown> =
+                         ::intercom::raw::InterfacePtr::new(::std::ptr::null_mut());
                      let __result =
-                         ((**vtbl).comitf_method_Automation)(comptr,
-                                                             itf.into(),
+                         ((**vtbl).comitf_method_Automation)(comptr.ptr,
+                                                             ::intercom::ComItf::ptr(&itf.into(),
+                                                                                     ::intercom::TypeSystem::Automation),
                                                              &mut __out);
                      Ok({
                             if __result == ::intercom::S_OK {
-                                Ok(__out.into())
+                                Ok(::intercom::ComItf::wrap(__out.ptr,
+                                                            ::intercom::TypeSystem::Automation))
                             } else {
                                 Err(::intercom::get_last_error(__result))
                             }
@@ -342,15 +351,21 @@ pub struct __Foo_RawVtbl {
                                -> ::intercom::raw::OutBSTR,
     pub comitf_method_Raw: unsafe extern "C" fn(self_vtable:
                                                           ::intercom::RawComPtr,
-                                                      itf: ComItf<Foo>,
+                                                      itf:
+                                                          ::intercom::raw::InterfacePtr<Foo>,
                                                       __out:
-                                                          *mut ComItf<IUnknown>)
+                                                          *mut ::intercom::raw::InterfacePtr<IUnknown>)
                                -> ::intercom::HRESULT,
 }
-impl ::std::ops::Deref for ::intercom::ComItf<Foo> {
-    type
-    Target
-    =
-    Foo;
-    fn deref(&self) -> &Self::Target { self }
+impl ::intercom::ComInterface for Foo {
+    #[doc = "Returns the IID of the requested interface."]
+    fn iid(ts: ::intercom::TypeSystem) -> Option<&'static ::intercom::IID> {
+        match ts {
+            ::intercom::TypeSystem::Automation => Some(&IID_Foo_Automation),
+            ::intercom::TypeSystem::Raw => Some(&IID_Foo_Raw),
+        }
+    }
+    fn deref(com_itf: &::intercom::ComItf<Foo>) -> &(Foo + 'static) {
+        com_itf
+    }
 }

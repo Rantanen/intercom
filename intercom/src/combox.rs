@@ -17,6 +17,8 @@ pub trait CoClass {
     ) -> bool;
 }
 
+pub trait HasInterface<T: ComInterface + ?Sized> : CoClass { }
+
 /// Pointer to a COM-enabled Rust struct.
 ///
 /// Intercom requires a specific memory layout for the COM objects so that it
@@ -72,6 +74,36 @@ impl<T: CoClass> AsRef<ComBox<T>> for ComStruct<T>
     fn as_ref( &self ) -> &ComBox<T> {
         // 'data' should always be valid pointer.
         unsafe { self.data.as_ref().expect( "ComStruct had null reference" ) }
+    }
+}
+
+impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComItf<I> {
+    fn from( source : ComStruct<T> ) -> ComItf<I> {
+
+        let ( automation_ptr, raw_ptr ) = {
+            let vtbl = &source.as_ref().vtable_list;
+
+            let automation_ptr = match I::iid( TypeSystem::Automation ) {
+                Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
+                    Ok( itf ) => itf,
+                    Err( _ ) => ::std::ptr::null_mut(),
+                },
+                None => ::std::ptr::null_mut(),
+            };
+
+            let raw_ptr = match I::iid( TypeSystem::Raw ) {
+                Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
+                    Ok( itf ) => itf,
+                    Err( _ ) => ::std::ptr::null_mut(),
+                },
+                None => ::std::ptr::null_mut(),
+            };
+
+            ( automation_ptr, raw_ptr )
+        };
+
+        std::mem::forget( source );
+        unsafe { ComItf::new( automation_ptr, raw_ptr ) }
     }
 }
 

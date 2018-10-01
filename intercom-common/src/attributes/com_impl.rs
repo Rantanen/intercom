@@ -213,5 +213,9 @@ pub fn expand_com_impl(
             ) );
     }
 
+    output.push( quote!(
+        impl ::intercom::HasInterface< #itf_ident > for #struct_ident {}
+    ) );
+
     Ok( tokens_to_tokenstream( item_tokens, output ) )
 }

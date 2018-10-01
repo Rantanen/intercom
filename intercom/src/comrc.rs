@@ -4,7 +4,6 @@ use super::*;
 /// Reference counted handle to the `ComBox` data.
 ///
 /// Provides a safe way to handle the unsafe `ComBox` values.
-#[fundamental]
 pub struct ComRc<T : ?Sized> {
     itf : ComItf<T>
 }
@@ -26,9 +25,14 @@ impl<T : ?Sized> ComRc<T> {
 }
 
 #[cfg(windows)]
-impl<T: IidOf + ?Sized> ComRc<T>
+impl<T: ComInterface + ?Sized> ComRc<T>
 {
     pub fn create( clsid : GUID ) -> ::ComResult< ComRc<T> > {
+
+        let iid = match T::iid( TypeSystem::Automation ) {
+            Some( iid ) => iid,
+            None => return Err( E_NOINTERFACE ),
+        };
 
         unsafe {
             let mut out = ::std::ptr::null_mut();
@@ -36,10 +40,11 @@ impl<T: IidOf + ?Sized> ComRc<T>
                     clsid,
                     std::ptr::null_mut(),
                     1, // in-proc server.
-                    T::iid(),
+                    iid,
                     &mut out ) {
 
-                ::S_OK => Ok( ComRc::attach( ComItf::wrap( out ) ) ),
+                ::S_OK => Ok( ComRc::attach( ComItf::wrap(
+                                out, TypeSystem::Automation ) ) ),
                 e => Err( e ),
             }
         }

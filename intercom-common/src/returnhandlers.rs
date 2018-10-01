@@ -2,7 +2,7 @@
 use prelude::*;
 use syn::*;
 use methodinfo::{ComArg};
-use tyhandlers::{self, TypeContext, TypeSystem, Direction};
+use tyhandlers::{self, TypeContext, ModelTypeSystem, Direction};
 use utils;
 
 /// Defines return handler for handling various different return type schemes.
@@ -16,7 +16,9 @@ pub trait ReturnHandler : ::std::fmt::Debug {
     {
         tyhandlers::get_ty_handler(
                     &self.rust_ty(),
-                    TypeContext::new( Direction::Retval, TypeSystem::Invariant ),
+                    TypeContext::new(
+                            Direction::Retval,
+                            ModelTypeSystem::Automation ),
                 ).com_ty()
     }
 
@@ -41,7 +43,7 @@ impl ReturnHandler for VoidHandler {
 
 /// Simple return type with the return value as the immediate value.
 #[derive(Debug)]
-struct ReturnOnlyHandler( Type, TypeSystem );
+struct ReturnOnlyHandler( Type, ModelTypeSystem );
 impl ReturnHandler for ReturnOnlyHandler {
 
     fn rust_ty( &self ) -> Type { self.0.clone() }
@@ -79,7 +81,7 @@ impl ReturnHandler for ReturnOnlyHandler {
 struct ErrorResultHandler {
     retval_ty: Type,
     return_ty: Type,
-    type_system: TypeSystem
+    type_system: ModelTypeSystem
 }
 
 impl ReturnHandler for ErrorResultHandler {
@@ -156,7 +158,7 @@ impl ReturnHandler for ErrorResultHandler {
 
 fn get_out_args_for_result(
     retval_ty : &Type,
-    type_system : TypeSystem,
+    type_system : ModelTypeSystem,
 ) -> Vec<ComArg> {
 
     match *retval_ty {
@@ -226,7 +228,7 @@ fn get_rust_ok_values(
 pub fn get_return_handler(
     retval_ty : &Option< Type >,
     return_ty : &Option< Type >,
-    type_system : TypeSystem,
+    type_system : ModelTypeSystem,
 ) -> Result< Box<ReturnHandler>, () >
 {
     Ok( match ( retval_ty, return_ty ) {

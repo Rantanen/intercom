@@ -1,6 +1,6 @@
 
 use prelude::*;
-use tyhandlers::TypeSystem;
+use tyhandlers::ModelTypeSystem;
 use syn::*;
 
 use super::*;
@@ -168,7 +168,7 @@ const AUTO_GUID_BASE : guid::GUID = guid::GUID {
 pub fn generate_iid(
     crate_name : &str,
     item_name : &str,
-    type_system : TypeSystem,
+    type_system : ModelTypeSystem,
 ) -> guid::GUID
 {
     generate_guid( &[
@@ -176,9 +176,8 @@ pub fn generate_iid(
             crate_name,
             item_name,
             match type_system {
-                TypeSystem::Automation => "automation",
-                TypeSystem::Raw => "raw",
-                TypeSystem::Invariant => "invariant",
+                ModelTypeSystem::Automation => "automation",
+                ModelTypeSystem::Raw => "raw",
             }
         ].join( ":" ) )
 }

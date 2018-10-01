@@ -6,7 +6,7 @@ use idents;
 use utils;
 use model;
 
-use tyhandlers::{TypeSystem};
+use tyhandlers::{ModelTypeSystem};
 use syn::*;
 
 /// Expands the `com_class` attribute.
@@ -68,7 +68,7 @@ pub fn expand_com_class(
     // The data should include the match-arms for the primary query_interface
     // and the vtable offsets used for the delegating query_interface impls.
     for itf in cls.interfaces() {
-    for &ts in &[ TypeSystem::Automation, TypeSystem::Raw ] {
+    for &ts in &[ ModelTypeSystem::Automation, ModelTypeSystem::Raw ] {
 
         // Various idents.
         let itf_variant = Ident::new( &format!( "{}_{:?}", itf, ts ), Span::call_site() );
@@ -116,86 +116,6 @@ pub fn expand_com_class(
         support_error_info_match_arms.push( quote!(
             self::#iid_ident => true
         ) );
-
-        // ComStruct (which is what the struct should be constructed to)
-        // can be .into()'d into ComRc and ComItf. Generate the impls for this.
-        if ts == TypeSystem::Automation {
-            let into_expect_msg = format!(
-                "query_interface( {} ) failed for {}",
-                iid_ident, itf );
-            output.push( quote!(
-                impl From< ::intercom::ComStruct< #struct_ident > > for
-                        ::intercom::ComRc< #itf > {
-
-                    fn from( source : ::intercom::ComStruct< #struct_ident >) -> Self
-                    {
-                        // into ComItf will leave the ref count dangling.
-                        // This means we can just attach to get a proper ComRc.
-                        let itf : ::intercom::ComItf< #itf > = source.into();
-                        ::intercom::ComRc::attach( itf )
-                    }
-                }
-            ) );
-            output.push( quote!(
-                impl From< ::intercom::ComStruct< #struct_ident > > for
-                        ::intercom::ComItf< #itf > {
-
-                    fn from( source : ::intercom::ComStruct< #struct_ident >) -> Self
-                    {
-                        unsafe {
-
-                            // ComBox::query_interface is contracted to return
-                            // pointer to the correct interface. We can attach
-                            // safely.
-                            let itf = ::intercom::ComItf::wrap(
-
-                                // Query interface the ComBox.
-                                < #struct_ident as ::intercom::CoClass >
-                                    ::query_interface(
-                                        ::intercom::ComBox::vtable( &source ),
-                                        &#iid_ident
-                                    ).expect( #into_expect_msg )
-                            );
-
-                            // Forget the source. We did not increment the
-                            // reference count when attaching to ComRc so we must
-                            // not decrement when ComStruct drops.
-                            std::mem::forget( source );
-
-                            itf
-                        }
-                    }
-                }
-            ) );
-
-            // Check if the current interface is the implicit struct interface.
-            if struct_ident == &itf.to_string() {
-
-                // Implicit interface.
-                //
-                // This interface is unimplementable from Rust perspective as it
-                // represents a struct instead of a trait. Deref on ComItf will
-                // deref into the struct, which we'll do through the ComBox.
-                //
-                // ComBox already derefs into the struct so we'll just get the
-                // ComBox here and deref that.
-                output.push( quote!(
-                    impl ::std::ops::Deref for ::intercom::ComItf< #struct_ident > {
-                        type Target = #struct_ident;
-                        fn deref( &self ) -> &Self::Target {
-                            unsafe {
-                                let self_combox =
-                                        ( ::intercom::ComItf::ptr( self ) as usize
-                                                - #offset_ident() )
-                                        as *mut ::intercom::ComBox< #struct_ident >;
-
-                                &**self_combox
-                            }
-                        }
-                    }
-                ) );
-            }
-        }
     } }
 
     /////////////////////

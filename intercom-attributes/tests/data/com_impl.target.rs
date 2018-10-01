@@ -33,39 +33,6 @@ fn __Foo_Foo_AutomationVtbl_offset() -> usize {
             as usize
     }
 }
-impl From<::intercom::ComStruct<Foo>> for ::intercom::ComRc<Foo> {
-    fn from(source: ::intercom::ComStruct<Foo>) -> Self {
-        let itf: ::intercom::ComItf<Foo> = source.into();
-        ::intercom::ComRc::attach(itf)
-    }
-}
-impl From<::intercom::ComStruct<Foo>> for ::intercom::ComItf<Foo> {
-    fn from(source: ::intercom::ComStruct<Foo>) -> Self {
-        unsafe {
-            let itf =
-                ::intercom::ComItf::wrap(<Foo as
-                                             ::intercom::CoClass>::query_interface(::intercom::ComBox::vtable(&source),
-                                                                                   &IID_Foo_Automation).expect("query_interface( IID_Foo_Automation ) failed for Foo"));
-            std::mem::forget(source);
-            itf
-        }
-    }
-}
-impl ::std::ops::Deref for ::intercom::ComItf<Foo> {
-    type
-    Target
-    =
-    Foo;
-    fn deref(&self) -> &Self::Target {
-        unsafe {
-            let self_combox =
-                (::intercom::ComItf::ptr(self) as usize -
-                     __Foo_Foo_AutomationVtbl_offset()) as
-                    *mut ::intercom::ComBox<Foo>;
-            &**self_combox
-        }
-    }
-}
 #[inline(always)]
 #[allow(non_snake_case)]
 fn __Foo_Foo_RawVtbl_offset() -> usize {
@@ -780,3 +747,4 @@ const __Foo_Foo_RawVtbl_INSTANCE: __Foo_RawVtbl =
                       __Foo_Foo_Raw_tuple_result_method_Raw,
                   string_method_Raw: __Foo_Foo_Raw_string_method_Raw,
                   complete_method_Raw: __Foo_Foo_Raw_complete_method_Raw,};
+impl ::intercom::HasInterface<Foo> for Foo { }

@@ -6,12 +6,18 @@ use std::iter;
 
 use idents;
 use utils;
-use tyhandlers::{Direction, TypeSystem};
+use tyhandlers::{Direction, ModelTypeSystem};
 use model;
 use methodinfo::ComMethodInfo;
 
 extern crate proc_macro;
 use syn::*;
+
+/// Interface level output.
+#[derive(Default)]
+struct InterfaceOutput {
+    iid_arms : Vec<TokenStream>,
+}
 
 /// Expands the `com_interface` attribute.
 ///
@@ -34,27 +40,74 @@ pub fn expand_com_interface(
             &item_tokens.to_string() )?;
     let itf_ident = itf.name();
 
-    // Impls for Rust-to-COM calls using Automation type system.
+    let mut itf_output = InterfaceOutput::default();
     for ( &ts, itf_variant ) in itf.variants() {
-        process_itf_variant( &itf, ts, itf_variant, &mut output );
+        process_itf_variant(
+                &itf, ts, itf_variant,
+                &mut output, &mut itf_output );
     }
 
-    // If this is a trait based interface, implement Deref for ComItf.
-    //
-    // Trait based interfaces can always be Deref'd from ComItf into &Trait.
-    // Struct based interfaces can only be Deref'd if the struct has the
-    // interface in its vtable list. This is decided in the com_class
-    // attribute.
-    if itf.item_type() == utils::InterfaceType::Trait {
-        output.push( quote!(
-            impl ::std::ops::Deref for ::intercom::ComItf< #itf_ident > {
-                type Target = #itf_ident;
-                fn deref( &self ) -> &Self::Target {
-                    self
+    // Implement the ComInterface for the trait.
+    let iid_arms = itf_output.iid_arms;
+    let ( deref_impl, deref_ret ) = if itf.item_type() == utils::InterfaceType::Trait {
+        (
+            quote!( com_itf ),
+            quote!( &( #itf_ident + 'static ) )
+        )
+    } else {
+
+        // Note this is _extremely_ dangerous.
+        //
+        // Essentially we are assuming here that every #itf_ident pointer represents
+        // a ComBox structure that we have created. This will fail the moment
+        // the user code implements #itf_ident interface on their own and passes
+        // that back to us.
+        //
+        // There's no real way to get this to work and we might want to just remove
+        // the possibility to do 'implicit' interfaces by just impling the struct.
+        (
+            quote!(
+                let some_iunk : &::intercom::ComItf<::intercom::IUnknown> = com_itf.as_ref();
+                let iunknown_iid = ::intercom::IUnknown::iid(
+                        ::intercom::TypeSystem::Automation )
+                            .expect( "IUnknown must have Automation IID" );
+                let primary_iunk = some_iunk.query_interface( iunknown_iid )
+                        .expect( "All types must implement IUnknown" );
+
+                let combox : *mut ::intercom::ComBox< #itf_ident > =
+                        primary_iunk as *mut ::intercom::ComBox< #itf_ident >;
+                unsafe {
+
+                    // We are already holding a reference to the 'self', which should
+                    // keep this alive. We don't need to maintain a lifetime of the
+                    // queried interface.
+                    ::intercom::ComBox::release( combox );
+
+                    // Deref.
+                    use std::ops::Deref;
+                    (*combox).deref()
+                }
+            ),
+            quote!( & #itf_ident )
+        )
+    };
+    output.push( quote!(
+        impl ::intercom::ComInterface for #itf_ident {
+
+            #[doc = "Returns the IID of the requested interface."]
+            fn iid( ts : ::intercom::TypeSystem ) -> Option< &'static ::intercom::IID > {
+                match ts {
+                    #( #iid_arms ),*
                 }
             }
-        ) );
-    }
+
+            fn deref(
+                com_itf : &::intercom::ComItf< #itf_ident >
+            ) -> #deref_ret {
+                #deref_impl
+            }
+        }
+    ) );
 
     Ok( tokens_to_tokenstream( item_tokens, output ) )
 }
@@ -66,12 +119,14 @@ pub fn expand_com_interface(
 /// * `itf` - Interface details.
 /// * `ts` - Type system the variant represents.
 /// * `itf_variant` - Interface variant details.
-/// * `output` - Output emitted by the attribute macro.
+/// * `output` - Direct output emitted for each interface variant.
+/// * `itf_output` - Interface variant data for the interface level output.
 fn process_itf_variant(
     itf : &model::ComInterface,
-    ts : TypeSystem,
+    ts : ModelTypeSystem,
     itf_variant : &model::ComInterfaceVariant,
     output : &mut Vec<TokenStream>,
+    itf_output : &mut InterfaceOutput,
 ) {
 
     let itf_ident = itf.name();
@@ -87,6 +142,10 @@ fn process_itf_variant(
         #[allow(non_upper_case_globals)]
         #visibility const #iid_ident : ::intercom::IID = #iid_tokens;
     ) );
+
+    // Construct the iid(ts) match arm for this type system.
+    let ts_match = ts.as_typesystem_tokens();
+    itf_output.iid_arms.push( quote!( #ts_match => Some( & #iid_ident ) ) );
 
     // Create a vector for the virtual table fields and insert the base
     // interface virtual table in it if required.
@@ -135,41 +194,23 @@ fn process_itf_variant(
         #visibility struct #vtable_ident { #( #vtbl_fields, )* }
     ) );
 
-    // COM delegation implementation.
+    // COM delegation implementation for COM traits.
+    //
     // This is done only for the primary interface, whic is currently always the Automation
     // interface.
-    if ts == TypeSystem::Automation {
+    if ts == ModelTypeSystem::Automation &&
+        itf.item_type() == utils::InterfaceType::Trait {
 
-        // IidOf trait impl.
-        let iidof_doc = format!( "Returns `{}`.", iid_ident );
+        // Gather method implementations.
+        let impls = itf_variant.methods().iter()
+                .map( |m| rust_to_com_delegate( m, &vtable_ident ) );
+
+        let unsafety = if itf.is_unsafe() { quote!( unsafe ) } else { quote!() };
         output.push( quote!(
-            impl ::intercom::IidOf for #itf_ident {
-                #[doc = #iidof_doc]
-                fn iid() -> &'static ::intercom::IID {
-                    & #iid_ident
-                }
+            #unsafety impl #itf_ident for ::intercom::ComItf< #itf_ident > {
+                #( #impls )*
             }
         ) );
-
-        // If this is a trait (as opposed to an implicit struct `impl`), include
-        // the Rust-to-COM call implementations.
-        //
-        // If the [com_interface] is on an implicit struct `impl` we'd end up with
-        // `impl StructName for intercom::ComItf<StructName>`, which is invalid
-        // syntax when `StructName` is struct instead of a trait.
-        if itf.item_type() == utils::InterfaceType::Trait {
-
-            // Gather method implementations.
-            let impls = itf_variant.methods().iter()
-                    .map( |m| rust_to_com_delegate( m, &vtable_ident ) );
-
-            let unsafety = if itf.is_unsafe() { quote!( unsafe ) } else { quote!() };
-            output.push( quote!(
-                #unsafety impl #itf_ident for ::intercom::ComItf< #itf_ident > {
-                    #( #impls )*
-                }
-            ) );
-        }
     }
 }
 
@@ -223,7 +264,7 @@ fn rust_to_com_delegate(
     // Combine the parameters into the final parameter list.
     // This includes the 'this' pointer and both the IN and OUT
     // parameters.
-    let params = iter::once( quote!( comptr ) ).chain( params );
+    let params = iter::once( quote!( comptr.ptr ) ).chain( params );
 
     // Create the return statement. 
     let return_ident = Ident::new( "__result", Span::call_site() );
@@ -247,8 +288,8 @@ fn rust_to_com_delegate(
             #[allow(unused_imports)]
             use ::intercom::ComInto;
 
-            let comptr = ::intercom::ComItf::ptr( self );
-            let vtbl = comptr as *const *const #vtable_ident;
+            let comptr = ::intercom::ComItf::ptr( self, ::intercom::TypeSystem::Automation );
+            let vtbl = comptr.ptr as *const *const #vtable_ident;
 
             #( #temporaries )*
 

@@ -46,7 +46,7 @@
 //! ```
 
 #![crate_type="dylib"]
-#![feature(try_from, fundamental, specialization, non_exhaustive, integer_atomics, tool_lints)]
+#![feature(try_from, specialization, non_exhaustive, integer_atomics, tool_lints)]
 
 #[cfg(not(windows))]
 extern crate libc;
@@ -88,8 +88,20 @@ mod intercom {
     pub use ::*;
 }
 
-pub trait IidOf {
-    fn iid() -> &'static IID;
+/// The `ComInterface` trait defines the COM interface details for a COM
+/// interface trait.
+pub trait ComInterface {
+
+    /// IID of the COM interface.
+    fn iid( ts : TypeSystem ) -> Option< &'static IID >;
+
+    /// Dereferences a `ComItf<T>` into a `&T`.
+    ///
+    /// While in most cases the user crate will implement `T` for `ComItf<T>`,
+    /// this impl exists only in the user crate and cannot be used in generic
+    /// contexts. For generic `ComItf<T>` use, Intercom ipmls `Deref<Target=T>`
+    /// for `ComItf<T>` which requires this method.
+    fn deref( com_itf : &ComItf<Self> ) -> &Self;
 }
 
 /// Raw COM pointer type.
@@ -110,6 +122,18 @@ pub type REFCLSID = *const IID;
 pub mod raw {
     pub type InBSTR = *const u16;
     pub type OutBSTR = *mut u16;
+    
+    #[repr(C)]
+    pub struct InterfacePtr<I: ?Sized> {
+        pub ptr : super::RawComPtr,
+        phantom : ::std::marker::PhantomData<I>,
+    }
+
+    impl<I: ?Sized> InterfacePtr<I> {
+        pub fn new( ptr : super::RawComPtr ) -> InterfacePtr<I> {
+            InterfacePtr { ptr, phantom: ::std::marker::PhantomData }
+        }
+    }
 }
 
 /// COM method status code.

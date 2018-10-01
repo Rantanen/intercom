@@ -19,12 +19,12 @@ pub struct TypeConversion {
 }
 
 #[derive(PartialEq, Eq, Debug)]
-pub struct TypeSystemConfig {
-    pub effective_system : TypeSystem,
+pub struct ModelTypeSystemConfig {
+    pub effective_system : ModelTypeSystem,
     pub is_default : bool,
 }
 
-impl TypeSystemConfig {
+impl ModelTypeSystemConfig {
     pub fn get_unique_name( &self, base : &str ) -> String {
         match self.is_default {
             true => base.to_string(),
@@ -34,11 +34,7 @@ impl TypeSystemConfig {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
-pub enum TypeSystem {
-
-    /// Invariant type system. There should be no differentiation despite the
-    /// ability to do so.
-    Invariant,
+pub enum ModelTypeSystem {
 
     /// COM Automation compatible type system.
     Automation,
@@ -47,14 +43,27 @@ pub enum TypeSystem {
     Raw,
 }
 
+impl ModelTypeSystem {
+
+    /// Converts the model type system into public type system tokens.
+    pub fn as_typesystem_tokens( self ) -> TokenStream {
+        match self {
+            ModelTypeSystem::Automation =>
+                    quote!( ::intercom::TypeSystem::Automation ),
+            ModelTypeSystem::Raw =>
+                    quote!( ::intercom::TypeSystem::Raw ),
+        }
+    }
+}
+
 /// Type usage context.
 pub struct TypeContext {
     dir: Direction,
-    type_system: TypeSystem,
+    type_system: ModelTypeSystem,
 }
 
 impl TypeContext {
-    pub fn new( dir : Direction, type_system : TypeSystem ) -> TypeContext {
+    pub fn new( dir : Direction, type_system : ModelTypeSystem ) -> TypeContext {
         TypeContext { dir, type_system }
     }
 }
@@ -114,7 +123,7 @@ pub trait TypeHandler {
 
     /// Gets the sype system the handler serves if the handler is type system specific. Returns
     /// None if the handler is type system agnostic.
-    fn type_system( &self ) -> Option<TypeSystem> { None }
+    fn type_system( &self ) -> Option<ModelTypeSystem> { None }
 }
 
 /// Identity parameter handler.
@@ -129,15 +138,63 @@ impl TypeHandler for IdentityParam {
 
 /// `ComItf` parameter handler. Supports `ComItf` Rust type and ensures the this
 /// to/from `RawComPtr` COM type.
-struct ComItfParam( Type );
+struct ComItfParam { ty: Type, context: TypeContext }
 
 impl TypeHandler for ComItfParam {
 
-    fn rust_ty( &self ) -> Type { self.0.clone() }
+    fn rust_ty( &self ) -> Type { self.ty.clone() }
+
+    /// The COM type.
+    fn com_ty( &self ) -> Type
+    {
+        let rust_ty = self.rust_ty();
+
+        // Extract the interface type T from the ComItf<T> type definition
+        use syn;
+        let itf_ty = match rust_ty {
+            syn::Type::Path( path ) =>
+                match path.path.segments.last().unwrap().value().arguments {
+                    syn::PathArguments::AngleBracketed( ref ab ) =>
+                            match ab.args.last().unwrap().value() {
+                                syn::GenericArgument::Type( ref t ) => t.clone(),
+                                _ => panic!( "ComItf generic argument must be type" ),
+                            },
+                    _ => panic!( "ComItf type parameter must be angle bracketed" ),
+                },
+            _ => panic!( "ComItf type parameter must be a type path" ),
+        };
+
+        // Construct the final InterfacePtr<T> type.
+        parse_quote!( ::intercom::raw::InterfacePtr< #itf_ty > )
+    }
 
     fn default_value( &self ) -> TokenStream
     {
-        quote!( ComItf::null_itf() )
+        quote!( ::intercom::raw::InterfacePtr::new( ::std::ptr::null_mut() ) )
+    }
+
+    /// Converts a COM parameter named by the ident into a Rust type.
+    fn com_to_rust(
+        &self, ident : &Ident
+    ) -> TypeConversion
+    {
+        let ts = self.context.type_system.as_typesystem_tokens();
+        TypeConversion {
+            temporary: None,
+            value: quote!( ::intercom::ComItf::wrap( #ident.ptr, #ts ) ),
+        }
+    }
+
+    /// Converts a Rust parameter named by the ident into a COM type.
+    fn rust_to_com(
+        &self, ident : &Ident
+    ) -> TypeConversion
+    {
+        let ts = self.context.type_system.as_typesystem_tokens();
+        TypeConversion {
+            temporary: None,
+            value: quote!( ::intercom::ComItf::ptr( &#ident.into(), #ts ) )
+        }
     }
 }
 
@@ -212,7 +269,7 @@ impl TypeHandler for StringParam
     }
 
     /// String parameters differ between the type systems.
-    fn type_system( &self ) -> Option<TypeSystem> {
+    fn type_system( &self ) -> Option<ModelTypeSystem> {
         Some( self.context.type_system )
     }
 }
@@ -240,7 +297,7 @@ fn map_by_name(
 
     match name {
 
-        "ComItf" => Rc::new( ComItfParam( original_type ) ),
+        "ComItf" => Rc::new( ComItfParam { ty: original_type, context } ),
         "BString" | "BStr" | "String" | "str" =>
             Rc::new( StringParam { ty: original_type, context } ),
         // "str" => Rc::new( StringRefParam( original_type ) ),

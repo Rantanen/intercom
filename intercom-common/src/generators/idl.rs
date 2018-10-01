@@ -9,7 +9,7 @@ use super::GeneratorError;
 use utils;
 use model;
 use model::{ComCrate, ComInterfaceVariant};
-use tyhandlers::{Direction, TypeSystem, TypeSystemConfig};
+use tyhandlers::{Direction, ModelTypeSystem, ModelTypeSystemConfig};
 use foreign_ty::*;
 use type_parser::*;
 
@@ -60,14 +60,14 @@ trait IdlTypeInfo<'s> {
     fn to_idl(
         &self,
         krate : &ComCrate,
-        ts_config : &TypeSystemConfig,
+        ts_config : &ModelTypeSystemConfig,
     ) -> String;
 
     /// Gets the IDL compatile type name for this type.
     fn get_idl_type_name(
         &self,
         krate: &model::ComCrate,
-        ts_config : &TypeSystemConfig,
+        ts_config : &ModelTypeSystemConfig,
     ) -> String;
 
     /// Determines whether this type should be passed as a pointer.
@@ -98,11 +98,11 @@ impl IdlModel {
         all_type_systems : bool,
     ) -> Result<IdlModel, GeneratorError> {
 
-        let itf_variant_filter : Box<Fn( &( &TypeSystem, &ComInterfaceVariant ) ) -> bool> =
+        let itf_variant_filter : Box<Fn( &( &ModelTypeSystem, &ComInterfaceVariant ) ) -> bool> =
                 match all_type_systems {
                     true => Box::new( | _ | true ),
                     false => Box::new( | ( ts, _ ) | match ts {
-                        TypeSystem::Automation => true,
+                        ModelTypeSystem::Automation => true,
                         _ => false
                     } ),
                 };
@@ -120,7 +120,7 @@ impl IdlModel {
                 let methods = itf_variant.methods().iter().enumerate().map(|(i,m)| {
 
                     // Define the config to use when constructing the type names.
-                    let ts_config = TypeSystemConfig {
+                    let ts_config = ModelTypeSystemConfig {
                         effective_system: ts,
                         is_default: ! all_type_systems,
                     };
@@ -258,7 +258,7 @@ impl<'s> IdlTypeInfo<'s> {
     fn get_idl_name_for_custom_type(
         krate : &ComCrate,
         ty_name : &str,
-        ts_config : &TypeSystemConfig,
+        ts_config : &ModelTypeSystemConfig,
     ) -> String {
 
         let itf = if let Some( itf ) = krate.interfaces().get( ty_name ) {
@@ -282,7 +282,7 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
     fn to_idl(
         &self,
         krate : &ComCrate,
-        ts_config : &TypeSystemConfig,
+        ts_config : &ModelTypeSystemConfig,
     ) -> String {
 
         // We want to enable if for interface methods and parameters.
@@ -297,12 +297,12 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
     fn get_idl_type_name(
         &self,
         krate : &ComCrate,
-        ts_config : &TypeSystemConfig,
+        ts_config : &ModelTypeSystemConfig,
     ) -> String {
 
         let type_name = self.get_name();
         match type_name.as_str() {
-            "RawComPtr" => "*void".to_owned(),
+            "RawComPtr" => "void*".to_owned(),
             "InBSTR" | "OutBSTR" => "BSTR".to_owned(),
             "usize" => "size_t".to_owned(),
             "u64" => "uint64".to_owned(),
