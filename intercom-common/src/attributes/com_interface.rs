@@ -3,7 +3,7 @@ use prelude::*;
 use super::common::*;
 
 use std::iter;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use idents;
 use utils;
@@ -18,7 +18,7 @@ use syn::*;
 #[derive(Default)]
 struct InterfaceOutput {
     iid_arms : Vec<TokenStream>,
-    method_impls : HashMap< String, MethodImpl >,
+    method_impls : BTreeMap< String, MethodImpl >,
 }
 
 struct MethodImpl {
@@ -29,7 +29,7 @@ struct MethodImpl {
     info : ComMethodInfo,
 
     /// Type system specific implementation for the method.
-    impls : HashMap< ModelTypeSystem, TokenStream >,
+    impls : BTreeMap< ModelTypeSystem, TokenStream >,
 }
 
 impl MethodImpl {

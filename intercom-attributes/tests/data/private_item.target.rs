@@ -49,14 +49,14 @@ impl IFoo for ::intercom::ComItf<IFoo> {
         #[allow(unused_imports)]
         use ::intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
-            let vtbl = comptr.ptr as *const *const __IFoo_RawVtbl;
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+            let vtbl = comptr.ptr as *const *const __IFoo_AutomationVtbl;
             #[allow(unused_unsafe)]
             let result: Result<(), ::intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
-                             ((**vtbl).trait_method_Raw)(comptr.ptr);
+                             ((**vtbl).trait_method_Automation)(comptr.ptr);
                          Ok({ })
                      })();
             return match result {
@@ -67,14 +67,14 @@ impl IFoo for ::intercom::ComItf<IFoo> {
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
-            let vtbl = comptr.ptr as *const *const __IFoo_AutomationVtbl;
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+            let vtbl = comptr.ptr as *const *const __IFoo_RawVtbl;
             #[allow(unused_unsafe)]
             let result: Result<(), ::intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
-                             ((**vtbl).trait_method_Automation)(comptr.ptr);
+                             ((**vtbl).trait_method_Raw)(comptr.ptr);
                          Ok({ })
                      })();
             return match result {

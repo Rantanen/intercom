@@ -33,7 +33,7 @@ impl ModelTypeSystemConfig {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash, PartialOrd, Ord)]
 pub enum ModelTypeSystem {
 
     /// COM Automation compatible type system.
