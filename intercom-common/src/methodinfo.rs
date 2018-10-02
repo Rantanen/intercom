@@ -126,7 +126,7 @@ impl ::std::fmt::Debug for ComArg {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ComMethodInfo {
 
     /// The display name used in public places that do not require an unique name.
@@ -151,7 +151,7 @@ pub struct ComMethodInfo {
     pub return_type: Option<Type>,
 
     /// Return value handler.
-    pub returnhandler: Box<ReturnHandler>,
+    pub returnhandler: Rc<ReturnHandler>,
 
     /// Method arguments.
     pub args: Vec<RustArg>,
@@ -247,12 +247,12 @@ impl ComMethodInfo {
         Ok( ComMethodInfo {
             unique_name: Ident::new( &format!( "{}_{:?}", n, type_system ), Span::call_site() ),
             display_name: n,
+            returnhandler: returnhandler.into(),
             is_const,
             rust_self_arg,
             rust_return_ty,
             retval_type,
             return_type,
-            returnhandler,
             args,
             is_unsafe: unsafety,
             type_system

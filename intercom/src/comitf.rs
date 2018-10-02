@@ -72,6 +72,25 @@ impl<T: ?Sized> ComItf<T> {
         } )
     }
 
+    pub fn maybe_ptr(
+        this : &Self,
+        ts : TypeSystem
+    ) -> Option<raw::InterfacePtr<T>> {
+
+        // Acquire the pointer.
+        let ptr = match ts {
+            TypeSystem::Automation => this.automation_ptr,
+            TypeSystem::Raw => this.raw_ptr,
+        };
+
+        // Check for null.
+        if ptr.is_null() {
+            None
+        } else {
+            Some( raw::InterfacePtr::new( ptr ) )
+        }
+    }
+
     /// Returns a `ComItf<T>` value that references a null pointer.
     ///
     /// # Safety

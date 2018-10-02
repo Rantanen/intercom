@@ -26,30 +26,6 @@ struct __IFoo_AutomationVtbl {
                                                                 ::intercom::RawComPtr)
                                      -> (),
 }
-impl IFoo for ::intercom::ComItf<IFoo> {
-    fn trait_method(&self) -> () {
-        #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        let comptr =
-            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
-        let vtbl = comptr.ptr as *const *const __IFoo_AutomationVtbl;
-        #[allow(unused_unsafe)]
-        let result: Result<(), ::intercom::ComError> =
-            (||
-                 unsafe {
-                     let __result =
-                         ((**vtbl).trait_method_Automation)(comptr.ptr);
-                     Ok({ })
-                 })();
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
-        match result {
-            Ok(v) => v,
-            Err(err) =>
-            <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
-        }
-    }
-}
 #[doc = "`IFoo` interface ID."]
 #[allow(non_upper_case_globals)]
 const IID_IFoo_Raw: ::intercom::IID =
@@ -65,6 +41,51 @@ struct __IFoo_RawVtbl {
     pub trait_method_Raw: unsafe extern "C" fn(self_vtable:
                                                          ::intercom::RawComPtr)
                               -> (),
+}
+impl IFoo for ::intercom::ComItf<IFoo> {
+    fn trait_method(&self) -> () {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+            let vtbl = comptr.ptr as *const *const __IFoo_RawVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<(), ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let __result =
+                             ((**vtbl).trait_method_Raw)(comptr.ptr);
+                         Ok({ })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <() as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+            let vtbl = comptr.ptr as *const *const __IFoo_AutomationVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<(), ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let __result =
+                             ((**vtbl).trait_method_Automation)(comptr.ptr);
+                         Ok({ })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <() as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        <() as ErrorValue>::from_error(::intercom::E_POINTER)
+    }
 }
 impl ::intercom::ComInterface for IFoo {
     #[doc = "Returns the IID of the requested interface."]

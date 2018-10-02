@@ -18,7 +18,7 @@ pub struct TypeConversion {
     pub value : TokenStream,
 }
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Hash)]
 pub struct ModelTypeSystemConfig {
     pub effective_system : ModelTypeSystem,
     pub is_default : bool,

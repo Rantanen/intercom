@@ -3,6 +3,7 @@ use prelude::*;
 use super::common::*;
 
 use std::iter;
+use std::collections::HashMap;
 
 use idents;
 use utils;
@@ -17,6 +18,27 @@ use syn::*;
 #[derive(Default)]
 struct InterfaceOutput {
     iid_arms : Vec<TokenStream>,
+    method_impls : HashMap< String, MethodImpl >,
+}
+
+struct MethodImpl {
+
+    /// _Some_ method info.
+    ///
+    /// This should not be depended upon for anything type system specific.
+    info : ComMethodInfo,
+
+    /// Type system specific implementation for the method.
+    impls : HashMap< ModelTypeSystem, TokenStream >,
+}
+
+impl MethodImpl {
+    pub fn new( mi : ComMethodInfo ) -> Self {
+        MethodImpl {
+            info: mi,
+            impls : Default::default(),
+        }
+    }
 }
 
 /// Expands the `com_interface` attribute.
@@ -45,6 +67,59 @@ pub fn expand_com_interface(
         process_itf_variant(
                 &itf, ts, itf_variant,
                 &mut output, &mut itf_output );
+    }
+
+    if itf.item_type() == utils::InterfaceType::Trait {
+        let mut impls = vec![];
+        for ( _, method ) in itf_output.method_impls.iter() {
+
+            let mut impl_branches = vec![];
+            for ( ts, method_ts_impl ) in method.impls.iter() {
+
+                let ts_tokens = ts.as_typesystem_tokens();
+                impl_branches.push( quote!(
+                    if let Some( comptr ) = ComItf::maybe_ptr( self, #ts_tokens ) {
+                        #method_ts_impl
+                    }
+                ) );
+            }
+
+            // Format the method arguments into tokens.
+            let impl_args = method.info.args.iter().map( |ca| {
+                let name = &ca.name;
+                let ty = &ca.ty;
+                quote!( #name : #ty )
+            } );
+
+            let unsafety = if method.info.is_unsafe { quote!( unsafe ) } else { quote!() };
+            let self_arg = &method.info.rust_self_arg;
+            let method_rust_ident = &method.info.display_name;
+            let return_ty = &method.info.rust_return_ty;
+
+            impls.push( quote!(
+                #unsafety fn #method_rust_ident(
+                    #self_arg, #( #impl_args ),*
+                ) -> #return_ty {
+
+                    #[allow(unused_imports)]
+                    use ::intercom::ComInto;
+                    #[allow(unused_imports)]
+                    use ::intercom::ErrorValue;
+
+                    #( #impl_branches )*
+
+                    < #return_ty as ErrorValue >
+                            ::from_error( ::intercom::E_POINTER )
+                }
+            ) );
+        }
+
+        let unsafety = if itf.is_unsafe() { quote!( unsafe ) } else { quote!() };
+        output.push( quote!(
+            #unsafety impl #itf_ident for ::intercom::ComItf< #itf_ident > {
+                #( #impls )*
+            }
+        ) );
     }
 
     // Implement the ComInterface for the trait.
@@ -91,6 +166,7 @@ pub fn expand_com_interface(
             quote!( & #itf_ident )
         )
     };
+
     output.push( quote!(
         impl ::intercom::ComInterface for #itf_ident {
 
@@ -183,6 +259,19 @@ fn process_itf_variant(
             pub #method_ident :
                 unsafe extern #calling_convention fn( #( #args ),* ) -> #ret_ty
         ) );
+
+        let method_name = method_info.display_name.to_string();
+        if ! itf_output.method_impls.contains_key( &method_name ) {
+            itf_output.method_impls.insert(
+                    method_name.clone(),
+                    MethodImpl::new( method_info.clone() ) );
+        }
+
+        let method_impl = &mut itf_output.method_impls.get_mut( &method_name )
+                .expect( "We just ensured this exists three lines up... ;_;" );
+        method_impl.impls.insert(
+                itf_variant.type_system(),
+                rust_to_com_delegate( method_info, &vtable_ident ) );
     }
 
     // Create the vtable. We've already gathered all the vtable method
@@ -193,25 +282,6 @@ fn process_itf_variant(
         #[doc(hidden)]
         #visibility struct #vtable_ident { #( #vtbl_fields, )* }
     ) );
-
-    // COM delegation implementation for COM traits.
-    //
-    // This is done only for the primary interface, whic is currently always the Automation
-    // interface.
-    if ts == ModelTypeSystem::Automation &&
-        itf.item_type() == utils::InterfaceType::Trait {
-
-        // Gather method implementations.
-        let impls = itf_variant.methods().iter()
-                .map( |m| rust_to_com_delegate( m, &vtable_ident ) );
-
-        let unsafety = if itf.is_unsafe() { quote!( unsafe ) } else { quote!() };
-        output.push( quote!(
-            #unsafety impl #itf_ident for ::intercom::ComItf< #itf_ident > {
-                #( #impls )*
-            }
-        ) );
-    }
 }
 
 /// Creates the functions responsible for delegating calls from Rust to COM
@@ -225,13 +295,6 @@ fn rust_to_com_delegate(
     method_info : &ComMethodInfo,
     vtable_ident : &Ident,
 ) -> TokenStream {
-
-    // Format the method arguments into tokens.
-    let impl_args = method_info.args.iter().map( |ca| {
-        let name = &ca.name;
-        let ty = &ca.ty;
-        quote!( #name : #ty )
-    } );
 
     // The COM out-arguments that mirror the Rust return value will
     // require temporary variables during the COM call. Format their
@@ -274,43 +337,29 @@ fn rust_to_com_delegate(
 
     // Resolve some of the fields needed for quote.
     let method_ident = &method_info.unique_name;
-    let method_rust_ident = &method_info.display_name;
-    let self_arg = &method_info.rust_self_arg;
     let return_ty = &method_info.rust_return_ty;
-    let unsafety = if method_info.is_unsafe { quote!( unsafe ) } else { quote!() };
 
     // Construct the final method.
     quote!(
-        #unsafety fn #method_rust_ident(
-            #self_arg, #( #impl_args ),*
-        ) -> #return_ty
-        {
-            #[allow(unused_imports)]
-            use ::intercom::ComInto;
+        let vtbl = comptr.ptr as *const *const #vtable_ident;
 
-            let comptr = ::intercom::ComItf::ptr( self, ::intercom::TypeSystem::Automation );
-            let vtbl = comptr.ptr as *const *const #vtable_ident;
+        #( #temporaries )*
 
-            #( #temporaries )*
+        // Use an IIFE to act as a try/catch block. The various template
+        // substitutions might end up using ?'s for error handling. The IIFE allows
+        // us to handle the results here immediately.
+        #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
+        let result : Result< #return_ty, ::intercom::ComError > = ( || unsafe {
+            #( #out_arg_declarations )*;
+            let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
 
-            // Use an IIFE to act as a try/catch block. The various template
-            // substitutions might end up using ?'s for error handling. The IIFE allows
-            // us to handle the results here immediately.
-            #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
-            let result : Result< #return_ty, ::intercom::ComError > = ( || unsafe {
-                #( #out_arg_declarations )*;
-                let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
+            Ok( { #return_statement } )
+        } )();
 
-                Ok( { #return_statement } )
-            } )();
-
-            #[allow(unused_imports)]
-            use ::intercom::ErrorValue;
-            match result {
-                Ok( v ) => v,
-                Err( err ) => < #return_ty as ErrorValue >::from_error(
-                        ::intercom::return_hresult( err ) ),
-            }
-        }
+        return match result {
+            Ok( v ) => v,
+            Err( err ) => < #return_ty as ErrorValue >::from_error(
+                    ::intercom::return_hresult( err ) ),
+        };
     )
 }
