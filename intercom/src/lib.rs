@@ -46,7 +46,7 @@
 //! ```
 
 #![crate_type="dylib"]
-#![feature(try_from, specialization, non_exhaustive, integer_atomics, tool_lints)]
+#![feature(try_from, specialization, non_exhaustive, integer_atomics)]
 
 #[cfg(not(windows))]
 extern crate libc;
