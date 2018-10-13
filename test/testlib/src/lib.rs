@@ -19,6 +19,7 @@ extern crate winapi;
     ErrorSource,
     AllocTests,
     StringTests,
+    TypeSystemCaller,
 )]
 
 #[com_interface]
@@ -335,5 +336,31 @@ impl StringTests
         // Caller expects E_INVALIDARG, use E_FAIL to indicate something
         // went wrong.
         Err( intercom::E_FAIL )
+    }
+}
+
+#[com_interface]
+pub trait ITypeSystemDifferingInterface {
+    fn func( &self, s : &str ) -> ComResult<String>;
+}
+
+#[com_class( TypeSystemCaller )]
+pub struct TypeSystemCaller;
+
+#[com_interface]
+#[com_impl]
+impl TypeSystemCaller
+{
+    pub fn new() -> Self { TypeSystemCaller }
+
+    pub fn test( &self, callback : ComItf<ITypeSystemDifferingInterface> ) -> ComResult<()> {
+
+        // Check for unicode string.
+        let string = callback.func( "\u{1F980}" )?;
+        if string != "\u{1F980}" {
+            return Err( intercom::E_FAIL );
+        }
+
+        Ok(())
     }
 }
