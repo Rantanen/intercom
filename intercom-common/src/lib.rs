@@ -1,4 +1,4 @@
-#![feature(non_exhaustive, tool_lints)]
+#![feature(non_exhaustive)]
 #![recursion_limit="128"]
 
 #![allow(clippy::match_bool)]
