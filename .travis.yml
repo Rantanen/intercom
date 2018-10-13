@@ -3,6 +3,10 @@ sudo: false
 rust:
     - nightly
 
+branches:
+    only:
+        - master
+
 addons:
     apt:
         sources:
