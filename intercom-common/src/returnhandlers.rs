@@ -8,6 +8,9 @@ use utils;
 /// Defines return handler for handling various different return type schemes.
 pub trait ReturnHandler : ::std::fmt::Debug {
 
+    /// Returns the current type system. Used internally by the trait.
+    fn type_system( &self ) -> ModelTypeSystem;
+
     /// The return type of the original Rust method.
     fn rust_ty( &self ) -> Type;
 
@@ -18,7 +21,7 @@ pub trait ReturnHandler : ::std::fmt::Debug {
                     &self.rust_ty(),
                     TypeContext::new(
                             Direction::Retval,
-                            ModelTypeSystem::Automation ),
+                            self.type_system() ),
                 ).com_ty()
     }
 
@@ -39,12 +42,17 @@ pub trait ReturnHandler : ::std::fmt::Debug {
 struct VoidHandler;
 impl ReturnHandler for VoidHandler {
     fn rust_ty( &self ) -> Type { utils::unit_ty() }
+
+    // Void types do not depend on the type system.
+    fn type_system( &self ) -> ModelTypeSystem { ModelTypeSystem::Automation }
 }
 
 /// Simple return type with the return value as the immediate value.
 #[derive(Debug)]
 struct ReturnOnlyHandler( Type, ModelTypeSystem );
 impl ReturnHandler for ReturnOnlyHandler {
+
+    fn type_system( &self ) -> ModelTypeSystem { self.1 }
 
     fn rust_ty( &self ) -> Type { self.0.clone() }
 
@@ -86,6 +94,7 @@ struct ErrorResultHandler {
 
 impl ReturnHandler for ErrorResultHandler {
 
+    fn type_system( &self ) -> ModelTypeSystem { self.type_system }
     fn rust_ty( &self ) -> Type { self.return_ty.clone() }
     fn com_ty( &self ) -> Type { parse_quote!( ::intercom::HRESULT ) }
 

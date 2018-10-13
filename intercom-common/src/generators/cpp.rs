@@ -143,6 +143,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
         match type_name.as_str() {
             "RawComPtr" => "*void".to_owned(),
             "InBSTR" | "OutBSTR" => "intercom::BSTR".to_owned(),
+            "InCStr" | "OutCStr" => "char*".to_owned(),
             "usize" => "size_t".to_owned(),
             "i8" => "int8_t".to_owned(),
             "u8" => "uint8_t".to_owned(),

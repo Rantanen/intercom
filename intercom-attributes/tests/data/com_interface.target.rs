@@ -347,8 +347,8 @@ pub struct __Foo_RawVtbl {
     pub string_method_Raw: unsafe extern "C" fn(self_vtable:
                                                           ::intercom::RawComPtr,
                                                       msg:
-                                                          ::intercom::raw::InBSTR)
-                               -> ::intercom::raw::OutBSTR,
+                                                          ::intercom::raw::InCStr)
+                               -> ::intercom::raw::OutCStr,
     pub comitf_method_Raw: unsafe extern "C" fn(self_vtable:
                                                           ::intercom::RawComPtr,
                                                       itf:

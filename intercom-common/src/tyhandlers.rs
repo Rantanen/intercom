@@ -206,9 +206,15 @@ impl TypeHandler for StringParam
 
     fn com_ty( &self ) -> Type
     {
-        match self.context.dir {
-            Direction::In => parse_quote!( ::intercom::raw::InBSTR ),
-            Direction::Out | Direction::Retval => parse_quote!( ::intercom::raw::OutBSTR ),
+        match self.context.type_system {
+            ModelTypeSystem::Automation => match self.context.dir {
+                Direction::In => parse_quote!( ::intercom::raw::InBSTR ),
+                Direction::Out | Direction::Retval => parse_quote!( ::intercom::raw::OutBSTR ),
+            },
+            ModelTypeSystem::Raw => match self.context.dir {
+                Direction::In => parse_quote!( ::intercom::raw::InCStr ),
+                Direction::Out | Direction::Retval => parse_quote!( ::intercom::raw::OutCStr ),
+            },
         }
     }
 
@@ -218,9 +224,14 @@ impl TypeHandler for StringParam
 
             Direction::In => {
 
+                let str_type = match self.context.type_system {
+                    ModelTypeSystem::Automation => quote!( BStr ),
+                    ModelTypeSystem::Raw => quote!( CStr ),
+                };
+
                 let target_ty = self.rust_ty();
-                let intermediate_ty = quote!( &::intercom::BStr );
-                let to_intermediate = quote!( ::intercom::BStr::from_ptr( #ident ) );
+                let intermediate_ty = quote!( &::intercom::#str_type );
+                let to_intermediate = quote!( ::intercom::#str_type::from_ptr( #ident ) );
                 let as_trait = quote!( < #target_ty as ::intercom::FromWithTemporary< #intermediate_ty > > );
 
                 let temp_ident = Ident::new( &format!( "__{}_temporary", ident.to_string() ), Span::call_site() );
@@ -230,9 +241,21 @@ impl TypeHandler for StringParam
                 }
             },
             Direction::Out | Direction::Retval => {
+
+                // The type system input 'ident' should represent either a BString or CString
+                // depending on the type system.
+                let str_type = match self.context.type_system {
+                    ModelTypeSystem::Automation => quote!( BString ),
+                    ModelTypeSystem::Raw => quote!( CString ),
+                };
+
+                // Get the type system string as Rust string.
+                let ts_string = quote!( ::intercom::#str_type::from_ptr( #ident ) );
+
+                // Convert the TS string into whatever string type the method requires.
                 TypeConversion {
                     temporary: None,
-                    value: quote!( ::intercom::BString::from_ptr( #ident ).com_into()? ),
+                    value: quote!( #ts_string.com_into()? ),
                 }
             },
         }
@@ -244,8 +267,13 @@ impl TypeHandler for StringParam
 
             Direction::In => {
 
+                let str_type = match self.context.type_system {
+                    ModelTypeSystem::Automation => quote!( BStr ),
+                    ModelTypeSystem::Raw => quote!( CStr ),
+                };
+
                 let target_ty = self.rust_ty();
-                let intermediate_ty = quote!( &::intercom::BStr );
+                let intermediate_ty = quote!( &::intercom::#str_type );
                 let as_trait = quote!( < #intermediate_ty as ::intercom::FromWithTemporary< #target_ty > > );
 
                 let temp_ident = Ident::new( &format!( "__{}_temporary", ident.to_string() ), Span::call_site() );
@@ -255,9 +283,26 @@ impl TypeHandler for StringParam
                 }
             },
             Direction::Out | Direction::Retval => {
+
+                // The Rust string value `ident` must be first converted into a type system
+                // compatible Rust string, either BString or CSTring.
+                // depending on the type system.
+                let str_type = match self.context.type_system {
+                    ModelTypeSystem::Automation => quote!( BString ),
+                    ModelTypeSystem::Raw => quote!( CString ),
+                };
+
+                // Convert the `ident` into the required string type.
+                let ts_string = quote!( ::intercom::ComInto::< ::intercom::#str_type >::com_into( #ident )? );
+
                 TypeConversion {
                     temporary: None,
-                    value: quote!( ::intercom::BString::from( #ident ).into_ptr() ),
+                    value: match self.context.type_system {
+                        ModelTypeSystem::Automation =>
+                            quote!( #ts_string.into_ptr() ),
+                        ModelTypeSystem::Raw =>
+                            quote!( #ts_string.into_raw() ),
+                    }
                 }
             },
         }
@@ -298,7 +343,7 @@ fn map_by_name(
     match name {
 
         "ComItf" => Rc::new( ComItfParam { ty: original_type, context } ),
-        "BString" | "BStr" | "String" | "str" =>
+        "CString" | "CStr" | "BString" | "BStr" | "String" | "str" =>
             Rc::new( StringParam { ty: original_type, context } ),
         // "str" => Rc::new( StringRefParam( original_type ) ),
 

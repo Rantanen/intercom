@@ -122,6 +122,9 @@ pub type REFCLSID = *const IID;
 pub mod raw {
     pub type InBSTR = *const u16;
     pub type OutBSTR = *mut u16;
+
+    pub type InCStr = *const ::std::os::raw::c_char;
+    pub type OutCStr = *mut ::std::os::raw::c_char;
     
     #[repr(C)]
     pub struct InterfacePtr<I: ?Sized> {
