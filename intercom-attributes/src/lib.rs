@@ -12,7 +12,6 @@
 //! macros.
 
 #![allow(unused_imports)]
-#![feature(tool_lints)]
 
 extern crate intercom_common;
 use intercom_common::attributes::*;
