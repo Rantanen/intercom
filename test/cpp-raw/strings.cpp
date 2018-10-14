@@ -9,6 +9,32 @@ using std::char_traits;
 
 #include "testlib.hpp"
 
+const int DESC_IDX = 0;
+const int UTF16_IDX = 1;
+const int UTF8_IDX = 2;
+std::tuple< const char*, const char16_t*, const char* > test_data[] = {
+	std::make_tuple(
+			"<empty>",
+			nullptr,
+			u8""
+	),
+	std::make_tuple( 
+			"\"Test\"",
+			u"Test",
+			u8"Test"
+	),
+	std::make_tuple( 
+			"Multibyte UTF-8",  // Scandinavian letters: öäå
+			u"\u00f6\u00e4\u00e5",
+			u8"\u00f6\u00e4\u00e5"
+	),
+	std::make_tuple( 
+			"Multibyte UTF-16",  // Crab: 🦀
+			u"\U0001F980",
+			u8"\U0001F980"
+	)
+};
+
 intercom::BSTR AllocBstr(
     IAllocator_Automation* pAllocator,
     const char16_t* str
@@ -83,32 +109,6 @@ TEST_CASE( "Using BSTR in interface works" )
 			OUT reinterpret_cast< void** >( &pStringTestsRaw ) );
 	REQUIRE( hr == intercom::SC_OK );
 
-	const int DESC_IDX = 0;
-	const int UTF16_IDX = 1;
-	const int UTF8_IDX = 2;
-	std::tuple< const char*, const char16_t*, const char* > test_data[] = {
-		std::make_tuple(
-				"<empty>",
-				nullptr,
-				u8""
-		),
-		std::make_tuple( 
-				"\"Test\"",
-				u"Test",
-				u8"Test"
-		),
-		std::make_tuple( 
-				"Multibyte UTF-8",  // Scandinavian letters: öäå
-				u"\u00f6\u00e4\u00e5",
-				u8"\u00f6\u00e4\u00e5"
-		),
-		std::make_tuple( 
-				"Multibyte UTF-16",  // Crab: 🦀
-				u"\U0001F980",
-				u8"\U0001F980"
-		)
-	};
-
     SECTION( "String parameters work." )
     {
         for( uint32_t i = 0; i < sizeof( test_data ) / sizeof( *test_data ); i++ )
@@ -154,7 +154,6 @@ TEST_CASE( "Using BSTR in interface works" )
 
 			const char* utf8_text = std::get< UTF8_IDX >( tuple );
 			const size_t utf8_len = utf8_text == nullptr ? 0 : char_traits<char>::length( utf8_text );
-			const uint32_t utf8_len32 = static_cast< uint32_t >( utf8_len );
 
             SECTION( std::string( "Passing C-string: " ) + desc )
             {
@@ -243,8 +242,8 @@ TEST_CASE( "Using BSTR in interface works" )
 
         pAllocator->FreeBstr( test_bstr_output );
 
-
-        char* test_cstr_input = u8"\U0001F600";
+        // We are passing this to generated functions that do not define 'const'.
+        char* test_cstr_input = const_cast< char* >( u8"\U0001F600" );
 
         SECTION( "char* to CStr" ) {
 

@@ -19,6 +19,7 @@ extern crate winapi;
     ErrorSource,
     AllocTests,
     StringTests,
+    TypeSystemCaller,
 )]
 
 #[com_interface]
@@ -269,7 +270,29 @@ impl AllocTests
     }
 }
 
-#[com_class( StringTests)]
+#[com_interface]
+pub trait IStringTests
+{
+    fn string_to_index( &self, s : &str ) -> ComResult<u32>;
+
+    fn index_to_string( &self, i : u32 ) -> ComResult<String>;
+
+    fn bstr_parameter( &self, s : &BStr, ptr : usize ) -> ComResult<()>;
+
+    fn bstring_parameter( &self, s : BString ) -> ComResult<()>;
+
+    fn bstring_return_value( &self ) -> ComResult<( BString, usize )>;
+
+    fn cstr_parameter( &self, s : &CStr, ptr : usize ) -> ComResult<()>;
+
+    fn cstring_parameter( &self, s : CString ) -> ComResult<()>;
+
+    fn cstring_return_value( &self ) -> ComResult<( CString, usize )>;
+
+    fn invalid_string( &self, s : &str ) -> ComResult<()>;
+}
+
+#[com_class( IStringTests )]
 pub struct StringTests;
 
 static STRING_DATA: &[ &str ] = &[
@@ -279,13 +302,14 @@ static STRING_DATA: &[ &str ] = &[
     "\u{1F980}",
 ];
 
-#[com_interface]
-#[com_impl]
-impl StringTests
-{
+impl StringTests {
     pub fn new() -> StringTests { StringTests }
+}
 
-    pub fn string_to_index( &self, s : &str ) -> ComResult<u32> {
+#[com_impl]
+impl IStringTests for StringTests
+{
+    fn string_to_index( &self, s : &str ) -> ComResult<u32> {
 
         for candidate in 0..STRING_DATA.len() {
             if s == STRING_DATA[ candidate ] {
@@ -297,7 +321,7 @@ impl StringTests
         Err( intercom::E_FAIL )
     }
 
-    pub fn index_to_string( &self, i : u32 ) -> ComResult<String> {
+    fn index_to_string( &self, i : u32 ) -> ComResult<String> {
 
         for candidate in 0..STRING_DATA.len() {
             if i as usize == candidate {
@@ -309,7 +333,7 @@ impl StringTests
         Err( intercom::E_FAIL )
     }
 
-    pub fn bstr_parameter( &self, s : &BStr, ptr : usize ) -> ComResult<()> {
+    fn bstr_parameter( &self, s : &BStr, ptr : usize ) -> ComResult<()> {
 
         let string = s.to_string()
                 .map_err( |_| intercom::E_INVALIDARG )?;
@@ -325,7 +349,7 @@ impl StringTests
         }
     }
 
-    pub fn bstring_parameter( &self, s : BString ) -> ComResult<()> {
+    fn bstring_parameter( &self, s : BString ) -> ComResult<()> {
 
         let string = s.to_string()
                 .map_err( |_| intercom::E_INVALIDARG )?;
@@ -337,7 +361,7 @@ impl StringTests
         }
     }
 
-    pub fn bstring_return_value( &self ) -> ComResult<( BString, usize )> {
+    fn bstring_return_value( &self ) -> ComResult<( BString, usize )> {
 
         let bs : BString = BString::from( "\u{1F600}" );
         let ptr = bs.as_ptr() as usize;
@@ -345,7 +369,7 @@ impl StringTests
         Ok( ( bs, ptr ) )
     }
 
-    pub fn cstr_parameter( &self, s : &CStr, ptr : usize ) -> ComResult<()> {
+    fn cstr_parameter( &self, s : &CStr, ptr : usize ) -> ComResult<()> {
 
         if s.to_string_lossy() != "\u{1F600}" {
             return Err( intercom::E_FAIL );
@@ -358,7 +382,7 @@ impl StringTests
         }
     }
 
-    pub fn cstring_parameter( &self, s : CString ) -> ComResult<()> {
+    fn cstring_parameter( &self, s : CString ) -> ComResult<()> {
 
         if s.to_string_lossy() != "\u{1F600}" {
             Err( intercom::E_FAIL )
@@ -367,7 +391,7 @@ impl StringTests
         }
     }
 
-    pub fn cstring_return_value( &self ) -> ComResult<( CString, usize )> {
+    fn cstring_return_value( &self ) -> ComResult<( CString, usize )> {
 
         let bs : CString = CString::new( "\u{1F600}" ).unwrap();
         let ptr = bs.as_ptr() as usize;
@@ -375,7 +399,7 @@ impl StringTests
         Ok( ( bs, ptr ) )
     }
 
-    pub fn invalid_string( &self, s : &str ) -> ComResult<()> {
+    fn invalid_string( &self, s : &str ) -> ComResult<()> {
 
         // Don't do any validation here.
         // Intercom should do validation automatically.
@@ -386,3 +410,84 @@ impl StringTests
         Err( intercom::E_FAIL )
     }
 }
+
+#[com_class( TypeSystemCaller )]
+pub struct TypeSystemCaller;
+
+#[com_interface]
+#[com_impl]
+impl TypeSystemCaller
+{
+    pub fn new() -> Self { TypeSystemCaller }
+
+    pub fn call_string( &self, i: u32, callback : ComItf<IStringTests> ) -> ComResult<()> {
+
+        let actual = callback.string_to_index( STRING_DATA[ i as usize ] )?;
+        if actual == i {
+            Ok(())
+        } else {
+            Err( intercom::E_FAIL )
+        }
+    }
+
+    fn receive_string( &self, i : u32, callback : ComItf<IStringTests> ) -> ComResult<()> {
+
+        let actual = callback.index_to_string( i )?;
+        let expected = STRING_DATA[ i as usize ];
+
+        if actual == expected {
+            Ok(())
+        } else {
+            Err( intercom::E_FAIL )
+        }
+    }
+
+    fn pass_bstr( &self, callback : ComItf<IStringTests> ) -> ComResult<()> {
+        let bstr = BString::from( "\u{1F4A9}" );
+        callback.bstr_parameter( &bstr, bstr.as_ptr() as usize )
+    }
+
+    fn pass_bstring( &self, callback : ComItf<IStringTests> ) -> ComResult<()> {
+        let bstr = BString::from( "\u{1F4A9}" );
+        callback.bstring_parameter( bstr )
+    }
+
+    fn receive_bstring( &self, callback : ComItf<IStringTests> ) -> ComResult<()> {
+        let ( bstr, ptr ) = callback.bstring_return_value()?;
+
+        if bstr.to_string().unwrap() != "\u{1F4A9}" {
+            return Err( intercom::E_FAIL );
+        }
+
+        if bstr.as_ptr() as usize != ptr {
+            return Err( intercom::E_POINTER );
+        }
+
+        Ok(())
+    }
+
+    fn pass_cstr( &self, callback : ComItf<IStringTests> ) -> ComResult<()> {
+        let cstr = CString::new( "\u{1F4A9}" ).unwrap();
+        callback.cstr_parameter( &cstr, cstr.as_ptr() as usize )
+    }
+
+    fn pass_cstring( &self, callback : ComItf<IStringTests> ) -> ComResult<()> {
+        let cstr = CString::new( "\u{1F4A9}" ).unwrap();
+        callback.cstring_parameter( cstr )
+    }
+
+    fn receive_cstring( &self, callback : ComItf<IStringTests> ) -> ComResult<()> {
+        let ( cstr, ptr ) = callback.cstring_return_value()?;
+
+        if cstr.to_string_lossy() != "\u{1F4A9}" {
+            return Err( intercom::E_FAIL );
+        }
+
+        if cstr.as_ptr() as usize != ptr {
+            return Err( intercom::E_POINTER );
+        }
+
+        Ok(())
+    }
+}
+

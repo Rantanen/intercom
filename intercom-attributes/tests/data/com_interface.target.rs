@@ -79,237 +79,6 @@ pub struct __Foo_AutomationVtbl {
                                                                  *mut ::intercom::raw::InterfacePtr<IUnknown>)
                                       -> ::intercom::HRESULT,
 }
-impl Foo for ::intercom::ComItf<Foo> {
-    fn simple_method(&self) -> () {
-        #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        let comptr =
-            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
-        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
-        #[allow(unused_unsafe)]
-        let result: Result<(), ::intercom::ComError> =
-            (||
-                 unsafe {
-                     let __result =
-                         ((**vtbl).simple_method_Automation)(comptr.ptr);
-                     Ok({ })
-                 })();
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
-        match result {
-            Ok(v) => v,
-            Err(err) =>
-            <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
-        }
-    }
-    fn arg_method(&self, a: u16) -> () {
-        #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        let comptr =
-            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
-        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
-        #[allow(unused_unsafe)]
-        let result: Result<(), ::intercom::ComError> =
-            (||
-                 unsafe {
-                     let __result =
-                         ((**vtbl).arg_method_Automation)(comptr.ptr,
-                                                          a.into());
-                     Ok({ })
-                 })();
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
-        match result {
-            Ok(v) => v,
-            Err(err) =>
-            <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
-        }
-    }
-    fn simple_result_method(&self) -> u16 {
-        #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        let comptr =
-            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
-        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
-        #[allow(unused_unsafe)]
-        let result: Result<u16, ::intercom::ComError> =
-            (||
-                 unsafe {
-                     let __result =
-                         ((**vtbl).simple_result_method_Automation)(comptr.ptr);
-                     Ok({ __result.into() })
-                 })();
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
-        match result {
-            Ok(v) => v,
-            Err(err) =>
-            <u16 as ErrorValue>::from_error(::intercom::return_hresult(err)),
-        }
-    }
-    fn com_result_method(&self) -> ComResult<u16> {
-        #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        let comptr =
-            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
-        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
-        #[allow(unused_unsafe)]
-        let result: Result<ComResult<u16>, ::intercom::ComError> =
-            (||
-                 unsafe {
-                     let mut __out: u16 = Default::default();
-                     let __result =
-                         ((**vtbl).com_result_method_Automation)(comptr.ptr,
-                                                                 &mut __out);
-                     Ok({
-                            if __result == ::intercom::S_OK {
-                                Ok(__out.into())
-                            } else {
-                                Err(::intercom::get_last_error(__result))
-                            }
-                        })
-                 })();
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
-        match result {
-            Ok(v) => v,
-            Err(err) =>
-            <ComResult<u16> as
-                ErrorValue>::from_error(::intercom::return_hresult(err)),
-        }
-    }
-    fn rust_result_method(&self) -> Result<u16, i32> {
-        #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        let comptr =
-            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
-        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
-        #[allow(unused_unsafe)]
-        let result: Result<Result<u16, i32>, ::intercom::ComError> =
-            (||
-                 unsafe {
-                     let mut __out: u16 = Default::default();
-                     let __result =
-                         ((**vtbl).rust_result_method_Automation)(comptr.ptr,
-                                                                  &mut __out);
-                     Ok({
-                            if __result == ::intercom::S_OK {
-                                Ok(__out.into())
-                            } else {
-                                Err(::intercom::get_last_error(__result))
-                            }
-                        })
-                 })();
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
-        match result {
-            Ok(v) => v,
-            Err(err) =>
-            <Result<u16, i32> as
-                ErrorValue>::from_error(::intercom::return_hresult(err)),
-        }
-    }
-    fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
-        #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        let comptr =
-            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
-        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
-        #[allow(unused_unsafe)]
-        let result: Result<ComResult<bool>, ::intercom::ComError> =
-            (||
-                 unsafe {
-                     let mut __out: bool = Default::default();
-                     let __result =
-                         ((**vtbl).complete_method_Automation)(comptr.ptr,
-                                                               a.into(),
-                                                               b.into(),
-                                                               &mut __out);
-                     Ok({
-                            if __result == ::intercom::S_OK {
-                                Ok(__out.into())
-                            } else {
-                                Err(::intercom::get_last_error(__result))
-                            }
-                        })
-                 })();
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
-        match result {
-            Ok(v) => v,
-            Err(err) =>
-            <ComResult<bool> as
-                ErrorValue>::from_error(::intercom::return_hresult(err)),
-        }
-    }
-    fn string_method(&self, msg: String) -> String {
-        #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        let comptr =
-            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
-        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
-        let mut __msg_temporary =
-            <&::intercom::BStr as
-                ::intercom::FromWithTemporary<String>>::to_temporary(msg)?;
-        #[allow(unused_unsafe)]
-        let result: Result<String, ::intercom::ComError> =
-            (||
-                 unsafe {
-                     let __result =
-                         ((**vtbl).string_method_Automation)(comptr.ptr,
-                                                             <&::intercom::BStr
-                                                                 as
-                                                                 ::intercom::FromWithTemporary<String>>::from_temporary(&mut __msg_temporary)?.as_ptr());
-                     Ok({
-                            ::intercom::BString::from_ptr(__result).com_into()?
-                        })
-                 })();
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
-        match result {
-            Ok(v) => v,
-            Err(err) =>
-            <String as
-                ErrorValue>::from_error(::intercom::return_hresult(err)),
-        }
-    }
-    fn comitf_method(&self, itf: ComItf<Foo>) -> ComResult<ComItf<IUnknown>> {
-        #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        let comptr =
-            ::intercom::ComItf::ptr(self, ::intercom::TypeSystem::Automation);
-        let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
-        #[allow(unused_unsafe)]
-        let result:
-                Result<ComResult<ComItf<IUnknown>>, ::intercom::ComError> =
-            (||
-                 unsafe {
-                     let mut __out: ::intercom::raw::InterfacePtr<IUnknown> =
-                         ::intercom::raw::InterfacePtr::new(::std::ptr::null_mut());
-                     let __result =
-                         ((**vtbl).comitf_method_Automation)(comptr.ptr,
-                                                             ::intercom::ComItf::ptr(&itf.into(),
-                                                                                     ::intercom::TypeSystem::Automation),
-                                                             &mut __out);
-                     Ok({
-                            if __result == ::intercom::S_OK {
-                                Ok(::intercom::ComItf::wrap(__out.ptr,
-                                                            ::intercom::TypeSystem::Automation))
-                            } else {
-                                Err(::intercom::get_last_error(__result))
-                            }
-                        })
-                 })();
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
-        match result {
-            Ok(v) => v,
-            Err(err) =>
-            <ComResult<ComItf<IUnknown>> as
-                ErrorValue>::from_error(::intercom::return_hresult(err)),
-        }
-    }
-}
 #[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
 pub const IID_Foo_Raw: ::intercom::IID =
@@ -356,6 +125,452 @@ pub struct __Foo_RawVtbl {
                                                       __out:
                                                           *mut ::intercom::raw::InterfacePtr<IUnknown>)
                                -> ::intercom::HRESULT,
+}
+impl Foo for ::intercom::ComItf<Foo> {
+    fn arg_method(&self, a: u16) -> () {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+            let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<(), ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let __result =
+                             ((**vtbl).arg_method_Automation)(comptr.ptr,
+                                                              a.into());
+                         Ok({ })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <() as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+            let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<(), ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let __result =
+                             ((**vtbl).arg_method_Raw)(comptr.ptr, a.into());
+                         Ok({ })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <() as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        <() as ErrorValue>::from_error(::intercom::E_POINTER)
+    }
+    fn com_result_method(&self) -> ComResult<u16> {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+            let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<ComResult<u16>, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let mut __out: u16 = Default::default();
+                         let __result =
+                             ((**vtbl).com_result_method_Automation)(comptr.ptr,
+                                                                     &mut __out);
+                         Ok({
+                                if __result == ::intercom::S_OK {
+                                    Ok(__out.into())
+                                } else {
+                                    Err(::intercom::get_last_error(__result))
+                                }
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <ComResult<u16> as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+            let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<ComResult<u16>, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let mut __out: u16 = Default::default();
+                         let __result =
+                             ((**vtbl).com_result_method_Raw)(comptr.ptr,
+                                                              &mut __out);
+                         Ok({
+                                if __result == ::intercom::S_OK {
+                                    Ok(__out.into())
+                                } else {
+                                    Err(::intercom::get_last_error(__result))
+                                }
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <ComResult<u16> as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        <ComResult<u16> as ErrorValue>::from_error(::intercom::E_POINTER)
+    }
+    fn comitf_method(&self, itf: ComItf<Foo>) -> ComResult<ComItf<IUnknown>> {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+            let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
+            #[allow(unused_unsafe)]
+            let result:
+                    Result<ComResult<ComItf<IUnknown>>,
+                           ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let mut __out:
+                                 ::intercom::raw::InterfacePtr<IUnknown> =
+                             ::intercom::raw::InterfacePtr::new(::std::ptr::null_mut());
+                         let __result =
+                             ((**vtbl).comitf_method_Automation)(comptr.ptr,
+                                                                 ::intercom::ComItf::ptr(&itf.into(),
+                                                                                         ::intercom::TypeSystem::Automation),
+                                                                 &mut __out);
+                         Ok({
+                                if __result == ::intercom::S_OK {
+                                    Ok(::intercom::ComItf::wrap(__out.ptr,
+                                                                ::intercom::TypeSystem::Automation))
+                                } else {
+                                    Err(::intercom::get_last_error(__result))
+                                }
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <ComResult<ComItf<IUnknown>> as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+            let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
+            #[allow(unused_unsafe)]
+            let result:
+                    Result<ComResult<ComItf<IUnknown>>,
+                           ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let mut __out:
+                                 ::intercom::raw::InterfacePtr<IUnknown> =
+                             ::intercom::raw::InterfacePtr::new(::std::ptr::null_mut());
+                         let __result =
+                             ((**vtbl).comitf_method_Raw)(comptr.ptr,
+                                                          ::intercom::ComItf::ptr(&itf.into(),
+                                                                                  ::intercom::TypeSystem::Raw),
+                                                          &mut __out);
+                         Ok({
+                                if __result == ::intercom::S_OK {
+                                    Ok(::intercom::ComItf::wrap(__out.ptr,
+                                                                ::intercom::TypeSystem::Raw))
+                                } else {
+                                    Err(::intercom::get_last_error(__result))
+                                }
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <ComResult<ComItf<IUnknown>> as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        <ComResult<ComItf<IUnknown>> as
+            ErrorValue>::from_error(::intercom::E_POINTER)
+    }
+    fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+            let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<ComResult<bool>, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let mut __out: bool = Default::default();
+                         let __result =
+                             ((**vtbl).complete_method_Automation)(comptr.ptr,
+                                                                   a.into(),
+                                                                   b.into(),
+                                                                   &mut __out);
+                         Ok({
+                                if __result == ::intercom::S_OK {
+                                    Ok(__out.into())
+                                } else {
+                                    Err(::intercom::get_last_error(__result))
+                                }
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <ComResult<bool> as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+            let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<ComResult<bool>, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let mut __out: bool = Default::default();
+                         let __result =
+                             ((**vtbl).complete_method_Raw)(comptr.ptr,
+                                                            a.into(),
+                                                            b.into(),
+                                                            &mut __out);
+                         Ok({
+                                if __result == ::intercom::S_OK {
+                                    Ok(__out.into())
+                                } else {
+                                    Err(::intercom::get_last_error(__result))
+                                }
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <ComResult<bool> as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        <ComResult<bool> as ErrorValue>::from_error(::intercom::E_POINTER)
+    }
+    fn rust_result_method(&self) -> Result<u16, i32> {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+            let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<Result<u16, i32>, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let mut __out: u16 = Default::default();
+                         let __result =
+                             ((**vtbl).rust_result_method_Automation)(comptr.ptr,
+                                                                      &mut __out);
+                         Ok({
+                                if __result == ::intercom::S_OK {
+                                    Ok(__out.into())
+                                } else {
+                                    Err(::intercom::get_last_error(__result))
+                                }
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <Result<u16, i32> as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+            let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<Result<u16, i32>, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let mut __out: u16 = Default::default();
+                         let __result =
+                             ((**vtbl).rust_result_method_Raw)(comptr.ptr,
+                                                               &mut __out);
+                         Ok({
+                                if __result == ::intercom::S_OK {
+                                    Ok(__out.into())
+                                } else {
+                                    Err(::intercom::get_last_error(__result))
+                                }
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <Result<u16, i32> as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        <Result<u16, i32> as ErrorValue>::from_error(::intercom::E_POINTER)
+    }
+    fn simple_method(&self) -> () {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+            let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<(), ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let __result =
+                             ((**vtbl).simple_method_Automation)(comptr.ptr);
+                         Ok({ })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <() as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+            let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<(), ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let __result =
+                             ((**vtbl).simple_method_Raw)(comptr.ptr);
+                         Ok({ })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <() as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        <() as ErrorValue>::from_error(::intercom::E_POINTER)
+    }
+    fn simple_result_method(&self) -> u16 {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+            let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<u16, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let __result =
+                             ((**vtbl).simple_result_method_Automation)(comptr.ptr);
+                         Ok({ __result.into() })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <u16 as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+            let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<u16, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let __result =
+                             ((**vtbl).simple_result_method_Raw)(comptr.ptr);
+                         Ok({ __result.into() })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <u16 as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        <u16 as ErrorValue>::from_error(::intercom::E_POINTER)
+    }
+    fn string_method(&self, msg: String) -> String {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+            let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
+            let mut __msg_temporary =
+                <&::intercom::BStr as
+                    ::intercom::FromWithTemporary<String>>::to_temporary(msg)?;
+            #[allow(unused_unsafe)]
+            let result: Result<String, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let __result =
+                             ((**vtbl).string_method_Automation)(comptr.ptr,
+                                                                 <&::intercom::BStr
+                                                                     as
+                                                                     ::intercom::FromWithTemporary<String>>::from_temporary(&mut __msg_temporary)?.as_ptr());
+                         Ok({
+                                ::intercom::BString::from_ptr(__result).com_into()?
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <String as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+            let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
+            let mut __msg_temporary =
+                <&::intercom::CStr as
+                    ::intercom::FromWithTemporary<String>>::to_temporary(msg)?;
+            #[allow(unused_unsafe)]
+            let result: Result<String, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let __result =
+                             ((**vtbl).string_method_Raw)(comptr.ptr,
+                                                          <&::intercom::CStr
+                                                              as
+                                                              ::intercom::FromWithTemporary<String>>::from_temporary(&mut __msg_temporary)?.as_ptr());
+                         Ok({
+                                ::intercom::CString::from_raw(__result).com_into()?
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <String as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        <String as ErrorValue>::from_error(::intercom::E_POINTER)
+    }
 }
 impl ::intercom::ComInterface for Foo {
     #[doc = "Returns the IID of the requested interface."]
