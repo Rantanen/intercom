@@ -10,34 +10,6 @@ REM Build Intercom
 cargo build
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-REM Build testlib
-pushd test\testlib
-
-cargo build
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-popd
-
-REM Build multilib
-pushd test\multilib
-
-cargo build
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-popd
-
-
-REM Generate IDL and Manifest for the testlib.
-pushd intercom-cli
-
-cargo run -- idl ..\test\testlib > ..\test\testlib\testlib.idl
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-cargo run -- manifest ..\test\testlib > ..\test\testlib\TestLib.Assembly.manifest
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-popd
-
 REM Build C++ test suite
 del /s /q build\x64
 mkdir build
@@ -56,8 +28,9 @@ popd
 REM Build C# test suite
 pushd test\cs
 
-tlbimp ..\testlib\target\debug\test_lib.dll /MACHINE:X64 /out:TestLib.Interop.dll
+tlbimp ..\target\release\test_lib.dll /MACHINE:X64 /out:TestLib.Interop.dll
 
+nuget restore
 msbuild /p:Platform=x64 /p:Configuration=Release
 if %errorlevel% neq 0 exit /b %errorlevel%
 

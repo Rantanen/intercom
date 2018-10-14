@@ -116,8 +116,8 @@ pub struct __Foo_RawVtbl {
     pub string_method_Raw: unsafe extern "C" fn(self_vtable:
                                                           ::intercom::RawComPtr,
                                                       msg:
-                                                          ::intercom::raw::InBSTR)
-                               -> ::intercom::raw::OutBSTR,
+                                                          ::intercom::raw::InCStr)
+                               -> ::intercom::raw::OutCStr,
     pub comitf_method_Raw: unsafe extern "C" fn(self_vtable:
                                                           ::intercom::RawComPtr,
                                                       itf:
@@ -547,7 +547,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             let mut __msg_temporary =
-                <&::intercom::BStr as
+                <&::intercom::CStr as
                     ::intercom::FromWithTemporary<String>>::to_temporary(msg)?;
             #[allow(unused_unsafe)]
             let result: Result<String, ::intercom::ComError> =
@@ -555,11 +555,11 @@ impl Foo for ::intercom::ComItf<Foo> {
                      unsafe {
                          let __result =
                              ((**vtbl).string_method_Raw)(comptr.ptr,
-                                                          <&::intercom::BStr
+                                                          <&::intercom::CStr
                                                               as
                                                               ::intercom::FromWithTemporary<String>>::from_temporary(&mut __msg_temporary)?.as_ptr());
                          Ok({
-                                ::intercom::BString::from_ptr(__result).com_into()?
+                                ::intercom::CString::from_raw(__result).com_into()?
                             })
                      })();
             return match result {

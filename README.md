@@ -91,7 +91,8 @@ and deallocated using [`IIntercomAllocator`]
 ## Nightly requirement
 
 Intercom requires nightly Rust version for few unstable features. By far the
-most important of these is the procedural macro attributes.
+most important of these is the procedural macro attributes. Unfortunately these
+are not properly feature gated.
 
 The features with feature gates and tracking issues that Intercom depends on are
 listed below:
@@ -101,8 +102,6 @@ listed below:
   Tracking issue: [#31844](https://github.com/rust-lang/rust/issues/31844)
 - `non_exhaustive` - There are some types that we may want to add items to.
   Tracking issue: [#44109](https://github.com/rust-lang/rust/issues/44109)
-- `tool_lints` - Because clippy wants this now.
-  Tracking issue: [#44690](https://github.com/rust-lang/rust/issues/44690)
 
 The following features are currently in use, but more for 'nice to have'
 reasons and could be worked around if we needed to get to stable quickly:

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="packages\MSTest.TestAdapter.1.1.18\build\net45\MSTest.TestAdapter.props" Condition="Exists('packages\MSTest.TestAdapter.1.1.18\build\net45\MSTest.TestAdapter.props')" />
   <PropertyGroup>
@@ -91,7 +91,7 @@
     <Error Condition="!Exists('packages\MSTest.TestAdapter.1.1.18\build\net45\MSTest.TestAdapter.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\MSTest.TestAdapter.1.1.18\build\net45\MSTest.TestAdapter.targets'))" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>copy $(ProjectDir)..\testlib\target\debug\test_lib.dll $(ProjectDir)$(OutDir)test_lib.dll</PostBuildEvent>
+    <PostBuildEvent>copy $(ProjectDir)..\target\$(Configuration)\test_lib.dll $(ProjectDir)$(OutDir)test_lib.dll</PostBuildEvent>
   </PropertyGroup>
   <Import Project="packages\MSTest.TestAdapter.1.1.18\build\net45\MSTest.TestAdapter.targets" Condition="Exists('packages\MSTest.TestAdapter.1.1.18\build\net45\MSTest.TestAdapter.targets')" />
 </Project>

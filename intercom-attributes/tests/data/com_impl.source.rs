@@ -36,6 +36,7 @@ impl Foo
     fn tuple_result_method(&self) -> Result<(u8, u16, u32), i32> { Ok(0) }
 
     fn string_method(&self, input : String) -> String { input }
+    fn string_result_method(&self, input : String) -> ComResult<String> { Ok(input) }
 
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool>
     {

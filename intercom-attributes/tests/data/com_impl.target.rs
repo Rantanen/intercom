@@ -120,6 +120,9 @@ impl Foo {
     fn tuple_result_method(&self) -> Result<(u8, u16, u32), i32> { Ok(0) }
 
     fn string_method(&self, input: String) -> String { input }
+    fn string_result_method(&self, input: String) -> ComResult<String> {
+        Ok(input)
+    }
 
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
         Ok(true)
@@ -370,13 +373,61 @@ unsafe extern "C" fn __Foo_Foo_Automation_string_method_Automation(self_vtable:
                  let __result =
                      self_struct.string_method(<String as
                                                    ::intercom::FromWithTemporary<&::intercom::BStr>>::from_temporary(&mut __input_temporary)?);
-                 Ok({ ::intercom::BString::from(__result).into_ptr() })
+                 Ok({
+                        ::intercom::ComInto::<::intercom::BString>::com_into(__result)?.into_ptr()
+                    })
              })();
     use ::intercom::ErrorValue;
     match result {
         Ok(v) => v,
         Err(err) =>
         <::intercom::raw::OutBSTR as
+            ErrorValue>::from_error(::intercom::return_hresult(err)),
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "C" fn __Foo_Foo_Automation_string_result_method_Automation(self_vtable:
+                                                                                    ::intercom::RawComPtr,
+                                                                                input:
+                                                                                    ::intercom::raw::InBSTR,
+                                                                                __out:
+                                                                                    *mut ::intercom::raw::OutBSTR)
+ -> ::intercom::HRESULT {
+    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+        (||
+             {
+                 let self_combox =
+                     (self_vtable as usize -
+                          __Foo_Foo_AutomationVtbl_offset()) as
+                         *mut ::intercom::ComBox<Foo>;
+                 let mut __input_temporary =
+                     <String as
+                         ::intercom::FromWithTemporary<&::intercom::BStr>>::to_temporary(::intercom::BStr::from_ptr(input))?;
+                 let self_struct: &Foo = &**self_combox;
+                 let __result =
+                     self_struct.string_result_method(<String as
+                                                          ::intercom::FromWithTemporary<&::intercom::BStr>>::from_temporary(&mut __input_temporary)?);
+                 Ok({
+                        match __result {
+                            Ok(v1) => {
+                                *__out =
+                                    ::intercom::ComInto::<::intercom::BString>::com_into(v1)?.into_ptr();
+                                ::intercom::S_OK
+                            }
+                            Err(e) => {
+                                *__out = ::std::ptr::null_mut();
+                                ::intercom::return_hresult(e)
+                            }
+                        }
+                    })
+             })();
+    use ::intercom::ErrorValue;
+    match result {
+        Ok(v) => v,
+        Err(err) =>
+        <::intercom::HRESULT as
             ErrorValue>::from_error(::intercom::return_hresult(err)),
     }
 }
@@ -443,6 +494,8 @@ const __Foo_Foo_AutomationVtbl_INSTANCE: __Foo_AutomationVtbl =
                              __Foo_Foo_Automation_tuple_result_method_Automation,
                          string_method_Automation:
                              __Foo_Foo_Automation_string_method_Automation,
+                         string_result_method_Automation:
+                             __Foo_Foo_Automation_string_result_method_Automation,
                          complete_method_Automation:
                              __Foo_Foo_Automation_complete_method_Automation,};
 #[allow(non_snake_case)]
@@ -667,9 +720,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_tuple_result_method_Raw(self_vtable:
 unsafe extern "C" fn __Foo_Foo_Raw_string_method_Raw(self_vtable:
                                                                ::intercom::RawComPtr,
                                                            input:
-                                                               ::intercom::raw::InBSTR)
- -> ::intercom::raw::OutBSTR {
-    let result: Result<::intercom::raw::OutBSTR, ::intercom::ComError> =
+                                                               ::intercom::raw::InCStr)
+ -> ::intercom::raw::OutCStr {
+    let result: Result<::intercom::raw::OutCStr, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -677,18 +730,65 @@ unsafe extern "C" fn __Foo_Foo_Raw_string_method_Raw(self_vtable:
                          *mut ::intercom::ComBox<Foo>;
                  let mut __input_temporary =
                      <String as
-                         ::intercom::FromWithTemporary<&::intercom::BStr>>::to_temporary(::intercom::BStr::from_ptr(input))?;
+                         ::intercom::FromWithTemporary<&::intercom::CStr>>::to_temporary(::intercom::CStr::from_ptr(input))?;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
                      self_struct.string_method(<String as
-                                                   ::intercom::FromWithTemporary<&::intercom::BStr>>::from_temporary(&mut __input_temporary)?);
-                 Ok({ ::intercom::BString::from(__result).into_ptr() })
+                                                   ::intercom::FromWithTemporary<&::intercom::CStr>>::from_temporary(&mut __input_temporary)?);
+                 Ok({
+                        ::intercom::ComInto::<::intercom::CString>::com_into(__result)?.into_raw()
+                    })
              })();
     use ::intercom::ErrorValue;
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::OutBSTR as
+        <::intercom::raw::OutCStr as
+            ErrorValue>::from_error(::intercom::return_hresult(err)),
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "C" fn __Foo_Foo_Raw_string_result_method_Raw(self_vtable:
+                                                                      ::intercom::RawComPtr,
+                                                                  input:
+                                                                      ::intercom::raw::InCStr,
+                                                                  __out:
+                                                                      *mut ::intercom::raw::OutCStr)
+ -> ::intercom::HRESULT {
+    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+        (||
+             {
+                 let self_combox =
+                     (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
+                         *mut ::intercom::ComBox<Foo>;
+                 let mut __input_temporary =
+                     <String as
+                         ::intercom::FromWithTemporary<&::intercom::CStr>>::to_temporary(::intercom::CStr::from_ptr(input))?;
+                 let self_struct: &Foo = &**self_combox;
+                 let __result =
+                     self_struct.string_result_method(<String as
+                                                          ::intercom::FromWithTemporary<&::intercom::CStr>>::from_temporary(&mut __input_temporary)?);
+                 Ok({
+                        match __result {
+                            Ok(v1) => {
+                                *__out =
+                                    ::intercom::ComInto::<::intercom::CString>::com_into(v1)?.into_raw();
+                                ::intercom::S_OK
+                            }
+                            Err(e) => {
+                                *__out = ::std::ptr::null_mut();
+                                ::intercom::return_hresult(e)
+                            }
+                        }
+                    })
+             })();
+    use ::intercom::ErrorValue;
+    match result {
+        Ok(v) => v,
+        Err(err) =>
+        <::intercom::HRESULT as
             ErrorValue>::from_error(::intercom::return_hresult(err)),
     }
 }
@@ -746,5 +846,7 @@ const __Foo_Foo_RawVtbl_INSTANCE: __Foo_RawVtbl =
                   tuple_result_method_Raw:
                       __Foo_Foo_Raw_tuple_result_method_Raw,
                   string_method_Raw: __Foo_Foo_Raw_string_method_Raw,
+                  string_result_method_Raw:
+                      __Foo_Foo_Raw_string_result_method_Raw,
                   complete_method_Raw: __Foo_Foo_Raw_complete_method_Raw,};
 impl ::intercom::HasInterface<Foo> for Foo { }
