@@ -373,6 +373,24 @@ impl<'a> FromWithTemporary<'a, &'a BStr>
     }
 }
 
+impl<'a> FromWithTemporary<'a, &'a BStr>
+        for CString {
+
+    type Temporary = &'a BStr;
+
+    fn to_temporary( source : &'a BStr ) -> Result<Self::Temporary, ComError> {
+        Ok( source )
+    }
+
+    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
+        let string = temp.to_string()
+                .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )?;
+
+        CString::new( string )
+                .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+    }
+}
+
 pub trait ComInto<TTarget> {
     fn com_into( self ) -> Result<TTarget, ComError>;
 }

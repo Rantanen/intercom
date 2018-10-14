@@ -311,16 +311,35 @@ impl StringTests
 
     pub fn bstr_parameter( &self, s : &BStr, ptr : usize ) -> ComResult<()> {
 
+        let string = s.to_string()
+                .map_err( |_| intercom::E_INVALIDARG )?;
+
+        if string != "\u{1F600}" {
+            return Err( intercom::E_FAIL );
+        }
+
         if s.as_ptr() as usize == ptr {
             Ok(())
         } else {
-            Err( intercom::E_FAIL )
+            Err( intercom::E_POINTER )
         }
     }
 
-    pub fn bstr_return_value( &self ) -> ComResult<( BString, usize )> {
+    pub fn bstring_parameter( &self, s : BString ) -> ComResult<()> {
 
-        let bs : BString = BString::from( "some string" );
+        let string = s.to_string()
+                .map_err( |_| intercom::E_INVALIDARG )?;
+
+        if string != "\u{1F600}" {
+            Err( intercom::E_FAIL )
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn bstring_return_value( &self ) -> ComResult<( BString, usize )> {
+
+        let bs : BString = BString::from( "\u{1F600}" );
         let ptr = bs.as_ptr() as usize;
 
         Ok( ( bs, ptr ) )
@@ -328,16 +347,29 @@ impl StringTests
 
     pub fn cstr_parameter( &self, s : &CStr, ptr : usize ) -> ComResult<()> {
 
+        if s.to_string_lossy() != "\u{1F600}" {
+            return Err( intercom::E_FAIL );
+        }
+
         if s.as_ptr() as usize == ptr {
             Ok(())
         } else {
-            Err( intercom::E_FAIL )
+            Err( intercom::E_POINTER )
         }
     }
 
-    pub fn cstr_return_value( &self ) -> ComResult<( CString, usize )> {
+    pub fn cstring_parameter( &self, s : CString ) -> ComResult<()> {
 
-        let bs : CString = CString::new( "some string" ).unwrap();
+        if s.to_string_lossy() != "\u{1F600}" {
+            Err( intercom::E_FAIL )
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn cstring_return_value( &self ) -> ComResult<( CString, usize )> {
+
+        let bs : CString = CString::new( "\u{1F600}" ).unwrap();
         let ptr = bs.as_ptr() as usize;
 
         Ok( ( bs, ptr ) )

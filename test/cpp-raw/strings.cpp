@@ -9,8 +9,24 @@ using std::char_traits;
 
 #include "testlib.hpp"
 
-void check_equal( uint32_t len, const char16_t* text, intercom::BSTR right )
+intercom::BSTR AllocBstr(
+    IAllocator_Automation* pAllocator,
+    const char16_t* str
+)
 {
+    return pAllocator->AllocBstr(
+            const_cast< uint16_t* >(
+                reinterpret_cast< const uint16_t* >( str ) ),
+			static_cast< uint32_t >(
+                char_traits<char16_t>::length( str ) ) );
+}
+
+
+void check_equal( const char16_t* text, intercom::BSTR right )
+{
+    const size_t len_size_t = text == nullptr ? 0 : char_traits<char16_t>::length( text );
+    const uint32_t len = static_cast< uint32_t >( len_size_t );
+
     if( len == 0 ) {
         REQUIRE( right == nullptr );
         return;
@@ -131,7 +147,7 @@ TEST_CASE( "Using BSTR in interface works" )
                 intercom::HRESULT hr = pStringTestsAutomation->IndexToString( i, OUT &test_text );
                 REQUIRE( hr == intercom::SC_OK );
 
-                check_equal( utf16_len32, utf16_text, test_text );
+                check_equal( utf16_text, test_text );
 
                 pAllocator->FreeBstr( test_text );
             }
@@ -164,62 +180,133 @@ TEST_CASE( "Using BSTR in interface works" )
 
         }
 
-        SECTION( "BSTR into &intercom::BStr is not re-allocated" ) {
+        intercom::BSTR test_bstr_input = AllocBstr( pAllocator, u"\U0001F600" );
 
-            intercom::BSTR test_text = pAllocator->AllocBstr(
-                    const_cast< uint16_t* >(
-                        reinterpret_cast< const uint16_t* >( u"Test string" ) ),
-                    11 );
+        SECTION( "BSTR to BStr" ) {
 
             intercom::HRESULT hr = pStringTestsAutomation->BstrParameter(
-                    test_text, reinterpret_cast< uintptr_t >( test_text ) );
-
-            pAllocator->FreeBstr( test_text );
-
+                    test_bstr_input, reinterpret_cast< uintptr_t >( test_bstr_input ) );
             REQUIRE( hr == intercom::SC_OK );
         }
 
-        SECTION( "BString return value is not re-allocated" ) {
+        SECTION( "BSTR to BString" ) {
 
-            intercom::BSTR test_text = nullptr;
-            uintptr_t test_ptr = 0;
+            intercom::HRESULT hr = pStringTestsAutomation->BstringParameter( test_bstr_input );
+            REQUIRE( hr == intercom::SC_OK );
+        }
 
-            intercom::HRESULT hr = pStringTestsAutomation->BstrReturnValue(
-                    OUT &test_text,
+        SECTION( "BSTR to CStr" ) {
+
+            intercom::HRESULT hr = pStringTestsAutomation->CstrParameter(
+                    test_bstr_input, reinterpret_cast< uintptr_t >( test_bstr_input ) );
+
+            // The text validation should succeed (ie. no E_FAIL), but
+            // pointer validation won't.
+            REQUIRE( hr == intercom::EC_POINTER );
+        }
+
+        SECTION( "BSTR to CString" ) {
+
+            intercom::HRESULT hr = pStringTestsAutomation->CstringParameter( test_bstr_input );
+            REQUIRE( hr == intercom::SC_OK );
+        }
+
+        pAllocator->FreeBstr( test_bstr_input );
+
+        intercom::BSTR test_bstr_output = nullptr;
+        uintptr_t test_ptr = 0;
+
+        SECTION( "BString into BSTR return value" ) {
+
+            intercom::HRESULT hr = pStringTestsAutomation->BstringReturnValue(
+                    OUT &test_bstr_output,
                     OUT &test_ptr );
             REQUIRE( hr == intercom::SC_OK );
 
-            REQUIRE( test_text != nullptr );
-            REQUIRE( reinterpret_cast< uintptr_t >( test_text ) == test_ptr );
-
-            pAllocator->FreeBstr( test_text );
+            check_equal( u"\U0001F600", test_bstr_output );
+            REQUIRE( reinterpret_cast< uintptr_t >( test_bstr_output ) == test_ptr );
         }
 
-        SECTION( "char* into &intercom::CStr is not re-allocated" ) {
+        SECTION( "CString into BSTR return value" ) {
 
-            char* test_text = u8"Test string";
+            intercom::HRESULT hr = pStringTestsAutomation->CstringReturnValue(
+                    OUT &test_bstr_output,
+                    OUT &test_ptr );
+            REQUIRE( hr == intercom::SC_OK );
+
+            check_equal( u"\U0001F600", test_bstr_output );
+
+            // CString into BSTR gets reallocated so the pointer should differ here.
+            REQUIRE( reinterpret_cast< uintptr_t >( test_bstr_output ) != test_ptr );
+        }
+
+
+        pAllocator->FreeBstr( test_bstr_output );
+
+
+        char* test_cstr_input = u8"\U0001F600";
+
+        SECTION( "char* to CStr" ) {
 
             intercom::HRESULT hr = pStringTestsRaw->CstrParameter(
-                    test_text, reinterpret_cast< uintptr_t >( test_text ) );
+                    test_cstr_input, reinterpret_cast< uintptr_t >( test_cstr_input ) );
 
             REQUIRE( hr == intercom::SC_OK );
         }
 
-        SECTION( "BString return value is not re-allocated" ) {
+        SECTION( "char* to CString" ) {
 
-            char* test_text = nullptr;
-            uintptr_t test_ptr = 0;
+            intercom::HRESULT hr = pStringTestsRaw->CstringParameter( test_cstr_input );
 
-            intercom::HRESULT hr = pStringTestsRaw->CstrReturnValue(
-                    OUT &test_text,
+            REQUIRE( hr == intercom::SC_OK );
+        }
+
+        SECTION( "char* to BStr" ) {
+
+            intercom::HRESULT hr = pStringTestsRaw->BstrParameter(
+                    test_cstr_input, reinterpret_cast< uintptr_t >( test_cstr_input ) );
+
+            // The text validation should succeed (ie. no E_FAIL), but
+            // pointer validation won't.
+            REQUIRE( hr == intercom::EC_POINTER );
+        }
+
+        SECTION( "char* to BString" ) {
+
+            intercom::HRESULT hr = pStringTestsRaw->BstringParameter( test_cstr_input );
+
+            REQUIRE( hr == intercom::SC_OK );
+        }
+
+        char* test_cstr_output = nullptr;
+
+        SECTION( "CString into char* return value" ) {
+
+            intercom::HRESULT hr = pStringTestsRaw->CstringReturnValue(
+                    OUT &test_cstr_output,
                     OUT &test_ptr );
             REQUIRE( hr == intercom::SC_OK );
 
-            REQUIRE( test_text != nullptr );
-            REQUIRE( reinterpret_cast< uintptr_t >( test_text ) == test_ptr );
-
-            pAllocator->Free( test_text );
+            REQUIRE( test_cstr_output != nullptr );
+            REQUIRE( strcmp( test_cstr_output, u8"\U0001F600" ) == 0 );
+            REQUIRE( reinterpret_cast< uintptr_t >( test_cstr_output ) == test_ptr );
         }
+
+        SECTION( "BString into char* return value" ) {
+
+            intercom::HRESULT hr = pStringTestsRaw->BstringReturnValue(
+                    OUT &test_cstr_output,
+                    OUT &test_ptr );
+            REQUIRE( hr == intercom::SC_OK );
+
+            REQUIRE( test_cstr_output != nullptr );
+            REQUIRE( strcmp( test_cstr_output, u8"\U0001F600" ) == 0 );
+
+            // BString into char* gets reallocated so the pointer should differ here.
+            REQUIRE( reinterpret_cast< uintptr_t >( test_cstr_output ) != test_ptr );
+        }
+
+        pAllocator->Free( test_cstr_output );
     }
 
     SECTION( "Invalid UTF-16 results in E_INVALIDARG" )
