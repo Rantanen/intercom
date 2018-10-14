@@ -248,7 +248,7 @@ pub fn get_last_error< E >( last_hr : HRESULT ) -> E
             let mut error_ptr : RawComPtr = std::ptr::null_mut();
             let hr = error_store::GetErrorInfo( 0, &mut error_ptr );
 
-            if hr == S_OK {
+            if hr == S_OK && ! error_ptr.is_null(){
 
                 let ierrorinfo = ComItf::< IErrorInfo >::wrap(
                         error_ptr, TypeSystem::Automation );
@@ -289,7 +289,9 @@ pub trait ErrorValue {
 }
 
 impl<T> ErrorValue for T {
-    default fn from_error( _ : HRESULT ) -> Self { panic!() }
+    default fn from_error( _ : HRESULT ) -> Self {
+        panic!( "Function does not support error values" )
+    }
 }
 
 impl ErrorValue for HRESULT {

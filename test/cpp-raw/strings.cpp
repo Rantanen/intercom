@@ -242,8 +242,8 @@ TEST_CASE( "Using BSTR in interface works" )
 
         pAllocator->FreeBstr( test_bstr_output );
 
-
-        char* test_cstr_input = u8"\U0001F600";
+        // We are passing this to generated functions that do not define 'const'.
+        char* test_cstr_input = const_cast< char* >( u8"\U0001F600" );
 
         SECTION( "char* to CStr" ) {
 

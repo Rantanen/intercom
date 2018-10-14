@@ -2,6 +2,9 @@
 #include <string>
 using std::char_traits;
 
+#include <iostream>
+using namespace std;
+
 #include "../cpp-utility/os.hpp"
 #include "../cpp-utility/catch.hpp"
 
@@ -38,6 +41,9 @@ std::tuple< const char*, const char16_t*, const char* > test_data[] = {
 	)
 };
 
+const char16_t* poop_utf16 = u"\U0001F4A9";
+const char* poop_utf8 = u8"\U0001F4A9";
+
 intercom::BSTR AllocBstr(
     IAllocator_Automation* pAllocator,
     const char16_t* str
@@ -48,41 +54,6 @@ intercom::BSTR AllocBstr(
             const_cast< uint16_t* >(
                 reinterpret_cast< const uint16_t* >( str ) ),
 			static_cast< uint32_t >( len ) );
-}
-
-
-void check_equal( const char16_t* text, intercom::BSTR right )
-{
-    const size_t len_size_t = text == nullptr ? 0 : char_traits<char16_t>::length( text );
-    const uint32_t len = static_cast< uint32_t >( len_size_t );
-
-    if( len == 0 ) {
-        REQUIRE( right == nullptr );
-        return;
-    }
-
-    if( len != 0 )
-        REQUIRE( right != nullptr );
-
-    uint32_t right_len = 0;
-    std::memcpy(
-            reinterpret_cast< char* >( &right_len ),
-            reinterpret_cast< char* >( right ) - 4,
-            4 );
-
-    REQUIRE( len * 2 == right_len );
-
-    uint16_t right_termination = 0xffff;
-    std::memcpy(
-            reinterpret_cast< char* >( &right_termination ),
-            reinterpret_cast< char* >( right ) + right_len,
-            2 );
-
-    REQUIRE( right_termination == 0 );
-
-    for( uint32_t i = 0; i < len; i++ ) {
-        REQUIRE( text[ i ] == right[ i ] );
-    }
 }
 
 }
@@ -152,7 +123,7 @@ class RawImplementation : public IStringTests_Raw
         size_t input_len = strlen( input );
 
         if( char_traits<char>::compare(
-                input, u8"\U0001F4A9", input_len ) != 0 )
+                input, poop_utf8, input_len ) != 0 )
         {
             return intercom::EC_FAIL;
         }
@@ -170,7 +141,7 @@ class RawImplementation : public IStringTests_Raw
         size_t input_len = strlen( input );
 
         if( char_traits<char>::compare(
-                input, u8"\U0001F4A9", input_len ) != 0 )
+                input, poop_utf8, input_len ) != 0 )
         {
             return intercom::EC_FAIL;
         }
@@ -192,11 +163,10 @@ class RawImplementation : public IStringTests_Raw
         if( hr != intercom::SC_OK )
             return hr;
 
-        char* utf8_text = u8"\U0001F4A9";
-        const size_t utf8_len = utf8_text == nullptr ? 0 : char_traits<char>::length( utf8_text );
+        const size_t utf8_len = char_traits<char>::length( poop_utf8 );
 
         *result = reinterpret_cast< char* >( pAllocator->Alloc( utf8_len + 1 ) );
-        memcpy( *result, utf8_text, utf8_len + 1 );
+        memcpy( *result, poop_utf8, utf8_len + 1 );
         *result_ptr = reinterpret_cast<size_t>( *result );
 
         pAllocator->Release();
@@ -211,7 +181,7 @@ class RawImplementation : public IStringTests_Raw
         size_t input_len = strlen( input );
 
         if( char_traits<char>::compare(
-                input, u8"\U0001F4A9", input_len ) != 0 )
+                input, poop_utf8, input_len ) != 0 )
         {
             return intercom::EC_FAIL;
         }
@@ -229,7 +199,7 @@ class RawImplementation : public IStringTests_Raw
         size_t input_len = strlen( input );
 
         if( char_traits<char>::compare(
-                input, u8"\U0001F4A9", input_len ) != 0 )
+                input, poop_utf8, input_len ) != 0 )
         {
             return intercom::EC_FAIL;
         }
@@ -251,11 +221,10 @@ class RawImplementation : public IStringTests_Raw
         if( hr != intercom::SC_OK )
             return hr;
 
-        char* utf8_text = u8"\U0001F4A9";
-        const size_t utf8_len = utf8_text == nullptr ? 0 : char_traits<char>::length( utf8_text );
+        const size_t utf8_len = char_traits<char>::length( poop_utf8 );
 
         *result = reinterpret_cast< char* >( pAllocator->Alloc( utf8_len + 1 ) );
-        memcpy( *result, utf8_text, utf8_len + 1 );
+        memcpy( *result, poop_utf8, utf8_len + 1 );
         *result_ptr = reinterpret_cast<size_t>( *result );
 
         pAllocator->Release();
@@ -271,9 +240,6 @@ class RawImplementation : public IStringTests_Raw
     virtual intercom::REF_COUNT_32 INTERCOM_CC Release() { return 1; }
 };
 
-#include <iostream>
-#include <codecvt>
-using namespace std;
 class AutomationImplementation : public IStringTests_Automation
 {
     virtual intercom::HRESULT INTERCOM_CC StringToIndex(
@@ -349,10 +315,14 @@ class AutomationImplementation : public IStringTests_Automation
                     4 );
         }
 
+        size_t expected_len = char_traits<char16_t>::length( poop_utf16 );
+        if( expected_len * 2 != input_len )
+            return intercom::EC_FAIL;
+
         if( char_traits<char16_t>::compare(
                 reinterpret_cast<char16_t*>(input),
-                u"\U0001F4A9",
-                input_len ) != 0 )
+                poop_utf16,
+                expected_len ) != 0 )
         {
             return intercom::EC_FAIL;
         }
@@ -376,10 +346,14 @@ class AutomationImplementation : public IStringTests_Automation
                     4 );
         }
 
+        size_t expected_len = char_traits<char16_t>::length( poop_utf16 );
+        if( expected_len * 2 != input_len )
+            return intercom::EC_FAIL;
+
         if( char_traits<char16_t>::compare(
                 reinterpret_cast<char16_t*>(input),
-                u"\U0001F4A9",
-                input_len ) != 0 )
+                poop_utf16,
+                expected_len ) != 0 )
         {
             return intercom::EC_FAIL;
         }
@@ -401,7 +375,7 @@ class AutomationImplementation : public IStringTests_Automation
         if( hr != intercom::SC_OK )
             return hr;
 
-        *result = AllocBstr( pAllocator, u"\U0001F4A9" );
+        *result = AllocBstr( pAllocator, poop_utf16 );
         *result_ptr = reinterpret_cast<size_t>( *result );
 
         pAllocator->Release();
@@ -422,10 +396,14 @@ class AutomationImplementation : public IStringTests_Automation
                     4 );
         }
 
+        size_t expected_len = char_traits<char16_t>::length( poop_utf16 );
+        if( expected_len * 2 != input_len )
+            return intercom::EC_FAIL;
+
         if( char_traits<char16_t>::compare(
                 reinterpret_cast<char16_t*>(input),
-                u"\U0001F4A9",
-                input_len ) != 0 )
+                poop_utf16,
+                expected_len ) != 0 )
         {
             return intercom::EC_FAIL;
         }
@@ -449,10 +427,14 @@ class AutomationImplementation : public IStringTests_Automation
                     4 );
         }
 
+        size_t expected_len = char_traits<char16_t>::length( poop_utf16 );
+        if( expected_len * 2 != input_len )
+            return intercom::EC_FAIL;
+
         if( char_traits<char16_t>::compare(
                 reinterpret_cast<char16_t*>(input),
-                u"\U0001F4A9",
-                input_len ) != 0 )
+                poop_utf16,
+                expected_len ) != 0 )
         {
             return intercom::EC_FAIL;
         }
@@ -474,7 +456,7 @@ class AutomationImplementation : public IStringTests_Automation
         if( hr != intercom::SC_OK )
             return hr;
 
-        *result = AllocBstr( pAllocator, u"\U0001F4A9" );
+        *result = AllocBstr( pAllocator, poop_utf16 );
         *result_ptr = reinterpret_cast<size_t>( *result );
 
         pAllocator->Release();
