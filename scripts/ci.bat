@@ -28,8 +28,9 @@ popd
 REM Build C# test suite
 pushd test\cs
 
-tlbimp ..\testlib\target\debug\test_lib.dll /MACHINE:X64 /out:TestLib.Interop.dll
+tlbimp ..\target\release\test_lib.dll /MACHINE:X64 /out:TestLib.Interop.dll
 
+nuget restore
 msbuild /p:Platform=x64 /p:Configuration=Release
 if %errorlevel% neq 0 exit /b %errorlevel%
 
