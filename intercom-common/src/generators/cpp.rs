@@ -143,6 +143,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
         match type_name.as_str() {
             "RawComPtr" => "*void".to_owned(),
             "InBSTR" | "OutBSTR" => "intercom::BSTR".to_owned(),
+            "InCStr" | "OutCStr" => "char*".to_owned(),
             "usize" => "size_t".to_owned(),
             "i8" => "int8_t".to_owned(),
             "u8" => "uint8_t".to_owned(),
@@ -460,7 +461,7 @@ mod test {
                     methods : vec![
                         CppMethod {
                             name : "AllocBstr".to_owned(),
-                            ret_type : "intercom::BSTR".to_owned(),
+                            ret_type : "char*".to_owned(),
                             args : vec![
                                 CppArg {
                                     name : "text".to_owned(),
@@ -478,7 +479,7 @@ mod test {
                             args : vec![
                                 CppArg {
                                     name : "bstr".to_owned(),
-                                    arg_type : "intercom::BSTR".to_owned(),
+                                    arg_type : "char*".to_owned(),
                                 },
                             ]
                         },
@@ -544,18 +545,18 @@ mod test {
             #[com_impl]
             impl CoClass {
                 pub fn new() -> CoClass { CoClass }
-                pub fn bstr_method( &self, b : String ) -> String {}
+                pub fn cstr_method( &self, b : String ) -> String {}
             }
         "# ] ).expect( "Could not parse test crate" );
 
         let expected_method =
             CppMethod {
-                name : "BstrMethod".to_owned(),
-                ret_type : "intercom::BSTR".to_owned(),
+                name : "CstrMethod".to_owned(),
+                ret_type : "char*".to_owned(),
                 args : vec![
                     CppArg {
                         name : "b".to_owned(),
-                        arg_type : "intercom::BSTR".to_owned(),
+                        arg_type : "char*".to_owned(),
                     },
                 ]
             };
@@ -569,7 +570,7 @@ mod test {
                         .unwrap()
                     .methods
                         .iter()
-                        .find( |m| m.name == "BstrMethod" )
+                        .find( |m| m.name == "CstrMethod" )
                         .unwrap();
 
         assert_eq!( &expected_method, actual_method );
