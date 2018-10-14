@@ -245,12 +245,12 @@ impl TypeHandler for StringParam
                 // The type system input 'ident' should represent either a BString or CString
                 // depending on the type system.
                 let str_type = match self.context.type_system {
-                    ModelTypeSystem::Automation => quote!( BString ),
-                    ModelTypeSystem::Raw => quote!( CString ),
+                    ModelTypeSystem::Automation => quote!( BString::from_ptr ),
+                    ModelTypeSystem::Raw => quote!( CString::from_raw ),
                 };
 
                 // Get the type system string as Rust string.
-                let ts_string = quote!( ::intercom::#str_type::from_ptr( #ident ) );
+                let ts_string = quote!( ::intercom::#str_type( #ident ) );
 
                 // Convert the TS string into whatever string type the method requires.
                 TypeConversion {
