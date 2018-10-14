@@ -6,8 +6,13 @@
     #include <Windows.h>
 
     // Importing the DLL duplicates the __oud identifier which causes a warning.
-    #import "..\testlib\target\debug\test_lib.dll" raw_interfaces_only named_guids \
+#ifdef DEBUG
+    #import "..\target\debug\test_lib.dll" raw_interfaces_only named_guids \
         rename("__out", "__out_test_lib")
+#else
+    #import "..\target\release\test_lib.dll" raw_interfaces_only named_guids \
+        rename("__out", "__out_test_lib")
+#endif
     using namespace TestLib;
 
 #elif __GNUC__
