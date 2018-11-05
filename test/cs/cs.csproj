@@ -64,8 +64,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="TestLib.Interop">
-      <HintPath>.\TestLib.Interop.dll</HintPath>
+    <Reference Include="Interop.TestLib">
+      <HintPath>$(OutputPath)Interop.TestLib.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
   </ItemGroup>
@@ -77,6 +77,7 @@
     <Compile Include="PrimitiveOperations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StatefulOperations.cs" />
+    <Compile Include="VariantTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -94,4 +95,15 @@
     <PostBuildEvent>copy $(ProjectDir)..\target\$(Configuration)\test_lib.dll $(ProjectDir)$(OutDir)test_lib.dll</PostBuildEvent>
   </PropertyGroup>
   <Import Project="packages\MSTest.TestAdapter.1.1.18\build\net45\MSTest.TestAdapter.targets" Condition="Exists('packages\MSTest.TestAdapter.1.1.18\build\net45\MSTest.TestAdapter.targets')" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <Target Name="ResolveCOMReference" BeforeTargets="PrepareForBuild">
+    <ResolveComReference
+        TypeLibFiles="$(ProjectDir)..\target\$(Configuration)\test_lib.dll"
+        WrapperOutputDirectory="$(OutputPath)"
+        StateFile="$(OutputPath)\Interop.TestLib.dll.state"
+        Silent="true" />
+  </Target>
 </Project>

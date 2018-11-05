@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -14,7 +14,7 @@ namespace cs
         [TestMethod]
         public void ErrorsShowUpAsExceptions()
         {
-            var lib = new TestLib.Interop.ErrorSource();
+            var lib = new TestLib.ErrorSource();
             unchecked
             {
                 Assert.ThrowsException< COMException >(
@@ -26,7 +26,7 @@ namespace cs
         [TestMethod]
         public void E_NOTIMPL_ConvertsToNotImplementedException()
         {
-            var lib = new TestLib.Interop.ErrorSource();
+            var lib = new TestLib.ErrorSource();
             unchecked
             {
                 Assert.ThrowsException< NotImplementedException >(
@@ -38,7 +38,7 @@ namespace cs
         [TestMethod]
         public void E_INVALIDARG_ConvertsToInvalidArgumentException()
         {
-            var lib = new TestLib.Interop.ErrorSource();
+            var lib = new TestLib.ErrorSource();
             unchecked
             {
                 Assert.ThrowsException< ArgumentException >(
@@ -50,7 +50,7 @@ namespace cs
         [TestMethod]
         public void E_POINTER_ConvertsToNullReferenceException()
         {
-            var lib = new TestLib.Interop.ErrorSource();
+            var lib = new TestLib.ErrorSource();
             unchecked
             {
                 Assert.ThrowsException< NullReferenceException >(
@@ -62,7 +62,7 @@ namespace cs
         [TestMethod]
         public void E_NOINTERFACE_ConvertsToInvalidCastException()
         {
-            var lib = new TestLib.Interop.ErrorSource();
+            var lib = new TestLib.ErrorSource();
             unchecked
             {
                 Assert.ThrowsException< InvalidCastException >(
@@ -74,7 +74,7 @@ namespace cs
         [TestMethod]
         public void E_ABORT_ConvertsToCOMException()
         {
-            var lib = new TestLib.Interop.ErrorSource();
+            var lib = new TestLib.ErrorSource();
             unchecked
             {
                 Assert.ThrowsException< COMException >(

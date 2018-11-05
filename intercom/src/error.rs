@@ -96,6 +96,21 @@ impl From<ComError> for ::HRESULT {
     }
 }
 
+impl<'a> From<&'a str> for ::ComError
+{
+    fn from( s : &'a str ) -> Self {
+        s.to_string().into()
+    }
+}
+
+impl From<String> for ::ComError
+{
+    fn from( s : String ) -> Self {
+        Self::new_message( ::E_FAIL, s )
+    }
+}
+
+
 #[cfg(windows)]
 #[allow(non_snake_case)]
 mod error_store {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +13,7 @@ namespace cs
         [TestMethod]
         public void StateIsStored()
         {
-            var lib = new TestLib.Interop.StatefulOperations();
+            var lib = new TestLib.StatefulOperations();
 
             var value = new Random().Next();
             lib.PutValue( value );

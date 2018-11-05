@@ -144,7 +144,7 @@ pub struct BString(
 
 impl BString {
 
-    pub fn from_ptr( ptr : *mut u16 ) -> BString {
+    pub unsafe fn from_ptr( ptr : *mut u16 ) -> BString {
         BString( ptr )
     }
 
@@ -425,6 +425,18 @@ pub trait ComInto<TTarget> {
     fn com_into( self ) -> Result<TTarget, ComError>;
 }
 
+pub trait ComFrom<TSource> : Sized {
+    fn com_from( source : TSource ) -> Result<Self, ComError>;
+}
+
+impl<TTarget, TSource> ComFrom<TSource> for TTarget
+    where TSource : ComInto< TTarget > {
+
+    fn com_from( source : TSource ) -> Result<Self, ComError> {
+        source.com_into()
+    }
+}
+
 impl<T> ComInto<T> for T {
     fn com_into( self ) -> Result<T, ComError> {
         Ok( self )
@@ -687,6 +699,11 @@ mod os {
             *( pbstr.offset( -2 ) as *const u32 ) / 2
         }
     }
+}
+
+pub enum IntercomString {
+    BString( BString ),
+    CString( CString ),
 }
 
 #[cfg(test)]

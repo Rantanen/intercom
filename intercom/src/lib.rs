@@ -80,7 +80,7 @@ mod error; pub use error::{return_hresult, get_last_error, ComError, ErrorInfo, 
 mod interfaces;
 pub mod runtime;
 pub mod alloc;
-pub mod variant;
+mod variant;
 
 // intercom_attributes use "intercom::" to qualify things in this crate.
 // Declare such module here and import everything we have in it to make those
@@ -126,12 +126,22 @@ pub mod raw {
 
     pub type InCStr = *const ::std::os::raw::c_char;
     pub type OutCStr = *mut ::std::os::raw::c_char;
+
+    pub use variant::raw::*;
     
     #[repr(C)]
     pub struct InterfacePtr<I: ?Sized> {
         pub ptr : super::RawComPtr,
         phantom : ::std::marker::PhantomData<I>,
     }
+
+    impl<I: ?Sized> Clone for InterfacePtr<I> {
+        fn clone( &self ) -> Self {
+            InterfacePtr { ptr: self.ptr, phantom: ::std::marker::PhantomData }
+        }
+    }
+
+    impl<I: ?Sized> Copy for InterfacePtr<I> {}
 
     impl<I: ?Sized> InterfacePtr<I> {
         pub fn new( ptr : super::RawComPtr ) -> InterfacePtr<I> {
