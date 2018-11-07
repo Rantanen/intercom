@@ -421,66 +421,66 @@ impl<'a> FromWithTemporary<'a, &'a BStr>
     }
 }
 
-pub trait ComInto<TTarget> {
-    fn com_into( self ) -> Result<TTarget, ComError>;
-}
-
 pub trait ComFrom<TSource> : Sized {
     fn com_from( source : TSource ) -> Result<Self, ComError>;
 }
 
-impl<TTarget, TSource> ComFrom<TSource> for TTarget
-    where TSource : ComInto< TTarget > {
+pub trait ComInto<TTarget> {
+    fn com_into( self ) -> Result<TTarget, ComError>;
+}
 
-    fn com_from( source : TSource ) -> Result<Self, ComError> {
-        source.com_into()
+impl<TTarget, TSource> ComInto<TTarget> for TSource
+    where TTarget : ComFrom< TSource > {
+
+    fn com_into( self ) -> Result<TTarget, ComError> {
+        TTarget::com_from( self )
     }
 }
 
-impl<T> ComInto<T> for T {
-    fn com_into( self ) -> Result<T, ComError> {
-        Ok( self )
+impl<T> ComFrom<T> for T {
+    fn com_from( source : T ) -> Result<T, ComError> {
+        Ok( source )
     }
 }
 
-impl ComInto<String> for BString {
-    fn com_into( self ) -> Result<String, ComError> {
-        let mut bstr : &BStr = &self;
+impl ComFrom<BString> for String {
+    fn com_from( source : BString ) -> Result<Self, ComError> {
+        let mut bstr : &BStr = &source;
         < String as FromWithTemporary<&BStr> >::from_temporary( &mut bstr )
     }
 }
 
-impl ComInto<BString> for String {
-    fn com_into( self ) -> Result<BString, ComError> {
-        Ok( BString::from( self ) )
+impl ComFrom<String> for BString {
+    fn com_from( source : String ) -> Result<Self, ComError> {
+        Ok( BString::from( source ) )
     }
 }
 
-impl ComInto<String> for CString {
-    fn com_into( self ) -> Result<String, ComError> {
-        self.into_string()
+impl ComFrom<CString> for String {
+    fn com_from( source : CString ) -> Result<Self, ComError> {
+        source.into_string()
                 .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
     }
 }
 
-impl ComInto<CString> for String {
-    fn com_into( self ) -> Result<CString, ComError> {
-        CString::new( self )
+impl ComFrom<String> for CString {
+    fn com_from( source: String ) -> Result<Self, ComError> {
+        CString::new( source )
                 .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
     }
 }
 
-impl ComInto<BString> for CString {
-    fn com_into( self ) -> Result<BString, ComError> {
-        self.to_str()
+impl ComFrom<CString> for BString {
+    fn com_from( source : CString ) -> Result<Self, ComError> {
+        source.to_str()
                 .map( BString::from )
                 .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
     }
 }
 
-impl ComInto<CString> for BString {
-    fn com_into( self ) -> Result<CString, ComError> {
-        let string = self.to_string()
+impl ComFrom<BString> for CString {
+    fn com_from( source : BString ) -> Result<Self, ComError> {
+        let string = source.to_string()
                 .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )?;
 
         CString::new( string )
@@ -704,7 +704,10 @@ mod os {
 pub enum IntercomString {
     BString( BString ),
     CString( CString ),
+    String( String ),
 }
+
+
 
 #[cfg(test)]
 mod test {
