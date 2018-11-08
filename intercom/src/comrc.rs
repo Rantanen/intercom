@@ -8,6 +8,20 @@ pub struct ComRc<T : ?Sized> {
     itf : ComItf<T>
 }
 
+impl<T: ?Sized> std::fmt::Debug for ComRc<T> {
+    fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
+        (**self).fmt(f)
+    }
+}
+
+impl<T: ?Sized> Clone for ComRc<T> {
+    fn clone( &self ) -> Self {
+        let rc = ComRc { itf : self.itf.clone() };
+        rc.itf.as_ref().release();
+        rc
+    }
+}
+
 // ComRc is a smart pointer and shouldn't introduce methods on 'self'.
 //
 // Various as_ and into_ methods here are properly implemented static methods

@@ -26,7 +26,8 @@ impl VariantTests
                     format!( "Expected type {}, got {}", vt, variant.raw_type() ) ) );
         }
 
-        match vt {
+        let data = format!( "{:?}", variant );
+        let r = match vt {
             0 => Ok( true ),
             1 => Ok( true ),
             2 => Ok( -1i16 == variant.try_into()? ),
@@ -62,6 +63,15 @@ impl VariantTests
             20 => Ok( -1i64 == variant.try_into()? ),
             21 => Ok( 129292929u64 == variant.try_into()? ),
             _ => Err( E_NOTIMPL )?,
+        };
+
+        match r {
+            Ok( true ) => Ok( true ),
+            Ok( false ) => 
+                    Err( ComError::new_message(
+                            E_INVALIDARG,
+                            format!( "Bad data: {}", data ) ) ),
+            Err( e ) => e
         }
     }
 

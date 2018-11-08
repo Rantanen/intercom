@@ -26,6 +26,15 @@ pub struct BStr(
     [u8]
 );
 
+impl std::fmt::Debug for BStr {
+    fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
+        write!( f, "BStr(\"{}\")",
+                String::from_utf16_lossy( unsafe { std::slice::from_raw_parts(
+                        self.as_ptr() as *const u16,
+                        self.len() as usize / 2 ) } ) )
+    }
+}
+
 impl BStr {
 
     /// Unsafely creates a `BStr` from a BSTR pointer.
@@ -141,6 +150,16 @@ pub struct BString(
     // The pointer must be 32-bit aligned.
     *mut u16
 );
+
+impl std::fmt::Debug for BString {
+    fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
+        write!( f, "BStr(\"{}\")",
+                String::from_utf16_lossy( unsafe { std::slice::from_raw_parts(
+                        self.as_ptr() as *const u16,
+                        self.len_bytes() as usize / 2 ) } ) )
+    }
+}
+
 
 impl BString {
 
@@ -701,6 +720,7 @@ mod os {
     }
 }
 
+#[derive(Debug)]
 pub enum IntercomString {
     BString( BString ),
     CString( CString ),

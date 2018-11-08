@@ -3,6 +3,7 @@ use ::*;
 use std::convert::TryFrom;
 use std::time::{SystemTime};
 
+#[derive(Debug)]
 pub enum Variant
 {
     None,
@@ -100,6 +101,9 @@ impl From<raw::Variant> for Variant {
                                 ::BString::from_ptr( *src.data.pbstrVal ) ) ),
                     raw::var_type::DATE =>
                         Variant::SystemTime( (*src.data.pdate).into() ),
+                    raw::var_type::UNKNOWN =>
+                        Variant::IUnknown( ComRc::wrap(
+                                *src.data.ppunkVal, TypeSystem::Automation ) ),
                     _ => Variant::Raw( src ),
                 }
             }
@@ -450,8 +454,9 @@ impl<T: Into<IntercomString>> From< T > for Variant {
 
 pub mod raw {
 
-    use super::*;
     use std;
+    use intercom::{BString, ComError};
+    use std::convert::TryFrom;
     use std::time::{SystemTime, Duration};
 
     #[repr(C)]
@@ -1001,6 +1006,12 @@ pub mod raw {
                     }
                 }
             }
+        }
+    }
+
+    impl std::fmt::Debug for Variant {
+        fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
+            write!( f, "Variant::Raw(type = {})", self.vt.0 )
         }
     }
 

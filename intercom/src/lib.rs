@@ -128,7 +128,7 @@ pub mod raw {
     pub type OutCStr = *mut ::std::os::raw::c_char;
 
     // ... for some reason the 'Variant' needs to be exported explicitly here.
-    pub use variant::raw::{*, Variant};
+    pub use variant::raw::*;
     
     #[repr(C)]
     #[derive(PartialEq, Eq)]
@@ -145,6 +145,13 @@ pub mod raw {
     }
 
     impl<I: ?Sized> Copy for InterfacePtr<I> {}
+
+    impl<I: ?Sized> std::fmt::Debug for InterfacePtr<I> {
+        fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
+            write!( f, "InterfacePtr({:?})", self.ptr )
+        }
+    }
+
 
     impl<I: ?Sized> InterfacePtr<I> {
         pub fn new( ptr : super::RawComPtr ) -> InterfacePtr<I> {

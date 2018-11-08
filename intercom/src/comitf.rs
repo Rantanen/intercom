@@ -27,6 +27,23 @@ pub struct ComItf<T> where T: ?Sized {
     phantom: PhantomData<T>,
 }
 
+impl<T: ?Sized> std::fmt::Debug for ComItf<T> {
+    fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
+        write!( f, "ComItf(automation = {:?}, raw = {:?})", 
+                self.automation_ptr, self.raw_ptr )
+    }
+}
+
+impl<T: ?Sized> Clone for ComItf<T> {
+    fn clone( &self ) -> Self {
+        ComItf {
+            raw_ptr: self.raw_ptr,
+            automation_ptr: self.automation_ptr,
+            phantom: PhantomData
+        }
+    }
+}
+
 impl<T: ?Sized> ComItf<T> {
 
     /// Creates a `ComItf<T>` from a raw type system COM interface pointer..

@@ -317,6 +317,7 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
             "f64" => "double".to_owned(),
             "f32" => "float".to_owned(),
             "VariantBool" => "VARIANT_BOOL".to_owned(),
+            "Variant" => "VARIANT".to_owned(),
             "c_void" => "void".to_owned(),
             t => IdlTypeInfo::get_idl_name_for_custom_type( krate, t, ts_config ),
         }

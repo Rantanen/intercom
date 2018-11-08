@@ -430,7 +430,7 @@ fn map_by_name(
             Rc::new( StringParam { ty: original_type, context } ),
         "bool" =>
             Rc::new( BoolParam { context } ),
-        "Variant2" =>
+        "Variant" =>
             Rc::new( VariantParam { ty: original_type } ),
         // "str" => Rc::new( StringRefParam( original_type ) ),
 
