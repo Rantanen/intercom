@@ -246,7 +246,7 @@ impl TypeHandler for BoolParam {
 }
 
 /// `Variant` parameter handler. Supports `VARIANT` for automation type system.
-struct VariantParam { ty: Type, context: TypeContext }
+struct VariantParam { ty: Type }
 
 impl TypeHandler for VariantParam {
 
@@ -255,15 +255,7 @@ impl TypeHandler for VariantParam {
     /// The COM type.
     fn com_ty( &self ) -> Type
     {
-        parse_quote!( intercom::raw::Variant )
-    }
-
-    fn default_value( &self ) -> TokenStream
-    {
-        match self.context.type_system {
-            ModelTypeSystem::Automation => quote!( false.into() ),
-            ModelTypeSystem::Raw => quote!( false ),
-        }
+        parse_quote!( ::intercom::raw::Variant )
     }
 
     /// Converts a COM parameter named by the ident into a Rust type.
@@ -273,7 +265,7 @@ impl TypeHandler for VariantParam {
     {
         TypeConversion {
             temporary: None,
-            value: quote!( #ident.com_into()? )
+            value: quote!( #ident.into() )
         }
     }
 
@@ -438,8 +430,8 @@ fn map_by_name(
             Rc::new( StringParam { ty: original_type, context } ),
         "bool" =>
             Rc::new( BoolParam { context } ),
-        "Variant" =>
-            Rc::new( VariantParam { ty: original_type, context } ),
+        "Variant2" =>
+            Rc::new( VariantParam { ty: original_type } ),
         // "str" => Rc::new( StringRefParam( original_type ) ),
 
         // Unknown. Use IdentityParam.

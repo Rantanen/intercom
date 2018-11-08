@@ -5,6 +5,7 @@ use std::time::{SystemTime};
 
 pub enum Variant
 {
+    None,
     I8( i8 ),
     I16( i16 ),
     I32( i32 ),
@@ -27,6 +28,7 @@ impl Variant {
     pub fn raw_type( &self ) -> u16 {
 
         match self {
+            Variant::None => raw::var_type::EMPTY,
             Variant::I8( .. ) => raw::var_type::I1,
             Variant::I16( .. ) => raw::var_type::I2,
             Variant::I32( .. ) => raw::var_type::I4,
@@ -46,11 +48,18 @@ impl Variant {
     }
 }
 
+impl Default for Variant {
+    fn default() -> Self {
+        Variant::None
+    }
+}
+
 impl From<raw::Variant> for Variant {
     fn from( src: raw::Variant ) -> Variant {
         unsafe {
             if src.vt.0 & raw::var_type::BYREF == 0 {
                 match src.vt.0 & raw::var_type::TYPEMASK {
+                    raw::var_type::EMPTY | raw::var_type::NULL => Variant::None,
                     raw::var_type::I1 => Variant::I8( src.data.bVal ),
                     raw::var_type::I2 => Variant::I16( src.data.iVal ),
                     raw::var_type::I4 => Variant::I32( src.data.lVal ),
@@ -74,6 +83,7 @@ impl From<raw::Variant> for Variant {
                 }
             } else {
                 match src.vt.0 & raw::var_type::TYPEMASK {
+                    raw::var_type::EMPTY | raw::var_type::NULL => Variant::None,
                     raw::var_type::I1 => Variant::I8( *src.data.pbVal ),
                     raw::var_type::I2 => Variant::I16( *src.data.piVal ),
                     raw::var_type::I4 => Variant::I32( *src.data.plVal ),
@@ -100,6 +110,9 @@ impl From<raw::Variant> for Variant {
 impl ComFrom<Variant> for raw::Variant {
     fn com_from( src: Variant ) -> Result< Self, ComError > {
         Ok( match src {
+            Variant::None => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::EMPTY ),
+                    raw::VariantData { bVal : 0 } ),
             Variant::I8( data ) => raw::Variant::new(
                     raw::VariantType::new( raw::var_type::I1 ),
                     raw::VariantData { bVal : data } ),

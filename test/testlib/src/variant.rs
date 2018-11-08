@@ -9,7 +9,7 @@ pub struct VariantTests;
 
 #[com_interface]
 pub trait IVariantInterface {
-    fn do_stuff( &self ) -> ComResult<raw::Variant>;
+    fn do_stuff( &self ) -> ComResult<Variant>;
 }
 
 #[com_interface]
@@ -18,12 +18,12 @@ impl VariantTests
 {
     pub fn new() -> VariantTests { VariantTests }
 
-    pub fn variant_parameter( &self, vt : u16, variant : raw::Variant ) -> Result<bool, ComError> {
+    pub fn variant_parameter( &self, vt : u16, variant : Variant ) -> Result<bool, ComError> {
 
-        if variant.vt.0 != vt {
+        if variant.raw_type() != vt {
             return Err( ComError::new_message(
                     E_INVALIDARG,
-                    format!( "Expected type {}, got {}", vt, variant.vt.0 ) ) );
+                    format!( "Expected type {}, got {}", vt, variant.raw_type() ) ) );
         }
 
         match vt {
@@ -65,7 +65,7 @@ impl VariantTests
         }
     }
 
-    pub fn variant_result( &self ) -> ComResult<raw::Variant> {
+    pub fn variant_result( &self ) -> ComResult<Variant> {
         Ok( 123.into() )
     }
 }

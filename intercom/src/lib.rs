@@ -80,7 +80,7 @@ mod error; pub use error::{return_hresult, get_last_error, ComError, ErrorInfo, 
 mod interfaces;
 pub mod runtime;
 pub mod alloc;
-mod variant;
+mod variant; pub use variant::{Variant, VariantError};
 
 // intercom_attributes use "intercom::" to qualify things in this crate.
 // Declare such module here and import everything we have in it to make those
@@ -127,7 +127,8 @@ pub mod raw {
     pub type InCStr = *const ::std::os::raw::c_char;
     pub type OutCStr = *mut ::std::os::raw::c_char;
 
-    pub use variant::raw::*;
+    // ... for some reason the 'Variant' needs to be exported explicitly here.
+    pub use variant::raw::{*, Variant};
     
     #[repr(C)]
     #[derive(PartialEq, Eq)]
