@@ -187,7 +187,7 @@ impl TryFrom< Variant > for u8 {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< u8, Self::Error > {
         match src {
-            Variant::U8( data ) => Ok( data as Self ),
+            Variant::U8( data ) => Ok( data ),
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -204,7 +204,7 @@ impl TryFrom< Variant > for i8 {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< i8, Self::Error > {
         match src {
-            Variant::I8( data ) => Ok( data as Self ),
+            Variant::I8( data ) => Ok( data ),
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -220,8 +220,8 @@ impl TryFrom< Variant > for u16 {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< u16, Self::Error > {
         match src {
-            Variant::U8( data ) => Ok( data as Self ),
-            Variant::U16( data ) => Ok( data as Self ),
+            Variant::U8( data ) => Ok( data.into() ),
+            Variant::U16( data ) => Ok( data ),
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -238,9 +238,9 @@ impl TryFrom< Variant > for i16 {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< i16, Self::Error > {
         match src {
-            Variant::I8( data ) => Ok( data as Self ),
-            Variant::U8( data ) => Ok( data as Self ),
-            Variant::I16( data ) => Ok( data as Self ),
+            Variant::I8( data ) => Ok( data.into() ),
+            Variant::U8( data ) => Ok( data.into() ),
+            Variant::I16( data ) => Ok( data ),
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -256,9 +256,9 @@ impl TryFrom< Variant > for u32 {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< u32, Self::Error > {
         match src {
-            Variant::U8( data ) => Ok( data as Self ),
-            Variant::U16( data ) => Ok( data as Self ),
-            Variant::U32( data ) => Ok( data as Self ),
+            Variant::U8( data ) => Ok( data.into() ),
+            Variant::U16( data ) => Ok( data.into() ),
+            Variant::U32( data ) => Ok( data ),
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -275,11 +275,11 @@ impl TryFrom< Variant > for i32 {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< i32, Self::Error > {
         match src {
-            Variant::I8( data ) => Ok( data as Self ),
-            Variant::U8( data ) => Ok( data as Self ),
-            Variant::I16( data ) => Ok( data as Self ),
-            Variant::U16( data ) => Ok( data as Self ),
-            Variant::I32( data ) => Ok( data as Self ),
+            Variant::I8( data ) => Ok( data.into() ),
+            Variant::U8( data ) => Ok( data.into() ),
+            Variant::I16( data ) => Ok( data.into() ),
+            Variant::U16( data ) => Ok( data.into() ),
+            Variant::I32( data ) => Ok( data ),
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -295,10 +295,10 @@ impl TryFrom< Variant > for u64 {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< u64, Self::Error > {
         match src {
-            Variant::U8( data ) => Ok( data as Self ),
-            Variant::U16( data ) => Ok( data as Self ),
-            Variant::U32( data ) => Ok( data as Self ),
-            Variant::U64( data ) => Ok( data as Self ),
+            Variant::U8( data ) => Ok( data.into() ),
+            Variant::U16( data ) => Ok( data.into() ),
+            Variant::U32( data ) => Ok( data.into() ),
+            Variant::U64( data ) => Ok( data ),
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -315,13 +315,13 @@ impl TryFrom< Variant > for i64 {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< i64, Self::Error > {
         match src {
-            Variant::I8( data ) => Ok( data as Self ),
-            Variant::U8( data ) => Ok( data as Self ),
-            Variant::I16( data ) => Ok( data as Self ),
-            Variant::U16( data ) => Ok( data as Self ),
-            Variant::I32( data ) => Ok( data as Self ),
-            Variant::U32( data ) => Ok( data as Self ),
-            Variant::I64( data ) => Ok( data as Self ),
+            Variant::I8( data ) => Ok( data.into() ),
+            Variant::U8( data ) => Ok( data.into() ),
+            Variant::I16( data ) => Ok( data.into() ),
+            Variant::U16( data ) => Ok( data.into() ),
+            Variant::I32( data ) => Ok( data.into() ),
+            Variant::U32( data ) => Ok( data.into() ),
+            Variant::I64( data ) => Ok( data ),
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -342,7 +342,7 @@ impl TryFrom< Variant > for f32 {
             Variant::U8( data ) => Ok( data.into() ),
             Variant::I16( data ) => Ok( data.into() ),
             Variant::U16( data ) => Ok( data.into() ),
-            Variant::F32( data ) => Ok( data as Self ),
+            Variant::F32( data ) => Ok( data ),
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -364,8 +364,8 @@ impl TryFrom< Variant > for f64 {
             Variant::U16( data ) => Ok( data.into() ),
             Variant::I32( data ) => Ok( data.into() ),
             Variant::U32( data ) => Ok( data.into() ),
-            Variant::F32( data ) => Ok( data as Self ),
-            Variant::F64( data ) => Ok( data as Self ),
+            Variant::F32( data ) => Ok( data.into() ),
+            Variant::F64( data ) => Ok( data ),
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -476,7 +476,7 @@ pub mod raw {
 
     impl VariantDate {
         pub fn com_epoch() -> SystemTime {
-            SystemTime::UNIX_EPOCH - Duration::from_secs( 2209161600 )
+            SystemTime::UNIX_EPOCH - Duration::from_secs( 2_209_161_600 )
         }
     }
 
@@ -485,7 +485,7 @@ pub mod raw {
             let days = src.0.trunc() as i64;
             let time = src.0.fract().abs();
 
-            let com_epoch = SystemTime::UNIX_EPOCH - Duration::from_secs( 2209161600 );
+            let com_epoch = VariantDate::com_epoch();
             const DAY_SECONDS : u64 = 24 * 60 * 60;
             const DAY_SECONDS_F : f64 = DAY_SECONDS as f64;
 
@@ -495,17 +495,15 @@ pub mod raw {
                 com_epoch - Duration::from_secs( ( -days ) as u64 * DAY_SECONDS )
             };
 
-            let datetime = date + Duration::from_nanos(
-                    ( time * DAY_SECONDS_F * 1_000_000_000f64 ).round() as u64 );
-
-            datetime
+            date + Duration::from_nanos(
+                    ( time * DAY_SECONDS_F * 1_000_000_000f64 ).round() as u64 )
         }
     }
 
     impl From<SystemTime> for VariantDate {
         fn from( src : SystemTime ) -> VariantDate {
 
-            let com_epoch = SystemTime::UNIX_EPOCH - Duration::from_secs( 2209161600 );
+            let com_epoch = VariantDate::com_epoch();
             const DAY_SECONDS : u64 = 24 * 60 * 60;
             const DAY_SECONDS_F : f64 = DAY_SECONDS as f64;
             
@@ -513,7 +511,7 @@ pub mod raw {
                 Ok( duration ) => {
                     let days = duration.as_secs() / DAY_SECONDS;
                     let time = duration.as_secs() % ( DAY_SECONDS );
-                    let time_nanos = duration.subsec_nanos() as f64 / 1_000_000_000f64;
+                    let time_nanos = f64::from( duration.subsec_nanos() ) / 1_000_000_000f64;
                     let time = ( time as f64 + time_nanos ) / DAY_SECONDS_F;
 
                     VariantDate( days as f64 + time )
@@ -522,7 +520,7 @@ pub mod raw {
                     let duration = err.duration();
                     let days = duration.as_secs() / DAY_SECONDS;
                     let time = duration.as_secs() % ( DAY_SECONDS );
-                    let time_nanos = duration.subsec_nanos() as f64 / 1_000_000_000f64;
+                    let time_nanos = f64::from( duration.subsec_nanos() ) / 1_000_000_000f64;
                     let time = 1f64 - ( time as f64 + time_nanos ) / DAY_SECONDS_F;
 
                     VariantDate( days as f64 + time )
@@ -593,11 +591,11 @@ pub mod raw {
     impl Variant {
         pub fn new( vt : VariantType, data : VariantData ) -> Variant {
             Variant {
-                vt: vt,
+                vt,
+                data,
                 reserved1: 0,
                 reserved2: 0,
                 reserved3: 0,
-                data: data
             }
         }
     }
@@ -693,8 +691,8 @@ pub mod raw {
             impl From< $rust_type > for Variant {
                 fn from( src : $rust_type ) -> Variant {
                     Variant::new(
-                        VariantType::new( $var_type ),
-                        VariantData { $var_field : src } )
+                            VariantType::new( $var_type ),
+                            VariantData { $var_field : src } )
                 }
             }
         }
@@ -717,8 +715,8 @@ pub mod raw {
     impl From<BString> for Variant {
         fn from( src : BString ) -> Variant {
             Variant::new(
-                VariantType::new( BSTR ),
-                VariantData { bstrVal : src.into_ptr() } )
+                    VariantType::new( BSTR ),
+                    VariantData { bstrVal : src.into_ptr() } )
         }
     }
 
@@ -728,12 +726,12 @@ pub mod raw {
             unsafe {
                 if src.vt.0 & var_type::BYREF == 0 {
                     match src.vt.0 & var_type::TYPEMASK {
-                        var_type::I1 => Ok( src.data.bVal as Self ),
+                        var_type::I1 => Ok( src.data.bVal ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 } else {
                     match src.vt.0 & var_type::TYPEMASK {
-                        var_type::I1 => Ok( *src.data.pbVal as Self ),
+                        var_type::I1 => Ok( *src.data.pbVal ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 }
@@ -747,12 +745,12 @@ pub mod raw {
             unsafe {
                 if src.vt.0 & var_type::BYREF == 0 {
                     match src.vt.0 & var_type::TYPEMASK {
-                        var_type::UI1 => Ok( src.data.cVal as Self ),
+                        var_type::UI1 => Ok( src.data.cVal ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 } else {
                     match src.vt.0 & var_type::TYPEMASK {
-                        var_type::UI1 => Ok( *src.data.pcVal as Self ),
+                        var_type::UI1 => Ok( *src.data.pcVal ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 }
@@ -766,16 +764,16 @@ pub mod raw {
             unsafe {
                 if src.vt.0 & var_type::BYREF == 0 {
                     match src.vt.0 & var_type::TYPEMASK {
-                        var_type::I2 => Ok( src.data.iVal as Self ),
-                        var_type::I1 => Ok( src.data.bVal as Self ),
-                        var_type::UI1 => Ok( src.data.cVal as Self ),
+                        var_type::I2 => Ok( src.data.iVal ),
+                        var_type::I1 => Ok( src.data.bVal.into() ),
+                        var_type::UI1 => Ok( src.data.cVal.into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 } else {
                     match src.vt.0 & var_type::TYPEMASK {
-                        var_type::I2 => Ok( *src.data.piVal as Self ),
-                        var_type::I1 => Ok( *src.data.pbVal as Self ),
-                        var_type::UI1 => Ok( *src.data.pcVal as Self ),
+                        var_type::I2 => Ok( *src.data.piVal ),
+                        var_type::I1 => Ok( ( *src.data.pbVal ).into() ),
+                        var_type::UI1 => Ok( ( *src.data.pcVal ).into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 }
@@ -789,14 +787,14 @@ pub mod raw {
             unsafe {
                 if src.vt.0 & var_type::BYREF == 0 {
                     match src.vt.0 & var_type::TYPEMASK {
-                        var_type::UI2 => Ok( src.data.uiVal as Self ),
-                        var_type::UI1 => Ok( src.data.cVal as Self ),
+                        var_type::UI2 => Ok( src.data.uiVal ),
+                        var_type::UI1 => Ok( src.data.cVal.into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 } else {
                     match src.vt.0 & var_type::TYPEMASK {
-                        var_type::UI2 => Ok( *src.data.puiVal as Self ),
-                        var_type::UI1 => Ok( *src.data.pcVal as Self ),
+                        var_type::UI2 => Ok( *src.data.puiVal ),
+                        var_type::UI1 => Ok( ( *src.data.pcVal ).into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 }
@@ -811,21 +809,19 @@ pub mod raw {
                 if src.vt.0 & var_type::BYREF == 0 {
                     match src.vt.0 & var_type::TYPEMASK {
                         var_type::I4 => Ok( src.data.lVal ),
-                        var_type::UI4 => Ok( src.data.ulVal as Self ),
-                        var_type::I2 => Ok( src.data.iVal as Self ),
-                        var_type::UI2 => Ok( src.data.uiVal as Self ),
-                        var_type::I1 => Ok( src.data.bVal as Self ),
-                        var_type::UI1 => Ok( src.data.cVal as Self ),
+                        var_type::I2 => Ok( src.data.iVal.into() ),
+                        var_type::UI2 => Ok( src.data.uiVal.into() ),
+                        var_type::I1 => Ok( src.data.bVal.into() ),
+                        var_type::UI1 => Ok( src.data.cVal.into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 } else {
                     match src.vt.0 & var_type::TYPEMASK {
                         var_type::I4 => Ok( *src.data.plVal ),
-                        var_type::UI4 => Ok( *src.data.pulVal as Self ),
-                        var_type::I2 => Ok( *src.data.piVal as Self ),
-                        var_type::UI2 => Ok( *src.data.puiVal as Self ),
-                        var_type::I1 => Ok( *src.data.pbVal as Self ),
-                        var_type::UI1 => Ok( *src.data.pcVal as Self ),
+                        var_type::I2 => Ok( ( *src.data.piVal ).into() ),
+                        var_type::UI2 => Ok( ( *src.data.puiVal ).into() ),
+                        var_type::I1 => Ok( ( *src.data.pbVal ).into() ),
+                        var_type::UI1 => Ok( ( *src.data.pcVal ).into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 }
@@ -839,16 +835,16 @@ pub mod raw {
             unsafe {
                 if src.vt.0 & var_type::BYREF == 0 {
                     match src.vt.0 & var_type::TYPEMASK {
-                        var_type::UI4 => Ok( src.data.ulVal as Self ),
-                        var_type::UI2 => Ok( src.data.uiVal as Self ),
-                        var_type::UI1 => Ok( src.data.cVal as Self ),
+                        var_type::UI4 => Ok( src.data.ulVal ),
+                        var_type::UI2 => Ok( src.data.uiVal.into() ),
+                        var_type::UI1 => Ok( src.data.cVal.into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 } else {
                     match src.vt.0 & var_type::TYPEMASK {
-                        var_type::UI4 => Ok( *src.data.pulVal as Self ),
-                        var_type::UI2 => Ok( *src.data.puiVal as Self ),
-                        var_type::UI1 => Ok( *src.data.pcVal as Self ),
+                        var_type::UI4 => Ok( *src.data.pulVal ),
+                        var_type::UI2 => Ok( ( *src.data.puiVal ).into() ),
+                        var_type::UI1 => Ok( ( *src.data.pcVal ).into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 }
@@ -863,23 +859,23 @@ pub mod raw {
                 if src.vt.0 & var_type::BYREF == 0 {
                     match src.vt.0 & var_type::TYPEMASK {
                         var_type::I8 => Ok( src.data.llVal ),
-                        var_type::I4 => Ok( src.data.lVal as Self ),
-                        var_type::UI4 => Ok( src.data.ulVal as Self ),
-                        var_type::I2 => Ok( src.data.iVal as Self ),
-                        var_type::UI2 => Ok( src.data.uiVal as Self ),
-                        var_type::I1 => Ok( src.data.bVal as Self ),
-                        var_type::UI1 => Ok( src.data.cVal as Self ),
+                        var_type::I4 => Ok( src.data.lVal.into() ),
+                        var_type::UI4 => Ok( src.data.ulVal.into() ),
+                        var_type::I2 => Ok( src.data.iVal.into() ),
+                        var_type::UI2 => Ok( src.data.uiVal.into() ),
+                        var_type::I1 => Ok( src.data.bVal.into() ),
+                        var_type::UI1 => Ok( src.data.cVal.into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 } else {
                     match src.vt.0 & var_type::TYPEMASK {
                         var_type::I8 => Ok( *src.data.pllVal ),
-                        var_type::I4 => Ok( *src.data.plVal as Self ),
-                        var_type::UI4 => Ok( *src.data.pulVal as Self ),
-                        var_type::I2 => Ok( *src.data.piVal as Self ),
-                        var_type::UI2 => Ok( *src.data.puiVal as Self ),
-                        var_type::I1 => Ok( *src.data.pbVal as Self ),
-                        var_type::UI1 => Ok( *src.data.pcVal as Self ),
+                        var_type::I4 => Ok( ( *src.data.plVal ).into() ),
+                        var_type::UI4 => Ok( ( *src.data.pulVal ).into() ),
+                        var_type::I2 => Ok( ( *src.data.piVal ).into() ),
+                        var_type::UI2 => Ok( ( *src.data.puiVal ).into() ),
+                        var_type::I1 => Ok( ( *src.data.pbVal ).into() ),
+                        var_type::UI1 => Ok( ( *src.data.pcVal ).into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 }
@@ -894,17 +890,17 @@ pub mod raw {
                 if src.vt.0 & var_type::BYREF == 0 {
                     match src.vt.0 & var_type::TYPEMASK {
                         var_type::UI8 => Ok( src.data.ullVal ),
-                        var_type::UI4 => Ok( src.data.ulVal as Self ),
-                        var_type::UI2 => Ok( src.data.uiVal as Self ),
-                        var_type::UI1 => Ok( src.data.cVal as Self ),
+                        var_type::UI4 => Ok( src.data.ulVal.into() ),
+                        var_type::UI2 => Ok( src.data.uiVal.into() ),
+                        var_type::UI1 => Ok( src.data.cVal.into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 } else {
                     match src.vt.0 & var_type::TYPEMASK {
                         var_type::UI8 => Ok( *src.data.pullVal ),
-                        var_type::UI4 => Ok( *src.data.pulVal as Self ),
-                        var_type::UI2 => Ok( *src.data.puiVal as Self ),
-                        var_type::UI1 => Ok( *src.data.pcVal as Self ),
+                        var_type::UI4 => Ok( ( *src.data.pulVal ).into() ),
+                        var_type::UI2 => Ok( ( *src.data.puiVal ).into() ),
+                        var_type::UI1 => Ok( ( *src.data.pcVal ).into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 }
@@ -938,13 +934,13 @@ pub mod raw {
                 if src.vt.0 & var_type::BYREF == 0 {
                     match src.vt.0 & var_type::TYPEMASK {
                         var_type::R8 => Ok( src.data.dblVal ),
-                        var_type::R4 => Ok( src.data.fltVal as f64 ),
+                        var_type::R4 => Ok( src.data.fltVal.into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 } else {
                     match src.vt.0 & var_type::TYPEMASK {
                         var_type::R8 => Ok( *src.data.pdblVal ),
-                        var_type::R4 => Ok( *src.data.pfltVal as f64 ),
+                        var_type::R4 => Ok( ( *src.data.pfltVal ).into() ),
                         _ => Err( VariantError( src.vt ) )
                     }
                 }
