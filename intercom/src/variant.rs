@@ -1,5 +1,7 @@
 
 use ::*;
+use std::convert::TryFrom;
+use std::time::{SystemTime};
 
 pub enum Variant
 {
@@ -15,9 +17,33 @@ pub enum Variant
     F64( f64 ),
     Bool( bool ),
     String( IntercomString ),
-    SystemTime( std::time::SystemTime ),
+    SystemTime( SystemTime ),
     IUnknown( ComRc<IUnknown> ),
     Raw( raw::Variant ),
+}
+
+impl Variant {
+
+    pub fn raw_type( &self ) -> u16 {
+
+        match self {
+            Variant::I8( .. ) => raw::var_type::I1,
+            Variant::I16( .. ) => raw::var_type::I2,
+            Variant::I32( .. ) => raw::var_type::I4,
+            Variant::I64( .. ) => raw::var_type::I8,
+            Variant::U8( .. ) => raw::var_type::UI1,
+            Variant::U16( .. ) => raw::var_type::UI2,
+            Variant::U32( .. ) => raw::var_type::UI4,
+            Variant::U64( .. ) => raw::var_type::UI8,
+            Variant::F32( .. ) => raw::var_type::R4,
+            Variant::F64( .. ) => raw::var_type::R8,
+            Variant::Bool( .. ) => raw::var_type::BOOL,
+            Variant::String( .. ) => raw::var_type::BSTR,
+            Variant::SystemTime( .. ) => raw::var_type::DATE,
+            Variant::IUnknown( .. ) => raw::var_type::UNKNOWN,
+            Variant::Raw( raw ) => raw.vt.0,
+        }
+    }
 }
 
 impl From<raw::Variant> for Variant {
@@ -132,11 +158,287 @@ impl ComFrom<Variant> for raw::Variant {
     }
 }
 
+pub struct VariantError;
+impl<'a> From<&'a Variant> for VariantError {
+    fn from( _ : &Variant ) -> Self {
+        VariantError
+    }
+}
+
+impl From<VariantError> for ComError
+{
+    fn from( _ : VariantError ) -> Self { ::E_INVALIDARG.into() }
+}
+
+impl TryFrom< Variant > for u8 {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< u8, Self::Error > {
+        match src {
+            Variant::U8( data ) => Ok( data as Self ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl From< u8 > for Variant {
+    fn from( src : u8 ) -> Self {
+        Variant::U8( src )
+    }
+}
+
+
+impl TryFrom< Variant > for i8 {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< i8, Self::Error > {
+        match src {
+            Variant::I8( data ) => Ok( data as Self ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl From< i8 > for Variant {
+    fn from( src : i8 ) -> Self {
+        Variant::I8( src )
+    }
+}
+
+impl TryFrom< Variant > for u16 {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< u16, Self::Error > {
+        match src {
+            Variant::U8( data ) => Ok( data as Self ),
+            Variant::U16( data ) => Ok( data as Self ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl From< u16 > for Variant {
+    fn from( src : u16 ) -> Self {
+        Variant::U16( src )
+    }
+}
+
+
+impl TryFrom< Variant > for i16 {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< i16, Self::Error > {
+        match src {
+            Variant::I8( data ) => Ok( data as Self ),
+            Variant::U8( data ) => Ok( data as Self ),
+            Variant::I16( data ) => Ok( data as Self ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl From< i16 > for Variant {
+    fn from( src : i16 ) -> Self {
+        Variant::I16( src )
+    }
+}
+
+impl TryFrom< Variant > for u32 {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< u32, Self::Error > {
+        match src {
+            Variant::U8( data ) => Ok( data as Self ),
+            Variant::U16( data ) => Ok( data as Self ),
+            Variant::U32( data ) => Ok( data as Self ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl From< u32 > for Variant {
+    fn from( src : u32 ) -> Self {
+        Variant::U32( src )
+    }
+}
+
+
+impl TryFrom< Variant > for i32 {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< i32, Self::Error > {
+        match src {
+            Variant::I8( data ) => Ok( data as Self ),
+            Variant::U8( data ) => Ok( data as Self ),
+            Variant::I16( data ) => Ok( data as Self ),
+            Variant::U16( data ) => Ok( data as Self ),
+            Variant::I32( data ) => Ok( data as Self ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl From< i32 > for Variant {
+    fn from( src : i32 ) -> Self {
+        Variant::I32( src )
+    }
+}
+
+impl TryFrom< Variant > for u64 {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< u64, Self::Error > {
+        match src {
+            Variant::U8( data ) => Ok( data as Self ),
+            Variant::U16( data ) => Ok( data as Self ),
+            Variant::U32( data ) => Ok( data as Self ),
+            Variant::U64( data ) => Ok( data as Self ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl From< u64 > for Variant {
+    fn from( src : u64 ) -> Self {
+        Variant::U64( src )
+    }
+}
+
+
+impl TryFrom< Variant > for i64 {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< i64, Self::Error > {
+        match src {
+            Variant::I8( data ) => Ok( data as Self ),
+            Variant::U8( data ) => Ok( data as Self ),
+            Variant::I16( data ) => Ok( data as Self ),
+            Variant::U16( data ) => Ok( data as Self ),
+            Variant::I32( data ) => Ok( data as Self ),
+            Variant::U32( data ) => Ok( data as Self ),
+            Variant::I64( data ) => Ok( data as Self ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl From< i64 > for Variant {
+    fn from( src : i64 ) -> Self {
+        Variant::I64( src )
+    }
+}
+
+
+impl TryFrom< Variant > for f32 {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< f32, Self::Error > {
+        match src {
+            Variant::I8( data ) => Ok( data.into() ),
+            Variant::U8( data ) => Ok( data.into() ),
+            Variant::I16( data ) => Ok( data.into() ),
+            Variant::U16( data ) => Ok( data.into() ),
+            Variant::F32( data ) => Ok( data as Self ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl From< f32 > for Variant {
+    fn from( src : f32 ) -> Self {
+        Variant::F32( src )
+    }
+}
+
+impl TryFrom< Variant > for f64 {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< f64, Self::Error > {
+        match src {
+            Variant::I8( data ) => Ok( data.into() ),
+            Variant::U8( data ) => Ok( data.into() ),
+            Variant::I16( data ) => Ok( data.into() ),
+            Variant::U16( data ) => Ok( data.into() ),
+            Variant::I32( data ) => Ok( data.into() ),
+            Variant::U32( data ) => Ok( data.into() ),
+            Variant::F32( data ) => Ok( data as Self ),
+            Variant::F64( data ) => Ok( data as Self ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl From< f64 > for Variant {
+    fn from( src : f64 ) -> Self {
+        Variant::F64( src )
+    }
+}
+
+impl TryFrom< Variant > for bool {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< bool, Self::Error > {
+        match src {
+            Variant::Bool( data ) => Ok( data ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl From< bool > for Variant {
+    fn from( src : bool ) -> Self {
+        Variant::Bool( src )
+    }
+}
+
+impl TryFrom< Variant > for SystemTime {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< SystemTime, Self::Error > {
+        match src {
+            Variant::SystemTime( data ) => Ok( data ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl From< SystemTime > for Variant {
+    fn from( src : SystemTime ) -> Self {
+        Variant::SystemTime( src )
+    }
+}
+
+impl TryFrom< Variant > for String {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< String, Self::Error > {
+        match src {
+            Variant::String( data ) => String::com_from( data )
+                    .map_err( |_| VariantError ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl TryFrom< Variant > for BString {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< BString, Self::Error > {
+        match src {
+            Variant::String( data ) => BString::com_from( data )
+                    .map_err( |_| VariantError ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl TryFrom< Variant > for CString {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< CString, Self::Error > {
+        match src {
+            Variant::String( data ) => CString::com_from( data )
+                    .map_err( |_| VariantError ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl<T: Into<IntercomString>> From< T > for Variant {
+    fn from( src : T ) -> Self {
+        Variant::String( src.into() )
+    }
+}
+
 pub mod raw {
 
     use super::*;
     use std;
-    use std::convert::TryFrom;
     use std::time::{SystemTime, Duration};
 
     #[repr(C)]
