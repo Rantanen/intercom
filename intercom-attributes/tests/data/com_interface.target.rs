@@ -254,7 +254,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                                                  &mut __out);
                          Ok({
                                 if __result == ::intercom::S_OK {
-                                    Ok(::intercom::ComItf::wrap(__out.ptr,
+                                    Ok(::intercom::ComItf::wrap(__out,
                                                                 ::intercom::TypeSystem::Automation))
                                 } else {
                                     Err(::intercom::get_last_error(__result))
@@ -287,7 +287,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                                           &mut __out);
                          Ok({
                                 if __result == ::intercom::S_OK {
-                                    Ok(::intercom::ComItf::wrap(__out.ptr,
+                                    Ok(::intercom::ComItf::wrap(__out,
                                                                 ::intercom::TypeSystem::Raw))
                                 } else {
                                     Err(::intercom::get_last_error(__result))
