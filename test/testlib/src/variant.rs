@@ -9,7 +9,7 @@ pub struct VariantTests;
 
 #[com_interface]
 pub trait IVariantInterface {
-    fn do_stuff( &self ) -> ComResult<Variant>;
+    fn do_stuff( &self ) -> Result<Variant, ComError>;
 }
 
 #[com_interface]
@@ -72,6 +72,24 @@ impl VariantTests
                             E_INVALIDARG,
                             format!( "Bad data: {}", data ) ) ),
             Err( e ) => e
+        }
+    }
+
+    pub fn variant_interface( &self, variant : Variant ) -> Result<Variant, ComError> {
+
+        use std::convert::TryFrom;
+        match variant {
+            Variant::IUnknown( iunk ) => {
+                match ComRc::<IVariantInterface>::try_from( &iunk ) {
+                    Ok( itf ) => itf.do_stuff(),
+                    Err( e ) => Err( ComError::new_message(
+                            e,
+                            "Interface not supported. IDispatch not supported by tests.".to_string() ) )
+                }
+            },
+            _ => {
+                Err( E_INVALIDARG )?
+            }
         }
     }
 

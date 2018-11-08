@@ -125,28 +125,38 @@ impl<T: ?Sized> ComItf<T> {
             phantom: PhantomData,
         }
     }
+}
 
-    /// Tries to acquire a different interface from the current COM object.
-    ///
-    /// Returns a reference counted wrapper around the interface if successful.
-    pub fn try_into< U: ComInterface + ?Sized >(
-        &self
-    ) -> Result< ComRc<U>, ::HRESULT >
+impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized> std::convert::TryFrom<&ComRc<S>> for ComRc<T> {
+
+    type Error = ::HRESULT;
+
+    fn try_from( source : &ComRc<S> ) -> Result< ComRc<T>, ::HRESULT >
     {
-        let iunk : &ComItf<IUnknown> = self.as_ref();
+        ComRc::<T>::try_from( &**source )
+    }
+}
+
+impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized> std::convert::TryFrom<&ComItf<S>> for ComRc<T> {
+
+    type Error = ::HRESULT;
+
+    fn try_from( source : &ComItf<S> ) -> Result< ComRc<T>, ::HRESULT >
+    {
+        let iunk : &ComItf<IUnknown> = source.as_ref();
 
         let mut err = None;
         
         // Try each type system.
         for &ts in &[ TypeSystem::Raw, TypeSystem::Automation ] {
-            if let Some( iid ) = U::iid( ts ) {
+            if let Some( iid ) = T::iid( ts ) {
 
                 // Try to query interface using the iid.
                 match iunk.query_interface( iid ) {
                     Ok( ptr ) => unsafe {
                         // QueryInterface is guaranteed to return ptr of correct
                         // interface type, which makes the ComItf::wrap safe here.
-                        return Ok( ComRc::attach( ComItf::<U>::wrap(
+                        return Ok( ComRc::attach( ComItf::<T>::wrap(
                                 raw::InterfacePtr::new( ptr ),
                                 TypeSystem::Automation ) ) );
                     },

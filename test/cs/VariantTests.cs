@@ -36,7 +36,7 @@ namespace cs
         {
             public object DoStuff()
             {
-                return 1;
+                return nameof( InterfaceClass );
             }
         }
 
@@ -44,51 +44,54 @@ namespace cs
         public void InterfaceImplementation()
         {
             var variantTest = new TestLib.VariantTests();
-            Assert.IsTrue( variantTest.VariantParameter( 13, new InterfaceClass() ) );
+            dynamic d = variantTest.VariantInterface( new InterfaceClass() );
+            Assert.AreEqual( nameof( InterfaceClass ), d );
         }
 
         class DotNetClass
         {
             public object DoStuff()
             {
-                return 1;
+                return nameof( DotNetClass );
             }
         }
 
-        [TestMethod]
+        [TestMethod, Ignore( "Requires IDispatch support")]
         public void DotNetClassByParameter()
         {
             var variantTest = new TestLib.VariantTests();
-            Assert.IsTrue( variantTest.VariantParameter( 13, new DotNetClass() ) );
+            dynamic d = variantTest.VariantInterface( new DotNetClass() );
+            Assert.AreEqual( nameof( DotNetClass ), d );
         }
 
         struct DotNetStruct
         {
             public object DoStuff()
             {
-                return 1;
+                return nameof( DotNetStruct );
             }
         }
 
         interface IDotNetInterface
         {
-            int DoStuff();
+            string DoStuff();
         }
 
         class DotNetInterfaceImplementation : IDotNetInterface
         {
-            public int DoStuff()
+            public string DoStuff()
             {
-                return 1;
+                return nameof( DotNetInterfaceImplementation );
             }
         }
 
-        [TestMethod]
+        [TestMethod, Ignore( "Requires IDispatch support")]
         public void DotNetInterfaceByParameter()
         {
             var variantTest = new TestLib.VariantTests();
             IDotNetInterface iinterface = new DotNetInterfaceImplementation();
-            Assert.IsTrue( variantTest.VariantParameter( 13, iinterface ) );
+            dynamic d = variantTest.VariantInterface( iinterface );
+            Assert.AreEqual( nameof( DotNetInterfaceImplementation ), d );
         }
     }
 }
