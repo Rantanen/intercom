@@ -1,4 +1,6 @@
 
+use ::*;
+
 pub enum Variant
 {
     I8( i8 ),
@@ -12,8 +14,9 @@ pub enum Variant
     F32( f32 ),
     F64( f64 ),
     Bool( bool ),
-    String( ::IntercomString ),
+    String( IntercomString ),
     SystemTime( std::time::SystemTime ),
+    IUnknown( ComRc<IUnknown> ),
     Raw( raw::Variant ),
 }
 
@@ -38,6 +41,9 @@ impl From<raw::Variant> for Variant {
                                 ::BString::from_ptr( src.data.bstrVal ) ) ),
                     raw::var_type::DATE =>
                         Variant::SystemTime( src.data.date.into() ),
+                    raw::var_type::UNKNOWN =>
+                        Variant::IUnknown( ComRc::wrap(
+                                src.data.punkVal, TypeSystem::Automation ) ),
                     _ => Variant::Raw( src ),
                 }
             } else {
@@ -65,9 +71,70 @@ impl From<raw::Variant> for Variant {
     }
 }
 
+impl ComFrom<Variant> for raw::Variant {
+    fn com_from( src: Variant ) -> Result< Self, ComError > {
+        Ok( match src {
+            Variant::I8( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::I1 ),
+                    raw::VariantData { bVal : data } ),
+            Variant::I16( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::I2 ),
+                    raw::VariantData { iVal : data } ),
+            Variant::I32( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::I4 ),
+                    raw::VariantData { lVal : data } ),
+            Variant::I64( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::I8 ),
+                    raw::VariantData { llVal : data } ),
+            Variant::U8( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::UI1 ),
+                    raw::VariantData { cVal : data } ),
+            Variant::U16( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::UI2 ),
+                    raw::VariantData { uiVal : data } ),
+            Variant::U32( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::UI4 ),
+                    raw::VariantData { ulVal : data } ),
+            Variant::U64( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::UI8 ),
+                    raw::VariantData { ullVal : data } ),
+            Variant::F32( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::R4 ),
+                    raw::VariantData { fltVal : data } ),
+            Variant::F64( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::R8 ),
+                    raw::VariantData { dblVal : data } ),
+            Variant::Bool( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::BOOL ),
+                    raw::VariantData { boolVal: data .into() } ),
+            Variant::String( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::BSTR ),
+                    raw::VariantData { bstrVal : ::BString::com_from( data )?.into_ptr() } ),
+            Variant::SystemTime( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::DATE ),
+                    raw::VariantData { date : data.into() } ),
+
+            Variant::IUnknown( data ) => {
+                let v = raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::UNKNOWN ),
+                    raw::VariantData {
+                        punkVal : ComItf::ptr( &data, TypeSystem::Automation )
+                    } );
+
+                // We didn't add_ref the punkVal so avoid release by forgetting
+                // the ComRc.
+                std::mem::forget( data );
+
+                v
+            }
+            Variant::Raw( src ) => src,
+        } )
+    }
+}
+
 pub mod raw {
 
-    use strings::BString;
+    use super::*;
     use std;
     use std::convert::TryFrom;
     use std::time::{SystemTime, Duration};
@@ -209,7 +276,7 @@ pub mod raw {
     }
 
     impl Variant {
-        fn new( vt : VariantType, data : VariantData ) -> Variant {
+        pub fn new( vt : VariantType, data : VariantData ) -> Variant {
             Variant {
                 vt: vt,
                 reserved1: 0,
@@ -234,7 +301,7 @@ pub mod raw {
     pub struct VariantType(pub u16);
 
     impl VariantType {
-        fn new( vt : u16 ) -> VariantType {
+        pub fn new( vt : u16 ) -> VariantType {
             VariantType( vt as u16 )
         }
     }
@@ -298,7 +365,7 @@ pub mod raw {
 
     pub struct VariantError( VariantType );
 
-    impl From<VariantError> for ::ComError
+    impl From<VariantError> for ComError
     {
         fn from( _ : VariantError ) -> Self { ::E_INVALIDARG.into() }
     }

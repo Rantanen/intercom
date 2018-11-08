@@ -707,7 +707,53 @@ pub enum IntercomString {
     String( String ),
 }
 
+impl ComFrom<BString> for IntercomString {
+    fn com_from( source : BString ) -> Result<Self, ComError> {
+        Ok( IntercomString::BString( source ) )
+    }
+}
 
+impl ComFrom<CString> for IntercomString {
+    fn com_from( source : CString ) -> Result<Self, ComError> {
+        Ok( IntercomString::CString( source ) )
+    }
+}
+
+impl ComFrom<String> for IntercomString {
+    fn com_from( source : String ) -> Result<Self, ComError> {
+        Ok( IntercomString::String( source ) )
+    }
+}
+
+impl ComFrom<IntercomString> for BString {
+    fn com_from( source : IntercomString ) -> Result<Self, ComError> {
+        match source {
+            IntercomString::BString( bstring ) => bstring.com_into(),
+            IntercomString::CString( cstring ) => cstring.com_into(),
+            IntercomString::String( string ) => string.com_into()
+        }
+    }
+}
+
+impl ComFrom<IntercomString> for CString {
+    fn com_from( source : IntercomString ) -> Result<Self, ComError> {
+        match source {
+            IntercomString::BString( bstring ) => bstring.com_into(),
+            IntercomString::CString( cstring ) => cstring.com_into(),
+            IntercomString::String( string ) => string.com_into()
+        }
+    }
+}
+
+impl ComFrom<IntercomString> for String {
+    fn com_from( source : IntercomString ) -> Result<Self, ComError> {
+        match source {
+            IntercomString::BString( bstring ) => bstring.com_into(),
+            IntercomString::CString( cstring ) => cstring.com_into(),
+            IntercomString::String( string ) => string.com_into()
+        }
+    }
+}
 
 #[cfg(test)]
 mod test {
