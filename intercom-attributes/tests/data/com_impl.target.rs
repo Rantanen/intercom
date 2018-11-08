@@ -441,7 +441,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_complete_method_Automation(self_vtable
                                                                            b:
                                                                                i16,
                                                                            __out:
-                                                                               *mut bool)
+                                                                               *mut ::intercom::raw::VariantBool)
  -> ::intercom::HRESULT {
     let result: Result<::intercom::HRESULT, ::intercom::ComError> =
         (||
@@ -457,7 +457,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_complete_method_Automation(self_vtable
                         match __result {
                             Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
                             Err(e) => {
-                                *__out = Default::default();
+                                *__out = false.into();
                                 ::intercom::return_hresult(e)
                             }
                         }
@@ -813,7 +813,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_complete_method_Raw(self_vtable:
                         match __result {
                             Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
                             Err(e) => {
-                                *__out = Default::default();
+                                *__out = false;
                                 ::intercom::return_hresult(e)
                             }
                         }

@@ -64,7 +64,7 @@ pub struct __Foo_AutomationVtbl {
                                                                    ::intercom::RawComPtr,
                                                                a: u16, b: i16,
                                                                __out:
-                                                                   *mut bool)
+                                                                   *mut ::intercom::raw::VariantBool)
                                         -> ::intercom::HRESULT,
     pub string_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                  ::intercom::RawComPtr,
@@ -316,7 +316,8 @@ impl Foo for ::intercom::ComItf<Foo> {
             let result: Result<ComResult<bool>, ::intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: bool = Default::default();
+                         let mut __out: ::intercom::raw::VariantBool =
+                             false.into();
                          let __result =
                              ((**vtbl).complete_method_Automation)(comptr.ptr,
                                                                    a.into(),
@@ -344,7 +345,7 @@ impl Foo for ::intercom::ComItf<Foo> {
             let result: Result<ComResult<bool>, ::intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: bool = Default::default();
+                         let mut __out: bool = false;
                          let __result =
                              ((**vtbl).complete_method_Raw)(comptr.ptr,
                                                             a.into(),

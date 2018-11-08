@@ -392,7 +392,7 @@ mod test {
                                 },
                                 IdlArg {
                                     name : "__out".to_owned(),
-                                    arg_type : "bool*".to_owned(),
+                                    arg_type : "VARIANT_BOOL*".to_owned(),
                                     attributes : "out, retval".to_owned(),
                                 },
                             ]
