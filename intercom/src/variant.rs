@@ -512,25 +512,47 @@ pub mod raw {
             const DAY_SECONDS : u64 = 24 * 60 * 60;
             const DAY_SECONDS_F : f64 = DAY_SECONDS as f64;
             
-            match src.duration_since( com_epoch ) {
+            let v = match src.duration_since( com_epoch ) {
                 Ok( duration ) => {
-                    let days = duration.as_secs() / DAY_SECONDS;
-                    let time = duration.as_secs() % ( DAY_SECONDS );
-                    let time_nanos = f64::from( duration.subsec_nanos() ) / 1_000_000_000f64;
-                    let time = ( time as f64 + time_nanos ) / DAY_SECONDS_F;
 
-                    VariantDate( days as f64 + time )
+                    // Proper positive duration. The scale here matches that of
+                    // VariantDate so we can just turn the tics into a float
+                    // and be done with it.
+                    let duration_secs = duration.as_secs();
+                    let duration_secs_f = duration_secs as f64 / DAY_SECONDS_F;
+                    let nanos = f64::from( duration.subsec_nanos() ) / 1_000_000_000f64;
+                    duration_secs_f + nanos
                 },
                 Err( err ) => {
-                    let duration = err.duration();
-                    let days = duration.as_secs() / DAY_SECONDS;
-                    let time = duration.as_secs() % ( DAY_SECONDS );
-                    let time_nanos = f64::from( duration.subsec_nanos() ) / 1_000_000_000f64;
-                    let time = 1f64 - ( time as f64 + time_nanos ) / DAY_SECONDS_F;
 
-                    VariantDate( days as f64 + time )
+                    // Negative duration. Here we need to consider the date/time
+                    // split in the floating point number.
+                    let duration = err.duration();
+                    let duration_secs = duration.as_secs();
+                    let duration_secs_f = duration_secs as f64 / DAY_SECONDS_F;
+                    let nanos = f64::from( duration.subsec_nanos() ) / 1_000_000_000f64;
+                    
+                    // First of all, the current duration is positive.
+                    // day -1, 0:00:00 -> 1
+                    // day -1, 6:00:00 -> 0.75
+                    let f = -( duration_secs_f + nanos );
+
+                    // day -1, 0:00:00 -> -1, correct
+                    // day -1, 6:00:00 -> -0.75 and should be -1.25
+
+                    // To get the days properly, we'll floor the f. This gives
+                    // us the correct days in all the cases.
+                    let days = f.floor();
+
+                    // At this point the difference f - days will be the remaining
+                    // time fraction. Which we'll sub from the original days to
+                    // accumulate the fraction.
+                    let time = f - days;
+                    days - time
                 }
-            }
+            };
+
+            VariantDate( v )
         }
     }
 

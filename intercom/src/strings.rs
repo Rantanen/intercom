@@ -727,21 +727,21 @@ pub enum IntercomString {
     String( String ),
 }
 
-impl ComFrom<BString> for IntercomString {
-    fn com_from( source : BString ) -> Result<Self, ComError> {
-        Ok( IntercomString::BString( source ) )
+impl From<BString> for IntercomString {
+    fn from( source : BString ) -> Self {
+        IntercomString::BString( source )
     }
 }
 
-impl ComFrom<CString> for IntercomString {
-    fn com_from( source : CString ) -> Result<Self, ComError> {
-        Ok( IntercomString::CString( source ) )
+impl From<String> for IntercomString {
+    fn from( source : String ) -> Self {
+        IntercomString::String( source )
     }
 }
 
-impl ComFrom<String> for IntercomString {
-    fn com_from( source : String ) -> Result<Self, ComError> {
-        Ok( IntercomString::String( source ) )
+impl From<CString> for IntercomString {
+    fn from( source : CString ) -> Self {
+        IntercomString::CString( source )
     }
 }
 
