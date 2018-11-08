@@ -121,12 +121,14 @@ mod error_store {
 #[allow(non_snake_case)]
 mod error_store {
 
-    pub unsafe fn SetErrorInfo(
+    use super::*;
+
+    pub(super) unsafe fn SetErrorInfo(
         _dw_reserved: u32,
         _errorinfo: raw::InterfacePtr<IErrorInfo>,
     ) -> ::HRESULT { ::S_OK }
 
-    pub unsafe fn GetErrorInfo(
+    pub(super) unsafe fn GetErrorInfo(
         _dw_reserved: u32,
         _errorinfo: *mut raw::InterfacePtr<IErrorInfo>,
     ) -> ::HRESULT { ::S_OK }
