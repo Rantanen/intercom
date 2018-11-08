@@ -58,7 +58,7 @@ impl ComImpl
         let itf_ident = itf_ident_opt.unwrap_or_else( || struct_ident.clone() );
 
         let variants = OrderMap::from_iter(
-            [ ModelTypeSystem::Automation, ModelTypeSystem::Raw ].into_iter().map( |&ts| {
+            [ ModelTypeSystem::Automation, ModelTypeSystem::Raw ].iter().map( |&ts| {
 
             let itf_unique_ident = Ident::new(
                     &format!( "{}_{:?}", itf_ident.to_string(), ts ), Span::call_site() );

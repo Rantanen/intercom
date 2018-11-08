@@ -181,7 +181,7 @@ impl TypeHandler for ComItfParam {
         let ts = self.context.type_system.as_typesystem_tokens();
         TypeConversion {
             temporary: None,
-            value: quote!( ::intercom::ComItf::wrap( #ident.ptr, #ts ) ),
+            value: quote!( ::intercom::ComItf::wrap( #ident, #ts ) ),
         }
     }
 

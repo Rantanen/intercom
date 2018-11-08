@@ -127,14 +127,32 @@ pub mod raw {
     pub type OutCStr = *mut ::std::os::raw::c_char;
     
     #[repr(C)]
+    #[derive(PartialEq, Eq)]
     pub struct InterfacePtr<I: ?Sized> {
         pub ptr : super::RawComPtr,
         phantom : ::std::marker::PhantomData<I>,
     }
 
+    impl<I: ?Sized> Clone for InterfacePtr<I>
+    {
+        fn clone( &self ) -> Self {
+            InterfacePtr::new( self.ptr )
+        }
+    }
+
+    impl<I: ?Sized> Copy for InterfacePtr<I> {}
+
     impl<I: ?Sized> InterfacePtr<I> {
         pub fn new( ptr : super::RawComPtr ) -> InterfacePtr<I> {
             InterfacePtr { ptr, phantom: ::std::marker::PhantomData }
+        }
+
+        pub fn null() -> Self {
+            Self::new( std::ptr::null_mut() )
+        }
+
+        pub fn is_null( self ) -> bool {
+            self.ptr.is_null()
         }
     }
 }

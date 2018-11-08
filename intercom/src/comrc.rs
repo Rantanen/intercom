@@ -22,6 +22,21 @@ impl<T : ?Sized> ComRc<T> {
     pub fn attach( itf : ComItf<T> ) -> ComRc<T> {
         ComRc { itf }
     }
+
+    /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
+    ///
+    /// Does not increment the reference count.
+    ///
+    /// # Safety
+    ///
+    /// The `ptr` __must__ be a valid COM interface pointer for an interface
+    /// of type `T`.
+    pub unsafe fn wrap(
+        ptr : raw::InterfacePtr<T>,
+        ts : TypeSystem
+    ) -> ComRc<T> {
+        ComRc::attach( ComItf::wrap( ptr, ts ) )
+    }
 }
 
 #[cfg(windows)]
@@ -29,12 +44,19 @@ impl<T: ComInterface + ?Sized> ComRc<T>
 {
     pub fn create( clsid : GUID ) -> ::ComResult< ComRc<T> > {
 
+        // Get the IID.
+        //
+        // The IID we are getting here is the Automation type system ID.
+        // This is the one that plays well with Windows' CoCreateInstance, etc.
         let iid = match T::iid( TypeSystem::Automation ) {
             Some( iid ) => iid,
             None => return Err( E_NOINTERFACE ),
         };
 
         unsafe {
+
+            // Invoke CoCreateInstance and return a result based on the return
+            // value.  
             let mut out = ::std::ptr::null_mut();
             match CoCreateInstance(
                     clsid,
@@ -43,8 +65,11 @@ impl<T: ComInterface + ?Sized> ComRc<T>
                     iid,
                     &mut out ) {
 
+                // On success construct the ComRc. We are using Automation type
+                // system as that's the IID we used earlier.
                 ::S_OK => Ok( ComRc::attach( ComItf::wrap(
-                                out, TypeSystem::Automation ) ) ),
+                                raw::InterfacePtr::new( out ),
+                                TypeSystem::Automation ) ) ),
                 e => Err( e ),
             }
         }

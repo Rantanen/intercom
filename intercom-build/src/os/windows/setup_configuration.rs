@@ -136,7 +136,7 @@ fn find_path( roots : &[&PathBuf], path : &str ) -> Option< PathBuf > {
 fn get_compiler_paths( paths : &[ PathBuf ] ) -> Vec<PathBuf>
 {
     // Get the directory paths from the file paths.
-    let mut dir_paths = paths.into_iter()
+    let mut dir_paths = paths.iter()
         .filter_map(
             |p| p.parent().and_then(
                 |p| Some( p.to_owned() ) ) )

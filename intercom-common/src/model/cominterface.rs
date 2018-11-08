@@ -118,7 +118,7 @@ impl ComInterface
                 };
 
         let variants = OrderMap::from_iter(
-            [ ModelTypeSystem::Automation, ModelTypeSystem::Raw ].into_iter().map( |&ts| {
+            [ ModelTypeSystem::Automation, ModelTypeSystem::Raw ].iter().map( |&ts| {
 
             let itf_unique_ident = Ident::new( 
                     &format!( "{}_{:?}", itf_ident.to_string(), ts ), Span::call_site() );

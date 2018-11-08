@@ -22,8 +22,8 @@ pub enum TypeSystem {
 /// through `#[com_interface] impl MyStruct` constructs are not supported for
 /// `ComItf<T>`.
 pub struct ComItf<T> where T: ?Sized {
-    raw_ptr: RawComPtr,
-    automation_ptr: RawComPtr,
+    raw_ptr: raw::InterfacePtr<T>,
+    automation_ptr: raw::InterfacePtr<T>,
     phantom: PhantomData<T>,
 }
 
@@ -35,7 +35,10 @@ impl<T: ?Sized> ComItf<T> {
     ///
     /// The `ptr` __must__ be a valid COM interface pointer for an interface
     /// of type `T`.
-    pub unsafe fn new( automation : RawComPtr, raw : RawComPtr ) -> ComItf<T> {
+    pub unsafe fn new(
+        automation : raw::InterfacePtr<T>,
+        raw : raw::InterfacePtr<T>
+    ) -> ComItf<T> {
         ComItf {
             raw_ptr: raw,
             automation_ptr: automation,
@@ -49,16 +52,16 @@ impl<T: ?Sized> ComItf<T> {
     ///
     /// The `ptr` __must__ be a valid COM interface pointer for an interface
     /// of type `T`.
-    pub unsafe fn wrap( ptr : RawComPtr, ts : TypeSystem ) -> ComItf<T> {
+    pub unsafe fn wrap( ptr : raw::InterfacePtr<T>, ts : TypeSystem ) -> ComItf<T> {
         match ts {
             TypeSystem::Automation => ComItf {
-                raw_ptr: ::std::ptr::null_mut(),
+                raw_ptr: raw::InterfacePtr::null(),
                 automation_ptr: ptr,
                 phantom: PhantomData,
             },
             TypeSystem::Raw => ComItf {
                 raw_ptr: ptr,
-                automation_ptr: ::std::ptr::null_mut(),
+                automation_ptr: raw::InterfacePtr::null(),
                 phantom: PhantomData
             }
         }
@@ -66,10 +69,10 @@ impl<T: ?Sized> ComItf<T> {
 
     /// Gets the raw COM pointer from the `ComItf<T>`.
     pub fn ptr( this : &Self, ts : TypeSystem ) -> raw::InterfacePtr<T> {
-        raw::InterfacePtr::new( match ts {
+        match ts {
             TypeSystem::Automation => this.automation_ptr,
             TypeSystem::Raw => this.raw_ptr,
-        } )
+        }
     }
 
     pub fn maybe_ptr(
@@ -87,7 +90,7 @@ impl<T: ?Sized> ComItf<T> {
         if ptr.is_null() {
             None
         } else {
-            Some( raw::InterfacePtr::new( ptr ) )
+            Some( ptr )
         }
     }
 
@@ -100,8 +103,8 @@ impl<T: ?Sized> ComItf<T> {
     /// methods in the case of an error result.
     pub unsafe fn null_itf() -> ComItf<T> {
         ComItf {
-            raw_ptr: ::std::ptr::null_mut(),
-            automation_ptr: ::std::ptr::null_mut(),
+            raw_ptr: raw::InterfacePtr::null(),
+            automation_ptr: raw::InterfacePtr::null(),
             phantom: PhantomData,
         }
     }
@@ -127,7 +130,8 @@ impl<T: ?Sized> ComItf<T> {
                         // QueryInterface is guaranteed to return ptr of correct
                         // interface type, which makes the ComItf::wrap safe here.
                         return Ok( ComRc::attach( ComItf::<U>::wrap(
-                                ptr, TypeSystem::Automation ) ) );
+                                raw::InterfacePtr::new( ptr ),
+                                TypeSystem::Automation ) ) );
                     },
                     Err( e ) => { err = Some( e ); },
                 };
