@@ -45,7 +45,7 @@ pub fn get_ident_and_fns(
             => {
 
             let methods : Option< Vec< &MethodSig > > = items
-                    .into_iter()
+                    .iter()
                     .map( |i| get_trait_method( i ) )
                     .collect();
 
@@ -93,7 +93,7 @@ fn get_impl_data_raw<'a>(
     };
 
     let methods_opt : Option< Vec< &MethodSig > > = items
-            .into_iter()
+            .iter()
             .map( |i| get_impl_method( i ) )
             .collect();
     let methods = methods_opt.unwrap_or_else( || vec![] );
