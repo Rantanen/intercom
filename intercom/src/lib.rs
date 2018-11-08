@@ -130,14 +130,16 @@ pub mod raw {
     pub use variant::raw::*;
     
     #[repr(C)]
+    #[derive(PartialEq, Eq)]
     pub struct InterfacePtr<I: ?Sized> {
         pub ptr : super::RawComPtr,
         phantom : ::std::marker::PhantomData<I>,
     }
 
-    impl<I: ?Sized> Clone for InterfacePtr<I> {
+    impl<I: ?Sized> Clone for InterfacePtr<I>
+    {
         fn clone( &self ) -> Self {
-            InterfacePtr { ptr: self.ptr, phantom: ::std::marker::PhantomData }
+            InterfacePtr::new( self.ptr )
         }
     }
 
@@ -146,6 +148,14 @@ pub mod raw {
     impl<I: ?Sized> InterfacePtr<I> {
         pub fn new( ptr : super::RawComPtr ) -> InterfacePtr<I> {
             InterfacePtr { ptr, phantom: ::std::marker::PhantomData }
+        }
+
+        pub fn null() -> Self {
+            Self::new( std::ptr::null_mut() )
+        }
+
+        pub fn is_null( self ) -> bool {
+            self.ptr.is_null()
         }
     }
 }
