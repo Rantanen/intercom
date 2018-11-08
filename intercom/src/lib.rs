@@ -136,6 +136,14 @@ pub mod raw {
         pub fn new( ptr : super::RawComPtr ) -> InterfacePtr<I> {
             InterfacePtr { ptr, phantom: ::std::marker::PhantomData }
         }
+
+        pub fn null() -> Self {
+            Self::new( std::ptr::null_mut() )
+        }
+
+        pub fn is_null( &self ) -> bool {
+            self.ptr.is_null()
+        }
     }
 }
 

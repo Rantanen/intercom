@@ -78,6 +78,7 @@ impl<T: CoClass> AsRef<ComBox<T>> for ComStruct<T>
 }
 
 impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComItf<I> {
+
     fn from( source : ComStruct<T> ) -> ComItf<I> {
 
         let ( automation_ptr, raw_ptr ) = {
@@ -103,7 +104,9 @@ impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComItf
         };
 
         std::mem::forget( source );
-        unsafe { ComItf::new( automation_ptr, raw_ptr ) }
+        unsafe { ComItf::new(
+                raw::InterfacePtr::new( automation_ptr ),
+                raw::InterfacePtr::new( raw_ptr ) ) }
     }
 }
 

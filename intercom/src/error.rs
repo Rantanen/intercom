@@ -100,16 +100,19 @@ impl From<ComError> for ::HRESULT {
 #[allow(non_snake_case)]
 mod error_store {
 
+    use super::*;
+
     #[link(name = "oleaut32")]
     extern "system" {
-        pub fn SetErrorInfo(
+        pub(super) fn SetErrorInfo(
             dw_reserved: u32,
             errorinfo: ::RawComPtr,
         ) -> ::HRESULT;
 
-        pub fn GetErrorInfo(
+        #[allow(private_in_public)]
+        pub(super) fn GetErrorInfo(
             dw_reserved: u32,
-            errorinfo: &mut ::RawComPtr,
+            errorinfo: *mut raw::InterfacePtr<IErrorInfo>,
         ) -> ::HRESULT;
     }
 }
@@ -245,13 +248,15 @@ pub fn get_last_error< E >( last_hr : HRESULT ) -> E
         error_info: unsafe {
 
             // Get the last error COM interface.
-            let mut error_ptr : RawComPtr = std::ptr::null_mut();
+            let mut error_ptr : raw::InterfacePtr<IErrorInfo>
+                    = raw::InterfacePtr::null();
             let hr = error_store::GetErrorInfo( 0, &mut error_ptr );
 
             if hr == S_OK && ! error_ptr.is_null(){
 
                 let ierrorinfo = ComItf::< IErrorInfo >::wrap(
-                        error_ptr, TypeSystem::Automation );
+                        error_ptr,
+                        TypeSystem::Automation );
 
                 // Construct a proper ErrorInfo struct from the COM interface.
                 let error_info = ErrorInfo::try_from( &*ierrorinfo ).ok();
