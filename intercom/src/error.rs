@@ -106,7 +106,7 @@ mod error_store {
     extern "system" {
         pub(super) fn SetErrorInfo(
             dw_reserved: u32,
-            errorinfo: ::RawComPtr,
+            errorinfo: raw::InterfacePtr<IErrorInfo>,
         ) -> ::HRESULT;
 
         #[allow(private_in_public)]
@@ -123,12 +123,12 @@ mod error_store {
 
     pub unsafe fn SetErrorInfo(
         _dw_reserved: u32,
-        _errorinfo: ::RawComPtr,
+        _errorinfo: raw::InterfacePtr<IErrorInfo>,
     ) -> ::HRESULT { ::S_OK }
 
     pub unsafe fn GetErrorInfo(
         _dw_reserved: u32,
-        _errorinfo: &mut ::RawComPtr,
+        _errorinfo: *mut raw::InterfacePtr<IErrorInfo>,
     ) -> ::HRESULT { ::S_OK }
 }
 
@@ -226,12 +226,12 @@ pub fn return_hresult< E >( error : E ) -> HRESULT
                         info.as_mut(),
                         &IID_IErrorInfo,
                         &mut error_ptr );
-                error_store::SetErrorInfo( 0, error_ptr );
+                error_store::SetErrorInfo( 0, raw::InterfacePtr::new( error_ptr ) );
             }
         },
         None => {
             // No error info in the ComError.
-            unsafe { error_store::SetErrorInfo( 0, std::ptr::null_mut() ); }
+            unsafe { error_store::SetErrorInfo( 0, raw::InterfacePtr::null() ); }
         }
     }
 
