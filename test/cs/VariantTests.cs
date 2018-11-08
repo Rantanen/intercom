@@ -17,8 +17,8 @@ namespace cs
             Assert.IsTrue( variantTest.VariantParameter( 0, null ) );
             Assert.IsTrue( variantTest.VariantParameter( 2, (short) -1 ) );
             Assert.IsTrue( variantTest.VariantParameter( 3, -1 ) );
-            Assert.IsTrue( variantTest.VariantParameter( 4, -1.0f ) );
-            Assert.IsTrue( variantTest.VariantParameter( 5, -1.0d ) );
+            Assert.IsTrue( variantTest.VariantParameter( 4, -1.234f ) );
+            Assert.IsTrue( variantTest.VariantParameter( 5, -1.234d ) );
             Assert.IsTrue( variantTest.VariantParameter( 701,
                     DateTime.Parse( "1899-12-30T00:00:00" ) ) );
             Assert.IsTrue( variantTest.VariantParameter( 702,
@@ -48,8 +48,8 @@ namespace cs
             Assert.AreEqual( null, variantTest.VariantResult( 0 ) );
             Assert.AreEqual( ( short ) -1, variantTest.VariantResult( 2 ) );
             Assert.AreEqual( -1, variantTest.VariantResult( 3 ) );
-            Assert.AreEqual( -1.0f, variantTest.VariantResult( 4 ) );
-            Assert.AreEqual( -1.0d, variantTest.VariantResult( 5 ) );
+            Assert.AreEqual( -1.234f, variantTest.VariantResult( 4 ) );
+            Assert.AreEqual( -1.234d, variantTest.VariantResult( 5 ) );
             Assert.AreEqual( DateTime.Parse( "1899-12-30T00:00:00" ),
                     variantTest.VariantResult( 701 ) );
             Assert.AreEqual( DateTime.Parse( "2000-01-02T03:04:05" ),

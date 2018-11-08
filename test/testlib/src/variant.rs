@@ -41,8 +41,8 @@ impl VariantTests
             1 => Ok( true ),
             2 => Ok( -1i16 == variant.try_into()? ),
             3 => Ok( -1i32 == variant.try_into()? ),
-            4 => Ok( -1.0f32 == variant.try_into()? ),
-            5 => Ok( -1.0f64 == variant.try_into()? ),
+            4 => Ok( -1.234f32 == variant.try_into()? ),
+            5 => Ok( -1.234f64 == variant.try_into()? ),
             6 => Ok( true ),
             701 => Ok( {
                 let st = DateTime::<Utc>::from( SystemTime::try_from( variant )? );
@@ -115,8 +115,8 @@ impl VariantTests
             0 => Ok( Variant::None ),
             2 => Ok( Variant::from( -1i16 ) ),
             3 => Ok( Variant::from( -1i32 ) ),
-            4 => Ok( Variant::from( -1.0f32 ) ),
-            5 => Ok( Variant::from( -1.0f64 ) ),
+            4 => Ok( Variant::from( -1.234f32 ) ),
+            5 => Ok( Variant::from( -1.234f64 ) ),
             701 => Ok( Variant::from( raw::VariantDate::com_epoch() ) ),
             702 => Ok( Variant::from( SystemTime::from(
                         DateTime::parse_from_rfc3339( "2000-01-02T03:04:05-00:00" ).unwrap() ) ) ),
