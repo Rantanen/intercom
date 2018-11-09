@@ -142,6 +142,8 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
         let type_name = self.get_leaf().get_name();
         match type_name.as_str() {
             "RawComPtr" => "*void".to_owned(),
+            "Variant" => "intercom::VARIANT".to_owned(),
+            "VariantBool" => "intercom::VARIANT_BOOL".to_owned(),
             "InBSTR" | "OutBSTR" => "intercom::BSTR".to_owned(),
             "InCStr" | "OutCStr" => "char*".to_owned(),
             "usize" => "size_t".to_owned(),
