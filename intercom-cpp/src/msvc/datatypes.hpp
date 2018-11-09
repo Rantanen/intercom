@@ -47,6 +47,8 @@ namespace intercom
         }
     }
 
+    typedef INT INT;
+    typedef UINT UINT;
     typedef INT8 INT8;
     typedef UINT8 UINT8;
     typedef INT16 INT16;
@@ -57,15 +59,31 @@ namespace intercom
     typedef UINT64 UINT64;
 
     typedef BOOL BOOL;
-    typedef BYTE BYTE;
-    typedef ULONG ULONG;
     typedef DWORD DWORD;
     typedef WORD WORD;
+
+    typedef CHAR CHAR;
+    typedef SHORT SHORT;
+    typedef LONG LONG;
+    typedef LONGLONG LONGLONG;
+    typedef BYTE BYTE;
+    typedef USHORT USHORT;
+    typedef ULONG ULONG;
+    typedef ULONGLONG ULONGLONG;
+    typedef DOUBLE DOUBLE;
+    typedef FLOAT FLOAT;
 
     typedef OLECHAR OLECHAR;
     typedef BSTR BSTR;
 
     typedef HRESULT HRESULT;
+    typedef SCODE SCODE;
+
+    typedef DATE DATE;
+    typedef VARIANT_BOOL VARIANT_BOOL;
+    typedef CURRENCY CURRENCY;
+
+    typedef PVOID PVOID;
 
     //! 32-bit reference counter. unsigned long is 32-bit in Windows and 64-bit on Unix.
     typedef unsigned long REF_COUNT_32;
