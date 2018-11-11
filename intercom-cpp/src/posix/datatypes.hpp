@@ -40,7 +40,7 @@ namespace intercom
     typedef uint32_t SCODE;
 
     typedef double DATE;
-    typedef uint16_t VARIANT_BOOL;
+    typedef int16_t VARIANT_BOOL;
     typedef int64_t CY, CURRENCY;
 
     typedef void* PVOID;

@@ -16,7 +16,7 @@ namespace
         std::function<void(intercom::VARIANT&)> setter
     )
     {
-        intercom::VARIANT v;
+        intercom::VARIANT v = { 0 };
         v.vt = vtType;
         setter( v );
         return v;
@@ -83,8 +83,7 @@ TEST_CASE( "Variant parameters" )
         SECTION( "VT_EMPTY" )
         {
             REQUIRE( intercom::SC_OK == pVariantTests->VariantParameter(
-                    intercom::VT_EMPTY,
-                    intercom::VARIANT {} ) );
+                    intercom::VT_EMPTY, { 0 } ) );
         }
 
         SECTION( "VT_NULL" )
@@ -167,12 +166,12 @@ TEST_CASE( "Variant parameters" )
                         reinterpret_cast< const uint16_t* >( u"text" ) ),
                     4 );
 
+            // We pass the VARIANT by value so the receiver should take the
+            // ownership of the contained BSTR.
             REQUIRE( intercom::SC_OK == pVariantTests->VariantParameter(
                     intercom::VT_BSTR,
                     make_variant( intercom::VT_BSTR,
                         [&]( auto& variant ) { variant.bstrVal = bstr; } ) ) );
-
-            pAllocator->FreeBstr( bstr );
         }
 
         SECTION( "VT_BOOL" )

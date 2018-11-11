@@ -500,8 +500,11 @@ pub mod raw {
                 com_epoch - Duration::from_secs( ( -days ) as u64 * DAY_SECONDS )
             };
 
+            // Rust's SystemTime is accurate to 100ns in Windows as it uses the
+            // system's native time format. We'll truncate the time to 100ns
+            // accuracy here to reduce the differences between platforms.
             date + Duration::from_nanos(
-                    ( time * DAY_SECONDS_F * 1_000_000_000f64 ).round() as u64 )
+                    ( time * DAY_SECONDS_F * 10_000_000f64 ).trunc() as u64 * 100 )
         }
     }
 
@@ -559,6 +562,14 @@ pub mod raw {
     #[repr(C)]
     #[derive(Copy, Clone)]
     #[allow(non_snake_case)]
+    pub struct UserDefinedTypeValue {
+        pub pvRecord : *mut std::ffi::c_void,
+        pub pRecInfo : ::RawComPtr,
+    }
+
+    #[repr(C)]
+    #[derive(Copy, Clone)]
+    #[allow(non_snake_case)]
     pub union VariantData {
         pub llVal : i64,
         pub lVal : i32,
@@ -603,6 +614,7 @@ pub mod raw {
         pub pullVal : *mut u64,
         pub pintVal : *mut i32,
         pub puintVal : *mut u32,
+        pub record : UserDefinedTypeValue,
     }
 
     #[repr(C)]
@@ -636,7 +648,7 @@ pub mod raw {
         }
     }
 
-    #[repr(C)]
+    #[repr(transparent)]
     #[derive(Copy, Clone, PartialEq, Eq)]
     pub struct VariantType(pub u16);
 
