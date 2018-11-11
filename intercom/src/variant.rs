@@ -175,6 +175,7 @@ impl ComFrom<Variant> for raw::Variant {
     }
 }
 
+#[derive(Debug)]
 pub struct VariantError;
 impl<'a> From<&'a Variant> for VariantError {
     fn from( _ : &Variant ) -> Self {
@@ -1126,3 +1127,227 @@ pub mod raw {
     // impl_from!( Z : VERSIONEDSTREAM => u16 );
     // impl_from!( Z : BSTRBLOB => u16 );
 }
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    #[test]
+    fn i8_to_variant() {
+        match Variant::from( -123i8 ) {
+            Variant::I8( -123i8 ) => {},
+            _ => panic!( "Bad variant" ),
+        }
+    }
+
+    #[test]
+    fn i16_to_variant() {
+        match Variant::from( -12323i16 ) {
+            Variant::I16( -12323i16 ) => {},
+            _ => panic!( "Bad variant" ),
+        }
+    }
+
+    #[test]
+    fn i32_to_variant() {
+        match Variant::from( -1232323i32 ) {
+            Variant::I32( -1232323i32 ) => {},
+            _ => panic!( "Bad variant" ),
+        }
+    }
+
+    #[test]
+    fn i64_to_variant() {
+        match Variant::from( -1232323i64 ) {
+            Variant::I64( -1232323i64 ) => {},
+            _ => panic!( "Bad variant" ),
+        }
+    }
+
+    #[test]
+    fn u8_to_variant() {
+        match Variant::from( 123u8 ) {
+            Variant::U8( 123u8 ) => {},
+            _ => panic!( "Bad variant" ),
+        }
+    }
+
+    #[test]
+    fn u16_to_variant() {
+        match Variant::from( 12323u16 ) {
+            Variant::U16( 12323u16 ) => {},
+            _ => panic!( "Bad variant" ),
+        }
+    }
+
+    #[test]
+    fn u32_to_variant() {
+        match Variant::from( 1232323u32 ) {
+            Variant::U32( 1232323u32 ) => {},
+            _ => panic!( "Bad variant" ),
+        }
+    }
+
+    #[test]
+    fn u64_to_variant() {
+        match Variant::from( 1232323u64 ) {
+            Variant::U64( 1232323u64 ) => {},
+            _ => panic!( "Bad variant" ),
+        }
+    }
+
+    #[test]
+    fn bool_to_variant() {
+        match Variant::from( true ) {
+            Variant::Bool( true ) => {},
+            _ => panic!( "Bad variant" ),
+        }
+        match Variant::from( false ) {
+            Variant::Bool( false ) => {},
+            _ => panic!( "Bad variant" ),
+        }
+    }
+
+    #[test]
+    fn none_to_variant() {
+        match Variant::from( () ) {
+            Variant::None => {},
+            _ => panic!( "Bad variant" ),
+        }
+    }
+
+    #[test]
+    fn variant_to_i64() {
+        assert_eq!( -100000000i64,
+                i64::try_from( Variant::I64( -100000000i64 ) ).unwrap() );
+        assert_eq!( -1000000i64,
+                i64::try_from( Variant::I32( -1000000i32 ) ).unwrap() );
+        assert_eq!( 1000000i64,
+                i64::try_from( Variant::U32( 1000000u32 ) ).unwrap() );
+        assert_eq!( -10000i64,
+                i64::try_from( Variant::I16( -10000i16 ) ).unwrap() );
+        assert_eq!( 10000i64,
+                i64::try_from( Variant::U16( 10000u16 ) ).unwrap() );
+        assert_eq!( -100i64,
+                i64::try_from( Variant::I8( -100i8 ) ).unwrap() );
+        assert_eq!( 100i64,
+                i64::try_from( Variant::U8( 100u8 ) ).unwrap() );
+    }
+
+    #[test]
+    fn variant_to_u64() {
+        assert_eq!( 100000000u64,
+                u64::try_from( Variant::U64( 100000000u64 ) ).unwrap() );
+        assert_eq!( 1000000u64,
+                u64::try_from( Variant::U32( 1000000u32 ) ).unwrap() );
+        assert_eq!( 10000u64,
+                u64::try_from( Variant::U16( 10000u16 ) ).unwrap() );
+        assert_eq!( 100u64,
+                u64::try_from( Variant::U8( 100u8 ) ).unwrap() );
+    }
+
+    #[test]
+    fn variant_to_i32() {
+        assert_eq!( -1000000i32,
+                i32::try_from( Variant::I32( -1000000i32 ) ).unwrap() );
+        assert_eq!( -10000i32,
+                i32::try_from( Variant::I16( -10000i16 ) ).unwrap() );
+        assert_eq!( 10000i32,
+                i32::try_from( Variant::U16( 10000u16 ) ).unwrap() );
+        assert_eq!( -100i32,
+                i32::try_from( Variant::I8( -100i8 ) ).unwrap() );
+        assert_eq!( 100i32,
+                i32::try_from( Variant::U8( 100u8 ) ).unwrap() );
+    }
+
+    #[test]
+    fn variant_to_u32() {
+        assert_eq!( 1000000u32,
+                u32::try_from( Variant::U32( 1000000u32 ) ).unwrap() );
+        assert_eq!( 10000u32,
+                u32::try_from( Variant::U16( 10000u16 ) ).unwrap() );
+        assert_eq!( 100u32,
+                u32::try_from( Variant::U8( 100u8 ) ).unwrap() );
+    }
+
+    #[test]
+    fn variant_to_i16() {
+        assert_eq!( -10000i16,
+                i16::try_from( Variant::I16( -10000i16 ) ).unwrap() );
+        assert_eq!( -100i16,
+                i16::try_from( Variant::I8( -100i8 ) ).unwrap() );
+        assert_eq!( 100i16,
+                i16::try_from( Variant::U8( 100u8 ) ).unwrap() );
+    }
+
+    #[test]
+    fn variant_to_u16() {
+        assert_eq!( 10000u16,
+                u16::try_from( Variant::U16( 10000u16 ) ).unwrap() );
+        assert_eq!( 100u16,
+                u16::try_from( Variant::U8( 100u8 ) ).unwrap() );
+    }
+
+    #[test]
+    fn variant_to_i8() {
+        assert_eq!( -100i8,
+                i8::try_from( Variant::I8( -100i8 ) ).unwrap() );
+    }
+
+    #[test]
+    fn variant_to_u8() {
+        assert_eq!( 100u8,
+                u8::try_from( Variant::U8( 100u8 ) ).unwrap() );
+    }
+
+    #[test]
+    fn variant_to_f64() {
+        assert_eq!( -100000000f64,
+                f64::try_from( Variant::F64( -100000000f64 ) ).unwrap() );
+        assert_eq!( -1000000f64,
+                f64::try_from( Variant::F32( -1000000f32 ) ).unwrap() );
+        assert_eq!( -1000000f64,
+                f64::try_from( Variant::I32( -1000000i32 ) ).unwrap() );
+        assert_eq!( 1000000f64,
+                f64::try_from( Variant::U32( 1000000u32 ) ).unwrap() );
+        assert_eq!( -10000f64,
+                f64::try_from( Variant::I16( -10000i16 ) ).unwrap() );
+        assert_eq!( 10000f64,
+                f64::try_from( Variant::U16( 10000u16 ) ).unwrap() );
+        assert_eq!( -100f64,
+                f64::try_from( Variant::I8( -100i8 ) ).unwrap() );
+        assert_eq!( 100f64,
+                f64::try_from( Variant::U8( 100u8 ) ).unwrap() );
+    }
+
+    #[test]
+    fn variant_to_f32() {
+        assert_eq!( -1000000f64,
+                f64::try_from( Variant::F32( -1000000f32 ) ).unwrap() );
+        assert_eq!( -10000f64,
+                f64::try_from( Variant::I16( -10000i16 ) ).unwrap() );
+        assert_eq!( 10000f64,
+                f64::try_from( Variant::U16( 10000u16 ) ).unwrap() );
+        assert_eq!( -100f64,
+                f64::try_from( Variant::I8( -100i8 ) ).unwrap() );
+        assert_eq!( 100f64,
+                f64::try_from( Variant::U8( 100u8 ) ).unwrap() );
+    }
+
+    #[test]
+    fn variant_to_bool() {
+        assert_eq!( true,
+                bool::try_from( Variant::Bool( true ) ).unwrap() );
+        assert_eq!( false,
+                bool::try_from( Variant::Bool( false ) ).unwrap() );
+    }
+
+    #[test]
+    fn variant_to_none() {
+        assert_eq!( (),
+                <()>::try_from( Variant::None ).unwrap() );
+    }
+
+}
+
