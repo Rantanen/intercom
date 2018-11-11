@@ -6,7 +6,7 @@
     #include <Windows.h>
 
     // Importing the DLL duplicates the __oud identifier which causes a warning.
-#ifdef DEBUG
+#ifndef NDEBUG
     #import "..\target\debug\test_lib.dll" raw_interfaces_only named_guids \
         rename("__out", "__out_test_lib")
 #else

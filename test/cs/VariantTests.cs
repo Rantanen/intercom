@@ -14,31 +14,31 @@ namespace cs
         public void VariantsAsComToRustParameters()
         {
             var variantTest = new TestLib.VariantTests();
-            Assert.IsTrue( variantTest.VariantParameter( 0, null ) );
-            Assert.IsTrue( variantTest.VariantParameter( 2, (short) -1 ) );
-            Assert.IsTrue( variantTest.VariantParameter( 3, -1 ) );
-            Assert.IsTrue( variantTest.VariantParameter( 4, -1.234f ) );
-            Assert.IsTrue( variantTest.VariantParameter( 5, -1.234d ) );
-            Assert.IsTrue( variantTest.VariantParameter( 701,
-                    DateTime.Parse( "1899-12-30T00:00:00" ) ) );
-            Assert.IsTrue( variantTest.VariantParameter( 702,
-                    DateTime.Parse( "2000-01-02T03:04:05" ) ) );
-            Assert.IsTrue( variantTest.VariantParameter( 703,
-                    DateTime.Parse( "2000-01-01T00:00:00" ) ) );
-            Assert.IsTrue( variantTest.VariantParameter( 704,
-                    DateTime.Parse( "1800-01-02T03:04:05" ) ) );
-            Assert.IsTrue( variantTest.VariantParameter( 705,
-                    DateTime.Parse( "1800-01-01T00:00:00" ) ) );
-            Assert.IsTrue( variantTest.VariantParameter( 8, "text" ) );
-            Assert.IsTrue( variantTest.VariantParameter( 9, new object() ) );
-            Assert.IsTrue( variantTest.VariantParameter( 11, true ) );
-            Assert.IsTrue( variantTest.VariantParameter( 14, 1.0m ) );
-            Assert.IsTrue( variantTest.VariantParameter( 16, (sbyte) -1 ) );
-            Assert.IsTrue( variantTest.VariantParameter( 17, (byte) 129 ) );
-            Assert.IsTrue( variantTest.VariantParameter( 18, (ushort) 12929 ) );
-            Assert.IsTrue( variantTest.VariantParameter( 19, 1292929u ) );
-            Assert.IsTrue( variantTest.VariantParameter( 20, -1L ) );
-            Assert.IsTrue( variantTest.VariantParameter( 21, 129292929UL ) );
+            variantTest.VariantParameter( 0, null );
+            variantTest.VariantParameter( 2, (short) -1 );
+            variantTest.VariantParameter( 3, -1 );
+            variantTest.VariantParameter( 4, -1.234f );
+            variantTest.VariantParameter( 5, -1.234d );
+            variantTest.VariantParameter( 701,
+                    DateTime.Parse( "1899-12-30T00:00:00" ) );
+            variantTest.VariantParameter( 702,
+                    DateTime.Parse( "2000-01-02T03:04:05" ) );
+            variantTest.VariantParameter( 703,
+                    DateTime.Parse( "2000-01-01T00:00:00" ) );
+            variantTest.VariantParameter( 704,
+                    DateTime.Parse( "1800-01-02T03:04:05" ) );
+            variantTest.VariantParameter( 705,
+                    DateTime.Parse( "1800-01-01T00:00:00" ) );
+            variantTest.VariantParameter( 8, "text" );
+            variantTest.VariantParameter( 9, new object() );
+            variantTest.VariantParameter( 11, true );
+            variantTest.VariantParameter( 14, 1.0m );
+            variantTest.VariantParameter( 16, (sbyte) -1 );
+            variantTest.VariantParameter( 17, (byte) 129 );
+            variantTest.VariantParameter( 18, (ushort) 12929 );
+            variantTest.VariantParameter( 19, 1292929u );
+            variantTest.VariantParameter( 20, -1L );
+            variantTest.VariantParameter( 21, 129292929UL );
         }
 
         [TestMethod]

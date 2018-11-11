@@ -22,7 +22,7 @@ impl VariantTests
         &self,
         vt : u16,
         variant : Variant
-    ) -> Result<bool, ComError> {
+    ) -> Result<(), ComError> {
 
         let vt_type = if vt > 100 { vt / 100 } else { vt };
         if variant.raw_type() != vt_type {
@@ -100,7 +100,7 @@ impl VariantTests
 
         // Return the result depending on what we got.
         match r {
-            Ok( true ) => Ok( true ),
+            Ok( true ) => Ok(()),
             Ok( false ) => 
                     Err( ComError::new_message(
                             E_INVALIDARG,
