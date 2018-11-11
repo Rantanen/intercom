@@ -127,6 +127,13 @@ impl Foo {
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
         Ok(true)
     }
+
+    // Should be VARIANT_BOOL in Automation interface.
+    fn bool_method(&self, input: bool) -> ComResult<bool> { Ok(input) }
+
+    fn variant_method(&self, input: Variant) -> ComResult<Variant> {
+        Ok(input)
+    }
 }
 #[allow(non_snake_case)]
 #[doc(hidden)]
@@ -471,6 +478,83 @@ unsafe extern "C" fn __Foo_Foo_Automation_complete_method_Automation(self_vtable
             ErrorValue>::from_error(::intercom::return_hresult(err)),
     }
 }
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "C" fn __Foo_Foo_Automation_bool_method_Automation(self_vtable:
+                                                                           ::intercom::RawComPtr,
+                                                                       input:
+                                                                           ::intercom::raw::VariantBool,
+                                                                       __out:
+                                                                           *mut ::intercom::raw::VariantBool)
+ -> ::intercom::HRESULT {
+    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+        (||
+             {
+                 let self_combox =
+                     (self_vtable as usize -
+                          __Foo_Foo_AutomationVtbl_offset()) as
+                         *mut ::intercom::ComBox<Foo>;
+                 let self_struct: &Foo = &**self_combox;
+                 let __result = self_struct.bool_method(input.into());
+                 Ok({
+                        match __result {
+                            Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+                            Err(e) => {
+                                *__out = false.into();
+                                ::intercom::return_hresult(e)
+                            }
+                        }
+                    })
+             })();
+    use ::intercom::ErrorValue;
+    match result {
+        Ok(v) => v,
+        Err(err) =>
+        <::intercom::HRESULT as
+            ErrorValue>::from_error(::intercom::return_hresult(err)),
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "C" fn __Foo_Foo_Automation_variant_method_Automation(self_vtable:
+                                                                              ::intercom::RawComPtr,
+                                                                          input:
+                                                                              ::intercom::raw::Variant,
+                                                                          __out:
+                                                                              *mut ::intercom::raw::Variant)
+ -> ::intercom::HRESULT {
+    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+        (||
+             {
+                 let self_combox =
+                     (self_vtable as usize -
+                          __Foo_Foo_AutomationVtbl_offset()) as
+                         *mut ::intercom::ComBox<Foo>;
+                 let self_struct: &Foo = &**self_combox;
+                 let __result = self_struct.variant_method(input.into());
+                 Ok({
+                        match __result {
+                            Ok(v1) => {
+                                *__out = v1.com_into()?;
+                                ::intercom::S_OK
+                            }
+                            Err(e) => {
+                                *__out = Default::default();
+                                ::intercom::return_hresult(e)
+                            }
+                        }
+                    })
+             })();
+    use ::intercom::ErrorValue;
+    match result {
+        Ok(v) => v,
+        Err(err) =>
+        <::intercom::HRESULT as
+            ErrorValue>::from_error(::intercom::return_hresult(err)),
+    }
+}
 #[allow(non_upper_case_globals)]
 const __Foo_Foo_AutomationVtbl_INSTANCE: __Foo_AutomationVtbl =
     __Foo_AutomationVtbl{__base:
@@ -497,7 +581,11 @@ const __Foo_Foo_AutomationVtbl_INSTANCE: __Foo_AutomationVtbl =
                          string_result_method_Automation:
                              __Foo_Foo_Automation_string_result_method_Automation,
                          complete_method_Automation:
-                             __Foo_Foo_Automation_complete_method_Automation,};
+                             __Foo_Foo_Automation_complete_method_Automation,
+                         bool_method_Automation:
+                             __Foo_Foo_Automation_bool_method_Automation,
+                         variant_method_Automation:
+                             __Foo_Foo_Automation_variant_method_Automation,};
 #[allow(non_snake_case)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_query_interface(self_vtable:
@@ -827,6 +915,79 @@ unsafe extern "C" fn __Foo_Foo_Raw_complete_method_Raw(self_vtable:
             ErrorValue>::from_error(::intercom::return_hresult(err)),
     }
 }
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "C" fn __Foo_Foo_Raw_bool_method_Raw(self_vtable:
+                                                             ::intercom::RawComPtr,
+                                                         input: bool,
+                                                         __out: *mut bool)
+ -> ::intercom::HRESULT {
+    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+        (||
+             {
+                 let self_combox =
+                     (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
+                         *mut ::intercom::ComBox<Foo>;
+                 let self_struct: &Foo = &**self_combox;
+                 let __result = self_struct.bool_method(input.into());
+                 Ok({
+                        match __result {
+                            Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+                            Err(e) => {
+                                *__out = false;
+                                ::intercom::return_hresult(e)
+                            }
+                        }
+                    })
+             })();
+    use ::intercom::ErrorValue;
+    match result {
+        Ok(v) => v,
+        Err(err) =>
+        <::intercom::HRESULT as
+            ErrorValue>::from_error(::intercom::return_hresult(err)),
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "C" fn __Foo_Foo_Raw_variant_method_Raw(self_vtable:
+                                                                ::intercom::RawComPtr,
+                                                            input:
+                                                                ::intercom::raw::Variant,
+                                                            __out:
+                                                                *mut ::intercom::raw::Variant)
+ -> ::intercom::HRESULT {
+    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+        (||
+             {
+                 let self_combox =
+                     (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
+                         *mut ::intercom::ComBox<Foo>;
+                 let self_struct: &Foo = &**self_combox;
+                 let __result = self_struct.variant_method(input.into());
+                 Ok({
+                        match __result {
+                            Ok(v1) => {
+                                *__out = v1.com_into()?;
+                                ::intercom::S_OK
+                            }
+                            Err(e) => {
+                                *__out = Default::default();
+                                ::intercom::return_hresult(e)
+                            }
+                        }
+                    })
+             })();
+    use ::intercom::ErrorValue;
+    match result {
+        Ok(v) => v,
+        Err(err) =>
+        <::intercom::HRESULT as
+            ErrorValue>::from_error(::intercom::return_hresult(err)),
+    }
+}
 #[allow(non_upper_case_globals)]
 const __Foo_Foo_RawVtbl_INSTANCE: __Foo_RawVtbl =
     __Foo_RawVtbl{__base:
@@ -848,5 +1009,7 @@ const __Foo_Foo_RawVtbl_INSTANCE: __Foo_RawVtbl =
                   string_method_Raw: __Foo_Foo_Raw_string_method_Raw,
                   string_result_method_Raw:
                       __Foo_Foo_Raw_string_result_method_Raw,
-                  complete_method_Raw: __Foo_Foo_Raw_complete_method_Raw,};
+                  complete_method_Raw: __Foo_Foo_Raw_complete_method_Raw,
+                  bool_method_Raw: __Foo_Foo_Raw_bool_method_Raw,
+                  variant_method_Raw: __Foo_Foo_Raw_variant_method_Raw,};
 impl ::intercom::HasInterface<Foo> for Foo { }

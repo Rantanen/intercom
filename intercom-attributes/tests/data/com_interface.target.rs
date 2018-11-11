@@ -28,6 +28,13 @@ pub trait Foo {
     -> String;
     fn comitf_method(&self, itf: ComItf<Foo>)
     -> ComResult<ComItf<IUnknown>>;
+
+    // Should be VARIANT_BOOL in Automation interface.
+    fn bool_method(&self, input: bool)
+    -> ComResult<bool>;
+
+    fn variant_method(&self, input: Variant)
+    -> ComResult<Variant>;
 }
 #[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
@@ -78,6 +85,20 @@ pub struct __Foo_AutomationVtbl {
                                                              __out:
                                                                  *mut ::intercom::raw::InterfacePtr<IUnknown>)
                                       -> ::intercom::HRESULT,
+    pub bool_method_Automation: unsafe extern "C" fn(self_vtable:
+                                                               ::intercom::RawComPtr,
+                                                           input:
+                                                               ::intercom::raw::VariantBool,
+                                                           __out:
+                                                               *mut ::intercom::raw::VariantBool)
+                                    -> ::intercom::HRESULT,
+    pub variant_method_Automation: unsafe extern "C" fn(self_vtable:
+                                                                  ::intercom::RawComPtr,
+                                                              input:
+                                                                  ::intercom::raw::Variant,
+                                                              __out:
+                                                                  *mut ::intercom::raw::Variant)
+                                       -> ::intercom::HRESULT,
 }
 #[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
@@ -125,6 +146,18 @@ pub struct __Foo_RawVtbl {
                                                       __out:
                                                           *mut ::intercom::raw::InterfacePtr<IUnknown>)
                                -> ::intercom::HRESULT,
+    pub bool_method_Raw: unsafe extern "C" fn(self_vtable:
+                                                        ::intercom::RawComPtr,
+                                                    input: bool,
+                                                    __out: *mut bool)
+                             -> ::intercom::HRESULT,
+    pub variant_method_Raw: unsafe extern "C" fn(self_vtable:
+                                                           ::intercom::RawComPtr,
+                                                       input:
+                                                           ::intercom::raw::Variant,
+                                                       __out:
+                                                           *mut ::intercom::raw::Variant)
+                                -> ::intercom::HRESULT,
 }
 impl Foo for ::intercom::ComItf<Foo> {
     fn arg_method(&self, a: u16) -> () {
@@ -170,6 +203,68 @@ impl Foo for ::intercom::ComItf<Foo> {
                    };
         }
         <() as ErrorValue>::from_error(::intercom::E_POINTER)
+    }
+    fn bool_method(&self, input: bool) -> ComResult<bool> {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+            let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<ComResult<bool>, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let mut __out: ::intercom::raw::VariantBool =
+                             false.into();
+                         let __result =
+                             ((**vtbl).bool_method_Automation)(comptr.ptr,
+                                                               input.into(),
+                                                               &mut __out);
+                         Ok({
+                                if __result == ::intercom::S_OK {
+                                    Ok(__out.into())
+                                } else {
+                                    Err(::intercom::get_last_error(__result))
+                                }
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <ComResult<bool> as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+            let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<ComResult<bool>, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let mut __out: bool = false;
+                         let __result =
+                             ((**vtbl).bool_method_Raw)(comptr.ptr,
+                                                        input.into(),
+                                                        &mut __out);
+                         Ok({
+                                if __result == ::intercom::S_OK {
+                                    Ok(__out.into())
+                                } else {
+                                    Err(::intercom::get_last_error(__result))
+                                }
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <ComResult<bool> as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        <ComResult<bool> as ErrorValue>::from_error(::intercom::E_POINTER)
     }
     fn com_result_method(&self) -> ComResult<u16> {
         #[allow(unused_imports)]
@@ -571,6 +666,69 @@ impl Foo for ::intercom::ComItf<Foo> {
                    };
         }
         <String as ErrorValue>::from_error(::intercom::E_POINTER)
+    }
+    fn variant_method(&self, input: Variant) -> ComResult<Variant> {
+        #[allow(unused_imports)]
+        use ::intercom::ComInto;
+        #[allow(unused_imports)]
+        use ::intercom::ErrorValue;
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+            let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<ComResult<Variant>, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let mut __out: ::intercom::raw::Variant =
+                             Default::default();
+                         let __result =
+                             ((**vtbl).variant_method_Automation)(comptr.ptr,
+                                                                  input.com_into()?,
+                                                                  &mut __out);
+                         Ok({
+                                if __result == ::intercom::S_OK {
+                                    Ok(__out.into())
+                                } else {
+                                    Err(::intercom::get_last_error(__result))
+                                }
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <ComResult<Variant> as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        if let Some(comptr) =
+               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+            let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
+            #[allow(unused_unsafe)]
+            let result: Result<ComResult<Variant>, ::intercom::ComError> =
+                (||
+                     unsafe {
+                         let mut __out: ::intercom::raw::Variant =
+                             Default::default();
+                         let __result =
+                             ((**vtbl).variant_method_Raw)(comptr.ptr,
+                                                           input.com_into()?,
+                                                           &mut __out);
+                         Ok({
+                                if __result == ::intercom::S_OK {
+                                    Ok(__out.into())
+                                } else {
+                                    Err(::intercom::get_last_error(__result))
+                                }
+                            })
+                     })();
+            return match result {
+                       Ok(v) => v,
+                       Err(err) =>
+                       <ComResult<Variant> as
+                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                   };
+        }
+        <ComResult<Variant> as ErrorValue>::from_error(::intercom::E_POINTER)
     }
 }
 impl ::intercom::ComInterface for Foo {

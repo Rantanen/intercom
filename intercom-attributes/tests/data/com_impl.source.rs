@@ -42,4 +42,9 @@ impl Foo
     {
         Ok(true)
     }
+
+    // Should be VARIANT_BOOL in Automation interface.
+    fn bool_method(&self, input : bool) -> ComResult<bool> { Ok(input) }
+
+    fn variant_method(&self, input : Variant) -> ComResult<Variant> { Ok(input) }
 }

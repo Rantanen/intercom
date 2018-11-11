@@ -19,4 +19,9 @@ pub trait Foo {
 
     fn string_method(&self, msg: String) -> String;
     fn comitf_method(&self, itf: ComItf<Foo>) -> ComResult<ComItf<IUnknown>>;
+
+    // Should be VARIANT_BOOL in Automation interface.
+    fn bool_method(&self, input : bool) -> ComResult<bool>;
+
+    fn variant_method(&self, input : Variant) -> ComResult<Variant>;
 }
