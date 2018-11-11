@@ -51,11 +51,7 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
     ) -> ComRc<T> {
         ComRc::attach( ComItf::wrap( ptr, ts ) )
     }
-}
 
-#[cfg(windows)]
-impl<T: ComInterface + ?Sized> ComRc<T>
-{
     pub fn copy( itf : &ComItf<T> ) -> ComRc<T> {
 
         let iunk : &ComItf<IUnknown> = itf.as_ref();
@@ -70,7 +66,11 @@ impl<T: ComInterface + ?Sized> ComRc<T>
         };
         ComRc::attach( ComItf::into_unknown( itf ).clone() )
     }
+}
 
+#[cfg(windows)]
+impl<T: ComInterface + ?Sized> ComRc<T>
+{
     pub fn create( clsid : GUID ) -> ::ComResult< ComRc<T> > {
 
         // Get the IID.
