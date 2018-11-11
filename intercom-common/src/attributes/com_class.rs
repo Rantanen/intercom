@@ -146,7 +146,7 @@ pub fn expand_com_class(
 
     // Mark the struct as having IUnknown.
     output.push( quote!(
-        impl ::intercom::HasInterface< IUnknown > for #struct_ident {}
+        impl ::intercom::HasInterface< ::intercom::IUnknown > for #struct_ident {}
     ) );
 
     // The CoClass implementation.

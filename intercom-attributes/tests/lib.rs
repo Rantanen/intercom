@@ -111,19 +111,19 @@ fn check_expansions() {
                             Difference::Same(ref x) => {
                                 t.reset().unwrap();
                                 for line in x.lines() {
-                                    writeln!(t, "  {}", line);
+                                    writeln!(t, "  {}", line).expect( "Write failed" );
                                 }
                             }
                             Difference::Add(ref x) => {
                                 t.fg(term::color::GREEN).unwrap();
                                 for line in x.lines() {
-                                    writeln!(t, "+ {}", line);
+                                    writeln!(t, "+ {}", line).expect( "Write failed" );
                                 }
                             }
                             Difference::Rem(ref x) => {
                                 t.fg(term::color::RED).unwrap();
                                 for line in x.lines() {
-                                    writeln!(t, "- {}", line);
+                                    writeln!(t, "- {}", line).expect( "Write failed" );
                                 }
                             }
                         }

@@ -52,6 +52,7 @@ const __Foo_ISupportErrorInfoVtbl_INSTANCE: ::intercom::ISupportErrorInfoVtbl
                                                                        ::intercom::ComBox::<Foo>::release_ptr,},
                                       interface_supports_error_info_Automation:
                                           ::intercom::ComBox::<Foo>::interface_supports_error_info_ptr,};
+impl ::intercom::HasInterface<::intercom::IUnknown> for Foo { }
 #[allow(non_snake_case)]
 #[doc(hidden)]
 pub struct __FooVtblList {
