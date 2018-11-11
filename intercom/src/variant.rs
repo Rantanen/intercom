@@ -862,6 +862,33 @@ mod test {
     }
 
     #[test]
+    fn string_to_variant() {
+        match Variant::from( "input string".to_string() ) {
+            Variant::String( IntercomString::String( ref s ) )
+                if s == "input string" => { },
+            _ => panic!( "Bad variant" ),
+        }
+    }
+
+    #[test]
+    fn bstring_to_variant() {
+        match Variant::from( BString::from( "input string" ) ) {
+            Variant::String( IntercomString::BString( ref s ) )
+                if s.to_string().unwrap() == "input string" => { },
+            _ => panic!( "Bad variant" ),
+        }
+    }
+
+    #[test]
+    fn cstring_to_variant() {
+        match Variant::from( CString::new( "input string" ).unwrap() ) {
+            Variant::String( IntercomString::CString( ref s ) )
+                if s.to_str().unwrap() == "input string" => { },
+            _ => panic!( "Bad variant" ),
+        }
+    }
+
+    #[test]
     fn variant_to_i64() {
         assert_eq!( -100000000i64,
                 i64::try_from( Variant::I64( -100000000i64 ) ).unwrap() );
@@ -967,16 +994,16 @@ mod test {
 
     #[test]
     fn variant_to_f32() {
-        assert_eq!( -1000000f64,
-                f64::try_from( Variant::F32( -1000000f32 ) ).unwrap() );
-        assert_eq!( -10000f64,
-                f64::try_from( Variant::I16( -10000i16 ) ).unwrap() );
-        assert_eq!( 10000f64,
-                f64::try_from( Variant::U16( 10000u16 ) ).unwrap() );
-        assert_eq!( -100f64,
-                f64::try_from( Variant::I8( -100i8 ) ).unwrap() );
-        assert_eq!( 100f64,
-                f64::try_from( Variant::U8( 100u8 ) ).unwrap() );
+        assert_eq!( -1000000f32,
+                f32::try_from( Variant::F32( -1000000f32 ) ).unwrap() );
+        assert_eq!( -10000f32,
+                f32::try_from( Variant::I16( -10000i16 ) ).unwrap() );
+        assert_eq!( 10000f32,
+                f32::try_from( Variant::U16( 10000u16 ) ).unwrap() );
+        assert_eq!( -100f32,
+                f32::try_from( Variant::I8( -100i8 ) ).unwrap() );
+        assert_eq!( 100f32,
+                f32::try_from( Variant::U8( 100u8 ) ).unwrap() );
     }
 
     #[test]
@@ -993,5 +1020,28 @@ mod test {
                 <()>::try_from( Variant::None ).unwrap() );
     }
 
+    #[test]
+    fn variant_to_string() {
+        assert_eq!( "variant value".to_string(),
+                String::try_from( Variant::String(
+                        IntercomString::String( "variant value".to_string() ) ) )
+                    .unwrap() );
+    }
+
+    #[test]
+    fn variant_to_bstring() {
+        assert_eq!( BString::from( "variant value" ),
+                BString::try_from( Variant::String(
+                        IntercomString::String( "variant value".to_string() ) ) )
+                    .unwrap() );
+    }
+
+    #[test]
+    fn variant_to_cstring() {
+        assert_eq!( CString::new( "variant value" ).unwrap(),
+                CString::try_from( Variant::String(
+                        IntercomString::String( "variant value".to_string() ) ) )
+                    .unwrap() );
+    }
 }
 

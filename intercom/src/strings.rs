@@ -19,6 +19,7 @@ pub struct FormatError;
 
 /// Represents a borrowed BSTR string.
 #[repr(C)]
+#[derive(PartialEq)]
 pub struct BStr(
     // Invariant 1: .0.as_ptr() must be a valid BSTR pointer _or_ 0x1 if len == 0.
     //              This includes having u32 alignment.
@@ -160,6 +161,13 @@ impl std::fmt::Debug for BString {
     }
 }
 
+impl PartialEq for BString {
+    fn eq( &self, other : &Self ) -> bool {
+
+        // Deref into &BStr and compare those.
+        **self == **other
+    }
+}
 
 impl BString {
 
@@ -830,5 +838,29 @@ mod test {
                 assert_eq!( *( ptr.offset( 3 ) ), 0 );
             }
         }
+    }
+
+    #[test]
+    fn bstr_eq() {
+
+        let bstr_data = [ 6u16, 0u16, 102u16, 111u16, 111u16, 0u16 ];
+        let bstr = unsafe { BStr::from_ptr( bstr_data.as_ptr().offset( 2 ) ) };
+
+        let bstring_foo : BString = "foo".into();
+        assert_eq!( bstr, &*bstring_foo );
+
+        let bstring_bar : BString = "bar".into();
+        assert_ne!( bstr, &*bstring_bar );
+    }
+
+    #[test]
+    fn bstring_eq() {
+
+        let bstring_foo1 : BString = "foo".into();
+        let bstring_foo2 : BString = "foo".into();
+        assert_eq!( bstring_foo1, bstring_foo2 );
+
+        let bstring_bar : BString = "bar".into();
+        assert_ne!( bstring_foo1, bstring_bar );
     }
 }
