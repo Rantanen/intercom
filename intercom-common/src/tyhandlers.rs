@@ -120,10 +120,6 @@ pub trait TypeHandler {
             _ => quote!( Default::default() )
         }
     }
-
-    /// Gets the sype system the handler serves if the handler is type system specific. Returns
-    /// None if the handler is type system agnostic.
-    fn type_system( &self ) -> Option<ModelTypeSystem> { None }
 }
 
 /// Identity parameter handler.
@@ -394,11 +390,6 @@ impl TypeHandler for StringParam
     fn default_value( &self ) -> TokenStream
     {
         quote!( ::std::ptr::null_mut() )
-    }
-
-    /// String parameters differ between the type systems.
-    fn type_system( &self ) -> Option<ModelTypeSystem> {
-        Some( self.context.type_system )
     }
 }
 
