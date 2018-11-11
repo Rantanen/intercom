@@ -22,11 +22,6 @@ impl<T: ComInterface + ?Sized> Clone for ComRc<T> {
     }
 }
 
-// ComRc is a smart pointer and shouldn't introduce methods on 'self'.
-//
-// Various as_ and into_ methods here are properly implemented static methods
-// which is the recommended alternative - compare this to std::Box.
-#[allow(clippy::wrong_self_convention)]
 impl<T : ComInterface + ?Sized> ComRc<T> {
 
     /// Attaches a floating ComItf reference and brings it under managed
@@ -59,12 +54,15 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
         ComRc::attach( itf.clone() )
     }
 
+    // ComRc is a smart pointer and shouldn't introduce methods on 'self'.
+    #[allow(clippy::wrong_self_convention)]
     pub fn into_unknown( mut other : ComRc<T> ) -> ComRc<IUnknown> {
 
         let itf = unsafe {
             std::mem::replace( &mut other.itf, ComItf::null_itf() )
         };
-        ComRc::attach( ComItf::into_unknown( itf ).clone() )
+
+        ComRc::attach( ComItf::as_unknown( &itf ) )
     }
 }
 

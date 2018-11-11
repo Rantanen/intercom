@@ -136,7 +136,10 @@ impl<T: ?Sized> ComItf<T> {
 }
 
 impl<T: ComInterface + ?Sized> ComItf<T> {
-    pub fn into_unknown( this : Self ) -> ComItf<IUnknown> {
+
+    // ComItf is a smart pointer and shouldn't introduce methods on 'self'.
+    #[allow(clippy::wrong_self_convention)]
+    pub fn as_unknown( this : &Self ) -> ComItf<IUnknown> {
         ComItf {
             raw_ptr: this.raw_ptr.into_unknown(),
             automation_ptr: this.automation_ptr.into_unknown(),
