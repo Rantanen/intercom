@@ -358,6 +358,28 @@ impl From< f32 > for Variant {
     }
 }
 
+impl<T: HasInterface<IUnknown>> From< ComStruct<T> > for Variant {
+    fn from( src : ComStruct<T> ) -> Self {
+        let iunk : ComItf<IUnknown> = src.into();
+        Variant::IUnknown( ComRc::attach( iunk ) )
+    }
+}
+
+impl<T: ComInterface + ?Sized> From< ComItf<T> > for Variant {
+    fn from( src : ComItf<T> ) -> Self {
+        let iunk : &ComItf<IUnknown> = src.as_ref();
+        Variant::IUnknown( ComRc::copy( iunk ) )
+    }
+}
+
+impl<T: ComInterface + ?Sized> From< ComRc<T> > for Variant {
+
+    fn from( src : ComRc<T> ) -> Self {
+        let iunkrc = ComRc::into_unknown( src );
+        Variant::IUnknown( iunkrc )
+    }
+}
+
 impl TryFrom< Variant > for f64 {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< f64, Self::Error > {

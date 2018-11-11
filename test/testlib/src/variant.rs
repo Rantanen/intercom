@@ -12,6 +12,18 @@ pub trait IVariantInterface {
     fn do_stuff( &self ) -> Result<Variant, ComError>;
 }
 
+#[com_class( IVariantInterface )]
+pub struct VariantImpl;
+
+#[com_impl]
+impl IVariantInterface for VariantImpl
+{
+    fn do_stuff( &self ) -> Result<Variant, ComError>
+    {
+        Ok( Variant::from( 1.0 / 3.0 ) )
+    }
+}
+
 #[com_interface]
 #[com_impl]
 impl VariantTests
@@ -130,6 +142,9 @@ impl VariantTests
             802 => Ok( Variant::from( String::from( "text" ) ) ),
             803 => Ok( Variant::from( CString::new( "text" ).unwrap() ) ),
             11 => Ok( Variant::from( true ) ),
+            1301 => Ok( Variant::from( ComStruct::new( VariantImpl ) ) ),
+            1302 => Ok( Variant::from( ComRc::<IUnknown>::from( ComStruct::new( VariantImpl ) ) ) ),
+            1303 => Ok( Variant::from( ComRc::<IVariantInterface>::from( ComStruct::new( VariantImpl ) ) ) ),
             16 => Ok( Variant::from( -1i8 ) ),
             17 => Ok( Variant::from( 129u8 ) ),
             18 => Ok( Variant::from( 12929u16 ) ),

@@ -55,6 +55,47 @@ namespace
             REQUIRE( text[ i ] == right[ i ] );
         }
     }
+
+	class VariantImplementation : public IVariantInterface_Automation
+	{
+	public:
+
+		virtual intercom::HRESULT INTERCOM_CC DoStuff(
+			OUT intercom::VARIANT* pVariant
+		) 
+		{
+			// Construct allocator. This will be needed for BSTR tests.
+			IAllocator_Automation* pAllocator = nullptr;
+			intercom::HRESULT hr = CreateInstance(
+				CLSID_Allocator,
+				IID_IAllocator_Automation,
+				&pAllocator );
+
+			pVariant->vt = intercom::VT_BSTR;
+			pVariant->bstrVal = pAllocator->AllocBstr(
+					const_cast< uint16_t* >(
+						reinterpret_cast< const uint16_t* >( u"text" ) ),
+					4 );
+
+			return intercom::SC_OK;
+		}
+
+		virtual intercom::HRESULT INTERCOM_CC QueryInterface(
+			const intercom::IID& riid,
+			void** out
+		)
+		{
+			// We only have one interface implementation.
+			// The tests shouldn't be querying bad IIDs.
+			*out = this;
+			return intercom::SC_OK;
+		}
+
+		virtual intercom::REF_COUNT_32 INTERCOM_CC AddRef() { return ++refCount; }
+		virtual intercom::REF_COUNT_32 INTERCOM_CC Release() { return --refCount; }
+
+		int refCount = 0;
+	};
 }
 
 TEST_CASE( "Variant parameters" )
@@ -403,7 +444,56 @@ TEST_CASE( "Variant parameters" )
             REQUIRE( v.vt == vt );
             REQUIRE( v.ullVal == 129292929 );
         }
+
+        SECTION( "VT_UNKNOWN" )
+        {
+			for( int i = 1; i <= 3; i++ )
+			{
+				SECTION( "Alternative " + std::to_string( i ) )
+				{
+					intercom::VARENUM vt = intercom::VT_UNKNOWN;
+					intercom::VARIANT v = {};
+					REQUIRE( intercom::SC_OK == p->VariantResult( vt * 100 + i, OUT &v ) );
+
+					REQUIRE( v.vt == vt );
+
+					IVariantInterface_Automation* pimpl = nullptr;
+					REQUIRE( intercom::SC_OK == v.punkVal->QueryInterface(
+							IID_IVariantInterface_Automation,
+							OUT reinterpret_cast<void**>( &pimpl ) ) );
+
+					intercom::VARIANT v2 = {};
+					REQUIRE( intercom::SC_OK == pimpl->DoStuff( OUT &v2 ) );
+
+					REQUIRE( v2.vt == intercom::VT_R8 );
+					REQUIRE( v2.dblVal == 1.0 / 3.0 );
+
+					REQUIRE( pimpl->Release() == 1 );
+					REQUIRE( v.punkVal->Release() == 0 );
+				}
+			}
+        }
     }
+
+	SECTION( "IUnknown from COM to Rust" )
+	{
+		VariantImplementation vi;
+		vi.AddRef();
+
+		// We'll start with ref count of 1.
+		REQUIRE( vi.refCount == 1 );
+
+		REQUIRE( intercom::SC_OK == pVariantTests->VariantParameter(
+				intercom::VT_UNKNOWN,
+				make_variant( intercom::VT_UNKNOWN,
+					[&]( auto& variant ) {
+						variant.punkVal = &vi;
+						variant.punkVal->AddRef();
+					} ) ) );
+
+		// Intercom should have released the VARIANT.
+		REQUIRE( vi.refCount == 1 );
+	}
 
     REQUIRE( pAllocator->Release() == 0 );
     REQUIRE( pVariantTests->Release() == 0 );

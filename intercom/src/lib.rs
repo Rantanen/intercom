@@ -152,7 +152,6 @@ pub mod raw {
         }
     }
 
-
     impl<I: ?Sized> InterfacePtr<I> {
         pub fn new( ptr : super::RawComPtr ) -> InterfacePtr<I> {
             InterfacePtr { ptr, phantom: ::std::marker::PhantomData }
@@ -164,6 +163,12 @@ pub mod raw {
 
         pub fn is_null( self ) -> bool {
             self.ptr.is_null()
+        }
+    }
+
+    impl<I: ::ComInterface + ?Sized> InterfacePtr<I> {
+        pub fn into_unknown( self ) -> InterfacePtr<::IUnknown> {
+            InterfacePtr { ptr : self.ptr, phantom: ::std::marker::PhantomData }
         }
     }
 }

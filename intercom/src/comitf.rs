@@ -125,6 +125,24 @@ impl<T: ?Sized> ComItf<T> {
             phantom: PhantomData,
         }
     }
+
+    /// Checks whether the interface represents a null pointer.
+    ///
+    /// This should not be a case normally but may occur after certain unsafe
+    /// operations.
+    pub fn is_null( itf : &Self ) -> bool {
+        itf.raw_ptr.is_null() && itf.automation_ptr.is_null()
+    }
+}
+
+impl<T: ComInterface + ?Sized> ComItf<T> {
+    pub fn into_unknown( this : Self ) -> ComItf<IUnknown> {
+        ComItf {
+            raw_ptr: this.raw_ptr.into_unknown(),
+            automation_ptr: this.automation_ptr.into_unknown(),
+            phantom: PhantomData,
+        }
+    }
 }
 
 impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized> std::convert::TryFrom<&ComRc<S>> for ComRc<T> {
@@ -194,7 +212,7 @@ extern "system" {
     ) -> ::HRESULT;
 }
 
-impl<T: ?Sized> AsRef<ComItf<IUnknown>> for ComItf<T>
+impl<T: ComInterface + ?Sized> AsRef<ComItf<IUnknown>> for ComItf<T>
 {
     fn as_ref( &self ) -> &ComItf<IUnknown> {
         unsafe { &*( self as *const _ as *const ComItf<IUnknown> ) }
