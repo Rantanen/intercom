@@ -144,6 +144,11 @@ pub fn expand_com_class(
                     };
         ) );
 
+    // Mark the struct as having IUnknown.
+    output.push( quote!(
+        impl ::intercom::HasInterface< ::intercom::IUnknown > for #struct_ident {}
+    ) );
+
     // The CoClass implementation.
     //
     // Define the vtable list struct first. This lists the vtables of all the

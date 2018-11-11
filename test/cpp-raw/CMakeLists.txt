@@ -21,6 +21,7 @@ ${PROJECT_SOURCE_DIR}/return_interfaces.cpp
 ${PROJECT_SOURCE_DIR}/stateful.cpp
 ${PROJECT_SOURCE_DIR}/strings.cpp
 ${PROJECT_SOURCE_DIR}/type_system_callbacks.cpp
+${PROJECT_SOURCE_DIR}/variant.cpp
 )
 
 include_directories("${PROJECT_BINARY_DIR}")

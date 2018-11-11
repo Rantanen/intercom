@@ -110,6 +110,12 @@ impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComItf
     }
 }
 
+impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComRc<I> {
+    fn from( combox : ComStruct<T> ) -> Self {
+        ComRc::attach( ComItf::from( combox ) )
+    }
+}
+
 /// Type factory for the concrete COM coclass types.
 ///
 /// Includes the virtual tables required for COM method invocations, reference

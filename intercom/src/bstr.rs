@@ -26,6 +26,7 @@ use super::*;
 /// `SysAllocStringLen` methods and freeing them with `SysFreeString` by
 /// default.
 #[repr(C)]
+#[derive(Copy, Clone)]
 pub struct BStr( *mut u16 );
 
 #[cfg(windows)]

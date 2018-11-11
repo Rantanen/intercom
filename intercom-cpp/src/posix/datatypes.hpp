@@ -7,6 +7,8 @@
 // Declare data types used on Windows platform to facilitate code sharing.
 namespace intercom
 {
+    typedef int32_t INT;
+    typedef uint32_t UINT;
     typedef int8_t INT8;
     typedef uint8_t UINT8;
     typedef int16_t INT16;
@@ -17,18 +19,42 @@ namespace intercom
     typedef uint64_t UINT64;
 
     typedef int BOOL;
-    typedef uint8_t BYTE;
-    typedef uint32_t ULONG;
     typedef uint32_t DWORD;
     typedef uint16_t WORD;
+
+    typedef int8_t CHAR;
+    typedef int16_t SHORT;
+    typedef int32_t LONG;
+    typedef int64_t LONGLONG;
+    typedef uint8_t BYTE;
+    typedef uint16_t USHORT;
+    typedef uint32_t ULONG;
+    typedef uint64_t ULONGLONG;
+    typedef double DOUBLE;
+    typedef float FLOAT;
 
     typedef char16_t OLECHAR;
     typedef OLECHAR* BSTR;
 
     typedef uint32_t HRESULT;
+    typedef uint32_t SCODE;
+
+    typedef double DATE;
+    typedef int16_t VARIANT_BOOL;
+    typedef int64_t CY, CURRENCY;
+
+    typedef void* PVOID;
 
     //! 32-bit reference counter. unsigned long is 32-bit in Windows and 64-bit on Unix.
     typedef uint32_t REF_COUNT_32;
+
+    struct DECIMAL {
+        WORD wReserved;
+        BYTE scale;
+        BYTE sign;
+        ULONG Hi32;
+        ULONGLONG Lo64;
+    };
 }
 
 // Visual C++ does not declare the data types in their own namespace.

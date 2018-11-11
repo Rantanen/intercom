@@ -4,16 +4,25 @@ use super::*;
 /// Reference counted handle to the `ComBox` data.
 ///
 /// Provides a safe way to handle the unsafe `ComBox` values.
-pub struct ComRc<T : ?Sized> {
+pub struct ComRc<T : ComInterface + ?Sized> {
     itf : ComItf<T>
 }
 
-// ComRc is a smart pointer and shouldn't introduce methods on 'self'.
-//
-// Various as_ and into_ methods here are properly implemented static methods
-// which is the recommended alternative - compare this to std::Box.
-#[allow(clippy::wrong_self_convention)]
-impl<T : ?Sized> ComRc<T> {
+impl<T: ComInterface + ?Sized> std::fmt::Debug for ComRc<T> {
+    fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
+        (**self).fmt(f)
+    }
+}
+
+impl<T: ComInterface + ?Sized> Clone for ComRc<T> {
+    fn clone( &self ) -> Self {
+        let rc = ComRc { itf : self.itf.clone() };
+        rc.itf.as_ref().release();
+        rc
+    }
+}
+
+impl<T : ComInterface + ?Sized> ComRc<T> {
 
     /// Attaches a floating ComItf reference and brings it under managed
     /// reference counting.
@@ -36,6 +45,24 @@ impl<T : ?Sized> ComRc<T> {
         ts : TypeSystem
     ) -> ComRc<T> {
         ComRc::attach( ComItf::wrap( ptr, ts ) )
+    }
+
+    pub fn copy( itf : &ComItf<T> ) -> ComRc<T> {
+
+        let iunk : &ComItf<IUnknown> = itf.as_ref();
+        iunk.add_ref();
+        ComRc::attach( itf.clone() )
+    }
+
+    // ComRc is a smart pointer and shouldn't introduce methods on 'self'.
+    #[allow(clippy::wrong_self_convention)]
+    pub fn into_unknown( mut other : ComRc<T> ) -> ComRc<IUnknown> {
+
+        let itf = unsafe {
+            std::mem::replace( &mut other.itf, ComItf::null_itf() )
+        };
+
+        ComRc::attach( ComItf::as_unknown( &itf ) )
     }
 }
 
@@ -76,20 +103,22 @@ impl<T: ComInterface + ?Sized> ComRc<T>
     }
 }
 
-impl<T : ?Sized > ::std::ops::Deref for ::intercom::ComRc< T > {
+impl<T : ComInterface + ?Sized > ::std::ops::Deref for ::intercom::ComRc< T > {
     type Target = ComItf< T >;
     fn deref( &self ) -> &Self::Target {
         &self.itf
     }
 }
 
-impl<T : ?Sized> Drop for ComRc<T> {
+impl<T : ComInterface + ?Sized> Drop for ComRc<T> {
     fn drop( &mut self ) {
-        self.itf.as_ref().release();
+        if ! ComItf::is_null( &self.itf ) {
+            self.itf.as_ref().release();
+        }
     }
 }
 
-impl<T: ?Sized> AsRef<ComItf<T>> for ComRc<T> {
+impl<T: ComInterface + ?Sized> AsRef<ComItf<T>> for ComRc<T> {
     fn as_ref( &self ) -> &ComItf<T> {
         &self.itf
     }

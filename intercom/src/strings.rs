@@ -19,12 +19,22 @@ pub struct FormatError;
 
 /// Represents a borrowed BSTR string.
 #[repr(C)]
+#[derive(PartialEq)]
 pub struct BStr(
     // Invariant 1: .0.as_ptr() must be a valid BSTR pointer _or_ 0x1 if len == 0.
     //              This includes having u32 alignment.
     // Invariant 2: .0.len() must fit to u32.
     [u8]
 );
+
+impl std::fmt::Debug for BStr {
+    fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
+        write!( f, "BStr(\"{}\")",
+                String::from_utf16_lossy( unsafe { std::slice::from_raw_parts(
+                        self.as_ptr() as *const u16,
+                        self.len() as usize / 2 ) } ) )
+    }
+}
 
 impl BStr {
 
@@ -142,9 +152,26 @@ pub struct BString(
     *mut u16
 );
 
+impl std::fmt::Debug for BString {
+    fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
+        write!( f, "BStr(\"{}\")",
+                String::from_utf16_lossy( unsafe { std::slice::from_raw_parts(
+                        self.as_ptr() as *const u16,
+                        self.len_bytes() as usize / 2 ) } ) )
+    }
+}
+
+impl PartialEq for BString {
+    fn eq( &self, other : &Self ) -> bool {
+
+        // Deref into &BStr and compare those.
+        **self == **other
+    }
+}
+
 impl BString {
 
-    pub fn from_ptr( ptr : *mut u16 ) -> BString {
+    pub unsafe fn from_ptr( ptr : *mut u16 ) -> BString {
         BString( ptr )
     }
 
@@ -421,54 +448,66 @@ impl<'a> FromWithTemporary<'a, &'a BStr>
     }
 }
 
+pub trait ComFrom<TSource> : Sized {
+    fn com_from( source : TSource ) -> Result<Self, ComError>;
+}
+
 pub trait ComInto<TTarget> {
     fn com_into( self ) -> Result<TTarget, ComError>;
 }
 
-impl<T> ComInto<T> for T {
-    fn com_into( self ) -> Result<T, ComError> {
-        Ok( self )
+impl<TTarget, TSource> ComInto<TTarget> for TSource
+    where TTarget : ComFrom< TSource > {
+
+    fn com_into( self ) -> Result<TTarget, ComError> {
+        TTarget::com_from( self )
     }
 }
 
-impl ComInto<String> for BString {
-    fn com_into( self ) -> Result<String, ComError> {
-        let mut bstr : &BStr = &self;
+impl<T> ComFrom<T> for T {
+    fn com_from( source : T ) -> Result<T, ComError> {
+        Ok( source )
+    }
+}
+
+impl ComFrom<BString> for String {
+    fn com_from( source : BString ) -> Result<Self, ComError> {
+        let mut bstr : &BStr = &source;
         < String as FromWithTemporary<&BStr> >::from_temporary( &mut bstr )
     }
 }
 
-impl ComInto<BString> for String {
-    fn com_into( self ) -> Result<BString, ComError> {
-        Ok( BString::from( self ) )
+impl ComFrom<String> for BString {
+    fn com_from( source : String ) -> Result<Self, ComError> {
+        Ok( BString::from( source ) )
     }
 }
 
-impl ComInto<String> for CString {
-    fn com_into( self ) -> Result<String, ComError> {
-        self.into_string()
+impl ComFrom<CString> for String {
+    fn com_from( source : CString ) -> Result<Self, ComError> {
+        source.into_string()
                 .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
     }
 }
 
-impl ComInto<CString> for String {
-    fn com_into( self ) -> Result<CString, ComError> {
-        CString::new( self )
+impl ComFrom<String> for CString {
+    fn com_from( source: String ) -> Result<Self, ComError> {
+        CString::new( source )
                 .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
     }
 }
 
-impl ComInto<BString> for CString {
-    fn com_into( self ) -> Result<BString, ComError> {
-        self.to_str()
+impl ComFrom<CString> for BString {
+    fn com_from( source : CString ) -> Result<Self, ComError> {
+        source.to_str()
                 .map( BString::from )
                 .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
     }
 }
 
-impl ComInto<CString> for BString {
-    fn com_into( self ) -> Result<CString, ComError> {
-        let string = self.to_string()
+impl ComFrom<BString> for CString {
+    fn com_from( source : BString ) -> Result<Self, ComError> {
+        let string = source.to_string()
                 .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )?;
 
         CString::new( string )
@@ -689,6 +728,61 @@ mod os {
     }
 }
 
+#[derive(Debug)]
+pub enum IntercomString {
+    BString( BString ),
+    CString( CString ),
+    String( String ),
+}
+
+impl From<BString> for IntercomString {
+    fn from( source : BString ) -> Self {
+        IntercomString::BString( source )
+    }
+}
+
+impl From<String> for IntercomString {
+    fn from( source : String ) -> Self {
+        IntercomString::String( source )
+    }
+}
+
+impl From<CString> for IntercomString {
+    fn from( source : CString ) -> Self {
+        IntercomString::CString( source )
+    }
+}
+
+impl ComFrom<IntercomString> for BString {
+    fn com_from( source : IntercomString ) -> Result<Self, ComError> {
+        match source {
+            IntercomString::BString( bstring ) => bstring.com_into(),
+            IntercomString::CString( cstring ) => cstring.com_into(),
+            IntercomString::String( string ) => string.com_into()
+        }
+    }
+}
+
+impl ComFrom<IntercomString> for CString {
+    fn com_from( source : IntercomString ) -> Result<Self, ComError> {
+        match source {
+            IntercomString::BString( bstring ) => bstring.com_into(),
+            IntercomString::CString( cstring ) => cstring.com_into(),
+            IntercomString::String( string ) => string.com_into()
+        }
+    }
+}
+
+impl ComFrom<IntercomString> for String {
+    fn com_from( source : IntercomString ) -> Result<Self, ComError> {
+        match source {
+            IntercomString::BString( bstring ) => bstring.com_into(),
+            IntercomString::CString( cstring ) => cstring.com_into(),
+            IntercomString::String( string ) => string.com_into()
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -744,5 +838,29 @@ mod test {
                 assert_eq!( *( ptr.offset( 3 ) ), 0 );
             }
         }
+    }
+
+    #[test]
+    fn bstr_eq() {
+
+        let bstr_data = [ 6u16, 0u16, 102u16, 111u16, 111u16, 0u16 ];
+        let bstr = unsafe { BStr::from_ptr( bstr_data.as_ptr().offset( 2 ) ) };
+
+        let bstring_foo : BString = "foo".into();
+        assert_eq!( bstr, &*bstring_foo );
+
+        let bstring_bar : BString = "bar".into();
+        assert_ne!( bstr, &*bstring_bar );
+    }
+
+    #[test]
+    fn bstring_eq() {
+
+        let bstring_foo1 : BString = "foo".into();
+        let bstring_foo2 : BString = "foo".into();
+        assert_eq!( bstring_foo1, bstring_foo2 );
+
+        let bstring_bar : BString = "bar".into();
+        assert_ne!( bstring_foo1, bstring_bar );
     }
 }

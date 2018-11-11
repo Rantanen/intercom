@@ -5,6 +5,7 @@
 extern crate intercom;
 use intercom::*;
 extern crate winapi;
+extern crate chrono;
 
 // #[com_library] does not allow path references so all of the types must be
 // in scope here.
@@ -17,6 +18,7 @@ pub mod error_info; use error_info::*;
 pub mod alloc; use alloc::*;
 pub mod strings; use strings::*;
 pub mod type_system_callbacks; use type_system_callbacks::*;
+pub mod variant; use variant::*;
 
 // Declare available COM classes.
 #[com_library(
@@ -31,6 +33,7 @@ pub mod type_system_callbacks; use type_system_callbacks::*;
     AllocTests,
     StringTests,
     TypeSystemCaller,
+    VariantTests,
 )]
 #[allow(dead_code)]  // #[com_library] requires an item so we need one here for now.
 struct S;

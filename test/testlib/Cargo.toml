@@ -10,6 +10,7 @@ crate-type = [ "cdylib" ]
 [dependencies]
 intercom = { path = "../../intercom" }
 winapi = "0.2.8"
+chrono = "0.4"
 
 [build-dependencies]
 intercom-build = { path = "../../intercom-build" }

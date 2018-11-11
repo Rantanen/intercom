@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,14 +13,14 @@ namespace cs
         [TestMethod]
         public void NotImplemented()
         {
-            var lib = new TestLib.Interop.ResultOperations();
+            var lib = new TestLib.ResultOperations();
             Assert.ThrowsException< NotImplementedException >( () => lib.NotImpl() );
         }
 
         [TestMethod]
         public void ArgumentException()
         {
-            var lib = new TestLib.Interop.ResultOperations();
+            var lib = new TestLib.ResultOperations();
             Assert.ThrowsException< ArgumentException >( () => lib.Sqrt( -1 ) );
 
             var value = new Random().NextDouble();
@@ -30,14 +30,14 @@ namespace cs
         [TestMethod]
         public void Success()
         {
-            var lib = new TestLib.Interop.ResultOperations();
+            var lib = new TestLib.ResultOperations();
             lib.SOk();
         }
 
         [TestMethod]
         public void Tuples()
         {
-            var lib = new TestLib.Interop.ResultOperations();
+            var lib = new TestLib.ResultOperations();
 
             ushort left;
             ushort right;

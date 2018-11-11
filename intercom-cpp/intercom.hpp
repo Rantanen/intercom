@@ -5,6 +5,7 @@
 #include "src/conversions.hpp"
 #include "src/functions.hpp"
 #include "src/memory.hpp"
+#include "src/variant.hpp"
 
 // Exceptions.
 #include "src/no_such_interface.hpp"
