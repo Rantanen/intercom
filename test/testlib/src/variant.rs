@@ -121,6 +121,38 @@ impl VariantTests
         }
     }
 
+    pub fn bad_variant_parameter(
+        &self,
+        vt : u16,
+        variant : Variant
+    ) -> ComResult<()> {
+
+        let r = ( || Ok( match vt {
+            0 => { <()>::try_from( variant )?; },
+            1 => { <()>::try_from( variant )?; },
+            2 => { i16::try_from( variant )?; },
+            3 => { i32::try_from( variant )?; },
+            4 => { f32::try_from( variant )?; },
+            5 => { f64::try_from( variant )?; },
+            7 => { SystemTime::try_from( variant )?; },
+            8 => { BString::try_from( variant )?; },
+            11 => { bool::try_from( variant )?; },
+            16 => { i8::try_from( variant )?; },
+            17 => { u8::try_from( variant )?; },
+            18 => { u16::try_from( variant )?; },
+            19 => { u32::try_from( variant )?; },
+            20 => { i64::try_from( variant )?; },
+            21 => { u64::try_from( variant )?; },
+            _ => Err( E_NOTIMPL )?,
+        } ) )();
+
+        match r {
+            Err( ::E_INVALIDARG ) => Ok(()),
+            Err( e ) => Err( e ),
+            Ok(..) => Err( E_FAIL ),
+        }
+    }
+
     pub fn variant_result( &self, vt : u16 ) -> ComResult<Variant> {
 
         match vt {

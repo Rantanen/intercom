@@ -272,6 +272,95 @@ TEST_CASE( "Variant parameters" )
         }
     }
 
+    SECTION( "Bad variant conversion" )
+    {
+        SECTION( "VT_EMPTY" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_EMPTY,
+                    make_variant( intercom::VT_I2,
+                        [&]( auto& variant ) { variant.iVal = -1; } ) ) );
+        }
+
+        SECTION( "VT_I2" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_I2, { 0 } ) );
+        }
+
+        SECTION( "VT_I4" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_I4, { 0 } ) );
+        }
+
+        SECTION( "VT_R4" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_R4, { 0 } ) );
+        }
+
+        SECTION( "VT_R8" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_R8, { 0 } ) );
+        }
+
+        SECTION( "VT_DATE" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_DATE, { 0 } ) );
+        }
+
+        SECTION( "VT_BSTR" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_BSTR, { 0 } ) );
+        }
+
+        SECTION( "VT_BOOL" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_BOOL, { 0 } ) );
+        }
+
+        SECTION( "VT_I1" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_I1, { 0 } ) );
+        }
+
+        SECTION( "VT_UI1" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_UI1, { 0 } ) );
+        }
+
+        SECTION( "VT_UI2" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_UI2, { 0 } ) );
+        }
+
+        SECTION( "VT_UI4" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_UI4, { 0 } ) );
+        }
+
+        SECTION( "VT_I8" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_I8, { 0 } ) );
+        }
+
+        SECTION( "VT_UI8" )
+        {
+            REQUIRE( intercom::SC_OK == pVariantTests->BadVariantParameter(
+                    intercom::VT_UI8, { 0 } ) );
+        }
+    }
+
     SECTION( "Variant from Rust to COM return value" )
     {
         // Shorter alias.

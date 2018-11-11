@@ -187,6 +187,28 @@ impl From<VariantError> for ComError
     fn from( _ : VariantError ) -> Self { ::E_INVALIDARG.into() }
 }
 
+impl From<VariantError> for HRESULT {
+    fn from( _ : VariantError ) -> HRESULT {
+        E_INVALIDARG
+    }
+}
+
+impl TryFrom< Variant > for () {
+    type Error = VariantError;
+    fn try_from( src : Variant ) -> Result< (), Self::Error > {
+        match src {
+            Variant::None => Ok( () ),
+            _ => Err( VariantError::from( &src ) )
+        }
+    }
+}
+
+impl From< () > for Variant {
+    fn from( _ : () ) -> Self {
+        Variant::None
+    }
+}
+
 impl TryFrom< Variant > for u8 {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< u8, Self::Error > {
