@@ -30,7 +30,7 @@ pub mod unicode; use unicode::*;
     ClassCreator,
     CreatedClass,
     SharedImplementation,
-    ErrorSource,
+    ErrorTests,
     AllocTests,
     StringTests,
     TypeSystemCaller,

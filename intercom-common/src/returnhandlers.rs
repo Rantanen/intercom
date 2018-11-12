@@ -113,10 +113,16 @@ impl ReturnHandler for ErrorResultHandler {
         // Return statement checks for S_OK (should be is_success) HRESULT and
         // yields either Ok or Err Result based on that.
         quote!(
-            if #result == ::intercom::raw::S_OK {
+            // TODO: HRESULT::succeeded
+            if #result == ::intercom::raw::S_OK || #result == ::intercom::raw::S_FALSE {
                 Ok( #ok_tokens )
             } else {
-                Err( ::intercom::get_last_error( #result ) )
+                return Err( ::intercom::load_error(
+                        &ComItf::wrap(
+                            comptr.as_unknown(),
+                            ::intercom::TypeSystem::Automation ),
+                        &INTERCOM_iid,
+                        #result ) );
             }
         )
     }

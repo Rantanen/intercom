@@ -77,7 +77,7 @@ mod comrc; pub use comrc::*;
 mod comitf; pub use comitf::*;
 mod strings; pub use strings::*;
 mod guid; pub use guid::GUID;
-mod error; pub use error::{store_error, get_last_error, ComError, ErrorInfo, ErrorValue};
+pub mod error; pub use error::{ComError, store_error, load_error, ErrorValue};
 mod interfaces;
 pub mod runtime;
 pub mod alloc;
@@ -168,7 +168,7 @@ pub mod raw {
     }
 
     impl<I: ::ComInterface + ?Sized> InterfacePtr<I> {
-        pub fn into_unknown( self ) -> InterfacePtr<::IUnknown> {
+        pub fn as_unknown( &self ) -> InterfacePtr<::IUnknown> {
             InterfacePtr { ptr : self.ptr, phantom: ::std::marker::PhantomData }
         }
     }
