@@ -61,18 +61,18 @@ pub struct __Foo_AutomationVtbl {
                                                                      ::intercom::RawComPtr,
                                                                  __out:
                                                                      *mut u16)
-                                          -> ::intercom::HRESULT,
+                                          -> ::intercom::raw::HRESULT,
     pub rust_result_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                       ::intercom::RawComPtr,
                                                                   __out:
                                                                       *mut u16)
-                                           -> ::intercom::HRESULT,
+                                           -> ::intercom::raw::HRESULT,
     pub complete_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                    ::intercom::RawComPtr,
                                                                a: u16, b: i16,
                                                                __out:
                                                                    *mut ::intercom::raw::VariantBool)
-                                        -> ::intercom::HRESULT,
+                                        -> ::intercom::raw::HRESULT,
     pub string_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                  ::intercom::RawComPtr,
                                                              msg:
@@ -84,21 +84,21 @@ pub struct __Foo_AutomationVtbl {
                                                                  ::intercom::raw::InterfacePtr<Foo>,
                                                              __out:
                                                                  *mut ::intercom::raw::InterfacePtr<IUnknown>)
-                                      -> ::intercom::HRESULT,
+                                      -> ::intercom::raw::HRESULT,
     pub bool_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                ::intercom::RawComPtr,
                                                            input:
                                                                ::intercom::raw::VariantBool,
                                                            __out:
                                                                *mut ::intercom::raw::VariantBool)
-                                    -> ::intercom::HRESULT,
+                                    -> ::intercom::raw::HRESULT,
     pub variant_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                   ::intercom::RawComPtr,
                                                               input:
                                                                   ::intercom::raw::Variant,
                                                               __out:
                                                                   *mut ::intercom::raw::Variant)
-                                       -> ::intercom::HRESULT,
+                                       -> ::intercom::raw::HRESULT,
 }
 #[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
@@ -124,16 +124,16 @@ pub struct __Foo_RawVtbl {
     pub com_result_method_Raw: unsafe extern "C" fn(self_vtable:
                                                               ::intercom::RawComPtr,
                                                           __out: *mut u16)
-                                   -> ::intercom::HRESULT,
+                                   -> ::intercom::raw::HRESULT,
     pub rust_result_method_Raw: unsafe extern "C" fn(self_vtable:
                                                                ::intercom::RawComPtr,
                                                            __out: *mut u16)
-                                    -> ::intercom::HRESULT,
+                                    -> ::intercom::raw::HRESULT,
     pub complete_method_Raw: unsafe extern "C" fn(self_vtable:
                                                             ::intercom::RawComPtr,
                                                         a: u16, b: i16,
                                                         __out: *mut bool)
-                                 -> ::intercom::HRESULT,
+                                 -> ::intercom::raw::HRESULT,
     pub string_method_Raw: unsafe extern "C" fn(self_vtable:
                                                           ::intercom::RawComPtr,
                                                       msg:
@@ -145,19 +145,19 @@ pub struct __Foo_RawVtbl {
                                                           ::intercom::raw::InterfacePtr<Foo>,
                                                       __out:
                                                           *mut ::intercom::raw::InterfacePtr<IUnknown>)
-                               -> ::intercom::HRESULT,
+                               -> ::intercom::raw::HRESULT,
     pub bool_method_Raw: unsafe extern "C" fn(self_vtable:
                                                         ::intercom::RawComPtr,
                                                     input: bool,
                                                     __out: *mut bool)
-                             -> ::intercom::HRESULT,
+                             -> ::intercom::raw::HRESULT,
     pub variant_method_Raw: unsafe extern "C" fn(self_vtable:
                                                            ::intercom::RawComPtr,
                                                        input:
                                                            ::intercom::raw::Variant,
                                                        __out:
                                                            *mut ::intercom::raw::Variant)
-                                -> ::intercom::HRESULT,
+                                -> ::intercom::raw::HRESULT,
 }
 impl Foo for ::intercom::ComItf<Foo> {
     fn arg_method(&self, a: u16) -> () {
@@ -181,7 +181,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <() as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
         if let Some(comptr) =
@@ -199,10 +199,11 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <() as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
-        <() as ErrorValue>::from_error(::intercom::E_POINTER)
+        <() as
+            ErrorValue>::from_error(::intercom::store_error(::intercom::ComError::E_POINTER))
     }
     fn bool_method(&self, input: bool) -> ComResult<bool> {
         #[allow(unused_imports)]
@@ -223,7 +224,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                                                input.into(),
                                                                &mut __out);
                          Ok({
-                                if __result == ::intercom::S_OK {
+                                if __result == ::intercom::raw::S_OK {
                                     Ok(__out.into())
                                 } else {
                                     Err(::intercom::get_last_error(__result))
@@ -234,7 +235,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<bool> as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
         if let Some(comptr) =
@@ -250,7 +251,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                                         input.into(),
                                                         &mut __out);
                          Ok({
-                                if __result == ::intercom::S_OK {
+                                if __result == ::intercom::raw::S_OK {
                                     Ok(__out.into())
                                 } else {
                                     Err(::intercom::get_last_error(__result))
@@ -261,10 +262,11 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<bool> as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
-        <ComResult<bool> as ErrorValue>::from_error(::intercom::E_POINTER)
+        <ComResult<bool> as
+            ErrorValue>::from_error(::intercom::store_error(::intercom::ComError::E_POINTER))
     }
     fn com_result_method(&self) -> ComResult<u16> {
         #[allow(unused_imports)]
@@ -283,7 +285,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                              ((**vtbl).com_result_method_Automation)(comptr.ptr,
                                                                      &mut __out);
                          Ok({
-                                if __result == ::intercom::S_OK {
+                                if __result == ::intercom::raw::S_OK {
                                     Ok(__out.into())
                                 } else {
                                     Err(::intercom::get_last_error(__result))
@@ -294,7 +296,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<u16> as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
         if let Some(comptr) =
@@ -309,7 +311,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                              ((**vtbl).com_result_method_Raw)(comptr.ptr,
                                                               &mut __out);
                          Ok({
-                                if __result == ::intercom::S_OK {
+                                if __result == ::intercom::raw::S_OK {
                                     Ok(__out.into())
                                 } else {
                                     Err(::intercom::get_last_error(__result))
@@ -320,10 +322,11 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<u16> as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
-        <ComResult<u16> as ErrorValue>::from_error(::intercom::E_POINTER)
+        <ComResult<u16> as
+            ErrorValue>::from_error(::intercom::store_error(::intercom::ComError::E_POINTER))
     }
     fn comitf_method(&self, itf: ComItf<Foo>) -> ComResult<ComItf<IUnknown>> {
         #[allow(unused_imports)]
@@ -348,7 +351,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                                                                          ::intercom::TypeSystem::Automation),
                                                                  &mut __out);
                          Ok({
-                                if __result == ::intercom::S_OK {
+                                if __result == ::intercom::raw::S_OK {
                                     Ok(::intercom::ComItf::wrap(__out,
                                                                 ::intercom::TypeSystem::Automation))
                                 } else {
@@ -360,7 +363,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<ComItf<IUnknown>> as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
         if let Some(comptr) =
@@ -381,7 +384,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                                                                   ::intercom::TypeSystem::Raw),
                                                           &mut __out);
                          Ok({
-                                if __result == ::intercom::S_OK {
+                                if __result == ::intercom::raw::S_OK {
                                     Ok(::intercom::ComItf::wrap(__out,
                                                                 ::intercom::TypeSystem::Raw))
                                 } else {
@@ -393,11 +396,11 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<ComItf<IUnknown>> as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
         <ComResult<ComItf<IUnknown>> as
-            ErrorValue>::from_error(::intercom::E_POINTER)
+            ErrorValue>::from_error(::intercom::store_error(::intercom::ComError::E_POINTER))
     }
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
         #[allow(unused_imports)]
@@ -419,7 +422,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                                                    b.into(),
                                                                    &mut __out);
                          Ok({
-                                if __result == ::intercom::S_OK {
+                                if __result == ::intercom::raw::S_OK {
                                     Ok(__out.into())
                                 } else {
                                     Err(::intercom::get_last_error(__result))
@@ -430,7 +433,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<bool> as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
         if let Some(comptr) =
@@ -447,7 +450,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                                             b.into(),
                                                             &mut __out);
                          Ok({
-                                if __result == ::intercom::S_OK {
+                                if __result == ::intercom::raw::S_OK {
                                     Ok(__out.into())
                                 } else {
                                     Err(::intercom::get_last_error(__result))
@@ -458,10 +461,11 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<bool> as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
-        <ComResult<bool> as ErrorValue>::from_error(::intercom::E_POINTER)
+        <ComResult<bool> as
+            ErrorValue>::from_error(::intercom::store_error(::intercom::ComError::E_POINTER))
     }
     fn rust_result_method(&self) -> Result<u16, i32> {
         #[allow(unused_imports)]
@@ -480,7 +484,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                              ((**vtbl).rust_result_method_Automation)(comptr.ptr,
                                                                       &mut __out);
                          Ok({
-                                if __result == ::intercom::S_OK {
+                                if __result == ::intercom::raw::S_OK {
                                     Ok(__out.into())
                                 } else {
                                     Err(::intercom::get_last_error(__result))
@@ -491,7 +495,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <Result<u16, i32> as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
         if let Some(comptr) =
@@ -506,7 +510,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                              ((**vtbl).rust_result_method_Raw)(comptr.ptr,
                                                                &mut __out);
                          Ok({
-                                if __result == ::intercom::S_OK {
+                                if __result == ::intercom::raw::S_OK {
                                     Ok(__out.into())
                                 } else {
                                     Err(::intercom::get_last_error(__result))
@@ -517,10 +521,11 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <Result<u16, i32> as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
-        <Result<u16, i32> as ErrorValue>::from_error(::intercom::E_POINTER)
+        <Result<u16, i32> as
+            ErrorValue>::from_error(::intercom::store_error(::intercom::ComError::E_POINTER))
     }
     fn simple_method(&self) -> () {
         #[allow(unused_imports)]
@@ -542,7 +547,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <() as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
         if let Some(comptr) =
@@ -560,10 +565,11 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <() as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
-        <() as ErrorValue>::from_error(::intercom::E_POINTER)
+        <() as
+            ErrorValue>::from_error(::intercom::store_error(::intercom::ComError::E_POINTER))
     }
     fn simple_result_method(&self) -> u16 {
         #[allow(unused_imports)]
@@ -585,7 +591,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <u16 as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
         if let Some(comptr) =
@@ -603,10 +609,11 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <u16 as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
-        <u16 as ErrorValue>::from_error(::intercom::E_POINTER)
+        <u16 as
+            ErrorValue>::from_error(::intercom::store_error(::intercom::ComError::E_POINTER))
     }
     fn string_method(&self, msg: String) -> String {
         #[allow(unused_imports)]
@@ -636,7 +643,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <String as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
         if let Some(comptr) =
@@ -662,10 +669,11 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <String as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
-        <String as ErrorValue>::from_error(::intercom::E_POINTER)
+        <String as
+            ErrorValue>::from_error(::intercom::store_error(::intercom::ComError::E_POINTER))
     }
     fn variant_method(&self, input: Variant) -> ComResult<Variant> {
         #[allow(unused_imports)]
@@ -686,7 +694,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                                                   input.com_into()?,
                                                                   &mut __out);
                          Ok({
-                                if __result == ::intercom::S_OK {
+                                if __result == ::intercom::raw::S_OK {
                                     Ok(__out.into())
                                 } else {
                                     Err(::intercom::get_last_error(__result))
@@ -697,7 +705,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<Variant> as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
         if let Some(comptr) =
@@ -714,7 +722,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                                            input.com_into()?,
                                                            &mut __out);
                          Ok({
-                                if __result == ::intercom::S_OK {
+                                if __result == ::intercom::raw::S_OK {
                                     Ok(__out.into())
                                 } else {
                                     Err(::intercom::get_last_error(__result))
@@ -725,10 +733,11 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<Variant> as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                           ErrorValue>::from_error(::intercom::store_error(err)),
                    };
         }
-        <ComResult<Variant> as ErrorValue>::from_error(::intercom::E_POINTER)
+        <ComResult<Variant> as
+            ErrorValue>::from_error(::intercom::store_error(::intercom::ComError::E_POINTER))
     }
 }
 impl ::intercom::ComInterface for Foo {
