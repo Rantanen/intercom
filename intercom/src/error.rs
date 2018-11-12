@@ -168,13 +168,13 @@ mod error_store {
 
     pub(super) unsafe fn SetErrorInfo(
         _dw_reserved: u32,
-        _errorinfo: raw::InterfacePtr<IErrorInfo>,
-    ) -> raw::HRESULT { ::S_OK }
+        _errorinfo: ::raw::InterfacePtr<IErrorInfo>,
+    ) -> raw::HRESULT { raw::S_OK }
 
     pub(super) unsafe fn GetErrorInfo(
         _dw_reserved: u32,
-        _errorinfo: *mut raw::InterfacePtr<IErrorInfo>,
-    ) -> raw::HRESULT { ::S_OK }
+        _errorinfo: *mut ::raw::InterfacePtr<IErrorInfo>,
+    ) -> raw::HRESULT { raw::S_OK }
 }
 
 /// Error info COM object data.
