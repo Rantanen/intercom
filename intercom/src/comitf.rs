@@ -141,8 +141,8 @@ impl<T: ComInterface + ?Sized> ComItf<T> {
     #[allow(clippy::wrong_self_convention)]
     pub fn as_unknown( this : &Self ) -> ComItf<IUnknown> {
         ComItf {
-            raw_ptr: this.raw_ptr.into_unknown(),
-            automation_ptr: this.automation_ptr.into_unknown(),
+            raw_ptr: this.raw_ptr.as_unknown(),
+            automation_ptr: this.automation_ptr.as_unknown(),
             phantom: PhantomData,
         }
     }

@@ -78,8 +78,10 @@ impl From<raw::Variant> for Variant {
                     raw::var_type::DATE =>
                         Variant::SystemTime( src.data.date.into() ),
                     raw::var_type::UNKNOWN =>
-                        Variant::IUnknown( ComRc::wrap(
-                                src.data.punkVal, TypeSystem::Automation ) ),
+                        match ComRc::wrap( src.data.punkVal, TypeSystem::Automation ) {
+                            Some( rc ) => Variant::IUnknown( rc ),
+                            None => Variant::None,
+                        }
                     _ => Variant::Raw( src ),
                 }
             } else {
@@ -102,8 +104,10 @@ impl From<raw::Variant> for Variant {
                     raw::var_type::DATE =>
                         Variant::SystemTime( (*src.data.pdate).into() ),
                     raw::var_type::UNKNOWN =>
-                        Variant::IUnknown( ComRc::wrap(
-                                *src.data.ppunkVal, TypeSystem::Automation ) ),
+                        match ComRc::wrap( *src.data.ppunkVal, TypeSystem::Automation ) {
+                            Some( rc ) => Variant::IUnknown( rc ),
+                            None => Variant::None,
+                        }
                     _ => Variant::Raw( src ),
                 }
             }

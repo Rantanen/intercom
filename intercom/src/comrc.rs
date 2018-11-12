@@ -32,6 +32,14 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
         ComRc { itf }
     }
 
+    /// Attaches a floating ComItf reference and brings it under managed
+    /// reference counting.
+    ///
+    /// Does not increment the reference count.
+    pub fn detach( mut rc : ComRc<T> ) -> ComItf<T> {
+        unsafe { std::mem::replace( &mut rc.itf, ComItf::null_itf() ) }
+    }
+
     /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
     ///
     /// Does not increment the reference count.
@@ -41,6 +49,25 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
     /// The `ptr` __must__ be a valid COM interface pointer for an interface
     /// of type `T`.
     pub unsafe fn wrap(
+        ptr : raw::InterfacePtr<T>,
+        ts : TypeSystem
+    ) -> Option<ComRc<T>> {
+        if ptr.is_null() {
+            None
+        } else {
+            Some( ComRc::attach( ComItf::wrap( ptr, ts ) ) )
+        }
+    }
+
+    /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
+    ///
+    /// Does not increment the reference count.
+    ///
+    /// # Safety
+    ///
+    /// The `ptr` __must__ be a valid COM interface pointer for an interface
+    /// of type `T`.
+    pub unsafe fn wrap_unchecked(
         ptr : raw::InterfacePtr<T>,
         ts : TypeSystem
     ) -> ComRc<T> {
