@@ -47,6 +47,7 @@
 
 #![crate_type="dylib"]
 #![feature(try_from, specialization, non_exhaustive, integer_atomics)]
+#![allow(clippy::match_bool)]
 
 #[cfg(not(windows))]
 extern crate libc;
