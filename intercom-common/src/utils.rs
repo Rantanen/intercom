@@ -101,43 +101,6 @@ fn get_impl_data_raw<'a>(
     ( trait_ident, struct_ident, methods )
 }
 
-#[derive(PartialEq, Eq, Debug)]
-pub enum AttrParam {
-    Literal( Lit ),
-    Word( Ident ),
-}
-
-pub fn iter_parameters(
-    attr : &syn::Attribute
-) -> Box< Iterator<Item = AttrParam > >
-{
-    match attr.interpret_meta() {
-
-        Some( Meta::List( MetaList { ref nested, .. } ) ) =>
-            Box::new( nested.to_owned().into_iter().map( |i| {
-
-                match i {
-
-                    NestedMeta::Meta( meta ) =>
-                        AttrParam::Word( match meta {
-                            Meta::Word( i ) => i,
-                            Meta::List( l ) => l.ident,
-                            Meta::NameValue( nv ) => nv.ident,
-                        } ),
-
-                    syn::NestedMeta::Literal( l ) =>
-                            AttrParam::Literal( l ),
-                }
-            } ) ),
-
-        // Attributes without parameter lists don't have params.
-        None
-            | Some( Meta::Word(..) )
-            | Some( Meta::NameValue(..) ) => Box::new( std::iter::empty() ),
-
-    }
-}
-
 pub fn get_impl_method(
     i : &ImplItem
 ) -> Option< &MethodSig >

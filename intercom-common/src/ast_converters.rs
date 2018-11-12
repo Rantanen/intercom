@@ -30,17 +30,6 @@ impl GetType for FnArg {
     }
 }
 
-impl GetType for ReturnType {
-
-    fn get_ty( &self ) -> Result<Type, String>
-    {
-        Ok( match *self {
-            ReturnType::Type( _, ref ty ) => (**ty).clone(),
-            ReturnType::Default => unit_ty(),
-        } )
-    }
-}
-
 impl GetType for GenericArgument {
 
     fn get_ty( &self ) -> Result<Type, String>
@@ -93,41 +82,6 @@ impl GetIdent for Type {
             Type::Path( ref p ) => p.path.get_ident(),
             _ => Err( format!( "Cannot get Ident for {:?}", self ) )
         }
-    }
-}
-
-
-impl<'a> GetIdent for ::utils::AttrParam {
-
-    fn get_ident( &self ) -> Result<Ident, String>
-    {
-        match *self {
-            ::utils::AttrParam::Word( ref ident )
-                => Ok( ident.clone() ),
-            _ => Err( format!( "Unsupported AttrParam kind: {:?}", self ) ),
-        }
-    }
-}
-
-impl GetIdent for NestedMeta {
-
-    fn get_ident( &self ) -> Result<Ident, String>
-    {
-        match *self {
-            NestedMeta::Meta( ref m ) => m.get_ident(),
-            _ => Err( format!( "Unsupported meta item kind: {:?}", self ) ),
-        }
-    }
-}
-
-impl GetIdent for Meta {
-    fn get_ident( &self ) -> Result<Ident, String>
-    {
-        Ok( match *self {
-            Meta::Word( ref i ) => i.clone(),
-            Meta::List( ref ml ) => ml.ident.clone(),
-            Meta::NameValue( ref nv ) => nv.ident.clone(),
-        } )
     }
 }
 
@@ -194,8 +148,4 @@ impl GetAttributes for Item {
 
 fn self_ty() -> Type {
     parse_quote!( Self )
-}
-
-fn unit_ty() -> Type {
-    parse_quote!( () )
 }
