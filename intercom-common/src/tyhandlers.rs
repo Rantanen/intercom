@@ -111,12 +111,11 @@ pub trait TypeHandler {
                 let ident = p.path.get_ident().unwrap();
                 let name = ident.to_string();
                 match name.as_ref() {
-                    "c_void"
-                        | "RawComPtr"
-                        => quote!( ::std::ptr::null_mut() ),
+                    "RawComPtr" => quote!( ::std::ptr::null_mut() ),
                     _ => quote!( Default::default() )
                 }
             },
+            Type::Ptr( .. ) => quote!( ::std::ptr::null_mut() ),
             _ => quote!( Default::default() )
         }
     }
