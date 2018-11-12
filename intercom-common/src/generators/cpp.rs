@@ -159,6 +159,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
             "f64" => "double".to_owned(),
             "f32" => "float".to_owned(),
             "c_void" => "void".to_owned(),
+            "c_char" => "char".to_owned(),
             t => CppTypeInfo::get_cpp_name_for_custom_type( krate, t, ts_config ),
         }
     }
