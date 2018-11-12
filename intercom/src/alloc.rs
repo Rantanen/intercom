@@ -5,6 +5,7 @@ use std::os::raw;
 /// A memory allocator to be used for allocating/deallocating memory shared
 /// with intercom libraries.
 #[com_class( IAllocator )]
+#[derive(Default)]
 pub struct Allocator;
 
 #[com_interface(
@@ -36,10 +37,9 @@ impl IAllocator for Allocator {
     }
 }
 
-impl Default for Allocator {
-    fn default() -> Allocator { Allocator }
-}
+pub fn allocate( len : usize ) -> *mut raw::c_void { unsafe { os::alloc( len ) } }
 
+pub unsafe fn free( ptr : *mut raw::c_void ) { os::free( ptr ) }
 
 #[cfg(windows)]
 pub mod os {
