@@ -38,8 +38,7 @@ impl VariantTests
 
         let vt_type = if vt > 100 { vt / 100 } else { vt };
         if variant.raw_type() != vt_type {
-            return Err( ComError::new_message(
-                    E_INVALIDARG,
+            return Err( ComError::E_INVALIDARG.with_message(
                     format!( "Expected type {}, got {}", vt, variant.raw_type() ) ) );
         }
 
@@ -107,15 +106,14 @@ impl VariantTests
             19 => Ok( 1292929u32 == variant.try_into()? ),
             20 => Ok( -1i64 == variant.try_into()? ),
             21 => Ok( 129292929u64 == variant.try_into()? ),
-            _ => Err( E_NOTIMPL )?,
+            _ => Err( ComError::E_NOTIMPL )?,
         };
 
         // Return the result depending on what we got.
         match r {
             Ok( true ) => Ok(()),
             Ok( false ) => 
-                    Err( ComError::new_message(
-                            E_INVALIDARG,
+                    Err( ComError::E_INVALIDARG.with_message(
                             format!( "Bad data: {}", data ) ) ),
             Err( e ) => e
         }
@@ -127,7 +125,7 @@ impl VariantTests
         variant : Variant
     ) -> ComResult<()> {
 
-        let r = ( || Ok( match vt {
+        let r : ComResult<()> = ( || Ok( match vt {
             0 => { <()>::try_from( variant )?; },
             1 => { <()>::try_from( variant )?; },
             2 => { i16::try_from( variant )?; },
@@ -143,13 +141,15 @@ impl VariantTests
             19 => { u32::try_from( variant )?; },
             20 => { i64::try_from( variant )?; },
             21 => { u64::try_from( variant )?; },
-            _ => Err( E_NOTIMPL )?,
+            _ => Err( ComError::E_NOTIMPL )?,
         } ) )();
 
         match r {
-            Err( ::E_INVALIDARG ) => Ok(()),
-            Err( e ) => Err( e ),
-            Ok(..) => Err( E_FAIL ),
+            Err( e ) => match e.hresult {
+                raw::E_INVALIDARG => Ok(()),
+                _ => Err( e ),
+            },
+            Ok(..) => Err( ComError::E_FAIL ),
         }
     }
 
@@ -183,27 +183,26 @@ impl VariantTests
             19 => Ok( Variant::from( 1292929u32 ) ),
             20 => Ok( Variant::from( -1i64 ) ),
             21 => Ok( Variant::from( 129292929u64 ) ),
-            _ => Err( E_NOTIMPL )?,
+            _ => Err( ComError::E_NOTIMPL )?,
         }
     }
 
     pub fn variant_interface(
         &self,
         variant : Variant
-    ) -> Result<Variant, ComError> {
+    ) -> ComResult<Variant> {
 
         use std::convert::TryFrom;
         match variant {
             Variant::IUnknown( iunk ) => {
                 match ComRc::<IVariantInterface>::try_from( &iunk ) {
                     Ok( itf ) => itf.do_stuff(),
-                    Err( e ) => Err( ComError::new_message(
-                            e,
-                            "Interface not supported. IDispatch not supported by tests.".to_string() ) )
+                    Err( e ) => Err( e.with_message(
+                            "Interface not supported. IDispatch not supported by tests." ) ),
                 }
             },
             _ => {
-                Err( E_INVALIDARG )?
+                Err( ComError::E_INVALIDARG )?
             }
         }
     }

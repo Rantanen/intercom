@@ -177,11 +177,11 @@ pub fn expand_com_class(
                 fn query_interface(
                     vtables : &Self::VTableList,
                     riid : ::intercom::REFIID,
-                ) -> ::intercom::ComResult< ::intercom::RawComPtr > {
-                    if riid.is_null() { return Err( ::intercom::E_NOINTERFACE ) }
+                ) -> ::intercom::RawComResult< ::intercom::RawComPtr > {
+                    if riid.is_null() { return Err( ::intercom::raw::E_NOINTERFACE ) }
                     Ok( match *unsafe { &*riid } {
                         #( #query_interface_match_arms ),*,
-                        _ => return Err( ::intercom::E_NOINTERFACE )
+                        _ => return Err( ::intercom::raw::E_NOINTERFACE )
                     } )
                 }
 

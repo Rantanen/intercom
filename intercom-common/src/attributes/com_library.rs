@@ -98,7 +98,7 @@ fn get_dll_get_class_object_function(
                 rclsid : ::intercom::REFCLSID,
                 riid : ::intercom::REFIID,
                 pout : *mut ::intercom::RawComPtr
-            ) -> ::intercom::HRESULT
+            ) -> ::intercom::raw::HRESULT
             {
                 // Create new class factory.
                 // Specify a create function that is able to create all the
@@ -107,7 +107,7 @@ fn get_dll_get_class_object_function(
                     ::intercom::ClassFactory::new( rclsid, | clsid | {
                         match *clsid {
                             #( #match_arms, )*
-                            _ => Err( ::intercom::E_NOINTERFACE ),
+                            _ => Err( ::intercom::raw::E_NOINTERFACE ),
                         }
                     } ) );
                 ::intercom::ComBox::query_interface(
@@ -119,7 +119,7 @@ fn get_dll_get_class_object_function(
                 // This is okay, as the query_interface incremented it, leaving
                 // it at two at this point.
 
-                ::intercom::S_OK
+                ::intercom::raw::S_OK
             }
         )
 }
@@ -138,11 +138,11 @@ fn get_intercom_list_class_objects_function(
             pub unsafe extern #calling_convetion fn IntercomListClassObjects(
                 pcount: *mut usize,
                 pclsids: *mut *const ::intercom::CLSID,
-            ) -> ::intercom::HRESULT
+            ) -> ::intercom::raw::HRESULT
             {
                 // Do not crash due to invalid parameters.
-                if pcount.is_null() { return ::intercom::E_POINTER; }
-                if pclsids.is_null() { return ::intercom::E_POINTER; }
+                if pcount.is_null() { return ::intercom::raw::E_POINTER; }
+                if pclsids.is_null() { return ::intercom::raw::E_POINTER; }
 
                 // Store the available CLSID in a static variable so that we can
                 // pass them as-is to the caller.
@@ -156,7 +156,7 @@ fn get_intercom_list_class_objects_function(
                 *pcount = #token_count;
                 *pclsids = AVAILABLE_CLASSES.as_ptr();
 
-                ::intercom::S_OK
+                ::intercom::raw::S_OK
             }
         )
 }

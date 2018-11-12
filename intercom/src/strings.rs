@@ -9,10 +9,7 @@ use std::{
     str::{ FromStr, Utf8Error }
 };
 
-use intercom::{
-    self,
-    ComError,
-};
+use intercom::ComError;
 
 #[derive(Debug)]
 pub struct FormatError;
@@ -318,7 +315,7 @@ impl<'a> FromWithTemporary<'a, &'a BStr>
     type Temporary = String;
 
     fn to_temporary( bstr : &'a BStr ) -> Result<Self::Temporary, ComError> {
-        bstr.to_string().map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+        bstr.to_string().map_err( |_| ComError::E_INVALIDARG )
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
@@ -336,7 +333,7 @@ impl<'a> FromWithTemporary<'a, &'a BStr>
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        temp.to_string().map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+        temp.to_string().map_err( |_| ComError::E_INVALIDARG )
     }
 }
 
@@ -374,7 +371,7 @@ impl<'a> FromWithTemporary<'a, &'a str>
     type Temporary = BString;
 
     fn to_temporary( source : &'a str ) -> Result<Self::Temporary, ComError> {
-        BString::from_str( source ).map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+        BString::from_str( source ).map_err( |_| ComError::E_INVALIDARG )
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
@@ -388,7 +385,7 @@ impl<'a> FromWithTemporary<'a, String>
     type Temporary = BString;
 
     fn to_temporary( source : String ) -> Result<Self::Temporary, ComError> {
-        BString::from_str( &source ).map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+        BString::from_str( &source ).map_err( |_| ComError::E_INVALIDARG )
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
@@ -404,7 +401,7 @@ impl<'a> FromWithTemporary<'a, &'a CStr>
     fn to_temporary( source : &'a CStr ) -> Result<Self::Temporary, ComError> {
         source.to_str()
             .map( |s| s.into() )
-            .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+            .map_err( |_| ComError::E_INVALIDARG )
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
@@ -419,10 +416,10 @@ impl<'a> FromWithTemporary<'a, &'a BStr>
 
     fn to_temporary( source : &'a BStr ) -> Result<Self::Temporary, ComError> {
         let string = source.to_string()
-                .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )?;
+                .map_err( |_| ComError::E_INVALIDARG )?;
 
         CString::new( string )
-                .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+                .map_err( |_| ComError::E_INVALIDARG )
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
@@ -441,10 +438,10 @@ impl<'a> FromWithTemporary<'a, &'a BStr>
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
         let string = temp.to_string()
-                .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )?;
+                .map_err( |_| ComError::E_INVALIDARG )?;
 
         CString::new( string )
-                .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+                .map_err( |_| ComError::E_INVALIDARG )
     }
 }
 
@@ -486,14 +483,14 @@ impl ComFrom<String> for BString {
 impl ComFrom<CString> for String {
     fn com_from( source : CString ) -> Result<Self, ComError> {
         source.into_string()
-                .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+                .map_err( |_| ComError::E_INVALIDARG )
     }
 }
 
 impl ComFrom<String> for CString {
     fn com_from( source: String ) -> Result<Self, ComError> {
         CString::new( source )
-                .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+                .map_err( |_| ComError::E_INVALIDARG )
     }
 }
 
@@ -501,17 +498,17 @@ impl ComFrom<CString> for BString {
     fn com_from( source : CString ) -> Result<Self, ComError> {
         source.to_str()
                 .map( BString::from )
-                .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+                .map_err( |_| ComError::E_INVALIDARG )
     }
 }
 
 impl ComFrom<BString> for CString {
     fn com_from( source : BString ) -> Result<Self, ComError> {
         let string = source.to_string()
-                .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )?;
+                .map_err( |_| ComError::E_INVALIDARG )?;
 
         CString::new( string )
-                .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+                .map_err( |_| ComError::E_INVALIDARG )
     }
 }
 
@@ -537,7 +534,7 @@ impl<'a> FromWithTemporary<'a, &'a CStr>
     fn to_temporary( cstr : &'a CStr ) -> Result<Self::Temporary, ComError> {
         cstr.to_str()
             .map( |s| s.to_string() )
-            .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+            .map_err( |_| ComError::E_INVALIDARG )
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
@@ -557,7 +554,7 @@ impl<'a> FromWithTemporary<'a, &'a CStr>
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
         temp.to_str()
             .map( |s| s.to_string() )
-            .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+            .map_err( |_| ComError::E_INVALIDARG )
     }
 }
 
@@ -595,7 +592,7 @@ impl<'a> FromWithTemporary<'a, &'a str>
     type Temporary = CString;
 
     fn to_temporary( source : &'a str ) -> Result<Self::Temporary, ComError> {
-        CString::new( source ).map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+        CString::new( source ).map_err( |_| ComError::E_INVALIDARG )
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
@@ -609,7 +606,7 @@ impl<'a> FromWithTemporary<'a, String>
     type Temporary = CString;
 
     fn to_temporary( source : String ) -> Result<Self::Temporary, ComError> {
-        CString::new( source ).map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+        CString::new( source ).map_err( |_| ComError::E_INVALIDARG )
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
@@ -629,7 +626,7 @@ impl<'a> FromWithTemporary<'a, &'a CStr>
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
         temp.to_str()
             .map( |s| s.into() )
-            .map_err( |_| ComError::new_hr( intercom::E_INVALIDARG ) )
+            .map_err( |_| ComError::E_INVALIDARG )
     }
 }
 

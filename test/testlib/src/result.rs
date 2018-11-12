@@ -10,16 +10,16 @@ pub struct ResultOperations { }
 impl ResultOperations {
     pub fn new() -> ResultOperations { ResultOperations {} }
 
-    pub fn s_ok( &mut self ) -> HRESULT {
-        S_OK
+    pub fn s_ok( &mut self ) -> raw::HRESULT {
+        raw::S_OK
     }
 
-    pub fn not_impl( &mut self ) -> HRESULT {
-        E_NOTIMPL
+    pub fn not_impl( &mut self ) -> raw::HRESULT {
+        raw::E_NOTIMPL
     }
 
     pub fn sqrt( &mut self, value : f64 ) -> ComResult<f64> {
-        if value < 0.0 { return Err( E_INVALIDARG ) }
+        if value < 0.0 { return Err( ComError::E_INVALIDARG ) }
         Ok( value.sqrt() )
     }
 

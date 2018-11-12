@@ -96,7 +96,7 @@ impl ReturnHandler for ErrorResultHandler {
 
     fn type_system( &self ) -> ModelTypeSystem { self.type_system }
     fn rust_ty( &self ) -> Type { self.return_ty.clone() }
-    fn com_ty( &self ) -> Type { parse_quote!( ::intercom::HRESULT ) }
+    fn com_ty( &self ) -> Type { parse_quote!( ::intercom::raw::HRESULT ) }
 
     fn com_to_rust_return( &self, result : &Ident ) -> TokenStream {
 
@@ -113,7 +113,7 @@ impl ReturnHandler for ErrorResultHandler {
         // Return statement checks for S_OK (should be is_success) HRESULT and
         // yields either Ok or Err Result based on that.
         quote!(
-            if #result == ::intercom::S_OK {
+            if #result == ::intercom::raw::S_OK {
                 Ok( #ok_tokens )
             } else {
                 Err( ::intercom::get_last_error( #result ) )
@@ -151,10 +151,10 @@ impl ReturnHandler for ErrorResultHandler {
             self.com_out_args() );
         quote!(
             match #result {
-                Ok( #ok_pattern ) => { #( #ok_writes );*; ::intercom::S_OK },
+                Ok( #ok_pattern ) => { #( #ok_writes );*; ::intercom::raw::S_OK },
                 Err( e ) => {
                     #( #err_writes );*;
-                    ::intercom::return_hresult( e )
+                    ::intercom::store_error( e ).hresult
                 },
             }
         )

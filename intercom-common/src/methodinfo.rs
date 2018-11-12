@@ -304,7 +304,7 @@ fn try_parse_result( ty : &Type ) -> Option<( Type, Type )>
 }
 
 fn hresult_ty() -> Type {
-    parse_quote!( ::intercom::HRESULT )
+    parse_quote!( ::intercom::raw::HRESULT )
 }
 
 #[cfg(test)]
@@ -372,7 +372,7 @@ mod tests {
                 Some( parse_quote!( String ) ) );
         assert_eq!(
                 info.return_type,
-                Some( parse_quote!( ::intercom::HRESULT ) ) );
+                Some( parse_quote!( ::intercom::raw::HRESULT ) ) );
     }
 
     #[test]

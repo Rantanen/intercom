@@ -9,7 +9,7 @@ use super::*;
 pub struct ComError {
 
     /// `HRESULT` that triggered the error.
-    pub hresult : HRESULT,
+    pub hresult : raw::HRESULT,
 
     /// Possible detailed error info.
     pub error_info : Option<ErrorInfo>,
@@ -18,14 +18,14 @@ pub struct ComError {
 impl ComError {
 
     /// Constructs a new `ComError` from a `HRESULT` code.
-    pub fn new_hr( hresult : HRESULT ) -> ComError
+    pub fn new_hr( hresult : raw::HRESULT ) -> ComError
     {
         ComError { hresult, error_info: None }
     }
 
     /// Construts a new `ComError` with a given message.
     pub fn new_message(
-        hresult: HRESULT,
+        hresult: raw::HRESULT,
         description: String
     ) -> ComError
     {
@@ -35,11 +35,41 @@ impl ComError {
         }
     }
 
+    pub fn with_message<S: Into<String>>( mut self, msg : S ) -> Self {
+        self.error_info = Some( ErrorInfo::new( msg.into() ) );
+        self
+    }
+
     /// Gets the description if it's available.
     pub fn description( &self ) -> Option< &str >
     {
         self.error_info.as_ref().map( |e| e.description.as_str() )
     }
+
+    pub const E_NOTIMPL : ComError = ComError {
+            hresult : raw::E_NOTIMPL, error_info : None };
+    pub const E_NOINTERFACE : ComError = ComError {
+            hresult : raw::E_NOINTERFACE, error_info : None };
+    pub const E_POINTER : ComError = ComError {
+            hresult : raw::E_POINTER, error_info : None };
+    pub const E_ABORT : ComError = ComError {
+            hresult : raw::E_ABORT, error_info : None };
+    pub const E_FAIL : ComError = ComError {
+            hresult : raw::E_FAIL, error_info : None };
+    pub const E_INVALIDARG : ComError = ComError {
+            hresult : raw::E_INVALIDARG, error_info : None };
+    pub const E_ACCESSDENIED : ComError = ComError {
+            hresult : raw::E_ACCESSDENIED, error_info : None };
+    pub const STG_E_FILENOTFOUND : ComError = ComError {
+            hresult : raw::STG_E_FILENOTFOUND, error_info : None };
+    pub const RPC_E_DISCONNECTED : ComError = ComError {
+            hresult : raw::RPC_E_DISCONNECTED, error_info : None };
+    pub const RPC_E_CALL_REJECTED : ComError = ComError {
+            hresult : raw::RPC_E_CALL_REJECTED, error_info : None };
+    pub const RPC_E_CALL_CANCELED : ComError = ComError {
+            hresult : raw::RPC_E_CALL_CANCELED, error_info : None };
+    pub const RPC_E_TIMEOUT : ComError = ComError {
+            hresult : raw::RPC_E_TIMEOUT, error_info : None };
 }
 
 impl From<ComError> for std::io::Error {
@@ -48,13 +78,13 @@ impl From<ComError> for std::io::Error {
 
         let error_kind = match com_error.hresult {
 
-            ::STG_E_FILENOTFOUND => std::io::ErrorKind::NotFound,
-            ::E_ACCESSDENIED => std::io::ErrorKind::PermissionDenied,
-            ::RPC_E_CALL_REJECTED => std::io::ErrorKind::ConnectionRefused,
-            ::RPC_E_DISCONNECTED => std::io::ErrorKind::ConnectionReset,
-            ::RPC_E_CALL_CANCELED => std::io::ErrorKind::ConnectionAborted,
-            ::RPC_E_TIMEOUT => std::io::ErrorKind::TimedOut,
-            ::E_INVALIDARG => std::io::ErrorKind::InvalidInput,
+            raw::STG_E_FILENOTFOUND => std::io::ErrorKind::NotFound,
+            raw::E_ACCESSDENIED => std::io::ErrorKind::PermissionDenied,
+            raw::RPC_E_CALL_REJECTED => std::io::ErrorKind::ConnectionRefused,
+            raw::RPC_E_DISCONNECTED => std::io::ErrorKind::ConnectionReset,
+            raw::RPC_E_CALL_CANCELED => std::io::ErrorKind::ConnectionAborted,
+            raw::RPC_E_TIMEOUT => std::io::ErrorKind::TimedOut,
+            raw::E_INVALIDARG => std::io::ErrorKind::InvalidInput,
             _ => std::io::ErrorKind::Other,
         };
 
@@ -68,30 +98,28 @@ impl From<std::io::Error> for ComError {
 
     fn from( io_error : std::io::Error ) -> ComError {
 
-        let hresult = match io_error.kind() {
+        match io_error.kind() {
 
-            std::io::ErrorKind::NotFound => ::STG_E_FILENOTFOUND,
-            std::io::ErrorKind::PermissionDenied => ::E_ACCESSDENIED,
-            std::io::ErrorKind::ConnectionRefused => ::RPC_E_CALL_REJECTED,
-            std::io::ErrorKind::ConnectionReset => ::RPC_E_DISCONNECTED,
-            std::io::ErrorKind::ConnectionAborted => ::RPC_E_CALL_CANCELED,
-            std::io::ErrorKind::TimedOut => ::RPC_E_TIMEOUT,
-            std::io::ErrorKind::InvalidInput => ::E_INVALIDARG,
-            _ => ::E_FAIL,
-        };
-
-        ComError::new_message( hresult, io_error.description().to_owned() )
+            std::io::ErrorKind::NotFound => ComError::STG_E_FILENOTFOUND,
+            std::io::ErrorKind::PermissionDenied => ComError::E_ACCESSDENIED,
+            std::io::ErrorKind::ConnectionRefused => ComError::RPC_E_CALL_REJECTED,
+            std::io::ErrorKind::ConnectionReset => ComError::RPC_E_DISCONNECTED,
+            std::io::ErrorKind::ConnectionAborted => ComError::RPC_E_CALL_CANCELED,
+            std::io::ErrorKind::TimedOut => ComError::RPC_E_TIMEOUT,
+            std::io::ErrorKind::InvalidInput => ComError::E_INVALIDARG,
+            _ => ComError::E_FAIL,
+        }.with_message( io_error.description().to_owned() )
     }
 }
 
-impl From<::HRESULT> for ComError {
-    fn from( hresult : ::HRESULT ) -> ComError {
+impl From<raw::HRESULT> for ComError {
+    fn from( hresult : raw::HRESULT ) -> ComError {
         ComError::new_hr( hresult )
     }
 }
 
-impl From<ComError> for ::HRESULT {
-    fn from( error : ComError ) -> ::HRESULT {
+impl From<ComError> for raw::HRESULT {
+    fn from( error : ComError ) -> raw::HRESULT {
         error.hresult
     }
 }
@@ -106,7 +134,7 @@ impl<'a> From<&'a str> for ::ComError
 impl From<String> for ::ComError
 {
     fn from( s : String ) -> Self {
-        Self::new_message( ::E_FAIL, s )
+        Self::new_message( raw::E_FAIL, s )
     }
 }
 
@@ -121,14 +149,14 @@ mod error_store {
     extern "system" {
         pub(super) fn SetErrorInfo(
             dw_reserved: u32,
-            errorinfo: raw::InterfacePtr<IErrorInfo>,
-        ) -> ::HRESULT;
+            errorinfo: ::raw::InterfacePtr<IErrorInfo>,
+        ) -> raw::HRESULT;
 
         #[allow(private_in_public)]
         pub(super) fn GetErrorInfo(
             dw_reserved: u32,
-            errorinfo: *mut raw::InterfacePtr<IErrorInfo>,
-        ) -> ::HRESULT;
+            errorinfo: *mut ::raw::InterfacePtr<IErrorInfo>,
+        ) -> raw::HRESULT;
     }
 }
 
@@ -141,17 +169,17 @@ mod error_store {
     pub(super) unsafe fn SetErrorInfo(
         _dw_reserved: u32,
         _errorinfo: raw::InterfacePtr<IErrorInfo>,
-    ) -> ::HRESULT { ::S_OK }
+    ) -> raw::HRESULT { ::S_OK }
 
     pub(super) unsafe fn GetErrorInfo(
         _dw_reserved: u32,
         _errorinfo: *mut raw::InterfacePtr<IErrorInfo>,
-    ) -> ::HRESULT { ::S_OK }
+    ) -> raw::HRESULT { ::S_OK }
 }
 
 /// Error info COM object data.
 #[com_class( clsid = None, IErrorInfo )]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ErrorInfo {
     guid : GUID,
     source : String,
@@ -180,7 +208,7 @@ impl ErrorInfo {
 
 impl<'a> TryFrom<&'a IErrorInfo> for ErrorInfo {
 
-    type Error = ::HRESULT;
+    type Error = raw::HRESULT;
 
     fn try_from( source : &'a IErrorInfo ) -> Result<Self, Self::Error> {
 
@@ -216,7 +244,7 @@ impl IErrorInfo for ErrorInfo
 
 /// Extracts the HRESULT from the error result and stores the extended error
 /// information in thread memory so it can be fetched by the COM client.
-pub fn return_hresult< E >( error : E ) -> HRESULT
+pub fn store_error< E >( error : E ) -> ComError
     where E : Into< ComError >
 {
     // Convet the error.
@@ -224,14 +252,14 @@ pub fn return_hresult< E >( error : E ) -> HRESULT
 
     match com_error.error_info {
 
-        Some( error_info ) => {
+        Some( ref error_info ) => {
 
             // ComError contains ErrorInfo. We need to set this in the OS error
             // store.
 
             // Construct the COM class used for IErrorInfo. The class contains the
             // description in memory.
-            let mut info = ComStruct::< ErrorInfo >::new( error_info );
+            let mut info = ComStruct::< ErrorInfo >::new( error_info.clone() );
 
             // Get the IErrorInfo interface and set it in thread memory.
             let mut error_ptr : RawComPtr = std::ptr::null_mut();
@@ -243,21 +271,21 @@ pub fn return_hresult< E >( error : E ) -> HRESULT
                         info.as_mut(),
                         &IID_IErrorInfo,
                         &mut error_ptr );
-                error_store::SetErrorInfo( 0, raw::InterfacePtr::new( error_ptr ) );
+                error_store::SetErrorInfo( 0, ::raw::InterfacePtr::new( error_ptr ) );
             }
         },
         None => {
             // No error info in the ComError.
-            unsafe { error_store::SetErrorInfo( 0, raw::InterfacePtr::null() ); }
+            unsafe { error_store::SetErrorInfo( 0, ::raw::InterfacePtr::null() ); }
         }
     }
 
     // Return the HRESULT of the original error.
-    com_error.hresult
+    com_error
 }
 
 /// Gets the last COM error that occurred on the current thread.
-pub fn get_last_error< E >( last_hr : HRESULT ) -> E
+pub fn get_last_error< E >( last_hr : raw::HRESULT ) -> E
     where E : From< ComError >
 {
     let com_error = ComError {
@@ -265,11 +293,11 @@ pub fn get_last_error< E >( last_hr : HRESULT ) -> E
         error_info: unsafe {
 
             // Get the last error COM interface.
-            let mut error_ptr : raw::InterfacePtr<IErrorInfo>
-                    = raw::InterfacePtr::null();
+            let mut error_ptr : ::raw::InterfacePtr<IErrorInfo>
+                    = ::raw::InterfacePtr::null();
             let hr = error_store::GetErrorInfo( 0, &mut error_ptr );
 
-            if hr == S_OK && ! error_ptr.is_null(){
+            if hr == raw::S_OK && ! error_ptr.is_null(){
 
                 let ierrorinfo = ComItf::< IErrorInfo >::wrap(
                         error_ptr,
@@ -307,15 +335,86 @@ pub fn get_last_error< E >( last_hr : HRESULT ) -> E
 pub trait ErrorValue {
 
     /// Attempts to convert a COM error into a custom status code.
-    fn from_error( HRESULT ) -> Self;
+    fn from_error( ComError ) -> Self;
 }
 
 impl<T> ErrorValue for T {
-    default fn from_error( _ : HRESULT ) -> Self {
+    default fn from_error( _ : ComError ) -> Self {
         panic!( "Function does not support error values" )
     }
 }
 
-impl ErrorValue for HRESULT {
-    fn from_error( hr : HRESULT ) -> Self { hr }
+impl ErrorValue for raw::HRESULT {
+    fn from_error( err : ComError ) -> Self { err.hresult }
+}
+
+pub mod raw {
+
+    /// COM method status code.
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy)]
+    #[repr(C)]
+    pub struct HRESULT {
+
+        /// The numerical HRESULT code.
+        pub hr : i32
+    }
+
+    impl HRESULT {
+
+        /// Constructs a new `HRESULT` with the given numerical code.
+        pub fn new( hr : u32 ) -> HRESULT {
+            #[allow(overflowing_literals)]
+            HRESULT { hr : hr as i32 }
+        }
+    }
+
+    macro_rules! make_hr {
+        ( $(#[$attr:meta] )* $hr_name: ident = $hr_value: expr ) => {
+            $(#[$attr])*
+            #[allow(overflowing_literals)]
+            pub const $hr_name : HRESULT = HRESULT { hr: $hr_value as i32 };
+        }
+    }
+
+    make_hr!(
+        /// `HRESULT` indicating the operation completed successfully.
+        S_OK = 0 );
+
+    make_hr!(
+        /// `HRESULT` indicating the operation completed successfully and returned
+        /// `false`.
+        S_FALSE = 1 );
+
+    make_hr!(
+        /// `HRESULT` for unimplemented functionality.
+        E_NOTIMPL = 0x8000_4001 );
+
+    make_hr!(
+        /// `HRESULT` indicating the type does not support the requested interface.
+        E_NOINTERFACE = 0x8000_4002 );
+
+    make_hr!(
+        /// `HRESULT` indicating a pointer parameter was invalid.
+        E_POINTER = 0x8000_4003 );
+
+    make_hr!(
+        /// `HRESULT` for aborted operation.
+        E_ABORT = 0x8000_4004 );
+
+    make_hr!(
+        /// `HRESULT` for unspecified failure.
+        E_FAIL = 0x8000_4005 );
+
+    make_hr!(
+        /// `HRESULT` for invalid argument.
+        E_INVALIDARG = 0x8007_0057 );
+
+    // These might be deprecated. They are a bit too specific for cross-platform
+    // support. We'll just need to ensure the winapi HRESULTs are compatible.
+    make_hr!( E_ACCESSDENIED = 0x8007_0005 );
+    make_hr!( STG_E_FILENOTFOUND = 0x8003_0002 );
+    make_hr!( RPC_E_DISCONNECTED = 0x8001_0108 );
+    make_hr!( RPC_E_CALL_REJECTED = 0x8001_0001 );
+    make_hr!( RPC_E_CALL_CANCELED = 0x8001_0002 );
+    make_hr!( RPC_E_TIMEOUT = 0x8001_011F );
 }

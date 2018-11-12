@@ -20,7 +20,7 @@ pub trait IUnknown {
     ///
     /// Returns `Ok( interface_ptr )` if the object supports the specified
     /// interface or `Err( E_NOINTERFACE )` if it doesn't.
-    fn query_interface( &self, riid : ::REFIID ) -> ::ComResult< ::RawComPtr >;
+    fn query_interface( &self, riid : ::REFIID ) -> ::RawComResult< ::RawComPtr >;
 
     /// Increments the reference count of the object.
     ///
@@ -79,5 +79,5 @@ pub trait ISupportErrorInfo {
     /// for all custom interfaces the user defines. This includes returning
     /// `S_OK` from this method.
     ///
-    fn interface_supports_error_info( &self, riid : ::REFIID ) -> ::HRESULT;
+    fn interface_supports_error_info( &self, riid : ::REFIID ) -> ::raw::HRESULT;
 }

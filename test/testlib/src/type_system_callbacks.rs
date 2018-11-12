@@ -17,7 +17,7 @@ impl TypeSystemCaller
         if actual == i {
             Ok(())
         } else {
-            Err( intercom::E_FAIL )
+            Err( ComError::E_FAIL )
         }
     }
 
@@ -29,7 +29,7 @@ impl TypeSystemCaller
         if actual == expected {
             Ok(())
         } else {
-            Err( intercom::E_FAIL )
+            Err( ComError::E_FAIL )
         }
     }
 
@@ -47,11 +47,11 @@ impl TypeSystemCaller
         let ( bstr, ptr ) = callback.bstring_return_value()?;
 
         if bstr.to_string().unwrap() != "\u{1F4A9}" {
-            return Err( intercom::E_FAIL );
+            return Err( ComError::E_FAIL );
         }
 
         if bstr.as_ptr() as usize != ptr {
-            return Err( intercom::E_POINTER );
+            return Err( ComError::E_POINTER );
         }
 
         Ok(())
@@ -71,11 +71,11 @@ impl TypeSystemCaller
         let ( cstr, ptr ) = callback.cstring_return_value()?;
 
         if cstr.to_string_lossy() != "\u{1F4A9}" {
-            return Err( intercom::E_FAIL );
+            return Err( ComError::E_FAIL );
         }
 
         if cstr.as_ptr() as usize != ptr {
-            return Err( intercom::E_POINTER );
+            return Err( ComError::E_POINTER );
         }
 
         Ok(())

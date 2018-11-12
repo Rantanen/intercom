@@ -96,6 +96,7 @@ pub fn expand_com_interface(
             let method_rust_ident = &method.info.display_name;
             let return_ty = &method.info.rust_return_ty;
 
+            // Rust to COM implementation.
             impls.push( quote!(
                 #unsafety fn #method_rust_ident(
                     #self_arg, #( #impl_args ),*
@@ -106,10 +107,13 @@ pub fn expand_com_interface(
                     #[allow(unused_imports)]
                     use ::intercom::ErrorValue;
 
+                    // Try the available type systems.
                     #( #impl_branches )*
 
-                    < #return_ty as ErrorValue >
-                            ::from_error( ::intercom::E_POINTER )
+                    // None of the type system pointers were available,
+                    // which means this is a null reference.
+                    < #return_ty as ErrorValue >::from_error(
+                            ::intercom::store_error( ::intercom::ComError::E_POINTER ) )
                 }
             ) );
         }
@@ -359,7 +363,7 @@ fn rust_to_com_delegate(
         return match result {
             Ok( v ) => v,
             Err( err ) => < #return_ty as ErrorValue >::from_error(
-                    ::intercom::return_hresult( err ) ),
+                    ::intercom::store_error( err ) ),
         };
     )
 }

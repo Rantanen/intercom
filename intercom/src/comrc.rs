@@ -77,7 +77,7 @@ impl<T: ComInterface + ?Sized> ComRc<T>
         // This is the one that plays well with Windows' CoCreateInstance, etc.
         let iid = match T::iid( TypeSystem::Automation ) {
             Some( iid ) => iid,
-            None => return Err( E_NOINTERFACE ),
+            None => return Err( ComError::E_NOINTERFACE ),
         };
 
         unsafe {
@@ -94,10 +94,10 @@ impl<T: ComInterface + ?Sized> ComRc<T>
 
                 // On success construct the ComRc. We are using Automation type
                 // system as that's the IID we used earlier.
-                ::S_OK => Ok( ComRc::attach( ComItf::wrap(
+                ::raw::S_OK => Ok( ComRc::attach( ComItf::wrap(
                                 raw::InterfacePtr::new( out ),
                                 TypeSystem::Automation ) ) ),
-                e => Err( e ),
+                e => Err( e.into() ),
             }
         }
     }

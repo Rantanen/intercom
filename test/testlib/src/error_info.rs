@@ -5,7 +5,7 @@ use intercom::*;
 pub struct ErrorSource;
 
 #[derive(Debug)]
-pub struct TestError( HRESULT, String );
+pub struct TestError( raw::HRESULT, String );
 impl std::error::Error for TestError {
     fn description( &self ) -> &str { &self.1 }
     fn cause( &self ) -> Option<&std::error::Error> { None }
@@ -23,7 +23,11 @@ impl ErrorSource
 {
     pub fn new() -> ErrorSource { ErrorSource }
 
-    pub fn store_error( &self, hr : HRESULT, desc : String ) -> Result<(), TestError>
+    pub fn store_error(
+        &self, 
+        hr : raw::HRESULT,
+        desc : String
+    ) -> Result<(), TestError>
     {
         Err( TestError( hr, desc ) )
     }
