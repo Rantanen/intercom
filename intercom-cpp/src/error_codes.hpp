@@ -12,6 +12,7 @@
 namespace intercom
 {
     static const intercom::HRESULT SC_OK = intercom::detail::hresult::SC_OK;
+    static const intercom::HRESULT SC_FALSE = intercom::detail::hresult::SC_FALSE;
     static const intercom::HRESULT EC_FAIL = intercom::detail::hresult::EC_FAIL;
     static const intercom::HRESULT EC_NOTIMPL = intercom::detail::hresult::EC_NOTIMPL;
     static const intercom::HRESULT EC_NOINTERFACE = intercom::detail::hresult::EC_NOINTERFACE;

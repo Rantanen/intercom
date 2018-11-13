@@ -15,6 +15,7 @@ namespace detail
 namespace hresult
 {
     static const HRESULT SC_OK = 0;
+    static const HRESULT SC_FALSE = 1;
     static const HRESULT EC_NOTIMPL = null_error( 0x4001 );
     static const HRESULT EC_NOINTERFACE = null_error( 0x4002 );
     static const HRESULT EC_POINTER = null_error( 0x4003 );

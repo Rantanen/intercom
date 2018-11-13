@@ -9,8 +9,6 @@ using std::char_traits;
 #include <iostream>
 using namespace std;
 
-#ifdef _MSC_VER
-
 namespace
 {
 	class ErrorSource :
@@ -236,7 +234,7 @@ TEST_CASE( "Interfaces support error info" )
         CLSID_ErrorTests,
         IID_IErrorTests_Automation,
         &pErrorTests );
-    REQUIRE( hr == S_OK );
+    REQUIRE( hr == intercom::SC_OK );
     REQUIRE( pErrorTests != nullptr );
 
     // Get the error source interface.
@@ -244,7 +242,7 @@ TEST_CASE( "Interfaces support error info" )
     hr = pErrorTests->QueryInterface(
             IID_IErrorSource_Automation,
             OUT reinterpret_cast< void** >( &pErrorSource ) );
-    REQUIRE( hr == S_OK );
+    REQUIRE( hr == intercom::SC_OK );
     REQUIRE( pErrorSource != nullptr );
 
     // Get the error store.
@@ -253,7 +251,7 @@ TEST_CASE( "Interfaces support error info" )
         CLSID_ErrorStore,
         IID_IErrorStore_Automation,
         &pErrorStore );
-    REQUIRE( hr == S_OK );
+    REQUIRE( hr == intercom::SC_OK );
     REQUIRE( pErrorTests != nullptr );
 
     // Construct allocator.
@@ -270,25 +268,25 @@ TEST_CASE( "Interfaces support error info" )
         hr = pErrorTests->QueryInterface(
                 IID_ISupportErrorInfo,
                 reinterpret_cast< void** >( &pSupportErrorInfo ) );
-        REQUIRE( hr == S_OK );
+        REQUIRE( hr == intercom::SC_OK );
         REQUIRE( pSupportErrorInfo != nullptr );
 
         SECTION( "IErrorTests supports error info" )
         {
             hr = pSupportErrorInfo->InterfaceSupportsErrorInfo( IID_IErrorTests_Automation );
-            REQUIRE( hr == S_OK );
+            REQUIRE( hr == intercom::SC_OK );
         }
 
         SECTION( "IUnknown does not support error info" )
         {
             hr = pSupportErrorInfo->InterfaceSupportsErrorInfo( IID_IUnknown );
-            REQUIRE( hr == S_FALSE );
+            REQUIRE( hr == intercom::SC_FALSE );
         }
 
         SECTION( "ISupportErrorInfo does not support error info" )
         {
             hr = pSupportErrorInfo->InterfaceSupportsErrorInfo( IID_ISupportErrorInfo );
-            REQUIRE( hr == S_FALSE );
+            REQUIRE( hr == intercom::SC_FALSE );
         }
 
         pSupportErrorInfo->Release();
@@ -298,16 +296,16 @@ TEST_CASE( "Interfaces support error info" )
     {
         SECTION( "Returning ComError" )
         {
-            BSTR bstrError = AllocBstr( pAllocator, u"Error message" );
+            intercom::BSTR bstrError = AllocBstr( pAllocator, u"Error message" );
             hr = pErrorSource->ReturnComerror( 0x81234567, bstrError );
 
             REQUIRE( hr == 0x81234567 );
 
             IErrorInfo* pErrorInfo = nullptr;
             hr = pErrorStore->GetErrorInfo( &pErrorInfo );
-            REQUIRE( hr == S_OK );
+            REQUIRE( hr == intercom::SC_OK );
 
-            BSTR bstrOut = nullptr;
+            intercom::BSTR bstrOut = nullptr;
             hr = pErrorInfo->GetDescription( &bstrOut );
             check_equal( u"Error message", bstrOut );
             pAllocator->FreeBstr( bstrOut );
@@ -316,16 +314,16 @@ TEST_CASE( "Interfaces support error info" )
 
         SECTION( "Returning custom error" )
         {
-            BSTR bstrError = AllocBstr( pAllocator, u"Error message" );
+            intercom::BSTR bstrError = AllocBstr( pAllocator, u"Error message" );
             hr = pErrorSource->ReturnTesterror( 0x81234567, bstrError );
 
             REQUIRE( hr == 0x81234567 );
 
             IErrorInfo* pErrorInfo = nullptr;
             hr = pErrorStore->GetErrorInfo( &pErrorInfo );
-            REQUIRE( hr == S_OK );
+            REQUIRE( hr == intercom::SC_OK );
 
-            BSTR bstrOut = nullptr;
+            intercom::BSTR bstrOut = nullptr;
             hr = pErrorInfo->GetDescription( &bstrOut );
             check_equal( u"Error message", bstrOut );
             pAllocator->FreeBstr( bstrOut );
@@ -340,9 +338,9 @@ TEST_CASE( "Interfaces support error info" )
 
             IErrorInfo* pErrorInfo = nullptr;
             hr = pErrorStore->GetErrorInfo( &pErrorInfo );
-            REQUIRE( hr == S_OK );
+            REQUIRE( hr == intercom::SC_OK );
 
-            BSTR bstrOut = nullptr;
+            intercom::BSTR bstrOut = nullptr;
             hr = pErrorInfo->GetDescription( &bstrOut );
             check_equal( u"permission denied", bstrOut );
             pAllocator->FreeBstr( bstrOut );
@@ -383,5 +381,3 @@ TEST_CASE( "Interfaces support error info" )
 
     UninitializeRuntime();
 }
-
-#endif

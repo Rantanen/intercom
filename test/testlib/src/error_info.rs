@@ -132,11 +132,13 @@ impl IErrorSource for ErrorTests
 
     fn return_ioerror(
         &self,
-        hr : raw::HRESULT,
+        _hr : raw::HRESULT,
         _desc : &str
     ) -> Result<(), std::io::Error>
     {
-        Err( std::io::Error::from_raw_os_error( hr.hr ) )
+        Err( std::io::Error::new(
+                std::io::ErrorKind::PermissionDenied,
+                "permission denied" ) )
     }
 }
 
