@@ -133,7 +133,11 @@ mod test {
                 ManifestCoClass {
                     name : "Allocator".to_owned(),
                     clsid : "{EC444090-9CDC-31A4-4023-D0458C5CD45C}".to_owned(),
-                }
+                },
+                ManifestCoClass {
+                    name : "ErrorStore".to_owned(),
+                    clsid : "{1467B819-62DF-3720-4EE6-6E76FD4E1120}".to_owned(),
+                },
             ],
         };
 

@@ -57,13 +57,19 @@ impl IFoo for ::intercom::ComItf<IFoo> {
                      unsafe {
                          let __result =
                              ((**vtbl).trait_method_Automation)(comptr.ptr);
+                         let INTERCOM_iid =
+                             ::intercom::GUID{data1: 0u32,
+                                              data2: 0u16,
+                                              data3: 0u16,
+                                              data4:
+                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
+                                                   0u8, 0u8, 0u8],};
                          Ok({ })
                      })();
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <() as
-                           ErrorValue>::from_error(::intercom::store_error(err)),
+                       <() as ::intercom::ErrorValue>::from_com_error(err),
                    };
         }
         if let Some(comptr) =
@@ -75,17 +81,23 @@ impl IFoo for ::intercom::ComItf<IFoo> {
                      unsafe {
                          let __result =
                              ((**vtbl).trait_method_Raw)(comptr.ptr);
+                         let INTERCOM_iid =
+                             ::intercom::GUID{data1: 0u32,
+                                              data2: 0u16,
+                                              data3: 0u16,
+                                              data4:
+                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
+                                                   0u8, 0u8, 1u8],};
                          Ok({ })
                      })();
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <() as
-                           ErrorValue>::from_error(::intercom::store_error(err)),
+                       <() as ::intercom::ErrorValue>::from_com_error(err),
                    };
         }
         <() as
-            ErrorValue>::from_error(::intercom::store_error(::intercom::ComError::E_POINTER))
+            ::intercom::ErrorValue>::from_com_error(::intercom::ComError::E_POINTER.into())
     }
 }
 impl ::intercom::ComInterface for IFoo {

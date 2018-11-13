@@ -362,7 +362,7 @@ mod test
             &GUID::parse( "12345678-1234-1234-1234-567890000000" ).unwrap() );
 
         // The interfaces should contain the built-in interface.
-        assert_eq!( krate.interfaces().len(), 2 );
+        assert_eq!( krate.interfaces().len(), 3 );
 
         assert_eq!( krate.interfaces()[ "IFoo" ].variants()[ &Automation ].iid(),
             &GUID::parse( "12345678-1234-1234-1234-567890000001" ).unwrap() );
@@ -374,17 +374,26 @@ mod test
         assert_eq!( krate.interfaces()[ "Allocator" ].variants()[ &Raw ].iid(),
             &GUID::parse( "7A6F6564-04B5-4455-A223-EA0512B8CC63" ).unwrap() );
 
-        assert_eq!( krate.structs().len(), 2 );
+        assert_eq!( krate.interfaces()[ "ErrorStore" ].variants()[ &Automation ].iid(),
+            &GUID::parse( "D7F996C5-0B51-4053-82F8-19A7261793A9" ).unwrap() );
+        assert_eq!( krate.interfaces()[ "ErrorStore" ].variants()[ &Raw ].iid(),
+            &GUID::parse( "7586C49A-ABBD-4A06-B588-E3D02B431F01" ).unwrap() );
+
+        assert_eq!( krate.structs().len(), 3 );
         assert_eq!( krate.structs()[ "S" ].clsid().as_ref().unwrap(),
             &GUID::parse( "12345678-1234-1234-1234-567890000003" ).unwrap() );
         assert_eq!( krate.structs()[ "Allocator" ].clsid().as_ref().unwrap(),
             &GUID::parse( "1582F0E9-9CAB-3E18-7F37-0CF2CD9DA33A" ).unwrap() );
+        assert_eq!( krate.structs()[ "ErrorStore" ].clsid().as_ref().unwrap(),
+            &GUID::parse( "1CC4A0E8-C882-37B4-53FA-BC9E6030DF56" ).unwrap() );
 
-        assert_eq!( krate.impls().len(), 2 );
+        assert_eq!( krate.impls().len(), 3 );
         assert_eq!( krate.impls()[0].struct_name(), "S" );
         assert_eq!( krate.impls()[0].interface_name(), "IFoo" );
         assert_eq!( krate.impls()[1].struct_name(), "Allocator" );
         assert_eq!( krate.impls()[1].interface_name(), "Allocator" );
+        assert_eq!( krate.impls()[2].struct_name(), "ErrorStore" );
+        assert_eq!( krate.impls()[2].interface_name(), "ErrorStore" );
     }
 
     #[test]
