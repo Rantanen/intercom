@@ -9,6 +9,7 @@ use super::GeneratorError;
 
 use model;
 use utils;
+use ast_converters::GetIdent;
 
 use handlebars::Handlebars;
 
@@ -47,8 +48,12 @@ impl ManifestModel {
         let lib = c.lib().as_ref().ok_or( GeneratorError::MissingLibrary )?;
 
         // Gather all the com classes. These need to be declared in the manifest.
-        let classes = lib.coclasses().iter().map(|class_name| {
+        let classes = lib.coclasses().iter().map(|class_path| {
 
+            let class_name = class_path
+                    .get_ident()
+                    .expect( "coclass had no name" )
+                    .to_string();
             let coclass = &c.structs()[ &class_name.to_string() ];
             let clsid = coclass.clsid().as_ref()
                     .ok_or_else( || GeneratorError::MissingClsid(
@@ -97,8 +102,7 @@ mod test {
     pub fn crate_to_manifest() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"
-            #[com_library( libid = "11112222-3333-4444-5555-666677778888", CoClass )]
-            struct S;
+            com_library!( libid = "11112222-3333-4444-5555-666677778888", CoClass );
 
             #[com_interface( com_iid = "22223333-4444-5555-6666-777788889999", base = NO_BASE )]
             trait IInterface {

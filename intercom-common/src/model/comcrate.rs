@@ -83,7 +83,7 @@ impl ComCrateBuilder {
                         None
                     } ) {
 
-                lib.add_coclass( clsid )
+                lib.add_coclass( parse_quote!( ::intercom::#clsid ) )
             }
         }
     }
@@ -282,10 +282,19 @@ impl ComCrate
     ) -> ParseResult<()>
     {
         for item in items {
+
+            // Test for 'com_library' macro.
+            if let ::syn::Item::Macro( m ) = item {
+                if let Ok( ref ident ) = m.mac.path.get_ident() {
+                    if ident == "com_library" {
+                        b.libs.push(ComLibrary::parse(crate_name, m.mac.tts.clone())?);
+                    }
+                }
+            }
+
+            // The rest of the items we're interested in are attributes.
             for attr in &item.get_attributes().unwrap() {
                 match attr.path.get_ident().unwrap().to_string().as_ref() {
-                    "com_library" =>
-                        b.libs.push( ComLibrary::parse( crate_name, attr.tts.clone() )? ),
                     "com_interface" =>
                         b.interfaces.push( ComInterface::from_ast(
                                 crate_name, attr.tts.clone(), item )? ),
@@ -334,9 +343,9 @@ mod test
     fn parse_crate() {
         let krate = ComCrate::parse( "my_crate", &[
             r#"
-                #[com_library(
+                com_library!(
                         libid = "12345678-1234-1234-1234-567890000000",
-                        Foo, Bar )]
+                        Foo, Bar );
 
                 #[com_interface(
                         com_iid = "12345678-1234-1234-1234-567890000001",

@@ -13,7 +13,7 @@
 //! use intercom::{com_library, com_class, com_interface, com_impl, ComResult};
 //!
 //! // Define COM classes to expose from this library.
-//! #[com_library(Calculator)]
+//! com_library!(Calculator);
 //!
 //! // Define the COM class and the interfaces it implements.
 //! #[com_class(Calculator)]
@@ -26,7 +26,7 @@
 //! impl Calculator {
 //!
 //!     // Intercom requires a `new` method with no parameters for all classes.
-//! #   // NOTE: This should be replaced with Default::default implementation.
+//! #   // TODO: This should be replaced with Default::default implementation.
 //!     fn new() -> Calculator { Calculator }
 //!
 //!     fn add(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a + b) }

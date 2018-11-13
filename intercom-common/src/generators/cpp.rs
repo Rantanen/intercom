@@ -15,6 +15,7 @@ use type_parser::*;
 use guid::*;
 use model;
 use model::{ComCrate, ComInterfaceVariant};
+use ast_converters::GetIdent;
 use utils;
 
 use handlebars::Handlebars;
@@ -287,10 +288,14 @@ impl CppModel {
             .collect::<Result<Vec<_>, GeneratorError>>()?;
 
         // Generate class descriptors.
-        let classes = lib.coclasses().iter().map( |class_name| {
+        let classes = lib.coclasses().iter().map( |class_path| {
 
             // Get the class details by matching the name.
-            let coclass  = &c.structs()[ &class_name.to_string() ];
+            let class_name = class_path
+                    .get_ident()
+                    .expect( "coclass had no name" )
+                    .to_string();
+            let coclass = &c.structs()[ &class_name ];
 
             // Create a list of interfaces to be declared in the class descriptor.
             let interfaces = coclass.interfaces().iter()
@@ -392,8 +397,7 @@ mod test {
     pub fn crate_to_cpp() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"
-            #[com_library( libid = "11112222-3333-4444-5555-666677778888", CoClass )]
-            struct S;
+            com_library!( libid = "11112222-3333-4444-5555-666677778888", CoClass );
 
             #[com_interface( raw_iid = "22223333-4444-5555-6666-777788889999", base = NO_BASE )]
             trait IInterface {
@@ -585,7 +589,8 @@ mod test {
     fn bstr_method() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"
-            #[com_library( libid = "11112222-3333-4444-5555-666677778888", CoClass )]
+            com_library!( libid = "11112222-3333-4444-5555-666677778888", CoClass );
+
             #[com_class( clsid = "33334444-5555-6666-7777-888899990000", CoClass )]
             struct CoClass;
 

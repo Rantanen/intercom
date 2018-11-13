@@ -119,27 +119,23 @@ pub fn com_class(
 /// Defines the COM library.
 ///
 /// ```rust,ignore
-/// #[com_library(LIBID, classes...)]
-/// # struct S;  // Unfortunately the attribute needs to be on SOMETHING.
+/// com_library!( libid = "...", classes...)]
 /// ```
 ///
-/// - `LIBID` - A unique ID that specifies the current intercom library. Must
-///             be a valid GUID or `AUTO_GUID`.
+/// - `libid` - A unique ID that specifies the current intercom library.
+///             Optional, the libid is generated randomly if omitted.
 /// - `classes` - List of intercom classes that can be constructed by the
 ///               clients.
 ///
-/// Associated types: None
-///
-/// The attribute results in the implementation of the object creation
+/// The macro results in the implementation of the object creation
 /// infrastructure that allows external clients to load the library and
 /// instantiate the specified types.
-#[proc_macro_attribute]
+#[proc_macro]
 pub fn com_library(
-    attr: TokenStream,
-    tokens: TokenStream,
+    args: TokenStream,
 ) -> TokenStream
 {
-    match expand_com_library( attr, tokens ) {
+    match expand_com_library( args ) {
         Ok(t) => t,
         Err(e) => panic!( "{}", e ),
     }
