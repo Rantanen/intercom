@@ -43,11 +43,13 @@ impl ErrorTests
             Err( e ) => {
 
                 if e.hresult.hr != 123 {
-                    return Err( ComError::E_INVALIDARG );
+                    return Err( ComError::E_INVALIDARG
+                            .with_message( format!( "Bad HRESULT: {}", e.hresult.hr ) ) );
                 }
                 
                 if e.description() != Some( "Error message" ) {
-                    return Err( ComError::E_INVALIDARG );
+                    return Err( ComError::E_INVALIDARG
+                            .with_message( format!( "Bad message: {:?}", e.description() ) ) );
                 }
 
                 Ok(())
@@ -66,11 +68,13 @@ impl ErrorTests
             Err( e ) => {
 
                 if e.0.hr != 123 {
-                    return Err( ComError::E_INVALIDARG );
+                    return Err( ComError::E_INVALIDARG
+                            .with_message( format!( "Bad HRESULT: {}", e.0.hr ) ) );
                 }
                 
                 if e.1 != "Error message" {
-                    return Err( ComError::E_INVALIDARG );
+                    return Err( ComError::E_INVALIDARG
+                            .with_message( format!( "Bad message: {:?}", e.1 ) ) );
                 }
 
                 Ok(())
@@ -89,12 +93,14 @@ impl ErrorTests
             Err( e ) => {
 
                 if e.kind() != std::io::ErrorKind::PermissionDenied {
-                    return Err( ComError::E_INVALIDARG );
+                    return Err( ComError::E_INVALIDARG
+                            .with_message( format!( "Bad kind: {:?}", e.kind() ) ) );
                 }
 
                 use std::error::Error;
                 if e.description() != "Access denied" {
-                    return Err( ComError::E_INVALIDARG );
+                    return Err( ComError::E_INVALIDARG
+                            .with_message( format!( "Bad message: {:?}", e.description() ) ) );
                 }
 
                 Ok(())
