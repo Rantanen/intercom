@@ -208,7 +208,7 @@ mod error_store {
             reset_error_store( Some( ComItf::wrap( errorinfo, TypeSystem::Automation ) ) );
         }
 
-        return raw::S_OK;
+        raw::S_OK
     }
 
     pub(super) unsafe fn GetErrorInfo(
