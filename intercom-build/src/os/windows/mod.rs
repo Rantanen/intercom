@@ -8,6 +8,7 @@ use ::std::process::Command;
 use ::std::io::Write;
 
 use ::host;
+use ::BuildError;
 
 mod setup_configuration;
 
@@ -18,7 +19,7 @@ mod setup_configuration;
 /// * `all_type_systems` -
 ///     True to include both Automation and Raw type systems in the embedded IDLs. Normally the
 ///     build only includes Automation type system in the embedded IDL.
-pub fn build( all_type_systems : bool ) {
+pub fn build( all_type_systems : bool ) -> Result<(), BuildError> {
 
     // Get the host.
     let host = host::get_host();
@@ -58,10 +59,13 @@ pub fn build( all_type_systems : bool ) {
     // Generate IDL using intercom_utils.
     {
         let mut idl = File::create( &idl_path )
-                .unwrap_or_else( |_| panic!( "Could not create file: {:?}", idl_path ) );
+                .map_err( |e| BuildError::IoError(
+                        format!( "Failed to create file {}",
+                                 &idl_path.to_string_lossy() ),
+                        e ) )?;
         let model = ::intercom_common::generators::idl::IdlModel::from_path(
                     Path::new( &toml_dir ), all_type_systems )
-                .expect( "Failed to form IDL from the sources" );
+                .map_err( |e| BuildError::ParseError( e.to_string() ) )?;
         model.write( &mut idl )
                 .expect( "Failed to write IDL to file" );
         idl.sync_all()
@@ -99,9 +103,13 @@ pub fn build( all_type_systems : bool ) {
                 .current_dir( &out_dir )
                 .arg( &idl_path ).arg( "/tlb" ).arg( &tlb_path )
                 .status()
-                .unwrap().success() {
+                .map_err( |e| BuildError::CommandError(
+                        format!( "Failed to execute MIDL: {:?}", e ) ) )?
+                .success() {
 
-                    panic!( "midl.exe did not execute successfully" );
+                    // Command failed.
+                    return Err( BuildError::CommandError(
+                            "MIDL did not execute successfully".to_string() ) );
                 }
     }
 
@@ -113,15 +121,22 @@ pub fn build( all_type_systems : bool ) {
                 .arg( format!( "-dll:{}", dll_name ) )
                 .arg( format!( "-out:{}", manifest_path.to_string_lossy() ) )
                 .status()
-                .unwrap().success() {
+                .map_err( |e| BuildError::CommandError(
+                        format!( "Failed to execute Manifest Tool: {:?}", e ) ) )?
+                .success() {
 
-                    panic!( "mt.exe did not execute successfully" );
+                    return Err( BuildError::CommandError(
+                        "Manifest Tool did not execute successfully".to_string() ) );
                 }
     }
 
     // Create a resource script that references the tlb and the manifest.
     {
-        let mut rc = File::create( &rc_path ).unwrap();
+        let mut rc = File::create( &rc_path )
+                .map_err( |e| BuildError::IoError(
+                        format!( "Failed to create file {}",
+                                 &rc_path.to_string_lossy() ),
+                        e ) )?;
         writeln!(
             rc, "1 24 \"{}\"",
             &manifest_path.to_string_lossy().replace( r"\", r"\\" )
@@ -141,17 +156,21 @@ pub fn build( all_type_systems : bool ) {
                     .current_dir( &out_dir )
                     .arg( &rc_path )
                     .status()
-                    .unwrap().success() {
+                    .map_err( |e| BuildError::CommandError(
+                            format!( "Failed to execute Microsoft Resource Compiler: {:?}", e ) ) )?
+                    .success() {
 
-                        panic!( "rc.exe did not execute successfully" );
+                        return Err( BuildError::CommandError(
+                            "Microsoft Resource Compiler did not execute successfully".to_string() ) );
                     }
 
             // 'rc.exe' will result in 'foo.res'. We'll need 'foo.res.lib' as
             // rustc will insist on '.lib' extension.
             ::std::fs::rename( &res_path, &lib_path )
-                    .unwrap_or_else( |_| panic!(
-                            "Failed to rename {:?} to {:?}",
-                            res_path, lib_path ) );
+                    .map_err( |e| BuildError::IoError(
+                        format!( "Failed to rename {} to {}",
+                                 &res_path.to_string_lossy(),
+                                 &lib_path.to_string_lossy() ), e ) )?;
 
             // Instruct rustc to link the resource dll.
             println!( "cargo:rustc-link-lib=dylib={}", res_name );
@@ -165,13 +184,18 @@ pub fn build( all_type_systems : bool ) {
                     .arg( "-O" ).arg( "coff" )
                     .arg( "-o" ).arg( &res_path )
                     .status()
-                    .unwrap().success() {
+                    .map_err( |e| BuildError::CommandError(
+                            format!( "Failed to execute GNU windres: {:?}", e ) ) )?
+                    .success() {
 
-                        panic!( "windres.exe did not execute successfully" );
+                        return Err( BuildError::CommandError(
+                            "GNU windres did not execute successfully".to_string() ) );
                     }
             cc::Build::new()
                     .object( &res_path )
                     .compile( &format!( "lib{}.res.a", pkg_name ) );
         }
     }
+
+    Ok(())
 }
