@@ -15,6 +15,7 @@ use type_parser::*;
 use guid::*;
 use model;
 use model::{ComCrate, ComInterfaceVariant};
+use ast_converters::GetIdent;
 use utils;
 
 use handlebars::Handlebars;
@@ -287,10 +288,14 @@ impl CppModel {
             .collect::<Result<Vec<_>, GeneratorError>>()?;
 
         // Generate class descriptors.
-        let classes = lib.coclasses().iter().map( |class_name| {
+        let classes = lib.coclasses().iter().map( |class_path| {
 
             // Get the class details by matching the name.
-            let coclass  = &c.structs()[ &class_name.to_string() ];
+            let class_name = class_path
+                    .get_ident()
+                    .expect( "coclass had no name" )
+                    .to_string();
+            let coclass = &c.structs()[ &class_name ];
 
             // Create a list of interfaces to be declared in the class descriptor.
             let interfaces = coclass.interfaces().iter()

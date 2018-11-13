@@ -9,6 +9,7 @@ use super::GeneratorError;
 use utils;
 use model;
 use model::{ComCrate, ComInterfaceVariant};
+use ast_converters::GetIdent;
 use tyhandlers::{Direction, ModelTypeSystem, ModelTypeSystemConfig};
 use foreign_ty::*;
 use type_parser::*;
@@ -193,10 +194,14 @@ impl IdlModel {
         // [com_library] attribute. This is our source for the classes to include
         // in the IDL. r.classes has the actual class details, but might include
         // classes that are not exposed by the library.
-        let classes = lib.coclasses().iter().map(|class_name| {
+        let classes = lib.coclasses().iter().map(|class_path| {
 
             // Get the class details by matching the name.
-            let coclass = &c.structs()[ &class_name.to_string() ];
+            let class_name = class_path
+                    .get_ident()
+                    .expect( "coclass had no name" )
+                    .to_string();
+            let coclass = &c.structs()[ &class_name ];
 
             // Get the interfaces the class implements.
             let interfaces = coclass.interfaces().iter()

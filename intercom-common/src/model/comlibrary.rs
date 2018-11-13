@@ -3,10 +3,10 @@ use ::prelude::*;
 use super::*;
 
 use ::guid::GUID;
-use ::syn::{ LitStr };
+use ::syn::{ LitStr, Path };
 
 intercom_attribute!(
-    ComLibraryAttr< ComLibraryAttrParam, Ident > {
+    ComLibraryAttr< ComLibraryAttrParam, Path > {
         libid : LitStr,
     }
 );
@@ -16,7 +16,7 @@ intercom_attribute!(
 pub struct ComLibrary {
     name : String,
     libid : GUID,
-    coclasses : Vec<Ident>,
+    coclasses : Vec<Path>,
 }
 
 impl ComLibrary
@@ -52,10 +52,10 @@ impl ComLibrary
     pub fn libid( &self ) -> &GUID { &self.libid }
 
     /// CoClasses exposed by the library.
-    pub fn coclasses( &self ) -> &[Ident] { &self.coclasses }
+    pub fn coclasses( &self ) -> &[Path] { &self.coclasses }
 
     /// Adds a coclass.
-    pub fn add_coclass( &mut self, clsid : Ident ) { self.coclasses.push( clsid ) }
+    pub fn add_coclass( &mut self, clsid : Path ) { self.coclasses.push( clsid ) }
 }
 
 #[cfg(test)]

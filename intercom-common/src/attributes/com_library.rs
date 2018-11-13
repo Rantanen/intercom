@@ -6,40 +6,40 @@ use idents;
 use utils;
 use model;
 use builtin_model;
+use std::iter::FromIterator;
 
 extern crate quote;
 
-/// Expands the `com_library` attribute.
+/// Expands the `com_library` macro.
 ///
-/// The attribute expansion results in the following items:
+/// The macro expansion results in the following items:
 ///
 /// - `DllGetClassObject` extern function implementation.
 /// - `IntercomListClassObjects` extern function implementation.
 pub fn expand_com_library(
-    attr_tokens: TokenStreamNightly,
-    item_tokens: TokenStreamNightly,
+    arg_tokens: TokenStreamNightly,
 ) -> Result<TokenStreamNightly, model::ParseError>
 {
     let mut output = vec![];
-    let lib = model::ComLibrary::parse( &lib_name(), attr_tokens.into() )?;
+    let lib = model::ComLibrary::parse( &lib_name(), arg_tokens.into() )?;
 
     // Create the match-statmeent patterns for each supposedly visible COM class.
     let mut match_arms = vec![];
     let mut creatable_classes = vec![];
-    for struct_ident in lib.coclasses() {
+    for struct_path in lib.coclasses() {
 
         // Construct the match pattern.
-        let clsid_name = idents::clsid( struct_ident );
+        let clsid_path = idents::clsid_path( struct_path );
         match_arms.push( quote!(
-            self::#clsid_name =>
+            self::#clsid_path =>
                 Ok( ::intercom::ComBox::new(
-                        #struct_ident::new()
+                        #struct_path::new()
                     ) as ::intercom::RawComPtr )
         ) );
 
         // Collect class identifies of classes that have a guid and
         // which others outside the library can create.
-        creatable_classes.push( quote!( #clsid_name ) );
+        creatable_classes.push( quote!( #clsid_path ) );
     }
 
     // Generate built-in type data.
@@ -81,7 +81,7 @@ pub fn expand_com_library(
     let list_class_objects = get_intercom_list_class_objects_function( &creatable_classes );
     output.push( list_class_objects );
 
-    Ok( tokens_to_tokenstream( item_tokens, output ) )
+    Ok( TokenStream::from_iter( output.into_iter() ).into() )
 }
 
 fn get_dll_get_class_object_function(
