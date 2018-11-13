@@ -16,7 +16,7 @@ impl<T: ComInterface + ?Sized> std::fmt::Debug for ComRc<T> {
 
 impl<T: ComInterface + ?Sized> Clone for ComRc<T> {
     fn clone( &self ) -> Self {
-        let rc = ComRc { itf : self.itf.clone() };
+        let rc = ComRc { itf : self.itf };
         rc.itf.as_ref().release();
         rc
     }
@@ -78,7 +78,7 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
 
         let iunk : &ComItf<IUnknown> = itf.as_ref();
         iunk.add_ref();
-        ComRc::attach( itf.clone() )
+        ComRc::attach( *itf )
     }
 
     // ComRc is a smart pointer and shouldn't introduce methods on 'self'.
