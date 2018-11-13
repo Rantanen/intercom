@@ -397,8 +397,7 @@ mod test {
     pub fn crate_to_cpp() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"
-            #[com_library( libid = "11112222-3333-4444-5555-666677778888", CoClass )]
-            struct S;
+            com_library!( libid = "11112222-3333-4444-5555-666677778888", CoClass );
 
             #[com_interface( raw_iid = "22223333-4444-5555-6666-777788889999", base = NO_BASE )]
             trait IInterface {
@@ -590,7 +589,8 @@ mod test {
     fn bstr_method() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"
-            #[com_library( libid = "11112222-3333-4444-5555-666677778888", CoClass )]
+            com_library!( libid = "11112222-3333-4444-5555-666677778888", CoClass );
+
             #[com_class( clsid = "33334444-5555-6666-7777-888899990000", CoClass )]
             struct CoClass;
 

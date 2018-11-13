@@ -102,8 +102,7 @@ mod test {
     pub fn crate_to_manifest() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"
-            #[com_library( libid = "11112222-3333-4444-5555-666677778888", CoClass )]
-            struct S;
+            com_library!( libid = "11112222-3333-4444-5555-666677778888", CoClass );
 
             #[com_interface( com_iid = "22223333-4444-5555-6666-777788889999", base = NO_BASE )]
             trait IInterface {

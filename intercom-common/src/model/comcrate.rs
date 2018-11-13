@@ -343,9 +343,9 @@ mod test
     fn parse_crate() {
         let krate = ComCrate::parse( "my_crate", &[
             r#"
-                #[com_library(
+                com_library!(
                         libid = "12345678-1234-1234-1234-567890000000",
-                        Foo, Bar )]
+                        Foo, Bar );
 
                 #[com_interface(
                         com_iid = "12345678-1234-1234-1234-567890000001",
