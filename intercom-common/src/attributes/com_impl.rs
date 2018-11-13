@@ -59,7 +59,7 @@ pub fn expand_com_impl(
                     self_vtable : ::intercom::RawComPtr,
                     riid : ::intercom::REFIID,
                     out : *mut ::intercom::RawComPtr
-                ) -> ::intercom::HRESULT
+                ) -> ::intercom::raw::HRESULT
                 {
                     // Get the primary iunk interface by offsetting the current
                     // self_vtable with the vtable offset. Once we have the primary
@@ -195,7 +195,7 @@ pub fn expand_com_impl(
                     match result {
                         Ok( v ) => v,
                         Err( err ) => < #ret_ty as ErrorValue >::from_error(
-                                ::intercom::return_hresult( err ) ),
+                                ::intercom::store_error( err ) ),
                     }
                 }
             ) );

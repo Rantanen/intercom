@@ -159,6 +159,7 @@ impl<'s> CppTypeInfo<'s> for TypeInfo<'s> {
             "f64" => "double".to_owned(),
             "f32" => "float".to_owned(),
             "c_void" => "void".to_owned(),
+            "c_char" => "char".to_owned(),
             t => CppTypeInfo::get_cpp_name_for_custom_type( krate, t, ts_config ),
         }
     }
@@ -507,8 +508,45 @@ mod test {
                         },
                     ]
                 },
+                CppInterface {
+                    name : "IErrorStore".to_owned(),
+                    base : Some( "IUnknown".to_owned() ),
+                    iid_struct : "{0x7586c49a,0xabbd,0x4a06,{0xb5,0x88,0xe3,0xd0,0x2b,0x43,0x1f,0x01}}".to_owned(),
+                    methods : vec![
+                        CppMethod {
+                            name : "GetErrorInfo".to_owned(),
+                            ret_type : "intercom::HRESULT".to_owned(),
+                            args : vec![
+                                CppArg {
+                                    name : "__out".to_owned(),
+                                    arg_type : "IErrorInfo**".to_owned(),
+                                },
+                            ]
+                        },
+                        CppMethod {
+                            name : "SetErrorInfo".to_owned(),
+                            ret_type : "intercom::HRESULT".to_owned(),
+                            args : vec![
+                                CppArg {
+                                    name : "info".to_owned(),
+                                    arg_type : "IErrorInfo*".to_owned(),
+                                },
+                            ]
+                        },
+                        CppMethod {
+                            name : "SetErrorMessage".to_owned(),
+                            ret_type : "intercom::HRESULT".to_owned(),
+                            args : vec![
+                                CppArg {
+                                    name : "msg".to_owned(),
+                                    arg_type : "char*".to_owned(),
+                                },
+                            ]
+                        },
+                    ]
+                },
             ],
-            coclass_count: 2,
+            coclass_count: 3,
             coclasses : vec![
                 CppCoClass {
                     name : "CoClass".to_owned(),
@@ -526,6 +564,14 @@ mod test {
                     interfaces : vec![
                         "IAllocator".to_owned(),
                     ],
+                },
+                CppCoClass {
+                    name : "ErrorStore".to_owned(),
+                    clsid_struct : "{0x1467b819,0x62df,0x3720,{0x4e,0xe6,0x6e,0x76,0xfd,0x4e,0x11,0x20}}".to_owned(),
+                    interface_count: 1,
+                    interfaces : vec![
+                        "IErrorStore".to_owned(),
+                    ]
                 },
             ],
         };

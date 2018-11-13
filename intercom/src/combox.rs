@@ -11,7 +11,7 @@ pub trait CoClass {
     fn query_interface(
         vtables : &Self::VTableList,
         riid : REFIID,
-    ) -> ComResult< RawComPtr >;
+    ) -> RawComResult< RawComPtr >;
     fn interface_supports_error_info(
         riid : REFIID
     ) -> bool;
@@ -176,10 +176,10 @@ impl<T: CoClass> ComBox<T> {
         this : &mut Self,
         riid : REFIID,
         out : *mut RawComPtr,
-    ) -> HRESULT {
+    ) -> raw::HRESULT {
 
         match T::query_interface( &this.vtable_list, riid ) {
-            Ok( ptr ) => { *out = ptr; Self::add_ref( this ); S_OK },
+            Ok( ptr ) => { *out = ptr; Self::add_ref( this ); raw::S_OK },
             Err( e ) => { *out = std::ptr::null_mut(); e },
         }
     }
@@ -241,9 +241,12 @@ impl<T: CoClass> ComBox<T> {
     pub unsafe fn interface_supports_error_info(
         _this : &mut Self,
         riid : REFIID,
-    ) -> HRESULT {
+    ) -> raw::HRESULT {
 
-        if T::interface_supports_error_info( riid ) { S_OK } else { S_FALSE }
+        match T::interface_supports_error_info( riid ) {
+            true => raw::S_OK,
+            false => raw::S_FALSE,
+        }
     }
 
     /// Converts a RawComPtr to a ComBox reference.
@@ -271,7 +274,7 @@ impl<T: CoClass> ComBox<T> {
         self_iunk : RawComPtr,
         riid : REFIID,
         out : *mut RawComPtr,
-    ) -> HRESULT
+    ) -> raw::HRESULT
     {
         ComBox::query_interface( ComBox::<T>::from_ptr( self_iunk ), riid, out )
     }
@@ -282,7 +285,7 @@ impl<T: CoClass> ComBox<T> {
         self_iunk : RawComPtr,
         riid : REFIID,
         out : *mut RawComPtr,
-    ) -> HRESULT
+    ) -> raw::HRESULT
     {
         ComBox::query_interface( ComBox::<T>::from_ptr( self_iunk ), riid, out )
     }
@@ -328,7 +331,7 @@ impl<T: CoClass> ComBox<T> {
     pub unsafe extern "stdcall" fn interface_supports_error_info_ptr(
         self_iunk : RawComPtr,
         riid : REFIID,
-    ) -> HRESULT
+    ) -> raw::HRESULT
     {
         ComBox::interface_supports_error_info(
                 ComBox::<T>::from_ptr( self_iunk ),
@@ -340,7 +343,7 @@ impl<T: CoClass> ComBox<T> {
     pub unsafe extern "C" fn interface_supports_error_info_ptr(
         self_iunk : RawComPtr,
         riid : REFIID,
-    ) -> HRESULT
+    ) -> raw::HRESULT
     {
         ComBox::interface_supports_error_info(
                 ComBox::<T>::from_ptr( self_iunk ),

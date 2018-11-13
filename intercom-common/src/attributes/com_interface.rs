@@ -96,6 +96,7 @@ pub fn expand_com_interface(
             let method_rust_ident = &method.info.display_name;
             let return_ty = &method.info.rust_return_ty;
 
+            // Rust to COM implementation.
             impls.push( quote!(
                 #unsafety fn #method_rust_ident(
                     #self_arg, #( #impl_args ),*
@@ -106,10 +107,13 @@ pub fn expand_com_interface(
                     #[allow(unused_imports)]
                     use ::intercom::ErrorValue;
 
+                    // Try the available type systems.
                     #( #impl_branches )*
 
-                    < #return_ty as ErrorValue >
-                            ::from_error( ::intercom::E_POINTER )
+                    // None of the type system pointers were available,
+                    // which means this is a null reference.
+                    < #return_ty as ::intercom::ErrorValue >::from_com_error(
+                            ::intercom::ComError::E_POINTER.into() )
                 }
             ) );
         }
@@ -271,7 +275,7 @@ fn process_itf_variant(
                 .expect( "We just ensured this exists three lines up... ;_;" );
         method_impl.impls.insert(
                 itf_variant.type_system(),
-                rust_to_com_delegate( method_info, &vtable_ident ) );
+                rust_to_com_delegate( itf_variant, method_info, &vtable_ident ) );
     }
 
     // Create the vtable. We've already gathered all the vtable method
@@ -289,9 +293,11 @@ fn process_itf_variant(
 ///
 /// # Arguments
 ///
+/// * `itf_variant` - Interface variant details.
 /// * `method_info` - Method to delegate.
 /// * `vtable_ident` - Vtable to use for the delegation.
 fn rust_to_com_delegate(
+    itf_variant : &model::ComInterfaceVariant,
     method_info : &ComMethodInfo,
     vtable_ident : &Ident,
 ) -> TokenStream {
@@ -338,6 +344,7 @@ fn rust_to_com_delegate(
     // Resolve some of the fields needed for quote.
     let method_ident = &method_info.unique_name;
     let return_ty = &method_info.rust_return_ty;
+    let iid_tokens = utils::get_guid_tokens( itf_variant.iid() );
 
     // Construct the final method.
     quote!(
@@ -353,13 +360,13 @@ fn rust_to_com_delegate(
             #( #out_arg_declarations )*;
             let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
 
+            let INTERCOM_iid = #iid_tokens;
             Ok( { #return_statement } )
         } )();
 
         return match result {
             Ok( v ) => v,
-            Err( err ) => < #return_ty as ErrorValue >::from_error(
-                    ::intercom::return_hresult( err ) ),
+            Err( err ) => < #return_ty as ::intercom::ErrorValue >::from_com_error( err ),
         };
     )
 }

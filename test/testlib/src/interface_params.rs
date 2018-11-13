@@ -22,7 +22,7 @@ impl ISharedInterface for SharedImplementation {
     fn divide_by( &self, other: ComItf<ISharedInterface> ) -> ComResult<u32> {
         let divisor = other.get_value();
         match divisor {
-            0 => Err( intercom::E_INVALIDARG ),
+            0 => Err( ComError::E_INVALIDARG ),
             _ => Ok( self.value / divisor ),
         }
     }

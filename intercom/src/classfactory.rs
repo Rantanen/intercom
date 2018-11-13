@@ -13,8 +13,8 @@ use super::*;
 #[cfg(windows)]
 pub struct ClassFactoryVtbl {
     pub __base: IUnknownVtbl,
-    pub create_instance: unsafe extern "stdcall" fn( RawComPtr, RawComPtr, REFIID, *mut RawComPtr ) -> HRESULT,
-    pub lock_server: unsafe extern "stdcall" fn( RawComPtr, bool ) -> HRESULT
+    pub create_instance: unsafe extern "stdcall" fn( RawComPtr, RawComPtr, REFIID, *mut RawComPtr ) -> raw::HRESULT,
+    pub lock_server: unsafe extern "stdcall" fn( RawComPtr, bool ) -> raw::HRESULT
 }
 
 #[allow(non_camel_case_types)]
@@ -22,8 +22,8 @@ pub struct ClassFactoryVtbl {
 #[cfg(not(windows))]
 pub struct ClassFactoryVtbl {
     pub __base: IUnknownVtbl,
-    pub create_instance: unsafe extern "C" fn( RawComPtr, RawComPtr, REFIID, *mut RawComPtr ) -> HRESULT,
-    pub lock_server: unsafe extern "C" fn( RawComPtr, bool ) -> HRESULT
+    pub create_instance: unsafe extern "C" fn( RawComPtr, RawComPtr, REFIID, *mut RawComPtr ) -> raw::HRESULT,
+    pub lock_server: unsafe extern "C" fn( RawComPtr, bool ) -> raw::HRESULT
 }
 
 #[doc(hidden)]
@@ -32,7 +32,9 @@ pub struct ClassFactory<T> {
     pub create_instance : T,
 }
 
-impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > CoClass for ClassFactory<T> {
+impl< T: Fn( REFCLSID ) -> RawComResult< RawComPtr > > CoClass
+        for ClassFactory<T> {
+
     type VTableList = &'static ClassFactoryVtbl;
     fn create_vtable_list() -> Self::VTableList {
         ClassFactory::<T>::create_vtable()
@@ -40,13 +42,13 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > CoClass for ClassFactory<T> 
     fn query_interface(
         vtables : &Self::VTableList,
         riid : REFIID,
-    ) -> ComResult< RawComPtr >
+    ) -> RawComResult< RawComPtr >
     {
-        if riid.is_null() { return Err( E_NOINTERFACE ) }
+        if riid.is_null() { return Err( raw::E_NOINTERFACE ) }
         unsafe { match *riid {
             super::IID_IUnknown | super::IID_IClassFactory =>
                     Ok( vtables as *const _ as RawComPtr ),
-            _ => Err( E_NOINTERFACE ),
+            _ => Err( raw::E_NOINTERFACE ),
         } }
     }
 
@@ -59,7 +61,7 @@ impl AsRef<IUnknownVtbl> for ClassFactoryVtbl {
     }
 }
 
-impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
+impl< T: Fn( REFCLSID ) -> RawComResult< RawComPtr > > ClassFactory<T> {
 
     pub fn new( clsid : REFCLSID, create_instance : T ) -> Self {
         Self { clsid, create_instance }
@@ -71,7 +73,7 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
         _outer : RawComPtr,
         riid : REFIID,
         out : *mut RawComPtr,
-    ) -> HRESULT
+    ) -> raw::HRESULT
     {
         Self::create_instance_agnostic(self_vtbl, _outer, riid, out)
     }
@@ -82,7 +84,7 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
         _outer : RawComPtr,
         riid : REFIID,
         out : *mut RawComPtr,
-    ) -> HRESULT
+    ) -> raw::HRESULT
     {
         Self::create_instance_agnostic(self_vtbl, _outer, riid, out)
     }
@@ -91,7 +93,7 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
     pub unsafe extern "stdcall" fn lock_server(
         self_vtbl : RawComPtr,
         lock : bool
-    ) -> HRESULT
+    ) -> raw::HRESULT
     {
         Self::lock_server_agnostic(self_vtbl, lock)
     }
@@ -100,7 +102,7 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
     pub unsafe extern "C" fn lock_server(
         self_vtbl : RawComPtr,
         lock : bool
-    ) -> HRESULT
+    ) -> raw::HRESULT
     {
         Self::lock_server_agnostic(self_vtbl, lock)
     }
@@ -122,10 +124,10 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
         _outer : RawComPtr,
         riid : REFIID,
         out : *mut RawComPtr,
-    ) -> HRESULT
+    ) -> raw::HRESULT
     {
         if out.is_null() {
-            return E_POINTER
+            return raw::E_POINTER
         }
         *out = std::ptr::null_mut();
 
@@ -142,7 +144,7 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
             out );
 
         // Avoid leaking memory in case query_interface fails.
-        if query_result != S_OK {
+        if query_result != raw::S_OK {
             drop( Box::from_raw( iunk_ptr as RawComPtr ) );
         }
         query_result
@@ -151,14 +153,14 @@ impl< T: Fn( REFCLSID ) -> ComResult< RawComPtr > > ClassFactory<T> {
     unsafe fn lock_server_agnostic(
         self_vtbl : RawComPtr,
         lock : bool
-    ) -> HRESULT
+    ) -> raw::HRESULT
     {
         if lock {
             ComBox::<Self>::add_ref_ptr( self_vtbl );
         } else {
             ComBox::<Self>::release_ptr( self_vtbl );
         }
-        S_OK
+        raw::S_OK
     }
 }
 

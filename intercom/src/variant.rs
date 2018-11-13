@@ -78,8 +78,10 @@ impl From<raw::Variant> for Variant {
                     raw::var_type::DATE =>
                         Variant::SystemTime( src.data.date.into() ),
                     raw::var_type::UNKNOWN =>
-                        Variant::IUnknown( ComRc::wrap(
-                                src.data.punkVal, TypeSystem::Automation ) ),
+                        match ComRc::wrap( src.data.punkVal, TypeSystem::Automation ) {
+                            Some( rc ) => Variant::IUnknown( rc ),
+                            None => Variant::None,
+                        }
                     _ => Variant::Raw( src ),
                 }
             } else {
@@ -102,8 +104,10 @@ impl From<raw::Variant> for Variant {
                     raw::var_type::DATE =>
                         Variant::SystemTime( (*src.data.pdate).into() ),
                     raw::var_type::UNKNOWN =>
-                        Variant::IUnknown( ComRc::wrap(
-                                *src.data.ppunkVal, TypeSystem::Automation ) ),
+                        match ComRc::wrap( *src.data.ppunkVal, TypeSystem::Automation ) {
+                            Some( rc ) => Variant::IUnknown( rc ),
+                            None => Variant::None,
+                        }
                     _ => Variant::Raw( src ),
                 }
             }
@@ -185,13 +189,7 @@ impl<'a> From<&'a Variant> for VariantError {
 
 impl From<VariantError> for ComError
 {
-    fn from( _ : VariantError ) -> Self { ::E_INVALIDARG.into() }
-}
-
-impl From<VariantError> for HRESULT {
-    fn from( _ : VariantError ) -> HRESULT {
-        E_INVALIDARG
-    }
+    fn from( _ : VariantError ) -> Self { ComError::E_INVALIDARG }
 }
 
 impl TryFrom< Variant > for () {
@@ -621,7 +619,7 @@ pub mod raw {
         pub fltVal : f32,
         pub dblVal : f64,
         pub boolVal : VariantBool,
-        pub scode : ::HRESULT,
+        pub scode : ::raw::HRESULT,
         //cyVal : CY,
         pub date : VariantDate,
         pub bstrVal : *mut u16,
@@ -762,7 +760,7 @@ pub mod raw {
 
     impl From<VariantError> for ::ComError
     {
-        fn from( _ : VariantError ) -> Self { ::E_INVALIDARG.into() }
+        fn from( _ : VariantError ) -> Self { ::ComError::E_INVALIDARG }
     }
 
     impl std::fmt::Debug for Variant {

@@ -49,7 +49,7 @@ impl IStringTests for StringTests
         }
 
         println!( "Unrecognized string: {}", s );
-        Err( intercom::E_FAIL )
+        Err( ComError::E_FAIL )
     }
 
     fn index_to_string( &self, i : u32 ) -> ComResult<String> {
@@ -61,32 +61,32 @@ impl IStringTests for StringTests
         }
 
         println!( "Unrecognized index: {}", i );
-        Err( intercom::E_FAIL )
+        Err( ComError::E_FAIL )
     }
 
     fn bstr_parameter( &self, s : &BStr, ptr : usize ) -> ComResult<()> {
 
         let string = s.to_string()
-                .map_err( |_| intercom::E_INVALIDARG )?;
+                .map_err( |_| ComError::E_INVALIDARG )?;
 
         if string != "\u{1F600}" {
-            return Err( intercom::E_FAIL );
+            return Err( ComError::E_FAIL );
         }
 
         if s.as_ptr() as usize == ptr {
             Ok(())
         } else {
-            Err( intercom::E_POINTER )
+            Err( ComError::E_POINTER )
         }
     }
 
     fn bstring_parameter( &self, s : BString ) -> ComResult<()> {
 
         let string = s.to_string()
-                .map_err( |_| intercom::E_INVALIDARG )?;
+                .map_err( |_| ComError::E_INVALIDARG )?;
 
         if string != "\u{1F600}" {
-            Err( intercom::E_FAIL )
+            Err( ComError::E_FAIL )
         } else {
             Ok(())
         }
@@ -103,20 +103,20 @@ impl IStringTests for StringTests
     fn cstr_parameter( &self, s : &CStr, ptr : usize ) -> ComResult<()> {
 
         if s.to_string_lossy() != "\u{1F600}" {
-            return Err( intercom::E_FAIL );
+            return Err( ComError::E_FAIL );
         }
 
         if s.as_ptr() as usize == ptr {
             Ok(())
         } else {
-            Err( intercom::E_POINTER )
+            Err( ComError::E_POINTER )
         }
     }
 
     fn cstring_parameter( &self, s : CString ) -> ComResult<()> {
 
         if s.to_string_lossy() != "\u{1F600}" {
-            Err( intercom::E_FAIL )
+            Err( ComError::E_FAIL )
         } else {
             Ok(())
         }
@@ -138,7 +138,7 @@ impl IStringTests for StringTests
 
         // Caller expects E_INVALIDARG, use E_FAIL to indicate something
         // went wrong.
-        Err( intercom::E_FAIL )
+        Err( ComError::E_FAIL )
     }
 }
 

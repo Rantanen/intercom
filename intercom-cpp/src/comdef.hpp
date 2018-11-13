@@ -8,6 +8,7 @@
 #else
 
 #include "posix/iunknown.hpp"
+#include "posix/isupporterrorinfo.hpp"
 #include "posix/idispatch.hpp"
 
 #endif

@@ -319,6 +319,7 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
             "VariantBool" => "VARIANT_BOOL".to_owned(),
             "Variant" => "VARIANT".to_owned(),
             "c_void" => "void".to_owned(),
+            "c_char" => "char".to_owned(),
             t => IdlTypeInfo::get_idl_name_for_custom_type( krate, t, ts_config ),
         }
     }
@@ -479,6 +480,49 @@ mod test {
                         },
                     ]
                 },
+                IdlInterface {
+                    name : "IErrorStore".to_owned(),
+                    base : Some( "IUnknown".to_owned() ),
+                    iid : "D7F996C5-0B51-4053-82F8-19A7261793A9".to_owned(),
+                    methods : vec![
+                        IdlMethod {
+                            name : "GetErrorInfo".to_owned(),
+                            idx : 0,
+                            ret_type : "HRESULT".to_owned(),
+                            args : vec![
+                                IdlArg {
+                                    name : "__out".to_owned(),
+                                    arg_type : "IErrorInfo**".to_owned(),
+                                    attributes : "out, retval".to_owned(),
+                                },
+                            ]
+                        },
+                        IdlMethod {
+                            name : "SetErrorInfo".to_owned(),
+                            idx : 1,
+                            ret_type : "HRESULT".to_owned(),
+                            args : vec![
+                                IdlArg {
+                                    name : "info".to_owned(),
+                                    arg_type : "IErrorInfo*".to_owned(),
+                                    attributes : "in".to_owned(),
+                                },
+                            ]
+                        },
+                        IdlMethod {
+                            name : "SetErrorMessage".to_owned(),
+                            idx : 2,
+                            ret_type : "HRESULT".to_owned(),
+                            args : vec![
+                                IdlArg {
+                                    name : "msg".to_owned(),
+                                    arg_type : "BSTR".to_owned(),
+                                    attributes : "in".to_owned(),
+                                },
+                            ]
+                        },
+                    ]
+                },
             ],
             coclasses : vec![
                 IdlCoClass {
@@ -494,6 +538,13 @@ mod test {
                     clsid : "EC444090-9CDC-31A4-4023-D0458C5CD45C".to_owned(),
                     interfaces : vec![
                         "IAllocator".to_owned(),
+                    ]
+                },
+                IdlCoClass {
+                    name : "ErrorStore".to_owned(),
+                    clsid : "1467B819-62DF-3720-4EE6-6E76FD4E1120".to_owned(),
+                    interfaces : vec![
+                        "IErrorStore".to_owned(),
                     ]
                 },
             ],

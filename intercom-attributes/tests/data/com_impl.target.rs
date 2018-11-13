@@ -72,8 +72,8 @@ impl ::intercom::CoClass for Foo {
                       Foo_Raw: &__Foo_Foo_RawVtbl_INSTANCE,}
     }
     fn query_interface(vtables: &Self::VTableList, riid: ::intercom::REFIID)
-     -> ::intercom::ComResult<::intercom::RawComPtr> {
-        if riid.is_null() { return Err(::intercom::E_NOINTERFACE) }
+     -> ::intercom::RawComResult<::intercom::RawComPtr> {
+        if riid.is_null() { return Err(::intercom::raw::E_NOINTERFACE) }
         Ok(match *unsafe { &*riid } {
                ::intercom::IID_IUnknown =>
                (&vtables._ISupportErrorInfo) as
@@ -91,7 +91,7 @@ impl ::intercom::CoClass for Foo {
                self::IID_Foo_Raw =>
                &vtables.Foo_Raw as *const &__Foo_RawVtbl as
                    *mut &__Foo_RawVtbl as ::intercom::RawComPtr,
-               _ => return Err(::intercom::E_NOINTERFACE),
+               _ => return Err(::intercom::raw::E_NOINTERFACE),
            })
     }
     fn interface_supports_error_info(riid: ::intercom::REFIID) -> bool {
@@ -144,7 +144,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_query_interface(self_vtable:
                                                                     ::intercom::REFIID,
                                                                 out:
                                                                     *mut ::intercom::RawComPtr)
- -> ::intercom::HRESULT {
+ -> ::intercom::raw::HRESULT {
     ::intercom::ComBox::<Foo>::query_interface(&mut *((self_vtable as usize -
                                                            __Foo_Foo_AutomationVtbl_offset())
                                                           as *mut _), riid,
@@ -191,7 +191,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_simple_method_Automation(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <() as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -216,7 +216,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_arg_method_Automation(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <() as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -240,7 +240,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_simple_result_method_Automation(self_v
     match result {
         Ok(v) => v,
         Err(err) =>
-        <u16 as ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <u16 as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -250,8 +250,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_com_result_method_Automation(self_vtab
                                                                                  ::intercom::RawComPtr,
                                                                              __out:
                                                                                  *mut u16)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -262,10 +262,13 @@ unsafe extern "C" fn __Foo_Foo_Automation_com_result_method_Automation(self_vtab
                  let __result = self_struct.com_result_method();
                  Ok({
                         match __result {
-                            Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+                            Ok(v1) => {
+                                *__out = v1.into();
+                                ::intercom::raw::S_OK
+                            }
                             Err(e) => {
                                 *__out = Default::default();
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -274,8 +277,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_com_result_method_Automation(self_vtab
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -285,8 +288,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_rust_result_method_Automation(self_vta
                                                                                   ::intercom::RawComPtr,
                                                                               __out:
                                                                                   *mut u16)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -297,10 +300,13 @@ unsafe extern "C" fn __Foo_Foo_Automation_rust_result_method_Automation(self_vta
                  let __result = self_struct.rust_result_method();
                  Ok({
                         match __result {
-                            Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+                            Ok(v1) => {
+                                *__out = v1.into();
+                                ::intercom::raw::S_OK
+                            }
                             Err(e) => {
                                 *__out = Default::default();
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -309,8 +315,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_rust_result_method_Automation(self_vta
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -324,8 +330,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_tuple_result_method_Automation(self_vt
                                                                                    *mut u16,
                                                                                __out3:
                                                                                    *mut u32)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -340,13 +346,13 @@ unsafe extern "C" fn __Foo_Foo_Automation_tuple_result_method_Automation(self_vt
                                 *__out1 = v1.into();
                                 *__out2 = v2.into();
                                 *__out3 = v3.into();
-                                ::intercom::S_OK
+                                ::intercom::raw::S_OK
                             }
                             Err(e) => {
                                 *__out1 = Default::default();
                                 *__out2 = Default::default();
                                 *__out3 = Default::default();
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -355,8 +361,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_tuple_result_method_Automation(self_vt
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -390,7 +396,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_string_method_Automation(self_vtable:
         Ok(v) => v,
         Err(err) =>
         <::intercom::raw::OutBSTR as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -402,8 +408,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_string_result_method_Automation(self_v
                                                                                     ::intercom::raw::InBSTR,
                                                                                 __out:
                                                                                     *mut ::intercom::raw::OutBSTR)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -422,11 +428,11 @@ unsafe extern "C" fn __Foo_Foo_Automation_string_result_method_Automation(self_v
                             Ok(v1) => {
                                 *__out =
                                     ::intercom::ComInto::<::intercom::BString>::com_into(v1)?.into_ptr();
-                                ::intercom::S_OK
+                                ::intercom::raw::S_OK
                             }
                             Err(e) => {
                                 *__out = ::std::ptr::null_mut();
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -435,8 +441,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_string_result_method_Automation(self_v
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -450,8 +456,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_complete_method_Automation(self_vtable
                                                                                i16,
                                                                            __out:
                                                                                *mut ::intercom::raw::VariantBool)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -463,10 +469,13 @@ unsafe extern "C" fn __Foo_Foo_Automation_complete_method_Automation(self_vtable
                      self_struct.complete_method(a.into(), b.into());
                  Ok({
                         match __result {
-                            Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+                            Ok(v1) => {
+                                *__out = v1.into();
+                                ::intercom::raw::S_OK
+                            }
                             Err(e) => {
                                 *__out = false.into();
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -475,8 +484,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_complete_method_Automation(self_vtable
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -488,8 +497,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_bool_method_Automation(self_vtable:
                                                                            ::intercom::raw::VariantBool,
                                                                        __out:
                                                                            *mut ::intercom::raw::VariantBool)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -500,10 +509,13 @@ unsafe extern "C" fn __Foo_Foo_Automation_bool_method_Automation(self_vtable:
                  let __result = self_struct.bool_method(input.into());
                  Ok({
                         match __result {
-                            Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+                            Ok(v1) => {
+                                *__out = v1.into();
+                                ::intercom::raw::S_OK
+                            }
                             Err(e) => {
                                 *__out = false.into();
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -512,8 +524,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_bool_method_Automation(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -525,8 +537,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_variant_method_Automation(self_vtable:
                                                                               ::intercom::raw::Variant,
                                                                           __out:
                                                                               *mut ::intercom::raw::Variant)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -539,11 +551,11 @@ unsafe extern "C" fn __Foo_Foo_Automation_variant_method_Automation(self_vtable:
                         match __result {
                             Ok(v1) => {
                                 *__out = v1.com_into()?;
-                                ::intercom::S_OK
+                                ::intercom::raw::S_OK
                             }
                             Err(e) => {
                                 *__out = Default::default();
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -552,8 +564,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_variant_method_Automation(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_upper_case_globals)]
@@ -595,7 +607,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_query_interface(self_vtable:
                                                              ::intercom::REFIID,
                                                          out:
                                                              *mut ::intercom::RawComPtr)
- -> ::intercom::HRESULT {
+ -> ::intercom::raw::HRESULT {
     ::intercom::ComBox::<Foo>::query_interface(&mut *((self_vtable as usize -
                                                            __Foo_Foo_RawVtbl_offset())
                                                           as *mut _), riid,
@@ -641,7 +653,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_simple_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <() as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -664,7 +676,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_arg_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <() as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -687,7 +699,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_simple_result_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <u16 as ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <u16 as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -697,8 +709,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_com_result_method_Raw(self_vtable:
                                                                    ::intercom::RawComPtr,
                                                                __out:
                                                                    *mut u16)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -708,10 +720,13 @@ unsafe extern "C" fn __Foo_Foo_Raw_com_result_method_Raw(self_vtable:
                  let __result = self_struct.com_result_method();
                  Ok({
                         match __result {
-                            Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+                            Ok(v1) => {
+                                *__out = v1.into();
+                                ::intercom::raw::S_OK
+                            }
                             Err(e) => {
                                 *__out = Default::default();
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -720,8 +735,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_com_result_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -731,8 +746,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_rust_result_method_Raw(self_vtable:
                                                                     ::intercom::RawComPtr,
                                                                 __out:
                                                                     *mut u16)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -742,10 +757,13 @@ unsafe extern "C" fn __Foo_Foo_Raw_rust_result_method_Raw(self_vtable:
                  let __result = self_struct.rust_result_method();
                  Ok({
                         match __result {
-                            Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+                            Ok(v1) => {
+                                *__out = v1.into();
+                                ::intercom::raw::S_OK
+                            }
                             Err(e) => {
                                 *__out = Default::default();
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -754,8 +772,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_rust_result_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -769,8 +787,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_tuple_result_method_Raw(self_vtable:
                                                                      *mut u16,
                                                                  __out3:
                                                                      *mut u32)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -784,13 +802,13 @@ unsafe extern "C" fn __Foo_Foo_Raw_tuple_result_method_Raw(self_vtable:
                                 *__out1 = v1.into();
                                 *__out2 = v2.into();
                                 *__out3 = v3.into();
-                                ::intercom::S_OK
+                                ::intercom::raw::S_OK
                             }
                             Err(e) => {
                                 *__out1 = Default::default();
                                 *__out2 = Default::default();
                                 *__out3 = Default::default();
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -799,8 +817,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_tuple_result_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -833,7 +851,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_string_method_Raw(self_vtable:
         Ok(v) => v,
         Err(err) =>
         <::intercom::raw::OutCStr as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -845,8 +863,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_string_result_method_Raw(self_vtable:
                                                                       ::intercom::raw::InCStr,
                                                                   __out:
                                                                       *mut ::intercom::raw::OutCStr)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -864,11 +882,11 @@ unsafe extern "C" fn __Foo_Foo_Raw_string_result_method_Raw(self_vtable:
                             Ok(v1) => {
                                 *__out =
                                     ::intercom::ComInto::<::intercom::CString>::com_into(v1)?.into_raw();
-                                ::intercom::S_OK
+                                ::intercom::raw::S_OK
                             }
                             Err(e) => {
                                 *__out = ::std::ptr::null_mut();
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -877,8 +895,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_string_result_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -888,8 +906,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_complete_method_Raw(self_vtable:
                                                                  ::intercom::RawComPtr,
                                                              a: u16, b: i16,
                                                              __out: *mut bool)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -900,10 +918,13 @@ unsafe extern "C" fn __Foo_Foo_Raw_complete_method_Raw(self_vtable:
                      self_struct.complete_method(a.into(), b.into());
                  Ok({
                         match __result {
-                            Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+                            Ok(v1) => {
+                                *__out = v1.into();
+                                ::intercom::raw::S_OK
+                            }
                             Err(e) => {
                                 *__out = false;
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -912,8 +933,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_complete_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -923,8 +944,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_bool_method_Raw(self_vtable:
                                                              ::intercom::RawComPtr,
                                                          input: bool,
                                                          __out: *mut bool)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -934,10 +955,13 @@ unsafe extern "C" fn __Foo_Foo_Raw_bool_method_Raw(self_vtable:
                  let __result = self_struct.bool_method(input.into());
                  Ok({
                         match __result {
-                            Ok(v1) => { *__out = v1.into(); ::intercom::S_OK }
+                            Ok(v1) => {
+                                *__out = v1.into();
+                                ::intercom::raw::S_OK
+                            }
                             Err(e) => {
                                 *__out = false;
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -946,8 +970,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_bool_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -959,8 +983,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_variant_method_Raw(self_vtable:
                                                                 ::intercom::raw::Variant,
                                                             __out:
                                                                 *mut ::intercom::raw::Variant)
- -> ::intercom::HRESULT {
-    let result: Result<::intercom::HRESULT, ::intercom::ComError> =
+ -> ::intercom::raw::HRESULT {
+    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -972,11 +996,11 @@ unsafe extern "C" fn __Foo_Foo_Raw_variant_method_Raw(self_vtable:
                         match __result {
                             Ok(v1) => {
                                 *__out = v1.com_into()?;
-                                ::intercom::S_OK
+                                ::intercom::raw::S_OK
                             }
                             Err(e) => {
                                 *__out = Default::default();
-                                ::intercom::return_hresult(e)
+                                ::intercom::store_error(e).hresult
                             }
                         }
                     })
@@ -985,8 +1009,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_variant_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::HRESULT as
-            ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <::intercom::raw::HRESULT as
+            ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_upper_case_globals)]

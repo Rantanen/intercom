@@ -57,13 +57,19 @@ impl IFoo for ::intercom::ComItf<IFoo> {
                      unsafe {
                          let __result =
                              ((**vtbl).trait_method_Automation)(comptr.ptr);
+                         let INTERCOM_iid =
+                             ::intercom::GUID{data1: 0u32,
+                                              data2: 0u16,
+                                              data3: 0u16,
+                                              data4:
+                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
+                                                   0u8, 0u8, 0u8],};
                          Ok({ })
                      })();
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <() as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                       <() as ::intercom::ErrorValue>::from_com_error(err),
                    };
         }
         if let Some(comptr) =
@@ -75,16 +81,23 @@ impl IFoo for ::intercom::ComItf<IFoo> {
                      unsafe {
                          let __result =
                              ((**vtbl).trait_method_Raw)(comptr.ptr);
+                         let INTERCOM_iid =
+                             ::intercom::GUID{data1: 0u32,
+                                              data2: 0u16,
+                                              data3: 0u16,
+                                              data4:
+                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
+                                                   0u8, 0u8, 1u8],};
                          Ok({ })
                      })();
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <() as
-                           ErrorValue>::from_error(::intercom::return_hresult(err)),
+                       <() as ::intercom::ErrorValue>::from_com_error(err),
                    };
         }
-        <() as ErrorValue>::from_error(::intercom::E_POINTER)
+        <() as
+            ::intercom::ErrorValue>::from_com_error(::intercom::ComError::E_POINTER.into())
     }
 }
 impl ::intercom::ComInterface for IFoo {
@@ -168,8 +181,8 @@ impl ::intercom::CoClass for Foo {
                       IFoo_Raw: &__Foo_IFoo_RawVtbl_INSTANCE,}
     }
     fn query_interface(vtables: &Self::VTableList, riid: ::intercom::REFIID)
-     -> ::intercom::ComResult<::intercom::RawComPtr> {
-        if riid.is_null() { return Err(::intercom::E_NOINTERFACE) }
+     -> ::intercom::RawComResult<::intercom::RawComPtr> {
+        if riid.is_null() { return Err(::intercom::raw::E_NOINTERFACE) }
         Ok(match *unsafe { &*riid } {
                ::intercom::IID_IUnknown =>
                (&vtables._ISupportErrorInfo) as
@@ -193,7 +206,7 @@ impl ::intercom::CoClass for Foo {
                self::IID_IFoo_Raw =>
                &vtables.IFoo_Raw as *const &__IFoo_RawVtbl as
                    *mut &__IFoo_RawVtbl as ::intercom::RawComPtr,
-               _ => return Err(::intercom::E_NOINTERFACE),
+               _ => return Err(::intercom::raw::E_NOINTERFACE),
            })
     }
     fn interface_supports_error_info(riid: ::intercom::REFIID) -> bool {
@@ -225,7 +238,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_query_interface(self_vtable:
                                                                     ::intercom::REFIID,
                                                                 out:
                                                                     *mut ::intercom::RawComPtr)
- -> ::intercom::HRESULT {
+ -> ::intercom::raw::HRESULT {
     ::intercom::ComBox::<Foo>::query_interface(&mut *((self_vtable as usize -
                                                            __Foo_Foo_AutomationVtbl_offset())
                                                           as *mut _), riid,
@@ -272,7 +285,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_struct_method_Automation(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <() as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_upper_case_globals)]
@@ -294,7 +307,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_query_interface(self_vtable:
                                                              ::intercom::REFIID,
                                                          out:
                                                              *mut ::intercom::RawComPtr)
- -> ::intercom::HRESULT {
+ -> ::intercom::raw::HRESULT {
     ::intercom::ComBox::<Foo>::query_interface(&mut *((self_vtable as usize -
                                                            __Foo_Foo_RawVtbl_offset())
                                                           as *mut _), riid,
@@ -340,7 +353,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_struct_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <() as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_upper_case_globals)]
@@ -422,7 +435,7 @@ unsafe extern "C" fn __Foo_IFoo_Automation_query_interface(self_vtable:
                                                                      ::intercom::REFIID,
                                                                  out:
                                                                      *mut ::intercom::RawComPtr)
- -> ::intercom::HRESULT {
+ -> ::intercom::raw::HRESULT {
     ::intercom::ComBox::<Foo>::query_interface(&mut *((self_vtable as usize -
                                                            __Foo_IFoo_AutomationVtbl_offset())
                                                           as *mut _), riid,
@@ -469,7 +482,7 @@ unsafe extern "C" fn __Foo_IFoo_Automation_trait_method_Automation(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <() as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_upper_case_globals)]
@@ -491,7 +504,7 @@ unsafe extern "C" fn __Foo_IFoo_Raw_query_interface(self_vtable:
                                                               ::intercom::REFIID,
                                                           out:
                                                               *mut ::intercom::RawComPtr)
- -> ::intercom::HRESULT {
+ -> ::intercom::raw::HRESULT {
     ::intercom::ComBox::<Foo>::query_interface(&mut *((self_vtable as usize -
                                                            __Foo_IFoo_RawVtbl_offset())
                                                           as *mut _), riid,
@@ -537,7 +550,7 @@ unsafe extern "C" fn __Foo_IFoo_Raw_trait_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::return_hresult(err)),
+        <() as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_upper_case_globals)]

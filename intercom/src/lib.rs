@@ -47,6 +47,7 @@
 
 #![crate_type="dylib"]
 #![feature(try_from, specialization, non_exhaustive, integer_atomics)]
+#![allow(clippy::match_bool)]
 
 #[cfg(not(windows))]
 extern crate libc;
@@ -76,7 +77,7 @@ mod comrc; pub use comrc::*;
 mod comitf; pub use comitf::*;
 mod strings; pub use strings::*;
 mod guid; pub use guid::GUID;
-mod error; pub use error::{return_hresult, get_last_error, ComError, ErrorInfo, ErrorValue};
+pub mod error; pub use error::{ComError, store_error, load_error, ErrorValue};
 mod interfaces;
 pub mod runtime;
 pub mod alloc;
@@ -127,8 +128,8 @@ pub mod raw {
     pub type InCStr = *const ::std::os::raw::c_char;
     pub type OutCStr = *mut ::std::os::raw::c_char;
 
-    // ... for some reason the 'Variant' needs to be exported explicitly here.
     pub use variant::raw::*;
+    pub use error::raw::*;
     
     #[repr(C)]
     #[derive(PartialEq, Eq)]
@@ -167,79 +168,11 @@ pub mod raw {
     }
 
     impl<I: ::ComInterface + ?Sized> InterfacePtr<I> {
-        pub fn into_unknown( self ) -> InterfacePtr<::IUnknown> {
+        pub fn as_unknown( self ) -> InterfacePtr<::IUnknown> {
             InterfacePtr { ptr : self.ptr, phantom: ::std::marker::PhantomData }
         }
     }
 }
-
-/// COM method status code.
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy)]
-#[repr(C)]
-pub struct HRESULT {
-
-    /// The numerical HRESULT code.
-    pub hr : i32
-}
-
-impl HRESULT {
-
-    /// Constructs a new `HRESULT` with the given numerical code.
-    pub fn new( hr : u32 ) -> HRESULT {
-        #[allow(overflowing_literals)]
-        HRESULT { hr : hr as i32 }
-    }
-}
-
-macro_rules! make_hr {
-    ( $(#[$attr:meta] )* $hr_name: ident = $hr_value: expr ) => {
-        $(#[$attr])*
-        #[allow(overflowing_literals)]
-        pub const $hr_name : HRESULT = HRESULT { hr: $hr_value as i32 };
-    }
-}
-
-make_hr!(
-    /// `HRESULT` indicating the operation completed successfully.
-    S_OK = 0 );
-
-make_hr!(
-    /// `HRESULT` indicating the operation completed successfully and returned
-    /// `false`.
-    S_FALSE = 1 );
-
-make_hr!(
-    /// `HRESULT` for unimplemented functionality.
-    E_NOTIMPL = 0x8000_4001 );
-
-make_hr!(
-    /// `HRESULT` indicating the type does not support the requested interface.
-    E_NOINTERFACE = 0x8000_4002 );
-
-make_hr!(
-    /// `HRESULT` indicating a pointer parameter was invalid.
-    E_POINTER = 0x8000_4003 );
-
-make_hr!(
-    /// `HRESULT` for aborted operation.
-    E_ABORT = 0x8000_4004 );
-
-make_hr!(
-    /// `HRESULT` for unspecified failure.
-    E_FAIL = 0x8000_4005 );
-
-make_hr!(
-    /// `HRESULT` for invalid argument.
-    E_INVALIDARG = 0x8007_0057 );
-
-// These might be deprecated. They are a bit too specific for cross-platform
-// support. We'll just need to ensure the winapi HRESULTs are compatible.
-make_hr!( E_ACCESSDENIED = 0x8007_0005 );
-make_hr!( STG_E_FILENOTFOUND = 0x8003_0002 );
-make_hr!( RPC_E_DISCONNECTED = 0x8001_0108 );
-make_hr!( RPC_E_CALL_REJECTED = 0x8001_0001 );
-make_hr!( RPC_E_CALL_CANCELED = 0x8001_0002 );
-make_hr!( RPC_E_TIMEOUT = 0x8001_011F );
 
 
 /// `IClassFactory` interface ID.
@@ -285,5 +218,11 @@ pub extern "stdcall" fn DllMain(
 ///
 /// The `ComResult` maps the Rust concept of `Ok` and `Err` values to COM
 /// `[out, retval]` parameter and `HRESULT` return value.
-pub type ComResult<A> = Result<A, HRESULT>;
+pub type ComResult<A> = Result<A, ComError>;
+
+/// Basic COM result type.
+///
+/// The `ComResult` maps the Rust concept of `Ok` and `Err` values to COM
+/// `[out, retval]` parameter and `HRESULT` return value.
+pub type RawComResult<A> = Result<A, raw::HRESULT>;
 

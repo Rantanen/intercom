@@ -16,7 +16,7 @@ impl<T: ComInterface + ?Sized> std::fmt::Debug for ComRc<T> {
 
 impl<T: ComInterface + ?Sized> Clone for ComRc<T> {
     fn clone( &self ) -> Self {
-        let rc = ComRc { itf : self.itf.clone() };
+        let rc = ComRc { itf : self.itf };
         rc.itf.as_ref().release();
         rc
     }
@@ -32,6 +32,14 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
         ComRc { itf }
     }
 
+    /// Attaches a floating ComItf reference and brings it under managed
+    /// reference counting.
+    ///
+    /// Does not increment the reference count.
+    pub fn detach( mut rc : ComRc<T> ) -> ComItf<T> {
+        unsafe { std::mem::replace( &mut rc.itf, ComItf::null_itf() ) }
+    }
+
     /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
     ///
     /// Does not increment the reference count.
@@ -43,6 +51,25 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
     pub unsafe fn wrap(
         ptr : raw::InterfacePtr<T>,
         ts : TypeSystem
+    ) -> Option<ComRc<T>> {
+        if ptr.is_null() {
+            None
+        } else {
+            Some( ComRc::attach( ComItf::wrap( ptr, ts ) ) )
+        }
+    }
+
+    /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
+    ///
+    /// Does not increment the reference count.
+    ///
+    /// # Safety
+    ///
+    /// The `ptr` __must__ be a valid COM interface pointer for an interface
+    /// of type `T`.
+    pub unsafe fn wrap_unchecked(
+        ptr : raw::InterfacePtr<T>,
+        ts : TypeSystem
     ) -> ComRc<T> {
         ComRc::attach( ComItf::wrap( ptr, ts ) )
     }
@@ -51,7 +78,7 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
 
         let iunk : &ComItf<IUnknown> = itf.as_ref();
         iunk.add_ref();
-        ComRc::attach( itf.clone() )
+        ComRc::attach( *itf )
     }
 
     // ComRc is a smart pointer and shouldn't introduce methods on 'self'.
@@ -77,7 +104,7 @@ impl<T: ComInterface + ?Sized> ComRc<T>
         // This is the one that plays well with Windows' CoCreateInstance, etc.
         let iid = match T::iid( TypeSystem::Automation ) {
             Some( iid ) => iid,
-            None => return Err( E_NOINTERFACE ),
+            None => return Err( ComError::E_NOINTERFACE ),
         };
 
         unsafe {
@@ -94,10 +121,10 @@ impl<T: ComInterface + ?Sized> ComRc<T>
 
                 // On success construct the ComRc. We are using Automation type
                 // system as that's the IID we used earlier.
-                ::S_OK => Ok( ComRc::attach( ComItf::wrap(
+                ::raw::S_OK => Ok( ComRc::attach( ComItf::wrap(
                                 raw::InterfacePtr::new( out ),
                                 TypeSystem::Automation ) ) ),
-                e => Err( e ),
+                e => Err( e.into() ),
             }
         }
     }

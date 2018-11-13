@@ -19,6 +19,7 @@ pub mod alloc; use alloc::*;
 pub mod strings; use strings::*;
 pub mod type_system_callbacks; use type_system_callbacks::*;
 pub mod variant; use variant::*;
+pub mod unicode; use unicode::*;
 
 // Declare available COM classes.
 #[com_library(
@@ -29,11 +30,12 @@ pub mod variant; use variant::*;
     ClassCreator,
     CreatedClass,
     SharedImplementation,
-    ErrorSource,
+    ErrorTests,
     AllocTests,
     StringTests,
     TypeSystemCaller,
     VariantTests,
+    UnicodeConversion,
 )]
 #[allow(dead_code)]  // #[com_library] requires an item so we need one here for now.
 struct S;

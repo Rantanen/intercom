@@ -44,6 +44,8 @@ impl<T: ?Sized> Clone for ComItf<T> {
     }
 }
 
+impl<T: ?Sized> Copy for ComItf<T> { }
+
 impl<T: ?Sized> ComItf<T> {
 
     /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
@@ -141,18 +143,19 @@ impl<T: ComInterface + ?Sized> ComItf<T> {
     #[allow(clippy::wrong_self_convention)]
     pub fn as_unknown( this : &Self ) -> ComItf<IUnknown> {
         ComItf {
-            raw_ptr: this.raw_ptr.into_unknown(),
-            automation_ptr: this.automation_ptr.into_unknown(),
+            raw_ptr: this.raw_ptr.as_unknown(),
+            automation_ptr: this.automation_ptr.as_unknown(),
             phantom: PhantomData,
         }
     }
 }
 
-impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized> std::convert::TryFrom<&ComRc<S>> for ComRc<T> {
+impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized>
+        std::convert::TryFrom<&ComRc<S>> for ComRc<T> {
 
-    type Error = ::HRESULT;
+    type Error = ::ComError;
 
-    fn try_from( source : &ComRc<S> ) -> Result< ComRc<T>, ::HRESULT >
+    fn try_from( source : &ComRc<S> ) -> Result< ComRc<T>, ::ComError >
     {
         ComRc::<T>::try_from( &**source )
     }
@@ -160,9 +163,9 @@ impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized> std::convert::TryFrom<&
 
 impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized> std::convert::TryFrom<&ComItf<S>> for ComRc<T> {
 
-    type Error = ::HRESULT;
+    type Error = ::ComError;
 
-    fn try_from( source : &ComItf<S> ) -> Result< ComRc<T>, ::HRESULT >
+    fn try_from( source : &ComItf<S> ) -> Result< ComRc<T>, ::ComError >
     {
         let iunk : &ComItf<IUnknown> = source.as_ref();
 
@@ -175,6 +178,7 @@ impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized> std::convert::TryFrom<&
                 // Try to query interface using the iid.
                 match iunk.query_interface( iid ) {
                     Ok( ptr ) => unsafe {
+
                         // QueryInterface is guaranteed to return ptr of correct
                         // interface type, which makes the ComItf::wrap safe here.
                         return Ok( ComRc::attach( ComItf::<T>::wrap(
@@ -186,9 +190,15 @@ impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized> std::convert::TryFrom<&
             }
         }
 
+        // If we got here, none of the query interfaces we invoked returned
+        // anything.
+        //
+        // If 'err' is None, we didn't even get to invoke any of the query
+        // interfaces. This is a case when the interface doesn't have IID
+        // for any of the type systems.
         match err {
-            None => Err( E_FAIL ),
-            Some( err ) => Err( err ),
+            None => Err( ::ComError::E_FAIL ),
+            Some( err ) => Err( err.into() ),
         }
     }
 }
@@ -212,7 +222,7 @@ extern "system" {
         cls_context: u32,
         riid : ::REFIID,
         out : &mut RawComPtr,
-    ) -> ::HRESULT;
+    ) -> ::raw::HRESULT;
 }
 
 impl<T: ComInterface + ?Sized> AsRef<ComItf<IUnknown>> for ComItf<T>
