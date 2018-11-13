@@ -23,10 +23,12 @@ impl BuildError {
 
         writeln!( w, "cargo:warning={}", msg )?;
 
+        // Handle all the errors that provide extra info.
+        // (Only one currently, but we'll still want to structure this as a match)
+        #[allow(clippy::single_match)]
         match *self {
             BuildError::CommandError( _, ref stdout, ref stderr ) => {
-
-                if stdout.len() > 0 {
+                if ! stdout.is_empty() {
                     writeln!( w, "cargo:warning=" )?;
                     writeln!( w, "cargo:warning=Program stdout:" )?;
                     writeln!( w, "cargo:warning=---------------" )?;
@@ -35,7 +37,7 @@ impl BuildError {
                     }
                 }
 
-                if stderr.len() > 0 {
+                if ! stderr.is_empty() {
                     writeln!( w, "cargo:warning=" )?;
                     writeln!( w, "cargo:warning=Program stderr:" )?;
                     writeln!( w, "cargo:warning=---------------" )?;
@@ -44,7 +46,10 @@ impl BuildError {
                     }
                 }
 
-                if stdout.len() == 0 && stderr.len() == 0 {
+                // If the program didn't provide stdout or stderr, we'll want to
+                // inform the user of that so they aren't left confused on why
+                // our error messages are crap.
+                if stdout.is_empty() && stderr.is_empty() {
                     writeln!( w, "cargo:warning=(Command produced no output)" )?;
                 }
             },
