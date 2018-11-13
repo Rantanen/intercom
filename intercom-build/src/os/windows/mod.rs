@@ -12,6 +12,20 @@ use ::BuildError;
 
 mod setup_configuration;
 
+fn run_command( name : &str, cmd : &mut Command ) -> Result<(), BuildError> {
+    let output = cmd.output()
+            .map_err( |e| BuildError::IoError(
+                    format!( "Failed to execute {}", name ), e ) )?;
+    if ! output.status.success() {
+        return Err( BuildError::CommandError(
+                format!( "{} did not execute successfully", name ),
+                String::from_utf8_lossy( &output.stdout ).to_string(),
+                String::from_utf8_lossy( &output.stderr ).to_string() ) );
+    }
+
+    Ok(())
+}
+
 /// Executes the Windows-specific build steps.
 ///
 /// # Arguments
@@ -92,7 +106,7 @@ pub fn build( all_type_systems : bool ) -> Result<(), BuildError> {
 
     // Invoke midl.exe to turn the idl into tlb.
     {
-        if ! Command::new( paths.midl )
+        run_command( "MIDL", Command::new( paths.midl )
                 .env( "PATH",
                     format!( "{};{}",
                         &paths.vs_bin.to_string_lossy(),
@@ -101,33 +115,16 @@ pub fn build( all_type_systems : bool ) -> Result<(), BuildError> {
                 .env( "LIB", libs )
                 .env( "INCLUDE", incs )
                 .current_dir( &out_dir )
-                .arg( &idl_path ).arg( "/tlb" ).arg( &tlb_path )
-                .status()
-                .map_err( |e| BuildError::CommandError(
-                        format!( "Failed to execute MIDL: {:?}", e ) ) )?
-                .success() {
-
-                    // Command failed.
-                    return Err( BuildError::CommandError(
-                            "MIDL did not execute successfully".to_string() ) );
-                }
+                .arg( &idl_path ).arg( "/tlb" ).arg( &tlb_path ) )?;
     }
 
     // Invoke mt.exe to create a manifest from the tlb.
     {
-        if ! Command::new( paths.mt )
+        run_command( "Manifest Tool", Command::new( paths.mt )
                 .current_dir( &out_dir )
                 .arg( format!( "-tlb:{}", tlb_path.to_string_lossy() ) )
                 .arg( format!( "-dll:{}", dll_name ) )
-                .arg( format!( "-out:{}", manifest_path.to_string_lossy() ) )
-                .status()
-                .map_err( |e| BuildError::CommandError(
-                        format!( "Failed to execute Manifest Tool: {:?}", e ) ) )?
-                .success() {
-
-                    return Err( BuildError::CommandError(
-                        "Manifest Tool did not execute successfully".to_string() ) );
-                }
+                .arg( format!( "-out:{}", manifest_path.to_string_lossy() ) ) )?;
     }
 
     // Create a resource script that references the tlb and the manifest.
@@ -152,17 +149,9 @@ pub fn build( all_type_systems : bool ) -> Result<(), BuildError> {
     // use rc.exe while MinGW will use windres.exe.
     match host.compiler {
         host::Compiler::Msvc => {
-            if ! Command::new( paths.rc )
+            run_command( "Microsoft Resource Compiler", Command::new( paths.rc )
                     .current_dir( &out_dir )
-                    .arg( &rc_path )
-                    .status()
-                    .map_err( |e| BuildError::CommandError(
-                            format!( "Failed to execute Microsoft Resource Compiler: {:?}", e ) ) )?
-                    .success() {
-
-                        return Err( BuildError::CommandError(
-                            "Microsoft Resource Compiler did not execute successfully".to_string() ) );
-                    }
+                    .arg( &rc_path ) )?;
 
             // 'rc.exe' will result in 'foo.res'. We'll need 'foo.res.lib' as
             // rustc will insist on '.lib' extension.
@@ -177,20 +166,12 @@ pub fn build( all_type_systems : bool ) -> Result<(), BuildError> {
             println!( "cargo:rustc-link-search=native={}", out_dir );
         },
         host::Compiler::Gnu => {
-            if ! Command::new( paths.rc )
+            run_command( "GNU windres", Command::new( paths.rc )
                     .current_dir( &out_dir )
                     .arg( "-J" ).arg( "rc" )
                     .arg( "-i" ).arg( &rc_path )
                     .arg( "-O" ).arg( "coff" )
-                    .arg( "-o" ).arg( &res_path )
-                    .status()
-                    .map_err( |e| BuildError::CommandError(
-                            format!( "Failed to execute GNU windres: {:?}", e ) ) )?
-                    .success() {
-
-                        return Err( BuildError::CommandError(
-                            "GNU windres did not execute successfully".to_string() ) );
-                    }
+                    .arg( "-o" ).arg( &res_path ) )?;
             cc::Build::new()
                     .object( &res_path )
                     .compile( &format!( "lib{}.res.a", pkg_name ) );
