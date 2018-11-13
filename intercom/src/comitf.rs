@@ -44,6 +44,8 @@ impl<T: ?Sized> Clone for ComItf<T> {
     }
 }
 
+impl<T: ?Sized> Copy for ComItf<T> { }
+
 impl<T: ?Sized> ComItf<T> {
 
     /// Creates a `ComItf<T>` from a raw type system COM interface pointer..

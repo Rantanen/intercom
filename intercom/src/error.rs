@@ -175,16 +175,59 @@ mod error_store {
 mod error_store {
 
     use super::*;
+    use std::cell::Cell;
+
+    thread_local! {
+        static ERROR_STORE: Cell< Option< ComItf<IErrorInfo> > > = Cell::new( None );
+    }
+
+    fn reset_error_store( value : Option< ComItf< IErrorInfo > > ) {
+
+        ERROR_STORE.with( |store| {
+
+            if let Some( itf ) = store.get() {
+                ComItf::as_unknown( &itf ).release();
+            }
+
+            store.set( value );
+
+            if let Some( itf ) = value {
+                ComItf::as_unknown( &itf ).add_ref();
+            }
+        } );
+    }
 
     pub(super) unsafe fn SetErrorInfo(
         _dw_reserved: u32,
-        _errorinfo: ::raw::InterfacePtr<IErrorInfo>,
-    ) -> raw::HRESULT { raw::S_OK }
+        errorinfo: ::raw::InterfacePtr<IErrorInfo>,
+    ) -> raw::HRESULT {
+
+        if errorinfo.ptr.is_null() {
+            reset_error_store( None );
+        } else {
+            reset_error_store( Some( ComItf::wrap( errorinfo, TypeSystem::Automation ) ) );
+        }
+
+        return raw::S_OK;
+    }
 
     pub(super) unsafe fn GetErrorInfo(
         _dw_reserved: u32,
-        _errorinfo: *mut ::raw::InterfacePtr<IErrorInfo>,
-    ) -> raw::HRESULT { raw::S_OK }
+        errorinfo: *mut ::raw::InterfacePtr<IErrorInfo>,
+    ) -> raw::HRESULT {
+
+        ERROR_STORE.with( |store| {
+
+            if let Some( itf ) = store.get() {
+                *errorinfo = ComItf::ptr( &itf, TypeSystem::Automation );
+                reset_error_store( None );
+                return raw::S_OK;
+            } else {
+                *errorinfo = ::raw::InterfacePtr::null();
+                return raw::S_FALSE;
+            }
+        } )
+    }
 }
 
 /// Error info COM object data.
