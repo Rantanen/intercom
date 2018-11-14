@@ -21,7 +21,7 @@ ${PROJECT_SOURCE_DIR}/shared_functions.cpp
 file(GLOB multilib_sources ${MULTILIB_DIR}/src)
 add_custom_command(
     OUTPUT ${PROJECT_SOURCE_DIR}/generated/multi_lib.h ${PROJECT_SOURCE_DIR}/generated/multi_lib.cpp
-    COMMAND cargo run cpp ${MULTILIB_DIR} ${PROJECT_SOURCE_DIR}/generated
+    COMMAND cargo run --release cpp ${MULTILIB_DIR} ${PROJECT_SOURCE_DIR}/generated
     WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
     DEPENDS ${multilib_sources})
 
@@ -29,7 +29,7 @@ add_custom_command(
 file(GLOB testlib_sources ${TESTLIB_DIR}/src)
 add_custom_command(
     OUTPUT ${PROJECT_SOURCE_DIR}/generated/test_lib.h ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
-    COMMAND cargo run cpp ${TESTLIB_DIR} ${PROJECT_SOURCE_DIR}/generated
+    COMMAND cargo run --release cpp ${TESTLIB_DIR} ${PROJECT_SOURCE_DIR}/generated
     WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
     DEPENDS ${testlib_sources})
 
