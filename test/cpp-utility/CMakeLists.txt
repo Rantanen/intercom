@@ -30,7 +30,7 @@ endif()
 file(GLOB testlib_sources ${TESTLIB_DIR}/src)
 add_custom_command(
     OUTPUT ${PROJECT_SOURCE_DIR}/generated/test_lib.h ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
-    COMMAND cargo run cpp ${TESTLIB_DIR} --all ${PROJECT_SOURCE_DIR}/generated
+    COMMAND cargo run --release cpp ${TESTLIB_DIR} --all ${PROJECT_SOURCE_DIR}/generated
     WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
     DEPENDS ${testlib_sources})
 

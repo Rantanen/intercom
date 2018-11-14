@@ -6,11 +6,7 @@ popd
 
 echo on
 
-REM Build Intercom
-cargo build
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-REM Build C++ test suite
+REM Build Intercom and the C++ test suite
 del /s /q build\x64
 mkdir build
 mkdir build\x64
