@@ -209,9 +209,15 @@ fn build_crate(
     module: &str
 )
 {
-    let status = Command::new( "cargo" )
-                     .arg( "build" )
-                     .current_dir( find_root().unwrap().join( module ) )
+    let mut cmd = Command::new( "cargo" );
+    cmd.arg( "build" );
+
+    #[cfg(not(debug_assertions))]
+    {
+        cmd.arg( "--release" );
+    }
+
+    let status = cmd.current_dir( find_root().unwrap().join( module ) )
                      .status()
                      .expect( &format!("Failed to build crate \"{0}\"", module ) );
     assert!( status.success() );
