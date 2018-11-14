@@ -8,8 +8,23 @@ use ::std::process::Command;
 use ::std::io::Write;
 
 use ::host;
+use ::BuildError;
 
 mod setup_configuration;
+
+fn run_command( name : &str, cmd : &mut Command ) -> Result<(), BuildError> {
+    let output = cmd.output()
+            .map_err( |e| BuildError::IoError(
+                    format!( "Failed to execute {}", name ), e ) )?;
+    if ! output.status.success() {
+        return Err( BuildError::CommandError(
+                format!( "{} did not execute successfully", name ),
+                String::from_utf8_lossy( &output.stdout ).to_string(),
+                String::from_utf8_lossy( &output.stderr ).to_string() ) );
+    }
+
+    Ok(())
+}
 
 /// Executes the Windows-specific build steps.
 ///
@@ -18,7 +33,7 @@ mod setup_configuration;
 /// * `all_type_systems` -
 ///     True to include both Automation and Raw type systems in the embedded IDLs. Normally the
 ///     build only includes Automation type system in the embedded IDL.
-pub fn build( all_type_systems : bool ) {
+pub fn build( all_type_systems : bool ) -> Result<(), BuildError> {
 
     // Get the host.
     let host = host::get_host();
@@ -58,10 +73,13 @@ pub fn build( all_type_systems : bool ) {
     // Generate IDL using intercom_utils.
     {
         let mut idl = File::create( &idl_path )
-                .unwrap_or_else( |_| panic!( "Could not create file: {:?}", idl_path ) );
+                .map_err( |e| BuildError::IoError(
+                        format!( "Failed to create file {}",
+                                 &idl_path.to_string_lossy() ),
+                        e ) )?;
         let model = ::intercom_common::generators::idl::IdlModel::from_path(
                     Path::new( &toml_dir ), all_type_systems )
-                .expect( "Failed to form IDL from the sources" );
+                .map_err( |e| BuildError::ParseError( e.to_string() ) )?;
         model.write( &mut idl )
                 .expect( "Failed to write IDL to file" );
         idl.sync_all()
@@ -88,7 +106,7 @@ pub fn build( all_type_systems : bool ) {
 
     // Invoke midl.exe to turn the idl into tlb.
     {
-        if ! Command::new( paths.midl )
+        run_command( "MIDL", Command::new( paths.midl )
                 .env( "PATH",
                     format!( "{};{}",
                         &paths.vs_bin.to_string_lossy(),
@@ -97,31 +115,25 @@ pub fn build( all_type_systems : bool ) {
                 .env( "LIB", libs )
                 .env( "INCLUDE", incs )
                 .current_dir( &out_dir )
-                .arg( &idl_path ).arg( "/tlb" ).arg( &tlb_path )
-                .status()
-                .unwrap().success() {
-
-                    panic!( "midl.exe did not execute successfully" );
-                }
+                .arg( &idl_path ).arg( "/tlb" ).arg( &tlb_path ) )?;
     }
 
     // Invoke mt.exe to create a manifest from the tlb.
     {
-        if ! Command::new( paths.mt )
+        run_command( "Manifest Tool", Command::new( paths.mt )
                 .current_dir( &out_dir )
                 .arg( format!( "-tlb:{}", tlb_path.to_string_lossy() ) )
                 .arg( format!( "-dll:{}", dll_name ) )
-                .arg( format!( "-out:{}", manifest_path.to_string_lossy() ) )
-                .status()
-                .unwrap().success() {
-
-                    panic!( "mt.exe did not execute successfully" );
-                }
+                .arg( format!( "-out:{}", manifest_path.to_string_lossy() ) ) )?;
     }
 
     // Create a resource script that references the tlb and the manifest.
     {
-        let mut rc = File::create( &rc_path ).unwrap();
+        let mut rc = File::create( &rc_path )
+                .map_err( |e| BuildError::IoError(
+                        format!( "Failed to create file {}",
+                                 &rc_path.to_string_lossy() ),
+                        e ) )?;
         writeln!(
             rc, "1 24 \"{}\"",
             &manifest_path.to_string_lossy().replace( r"\", r"\\" )
@@ -137,41 +149,34 @@ pub fn build( all_type_systems : bool ) {
     // use rc.exe while MinGW will use windres.exe.
     match host.compiler {
         host::Compiler::Msvc => {
-            if ! Command::new( paths.rc )
+            run_command( "Microsoft Resource Compiler", Command::new( paths.rc )
                     .current_dir( &out_dir )
-                    .arg( &rc_path )
-                    .status()
-                    .unwrap().success() {
-
-                        panic!( "rc.exe did not execute successfully" );
-                    }
+                    .arg( &rc_path ) )?;
 
             // 'rc.exe' will result in 'foo.res'. We'll need 'foo.res.lib' as
             // rustc will insist on '.lib' extension.
             ::std::fs::rename( &res_path, &lib_path )
-                    .unwrap_or_else( |_| panic!(
-                            "Failed to rename {:?} to {:?}",
-                            res_path, lib_path ) );
+                    .map_err( |e| BuildError::IoError(
+                        format!( "Failed to rename {} to {}",
+                                 &res_path.to_string_lossy(),
+                                 &lib_path.to_string_lossy() ), e ) )?;
 
             // Instruct rustc to link the resource dll.
             println!( "cargo:rustc-link-lib=dylib={}", res_name );
             println!( "cargo:rustc-link-search=native={}", out_dir );
         },
         host::Compiler::Gnu => {
-            if ! Command::new( paths.rc )
+            run_command( "GNU windres", Command::new( paths.rc )
                     .current_dir( &out_dir )
                     .arg( "-J" ).arg( "rc" )
                     .arg( "-i" ).arg( &rc_path )
                     .arg( "-O" ).arg( "coff" )
-                    .arg( "-o" ).arg( &res_path )
-                    .status()
-                    .unwrap().success() {
-
-                        panic!( "windres.exe did not execute successfully" );
-                    }
+                    .arg( "-o" ).arg( &res_path ) )?;
             cc::Build::new()
                     .object( &res_path )
                     .compile( &format!( "lib{}.res.a", pkg_name ) );
         }
     }
+
+    Ok(())
 }

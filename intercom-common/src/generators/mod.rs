@@ -23,6 +23,9 @@ pub enum GeneratorError {
     #[fail( display = "Unsupported type: {}", _0 )]
     UnsupportedType( String ),
 
+    #[fail( display = "Type not found: {}", _0 )]
+    TypeNotFound( String ),
+
     #[fail( display = "{}", _0 )]
     IoError( #[cause] ::std::io::Error ),
 }

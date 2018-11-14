@@ -1,4 +1,5 @@
 
+
 #[cfg(windows)]
 mod windows;
 
@@ -6,4 +7,7 @@ mod windows;
 pub use self::windows::build;
 
 #[cfg(not(windows))]
-pub fn build(_: bool) {}
+use ::BuildError;
+
+#[cfg(not(windows))]
+pub fn build(_: bool) -> Result<(), BuildError> { Ok(()) }

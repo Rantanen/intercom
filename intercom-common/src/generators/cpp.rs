@@ -295,22 +295,29 @@ impl CppModel {
                     .get_ident()
                     .expect( "coclass had no name" )
                     .to_string();
-            let coclass = &c.structs()[ &class_name ];
+            let coclass = &c.structs().get( &class_name )
+                    .ok_or_else( || GeneratorError::TypeNotFound( class_name.clone() ) )?;
 
             // Create a list of interfaces to be declared in the class descriptor.
             let interfaces = coclass.interfaces().iter()
                 .flat_map(|itf_name| {
-                    let itf = &c.interfaces()[ &itf_name.to_string() ];
-                    itf.variants().iter()
-                        .filter( itf_variant_filter.as_ref() )
-                        .map( |(_, itf_variant)| {
+                    let result = c.interfaces().get( &itf_name.to_string() )
+                            .ok_or_else( || GeneratorError::TypeNotFound( itf_name.to_string() ) );
 
-                            foreign.get_name( c, match all_type_systems {
-                                false => itf.name(),
-                                true => itf_variant.unique_name(),
-                            } )
-                        } ).collect::<Vec<_>>()
-                } ).collect::<Vec<_>>();
+                    match result {
+                        Ok( itf ) => itf.variants().iter()
+                            .filter( itf_variant_filter.as_ref() )
+                            .map( |(_, itf_variant)| {
+
+                                Ok( foreign.get_name( c, match all_type_systems {
+                                    false => itf.name(),
+                                    true => itf_variant.unique_name(),
+                                } ) )
+                            } ).collect::<Vec<_>>(),
+                        Err( e ) => vec![ Err( e ) ],
+                    }
+                } )
+                .collect::<Result<Vec<_>, GeneratorError>>()?;
 
             let clsid = coclass.clsid().as_ref()
                     .ok_or_else( || GeneratorError::MissingClsid(
