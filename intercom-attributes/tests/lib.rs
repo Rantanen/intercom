@@ -146,6 +146,13 @@ fn check_expansions() {
 /// cargo would have used.
 fn build( cwd: &str, path : &str ) -> String {
 
+
+    #[cfg(debug_assertions)]
+    let conf = "debug";
+
+    #[cfg(not(debug_assertions))]
+    let conf = "release";
+
     // Launch rustc.
     let output = std::process::Command::new( "rustc" )
             .current_dir( cwd )
@@ -155,8 +162,8 @@ fn build( cwd: &str, path : &str ) -> String {
                 "--crate-type", "lib",
                 path,
                 "--out-dir", "tests/out",
-                "-L", "dependency=../target/debug/deps",
-                "--extern", "intercom=../target/debug/libintercom.rlib",
+                "-L", &format!( "dependency=../target/{}/deps", conf ),
+                "--extern", &format!( "intercom=../target/{}/libintercom.rlib", conf ),
                 "--pretty=expanded",
                 "-Z", "unstable-options",
             ] )
