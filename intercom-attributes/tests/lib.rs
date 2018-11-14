@@ -58,9 +58,9 @@ fn check_expansions() {
         {
             // Scope the lifetime of the open file handle.
 
-            let mut target_file = fs::File::open( &target_path ).unwrap();
-            target_file.read_to_string( &mut target_code )
-                        .expect( "Failed to read target" );
+            // Ignore the possible result. If we can't read the file we'll assume it was empty.
+            let _ = fs::File::open( &target_path )
+                .map( |mut target_file| target_file.read_to_string( &mut target_code ) );
         }
 
         // The source is compiled using rustc
