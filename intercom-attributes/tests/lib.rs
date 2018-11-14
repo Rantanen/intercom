@@ -146,6 +146,13 @@ fn check_expansions() {
 /// cargo would have used.
 fn build( cwd: &str, path : &str ) -> String {
 
+
+    #[cfg(debug_assertions)]
+    let conf = "debug";
+
+    #[cfg(not(debug_assertions))]
+    let conf = "release";
+
     // Launch rustc.
     let output = std::process::Command::new( "rustc" )
             .current_dir( cwd )
@@ -155,8 +162,8 @@ fn build( cwd: &str, path : &str ) -> String {
                 "--crate-type", "lib",
                 path,
                 "--out-dir", "tests/out",
-                "-L", "dependency=../target/debug/deps",
-                "--extern", "intercom=../target/debug/libintercom.rlib",
+                "-L", &format!( "dependency=../target/{}/deps", conf ),
+                "--extern", &format!( "intercom=../target/{}/libintercom.rlib", conf ),
                 "--pretty=expanded",
                 "-Z", "unstable-options",
             ] )
@@ -209,9 +216,15 @@ fn build_crate(
     module: &str
 )
 {
-    let status = Command::new( "cargo" )
-                     .arg( "build" )
-                     .current_dir( find_root().unwrap().join( module ) )
+    let mut cmd = Command::new( "cargo" );
+    cmd.arg( "build" );
+
+    #[cfg(not(debug_assertions))]
+    {
+        cmd.arg( "--release" );
+    }
+
+    let status = cmd.current_dir( find_root().unwrap().join( module ) )
                      .status()
                      .expect( &format!("Failed to build crate \"{0}\"", module ) );
     assert!( status.success() );
