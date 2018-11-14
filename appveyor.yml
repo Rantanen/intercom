@@ -36,5 +36,5 @@ build_script:
     - cmd: .\scripts\ci.bat
 
 test_script:
-    - cargo test --all-features
+    - cargo test --release --all-features
     - ps: .\scripts\test.ps1
