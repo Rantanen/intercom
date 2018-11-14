@@ -70,3 +70,57 @@ pub fn build( all_type_systems : bool ) {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    #[test]
+    fn test_basic_error() {
+        let e = BuildError::ParseError( "Error message".to_string() );
+        let mut v = vec![];
+        e.print_as_warning( &mut v ).expect( "Failed to write string" );
+
+        let s = String::from_utf8_lossy( &v );
+        assert_eq!( s, "cargo:warning=Error message\n" );
+    }
+
+    #[test]
+    fn test_command_error() {
+        let e = BuildError::CommandError(
+            "Error message".to_string(),
+            "stdout".to_string(),
+            "stderr".to_string(),
+        );
+        let mut v = vec![];
+        e.print_as_warning( &mut v ).expect( "Failed to write string" );
+
+        let s = String::from_utf8_lossy( &v );
+        assert_eq!( s, "\
+            cargo:warning=Error message\n\
+            cargo:warning=\n\
+            cargo:warning=Program stdout:\n\
+            cargo:warning=---------------\n\
+            cargo:warning=stdout\n\
+            cargo:warning=\n\
+            cargo:warning=Program stderr:\n\
+            cargo:warning=---------------\n\
+            cargo:warning=stderr\n" );
+    }
+
+    #[test]
+    fn test_command_error_no_output() {
+        let e = BuildError::CommandError(
+            "Error message".to_string(),
+            String::new(),
+            String::new() );
+        let mut v = vec![];
+        e.print_as_warning( &mut v ).expect( "Failed to write string" );
+
+        let s = String::from_utf8_lossy( &v );
+        assert_eq!( s, "\
+            cargo:warning=Error message\n\
+            cargo:warning=(Command produced no output)\n" );
+    }
+}
