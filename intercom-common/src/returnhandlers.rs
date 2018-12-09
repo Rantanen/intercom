@@ -94,7 +94,13 @@ impl ReturnHandler for ErrorResultHandler {
 
     fn type_system( &self ) -> ModelTypeSystem { self.type_system }
     fn rust_ty( &self ) -> Type { self.return_ty.clone() }
-    fn com_ty( &self ) -> Type { parse_quote!( ::intercom::raw::HRESULT ) }
+    fn com_ty( &self ) -> Type {
+        let ts = self.type_system.as_typesystem_type();
+        parse_quote!(
+            < ::intercom::raw::HRESULT as
+                ::intercom::type_system::ExternType< #ts >>
+                    ::ExternOutputType )
+    }
 
     fn com_to_rust_return( &self, result : &Ident ) -> TokenStream {
 
@@ -116,9 +122,7 @@ impl ReturnHandler for ErrorResultHandler {
                 Ok( #ok_tokens )
             } else {
                 return Err( ::intercom::load_error(
-                        &ComItf::wrap(
-                            comptr.as_unknown(),
-                            ::intercom::TypeSystem::Automation ),
+                        self.as_ref(),
                         &INTERCOM_iid,
                         #result ) );
             }

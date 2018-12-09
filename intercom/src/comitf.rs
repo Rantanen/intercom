@@ -1,17 +1,7 @@
 
 use super::*;
 use std::marker::PhantomData;
-
-/// Intercom type system.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum TypeSystem {
-
-    /// Type system compatible with COM automation types.
-    Automation,
-
-    /// Type system using raw C types.
-    Raw,
-}
+use type_system::{TypeSystem, TypeSystemName, RawTypeSystem, AutomationTypeSystem};
 
 /// An incoming COM interface pointer.
 ///
@@ -22,8 +12,8 @@ pub enum TypeSystem {
 /// through `#[com_interface] impl MyStruct` constructs are not supported for
 /// `ComItf<T>`.
 pub struct ComItf<T> where T: ?Sized {
-    raw_ptr: raw::InterfacePtr<T>,
-    automation_ptr: raw::InterfacePtr<T>,
+    raw_ptr: raw::InterfacePtr<RawTypeSystem, T>,
+    automation_ptr: raw::InterfacePtr<AutomationTypeSystem, T>,
     phantom: PhantomData<T>,
 }
 
@@ -55,8 +45,8 @@ impl<T: ?Sized> ComItf<T> {
     /// The `ptr` __must__ be a valid COM interface pointer for an interface
     /// of type `T`.
     pub unsafe fn new(
-        automation : raw::InterfacePtr<T>,
-        raw : raw::InterfacePtr<T>
+        automation : raw::InterfacePtr<AutomationTypeSystem, T>,
+        raw : raw::InterfacePtr<RawTypeSystem, T>
     ) -> ComItf<T> {
         ComItf {
             raw_ptr: raw,
@@ -71,39 +61,28 @@ impl<T: ?Sized> ComItf<T> {
     ///
     /// The `ptr` __must__ be a valid COM interface pointer for an interface
     /// of type `T`.
-    pub unsafe fn wrap( ptr : raw::InterfacePtr<T>, ts : TypeSystem ) -> ComItf<T> {
-        match ts {
-            TypeSystem::Automation => ComItf {
-                raw_ptr: raw::InterfacePtr::null(),
-                automation_ptr: ptr,
-                phantom: PhantomData,
-            },
-            TypeSystem::Raw => ComItf {
-                raw_ptr: ptr,
-                automation_ptr: raw::InterfacePtr::null(),
-                phantom: PhantomData
-            }
+    pub fn maybe_wrap<TS: TypeSystem>(
+        ptr : raw::InterfacePtr<TS, T>,
+    ) -> Option<ComItf<T>>
+    {
+        if ptr.is_null() {
+            None
+        } else {
+            Some( TS::wrap_ptr( ptr ) )
         }
     }
 
     /// Gets the raw COM pointer from the `ComItf<T>`.
-    pub fn ptr( this : &Self, ts : TypeSystem ) -> raw::InterfacePtr<T> {
-        match ts {
-            TypeSystem::Automation => this.automation_ptr,
-            TypeSystem::Raw => this.raw_ptr,
-        }
+    pub fn ptr<TS: TypeSystem>( this : &Self ) -> raw::InterfacePtr<TS, T> {
+        TS::get_ptr( this )
     }
 
-    pub fn maybe_ptr(
-        this : &Self,
-        ts : TypeSystem
-    ) -> Option<raw::InterfacePtr<T>> {
+    pub fn maybe_ptr<TS: TypeSystem>(
+        this : &Self
+    ) -> Option<raw::InterfacePtr<TS, T>> {
 
         // Acquire the pointer.
-        let ptr = match ts {
-            TypeSystem::Automation => this.automation_ptr,
-            TypeSystem::Raw => this.raw_ptr,
-        };
+        let ptr = Self::ptr( this );
 
         // Check for null.
         if ptr.is_null() {
@@ -137,7 +116,121 @@ impl<T: ?Sized> ComItf<T> {
     }
 }
 
+impl ComItf<IUnknown> {
+
+    /// Tries to convert the ComRc into a different interface within a single
+    /// type system. Used to implement the generic conversion method.
+    fn query_interface_ts<TS: TypeSystem, TTarget: ComInterface + ?Sized>(
+        &self
+    ) -> ComResult<ComRc<TTarget>>
+    {
+        // Try to get the IID.
+        let iid = match TTarget::iid( TS::key() ) {
+            None => return Err( ComError::E_NOINTERFACE ),
+            Some( iid ) => iid
+        } ;
+
+        // Try to query interface using the iid.
+        let iunk : &IUnknown = &*self;
+        match iunk.query_interface( iid ) {
+            Ok( ptr ) => {
+
+                let target_itf = unsafe {
+                    raw::InterfacePtr::<TS, TTarget>::new( ptr )
+                };
+                let itf = ComItf::maybe_wrap( target_itf )
+                        .ok_or_else( || ComError::E_POINTER )?;
+                Ok( ComRc::attach( itf ) )
+            },
+            Err( e ) => Err( e.into() )
+        }
+    }
+}
+
+trait PointerOperations : TypeSystem + Sized {
+    fn wrap_ptr<I: ?Sized>(
+        ptr: ::raw::InterfacePtr<Self, I>
+    ) -> ComItf<I>;
+
+    fn get_ptr<I: ?Sized>(
+        itf: &ComItf<I>
+    ) -> ::raw::InterfacePtr<Self, I>;
+}
+
+impl<TS: TypeSystem> PointerOperations for TS {
+    default fn wrap_ptr<I: ?Sized>(
+        ptr: ::raw::InterfacePtr<Self, I>
+    ) -> ComItf<I>
+    {
+        panic!( "Not implemented" );
+    }
+
+    default fn get_ptr<I: ?Sized>(
+        itf: &ComItf<I>
+    ) -> ::raw::InterfacePtr<Self, I>
+    {
+        panic!( "Not implemented" );
+    }
+}
+
+impl PointerOperations for AutomationTypeSystem {
+    fn wrap_ptr<I: ?Sized>(
+        ptr: ::raw::InterfacePtr<Self, I>
+    ) -> ComItf<I>
+    {
+        ComItf {
+            raw_ptr: raw::InterfacePtr::null(),
+            automation_ptr: ptr,
+            phantom: PhantomData,
+        }
+    }
+
+    fn get_ptr<I: ?Sized>(
+        itf: &ComItf<I>
+    ) -> ::raw::InterfacePtr<Self, I>
+    {
+        itf.automation_ptr
+    }
+}
+
+impl PointerOperations for RawTypeSystem {
+    fn wrap_ptr<I: ?Sized>(
+        ptr: ::raw::InterfacePtr<Self, I>
+    ) -> ComItf<I>
+    {
+        ComItf {
+            raw_ptr: ptr,
+            automation_ptr: raw::InterfacePtr::null(),
+            phantom: PhantomData,
+        }
+    }
+
+    fn get_ptr<I: ?Sized>(
+        itf: &ComItf<I>
+    ) -> ::raw::InterfacePtr<Self, I>
+    {
+        itf.raw_ptr
+    }
+}
+
 impl<T: ComInterface + ?Sized> ComItf<T> {
+
+    pub fn query_interface<TTarget: ComInterface + ?Sized>( this : &Self ) -> ComResult<ComRc<TTarget>>
+    {
+        let iunk : &ComItf<IUnknown> = this.as_ref();
+
+        if let Ok( itf ) = iunk.query_interface_ts::<RawTypeSystem, TTarget>() {
+            return Ok( itf );
+        }
+
+        if let Ok( itf ) = iunk.query_interface_ts::<AutomationTypeSystem, TTarget>() {
+            return Ok( itf );
+        }
+
+        // If we got here, none of the query interfaces we invoked returned
+        // anything.
+        Err( ComError::E_NOINTERFACE )
+    }
 
     // ComItf is a smart pointer and shouldn't introduce methods on 'self'.
     #[allow(clippy::wrong_self_convention)]
@@ -146,59 +239,6 @@ impl<T: ComInterface + ?Sized> ComItf<T> {
             raw_ptr: this.raw_ptr.as_unknown(),
             automation_ptr: this.automation_ptr.as_unknown(),
             phantom: PhantomData,
-        }
-    }
-}
-
-impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized>
-        std::convert::TryFrom<&ComRc<S>> for ComRc<T> {
-
-    type Error = ::ComError;
-
-    fn try_from( source : &ComRc<S> ) -> Result< ComRc<T>, ::ComError >
-    {
-        ComRc::<T>::try_from( &**source )
-    }
-}
-
-impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized> std::convert::TryFrom<&ComItf<S>> for ComRc<T> {
-
-    type Error = ::ComError;
-
-    fn try_from( source : &ComItf<S> ) -> Result< ComRc<T>, ::ComError >
-    {
-        let iunk : &ComItf<IUnknown> = source.as_ref();
-
-        let mut err = None;
-
-        // Try each type system.
-        for &ts in &[ TypeSystem::Raw, TypeSystem::Automation ] {
-            if let Some( iid ) = T::iid( ts ) {
-
-                // Try to query interface using the iid.
-                match iunk.query_interface( iid ) {
-                    Ok( ptr ) => unsafe {
-
-                        // QueryInterface is guaranteed to return ptr of correct
-                        // interface type, which makes the ComItf::wrap safe here.
-                        return Ok( ComRc::attach( ComItf::<T>::wrap(
-                                raw::InterfacePtr::new( ptr ),
-                                TypeSystem::Automation ) ) );
-                    },
-                    Err( e ) => { err = Some( e ); },
-                };
-            }
-        }
-
-        // If we got here, none of the query interfaces we invoked returned
-        // anything.
-        //
-        // If 'err' is None, we didn't even get to invoke any of the query
-        // interfaces. This is a case when the interface doesn't have IID
-        // for any of the type systems.
-        match err {
-            None => Err( ::ComError::E_FAIL ),
-            Some( err ) => Err( err.into() ),
         }
     }
 }

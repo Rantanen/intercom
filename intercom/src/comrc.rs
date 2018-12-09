@@ -1,5 +1,6 @@
 
 use super::*;
+use type_system::{TypeSystem, TypeSystemName, AutomationTypeSystem};
 
 /// Reference counted handle to the `ComBox` data.
 ///
@@ -48,30 +49,11 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
     ///
     /// The `ptr` __must__ be a valid COM interface pointer for an interface
     /// of type `T`.
-    pub unsafe fn wrap(
-        ptr : raw::InterfacePtr<T>,
-        ts : TypeSystem
+    pub unsafe fn wrap<TS: TypeSystem>(
+        ptr : raw::InterfacePtr<TS, T>
     ) -> Option<ComRc<T>> {
-        if ptr.is_null() {
-            None
-        } else {
-            Some( ComRc::attach( ComItf::wrap( ptr, ts ) ) )
-        }
-    }
-
-    /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
-    ///
-    /// Does not increment the reference count.
-    ///
-    /// # Safety
-    ///
-    /// The `ptr` __must__ be a valid COM interface pointer for an interface
-    /// of type `T`.
-    pub unsafe fn wrap_unchecked(
-        ptr : raw::InterfacePtr<T>,
-        ts : TypeSystem
-    ) -> ComRc<T> {
-        ComRc::attach( ComItf::wrap( ptr, ts ) )
+        ComItf::maybe_wrap( ptr )
+            .map( |itf| ComRc::attach( itf ) )
     }
 
     pub fn copy( itf : &ComItf<T> ) -> ComRc<T> {
@@ -102,7 +84,7 @@ impl<T: ComInterface + ?Sized> ComRc<T>
         //
         // The IID we are getting here is the Automation type system ID.
         // This is the one that plays well with Windows' CoCreateInstance, etc.
-        let iid = match T::iid( TypeSystem::Automation ) {
+        let iid = match T::iid( TypeSystemName::Automation ) {
             Some( iid ) => iid,
             None => return Err( ComError::E_NOINTERFACE ),
         };
@@ -121,9 +103,15 @@ impl<T: ComInterface + ?Sized> ComRc<T>
 
                 // On success construct the ComRc. We are using Automation type
                 // system as that's the IID we used earlier.
-                ::raw::S_OK => Ok( ComRc::attach( ComItf::wrap(
-                                raw::InterfacePtr::new( out ),
-                                TypeSystem::Automation ) ) ),
+                ::raw::S_OK => {
+
+                    // Wrap the pointer into ComItf. This takes care of null checks.
+                    let itf = ComItf::maybe_wrap::<AutomationTypeSystem>(
+                                    raw::InterfacePtr::new( out ) )
+                            .ok_or_else( || ComError::E_POINTER )?;
+
+                    Ok( ComRc::attach( itf ) )
+                },
                 e => Err( e.into() ),
             }
         }

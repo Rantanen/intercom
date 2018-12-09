@@ -46,12 +46,29 @@ pub enum ModelTypeSystem {
 impl ModelTypeSystem {
 
     /// Converts the model type system into public type system tokens.
+    pub fn as_tokens( self ) -> TokenStream {
+        match self {
+            ModelTypeSystem::Automation => quote!( Automation ),
+            ModelTypeSystem::Raw => quote!( Raw ),
+        }
+    }
+
+    /// Converts the model type system into public type system tokens.
     pub fn as_typesystem_tokens( self ) -> TokenStream {
         match self {
             ModelTypeSystem::Automation =>
-                    quote!( ::intercom::TypeSystem::Automation ),
+                    quote!( ::intercom::type_system::TypeSystemName::Automation ),
             ModelTypeSystem::Raw =>
-                    quote!( ::intercom::TypeSystem::Raw ),
+                    quote!( ::intercom::type_system::TypeSystemName::Raw ),
+        }
+    }
+
+    pub fn as_typesystem_type( self ) -> Type {
+        match self {
+            ModelTypeSystem::Automation =>
+                    parse_quote!( ::intercom::type_system::AutomationTypeSystem ),
+            ModelTypeSystem::Raw =>
+                    parse_quote!( ::intercom::type_system::RawTypeSystem ),
         }
     }
 }
@@ -107,17 +124,88 @@ pub trait TypeHandler {
     /// Gets the default value for the type.
     fn default_value( &self ) -> TokenStream
     {
-        match self.rust_ty() {
-            Type::Path( ref p ) => {
-                let ident = p.path.get_ident().unwrap();
-                let name = ident.to_string();
-                match name.as_ref() {
-                    "RawComPtr" => quote!( ::std::ptr::null_mut() ),
-                    _ => quote!( Default::default() )
-                }
-            },
-            Type::Ptr( .. ) => quote!( ::std::ptr::null_mut() ),
-            _ => quote!( Default::default() )
+        quote!( ::intercom::type_system::ExternDefault::extern_default() )
+    }
+}
+
+struct TypeSystemParam {
+    ty : Type,
+    context : TypeContext,
+}
+impl TypeHandler for TypeSystemParam {
+    fn rust_ty( &self ) -> Type {
+        self.ty.clone()
+    }
+
+    fn com_ty( &self, dir: Direction ) -> Type {
+
+        // Construct bits for the quote.
+        let ty = &self.ty;
+        let ts = self.context.type_system.as_typesystem_type();
+        let ts_trait = quote!(
+            <#ty as ::intercom::type_system::ExternType< #ts > > );
+
+        // Get the final type based on the parameter direction.
+        match dir {
+            Direction::In
+                => parse_quote!( #ts_trait::ExternInputType ),
+            Direction::Out | Direction::Retval
+                => parse_quote!( #ts_trait::ExternOutputType ),
+        }
+    }
+
+    fn com_to_rust( &self, ident : &Ident, dir: Direction ) -> TypeConversion
+    {
+        // Construct bits for the quote.
+        let ty = &self.ty;
+        let ts = self.context.type_system.as_typesystem_type();
+        let ts_trait = quote!(
+            <#ty as ::intercom::type_system::ExternType< #ts > > );
+
+        let intermediate = quote!(
+            #ts_trait::OwnedNativeType::IntercomFrom( #ident )? );
+
+        TypeConversion {
+            temporary: None,
+            value: match dir {
+                Direction::In => {
+                    // Input arguments may use an intermediate type.
+                    let intermediate = quote!(
+                        < #ts_trait::OwnedNativeType >::intercom_from( #ident )? );
+                    quote!( ( & #intermediate ).intercom_into()? )
+                },
+                Direction::Out | Direction::Retval => {
+                    // Output arguments must not use an intermediate type
+                    // as these must outlive the current function.
+                    quote!( #ident.intercom_into()? )
+                },
+            }
+        }
+    }
+
+    fn rust_to_com( &self, ident : &Ident, dir: Direction ) -> TypeConversion
+    {
+        // Construct bits for the quote.
+        let ty = &self.ty;
+        let ts = self.context.type_system.as_typesystem_type();
+        let ts_trait = quote!(
+            <#ty as ::intercom::type_system::ExternType< #ts > > );
+
+        let intermediate = quote!(
+            #ts_trait::OwnedExternType::IntercomFrom( #ident )? );
+
+        TypeConversion {
+            temporary: None,
+            value: match dir {
+                Direction::In => {
+                    let intermediate = quote!(
+                        #ts_trait::OwnedExternType::intercom_from( #ident )? );
+                    quote!( ( & #intermediate ).intercom_into()? )
+                },
+                Direction::Out | Direction::Retval => {
+                    quote!( #ident.intercom_into()? )
+                },
+            }
         }
     }
 }
@@ -179,6 +267,7 @@ impl TypeHandler for ComItfParam {
             temporary: None,
             value: quote!( ::intercom::ComItf::wrap( #ident, #ts ) ),
         }
+
     }
 
     /// Converts a Rust parameter named by the ident into a COM type.
@@ -399,6 +488,13 @@ pub fn get_ty_handler(
     context : TypeContext,
 ) -> Rc<TypeHandler>
 {
+    return Rc::new( TypeSystemParam {
+        ty: arg_ty.clone(),
+        context
+    } )
+}
+    
+    /*
     let type_info = ::type_parser::parse( arg_ty )
             .unwrap_or_else( || panic!( "Type {:?} could not be parsed.", arg_ty ) );
 
@@ -430,3 +526,4 @@ fn map_by_name(
     }
 
 }
+*/

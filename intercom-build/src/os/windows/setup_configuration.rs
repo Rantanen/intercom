@@ -29,6 +29,16 @@ pub struct FILETIME {
     high_part : u32,
 }
 
+impl<TS: intercom::type_system::TypeSystem>
+        intercom::type_system::ExternType<TS>
+        for FILETIME {
+
+    type ExternInputType = Self;
+    type ExternOutputType = Self;
+    type OwnedExternType = Self;
+    type OwnedNativeType = Self;
+}
+
 #[com_interface( com_iid = "B41463C3-8866-43B5-BC33-2B0676F7F42E" )]
 pub trait ISetupInstance
 {

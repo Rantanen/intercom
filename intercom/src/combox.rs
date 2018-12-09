@@ -1,6 +1,7 @@
 
 use super::*;
 use std::sync::atomic::{ AtomicU32, Ordering };
+use type_system::TypeSystemName;
 
 /// Trait required by any COM coclass type.
 ///
@@ -84,7 +85,7 @@ impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComItf
         let ( automation_ptr, raw_ptr ) = {
             let vtbl = &source.as_ref().vtable_list;
 
-            let automation_ptr = match I::iid( TypeSystem::Automation ) {
+            let automation_ptr = match I::iid( TypeSystemName::Automation ) {
                 Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
                     Ok( itf ) => itf,
                     Err( _ ) => ::std::ptr::null_mut(),
@@ -92,7 +93,7 @@ impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComItf
                 None => ::std::ptr::null_mut(),
             };
 
-            let raw_ptr = match I::iid( TypeSystem::Raw ) {
+            let raw_ptr = match I::iid( TypeSystemName::Raw ) {
                 Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
                     Ok( itf ) => itf,
                     Err( _ ) => ::std::ptr::null_mut(),
@@ -104,9 +105,11 @@ impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComItf
         };
 
         std::mem::forget( source );
-        unsafe { ComItf::new(
+        unsafe {
+            ComItf::new(
                 raw::InterfacePtr::new( automation_ptr ),
-                raw::InterfacePtr::new( raw_ptr ) ) }
+                raw::InterfacePtr::new( raw_ptr ) )
+        }
     }
 }
 
@@ -284,7 +287,7 @@ impl<T: CoClass> ComBox<T> {
     pub unsafe extern "C" fn query_interface_ptr(
         self_iunk : RawComPtr,
         riid : REFIID,
-        out : *mut RawComPtr,
+        out : *mut RawComPtr
     ) -> raw::HRESULT
     {
         ComBox::query_interface( ComBox::<T>::from_ptr( self_iunk ), riid, out )
