@@ -16,10 +16,6 @@ jobs:
                     rustc -vV
                     cargo -vV
             - run:
-                name: "Install rustfmt"
-                command: |
-                    rustup component add rustfmt
-            - run:
                 name: "Cargo test"
                 command: |
                     export RUST_BACKTRACE=1
