@@ -25,8 +25,8 @@ env:
     - CC=gcc-5 CXX=g++-5 RUSTFLAGS='-C link-dead-code'
 
 script:
-    - rustup component add rustfmt-preview
-    - rustup component add clippy-preview
+    - rustup component add rustfmt
+    - rustup component add clippy
     - cargo clippy --all-features --all -- -D warnings
     - cargo test --all-features
     - mkdir build
