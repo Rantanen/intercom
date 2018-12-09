@@ -46,7 +46,7 @@
 //! ```
 
 #![crate_type="dylib"]
-#![feature(try_from, specialization, non_exhaustive, integer_atomics)]
+#![feature(try_from, specialization, non_exhaustive, integer_atomics, associated_type_defaults)]
 #![allow(clippy::match_bool)]
 
 #[cfg(not(windows))]
@@ -71,6 +71,8 @@ pub use intercom_attributes::*;
 #[allow(unused_imports)]
 #[macro_use] extern crate failure;
 
+pub mod prelude;
+
 mod classfactory; pub use classfactory::*;
 mod combox; pub use combox::*;
 mod comrc; pub use comrc::*;
@@ -82,6 +84,7 @@ mod interfaces;
 pub mod runtime;
 pub mod alloc;
 mod variant; pub use variant::{Variant, VariantError};
+pub mod type_system;
 
 // intercom_attributes use "intercom::" to qualify things in this crate.
 // Declare such module here and import everything we have in it to make those
@@ -95,7 +98,7 @@ mod intercom {
 pub trait ComInterface {
 
     /// IID of the COM interface.
-    fn iid( ts : TypeSystem ) -> Option< &'static IID >;
+    fn iid( ts : type_system::TypeSystemName ) -> Option< &'static IID >;
 
     /// Dereferences a `ComItf<T>` into a `&T`.
     ///
@@ -130,32 +133,38 @@ pub mod raw {
 
     pub use variant::raw::*;
     pub use error::raw::*;
+    pub use type_system::TypeSystem;
     
     #[repr(C)]
     #[derive(PartialEq, Eq)]
-    pub struct InterfacePtr<I: ?Sized> {
+    pub struct InterfacePtr<TS: TypeSystem, I: ?Sized> {
         pub ptr : super::RawComPtr,
-        phantom : ::std::marker::PhantomData<I>,
+        phantom_itf : ::std::marker::PhantomData<I>,
+        phantom_ts : ::std::marker::PhantomData<TS>,
     }
 
-    impl<I: ?Sized> Clone for InterfacePtr<I>
+    impl<TS: TypeSystem, I: ?Sized> Clone for InterfacePtr<TS, I>
     {
         fn clone( &self ) -> Self {
             InterfacePtr::new( self.ptr )
         }
     }
 
-    impl<I: ?Sized> Copy for InterfacePtr<I> {}
+    impl<TS: TypeSystem, I: ?Sized> Copy for InterfacePtr<TS, I> {}
 
-    impl<I: ?Sized> std::fmt::Debug for InterfacePtr<I> {
+    impl<TS: TypeSystem, I: ?Sized> std::fmt::Debug for InterfacePtr<TS, I> {
         fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
             write!( f, "InterfacePtr({:?})", self.ptr )
         }
     }
 
-    impl<I: ?Sized> InterfacePtr<I> {
-        pub fn new( ptr : super::RawComPtr ) -> InterfacePtr<I> {
-            InterfacePtr { ptr, phantom: ::std::marker::PhantomData }
+    impl<TS: TypeSystem, I: ?Sized> InterfacePtr<TS, I> {
+        pub fn new( ptr : super::RawComPtr ) -> InterfacePtr<TS, I> {
+            InterfacePtr {
+                ptr,
+                phantom_itf: ::std::marker::PhantomData,
+                phantom_ts: ::std::marker::PhantomData,
+            }
         }
 
         pub fn null() -> Self {
@@ -167,9 +176,9 @@ pub mod raw {
         }
     }
 
-    impl<I: ::ComInterface + ?Sized> InterfacePtr<I> {
-        pub fn as_unknown( self ) -> InterfacePtr<::IUnknown> {
-            InterfacePtr { ptr : self.ptr, phantom: ::std::marker::PhantomData }
+    impl<TS: TypeSystem, I: ::ComInterface + ?Sized> InterfacePtr<TS, I> {
+        pub fn as_unknown( self ) -> InterfacePtr<TS, ::IUnknown> {
+            InterfacePtr::new( self.ptr )
         }
     }
 }

@@ -56,9 +56,15 @@ pub fn expand_com_impl(
                 #[doc(hidden)]
                 unsafe extern #calling_convetion fn #query_interface_ident(
                     self_vtable : ::intercom::RawComPtr,
-                    riid : ::intercom::REFIID,
-                    out : *mut ::intercom::RawComPtr
-                ) -> ::intercom::raw::HRESULT
+                    riid : <::intercom::REFIID as ::intercom::type_system::ExternType<
+                            ::intercom::type_system::AutomationTypeSystem>>
+                                ::ExternInputType,
+                    out : *mut <::intercom::RawComPtr as ::intercom::type_system::ExternType<
+                            ::intercom::type_system::AutomationTypeSystem>>
+                                ::ExternOutputType,
+                ) -> <::intercom::raw::HRESULT as ::intercom::type_system::ExternType<
+                        ::intercom::type_system::AutomationTypeSystem>>
+                            ::ExternOutputType
                 {
                     // Get the primary iunk interface by offsetting the current
                     // self_vtable with the vtable offset. Once we have the primary
@@ -79,7 +85,10 @@ pub fn expand_com_impl(
                 #[doc(hidden)]
                 unsafe extern #calling_convetion fn #add_ref_ident(
                     self_vtable : ::intercom::RawComPtr
-                ) -> u32 {
+                ) -> <u32 as ::intercom::type_system::ExternType<
+                        ::intercom::type_system::AutomationTypeSystem>>
+                            ::ExternOutputType
+                {
                     ::intercom::ComBox::< #struct_ident >::add_ref(
                             &mut *(( self_vtable as usize - #vtable_offset() ) as *mut _ ) )
                 }
@@ -94,7 +103,10 @@ pub fn expand_com_impl(
                 #[doc(hidden)]
                 unsafe extern #calling_convetion fn #release_ident(
                     self_vtable : ::intercom::RawComPtr
-                ) -> u32 {
+                ) -> <u32 as ::intercom::type_system::ExternType<
+                        ::intercom::type_system::AutomationTypeSystem>>
+                            ::ExternOutputType
+                {
                     ::intercom::ComBox::< #struct_ident >::release_ptr(
                             ( self_vtable as usize - #vtable_offset() ) as *mut _ )
                 }
@@ -176,6 +188,7 @@ pub fn expand_com_impl(
                 unsafe extern #calling_convetion fn #method_impl_ident(
                     #( #args ),*
                 ) -> #ret_ty {
+                    use ::intercom::type_system::{IntercomFrom, IntercomRefInto, IntercomInto};
                     let result : Result< #ret_ty, ::intercom::ComError > = ( || {
                         // Acquire the reference to the ComBox. For this we need
                         // to offset the current 'self_vtable' vtable pointer.

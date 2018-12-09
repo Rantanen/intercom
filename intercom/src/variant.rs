@@ -2,8 +2,9 @@
 use ::*;
 use std::convert::TryFrom;
 use std::time::{SystemTime};
+use type_system::{TypeSystem, ExternType, IntercomFrom};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Variant
 {
     None,
@@ -21,7 +22,6 @@ pub enum Variant
     String( IntercomString ),
     SystemTime( SystemTime ),
     IUnknown( ComRc<IUnknown> ),
-    Raw( raw::Variant ),
 }
 
 impl Variant {
@@ -44,9 +44,15 @@ impl Variant {
             Variant::String( .. ) => raw::var_type::BSTR,
             Variant::SystemTime( .. ) => raw::var_type::DATE,
             Variant::IUnknown( .. ) => raw::var_type::UNKNOWN,
-            Variant::Raw( raw ) => raw.vt.0,
         }
     }
+}
+
+impl<TS: TypeSystem> ExternType<TS> for Variant {
+    type ExternInputType = ::raw::Variant<TS>;
+    type ExternOutputType = ::raw::Variant<TS>;
+    type OwnedExternType = Variant;
+    type OwnedNativeType = Variant;
 }
 
 impl Default for Variant {
@@ -55,8 +61,8 @@ impl Default for Variant {
     }
 }
 
-impl From<raw::Variant> for Variant {
-    fn from( src: raw::Variant ) -> Variant {
+impl<TS: TypeSystem> From<raw::Variant<TS>> for Variant {
+    fn from( src: raw::Variant<TS> ) -> Variant {
         unsafe {
             if src.vt.0 & raw::var_type::BYREF == 0 {
                 match src.vt.0 & raw::var_type::TYPEMASK {
@@ -78,11 +84,11 @@ impl From<raw::Variant> for Variant {
                     raw::var_type::DATE =>
                         Variant::SystemTime( src.data.date.into() ),
                     raw::var_type::UNKNOWN =>
-                        match ComRc::wrap( src.data.punkVal, TypeSystem::Automation ) {
+                        match ComRc::wrap( src.data.punkVal ) {
                             Some( rc ) => Variant::IUnknown( rc ),
                             None => Variant::None,
                         }
-                    _ => Variant::Raw( src ),
+                    _ => panic!( "Unsupported variant type" ),
                 }
             } else {
                 match src.vt.0 & raw::var_type::TYPEMASK {
@@ -104,19 +110,25 @@ impl From<raw::Variant> for Variant {
                     raw::var_type::DATE =>
                         Variant::SystemTime( (*src.data.pdate).into() ),
                     raw::var_type::UNKNOWN =>
-                        match ComRc::wrap( *src.data.ppunkVal, TypeSystem::Automation ) {
+                        match ComRc::wrap( *src.data.ppunkVal ) {
                             Some( rc ) => Variant::IUnknown( rc ),
                             None => Variant::None,
                         }
-                    _ => Variant::Raw( src ),
+                    _ => panic!( "Unsupported variant type" ),
                 }
             }
         }
     }
 }
 
-impl ComFrom<Variant> for raw::Variant {
-    fn com_from( src: Variant ) -> Result< Self, ComError > {
+impl<TS: TypeSystem> IntercomFrom<raw::Variant<TS>> for Variant {
+    fn intercom_from( src: raw::Variant<TS> ) -> ComResult<Self> {
+        Ok( src.into() )
+    }
+}
+
+impl<TS: TypeSystem> IntercomFrom<Variant> for raw::Variant<TS> {
+    fn intercom_from( src: Variant ) -> ComResult<Self> {
         Ok( match src {
             Variant::None => raw::Variant::new(
                     raw::VariantType::new( raw::var_type::EMPTY ),
@@ -165,7 +177,7 @@ impl ComFrom<Variant> for raw::Variant {
                 let v = raw::Variant::new(
                     raw::VariantType::new( raw::var_type::UNKNOWN ),
                     raw::VariantData {
-                        punkVal : ComItf::ptr( &data, TypeSystem::Automation )
+                        punkVal : ComItf::ptr( &data )
                     } );
 
                 // We didn't add_ref the punkVal so avoid release by forgetting
@@ -173,8 +185,7 @@ impl ComFrom<Variant> for raw::Variant {
                 std::mem::forget( data );
 
                 v
-            }
-            Variant::Raw( src ) => src,
+            },
         } )
     }
 }
@@ -499,6 +510,7 @@ pub mod raw {
 
     use std;
     use std::time::{SystemTime, Duration};
+    use type_system::{TypeSystem};
 
     #[repr(C)]
     #[derive(Copy, Clone)]
@@ -611,7 +623,7 @@ pub mod raw {
     #[repr(C)]
     #[derive(Copy, Clone)]
     #[allow(non_snake_case)]
-    pub union VariantData {
+    pub union VariantData<TS: TypeSystem> {
         pub llVal : i64,
         pub lVal : i32,
         pub bVal : i8,
@@ -623,7 +635,7 @@ pub mod raw {
         //cyVal : CY,
         pub date : VariantDate,
         pub bstrVal : *mut u16,
-        pub punkVal : ::raw::InterfacePtr<::IUnknown>,
+        pub punkVal : ::raw::InterfacePtr<TS, ::IUnknown>,
         //*pdispVal : ComItf<IDispatch>,
         //parray : SafeArray,
         pub pbVal : *mut i8,
@@ -637,10 +649,10 @@ pub mod raw {
         //*pcyVal : CY,
         pub pdate : *mut VariantDate,
         pub pbstrVal : *mut *mut u16,
-        pub ppunkVal : *mut ::raw::InterfacePtr<::IUnknown>,
+        pub ppunkVal : *mut ::raw::InterfacePtr<TS, ::IUnknown>,
         //ppdispVal : *mut ComItf<IDispatch>,
         //pparray : *mut SafeArray,
-        pub pvarVal : *mut Variant,
+        pub pvarVal : *mut Variant<TS>,
         pub byref : *mut std::os::raw::c_void,
         pub cVal : u8,
         pub uiVal : u16,
@@ -660,16 +672,16 @@ pub mod raw {
 
     #[repr(C)]
     #[derive(Copy, Clone)]
-    pub struct Variant {
+    pub struct Variant<TS: TypeSystem> {
         pub vt : VariantType,
         reserved1 : u16,
         reserved2 : u16,
         reserved3 : u16,
-        pub data : VariantData,
+        pub data : VariantData<TS>,
     }
 
-    impl Variant {
-        pub fn new( vt : VariantType, data : VariantData ) -> Variant {
+    impl<TS: TypeSystem> Variant<TS> {
+        pub fn new( vt : VariantType, data : VariantData<TS> ) -> Variant<TS> {
             Variant {
                 vt,
                 data,
@@ -680,8 +692,8 @@ pub mod raw {
         }
     }
 
-    impl Default for Variant {
-        fn default() -> Variant {
+    impl<TS: TypeSystem> Default for Variant<TS> {
+        fn default() -> Variant<TS> {
             Variant::new(
                 VariantType::new( var_type::EMPTY ),
                 VariantData { lVal : 0 }
@@ -763,7 +775,7 @@ pub mod raw {
         fn from( _ : VariantError ) -> Self { ::ComError::E_INVALIDARG }
     }
 
-    impl std::fmt::Debug for Variant {
+    impl<TS: TypeSystem> std::fmt::Debug for Variant<TS> {
         fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
             write!( f, "Variant::Raw(type = {})", self.vt.0 )
         }

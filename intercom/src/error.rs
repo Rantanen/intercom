@@ -3,6 +3,7 @@ use std::error::Error;
 use std::convert::TryFrom;
 
 use super::*;
+use type_system::{TypeSystem, AutomationTypeSystem};
 
 /// Error structure containing the available information on a COM error.
 #[derive(Debug)]
@@ -159,13 +160,13 @@ mod error_store {
     extern "system" {
         pub(super) fn SetErrorInfo(
             dw_reserved: u32,
-            errorinfo: ::raw::InterfacePtr<IErrorInfo>,
+            errorinfo: ::raw::InterfacePtr<AutomationTypeSystem, IErrorInfo>,
         ) -> raw::HRESULT;
 
         #[allow(private_in_public)]
         pub(super) fn GetErrorInfo(
             dw_reserved: u32,
-            errorinfo: *mut ::raw::InterfacePtr<IErrorInfo>,
+            errorinfo: *mut ::raw::InterfacePtr<AutomationTypeSystem, IErrorInfo>,
         ) -> raw::HRESULT;
     }
 }
@@ -199,27 +200,23 @@ mod error_store {
 
     pub(super) unsafe fn SetErrorInfo(
         _dw_reserved: u32,
-        errorinfo: ::raw::InterfacePtr<IErrorInfo>,
+        errorinfo: ::raw::InterfacePtr<AutomationTypeSystem, IErrorInfo>,
     ) -> raw::HRESULT {
 
-        if errorinfo.ptr.is_null() {
-            reset_error_store( None );
-        } else {
-            reset_error_store( Some( ComItf::wrap( errorinfo, TypeSystem::Automation ) ) );
-        }
+        reset_error_store(ComItf::maybe_wrap( errorinfo ) );
 
         raw::S_OK
     }
 
     pub(super) unsafe fn GetErrorInfo(
         _dw_reserved: u32,
-        errorinfo: *mut ::raw::InterfacePtr<IErrorInfo>,
+        errorinfo: *mut ::raw::InterfacePtr<AutomationTypeSystem, IErrorInfo>,
     ) -> raw::HRESULT {
 
         ERROR_STORE.with( |store| {
 
             if let Some( itf ) = store.get() {
-                *errorinfo = ComItf::ptr( &itf, TypeSystem::Automation );
+                *errorinfo = ComItf::ptr( &itf );
                 reset_error_store( None );
                 return raw::S_OK;
             } else {
@@ -350,7 +347,7 @@ pub fn load_error(
     }
 
     // Try to get the ISupportErrorInfo and query that for the IID.
-    let supports_errorinfo = match ComRc::<ISupportErrorInfo>::try_from( iunk ) {
+    let supports_errorinfo = match ComItf::query_interface::<ISupportErrorInfo>( iunk ) {
         Ok( rc ) => match rc.interface_supports_error_info( iid ) {
             intercom::raw::S_OK => true,
             _ => false,
@@ -371,7 +368,7 @@ pub fn load_error(
 pub fn get_last_error() -> Option<ErrorInfo>
 {
     // Get the last error COM interface.
-    let mut error_ptr : ::raw::InterfacePtr<IErrorInfo>
+    let mut error_ptr : ::raw::InterfacePtr<AutomationTypeSystem, IErrorInfo>
             = ::raw::InterfacePtr::null();
     match unsafe { error_store::GetErrorInfo( 0, &mut error_ptr ) } {
 
@@ -380,9 +377,7 @@ pub fn get_last_error() -> Option<ErrorInfo>
             // GetErrorInfo returns an automation interface pointer.
             // Passing that to wrap with TypeSystem::Automation is safe.
             let ierrorinfo = unsafe {
-                ComRc::< IErrorInfo >::wrap(
-                    error_ptr,
-                    TypeSystem::Automation )
+                ComRc::< IErrorInfo >::wrap( error_ptr )
             };
 
             match ierrorinfo {
@@ -487,7 +482,7 @@ impl IErrorStore for ErrorStore
 fn get_error_info() -> ComResult<ComRc<IErrorInfo>>
 {
     // Get the last error COM interface.
-    let mut error_ptr : ::raw::InterfacePtr<IErrorInfo>
+    let mut error_ptr : ::raw::InterfacePtr<AutomationTypeSystem, IErrorInfo>
             = ::raw::InterfacePtr::null();
     match unsafe { error_store::GetErrorInfo( 0, &mut error_ptr ) } {
 
@@ -496,9 +491,7 @@ fn get_error_info() -> ComResult<ComRc<IErrorInfo>>
             // GetErrorInfo returns an automation interface pointer.
             // Passing that to wrap with TypeSystem::Automation is safe.
             match unsafe {
-                ComRc::< IErrorInfo >::wrap(
-                    error_ptr,
-                    TypeSystem::Automation )
+                ComRc::< IErrorInfo >::wrap( error_ptr )
             } {
                 Some( rc ) => Ok( rc ),
 
@@ -515,9 +508,7 @@ fn get_error_info() -> ComResult<ComRc<IErrorInfo>>
 fn set_error_info( info : &ComItf<IErrorInfo> ) -> ComResult<()>
 {
     unsafe {
-        error_store::SetErrorInfo(
-                0,
-                ComItf::ptr( info, TypeSystem::Automation ) ).into()
+        error_store::SetErrorInfo( 0, ComItf::ptr( info ) ).into()
     }
 }
 

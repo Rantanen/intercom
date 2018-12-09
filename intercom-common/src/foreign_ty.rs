@@ -54,10 +54,6 @@ impl CTypeHandler
             return ty_name.to_owned()
         };
 
-        if itf.item_type() == ::utils::InterfaceType::Struct {
-            format!( "I{}", ty_name )
-        } else {
-            ty_name.to_owned()
-        }
+        ty_name.to_owned()
     }
 }

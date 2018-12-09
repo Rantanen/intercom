@@ -75,9 +75,9 @@ pub fn expand_com_interface(
             let mut impl_branches = vec![];
             for ( ts, method_ts_impl ) in method.impls.iter() {
 
-                let ts_tokens = ts.as_typesystem_tokens();
+                let ts_tokens = ts.as_typesystem_type();
                 impl_branches.push( quote!(
-                    if let Some( comptr ) = ComItf::maybe_ptr( self, #ts_tokens ) {
+                    if let Some( comptr ) = ComItf::maybe_ptr::< #ts_tokens >( self ) {
                         #method_ts_impl
                     }
                 ) );
@@ -147,7 +147,7 @@ pub fn expand_com_interface(
             quote!(
                 let some_iunk : &::intercom::ComItf<::intercom::IUnknown> = com_itf.as_ref();
                 let iunknown_iid = ::intercom::IUnknown::iid(
-                        ::intercom::TypeSystem::Automation )
+                        ::intercom::type_system::TypeSystemName::Automation )
                             .expect( "IUnknown must have Automation IID" );
                 let primary_iunk = some_iunk.query_interface( iunknown_iid )
                         .expect( "All types must implement IUnknown" );
@@ -174,7 +174,10 @@ pub fn expand_com_interface(
         impl ::intercom::ComInterface for #itf_ident {
 
             #[doc = "Returns the IID of the requested interface."]
-            fn iid( ts : ::intercom::TypeSystem ) -> Option< &'static ::intercom::IID > {
+            fn iid(
+                ts : ::intercom::type_system::TypeSystemName
+            ) -> Option< &'static ::intercom::IID >
+            {
                 match ts {
                     #( #iid_arms ),*
                 }
@@ -347,6 +350,7 @@ fn rust_to_com_delegate(
 
     // Construct the final method.
     quote!(
+        use ::intercom::type_system::{IntercomFrom, IntercomRefInto, IntercomInto};
         let vtbl = comptr.ptr as *const *const #vtable_ident;
 
         #( #temporaries )*

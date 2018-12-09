@@ -138,29 +138,20 @@ impl IdlModel {
                         };
 
                         // Get the foreign type for the arg type.
-                        let com_ty = a.handler.com_ty( a.dir );
-                        let idl_type = foreign
-                            .get_ty( &com_ty )
-                            .ok_or_else( || GeneratorError::UnsupportedType(
-                                            utils::ty_to_string( &a.ty ) ) )?;
-
+                        let idl_type = to_type_name( &a.ty, ts )?;
                         Ok( IdlArg {
                             name : a.name.to_string(),
-                            arg_type : format!( "{}{}", idl_type.to_idl( c, &ts_config ), out_ptr ),
+                            arg_type : format!( "{}{}", idl_type, out_ptr ), //.to_idl( c, &ts_config ), out_ptr ),
                             attributes : attrs.to_owned(),
                         } )
 
                     } ).collect::<Result<Vec<_>, GeneratorError>>()?;
 
-                    let ret_ty = m.returnhandler.com_ty();
-                    let ret_ty = foreign
-                            .get_ty( &ret_ty )
-                            .ok_or_else( || GeneratorError::UnsupportedType(
-                                            utils::ty_to_string( &ret_ty ) ) )?;
+                    let ret_ty = to_type_name( &m.returnhandler.rust_ty(), ts )?;
                     Ok( IdlMethod {
-                    name: utils::pascal_case( m.display_name.to_string() ),
+                        name: utils::pascal_case( m.display_name.to_string() ),
                         idx: i,
-                        ret_type: ret_ty.to_idl( c, &ts_config ),
+                        ret_type: ret_ty,
                         args
                     } )
 
@@ -279,12 +270,7 @@ impl<'s> IdlTypeInfo<'s> {
             return ty_name.to_owned()
         };
 
-        let base_name = if itf.item_type() == ::utils::InterfaceType::Struct {
-            format!( "I{}", itf.name() )
-        } else {
-            ty_name.to_string()
-        };
-
+        let base_name = ty_name.to_string();
         ts_config.get_unique_name( &base_name )
     }
 }
@@ -352,6 +338,87 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
         }
     }
 }
+
+fn get_itf_type(
+    ty: &::syn::Type,
+    ts: ModelTypeSystem,
+) -> Result<Option<&::syn::Type>, GeneratorError>
+{
+    use syn::{self, Type};
+
+    let type_path = match ty {
+        Type::Path( ref p ) => p,
+        _ => return Ok( None ),
+    };
+
+    if type_path.qself.is_some() {
+        return Ok( None );
+    }
+
+    let last_segment = match type_path.path.segments.last() {
+        Some( segment ) => segment,
+        None => Err( GeneratorError::UnsupportedType( "Empty path".to_string() ) )?,
+    };
+
+    let ident = &last_segment.value().ident;
+    if ident != "ComItf" && ident != "ComRc" {
+        return Ok( None );
+    }
+
+    let arg_list = match last_segment.value().arguments {
+        syn::PathArguments::AngleBracketed( ref args ) => args,
+        _ => Err( GeneratorError::UnsupportedType( format!(
+                "Unrecognized generic arguments: {:?}", ty ) ) )?,
+    };
+
+    if arg_list.args.len() != 1 {
+        Err( GeneratorError::UnsupportedType(
+                "COM interface types require exactly one type argument".to_string() ) )?;
+    }
+
+    let arg = arg_list.args.first()
+            .expect( "Argument list should have one argument." );
+
+    match arg.value() {
+        syn::GenericArgument::Type( ref t ) => Ok( Some( t ) ),
+        _ => Err( GeneratorError::UnsupportedType( "Unsupported generic argument".to_string() ) ),
+    }
+}
+
+fn to_type_name(
+    ty: &::syn::Type,
+    ts: ModelTypeSystem,
+) -> Result<String, GeneratorError>
+{
+    use quote::ToTokens;
+
+    if ty == &parse_quote!( () ) {
+        return Ok( "void".to_string() )
+    }
+
+    // Extract the inner type.
+    let ( is_ref, bare_type ) = match ty {
+        ::syn::Type::Reference( ref r ) => ( true, r.elem.as_ref() ),
+        t => ( false, t ),
+    };
+
+    // Check whether the inner type is a COM interface.
+    let itf_type = get_itf_type( &bare_type, ts )?;
+
+    let ( used_ty, ptr ) = match itf_type {
+        Some( itf_ty ) => ( itf_ty, "*" ),
+        None => ( ty, "" ),
+    };
+
+    let ts_tokens = ts.as_tokens();
+    let idl_type = quote!( #used_ty _ #ts_tokens ).to_string()
+            .replace( ":", "_" )
+            .replace( " ", "" )
+            .replace( "&", "ref_" );
+
+    Ok( idl_type + ptr )
+}
+
 
 #[cfg(test)]
 mod test {

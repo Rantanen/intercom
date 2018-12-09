@@ -195,7 +195,7 @@ impl VariantTests
         use std::convert::TryFrom;
         match variant {
             Variant::IUnknown( iunk ) => {
-                match ComRc::<IVariantInterface>::try_from( &iunk ) {
+                match ComItf::query_interface::<IVariantInterface>( &iunk ) {
                     Ok( itf ) => itf.do_stuff(),
                     Err( e ) => Err( e.with_message(
                             "Interface not supported. IDispatch not supported by tests." ) ),
