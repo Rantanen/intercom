@@ -1,6 +1,6 @@
 
 use prelude::*;
-use syn::*;
+use syn::{ Type };
 use methodinfo::{ComArg};
 use tyhandlers::{self, TypeContext, ModelTypeSystem, Direction};
 use utils;

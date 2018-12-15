@@ -7,7 +7,6 @@ use utils;
 use model;
 
 use tyhandlers::{ModelTypeSystem};
-use syn::*;
 
 /// Expands the `com_class` attribute.
 ///

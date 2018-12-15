@@ -12,7 +12,6 @@ use model;
 use methodinfo::ComMethodInfo;
 
 extern crate proc_macro;
-use syn::*;
 
 /// Interface level output.
 #[derive(Default)]
@@ -335,7 +334,7 @@ fn rust_to_com_delegate(
     // parameters.
     let params = iter::once( quote!( comptr.ptr ) ).chain( params );
 
-    // Create the return statement. 
+    // Create the return statement.
     let return_ident = Ident::new( "__result", Span::call_site() );
     let return_statement = method_info
             .returnhandler

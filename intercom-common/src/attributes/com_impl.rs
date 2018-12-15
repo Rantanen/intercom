@@ -10,7 +10,6 @@ use model;
 
 extern crate proc_macro;
 use self::proc_macro::TokenStream;
-use syn::*;
 
 /// Expands the `com_impl` attribute.
 ///
