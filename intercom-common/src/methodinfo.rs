@@ -1,7 +1,7 @@
 
 use prelude::*;
 use std::rc::Rc;
-use syn::*;
+use syn::{ ArgSelfRef, FnArg, FnDecl, MethodSig, PathArguments, ReturnType, Type };
 
 use ast_converters::*;
 use tyhandlers::{Direction, TypeContext, ModelTypeSystem, TypeHandler, get_ty_handler};
@@ -310,6 +310,8 @@ fn hresult_ty() -> Type {
 #[cfg(test)]
 mod tests {
 
+    use syn::{ Item };
+
     use super::*;
     use tyhandlers::ModelTypeSystem::*;
 
@@ -397,7 +399,7 @@ mod tests {
 
     fn test_info( code : &str, ts : ModelTypeSystem) -> ComMethodInfo {
 
-        let item = parse_str( code ).unwrap();
+        let item = syn::parse_str( code ).unwrap();
         let ( ident, decl, unsafety ) = match item {
             Item::Fn( ref f ) => ( f.ident.clone(), f.decl.as_ref(), f.unsafety.is_some() ),
             _ => panic!( "Code isn't function" ),

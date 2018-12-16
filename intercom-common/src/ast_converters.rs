@@ -1,6 +1,6 @@
 
 use prelude::*;
-use syn::*;
+use syn::{ Attribute, FnArg, GenericArgument, Ident, Item, Pat, Path, Type, TypeReference };
 
 /// Extract the underlying Type from various AST types.
 pub trait GetType {
