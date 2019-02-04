@@ -132,7 +132,7 @@ pub fn expand_com_impl(
                     .into_iter()
                     .map( |com_arg| {
                         let name = &com_arg.name;
-                        let com_ty = &com_arg.handler.com_ty();
+                        let com_ty = &com_arg.handler.com_ty( com_arg.dir );
                         let dir = match com_arg.dir {
                             Direction::In => quote!(),
                             Direction::Out | Direction::Retval => quote!( *mut )
@@ -146,7 +146,7 @@ pub fn expand_com_impl(
             let ( in_temporaries, in_params ) : ( Vec<_>, Vec<_> ) = method_info.args
                     .iter()
                     .map( |ca| {
-                        let conversion = ca.handler.com_to_rust( &ca.name );
+                        let conversion = ca.handler.com_to_rust( &ca.name, Direction::In );
                         ( conversion.temporary, conversion.value )
                     } )
                     .unzip();

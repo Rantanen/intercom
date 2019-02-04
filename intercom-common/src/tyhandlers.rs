@@ -58,13 +58,12 @@ impl ModelTypeSystem {
 
 /// Type usage context.
 pub struct TypeContext {
-    dir: Direction,
     type_system: ModelTypeSystem,
 }
 
 impl TypeContext {
-    pub fn new( dir : Direction, type_system : ModelTypeSystem ) -> TypeContext {
-        TypeContext { dir, type_system }
+    pub fn new( type_system : ModelTypeSystem ) -> TypeContext {
+        TypeContext { type_system }
     }
 }
 
@@ -76,14 +75,16 @@ pub trait TypeHandler {
     fn rust_ty( &self ) -> Type;
 
     /// The COM type.
-    fn com_ty( &self ) -> Type
+    fn com_ty( &self, _dir: Direction ) -> Type
     {
         self.rust_ty()
     }
 
     /// Converts a COM parameter named by the ident into a Rust type.
     fn com_to_rust(
-        &self, ident : &Ident
+        &self,
+        ident : &Ident,
+        _dir: Direction,
     ) -> TypeConversion
     {
         TypeConversion {
@@ -94,7 +95,7 @@ pub trait TypeHandler {
 
     /// Converts a Rust parameter named by the ident into a COM type.
     fn rust_to_com(
-        &self, ident : &Ident
+        &self, ident : &Ident, _dir: Direction
     ) -> TypeConversion
     {
         TypeConversion {
@@ -140,7 +141,7 @@ impl TypeHandler for ComItfParam {
     fn rust_ty( &self ) -> Type { self.ty.clone() }
 
     /// The COM type.
-    fn com_ty( &self ) -> Type
+    fn com_ty( &self, _dir: Direction ) -> Type
     {
         let rust_ty = self.rust_ty();
 
@@ -170,7 +171,7 @@ impl TypeHandler for ComItfParam {
 
     /// Converts a COM parameter named by the ident into a Rust type.
     fn com_to_rust(
-        &self, ident : &Ident
+        &self, ident : &Ident, _dir: Direction
     ) -> TypeConversion
     {
         let ts = self.context.type_system.as_typesystem_tokens();
@@ -182,7 +183,7 @@ impl TypeHandler for ComItfParam {
 
     /// Converts a Rust parameter named by the ident into a COM type.
     fn rust_to_com(
-        &self, ident : &Ident
+        &self, ident : &Ident, _dir: Direction
     ) -> TypeConversion
     {
         let ts = self.context.type_system.as_typesystem_tokens();
@@ -201,7 +202,7 @@ impl TypeHandler for BoolParam {
     fn rust_ty( &self ) -> Type { parse_quote!( bool ) }
 
     /// The COM type.
-    fn com_ty( &self ) -> Type
+    fn com_ty( &self, _dir: Direction ) -> Type
     {
         match self.context.type_system {
             ModelTypeSystem::Automation => parse_quote!( ::intercom::raw::VariantBool ),
@@ -219,7 +220,7 @@ impl TypeHandler for BoolParam {
 
     /// Converts a COM parameter named by the ident into a Rust type.
     fn com_to_rust(
-        &self, ident : &Ident
+        &self, ident : &Ident, _dir: Direction
     ) -> TypeConversion
     {
         TypeConversion {
@@ -230,7 +231,7 @@ impl TypeHandler for BoolParam {
 
     /// Converts a Rust parameter named by the ident into a COM type.
     fn rust_to_com(
-        &self, ident : &Ident
+        &self, ident : &Ident, _dir: Direction
     ) -> TypeConversion
     {
         TypeConversion {
@@ -248,14 +249,14 @@ impl TypeHandler for VariantParam {
     fn rust_ty( &self ) -> Type { self.ty.clone() }
 
     /// The COM type.
-    fn com_ty( &self ) -> Type
+    fn com_ty( &self, _dir: Direction ) -> Type
     {
         parse_quote!( ::intercom::raw::Variant )
     }
 
     /// Converts a COM parameter named by the ident into a Rust type.
     fn com_to_rust(
-        &self, ident : &Ident
+        &self, ident : &Ident, _dir: Direction
     ) -> TypeConversion
     {
         TypeConversion {
@@ -266,7 +267,7 @@ impl TypeHandler for VariantParam {
 
     /// Converts a Rust parameter named by the ident into a COM type.
     fn rust_to_com(
-        &self, ident : &Ident
+        &self, ident : &Ident, _dir: Direction
     ) -> TypeConversion
     {
         TypeConversion {
@@ -282,23 +283,23 @@ impl TypeHandler for StringParam
 {
     fn rust_ty( &self ) -> Type { self.ty.clone() }
 
-    fn com_ty( &self ) -> Type
+    fn com_ty( &self, dir: Direction ) -> Type
     {
         match self.context.type_system {
-            ModelTypeSystem::Automation => match self.context.dir {
+            ModelTypeSystem::Automation => match dir {
                 Direction::In => parse_quote!( ::intercom::raw::InBSTR ),
                 Direction::Out | Direction::Retval => parse_quote!( ::intercom::raw::OutBSTR ),
             },
-            ModelTypeSystem::Raw => match self.context.dir {
+            ModelTypeSystem::Raw => match dir {
                 Direction::In => parse_quote!( ::intercom::raw::InCStr ),
                 Direction::Out | Direction::Retval => parse_quote!( ::intercom::raw::OutCStr ),
             },
         }
     }
 
-    fn com_to_rust( &self, ident : &Ident ) -> TypeConversion
+    fn com_to_rust( &self, ident : &Ident, dir: Direction ) -> TypeConversion
     {
-        match self.context.dir {
+        match dir {
 
             Direction::In => {
 
@@ -339,9 +340,9 @@ impl TypeHandler for StringParam
         }
     }
 
-    fn rust_to_com( &self, ident : &Ident ) -> TypeConversion
+    fn rust_to_com( &self, ident : &Ident, dir: Direction ) -> TypeConversion
     {
-        match self.context.dir {
+        match dir {
 
             Direction::In => {
 

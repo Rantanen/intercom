@@ -243,7 +243,7 @@ impl CppModel {
                         };
 
                         // Get the foreign type for the arg type in C++ format.
-                        let com_ty = a.handler.com_ty();
+                        let com_ty = a.handler.com_ty( dir );
                         let type_info = foreign.get_ty( &com_ty )
                                 .ok_or_else( || GeneratorError::UnsupportedType(
                                                 utils::ty_to_string( &a.ty ) ) )?;

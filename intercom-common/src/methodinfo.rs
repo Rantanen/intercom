@@ -49,7 +49,7 @@ impl RustArg {
     pub fn new( name: Ident, ty: Type, type_system: ModelTypeSystem ) -> RustArg {
 
         let tyhandler = get_ty_handler(
-                &ty, TypeContext::new( Direction::In, type_system ) );
+                &ty, TypeContext::new( type_system ) );
         RustArg {
             name,
             ty,
@@ -83,7 +83,7 @@ impl ComArg {
     ) -> ComArg {
 
         let tyhandler = get_ty_handler(
-                &ty, TypeContext::new( dir, type_system ) );
+                &ty, TypeContext::new( type_system ) );
         ComArg {
             name,
             ty,
@@ -99,7 +99,7 @@ impl ComArg {
     ) -> ComArg {
 
         let tyhandler = get_ty_handler(
-                &rustarg.ty, TypeContext::new( dir, type_system ) );
+                &rustarg.ty, TypeContext::new( type_system ) );
         ComArg {
             name: rustarg.name,
             ty: rustarg.ty,
