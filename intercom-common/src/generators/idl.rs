@@ -138,7 +138,7 @@ impl IdlModel {
                         };
 
                         // Get the foreign type for the arg type.
-                        let com_ty = a.handler.com_ty();
+                        let com_ty = a.handler.com_ty( a.dir );
                         let idl_type = foreign
                             .get_ty( &com_ty )
                             .ok_or_else( || GeneratorError::UnsupportedType(

@@ -19,10 +19,8 @@ pub trait ReturnHandler : ::std::fmt::Debug {
     {
         tyhandlers::get_ty_handler(
                     &self.rust_ty(),
-                    TypeContext::new(
-                            Direction::Retval,
-                            self.type_system() ),
-                ).com_ty()
+                    TypeContext::new( self.type_system() ),
+                ).com_ty( Direction::Retval )
     }
 
     /// Gets the return statement for converting the COM result into Rust
@@ -59,8 +57,8 @@ impl ReturnHandler for ReturnOnlyHandler {
     fn com_to_rust_return( &self, result : &Ident ) -> TokenStream {
         let conversion = tyhandlers::get_ty_handler(
                     &self.rust_ty(),
-                    TypeContext::new( Direction::Retval, self.1 )
-                ).com_to_rust( result );
+                    TypeContext::new( self.1 )
+                ).com_to_rust( result, Direction::Retval );
         if conversion.temporary.is_some() {
             panic!( "Return values cannot depend on temporaries" );
         }
@@ -71,8 +69,8 @@ impl ReturnHandler for ReturnOnlyHandler {
     fn rust_to_com_return( &self, result : &Ident ) -> TokenStream {
         let conversion = tyhandlers::get_ty_handler(
                     &self.rust_ty(),
-                    TypeContext::new( Direction::Retval, self.1 ),
-                ).rust_to_com( result );
+                    TypeContext::new( self.1 ),
+                ).rust_to_com( result, Direction::Retval );
         if conversion.temporary.is_some() {
             panic!( "Return values cannot depend on temporaries" );
         }
@@ -206,7 +204,7 @@ fn write_out_values(
     for ( ident, out_arg ) in idents.iter().zip( out_args ) {
 
         let arg_name = out_arg.name;
-        let ok_conversion = out_arg.handler.rust_to_com( ident );
+        let ok_conversion = out_arg.handler.rust_to_com( ident, Direction::Out );
         let err_value = out_arg.handler.default_value();
 
         if ok_conversion.temporary.is_some() {
@@ -229,7 +227,7 @@ fn get_rust_ok_values(
     let mut tokens = vec![];
     for out_arg in out_args {
 
-        let conversion = out_arg.handler.com_to_rust( &out_arg.name );
+        let conversion = out_arg.handler.com_to_rust( &out_arg.name, Direction::Retval );
         if conversion.temporary.is_some() {
             panic!( "Return values cannot depend on temporaries" );
         }

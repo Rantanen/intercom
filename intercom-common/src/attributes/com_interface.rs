@@ -246,7 +246,7 @@ fn process_itf_variant(
                 .into_iter()
                 .map( |com_arg| {
                     let name = &com_arg.name;
-                    let com_ty = &com_arg.handler.com_ty();
+                    let com_ty = &com_arg.handler.com_ty( com_arg.dir );
                     let dir = match com_arg.dir {
                         Direction::In => quote!(),
                         Direction::Out | Direction::Retval => quote!( *mut )
@@ -308,7 +308,7 @@ fn rust_to_com_delegate(
             .iter()
             .map( |ca| {
                 let ident = &ca.name;
-                let ty = &ca.handler.com_ty();
+                let ty = &ca.handler.com_ty( Direction::Retval );
                 let default = ca.handler.default_value();
                 quote!( let mut #ident : #ty = #default; )
             } ).collect::<Vec<_>>();
@@ -320,7 +320,7 @@ fn rust_to_com_delegate(
                 let name = com_arg.name;
                 match com_arg.dir {
                     Direction::In => {
-                        let param = com_arg.handler.rust_to_com( &name );
+                        let param = com_arg.handler.rust_to_com( &name, Direction::In );
                         ( param.temporary, param.value )
                     },
                     Direction::Out | Direction::Retval
