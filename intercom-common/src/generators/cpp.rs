@@ -276,10 +276,10 @@ impl CppModel {
                 };
 
                 Ok( CppInterface {
-                    name: foreign.get_name( c, itf_name ),
+                    name: foreign.get_name( itf_name ),
                     iid_struct: guid_as_struct( iid ),
                     base: itf.base_interface().as_ref()
-                            .map( |i| foreign.get_name( c, i ) ),
+                            .map( |i| foreign.get_name( i ) ),
                     methods,
                 } )
 
@@ -309,7 +309,7 @@ impl CppModel {
                             .filter( itf_variant_filter.as_ref() )
                             .map( |(_, itf_variant)| {
 
-                                Ok( foreign.get_name( c, match all_type_systems {
+                                Ok( foreign.get_name( match all_type_systems {
                                     false => itf.name(),
                                     true => itf_variant.unique_name(),
                                 } ) )

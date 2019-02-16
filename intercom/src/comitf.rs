@@ -135,6 +135,8 @@ impl ComItf<IUnknown> {
         match iunk.query_interface( iid ) {
             Ok( ptr ) => {
 
+                // Interface was available. Convert the raw pointer into
+                // a strong type-system specific InterfacePtr.
                 let target_itf = unsafe {
                     raw::InterfacePtr::<TS, TTarget>::new( ptr )
                 };
@@ -147,17 +149,32 @@ impl ComItf<IUnknown> {
     }
 }
 
+/// Trait that allows constructing strong pointer types from raw
+/// pointers in a type system specific way.
 trait PointerOperations : TypeSystem + Sized {
+
+    /// Wraps a raw interface pointer into a ComItf.
     fn wrap_ptr<I: ?Sized>(
         ptr: ::raw::InterfacePtr<Self, I>
     ) -> ComItf<I>;
 
+    /// Gets a raw interface pointer from a ComItf.
     fn get_ptr<I: ?Sized>(
         itf: &ComItf<I>
     ) -> ::raw::InterfacePtr<Self, I>;
 }
 
+/// A generic implementation that ensures _every_ type system has some
+/// implementation for this.
+///
+/// Note that this is required to tell Rust compiler that calls to wrap_ptr
+/// are okay in any case. The actual implementation here will throw a runtime
+/// panic.
+///
+/// This trait really needs to be specialized for each type system for it to
+/// work correctly.
 impl<TS: TypeSystem> PointerOperations for TS {
+
     default fn wrap_ptr<I: ?Sized>(
         ptr: ::raw::InterfacePtr<Self, I>
     ) -> ComItf<I>
@@ -174,10 +191,12 @@ impl<TS: TypeSystem> PointerOperations for TS {
 }
 
 impl PointerOperations for AutomationTypeSystem {
+
     fn wrap_ptr<I: ?Sized>(
         ptr: ::raw::InterfacePtr<Self, I>
     ) -> ComItf<I>
     {
+        // Construct a ComItf from a automation pointer.
         ComItf {
             raw_ptr: raw::InterfacePtr::null(),
             automation_ptr: ptr,
@@ -189,6 +208,7 @@ impl PointerOperations for AutomationTypeSystem {
         itf: &ComItf<I>
     ) -> ::raw::InterfacePtr<Self, I>
     {
+        // Get an automation pointer from the ComItf.
         itf.automation_ptr
     }
 }
@@ -198,6 +218,7 @@ impl PointerOperations for RawTypeSystem {
         ptr: ::raw::InterfacePtr<Self, I>
     ) -> ComItf<I>
     {
+        // Construct a ComItf from a raw pointer.
         ComItf {
             raw_ptr: ptr,
             automation_ptr: raw::InterfacePtr::null(),
@@ -209,20 +230,29 @@ impl PointerOperations for RawTypeSystem {
         itf: &ComItf<I>
     ) -> ::raw::InterfacePtr<Self, I>
     {
+        // Get an automation pointer form the ComItf.
         itf.raw_ptr
     }
 }
 
 impl<T: ComInterface + ?Sized> ComItf<T> {
 
+    /// Query interface on the ComItf.
     pub fn query_interface<TTarget: ComInterface + ?Sized>( this : &Self ) -> ComResult<ComRc<TTarget>>
     {
+        // Get the IUnknown interface.
         let iunk : &ComItf<IUnknown> = this.as_ref();
 
+        // Try every type system.
+        //
+        // From Rust side we don't really care which type system we end up with.
+        // Both of these work for Rust calls.
+        //
+        // We'll try RawTypeSystem first because that has a better chance of
+        // providing lower overhead calls.
         if let Ok( itf ) = iunk.query_interface_ts::<RawTypeSystem, TTarget>() {
             return Ok( itf );
         }
-
         if let Ok( itf ) = iunk.query_interface_ts::<AutomationTypeSystem, TTarget>() {
             return Ok( itf );
         }
@@ -232,6 +262,7 @@ impl<T: ComInterface + ?Sized> ComItf<T> {
         Err( ComError::E_NOINTERFACE )
     }
 
+    /// Get the IUnknown interface for the current interface.
     // ComItf is a smart pointer and shouldn't introduce methods on 'self'.
     #[allow(clippy::wrong_self_convention)]
     pub fn as_unknown( this : &Self ) -> ComItf<IUnknown> {

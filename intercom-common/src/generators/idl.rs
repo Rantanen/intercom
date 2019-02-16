@@ -8,7 +8,7 @@ use super::GeneratorError;
 
 use utils;
 use model;
-use model::{ComCrate, ComInterfaceVariant};
+use model::{ComInterfaceVariant};
 use ast_converters::GetIdent;
 use tyhandlers::{Direction, ModelTypeSystem, ModelTypeSystemConfig};
 use foreign_ty::*;
@@ -60,14 +60,12 @@ trait IdlTypeInfo<'s> {
     /// Gets full type for IDL.
     fn to_idl(
         &self,
-        krate : &ComCrate,
         ts_config : &ModelTypeSystemConfig,
     ) -> String;
 
     /// Gets the IDL compatile type name for this type.
     fn get_idl_type_name(
         &self,
-        krate: &model::ComCrate,
         ts_config : &ModelTypeSystemConfig,
     ) -> String;
 
@@ -120,12 +118,6 @@ impl IdlModel {
                 // Get the method definitions for the current interface.
                 let methods = itf_variant.methods().iter().enumerate().map(|(i,m)| {
 
-                    // Define the config to use when constructing the type names.
-                    let ts_config = ModelTypeSystemConfig {
-                        effective_system: ts,
-                        is_default: ! all_type_systems,
-                    };
-
                     // Construct the argument list.
                     let args = m.raw_com_args().iter().map(|a| {
 
@@ -141,7 +133,7 @@ impl IdlModel {
                         let idl_type = to_type_name( &a.ty, ts )?;
                         Ok( IdlArg {
                             name : a.name.to_string(),
-                            arg_type : format!( "{}{}", idl_type, out_ptr ), //.to_idl( c, &ts_config ), out_ptr ),
+                            arg_type : format!( "{}{}", idl_type, out_ptr ),
                             attributes : attrs.to_owned(),
                         } )
 
@@ -169,8 +161,8 @@ impl IdlModel {
                 // Now that we have methods sorted out, we can construct the final
                 // interface definition.
                 Ok( IdlInterface {
-                    name: foreign.get_name( c, itf_name ),
-                    base: base_name.as_ref().map( |i| foreign.get_name( c, i ) ),
+                    name: foreign.get_name( itf_name ),
+                    base: base_name.as_ref().map( |i| foreign.get_name( i ) ),
                     iid: format!( "{:-X}", itf_variant.iid() ),
                     methods,
                 } )
@@ -206,7 +198,7 @@ impl IdlModel {
                             .filter( itf_variant_filter.as_ref() )
                             .map( |(_, itf_variant)| {
 
-                                Ok( foreign.get_name( c, match all_type_systems {
+                                Ok( foreign.get_name( match all_type_systems {
                                     false => itf.name(),
                                     true => itf_variant.unique_name(),
                                 } ) )
@@ -259,16 +251,9 @@ impl<'s> IdlTypeInfo<'s> {
 
     /// Gets the name of a custom type for IDL.
     fn get_idl_name_for_custom_type(
-        krate : &ComCrate,
         ty_name : &str,
         ts_config : &ModelTypeSystemConfig,
     ) -> String {
-
-        let itf = if let Some( itf ) = krate.interfaces().get( ty_name ) {
-            itf
-        } else {
-            return ty_name.to_owned()
-        };
 
         let base_name = ty_name.to_string();
         ts_config.get_unique_name( &base_name )
@@ -279,14 +264,13 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
 
     fn to_idl(
         &self,
-        krate : &ComCrate,
         ts_config : &ModelTypeSystemConfig,
     ) -> String {
 
         // We want to enable if for interface methods and parameters.
         let const_specifier = if self.is_mutable || self.pass_by != PassBy::Reference { "" } else { "const " };
 
-        let type_name = self.get_leaf().get_idl_type_name( krate, ts_config );
+        let type_name = self.get_leaf().get_idl_type_name( ts_config );
         let ptr = if self.is_pointer() { "*" } else { "" };
         format!("{}{}{}", const_specifier, type_name, ptr )
     }
@@ -294,7 +278,6 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
     /// Gets the name of the IDL type for this type.
     fn get_idl_type_name(
         &self,
-        krate : &ComCrate,
         ts_config : &ModelTypeSystemConfig,
     ) -> String {
 
@@ -318,7 +301,7 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
             "Variant" => "VARIANT".to_owned(),
             "c_void" => "void".to_owned(),
             "c_char" => "char".to_owned(),
-            t => IdlTypeInfo::get_idl_name_for_custom_type( krate, t, ts_config ),
+            t => IdlTypeInfo::get_idl_name_for_custom_type( t, ts_config ),
         }
     }
 
@@ -339,77 +322,84 @@ impl<'s> IdlTypeInfo<'s> for TypeInfo<'s> {
     }
 }
 
+/// Gets the interface type from a ComItf/ComRc type.
+///
+/// Returns None if the given type is not a ComItf/ComRc type.
 fn get_itf_type(
-    ty: &::syn::Type,
-    ts: ModelTypeSystem,
+    ty: &::syn::Type
 ) -> Result<Option<&::syn::Type>, GeneratorError>
 {
     use syn::{self, Type};
 
+    // Make sure the type is a path specifier.
     let type_path = match ty {
         Type::Path( ref p ) => p,
         _ => return Ok( None ),
     };
 
+    // Type must not be a self-type. It must name the type correctly.
     if type_path.qself.is_some() {
         return Ok( None );
     }
 
+    // Find the type name on the last segment.
     let last_segment = match type_path.path.segments.last() {
         Some( segment ) => segment,
         None => Err( GeneratorError::UnsupportedType( "Empty path".to_string() ) )?,
     };
 
+    // We only recognize ComItf and ComRc as interface types.
     let ident = &last_segment.value().ident;
     if ident != "ComItf" && ident != "ComRc" {
         return Ok( None );
     }
 
+    // ComItf and ComRc must have only one argument.
     let arg_list = match last_segment.value().arguments {
         syn::PathArguments::AngleBracketed( ref args ) => args,
         _ => Err( GeneratorError::UnsupportedType( format!(
                 "Unrecognized generic arguments: {:?}", ty ) ) )?,
     };
-
     if arg_list.args.len() != 1 {
         Err( GeneratorError::UnsupportedType(
                 "COM interface types require exactly one type argument".to_string() ) )?;
     }
-
     let arg = arg_list.args.first()
             .expect( "Argument list should have one argument." );
 
+    // Return the interface.
     match arg.value() {
         syn::GenericArgument::Type( ref t ) => Ok( Some( t ) ),
         _ => Err( GeneratorError::UnsupportedType( "Unsupported generic argument".to_string() ) ),
     }
 }
 
+/// Turns a type name into a type system specific name.
 fn to_type_name(
     ty: &::syn::Type,
     ts: ModelTypeSystem,
 ) -> Result<String, GeneratorError>
 {
-    use quote::ToTokens;
-
     if ty == &parse_quote!( () ) {
         return Ok( "void".to_string() )
     }
 
     // Extract the inner type.
-    let ( is_ref, bare_type ) = match ty {
-        ::syn::Type::Reference( ref r ) => ( true, r.elem.as_ref() ),
-        t => ( false, t ),
+    let bare_type = match ty {
+        ::syn::Type::Reference( ref r ) => r.elem.as_ref(),
+        t => t,
     };
 
     // Check whether the inner type is a COM interface.
-    let itf_type = get_itf_type( &bare_type, ts )?;
+    let itf_type = get_itf_type( &bare_type )?;
 
+    // Interfaces use pointers, other types go as such.
     let ( used_ty, ptr ) = match itf_type {
         Some( itf_ty ) => ( itf_ty, "*" ),
         None => ( ty, "" ),
     };
 
+    // Make sure the tokens are suitable for type name.
     let ts_tokens = ts.as_tokens();
     let idl_type = quote!( #used_ty _ #ts_tokens ).to_string()
             .replace( ":", "_" )
