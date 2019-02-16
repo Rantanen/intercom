@@ -188,7 +188,7 @@ pub fn expand_com_impl(
                 unsafe extern #calling_convetion fn #method_impl_ident(
                     #( #args ),*
                 ) -> #ret_ty {
-                    use ::intercom::type_system::{IntercomFrom, IntercomRefInto, IntercomInto};
+                    use ::intercom::type_system::{IntercomFrom, IntercomInto};
                     let result : Result< #ret_ty, ::intercom::ComError > = ( || {
                         // Acquire the reference to the ComBox. For this we need
                         // to offset the current 'self_vtable' vtable pointer.

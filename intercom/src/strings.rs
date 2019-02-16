@@ -11,7 +11,7 @@ use std::{
 };
 
 use intercom::{ComError, ComResult};
-use type_system::{ExternType, AutomationTypeSystem, RawTypeSystem, IntercomFrom, IntercomInto, IntercomFromRef};
+use type_system::{ExternType, AutomationTypeSystem, RawTypeSystem, IntercomFrom, IntercomInto};
 
 #[derive(Debug)]
 pub struct FormatError;

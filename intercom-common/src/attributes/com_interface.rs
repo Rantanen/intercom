@@ -350,7 +350,7 @@ fn rust_to_com_delegate(
 
     // Construct the final method.
     quote!(
-        use ::intercom::type_system::{IntercomFrom, IntercomRefInto, IntercomInto};
+        use ::intercom::type_system::{IntercomFrom, IntercomInto};
         let vtbl = comptr.ptr as *const *const #vtable_ident;
 
         #( #temporaries )*
