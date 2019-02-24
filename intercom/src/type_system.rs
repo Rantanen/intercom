@@ -1,4 +1,4 @@
-
+extern crate proc_macro;
 use prelude::*;
 
 pub enum TypeSystemName {
@@ -28,14 +28,36 @@ impl TypeSystem for RawTypeSystem {
     fn key() -> TypeSystemName { TypeSystemName::Raw }
 }
 
+
+/// Defines a type that has identical representation for both input and output directions.
+pub trait BidirectionalTypeInfo {
+
+    /// The name of the type.
+    fn type_name() -> &'static str;
+}
+
+/// Defines details of the type that specify how to pass it as an input parameter.
+pub trait InputTypeInfo {
+
+    /// The name of the type.
+    fn type_name() -> &'static str;
+}
+
+/// Defines details of the type that specify how to pass it as an output parameter.
+pub trait OutputTypeInfo {
+
+    /// The name of the type.
+    fn type_name() -> &'static str;
+}
+
 /// Defines a type that is compatible with Intercom interfaces.
 pub trait ExternType<TS: TypeSystem> : Sized {
 
     /// Type used when the Self type is encountered as an input parameter.
-    type ExternInputType;
+    type ExternInputType : InputTypeInfo;
 
     /// Type used when the Self type is encountered as an output type.
-    type ExternOutputType;
+    type ExternOutputType : OutputTypeInfo;
 
     /// A possible temporary type used for converting `Self` into
     /// `ExternInputType` when calling Intercom interfaces from Rust.
@@ -77,6 +99,21 @@ impl<TSource, TTarget: IntercomFrom<TSource>>
     }
 }
 
+
+/// Bidirectional types can be used as input types.
+impl<BT> InputTypeInfo for BT where BT: BidirectionalTypeInfo {
+
+    /// The name of the type.
+    fn type_name() -> &'static str { <BT as BidirectionalTypeInfo>::type_name() }
+}
+
+/// Bidirectional types can be used as output types.
+impl<BT> OutputTypeInfo for BT where BT: BidirectionalTypeInfo {
+
+    /// The name of the type.
+    fn type_name() -> &'static str { <BT as BidirectionalTypeInfo>::type_name() }
+}
+
 /// A quick macro for implementing ExternType for various basic types that
 /// should represent themselves.
 ///
@@ -85,6 +122,13 @@ impl<TSource, TTarget: IntercomFrom<TSource>>
 /// some reason.
 macro_rules! self_extern {
     ( $t:ty ) => {
+
+        impl BidirectionalTypeInfo for $t {
+
+            /// The default name is the name of the type.
+            fn type_name() -> &'static str { stringify!( $t ) }
+        }
+
         impl<TS: TypeSystem> ExternType<TS> for $t {
             type ExternInputType = $t;
             type ExternOutputType = $t;
@@ -110,17 +154,30 @@ self_extern!( f32 );
 self_extern!( f64 );
 self_extern!( ::raw::HRESULT );
 self_extern!( ::GUID );
+self_extern!( libc::c_void );
 
 // Any raw pointer is passed as is.
 
-impl<TS: TypeSystem, TPtr> ExternType<TS> for *mut TPtr {
+impl<TPtr> BidirectionalTypeInfo for *mut TPtr where TPtr: BidirectionalTypeInfo {
+
+    /// The name of the type.
+    fn type_name() -> &'static str { <TPtr as BidirectionalTypeInfo>::type_name() }
+}
+
+impl<TS: TypeSystem, TPtr> ExternType<TS> for *mut TPtr where TPtr: BidirectionalTypeInfo {
     type ExternInputType = *mut TPtr;
     type ExternOutputType = *mut TPtr;
     type OwnedExternType = *mut TPtr;
     type OwnedNativeType = *mut TPtr;
 }
 
-impl<TS: TypeSystem, TPtr> ExternType<TS> for *const TPtr {
+impl<TPtr> BidirectionalTypeInfo for *const TPtr where TPtr: BidirectionalTypeInfo {
+
+    /// The name of the type.
+    fn type_name() -> &'static str { <TPtr as BidirectionalTypeInfo>::type_name() }
+}
+
+impl<TS: TypeSystem, TPtr> ExternType<TS> for *const TPtr where TPtr: BidirectionalTypeInfo {
     type ExternInputType = *const TPtr;
     type ExternOutputType = *const TPtr;
     type OwnedExternType = *const TPtr;
@@ -128,8 +185,20 @@ impl<TS: TypeSystem, TPtr> ExternType<TS> for *const TPtr {
 }
 
 /// `ComItf` extern type implementation.
+
+
+impl<I: ::ComInterface + ?Sized> BidirectionalTypeInfo for ::ComItf<I>
+    where I: BidirectionalTypeInfo
+{
+
+    /// The name of the type.
+    fn type_name() -> &'static str { <I as BidirectionalTypeInfo>::type_name() }
+}
+
 impl<TS: TypeSystem, I: ::ComInterface + ?Sized> ExternType<TS>
-        for ::ComItf<I> {
+        for ::ComItf<I>
+    where I: BidirectionalTypeInfo
+{
 
     type ExternInputType = ::raw::InterfacePtr<TS, I>;
     type ExternOutputType = ::raw::InterfacePtr<TS, I>;
@@ -137,8 +206,16 @@ impl<TS: TypeSystem, I: ::ComInterface + ?Sized> ExternType<TS>
     type OwnedNativeType = ::raw::InterfacePtr<TS, I>;
 }
 
+impl<TS: TypeSystem, I: ::ComInterface + ?Sized> BidirectionalTypeInfo for ::raw::InterfacePtr<TS, I>
+    where I: BidirectionalTypeInfo
+{
+
+    /// The name of the type.
+    fn type_name() -> &'static str { <I as BidirectionalTypeInfo>::type_name() }
+}
+
 impl<TS: TypeSystem, I: ::ComInterface + ?Sized>
-    IntercomFrom<::ComItf<I>> for ::raw::InterfacePtr<TS, I>
+IntercomFrom<::ComItf<I>> for ::raw::InterfacePtr<TS, I>
 {
     fn intercom_from( source: ::ComItf<I> ) -> ComResult<Self> {
         Ok( ::ComItf::ptr( &source ) )

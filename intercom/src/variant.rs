@@ -1,10 +1,13 @@
+extern crate intercom_attributes;
 
-use ::*;
+
+use super::*;
 use std::convert::TryFrom;
 use std::time::{SystemTime};
-use type_system::{TypeSystem, ExternType, IntercomFrom};
+use super::type_system::{TypeSystem, ExternType, IntercomFrom, BidirectionalTypeInfo};
+use intercom_attributes::BidirectionalTypeInfo;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, BidirectionalTypeInfo)]
 pub enum Variant
 {
     None,
@@ -510,7 +513,8 @@ pub mod raw {
 
     use std;
     use std::time::{SystemTime, Duration};
-    use type_system::{TypeSystem};
+    use super::type_system::{TypeSystem, BidirectionalTypeInfo};
+    use super::intercom_attributes::BidirectionalTypeInfo;
 
     #[repr(C)]
     #[derive(Copy, Clone)]
@@ -671,7 +675,7 @@ pub mod raw {
     }
 
     #[repr(C)]
-    #[derive(Copy, Clone)]
+    #[derive(Copy, Clone, BidirectionalTypeInfo)]
     pub struct Variant<TS: TypeSystem> {
         pub vt : VariantType,
         reserved1 : u16,
