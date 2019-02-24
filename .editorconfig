@@ -7,6 +7,7 @@ insert_final_newline = true
 indent_style = space
 indent_size = 4
 charset = utf-8
+trim_trailing_whitespace = true
 
 # End of line should be LF in the repository - but we'll use gitattributes
 # for this instead of editorconfig. This allows Windows editors to use CRLF
@@ -26,3 +27,9 @@ charset = utf-8-bom
 insert_final_newline = false
 indent_style = tab
 indent_size = 4
+
+# In markdown (or some flavors of it anyway) trailing whitespace is
+# significant.
+[*.md]
+trim_trailing_whitespace = false
+

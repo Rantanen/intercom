@@ -120,7 +120,7 @@ impl ComInterface
         let variants = OrderMap::from_iter(
             [ ModelTypeSystem::Automation, ModelTypeSystem::Raw ].iter().map( |&ts| {
 
-            let itf_unique_ident = Ident::new( 
+            let itf_unique_ident = Ident::new(
                     &format!( "{}_{:?}", itf_ident.to_string(), ts ), Span::call_site() );
 
                 // IUnknown interfaces do not have type system variants.

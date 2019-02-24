@@ -130,7 +130,7 @@ pub mod raw {
 
     pub use variant::raw::*;
     pub use error::raw::*;
-    
+
     #[repr(C)]
     #[derive(PartialEq, Eq)]
     pub struct InterfacePtr<I: ?Sized> {

@@ -111,7 +111,7 @@ impl BStr {
 
     pub fn to_string( &self ) -> Result<String, FormatError> {
         match self.len_bytes() {
-            x if x % 2 == 0 => 
+            x if x % 2 == 0 =>
                 String::from_utf16( unsafe { std::slice::from_raw_parts(
                         self.as_ptr() as *const u16,
                         x as usize / 2 ) } )
@@ -144,7 +144,7 @@ impl BStr {
 /// On Windows this means allocating the strings using `SysAllocString` or
 /// `SysAllocStringLen` methods and freeing them with `SysFreeString` by
 /// default.
-pub struct BString( 
+pub struct BString(
     // The pointer must be 32-bit aligned.
     *mut u16
 );
@@ -298,7 +298,7 @@ impl<'a, T: Copy> FromWithTemporary<'a, T> for T {
     }
 }
 
-impl<'a> FromWithTemporary<'a, &'a BStr > 
+impl<'a> FromWithTemporary<'a, &'a BStr >
         for BString {
 
     type Temporary = &'a BStr;
@@ -319,7 +319,7 @@ impl<'a> FromWithTemporary<'a, &'a BStr>
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp ) 
+        Ok( &**temp )
     }
 }
 
@@ -337,7 +337,7 @@ impl<'a> FromWithTemporary<'a, &'a BStr>
     }
 }
 
-impl<'a> FromWithTemporary<'a, BString > 
+impl<'a> FromWithTemporary<'a, BString >
         for &'a BStr {
 
     type Temporary = BString;
@@ -351,7 +351,7 @@ impl<'a> FromWithTemporary<'a, BString >
     }
 }
 
-impl<'a> FromWithTemporary<'a, CString > 
+impl<'a> FromWithTemporary<'a, CString >
         for &'a BStr {
 
     type Temporary = BString;
@@ -515,7 +515,7 @@ impl ComFrom<BString> for CString {
 pub type CStr = std::ffi::CStr;
 pub type CString = std::ffi::CString;
 
-impl<'a> FromWithTemporary<'a, &'a CStr > 
+impl<'a> FromWithTemporary<'a, &'a CStr >
         for CString {
 
     type Temporary = &'a CStr;
@@ -538,7 +538,7 @@ impl<'a> FromWithTemporary<'a, &'a CStr>
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp ) 
+        Ok( &**temp )
     }
 }
 
@@ -558,7 +558,7 @@ impl<'a> FromWithTemporary<'a, &'a CStr>
     }
 }
 
-impl<'a> FromWithTemporary<'a, CString > 
+impl<'a> FromWithTemporary<'a, CString >
         for &'a CStr {
 
     type Temporary = CString;
@@ -572,7 +572,7 @@ impl<'a> FromWithTemporary<'a, CString >
     }
 }
 
-impl<'a> FromWithTemporary<'a, BString > 
+impl<'a> FromWithTemporary<'a, BString >
         for &'a CStr {
 
     type Temporary = CString;
@@ -793,7 +793,7 @@ mod test {
         ];
 
         for bstr in bstrs {
-            
+
             assert_eq!( bstr.len_bytes(), 6 );
             assert_eq!( bstr.len(), 3 );
 
@@ -822,7 +822,7 @@ mod test {
         ];
 
         for bstr in bstrs {
-            
+
             assert_eq!( bstr.len_bytes(), 6 );
             assert_eq!( bstr.len(), 3 );
 

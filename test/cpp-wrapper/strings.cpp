@@ -7,18 +7,18 @@
 
 #include "testlib.hpp"
 
-TEST_CASE( "Manipulating BSTR succeeds" ) 
-{ 
-    SECTION( "Allocationg BSTR succeeds" ) 
-    { 
-        intercom::BSTR allocated = intercom::allocate_bstr( 10 ); 
-        REQUIRE( allocated != nullptr ); 
+TEST_CASE( "Manipulating BSTR succeeds" )
+{
+    SECTION( "Allocationg BSTR succeeds" )
+    {
+        intercom::BSTR allocated = intercom::allocate_bstr( 10 );
+        REQUIRE( allocated != nullptr );
 
         REQUIRE( *( reinterpret_cast< uint32_t* >( allocated ) - 1 ) == 10 * 2 );
         REQUIRE( *( allocated + 10 ) == 0 );
- 
-        intercom::free_bstr( allocated ); 
-    } 
+
+        intercom::free_bstr( allocated );
+    }
 
     std::tuple< const char16_t*, const char*, const char* > test_data[] = {
         std::make_tuple( nullptr, nullptr, "<empty>" ),
@@ -42,9 +42,9 @@ TEST_CASE( "Manipulating BSTR succeeds" )
             : std::char_traits<char16_t>::length( utf16_text );
 
         SECTION( std::string( "Converting UTF-8 to BSTR works: " ) + description )
-        { 
-            intercom::BSTR converted; 
-            intercom::utf8_to_bstr( utf8_text, &converted ); 
+        {
+            intercom::BSTR converted;
+            intercom::utf8_to_bstr( utf8_text, &converted );
 
             if( utf16_text != nullptr )
                 REQUIRE( converted != nullptr );
@@ -54,10 +54,10 @@ TEST_CASE( "Manipulating BSTR succeeds" )
             REQUIRE( intercom::get_characters_in_bstr( converted ) == utf16_len );
 
             REQUIRE( memcmp( converted, utf16_text, utf16_len * 2 ) == 0 );
-        } 
-     
+        }
+
         SECTION( std::string( "Converting BSTR to UTF-8 works: " ) + description )
-        { 
+        {
             intercom::BSTR bstr = intercom::allocate_bstr( utf16_len );
             memcpy( bstr, utf16_text, utf16_len * 2 );
 
@@ -75,10 +75,10 @@ TEST_CASE( "Manipulating BSTR succeeds" )
 
             REQUIRE( memcmp( converted, expected, utf8_len ) == 0 );
         }
-    } 
+    }
 
-    SECTION( "Attempting to free null BSTR succeeds" ) 
-    { 
-        intercom::free_bstr( nullptr ); 
-    } 
-} 
+    SECTION( "Attempting to free null BSTR succeeds" )
+    {
+        intercom::free_bstr( nullptr );
+    }
+}

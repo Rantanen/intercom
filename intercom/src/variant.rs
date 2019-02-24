@@ -72,7 +72,7 @@ impl From<raw::Variant> for Variant {
                     raw::var_type::R4 => Variant::F32( src.data.fltVal ),
                     raw::var_type::R8 => Variant::F64( src.data.dblVal ),
                     raw::var_type::BOOL => Variant::Bool( src.data.boolVal.into() ),
-                    raw::var_type::BSTR => 
+                    raw::var_type::BSTR =>
                         Variant::String( ::IntercomString::BString(
                                 ::BString::from_ptr( src.data.bstrVal ) ) ),
                     raw::var_type::DATE =>
@@ -555,7 +555,7 @@ pub mod raw {
             let com_epoch = VariantDate::com_epoch();
             const DAY_SECONDS : u64 = 24 * 60 * 60;
             const DAY_SECONDS_F : f64 = DAY_SECONDS as f64;
-            
+
             let v = match src.duration_since( com_epoch ) {
                 Ok( duration ) => {
 
@@ -575,7 +575,7 @@ pub mod raw {
                     let duration_secs = duration.as_secs();
                     let duration_secs_f = duration_secs as f64 / DAY_SECONDS_F;
                     let nanos = f64::from( duration.subsec_nanos() ) / 1_000_000_000f64;
-                    
+
                     // First of all, the current duration is positive.
                     // day -1, 0:00:00 -> 1
                     // day -1, 6:00:00 -> 0.75

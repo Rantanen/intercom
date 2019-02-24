@@ -110,7 +110,7 @@ impl<T: ComInterface + ?Sized> ComRc<T>
         unsafe {
 
             // Invoke CoCreateInstance and return a result based on the return
-            // value.  
+            // value.
             let mut out = ::std::ptr::null_mut();
             match CoCreateInstance(
                     clsid,

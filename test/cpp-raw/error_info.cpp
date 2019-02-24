@@ -20,7 +20,7 @@ namespace
 		virtual intercom::HRESULT INTERCOM_CC ReturnComerror(
             intercom::HRESULT hr,
             intercom::BSTR bstr
-		) 
+		)
 		{
             // Get the error store for storing the message.
             IErrorStore_Automation* pErrorStore = nullptr;
@@ -43,7 +43,7 @@ namespace
 		virtual intercom::HRESULT INTERCOM_CC ReturnTesterror(
             intercom::HRESULT hr,
             intercom::BSTR bstr
-		) 
+		)
 		{
             // Get the error store for storing the message.
             IErrorStore_Automation* pErrorStore = nullptr;
@@ -66,7 +66,7 @@ namespace
 		virtual intercom::HRESULT INTERCOM_CC ReturnIoerror(
             intercom::HRESULT hr,
             intercom::BSTR bstr
-		) 
+		)
 		{
             // Get the error store for storing the message.
             IErrorStore_Automation* pErrorStore = nullptr;
