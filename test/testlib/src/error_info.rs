@@ -5,19 +5,19 @@ use intercom::*;
 pub trait IErrorSource
 {
     fn return_comerror(
-        &self, 
+        &self,
         hr : raw::HRESULT,
         desc : &str
     ) -> ComResult<()>;
 
     fn return_testerror(
-        &self, 
+        &self,
         hr : raw::HRESULT,
         desc : &str
     ) -> Result<(), TestError>;
 
     fn return_ioerror(
-        &self, 
+        &self,
         hr : raw::HRESULT,
         desc : &str
     ) -> Result<(), std::io::Error>;
@@ -46,7 +46,7 @@ impl ErrorTests
                     return Err( ComError::E_INVALIDARG
                             .with_message( format!( "Bad HRESULT: {}", e.hresult.hr ) ) );
                 }
-                
+
                 if e.description() != Some( "Error message" ) {
                     return Err( ComError::E_INVALIDARG
                             .with_message( format!( "Bad message: {:?}", e.description() ) ) );
@@ -71,7 +71,7 @@ impl ErrorTests
                     return Err( ComError::E_INVALIDARG
                             .with_message( format!( "Bad HRESULT: {}", e.0.hr ) ) );
                 }
-                
+
                 if e.1 != "Error message" {
                     return Err( ComError::E_INVALIDARG
                             .with_message( format!( "Bad message: {:?}", e.1 ) ) );

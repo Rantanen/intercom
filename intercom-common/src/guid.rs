@@ -260,7 +260,7 @@ fn fmt_guid(
 #[cfg(test)]
 mod test {
     use super::*;
-    
+
     #[test]
     fn zero_guid() {
         let guid = GUID::zero_guid();
@@ -329,7 +329,7 @@ mod test {
             data3: 0xcdef,
             data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
         };
-        
+
         assert_eq!( expected, format!( "{}", guid ) );
     }
 
@@ -343,7 +343,7 @@ mod test {
             data3: 0xcdef,
             data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
         };
-        
+
         assert_eq!( expected, format!( "{:x}", guid ) );
     }
 
@@ -357,7 +357,7 @@ mod test {
             data3: 0xcdef,
             data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
         };
-        
+
         assert_eq!( expected, format!( "{:-x}", guid ) );
     }
 
@@ -371,7 +371,7 @@ mod test {
             data3: 0xcdef,
             data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
         };
-        
+
         assert_eq!( expected, format!( "{:X}", guid ) );
     }
 
@@ -385,7 +385,7 @@ mod test {
             data3: 0xcdef,
             data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
         };
-        
+
         assert_eq!( expected, format!( "{:-X}", guid ) );
     }
 }

@@ -13,7 +13,7 @@ namespace intercom
     /**
      * @brief Returns the last WINAPI error as an error message.
      */
-    inline std::string get_last_error() 
+    inline std::string get_last_error()
     {
         // Get the error message, if any.
         DWORD error = GetLastError();
@@ -70,7 +70,7 @@ namespace intercom
                 utf8_string, utf8_len,
                 *bstr_string, required_size );
 
-        if( written != required_size ) 
+        if( written != required_size )
         {
             std::string err_msg = get_last_error();
             intercom::free_bstr( *bstr_string );
@@ -123,7 +123,7 @@ namespace intercom
                 *utf8_string, _internal::checked_cast< int >( required_size ),
                 nullptr, nullptr );
 
-        if( written != required_size ) 
+        if( written != required_size )
         {
             std::string err_msg = get_last_error();
             intercom::free_string< char >( *utf8_string );

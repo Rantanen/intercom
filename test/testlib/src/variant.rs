@@ -112,7 +112,7 @@ impl VariantTests
         // Return the result depending on what we got.
         match r {
             Ok( true ) => Ok(()),
-            Ok( false ) => 
+            Ok( false ) =>
                     Err( ComError::E_INVALIDARG.with_message(
                             format!( "Bad data: {}", data ) ) ),
             Err( e ) => e

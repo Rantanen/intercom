@@ -24,17 +24,17 @@ std::tuple< const char*, const char16_t*, const char* > test_data[] = {
 			nullptr,
 			u8""
 	),
-	std::make_tuple( 
+	std::make_tuple(
 			"\"Test\"",
 			u"Test",
 			u8"Test"
 	),
-	std::make_tuple( 
+	std::make_tuple(
 			"Multibyte UTF-8",  // Scandinavian letters: öäå
 			u"\u00f6\u00e4\u00e5",
 			u8"\u00f6\u00e4\u00e5"
 	),
-	std::make_tuple( 
+	std::make_tuple(
 			"Multibyte UTF-16",  // Crab: 🦀
 			u"\U0001F980",
 			u8"\U0001F980"

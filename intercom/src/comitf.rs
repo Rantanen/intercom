@@ -29,7 +29,7 @@ pub struct ComItf<T> where T: ?Sized {
 
 impl<T: ?Sized> std::fmt::Debug for ComItf<T> {
     fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
-        write!( f, "ComItf(automation = {:?}, raw = {:?})", 
+        write!( f, "ComItf(automation = {:?}, raw = {:?})",
                 self.automation_ptr, self.raw_ptr )
     }
 }
@@ -170,7 +170,7 @@ impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized> std::convert::TryFrom<&
         let iunk : &ComItf<IUnknown> = source.as_ref();
 
         let mut err = None;
-        
+
         // Try each type system.
         for &ts in &[ TypeSystem::Raw, TypeSystem::Automation ] {
             if let Some( iid ) = T::iid( ts ) {
