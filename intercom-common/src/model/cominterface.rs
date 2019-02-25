@@ -148,7 +148,7 @@ impl ComInterface
                 let methods = fns.iter()
                         .map( | sig |
                             ComMethodInfo::new( sig, ts ) )
-                        .filter_map( |r| r.ok() )
+                        .filter_map( Result::ok )
                         .collect::<Vec<_>>();
 
                 Ok( ( ts, ComInterfaceVariant {

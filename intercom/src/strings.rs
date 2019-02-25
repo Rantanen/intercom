@@ -533,7 +533,7 @@ impl<'a> FromWithTemporary<'a, &'a CStr>
 
     fn to_temporary( cstr : &'a CStr ) -> Result<Self::Temporary, ComError> {
         cstr.to_str()
-            .map( |s| s.to_string() )
+            .map( ToString::to_string )
             .map_err( |_| ComError::E_INVALIDARG )
     }
 
@@ -553,7 +553,7 @@ impl<'a> FromWithTemporary<'a, &'a CStr>
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
         temp.to_str()
-            .map( |s| s.to_string() )
+            .map( ToString::to_string )
             .map_err( |_| ComError::E_INVALIDARG )
     }
 }

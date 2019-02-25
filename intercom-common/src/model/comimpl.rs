@@ -70,7 +70,7 @@ impl ComImpl
             let methods = fns.iter()
                 .map( | sig |
                     ComMethodInfo::new( sig, ts ).map_err( |_| sig.ident.clone() ) )
-                .filter_map( |r| r.ok() )
+                .filter_map( Result::ok )
                 .collect::<Vec<_>>();
 
             ( ts, ComImplVariant {
