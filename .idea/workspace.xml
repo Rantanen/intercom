@@ -1,0 +1,771 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated>
+      <config projectName="intercom" targetName="cpp-raw" />
+      <config projectName="intercom" targetName="intercom" />
+      <config projectName="intercom" targetName="cpp-wrapper" />
+      <config projectName="intercom" targetName="runpath" />
+      <config projectName="intercom" targetName="cpp-utility" />
+      <config projectName="intercom" targetName="testlib" />
+      <config projectName="intercom" targetName="multilib" />
+      <config projectName="intercom" targetName="cpp-dl" />
+    </generated>
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="888e776d-6f91-4ac8-90f0-50ce9f220311" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/intercom/src/serialization.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/intercom-common/src/attributes/com_class.rs" beforeDir="false" afterPath="$PROJECT_DIR$/intercom-common/src/attributes/com_class.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/intercom-common/src/attributes/com_interface.rs" beforeDir="false" afterPath="$PROJECT_DIR$/intercom-common/src/attributes/com_interface.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/intercom-common/src/tyhandlers.rs" beforeDir="false" afterPath="$PROJECT_DIR$/intercom-common/src/tyhandlers.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/intercom/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/intercom/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/intercom/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/intercom/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/intercom/src/type_system.rs" beforeDir="false" afterPath="$PROJECT_DIR$/intercom/src/type_system.rs" afterDir="false" />
+    </list>
+    <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/intercom/src/serialization.rs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="556">
+              <caret line="63" lean-forward="true" selection-start-line="63" selection-end-line="63" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/intercom/src/type_system.rs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="15">
+              <caret line="1" column="17" selection-start-line="1" selection-start-column="17" selection-end-line="1" selection-end-column="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/intercom-common/src/attributes/com_class.rs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="481">
+              <caret line="261" column="19" selection-start-line="261" selection-start-column="19" selection-end-line="261" selection-end-column="19" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/intercom-common/src/attributes/com_interface.rs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="168">
+              <caret line="390" selection-start-line="390" selection-end-line="390" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/intercom-common/src/model/comlibrary.rs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="203">
+              <caret line="28" column="5" selection-start-line="28" selection-start-column="5" selection-end-line="28" selection-end-column="5" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/intercom-common/src/model/macros.rs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="375">
+              <caret line="110" column="69" selection-start-line="110" selection-start-column="69" selection-end-line="110" selection-end-column="69" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/intercom-common/src/attributes/com_impl.rs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="390">
+              <caret line="26" column="4" selection-start-line="26" selection-start-column="4" selection-end-line="26" selection-end-column="29" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/intercom-common/src/attributes/com_library.rs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="480">
+              <caret line="42" column="5" selection-start-line="42" selection-start-column="5" selection-end-line="42" selection-end-column="5" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/intercom-common/src/model/cominterface.rs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1860">
+              <caret line="33" column="11" selection-start-line="33" selection-start-column="11" selection-end-line="33" selection-end-column="11" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/intercom-common/src/tyhandlers.rs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="645">
+              <caret line="67" column="75" selection-start-line="67" selection-start-column="75" selection-end-line="67" selection-end-column="75" />
+              <folding>
+                <element signature="e#2678#2679#0" expanded="true" />
+                <element signature="e#2720#2721#0" expanded="true" />
+                <element signature="e#2985#2986#0" expanded="true" />
+                <element signature="e#3014#3015#0" expanded="true" />
+                <element signature="e#3691#3692#0" expanded="true" />
+                <element signature="e#3772#3773#0" expanded="true" />
+                <element signature="e#4040#4041#0" expanded="true" />
+                <element signature="e#4070#4071#0" expanded="true" />
+                <element signature="e#6152#6202#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Rust File" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>HRESULt</find>
+      <find>mod</find>
+      <find>Generics</find>
+      <find>punctuated</find>
+      <find>split_for_impl</find>
+      <find>BirectionalTypeInfo</find>
+      <find>NamedT</find>
+      <find>NamedType</find>
+      <find>as</find>
+      <find>ComLibraryAttrParam</find>
+      <find>args()</find>
+      <find>dbg!(</find>
+      <find>json</find>
+      <find>dbg</find>
+      <find>std::prelude::v1:</find>
+      <find>extern crate intercom</find>
+      <find>return Ok( path );</find>
+      <find>dbg!</find>
+    </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/intercom/src/bstr.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/model/comstruct.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/returnhandlers.rs" />
+        <option value="$PROJECT_DIR$/intercom/src/combox.rs" />
+        <option value="$PROJECT_DIR$/intercom/src/error.rs" />
+        <option value="$PROJECT_DIR$/intercom-cli/src/main.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/methodinfo.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/comty.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/generators/cpp.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/attributes/named_type.rs" />
+        <option value="$PROJECT_DIR$/intercom/src/variant.rs" />
+        <option value="$PROJECT_DIR$/intercom-attributes/src/lib.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/attributes/type_info.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/utils.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/type_parser.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/model/json.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/lib.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/model/mod.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/json.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/attributes/json.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/attributes/mod.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/Cargo.toml" />
+        <option value="$PROJECT_DIR$/intercom/src/lib.rs" />
+        <option value="$PROJECT_DIR$/intercom/Cargo.toml" />
+        <option value="$PROJECT_DIR$/intercom/src/type_system.rs" />
+        <option value="$PROJECT_DIR$/intercom/src/json.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/idents.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/tyhandlers.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/model/cominterface.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/model/comlibrary.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/attributes/com_class.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/attributes/com_library.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/model/macros.rs" />
+        <option value="$PROJECT_DIR$/intercom-common/src/attributes/com_interface.rs" />
+        <option value="$PROJECT_DIR$/intercom/src/serialization.rs" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="y" value="1200" />
+    <option name="width" value="1920" />
+    <option name="height" value="1146" />
+  </component>
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="intercom" type="b2602c69:ProjectViewProjectNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="intercom" type="b2602c69:ProjectViewProjectNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="intercom" type="b2602c69:ProjectViewProjectNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="intercom" type="b2602c69:ProjectViewProjectNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+              <item name="intercom-attributes" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="intercom" type="b2602c69:ProjectViewProjectNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+              <item name="intercom-attributes" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="intercom" type="b2602c69:ProjectViewProjectNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+              <item name="intercom-cli" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="intercom" type="b2602c69:ProjectViewProjectNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+              <item name="intercom-common" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="intercom" type="b2602c69:ProjectViewProjectNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+              <item name="intercom-common" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="intercom" type="b2602c69:ProjectViewProjectNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+              <item name="intercom-common" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="attributes" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="intercom" type="b2602c69:ProjectViewProjectNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+              <item name="intercom-common" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="model" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="intercom" type="b2602c69:ProjectViewProjectNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="intercom" type="b2602c69:ProjectViewProjectNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="testlib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="intercom" type="b2602c69:ProjectViewProjectNode" />
+              <item name="intercom" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="testlib" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$USER_HOME$/.cargo/bin/cargo" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
+    <property name="settings.editor.selected.configurable" value="CPPToolchains" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/intercom/src" />
+      <recent name="$PROJECT_DIR$/intercom-common/src/attributes" />
+      <recent name="$PROJECT_DIR$/intercom-common/src" />
+      <recent name="$PROJECT_DIR$/intercom-common/src/model" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.Build testlib">
+    <configuration name="Build testlib" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="+nightly build" WORKING_DIR="file://$PROJECT_DIR$/test/testlib" PASS_PARENT_ENVS_2="true" PROJECT_NAME="intercom" TARGET_NAME="testlib" CONFIG_NAME="Debug" RUN_PATH="$USER_HOME$/.cargo/bin/cargo">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="cpp-dl" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="intercom" TARGET_NAME="cpp-dl" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="intercom" RUN_TARGET_NAME="cpp-dl">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="cpp-raw" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="intercom" TARGET_NAME="cpp-raw" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="intercom" RUN_TARGET_NAME="cpp-raw">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="cpp-utility" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="intercom" TARGET_NAME="cpp-utility" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="cpp-wrapper" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="intercom" TARGET_NAME="cpp-wrapper" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="intercom" RUN_TARGET_NAME="cpp-wrapper">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="intercom" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="intercom" TARGET_NAME="intercom" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="multilib" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="intercom" TARGET_NAME="multilib" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="runpath" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="intercom" TARGET_NAME="runpath" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.Build testlib" />
+      <item itemvalue="Application.cpp-dl" />
+      <item itemvalue="Application.cpp-raw" />
+      <item itemvalue="Application.cpp-utility" />
+      <item itemvalue="Application.cpp-wrapper" />
+      <item itemvalue="Application.intercom" />
+      <item itemvalue="Application.multilib" />
+      <item itemvalue="Application.runpath" />
+      <item itemvalue="Application.intercom-cli-cpp" />
+    </list>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="888e776d-6f91-4ac8-90f0-50ce9f220311" name="Default Changelist" comment="" />
+      <created>1550170344712</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1550170344712</updated>
+      <workItem from="1550170346590" duration="1903000" />
+      <workItem from="1550340627801" duration="3540000" />
+      <workItem from="1550907643958" duration="16552000" />
+      <workItem from="1550938384207" duration="1048000" />
+      <workItem from="1550946267170" duration="7007000" />
+      <workItem from="1550999734427" duration="9197000" />
+      <workItem from="1551119320852" duration="4515000" />
+      <workItem from="1551201247045" duration="8583000" />
+      <workItem from="1551282276238" duration="5003000" />
+      <workItem from="1551534841992" duration="7259000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="64607000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="0" y="1200" width="1920" height="1146" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.19743863" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" visible="true" weight="0.32907662" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32907662" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39980355" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Database Changes" order="7" />
+      <window_info anchor="bottom" id="Messages" order="8" weight="0.37819254" />
+      <window_info anchor="bottom" id="Terminal" order="9" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
+      <window_info anchor="bottom" id="Version Control" order="11" />
+      <window_info anchor="bottom" id="CMake" order="12" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Cargo" order="3" />
+      <window_info anchor="right" id="Database" order="4" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/intercom-common/src/idents.rs</url>
+          <line>14</line>
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/intercom-common/src/attributes/com_library.rs</url>
+          <line>23</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/test/testlib/src/stateful.rs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/testlib/src/type_system_callbacks.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="6" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/testlib/src/primitive.rs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file:///usr/src/debug/sys-libs/glibc-2.27-r6/glibc-2.27/malloc/malloc.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="2956" column="64" selection-start-line="2956" selection-start-column="64" selection-end-line="2956" selection-end-column="64" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/src/debug/sys-libs/glibc-2.27-r6/glibc-2.27/sysdeps/unix/sysv/linux/futex-internal.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="254">
+          <caret line="92" column="17" lean-forward="true" selection-start-line="92" selection-start-column="17" selection-end-line="92" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/syn-0.15.23/src/lib.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="9600">
+          <caret line="640" column="7" selection-start-line="640" selection-start-column="7" selection-end-line="640" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-0.4.24/src/lib.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1245">
+          <caret line="83" column="11" selection-start-line="83" selection-start-column="11" selection-end-line="83" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/generators/cpp.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3825">
+          <caret line="255" selection-start-line="255" selection-end-line="255" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src/liballoc/vec.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15105">
+          <caret line="1018" column="11" selection-start-line="1018" selection-start-column="11" selection-end-line="1018" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/utils.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="17" column="2" selection-start-line="17" selection-start-column="2" selection-end-line="17" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="19" column="20" selection-start-line="19" selection-start-column="20" selection-end-line="19" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/methodinfo.rs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/returnhandlers.rs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/comty.rs" />
+    <entry file="file://$USER_HOME$/.cargo/registry/src/github.com-1ecc6299db9ec823/quote-0.6.10/src/lib.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="320" column="13" selection-start-line="320" selection-start-column="13" selection-end-line="320" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/type_parser.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="8" selection-start-line="3" selection-start-column="8" selection-end-line="3" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/foreign_ty.rs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/builtin_model.rs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/model/comcrate.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1260">
+          <caret line="84" selection-start-line="84" selection-end-line="84" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/lib.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="21" selection-start-line="21" selection-end-line="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/ast_converters.rs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/model/mod.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="465">
+          <caret line="31" column="48" selection-start-line="31" selection-start-column="48" selection-end-line="31" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/attributes/type_info.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="36" selection-start-line="36" selection-end-line="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom/src/prelude.rs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom/src/interfaces.rs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom/Cargo.toml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="22" column="32" selection-start-line="22" selection-start-column="32" selection-end-line="22" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom/src/variant.rs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom/src/guid.rs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-cli/Cargo.toml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/Cargo.toml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="17" column="20" selection-start-line="17" selection-start-column="20" selection-end-line="17" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-attributes/src/lib.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="691">
+          <caret line="137" column="22" selection-start-line="137" selection-start-column="22" selection-end-line="137" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/idents.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="510">
+          <caret line="43" column="52" selection-start-line="43" selection-start-column="52" selection-end-line="43" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/attributes/mod.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom/src/lib.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="822">
+          <caret line="87" column="22" selection-start-line="87" selection-start-column="22" selection-end-line="87" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/testlib/src/return_interfaces.rs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/model/comstruct.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1290">
+          <caret line="90" column="34" selection-start-line="90" selection-start-column="34" selection-end-line="90" selection-end-column="43" />
+          <folding>
+            <element signature="e#532#622#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/testlib/src/lib.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="16" selection-start-line="5" selection-start-column="16" selection-end-line="5" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom/intercom_expand.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="870">
+          <caret line="58" column="4" selection-start-line="58" selection-start-column="4" selection-end-line="58" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/testlib/build.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="5" selection-start-line="5" selection-end-line="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/attributes/common.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="17" column="7" selection-start-line="17" selection-start-column="7" selection-end-line="17" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/prelude.rs">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/tyhandlers.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="645">
+          <caret line="67" column="75" selection-start-line="67" selection-start-column="75" selection-end-line="67" selection-end-column="75" />
+          <folding>
+            <element signature="e#2678#2679#0" expanded="true" />
+            <element signature="e#2720#2721#0" expanded="true" />
+            <element signature="e#2985#2986#0" expanded="true" />
+            <element signature="e#3014#3015#0" expanded="true" />
+            <element signature="e#3691#3692#0" expanded="true" />
+            <element signature="e#3772#3773#0" expanded="true" />
+            <element signature="e#4040#4041#0" expanded="true" />
+            <element signature="e#4070#4071#0" expanded="true" />
+            <element signature="e#6152#6202#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/attributes/com_impl.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="26" column="4" selection-start-line="26" selection-start-column="4" selection-end-line="26" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/model/cominterface.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1860">
+          <caret line="33" column="11" selection-start-line="33" selection-start-column="11" selection-end-line="33" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/model/comlibrary.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="203">
+          <caret line="28" column="5" selection-start-line="28" selection-start-column="5" selection-end-line="28" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/attributes/com_class.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="481">
+          <caret line="261" column="19" selection-start-line="261" selection-start-column="19" selection-end-line="261" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/attributes/com_library.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="480">
+          <caret line="42" column="5" selection-start-line="42" selection-start-column="5" selection-end-line="42" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/model/macros.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="110" column="69" selection-start-line="110" selection-start-column="69" selection-end-line="110" selection-end-column="69" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom/src/type_system.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="17" selection-start-line="1" selection-start-column="17" selection-end-line="1" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom-common/src/attributes/com_interface.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="390" selection-start-line="390" selection-end-line="390" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intercom/src/serialization.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="556">
+          <caret line="63" lean-forward="true" selection-start-line="63" selection-end-line="63" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

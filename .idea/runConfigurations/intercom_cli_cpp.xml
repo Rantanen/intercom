@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="intercom-cli-cpp" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="cpp ../../test/testlib" PASS_PARENT_ENVS_2="true" PROJECT_NAME="intercom" TARGET_NAME="intercom" CONFIG_NAME="Debug" RUN_PATH="$PROJECT_DIR$/target/debug/intercom-cli">
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>
