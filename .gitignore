@@ -12,6 +12,7 @@ build
 CMakeFiles
 Makefile
 generated
+cmake-*
 
 # Dolphin metadata
 .directory
