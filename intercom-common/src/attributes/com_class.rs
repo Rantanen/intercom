@@ -6,7 +6,7 @@ use idents;
 use utils;
 use model;
 
-use tyhandlers::{ModelTypeSystem};
+use tyhandlers::{ModelTypeSystem, get_type_systems};
 
 /// Expands the `com_class` attribute.
 ///
@@ -209,5 +209,48 @@ pub fn expand_com_class(
         output.push( clsid_const );
     }
 
+    // Methods for getting stuct descriptos.
+    output.push( get_type_descriptor_helpers( struct_ident, cls.interfaces() ) );
+
     Ok( tokens_to_tokenstream( item_tokens, output ) )
 }
+
+/// Gets helper functions for serializing the com class.
+fn get_type_descriptor_helpers(
+    class_ident: &syn::Ident,
+    interfaces: &[syn::Ident],
+) -> TokenStream{
+
+
+    let get_com_class_method = format!( "get_com_class_for_{}", class_ident );
+    let get_com_class_method = Ident::new(&get_com_class_method, Span::call_site());
+    let get_interfaces_method = format!( "get_interfaces_for_{}", class_ident );
+    let get_interfaces_method = Ident::new(&get_interfaces_method, Span::call_site());
+
+    // Determine method names for getting full interface descriptions.
+    let mut get_interface: Vec<syn::Ident> = Vec::new();
+    for type_system in get_type_systems()
+    {
+        get_interface.extend( interfaces.iter(). map( |itf|
+                Ident::new( &format!( "get_com_interface_for_{}_{}", itf, type_system.name() ), Span::call_site() ) ) );
+    }
+    let get_interface = get_interface;
+
+
+    let result = quote!(
+
+        /// Gets type description of the #class_ident COM class.
+        fn #get_com_class_method () -> intercom::serialization::ComClass {
+            intercom::serialization::ComClass::new( stringify!( #class_ident ).to_string() )
+        }
+
+        /// Gets the interfaces of the #class_ident COM class.
+        fn #get_interfaces_method () -> Vec<intercom::serialization::ComInterface> {
+            vec![ #( #get_interface () ),* ]
+        }
+
+    );
+    // dbg!( result );
+    result
+}
+

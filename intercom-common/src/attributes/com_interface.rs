@@ -291,6 +291,10 @@ fn process_itf_variant(
                 rust_to_com_delegate( itf_variant, method_info, &vtable_ident ) );
     }
 
+    // Methods for retrieving interface variant descriptions.
+    output.push( get_type_descriptor_helpers_for_variants(
+            &itf_variant.type_system(), itf_variant.unique_name() ) );
+
     // Create the vtable. We've already gathered all the vtable method
     // pointer fields so defining the struct is simple enough.
     output.push( quote!(
@@ -383,4 +387,25 @@ fn rust_to_com_delegate(
             Err( err ) => < #return_ty as ::intercom::ErrorValue >::from_com_error( err ),
         };
     )
+}
+
+/// Gets helper functions for serializing the com class.
+fn get_type_descriptor_helpers_for_variants(
+    type_system: &ModelTypeSystem,
+    interface_variant: &syn::Ident,
+) -> TokenStream {
+
+
+    let get_com_interface_method = format!( "get_com_interface_for_{}", interface_variant );
+    let get_com_interface_method = Ident::new(&get_com_interface_method, Span::call_site());
+
+    let result = quote!(
+
+        /// Gets type description of the #interface_variant COM class.
+        fn #get_com_interface_method () -> intercom::serialization::ComInterface {
+            intercom::serialization::ComInterface::new( stringify!( #interface_variant ).to_string() )
+        }
+    );
+    //dbg!( result );
+    result
 }

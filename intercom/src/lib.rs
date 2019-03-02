@@ -84,7 +84,8 @@ mod interfaces;
 pub mod runtime;
 pub mod alloc;
 mod variant; pub use variant::{Variant, VariantError};
-pub mod type_system; pub use type_system::{ BidirectionalTypeInfo, InputTypeInfo, OutputTypeInfo };
+pub mod type_system; pub use type_system::{ ComItemCategory, ItemInfo, BidirectionalTypeInfo, InputTypeInfo, OutputTypeInfo };
+pub mod serialization;
 
 // intercom_attributes use "intercom::" to qualify things in this crate.
 // Declare such module here and import everything we have in it to make those

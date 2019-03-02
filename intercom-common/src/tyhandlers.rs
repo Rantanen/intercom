@@ -43,6 +43,14 @@ pub enum ModelTypeSystem {
 
 impl ModelTypeSystem {
 
+    /// Gets the name of the type system.
+    pub fn name( self ) -> Ident {
+        match self {
+            ModelTypeSystem::Automation => Ident::new( stringify!( Automation ), Span::call_site() ),
+            ModelTypeSystem::Raw => Ident::new( stringify!( Raw ), Span::call_site() ),
+        }
+    }
+
     /// Converts the model type system into public type system tokens.
     pub fn as_tokens( self ) -> TokenStream {
         match self {
@@ -70,6 +78,11 @@ impl ModelTypeSystem {
                     parse_quote!( ::intercom::type_system::RawTypeSystem ),
         }
     }
+}
+
+/// Gets available type system.
+pub fn get_type_systems() -> &'static [ModelTypeSystem] {
+    &[ ModelTypeSystem::Automation, ModelTypeSystem::Raw ]
 }
 
 /// Type usage context.
