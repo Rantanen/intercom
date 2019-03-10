@@ -12,8 +12,8 @@ impl std::cmp::Eq for TypeSystemName {}
 
 /// Common trait for type systems.
 pub trait TypeSystem : Clone + Copy {
-    const Automation : TypeSystemName = TypeSystemName::Automation;
-    const Raw : TypeSystemName = TypeSystemName::Raw;
+    const AUTOMATION : TypeSystemName = TypeSystemName::Automation;
+    const RAW : TypeSystemName = TypeSystemName::Raw;
 
     fn key() -> TypeSystemName;
 }

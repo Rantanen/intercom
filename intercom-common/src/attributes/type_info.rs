@@ -1,14 +1,7 @@
 
 use prelude::*;
 
-use std::iter;
-
-use tyhandlers::{Direction};
-use idents;
-use model;
-
 extern crate proc_macro;
-use self::proc_macro::TokenStream;
 
 
 /// Expands the `BidirectionalTypeInfo` derive attribute.

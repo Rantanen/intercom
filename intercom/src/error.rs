@@ -3,7 +3,7 @@ use std::error::Error;
 use std::convert::TryFrom;
 
 use super::*;
-use type_system::{TypeSystem, AutomationTypeSystem};
+use type_system::{AutomationTypeSystem};
 
 /// Error structure containing the available information on a COM error.
 #[derive(Debug)]

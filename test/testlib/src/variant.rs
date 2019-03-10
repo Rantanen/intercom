@@ -1,6 +1,6 @@
 
 use intercom::*;
-use std::convert::{TryInto, TryFrom};
+use std::convert::{TryInto};
 use std::time::SystemTime;
 use chrono::prelude::*;
 
@@ -192,7 +192,6 @@ impl VariantTests
         variant : Variant
     ) -> ComResult<Variant> {
 
-        use std::convert::TryFrom;
         match variant {
             Variant::IUnknown( iunk ) => {
                 match ComItf::query_interface::<IVariantInterface>( &iunk ) {

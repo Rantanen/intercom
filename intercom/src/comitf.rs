@@ -1,7 +1,7 @@
 
 use super::*;
 use std::marker::PhantomData;
-use type_system::{TypeSystem, TypeSystemName, RawTypeSystem, AutomationTypeSystem};
+use type_system::{TypeSystem, RawTypeSystem, AutomationTypeSystem};
 
 /// An incoming COM interface pointer.
 ///
@@ -137,7 +137,7 @@ impl ComItf<IUnknown> {
 
                 // Interface was available. Convert the raw pointer into
                 // a strong type-system specific InterfacePtr.
-                let target_itf = unsafe {
+                let target_itf = {
                     raw::InterfacePtr::<TS, TTarget>::new( ptr )
                 };
                 let itf = ComItf::maybe_wrap( target_itf )
@@ -176,14 +176,14 @@ trait PointerOperations : TypeSystem + Sized {
 impl<TS: TypeSystem> PointerOperations for TS {
 
     default fn wrap_ptr<I: ?Sized>(
-        ptr: ::raw::InterfacePtr<Self, I>
+        _ptr: ::raw::InterfacePtr<Self, I>
     ) -> ComItf<I>
     {
         panic!( "Not implemented" );
     }
 
     default fn get_ptr<I: ?Sized>(
-        itf: &ComItf<I>
+        _itf: &ComItf<I>
     ) -> ::raw::InterfacePtr<Self, I>
     {
         panic!( "Not implemented" );

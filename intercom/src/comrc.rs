@@ -1,6 +1,6 @@
 
 use super::*;
-use type_system::{TypeSystem, TypeSystemName, AutomationTypeSystem};
+use type_system::{TypeSystem};
 
 /// Reference counted handle to the `ComBox` data.
 ///

@@ -2,9 +2,7 @@ extern crate serde;
 extern crate serde_json;
 extern crate serde_derive;
 
-use prelude::*;
 use std::collections::HashMap;
-use self::serde::{Deserialize, Serialize};
 use self::serde_derive::{Deserialize, Serialize};
 use super::type_system::{ComItemCategory, TypeSystemName};
 
