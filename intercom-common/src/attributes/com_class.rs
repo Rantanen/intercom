@@ -241,11 +241,12 @@ fn get_type_descriptor_helpers(
 
         /// Gets type description of the #class_ident COM class.
         fn #get_com_class_method () -> intercom::serialization::ComClass {
-            intercom::serialization::ComClass::new( stringify!( #class_ident ).to_string() )
+            intercom::serialization::ComClass::new(
+                    stringify!( #class_ident ).to_string(), #get_interfaces_method () )
         }
 
         /// Gets the interfaces of the #class_ident COM class.
-        fn #get_interfaces_method () -> Vec<intercom::serialization::ComInterface> {
+        fn #get_interfaces_method () -> Vec<intercom::serialization::ComInterfaceVariant> {
             vec![ #( #get_interface () ),* ]
         }
 

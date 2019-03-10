@@ -292,8 +292,7 @@ fn process_itf_variant(
     }
 
     // Methods for retrieving interface variant descriptions.
-    output.push( get_type_descriptor_helpers_for_variants(
-            &itf_variant.type_system(), itf_variant.unique_name() ) );
+    output.push( get_type_descriptor_helpers_for_variant( itf_variant ) );
 
     // Create the vtable. We've already gathered all the vtable method
     // pointer fields so defining the struct is simple enough.
@@ -390,20 +389,22 @@ fn rust_to_com_delegate(
 }
 
 /// Gets helper functions for serializing the com class.
-fn get_type_descriptor_helpers_for_variants(
-    type_system: &ModelTypeSystem,
-    interface_variant: &syn::Ident,
+fn get_type_descriptor_helpers_for_variant(
+    itf_variant : &model::ComInterfaceVariant,
 ) -> TokenStream {
 
 
-    let get_com_interface_method = format!( "get_com_interface_for_{}", interface_variant );
+    let itf_name = itf_variant.unique_name();
+    let type_system: syn::Type = itf_variant.type_system().as_typesystem_type();
+    let get_com_interface_method = format!( "get_com_interface_for_{}", itf_name );
     let get_com_interface_method = Ident::new(&get_com_interface_method, Span::call_site());
 
     let result = quote!(
 
         /// Gets type description of the #interface_variant COM class.
-        fn #get_com_interface_method () -> intercom::serialization::ComInterface {
-            intercom::serialization::ComInterface::new( stringify!( #interface_variant ).to_string() )
+        fn #get_com_interface_method () -> intercom::serialization::ComInterfaceVariant {
+            intercom::serialization::ComInterfaceVariant::new(
+                    stringify!( #itf_name ).to_string(), <#type_system as type_system::TypeSystem>::key() )
         }
     );
     //dbg!( result );

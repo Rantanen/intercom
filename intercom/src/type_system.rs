@@ -1,10 +1,14 @@
 extern crate proc_macro;
+extern crate serde_derive;
 use prelude::*;
+use self::serde_derive::{Deserialize, Serialize};
 
+#[derive(Clone, Copy, Serialize, Deserialize, Hash, PartialOrd, PartialEq)]
 pub enum TypeSystemName {
     Automation,
     Raw,
 }
+impl std::cmp::Eq for TypeSystemName {}
 
 /// Common trait for type systems.
 pub trait TypeSystem : Clone + Copy {
@@ -26,6 +30,25 @@ impl TypeSystem for AutomationTypeSystem {
 pub struct RawTypeSystem;
 impl TypeSystem for RawTypeSystem {
     fn key() -> TypeSystemName { TypeSystemName::Raw }
+}
+
+/// Defines the category of a COM item.
+#[derive(Serialize, Deserialize)]
+pub enum ComItemCategory {
+    Class,
+    Interface,
+    Method,
+    Primitive,
+}
+
+/// Defines information of an item.
+pub trait ItemInfo {
+
+    /// The category of the item.
+    fn category() -> ComItemCategory;
+
+    /// The name of the item.
+    fn name() -> &'static str;
 }
 
 
