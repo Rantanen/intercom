@@ -77,7 +77,7 @@ impl ManifestModel {
     /// - `out` - The writer to use for output.
     pub fn write(
         &self,
-        out : &mut Write,
+        out : &mut dyn Write,
     ) -> Result<(), GeneratorError>
     {
         let mut reg = Handlebars::new();

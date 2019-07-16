@@ -397,7 +397,7 @@ impl TypeHandler for StringParam
 pub fn get_ty_handler(
     arg_ty : &Type,
     context : TypeContext,
-) -> Rc<TypeHandler>
+) -> Rc<dyn TypeHandler>
 {
     let type_info = ::type_parser::parse( arg_ty )
             .unwrap_or_else( || panic!( "Type {:?} could not be parsed.", arg_ty ) );
@@ -412,7 +412,7 @@ fn map_by_name(
     name: &str,
     original_type: Type,
     context: TypeContext,
-) -> Rc<TypeHandler> {
+) -> Rc<dyn TypeHandler> {
 
     match name {
 

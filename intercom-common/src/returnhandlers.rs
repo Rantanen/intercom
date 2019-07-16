@@ -242,7 +242,7 @@ pub fn get_return_handler(
     retval_ty : &Option< Type >,
     return_ty : &Option< Type >,
     type_system : ModelTypeSystem,
-) -> Result< Box<ReturnHandler>, () >
+) -> Result< Box<dyn ReturnHandler>, () >
 {
     Ok( match ( retval_ty, return_ty ) {
         ( &None, &None ) => Box::new( VoidHandler ),

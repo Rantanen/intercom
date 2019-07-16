@@ -168,7 +168,7 @@ pub mod raw {
     }
 
     impl<I: ::ComInterface + ?Sized> InterfacePtr<I> {
-        pub fn as_unknown( self ) -> InterfacePtr<::IUnknown> {
+        pub fn as_unknown( self ) -> InterfacePtr<dyn (::IUnknown)> {
             InterfacePtr { ptr : self.ptr, phantom: ::std::marker::PhantomData }
         }
     }

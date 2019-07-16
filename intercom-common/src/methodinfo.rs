@@ -26,7 +26,7 @@ pub struct RustArg {
     pub ty: Type,
 
     /// Type handler.
-    pub handler: Rc<TypeHandler>,
+    pub handler: Rc<dyn TypeHandler>,
 }
 
 impl PartialEq for RustArg {
@@ -67,7 +67,7 @@ pub struct ComArg {
     pub ty: Type,
 
     /// Type handler.
-    pub handler: Rc<TypeHandler>,
+    pub handler: Rc<dyn TypeHandler>,
 
     /// Argument direction. COM uses OUT params while Rust uses return values.
     pub dir : Direction
@@ -151,7 +151,7 @@ pub struct ComMethodInfo {
     pub return_type: Option<Type>,
 
     /// Return value handler.
-    pub returnhandler: Rc<ReturnHandler>,
+    pub returnhandler: Rc<dyn ReturnHandler>,
 
     /// Method arguments.
     pub args: Vec<RustArg>,

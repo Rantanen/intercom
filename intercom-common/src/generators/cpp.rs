@@ -81,7 +81,7 @@ trait CppTypeInfo<'s> {
     ) -> bool;
 }
 
-impl<'s> CppTypeInfo<'s> {
+impl<'s> dyn CppTypeInfo<'s> {
 
     /// Gets the name of a custom type for C++.
     fn get_cpp_name_for_custom_type(
@@ -206,7 +206,7 @@ impl CppModel {
         all_type_systems : bool,
     ) -> Result<CppModel, GeneratorError> {
 
-        let itf_variant_filter : Box<Fn( &( &ModelTypeSystem, &ComInterfaceVariant ) ) -> bool> =
+        let itf_variant_filter : Box<dyn Fn( &( &ModelTypeSystem, &ComInterfaceVariant ) ) -> bool> =
                 match all_type_systems {
                     true => Box::new( | _ | true ),
                     false => Box::new( | ( ts, _ ) | match ts {
@@ -345,7 +345,7 @@ impl CppModel {
     /// - `out` - The writer to use for output.
     pub fn write_header(
         &self,
-        out : &mut Write,
+        out : &mut dyn Write,
     ) -> Result<(), GeneratorError>
     {
         let mut reg = Handlebars::new();
@@ -367,7 +367,7 @@ impl CppModel {
     /// - `out` - The writer to use for output.
     pub fn write_source(
         &self,
-        out : &mut Write,
+        out : &mut dyn Write,
     ) -> Result<(), GeneratorError>
     {
         let mut reg = Handlebars::new();

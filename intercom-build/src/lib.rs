@@ -13,7 +13,7 @@ pub enum BuildError {
 }
 
 impl BuildError {
-    fn print_as_warning( &self, w : &mut Write ) -> Result<(), std::io::Error> {
+    fn print_as_warning( &self, w : &mut dyn Write ) -> Result<(), std::io::Error> {
 
         let msg : std::borrow::Cow<str> = match *self {
             BuildError::ParseError( ref m, .. ) => m.into(),

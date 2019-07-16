@@ -20,7 +20,7 @@ pub enum Variant
     Bool( bool ),
     String( IntercomString ),
     SystemTime( SystemTime ),
-    IUnknown( ComRc<IUnknown> ),
+    IUnknown( ComRc<dyn IUnknown> ),
     Raw( raw::Variant ),
 }
 
@@ -379,16 +379,16 @@ impl From< f32 > for Variant {
     }
 }
 
-impl<T: HasInterface<IUnknown>> From< ComStruct<T> > for Variant {
+impl<T: HasInterface<dyn IUnknown>> From< ComStruct<T> > for Variant {
     fn from( src : ComStruct<T> ) -> Self {
-        let iunk : ComItf<IUnknown> = src.into();
+        let iunk : ComItf<dyn IUnknown> = src.into();
         Variant::IUnknown( ComRc::attach( iunk ) )
     }
 }
 
 impl<T: ComInterface + ?Sized> From< ComItf<T> > for Variant {
     fn from( src : ComItf<T> ) -> Self {
-        let iunk : &ComItf<IUnknown> = src.as_ref();
+        let iunk : &ComItf<dyn IUnknown> = src.as_ref();
         Variant::IUnknown( ComRc::copy( iunk ) )
     }
 }
@@ -623,7 +623,7 @@ pub mod raw {
         //cyVal : CY,
         pub date : VariantDate,
         pub bstrVal : *mut u16,
-        pub punkVal : ::raw::InterfacePtr<::IUnknown>,
+        pub punkVal : ::raw::InterfacePtr<dyn (::IUnknown)>,
         //*pdispVal : ComItf<IDispatch>,
         //parray : SafeArray,
         pub pbVal : *mut i8,
@@ -637,7 +637,7 @@ pub mod raw {
         //*pcyVal : CY,
         pub pdate : *mut VariantDate,
         pub pbstrVal : *mut *mut u16,
-        pub ppunkVal : *mut ::raw::InterfacePtr<::IUnknown>,
+        pub ppunkVal : *mut ::raw::InterfacePtr<dyn (::IUnknown)>,
         //ppdispVal : *mut ComItf<IDispatch>,
         //pparray : *mut SafeArray,
         pub pvarVal : *mut Variant,

@@ -141,7 +141,7 @@ impl<T: ComInterface + ?Sized> ComItf<T> {
 
     // ComItf is a smart pointer and shouldn't introduce methods on 'self'.
     #[allow(clippy::wrong_self_convention)]
-    pub fn as_unknown( this : &Self ) -> ComItf<IUnknown> {
+    pub fn as_unknown( this : &Self ) -> ComItf<dyn IUnknown> {
         ComItf {
             raw_ptr: this.raw_ptr.as_unknown(),
             automation_ptr: this.automation_ptr.as_unknown(),
@@ -167,7 +167,7 @@ impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized> std::convert::TryFrom<&
 
     fn try_from( source : &ComItf<S> ) -> Result< ComRc<T>, ::ComError >
     {
-        let iunk : &ComItf<IUnknown> = source.as_ref();
+        let iunk : &ComItf<dyn IUnknown> = source.as_ref();
 
         let mut err = None;
 
@@ -225,9 +225,9 @@ extern "system" {
     ) -> ::raw::HRESULT;
 }
 
-impl<T: ComInterface + ?Sized> AsRef<ComItf<IUnknown>> for ComItf<T>
+impl<T: ComInterface + ?Sized> AsRef<ComItf<dyn IUnknown>> for ComItf<T>
 {
-    fn as_ref( &self ) -> &ComItf<IUnknown> {
-        unsafe { &*( self as *const _ as *const ComItf<IUnknown> ) }
+    fn as_ref( &self ) -> &ComItf<dyn IUnknown> {
+        unsafe { &*( self as *const _ as *const ComItf<dyn IUnknown> ) }
     }
 }
