@@ -146,7 +146,6 @@ impl TypeHandler for ComItfParam {
         let rust_ty = self.rust_ty();
 
         // Extract the interface type T from the ComItf<T> type definition
-        use syn;
         let itf_ty = match rust_ty {
             syn::Type::Path( path ) =>
                 match path.path.segments.last().unwrap().value().arguments {
