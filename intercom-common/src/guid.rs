@@ -100,9 +100,9 @@ impl GUID {
 
             // Convert the hexadecimal character into a numerical value.
             let value : u8 = match chr {
-                b'0'...b'9' => chr - b'0',
-                b'a'...b'f' => chr - b'a' + 10,
-                b'A'...b'F' => chr - b'A' + 10,
+                b'0'..= b'9' => chr - b'0',
+                b'a'..= b'f' => chr - b'a' + 10,
+                b'A'..= b'F' => chr - b'A' + 10,
                 _ => return Err( format!( "Unrecognized character in GUID: {}", chr ) )
             };
 
