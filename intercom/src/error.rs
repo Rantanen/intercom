@@ -221,10 +221,10 @@ mod error_store {
             if let Some( itf ) = store.get() {
                 *errorinfo = ComItf::ptr( &itf, TypeSystem::Automation );
                 reset_error_store( None );
-                return raw::S_OK;
+                raw::S_OK
             } else {
                 *errorinfo = ::raw::InterfacePtr::null();
-                return raw::S_FALSE;
+                raw::S_FALSE
             }
         } )
     }

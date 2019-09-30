@@ -56,7 +56,7 @@ impl GetIdent for FnArg {
                 => Ident::new( "self", Span::call_site() ),
             FnArg::Captured( ref c ) => match c.pat {
                 Pat::Ident( ref i ) => i.ident.clone(),
-                _ => Err( format!( "Unsupported argument: {:?}", self ) )?,
+                _ => return Err( format!( "Unsupported argument: {:?}", self ) ),
             },
             FnArg::Ignored(..) => Ident::new( "_", Span::call_site() ),
             FnArg::Inferred(_)
