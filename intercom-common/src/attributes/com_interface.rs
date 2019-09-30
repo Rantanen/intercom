@@ -356,7 +356,7 @@ fn rust_to_com_delegate(
         // us to handle the results here immediately.
         #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
         let result : Result< #return_ty, ::intercom::ComError > = ( || unsafe {
-            #( #out_arg_declarations )*;
+            #( #out_arg_declarations )*
             let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
 
             let INTERCOM_iid = #iid_tokens;
