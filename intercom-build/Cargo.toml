@@ -1,11 +1,11 @@
 [package]
 name = "intercom-build"
-version = "0.1.0"
+version = "0.3.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 
 [dependencies]
-intercom = { version = "0.2", path = "../intercom" }
-intercom-common = { version = "0.2", path = "../intercom-common" }
+intercom = { version = "0.3", path = "../intercom" }
+intercom-common = { version = "0.3", path = "../intercom-common" }
 winapi = { version = "0.3", features = [ "winreg" ] }
 glob = "0.2"
 cc = "1.0"

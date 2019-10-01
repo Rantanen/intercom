@@ -1,10 +1,10 @@
 [package]
 name = "intercom-fmt"
-version = "0.1.0"
+version = "0.3.0"
 authors = ["Juha Lepola <fluxie@fluxie.fi>"]
 description = "Formats Rust code with \"rustfmt\""
 
 [dependencies]
-intercom-common = { path = "../intercom-common", version = "0.2.0" }
+intercom-common = { path = "../intercom-common", version = "0.3" }
 clap = { version = "2.27.1", default-features = false }
 failure = "0.1"
