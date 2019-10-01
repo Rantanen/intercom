@@ -11,7 +11,7 @@ use intercom::*;
 use std::path::PathBuf;
 use std::ffi::OsString;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
-use ::host;
+use crate::host;
 
 #[allow(dead_code)]
 #[allow(non_upper_case_globals)]
@@ -65,29 +65,29 @@ pub trait IEnumSetupInstances
     fn next(
         &self,
         celt : u32
-    ) -> ComResult< ( ComItf< ISetupInstance >, u32 ) >;
+    ) -> ComResult< ( ComItf<dyn ISetupInstance>, u32 ) >;
 
     fn skip( &self, celt : u32 ) -> ComResult<()>;
 
     fn reset( &self ) -> ComResult<()>;
 
-    fn clone( &self ) -> ComResult< ComItf< IEnumSetupInstances > >;
+    fn clone( &self ) -> ComResult< ComItf<dyn IEnumSetupInstances> >;
 }
 
 #[com_interface( com_iid = "26AAB78C-4A60-49D6-AF3B-3C35BC93365D" )]
 pub trait ISetupConfiguration2
 {
     fn enum_instances( &self )
-        -> ComResult< ComItf< IEnumSetupInstances > >;
+        -> ComResult< ComItf<dyn IEnumSetupInstances> >;
 
     fn get_instance_for_current_process( &self )
-        -> ComResult< ComItf< ISetupInstance > >;
+        -> ComResult< ComItf<dyn ISetupInstance> >;
 
     fn get_instance_for_path( &self, path : String )
-        -> ComResult< ComItf< ISetupInstance > >;
+        -> ComResult< ComItf<dyn ISetupInstance> >;
 
     fn enum_all_instances( &self )
-        -> ComResult< ComItf< IEnumSetupInstances > >;
+        -> ComResult< ComItf<dyn IEnumSetupInstances> >;
 }
 
 pub struct ToolPaths {
@@ -173,14 +173,14 @@ fn get_kit_path() -> Result<( String, String ), String> {
                     .collect::<Vec<_>>();
 
         // Open the Installed Roots registry key.
-        let mut hkey_roots : HKEY = ::std::ptr::null_mut();
+        let mut hkey_roots : HKEY = std::ptr::null_mut();
         let mut disp : DWORD = 0;
         winreg::RegCreateKeyExW(
             winreg::HKEY_LOCAL_MACHINE,
             key.as_slice().as_ptr(),
-            0, ::std::ptr::null_mut(), 0,
+            0,::std::ptr::null_mut(), 0,
             KEY_READ,
-            ::std::ptr::null_mut(),
+            std::ptr::null_mut(),
             &mut hkey_roots,
             &mut disp );
         if hkey_roots.is_null() {
@@ -191,8 +191,8 @@ fn get_kit_path() -> Result<( String, String ), String> {
         let mut buf = Vec::with_capacity( 250 );
         let mut buf_len : DWORD = 250;
         let hr = winreg::RegQueryValueExW(
-                hkey_roots, value.as_slice().as_ptr(), ::std::ptr::null_mut(),
-                ::std::ptr::null_mut(),
+                hkey_roots, value.as_slice().as_ptr(), std::ptr::null_mut(),
+                std::ptr::null_mut(),
                 buf.as_mut_ptr() as *mut _,
                 &mut buf_len );
         if hr != 0 {
@@ -212,10 +212,10 @@ fn get_kit_path() -> Result<( String, String ), String> {
         let hr = winreg::RegEnumKeyExW(
             hkey_roots, 0,
             buf.as_mut_ptr(), &mut buf_len,
-            ::std::ptr::null_mut(),
-            ::std::ptr::null_mut(),
-            ::std::ptr::null_mut(),
-            ::std::ptr::null_mut() );
+            std::ptr::null_mut(),
+            std::ptr::null_mut(),
+            std::ptr::null_mut(),
+            std::ptr::null_mut() );
         if hr != 0 {
             return Err( "Could not read Windows Kits versions".to_owned() );
         }
@@ -238,7 +238,7 @@ fn get_vs_path() -> Result<String, String> {
     let installation_path = {
 
         // Get the COM API entry point for the new VS configuration API.
-        let setup_conf = ComRc::<ISetupConfiguration2>
+        let setup_conf = ComRc::<dyn ISetupConfiguration2>
                 ::create( CLSID_SetupConfiguration ).unwrap();
 
         // Get the first instance.
@@ -309,15 +309,15 @@ pub fn get_tool_paths() -> Result<ToolPaths, String> {
 mod test
 {
     use super::*;
-    use ::std::process::Command;
-    use ::std::path::PathBuf;
+    use std::process::Command;
+    use std::path::PathBuf;
 
     #[test]
     fn get_vs_2017_details() {
         intercom::runtime::initialize().unwrap();
         {
 
-            let setup_conf = ComRc::<ISetupConfiguration2>
+            let setup_conf = ComRc::<dyn ISetupConfiguration2>
                     ::create( CLSID_SetupConfiguration ).unwrap();
             let instances = setup_conf.enum_instances().unwrap();
 
@@ -339,7 +339,7 @@ mod test
     }
 
     fn get_intercom_root() -> PathBuf {
-        let mut root_path = ::std::env::current_exe().unwrap();
+        let mut root_path = std::env::current_exe().unwrap();
         loop {
             if root_path.join( "intercom-build" ).exists() {
                 break;
@@ -419,7 +419,7 @@ mod test
 
         // The HOST env variable is set for build.rs, not for tests.
         // We need to fake one here.
-        ::std::env::set_var( "HOST", "x86_64-pc-windows-msvc" );
+        std::env::set_var( "HOST", "x86_64-pc-windows-msvc" );
 
         let paths = get_tool_paths().unwrap();
         assert!( paths.mt.exists() );

@@ -8,8 +8,8 @@ pub enum TypeSystemName {
 
 /// Common trait for type systems.
 pub trait TypeSystem : Clone + Copy {
-    const Automation : TypeSystemName = TypeSystemName::Automation;
-    const Raw : TypeSystemName = TypeSystemName::Raw;
+    const AUTOMATION : TypeSystemName = TypeSystemName::Automation;
+    const RAW : TypeSystemName = TypeSystemName::Raw;
 
     fn key() -> TypeSystemName;
 }
@@ -128,46 +128,46 @@ impl<TS: TypeSystem, TPtr> ExternType<TS> for *const TPtr {
 }
 
 /// `ComItf` extern type implementation.
-impl<TS: TypeSystem, I: ::ComInterface + ?Sized> ExternType<TS>
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternType<TS>
         for ::ComItf<I> {
 
-    type ExternInputType = ::raw::InterfacePtr<TS, I>;
-    type ExternOutputType = ::raw::InterfacePtr<TS, I>;
-    type OwnedExternType = ::raw::InterfacePtr<TS, I>;
-    type OwnedNativeType = ::raw::InterfacePtr<TS, I>;
+    type ExternInputType = crate::raw::InterfacePtr<TS, I>;
+    type ExternOutputType = crate::raw::InterfacePtr<TS, I>;
+    type OwnedExternType = crate::raw::InterfacePtr<TS, I>;
+    type OwnedNativeType = crate::raw::InterfacePtr<TS, I>;
 }
 
-impl<TS: TypeSystem, I: ::ComInterface + ?Sized>
-    IntercomFrom<::ComItf<I>> for ::raw::InterfacePtr<TS, I>
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
+    IntercomFrom<::ComItf<I>> for crate::raw::InterfacePtr<TS, I>
 {
-    fn intercom_from( source: ::ComItf<I> ) -> ComResult<Self> {
-        Ok( ::ComItf::ptr( &source ) )
+    fn intercom_from( source: crate::ComItf<I> ) -> ComResult<Self> {
+        Ok( crate::ComItf::ptr( &source ) )
     }
 }
 
-impl<TS: TypeSystem, I: ::ComInterface + ?Sized>
-    IntercomFrom<&::ComItf<I>> for ::raw::InterfacePtr<TS, I>
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
+    IntercomFrom<&::ComItf<I>> for crate::raw::InterfacePtr<TS, I>
 {
     fn intercom_from( source: &::ComItf<I> ) -> ComResult<Self> {
         Ok( ::ComItf::ptr( source ) )
     }
 }
 
-impl<TS: TypeSystem, I: ::ComInterface + ?Sized>
-    IntercomFrom<::raw::InterfacePtr<TS, I>> for ::ComItf<I>
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
+    IntercomFrom<::raw::InterfacePtr<TS, I>> for crate::ComItf<I>
 {
-    fn intercom_from( source: ::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
-        ::ComItf::maybe_wrap( source )
-                .ok_or_else( || ::ComError::E_INVALIDARG )
+    fn intercom_from( source: crate::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
+        crate::ComItf::maybe_wrap( source )
+                .ok_or_else( || crate::ComError::E_INVALIDARG )
     }
 }
 
-impl<TS: TypeSystem, I: ::ComInterface + ?Sized>
-    IntercomFrom<&::raw::InterfacePtr<TS, I>> for ::ComItf<I>
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
+    IntercomFrom<&::raw::InterfacePtr<TS, I>> for crate::ComItf<I>
 {
     fn intercom_from( source: &::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
-        ::ComItf::maybe_wrap( source.clone() )
-                .ok_or_else( || ::ComError::E_INVALIDARG )
+        crate::ComItf::maybe_wrap( source.clone() )
+                .ok_or_else( || crate::ComError::E_INVALIDARG )
     }
 }
 

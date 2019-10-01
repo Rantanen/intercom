@@ -329,7 +329,7 @@ fn get_itf_type(
     ty: &::syn::Type
 ) -> Result<Option<&::syn::Type>, GeneratorError>
 {
-    use syn::{self, Type};
+    use syn::{Type};
 
     // Make sure the type is a path specifier.
     let type_path = match ty {

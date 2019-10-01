@@ -1,7 +1,7 @@
 
 use super::*;
 use std::marker::PhantomData;
-use type_system::{TypeSystem, TypeSystemName, RawTypeSystem, AutomationTypeSystem};
+use type_system::{TypeSystem, RawTypeSystem, AutomationTypeSystem};
 
 /// An incoming COM interface pointer.
 ///
@@ -116,7 +116,7 @@ impl<T: ?Sized> ComItf<T> {
     }
 }
 
-impl ComItf<IUnknown> {
+impl ComItf<dyn IUnknown> {
 
     /// Tries to convert the ComRc into a different interface within a single
     /// type system. Used to implement the generic conversion method.
@@ -131,15 +131,13 @@ impl ComItf<IUnknown> {
         } ;
 
         // Try to query interface using the iid.
-        let iunk : &IUnknown = &*self;
+        let iunk : &dyn IUnknown = &*self;
         match iunk.query_interface( iid ) {
             Ok( ptr ) => {
 
                 // Interface was available. Convert the raw pointer into
                 // a strong type-system specific InterfacePtr.
-                let target_itf = unsafe {
-                    raw::InterfacePtr::<TS, TTarget>::new( ptr )
-                };
+                let target_itf = raw::InterfacePtr::<TS, TTarget>::new( ptr );
                 let itf = ComItf::maybe_wrap( target_itf )
                         .ok_or_else( || ComError::E_POINTER )?;
                 Ok( ComRc::attach( itf ) )
@@ -176,14 +174,14 @@ trait PointerOperations : TypeSystem + Sized {
 impl<TS: TypeSystem> PointerOperations for TS {
 
     default fn wrap_ptr<I: ?Sized>(
-        ptr: ::raw::InterfacePtr<Self, I>
+        _ptr: ::raw::InterfacePtr<Self, I>
     ) -> ComItf<I>
     {
         panic!( "Not implemented" );
     }
 
     default fn get_ptr<I: ?Sized>(
-        itf: &ComItf<I>
+        _itf: &ComItf<I>
     ) -> ::raw::InterfacePtr<Self, I>
     {
         panic!( "Not implemented" );
@@ -265,7 +263,7 @@ impl<T: ComInterface + ?Sized> ComItf<T> {
     /// Get the IUnknown interface for the current interface.
     // ComItf is a smart pointer and shouldn't introduce methods on 'self'.
     #[allow(clippy::wrong_self_convention)]
-    pub fn as_unknown( this : &Self ) -> ComItf<IUnknown> {
+    pub fn as_unknown( this : &Self ) -> ComItf<dyn IUnknown> {
         ComItf {
             raw_ptr: this.raw_ptr.as_unknown(),
             automation_ptr: this.automation_ptr.as_unknown(),

@@ -3,7 +3,7 @@ use std::error::Error;
 use std::convert::TryFrom;
 
 use super::*;
-use type_system::{TypeSystem, AutomationTypeSystem};
+use type_system::{AutomationTypeSystem};
 
 /// Error structure containing the available information on a COM error.
 #[derive(Debug)]
@@ -160,13 +160,13 @@ mod error_store {
     extern "system" {
         pub(super) fn SetErrorInfo(
             dw_reserved: u32,
-            errorinfo: ::raw::InterfacePtr<AutomationTypeSystem, IErrorInfo>,
+            errorinfo: ::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
         ) -> raw::HRESULT;
 
         #[allow(private_in_public)]
         pub(super) fn GetErrorInfo(
             dw_reserved: u32,
-            errorinfo: *mut ::raw::InterfacePtr<AutomationTypeSystem, IErrorInfo>,
+            errorinfo: *mut ::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
         ) -> raw::HRESULT;
     }
 }

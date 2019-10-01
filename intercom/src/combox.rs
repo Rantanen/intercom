@@ -1,7 +1,7 @@
 
 use super::*;
 use std::sync::atomic::{ AtomicU32, Ordering };
-use type_system::TypeSystemName;
+use crate::type_system::TypeSystemName;
 
 /// Trait required by any COM coclass type.
 ///

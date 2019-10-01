@@ -133,7 +133,7 @@ pub mod raw {
 
     pub use crate::variant::raw::*;
     pub use crate::error::raw::*;
-    pub use type_system::TypeSystem;
+    pub use crate::type_system::TypeSystem;
 
     #[repr(C)]
     #[derive(PartialEq, Eq)]
