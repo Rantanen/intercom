@@ -1,15 +1,15 @@
 
-use ::prelude::*;
+use crate::prelude::*;
 use super::*;
 use super::macros::*;
 
-use ::guid::GUID;
-use ::ast_converters::*;
-use ::methodinfo::ComMethodInfo;
+use crate::guid::GUID;
+use crate::ast_converters::*;
+use crate::methodinfo::ComMethodInfo;
 use ::syn::{ Ident, Visibility, LitStr };
 use ::ordermap::OrderMap;
 use ::std::iter::FromIterator;
-use ::tyhandlers::{ModelTypeSystem};
+use crate::tyhandlers::{ModelTypeSystem};
 
 intercom_attribute!(
     ComInterfaceAttr< ComInterfaceAttrParam, NoParams > {
@@ -37,7 +37,7 @@ pub struct ComInterface
     visibility : Visibility,
     base_interface : Option<Ident>,
     variants : OrderMap<ModelTypeSystem, ComInterfaceVariant>,
-    item_type: ::utils::InterfaceType,
+    item_type: crate::utils::InterfaceType,
     is_unsafe : bool,
 }
 
@@ -85,7 +85,7 @@ impl ComInterface
         // Get the interface details. As [com_interface] can be applied to both
         // impls and traits this handles both of those.
         let ( itf_ident, fns, itf_type, unsafety ) =
-                ::utils::get_ident_and_fns( item )
+                crate::utils::get_ident_and_fns( item )
                     .ok_or_else( || ParseError::ComInterface(
                             item.get_ident().unwrap().to_string(),
                             "Unsupported associated item".into() ) )?;
@@ -137,7 +137,7 @@ impl ComInterface
                         .map_err( |_| ParseError::ComInterface(
                                 item.get_ident().unwrap().to_string(),
                                 "Bad IID format".into() ) )?,
-                    None => ::utils::generate_iid(
+                    None => crate::utils::generate_iid(
                             crate_name, &itf_unique_ident.to_string(), ts )
                 };
 
@@ -191,7 +191,7 @@ impl ComInterface
     /// The type of the associated item for the #[com_interface] attribute.
     ///
     /// Either an impl or a trait.
-    pub fn item_type( &self ) -> ::utils::InterfaceType { self.item_type }
+    pub fn item_type( &self ) -> crate::utils::InterfaceType { self.item_type }
 
     /// True, if the interface requires unsafe impl.
     pub fn is_unsafe( &self ) -> bool { self.is_unsafe }
@@ -219,7 +219,7 @@ impl ComInterfaceVariant {
 mod test
 {
     use super::*;
-    use tyhandlers::ModelTypeSystem::*;
+    use crate::tyhandlers::ModelTypeSystem::*;
 
     #[test]
     fn parse_com_interface() {

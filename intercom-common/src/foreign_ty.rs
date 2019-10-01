@@ -1,9 +1,9 @@
 extern crate std;
 
-use prelude::*;
-use model::ComCrate;
+use crate::prelude::*;
+use crate::model::ComCrate;
 use syn;
-use type_parser::*;
+use crate::type_parser::*;
 
 pub trait ForeignTypeHandler
 {
@@ -36,7 +36,7 @@ impl ForeignTypeHandler for CTypeHandler
         ty: &'b syn::Type,
     ) -> Option<TypeInfo<'a>>
     {
-        ::type_parser::parse( ty )
+        crate::type_parser::parse( ty )
     }
 }
 
@@ -54,7 +54,7 @@ impl CTypeHandler
             return ty_name.to_owned()
         };
 
-        if itf.item_type() == ::utils::InterfaceType::Struct {
+        if itf.item_type() == crate::utils::InterfaceType::Struct {
             format!( "I{}", ty_name )
         } else {
             ty_name.to_owned()

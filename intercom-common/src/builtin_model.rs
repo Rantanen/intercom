@@ -2,8 +2,8 @@
 //! Defines the default Intercom type model.
 //!
 
-use prelude::*;
-use model::{ ComInterface, ComStruct, ComImpl };
+use crate::prelude::*;
+use crate::model::{ ComInterface, ComStruct, ComImpl };
 
 pub struct BuiltinTypeInfo {
     pub interface: ComInterface,

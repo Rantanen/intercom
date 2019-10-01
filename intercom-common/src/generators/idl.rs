@@ -6,13 +6,13 @@ use std::path::Path;
 
 use super::GeneratorError;
 
-use utils;
-use model;
-use model::{ComCrate, ComInterfaceVariant};
-use ast_converters::GetIdent;
-use tyhandlers::{Direction, ModelTypeSystem, ModelTypeSystemConfig};
-use foreign_ty::*;
-use type_parser::*;
+use crate::utils;
+use crate::model;
+use crate::model::{ComCrate, ComInterfaceVariant};
+use crate::ast_converters::GetIdent;
+use crate::tyhandlers::{Direction, ModelTypeSystem, ModelTypeSystemConfig};
+use crate::foreign_ty::*;
+use crate::type_parser::*;
 
 use handlebars::Handlebars;
 
@@ -279,7 +279,7 @@ impl<'s> dyn IdlTypeInfo<'s> {
             return ty_name.to_owned()
         };
 
-        let base_name = if itf.item_type() == ::utils::InterfaceType::Struct {
+        let base_name = if itf.item_type() == crate::utils::InterfaceType::Struct {
             format!( "I{}", itf.name() )
         } else {
             ty_name.to_string()

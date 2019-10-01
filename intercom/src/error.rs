@@ -134,14 +134,14 @@ impl From<ComError> for raw::HRESULT {
     }
 }
 
-impl<'a> From<&'a str> for ::ComError
+impl<'a> From<&'a str> for crate::ComError
 {
     fn from( s : &'a str ) -> Self {
         s.to_string().into()
     }
 }
 
-impl From<String> for ::ComError
+impl From<String> for crate::ComError
 {
     fn from( s : String ) -> Self {
         Self::new_message( raw::E_FAIL, s )
@@ -199,7 +199,7 @@ mod error_store {
 
     pub(super) unsafe fn SetErrorInfo(
         _dw_reserved: u32,
-        errorinfo: ::raw::InterfacePtr<dyn IErrorInfo>,
+        errorinfo: crate::raw::InterfacePtr<dyn IErrorInfo>,
     ) -> raw::HRESULT {
 
         if errorinfo.ptr.is_null() {
@@ -213,7 +213,7 @@ mod error_store {
 
     pub(super) unsafe fn GetErrorInfo(
         _dw_reserved: u32,
-        errorinfo: *mut ::raw::InterfacePtr<dyn IErrorInfo>,
+        errorinfo: *mut crate::raw::InterfacePtr<dyn IErrorInfo>,
     ) -> raw::HRESULT {
 
         ERROR_STORE.with( |store| {
@@ -223,7 +223,7 @@ mod error_store {
                 reset_error_store( None );
                 raw::S_OK
             } else {
-                *errorinfo = ::raw::InterfacePtr::null();
+                *errorinfo = crate::raw::InterfacePtr::null();
                 raw::S_FALSE
             }
         } )
@@ -324,12 +324,12 @@ pub fn store_error< E >( error : E ) -> ComError
                         info.as_mut(),
                         &IID_IErrorInfo,
                         &mut error_ptr );
-                error_store::SetErrorInfo( 0, ::raw::InterfacePtr::new( error_ptr ) );
+                error_store::SetErrorInfo( 0, crate::raw::InterfacePtr::new( error_ptr ) );
             }
         },
         None => {
             // No error info in the ComError.
-            unsafe { error_store::SetErrorInfo( 0, ::raw::InterfacePtr::null() ); }
+            unsafe { error_store::SetErrorInfo( 0, crate::raw::InterfacePtr::null() ); }
         }
     }
 
@@ -371,8 +371,8 @@ pub fn load_error(
 pub fn get_last_error() -> Option<ErrorInfo>
 {
     // Get the last error COM interface.
-    let mut error_ptr : ::raw::InterfacePtr<dyn IErrorInfo>
-            = ::raw::InterfacePtr::null();
+    let mut error_ptr : crate::raw::InterfacePtr<dyn IErrorInfo>
+            = crate::raw::InterfacePtr::null();
     match unsafe { error_store::GetErrorInfo( 0, &mut error_ptr ) } {
 
         raw::S_OK => {
@@ -408,10 +408,10 @@ pub fn get_last_error() -> Option<ErrorInfo>
 pub trait ErrorValue {
 
     /// Attempts to convert a COM error into a custom status code. Must not panic.
-    fn from_error( ComError ) -> Self;
+    fn from_error( _: ComError ) -> Self;
 
     /// Attempts to convert a COM error into a custom status code. May panic.
-    fn from_com_error( ComError ) -> Self;
+    fn from_com_error( _: ComError ) -> Self;
 }
 
 impl<T> ErrorValue for T {
@@ -487,8 +487,8 @@ impl IErrorStore for ErrorStore
 fn get_error_info() -> ComResult<ComRc<dyn IErrorInfo>>
 {
     // Get the last error COM interface.
-    let mut error_ptr : ::raw::InterfacePtr<dyn IErrorInfo>
-            = ::raw::InterfacePtr::null();
+    let mut error_ptr : crate::raw::InterfacePtr<dyn IErrorInfo>
+            = crate::raw::InterfacePtr::null();
     match unsafe { error_store::GetErrorInfo( 0, &mut error_ptr ) } {
 
         raw::S_OK => {

@@ -9,8 +9,8 @@
 
 use super::*;
 
-use ::ast_converters::*;
-use ::builtin_model;
+use crate::ast_converters::*;
+use crate::builtin_model;
 use ::std::path::{Path, PathBuf};
 use ::std::fs;
 use ::std::io::Read;
@@ -336,8 +336,8 @@ impl ComCrate
 mod test
 {
     use super::*;
-    use guid::GUID;
-    use tyhandlers::ModelTypeSystem::*;
+    use crate::guid::GUID;
+    use crate::tyhandlers::ModelTypeSystem::*;
 
     #[test]
     fn parse_crate() {

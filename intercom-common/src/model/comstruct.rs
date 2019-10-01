@@ -1,9 +1,9 @@
 
-use ::prelude::*;
+use crate::prelude::*;
 use super::*;
 use super::macros::*;
 
-use ::guid::GUID;
+use crate::guid::GUID;
 use ::syn::{Ident, Visibility};
 
 intercom_attribute!(
@@ -57,7 +57,7 @@ impl ComStruct
                 .map_err( |msg| ParseError::ComStruct(
                     item.ident.to_string(), msg ) )?;
         let clsid = match clsid_attr {
-            None => Some( ::utils::generate_clsid(
+            None => Some( crate::utils::generate_clsid(
                     crate_name, &item.ident.to_string() ) ),
             Some( StrOption::Str( clsid ) ) =>
                     Some( GUID::parse( &clsid.value() )

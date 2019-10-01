@@ -1,12 +1,12 @@
 
-use prelude::*;
+use crate::prelude::*;
 use super::common::*;
 
 use std::iter;
 
-use tyhandlers::{Direction};
-use idents;
-use model;
+use crate::tyhandlers::{Direction};
+use crate::idents;
+use crate::model;
 
 extern crate proc_macro;
 use self::proc_macro::TokenStream;

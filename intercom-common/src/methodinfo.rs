@@ -1,12 +1,12 @@
 
-use prelude::*;
+use crate::prelude::*;
 use std::rc::Rc;
 use syn::{ ArgSelfRef, FnArg, FnDecl, MethodSig, PathArguments, ReturnType, Type };
 
-use ast_converters::*;
-use tyhandlers::{Direction, TypeContext, ModelTypeSystem, TypeHandler, get_ty_handler};
-use returnhandlers::{ReturnHandler, get_return_handler};
-use utils;
+use crate::ast_converters::*;
+use crate::tyhandlers::{Direction, TypeContext, ModelTypeSystem, TypeHandler, get_ty_handler};
+use crate::returnhandlers::{ReturnHandler, get_return_handler};
+use crate::utils;
 
 #[derive(Debug, PartialEq)]
 pub enum ComMethodInfoError {
@@ -313,7 +313,7 @@ mod tests {
     use syn::{ Item };
 
     use super::*;
-    use tyhandlers::ModelTypeSystem::*;
+    use crate::tyhandlers::ModelTypeSystem::*;
 
     #[test]
     fn no_args_or_return_value() {

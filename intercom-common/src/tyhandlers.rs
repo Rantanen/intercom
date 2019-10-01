@@ -1,9 +1,9 @@
 
-use ::prelude::*;
+use crate::prelude::*;
 use std::rc::Rc;
 use syn::*;
 
-use ast_converters::*;
+use crate::ast_converters::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Direction { In, Out, Retval }
@@ -398,7 +398,7 @@ pub fn get_ty_handler(
     context : TypeContext,
 ) -> Rc<dyn TypeHandler>
 {
-    let type_info = ::type_parser::parse( arg_ty )
+    let type_info = crate::type_parser::parse( arg_ty )
             .unwrap_or_else( || panic!( "Type {:?} could not be parsed.", arg_ty ) );
 
     map_by_name(
