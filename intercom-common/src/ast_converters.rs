@@ -1,5 +1,5 @@
 
-use prelude::*;
+use crate::prelude::*;
 use syn::{ Attribute, FnArg, GenericArgument, Ident, Item, Pat, Path, Type, TypeReference };
 
 /// Extract the underlying Type from various AST types.

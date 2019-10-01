@@ -9,14 +9,14 @@ use std::path::Path;
 
 use super::GeneratorError;
 
-use tyhandlers::{Direction, ModelTypeSystem, ModelTypeSystemConfig};
-use foreign_ty::*;
-use type_parser::*;
-use guid::*;
-use model;
-use model::{ComCrate, ComInterfaceVariant};
-use ast_converters::GetIdent;
-use utils;
+use crate::tyhandlers::{Direction, ModelTypeSystem, ModelTypeSystemConfig};
+use crate::foreign_ty::*;
+use crate::type_parser::*;
+use crate::guid::*;
+use crate::model;
+use crate::model::{ComCrate, ComInterfaceVariant};
+use crate::ast_converters::GetIdent;
+use crate::utils;
 
 use handlebars::Handlebars;
 
@@ -96,7 +96,7 @@ impl<'s> dyn CppTypeInfo<'s> {
             return ty_name.to_owned()
         };
 
-        let base_name = if itf.item_type() == ::utils::InterfaceType::Struct {
+        let base_name = if itf.item_type() == crate::utils::InterfaceType::Struct {
             format!( "I{}", itf.name() )
         } else {
             ty_name.to_owned()

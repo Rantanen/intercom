@@ -4,7 +4,7 @@
 //!
 //! **Requires the optional `generators` feature**
 
-use model;
+use crate::model;
 
 /// A common error type for all the generators.
 #[derive(Fail, Debug)]

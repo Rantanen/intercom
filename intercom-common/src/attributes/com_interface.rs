@@ -1,15 +1,15 @@
 
-use prelude::*;
+use crate::prelude::*;
 use super::common::*;
 
 use std::iter;
 use std::collections::BTreeMap;
 
-use idents;
-use utils;
-use tyhandlers::{Direction, ModelTypeSystem};
-use model;
-use methodinfo::ComMethodInfo;
+use crate::idents;
+use crate::utils;
+use crate::tyhandlers::{Direction, ModelTypeSystem};
+use crate::model;
+use crate::methodinfo::ComMethodInfo;
 
 extern crate proc_macro;
 

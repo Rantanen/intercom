@@ -9,7 +9,7 @@ use std::{
     str::{ FromStr, Utf8Error }
 };
 
-use intercom::ComError;
+use crate::intercom::ComError;
 
 #[derive(Debug)]
 pub struct FormatError;

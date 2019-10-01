@@ -1,9 +1,9 @@
 
-use prelude::*;
+use crate::prelude::*;
 use syn::{ Type };
-use methodinfo::{ComArg};
-use tyhandlers::{self, TypeContext, ModelTypeSystem, Direction};
-use utils;
+use crate::methodinfo::{ComArg};
+use crate::tyhandlers::{self, TypeContext, ModelTypeSystem, Direction};
+use crate::utils;
 
 /// Defines return handler for handling various different return type schemes.
 pub trait ReturnHandler : ::std::fmt::Debug {

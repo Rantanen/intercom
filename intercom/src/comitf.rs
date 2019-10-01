@@ -153,9 +153,9 @@ impl<T: ComInterface + ?Sized> ComItf<T> {
 impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized>
         std::convert::TryFrom<&ComRc<S>> for ComRc<T> {
 
-    type Error = ::ComError;
+    type Error = crate::ComError;
 
-    fn try_from( source : &ComRc<S> ) -> Result< ComRc<T>, ::ComError >
+    fn try_from( source : &ComRc<S> ) -> Result< ComRc<T>, crate::ComError >
     {
         ComRc::<T>::try_from( &**source )
     }
@@ -163,9 +163,9 @@ impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized>
 
 impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized> std::convert::TryFrom<&ComItf<S>> for ComRc<T> {
 
-    type Error = ::ComError;
+    type Error = crate::ComError;
 
-    fn try_from( source : &ComItf<S> ) -> Result< ComRc<T>, ::ComError >
+    fn try_from( source : &ComItf<S> ) -> Result< ComRc<T>, crate::ComError >
     {
         let iunk : &ComItf<dyn IUnknown> = source.as_ref();
 
@@ -197,7 +197,7 @@ impl<T: ComInterface + ?Sized, S: ComInterface + ?Sized> std::convert::TryFrom<&
         // interfaces. This is a case when the interface doesn't have IID
         // for any of the type systems.
         match err {
-            None => Err( ::ComError::E_FAIL ),
+            None => Err( crate::ComError::E_FAIL ),
             Some( err ) => Err( err.into() ),
         }
     }
