@@ -175,8 +175,8 @@ impl VariantTests
             803 => Ok( Variant::from( CString::new( "text" ).unwrap() ) ),
             11 => Ok( Variant::from( true ) ),
             1301 => Ok( Variant::from( ComStruct::new( VariantImpl ) ) ),
-            1302 => Ok( Variant::from( ComRc::<IUnknown>::from( ComStruct::new( VariantImpl ) ) ) ),
-            1303 => Ok( Variant::from( ComRc::<IVariantInterface>::from( ComStruct::new( VariantImpl ) ) ) ),
+            1302 => Ok( Variant::from( ComRc::<dyn IUnknown>::from( ComStruct::new( VariantImpl ) ) ) ),
+            1303 => Ok( Variant::from( ComRc::<dyn IVariantInterface>::from( ComStruct::new( VariantImpl ) ) ) ),
             16 => Ok( Variant::from( -1i8 ) ),
             17 => Ok( Variant::from( 129u8 ) ),
             18 => Ok( Variant::from( 12929u16 ) ),
@@ -195,7 +195,7 @@ impl VariantTests
         use std::convert::TryFrom;
         match variant {
             Variant::IUnknown( iunk ) => {
-                match ComRc::<IVariantInterface>::try_from( &iunk ) {
+                match ComRc::<dyn IVariantInterface>::try_from( &iunk ) {
                     Ok( itf ) => itf.do_stuff(),
                     Err( e ) => Err( e.with_message(
                             "Interface not supported. IDispatch not supported by tests." ) ),

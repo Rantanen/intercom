@@ -22,7 +22,7 @@ impl ClassCreator {
     pub fn create_child(
         &self,
         id : i32,
-        parent : ComItf<IParent>
+        parent : ComItf<dyn IParent>
     ) -> ComResult<ComItf<CreatedClass>>
     {
         Ok( ComStruct::new(
