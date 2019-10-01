@@ -19,7 +19,7 @@ pub struct ComItf<T> where T: ?Sized {
 
 impl<T: ?Sized> std::fmt::Debug for ComItf<T> {
     fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
-        write!( f, "ComItf(automation = {:?}, raw = {:?})", 
+        write!( f, "ComItf(automation = {:?}, raw = {:?})",
                 self.automation_ptr, self.raw_ptr )
     }
 }
@@ -206,7 +206,7 @@ impl PointerOperations for AutomationTypeSystem {
 
     fn get_ptr<I: ?Sized>(
         itf: &ComItf<I>
-    ) -> ::raw::InterfacePtr<Self, I>
+    ) -> raw::InterfacePtr<Self, I>
     {
         // Get an automation pointer from the ComItf.
         itf.automation_ptr
@@ -215,7 +215,7 @@ impl PointerOperations for AutomationTypeSystem {
 
 impl PointerOperations for RawTypeSystem {
     fn wrap_ptr<I: ?Sized>(
-        ptr: ::raw::InterfacePtr<Self, I>
+        ptr: raw::InterfacePtr<Self, I>
     ) -> ComItf<I>
     {
         // Construct a ComItf from a raw pointer.
@@ -241,7 +241,7 @@ impl<T: ComInterface + ?Sized> ComItf<T> {
     pub fn query_interface<TTarget: ComInterface + ?Sized>( this : &Self ) -> ComResult<ComRc<TTarget>>
     {
         // Get the IUnknown interface.
-        let iunk : &ComItf<IUnknown> = this.as_ref();
+        let iunk : &ComItf<dyn IUnknown> = this.as_ref();
 
         // Try every type system.
         //
@@ -296,9 +296,9 @@ extern "system" {
     ) -> ::raw::HRESULT;
 }
 
-impl<T: ComInterface + ?Sized> AsRef<ComItf<IUnknown>> for ComItf<T>
+impl<T: ComInterface + ?Sized> AsRef<ComItf<dyn IUnknown>> for ComItf<T>
 {
-    fn as_ref( &self ) -> &ComItf<IUnknown> {
-        unsafe { &*( self as *const _ as *const ComItf<IUnknown> ) }
+    fn as_ref( &self ) -> &ComItf<dyn IUnknown> {
+        unsafe { &*( self as *const _ as *const ComItf<dyn IUnknown> ) }
     }
 }

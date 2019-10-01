@@ -58,14 +58,14 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
 
     pub fn copy( itf : &ComItf<T> ) -> ComRc<T> {
 
-        let iunk : &ComItf<IUnknown> = itf.as_ref();
+        let iunk : &ComItf<dyn IUnknown> = itf.as_ref();
         iunk.add_ref();
         ComRc::attach( *itf )
     }
 
     // ComRc is a smart pointer and shouldn't introduce methods on 'self'.
     #[allow(clippy::wrong_self_convention)]
-    pub fn into_unknown( mut other : ComRc<T> ) -> ComRc<IUnknown> {
+    pub fn into_unknown( mut other : ComRc<T> ) -> ComRc<dyn IUnknown> {
 
         let itf = unsafe {
             std::mem::replace( &mut other.itf, ComItf::null_itf() )
@@ -92,7 +92,7 @@ impl<T: ComInterface + ?Sized> ComRc<T>
         unsafe {
 
             // Invoke CoCreateInstance and return a result based on the return
-            // value.  
+            // value.
             let mut out = ::std::ptr::null_mut();
             match CoCreateInstance(
                     clsid,
@@ -118,7 +118,7 @@ impl<T: ComInterface + ?Sized> ComRc<T>
     }
 }
 
-impl<T : ComInterface + ?Sized > ::std::ops::Deref for ::intercom::ComRc< T > {
+impl<T : ComInterface + ?Sized > ::std::ops::Deref for crate::intercom::ComRc< T > {
     type Target = ComItf< T >;
     fn deref( &self ) -> &Self::Target {
         &self.itf

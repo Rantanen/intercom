@@ -1,11 +1,11 @@
 
-use prelude::*;
-use tyhandlers::ModelTypeSystem;
+use crate::prelude::*;
+use crate::tyhandlers::ModelTypeSystem;
 use syn::*;
 
 use super::*;
 
-use ast_converters::*;
+use crate::ast_converters::*;
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum InterfaceType { Trait, Struct }

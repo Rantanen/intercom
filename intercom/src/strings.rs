@@ -10,7 +10,7 @@ use std::{
     os::raw::c_char,
 };
 
-use intercom::{ComError, ComResult};
+use crate::intercom::{ComError, ComResult};
 use type_system::{ExternType, AutomationTypeSystem, RawTypeSystem, IntercomFrom, IntercomInto};
 
 #[derive(Debug)]
@@ -113,7 +113,7 @@ impl BStr {
 
     pub fn to_string( &self ) -> Result<String, FormatError> {
         match self.len_bytes() {
-            x if x % 2 == 0 => 
+            x if x % 2 == 0 =>
                 String::from_utf16( unsafe { std::slice::from_raw_parts(
                         self.as_ptr() as *const u16,
                         x as usize / 2 ) } )
@@ -146,7 +146,7 @@ impl BStr {
 /// On Windows this means allocating the strings using `SysAllocString` or
 /// `SysAllocStringLen` methods and freeing them with `SysFreeString` by
 /// default.
-pub struct BString( 
+pub struct BString(
     // The pointer must be 32-bit aligned.
     *mut u16
 );
@@ -306,7 +306,7 @@ impl<'a, T: Copy> FromWithTemporary<'a, T> for T {
     }
 }
 
-impl<'a> FromWithTemporary<'a, &'a BStr > 
+impl<'a> FromWithTemporary<'a, &'a BStr >
         for BString {
 
     type Temporary = &'a BStr;
@@ -327,7 +327,7 @@ impl<'a> FromWithTemporary<'a, &'a BStr>
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp ) 
+        Ok( &**temp )
     }
 }
 
@@ -345,7 +345,7 @@ impl<'a> FromWithTemporary<'a, &'a BStr>
     }
 }
 
-impl<'a> FromWithTemporary<'a, BString > 
+impl<'a> FromWithTemporary<'a, BString >
         for &'a BStr {
 
     type Temporary = BString;
@@ -359,7 +359,7 @@ impl<'a> FromWithTemporary<'a, BString >
     }
 }
 
-impl<'a> FromWithTemporary<'a, CString > 
+impl<'a> FromWithTemporary<'a, CString >
         for &'a BStr {
 
     type Temporary = BString;
@@ -523,7 +523,7 @@ impl ComFrom<BString> for CString {
 pub type CStr = std::ffi::CStr;
 pub type CString = std::ffi::CString;
 
-impl<'a> FromWithTemporary<'a, &'a CStr > 
+impl<'a> FromWithTemporary<'a, &'a CStr >
         for CString {
 
     type Temporary = &'a CStr;
@@ -541,12 +541,12 @@ impl<'a> FromWithTemporary<'a, &'a CStr>
 
     fn to_temporary( cstr : &'a CStr ) -> Result<Self::Temporary, ComError> {
         cstr.to_str()
-            .map( |s| s.to_string() )
+            .map( ToString::to_string )
             .map_err( |_| ComError::E_INVALIDARG )
     }
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp ) 
+        Ok( &**temp )
     }
 }
 
@@ -561,12 +561,12 @@ impl<'a> FromWithTemporary<'a, &'a CStr>
 
     fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
         temp.to_str()
-            .map( |s| s.to_string() )
+            .map( ToString::to_string )
             .map_err( |_| ComError::E_INVALIDARG )
     }
 }
 
-impl<'a> FromWithTemporary<'a, CString > 
+impl<'a> FromWithTemporary<'a, CString >
         for &'a CStr {
 
     type Temporary = CString;
@@ -580,7 +580,7 @@ impl<'a> FromWithTemporary<'a, CString >
     }
 }
 
-impl<'a> FromWithTemporary<'a, BString > 
+impl<'a> FromWithTemporary<'a, BString >
         for &'a CStr {
 
     type Temporary = CString;
@@ -1067,17 +1067,18 @@ impl IntercomFrom<&CString> for *const c_char {
 impl IntercomFrom<CString> for *mut c_char {
     fn intercom_from( source: CString ) -> ComResult<Self> {
         let bytes = source.as_bytes();
-        let buffer = ::alloc::allocate( bytes.len() + 1 ) as *mut u8;
 
         // We just allocated the memory. This is safe.
         unsafe {
+            let buffer = crate::alloc::allocate( bytes.len() + 1 ) as *mut u8;
             std::ptr::copy_nonoverlapping(
                 bytes.as_ptr(),
                 buffer,
                 bytes.len() );
             *buffer.offset( ( bytes.len() + 1 ) as isize ) = 0;
+
+            Ok( buffer as *mut c_char )
         }
-        Ok( buffer as *mut c_char )
     }
 }
 
@@ -1179,17 +1180,18 @@ impl<'a> IntercomInto<&'a str> for &'a String {
 impl IntercomFrom<String> for *mut c_char {
     fn intercom_from( source: String ) -> ComResult<Self> {
         let bytes = source.as_bytes();
-        let buffer = ::alloc::allocate( bytes.len() + 1 ) as *mut u8;
 
         // We just allocated the memory. This is safe.
         unsafe {
+            let buffer = crate::alloc::allocate( bytes.len() + 1 ) as *mut u8;
             std::ptr::copy_nonoverlapping(
                 bytes.as_ptr(),
                 buffer,
                 bytes.len() );
             *buffer.offset( ( bytes.len() + 1 ) as isize ) = 0;
+
+            Ok( buffer as *mut c_char )
         }
-        Ok( buffer as *mut c_char )
     }
 }
 
@@ -1229,7 +1231,7 @@ mod test {
         ];
 
         for bstr in bstrs {
-            
+
             assert_eq!( bstr.len_bytes(), 6 );
             assert_eq!( bstr.len(), 3 );
 
@@ -1258,7 +1260,7 @@ mod test {
         ];
 
         for bstr in bstrs {
-            
+
             assert_eq!( bstr.len_bytes(), 6 );
             assert_eq!( bstr.len(), 3 );
 

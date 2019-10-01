@@ -22,7 +22,7 @@ library TestLib
     {
         [id(0)]
         uint32 Method([in] uint32 a);
-    
+
     }
 
     [
@@ -35,16 +35,16 @@ library TestLib
     {
         [id(0)]
         BSTR AllocBstr([in] BSTR text, [in] uint32 len);
-    
+
         [id(1)]
         void FreeBstr([in] BSTR bstr);
-    
+
         [id(2)]
         void* Alloc([in] size_t len);
-    
+
         [id(3)]
         void Free([in] void* ptr);
-    
+
     }
 
 
@@ -54,7 +54,7 @@ library TestLib
     ]
     coclass Allocator
     {
-    
+
         interface IAllocator;
     }
 

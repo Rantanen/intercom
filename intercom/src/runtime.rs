@@ -34,14 +34,14 @@ mod os {
 
 #[cfg(not(windows))]
 mod os {
-    pub fn initialize() -> ::raw::HRESULT { ::raw::S_OK }
+    pub fn initialize() -> crate::raw::HRESULT { crate::raw::S_OK }
 
     pub fn uninitialize() {}
 }
 
-pub fn initialize() -> ::RawComResult<()> {
+pub fn initialize() -> crate::RawComResult<()> {
     match os::initialize() {
-        ::raw::S_OK => Ok( () ),
+        crate::raw::S_OK => Ok( () ),
         e => Err( e )
     }
 }

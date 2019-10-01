@@ -1,12 +1,12 @@
 
-use prelude::*;
+use crate::prelude::*;
 use std::rc::Rc;
 use syn::{ ArgSelfRef, FnArg, FnDecl, MethodSig, PathArguments, ReturnType, Type };
 
-use ast_converters::*;
-use tyhandlers::{Direction, TypeContext, ModelTypeSystem, TypeHandler, get_ty_handler};
-use returnhandlers::{ReturnHandler, get_return_handler};
-use utils;
+use crate::ast_converters::*;
+use crate::tyhandlers::{Direction, TypeContext, ModelTypeSystem, TypeHandler, get_ty_handler};
+use crate::returnhandlers::{ReturnHandler, get_return_handler};
+use crate::utils;
 
 #[derive(Debug, PartialEq)]
 pub enum ComMethodInfoError {
@@ -26,7 +26,7 @@ pub struct RustArg {
     pub ty: Type,
 
     /// Type handler.
-    pub handler: Rc<TypeHandler>,
+    pub handler: Rc<dyn TypeHandler>,
 }
 
 impl PartialEq for RustArg {
@@ -67,7 +67,7 @@ pub struct ComArg {
     pub ty: Type,
 
     /// Type handler.
-    pub handler: Rc<TypeHandler>,
+    pub handler: Rc<dyn TypeHandler>,
 
     /// Argument direction. COM uses OUT params while Rust uses return values.
     pub dir : Direction
@@ -151,7 +151,7 @@ pub struct ComMethodInfo {
     pub return_type: Option<Type>,
 
     /// Return value handler.
-    pub returnhandler: Rc<ReturnHandler>,
+    pub returnhandler: Rc<dyn ReturnHandler>,
 
     /// Method arguments.
     pub args: Vec<RustArg>,
@@ -313,7 +313,7 @@ mod tests {
     use syn::{ Item };
 
     use super::*;
-    use tyhandlers::ModelTypeSystem::*;
+    use crate::tyhandlers::ModelTypeSystem::*;
 
     #[test]
     fn no_args_or_return_value() {

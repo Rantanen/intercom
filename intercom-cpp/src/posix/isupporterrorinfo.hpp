@@ -14,19 +14,19 @@ struct IErrorInfo : public IUnknown
 {
 public:
 
-	virtual intercom::HRESULT INTERCOM_CC GetGUID( 
+	virtual intercom::HRESULT INTERCOM_CC GetGUID(
 		intercom::GUID *pGUID) = 0;
-	
-	virtual intercom::HRESULT INTERCOM_CC GetSource( 
+
+	virtual intercom::HRESULT INTERCOM_CC GetSource(
 		intercom::BSTR *pBstrSource) = 0;
-	
-	virtual intercom::HRESULT INTERCOM_CC GetDescription( 
+
+	virtual intercom::HRESULT INTERCOM_CC GetDescription(
 		intercom::BSTR *pBstrDescription) = 0;
-	
-	virtual intercom::HRESULT INTERCOM_CC GetHelpFile( 
+
+	virtual intercom::HRESULT INTERCOM_CC GetHelpFile(
 		intercom::BSTR *pBstrHelpFile) = 0;
-	
-	virtual intercom::HRESULT INTERCOM_CC GetHelpContext( 
+
+	virtual intercom::HRESULT INTERCOM_CC GetHelpContext(
 		intercom::DWORD *pdwHelpContext) = 0;
 };
 

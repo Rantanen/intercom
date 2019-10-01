@@ -62,7 +62,7 @@ namespace
 
 		virtual intercom::HRESULT INTERCOM_CC DoStuff(
 			OUT intercom::VARIANT* pVariant
-		) 
+		)
 		{
 			// Construct allocator. This will be needed for BSTR tests.
 			IAllocator_Automation* pAllocator = nullptr;

@@ -1,5 +1,5 @@
 
-use prelude::*;
+use crate::prelude::*;
 use syn::{ Attribute, FnArg, GenericArgument, Ident, Item, Pat, Path, Type, TypeReference };
 
 /// Extract the underlying Type from various AST types.
@@ -56,7 +56,7 @@ impl GetIdent for FnArg {
                 => Ident::new( "self", Span::call_site() ),
             FnArg::Captured( ref c ) => match c.pat {
                 Pat::Ident( ref i ) => i.ident.clone(),
-                _ => Err( format!( "Unsupported argument: {:?}", self ) )?,
+                _ => return Err( format!( "Unsupported argument: {:?}", self ) ),
             },
             FnArg::Ignored(..) => Ident::new( "_", Span::call_site() ),
             FnArg::Inferred(_)

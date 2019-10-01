@@ -1,12 +1,12 @@
 
-use ::prelude::*;
+use crate::prelude::*;
 use super::*;
 
-use ::ast_converters::*;
-use ::methodinfo::ComMethodInfo;
+use crate::ast_converters::*;
+use crate::methodinfo::ComMethodInfo;
 use ::ordermap::OrderMap;
 use ::std::iter::FromIterator;
-use ::tyhandlers::{ModelTypeSystem};
+use crate::tyhandlers::{ModelTypeSystem};
 
 #[derive(Debug, PartialEq)]
 pub struct ComImpl
@@ -49,7 +49,7 @@ impl ComImpl
     {
         // Resolve the idents and functions.
         let ( itf_ident_opt, struct_ident, fns ) =
-                ::utils::get_impl_data( item )
+                crate::utils::get_impl_data( item )
                     .ok_or_else( || ParseError::ComImpl(
                             item.get_ident().unwrap().to_string(),
                             "<Unknown>".into(),
@@ -70,7 +70,7 @@ impl ComImpl
             let methods = fns.iter()
                 .map( | sig |
                     ComMethodInfo::new( sig, ts ).map_err( |_| sig.ident.clone() ) )
-                .filter_map( |r| r.ok() )
+                .filter_map( Result::ok )
                 .collect::<Vec<_>>();
 
             ( ts, ComImplVariant {
@@ -117,7 +117,7 @@ impl ComImplVariant
 mod test
 {
     use super::*;
-    use tyhandlers::ModelTypeSystem::*;
+    use crate::tyhandlers::ModelTypeSystem::*;
 
     #[test]
     fn parse_com_impl_for_struct() {

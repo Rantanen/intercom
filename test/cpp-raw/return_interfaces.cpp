@@ -93,7 +93,7 @@ TEST_CASE( "Methods accept and return COM objects" )
 
                 // Query for the automation interface to be extra sure we get
                 // an interface that represents that one.
-                // 
+                //
                 // We are getting this into IUnknown pointer as that's the
                 // only interface we need out of it in the end for release.
                 IUnknown* pCreated_qi = nullptr;
@@ -126,7 +126,7 @@ TEST_CASE( "Methods accept and return COM objects" )
 
                 // Query for the automation interface to be extra sure we get
                 // an interface that represents that one.
-                // 
+                //
                 // We are getting this into IUnknown pointer as that's the
                 // only interface we need out of it in the end for release.
                 IUnknown* pCreated_qi = nullptr;
@@ -153,7 +153,7 @@ TEST_CASE( "Methods accept and return COM objects" )
 
                 // Query for the automation interface to be extra sure we get
                 // an interface that represents that one.
-                // 
+                //
                 // We are getting this into IUnknown pointer as that's the
                 // only interface we need out of it in the end for release.
                 IUnknown* pCreated_qi = nullptr;

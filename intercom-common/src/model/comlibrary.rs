@@ -1,8 +1,8 @@
 
-use ::prelude::*;
+use crate::prelude::*;
 use super::*;
 
-use ::guid::GUID;
+use crate::guid::GUID;
 use ::syn::{ LitStr, Path };
 
 intercom_attribute!(
@@ -33,9 +33,9 @@ impl ComLibrary
 
         // The first parameter is the LIBID of the library.
         let libid = match attr.libid().map_err( ParseError::ComLibrary )? {
-            Some( libid ) => GUID::parse( &libid.value() ) 
+            Some( libid ) => GUID::parse( &libid.value() )
                     .map_err( ParseError::ComLibrary )?,
-            None => ::utils::generate_libid( crate_name )
+            None => crate::utils::generate_libid( crate_name )
         } ;
 
         Ok( ComLibrary {

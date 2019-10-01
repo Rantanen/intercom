@@ -1,5 +1,5 @@
 
-use prelude::*;
+use crate::prelude::*;
 
 use std;
 use std::env;
@@ -22,7 +22,7 @@ pub fn tokens_to_tokenstream<T: IntoIterator<Item=TokenStream>>(
 {
     TokenStreamNightly::from_iter(
         std::iter::once( original )
-            .chain( tokens.into_iter().map( |t| t.into() ) ) )
+            .chain( tokens.into_iter().map( Into::into ) ) )
 }
 
 // https://msdn.microsoft.com/en-us/library/984x0h58.aspx

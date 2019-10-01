@@ -94,9 +94,9 @@ impl GUID {
 
             // Convert the hexadecimal character into a numerical value.
             let value : u8 = match chr {
-                b'0'...b'9' => chr - b'0',
-                b'a'...b'f' => chr - b'a' + 10,
-                b'A'...b'F' => chr - b'A' + 10,
+                b'0'..= b'9' => chr - b'0',
+                b'a'..= b'f' => chr - b'a' + 10,
+                b'A'..= b'F' => chr - b'A' + 10,
                 _ => return Err( format!( "Unrecognized character in GUID: {}", chr ) )
             };
 
@@ -254,7 +254,7 @@ fn fmt_guid(
 #[cfg(test)]
 mod test {
     use super::*;
-    
+
     #[test]
     fn zero_guid() {
         let guid = GUID::zero_guid();
@@ -323,7 +323,7 @@ mod test {
             data3: 0xcdef,
             data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
         };
-        
+
         assert_eq!( expected, format!( "{}", guid ) );
     }
 
@@ -337,7 +337,7 @@ mod test {
             data3: 0xcdef,
             data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
         };
-        
+
         assert_eq!( expected, format!( "{:x}", guid ) );
     }
 
@@ -351,7 +351,7 @@ mod test {
             data3: 0xcdef,
             data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
         };
-        
+
         assert_eq!( expected, format!( "{:-x}", guid ) );
     }
 
@@ -365,7 +365,7 @@ mod test {
             data3: 0xcdef,
             data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
         };
-        
+
         assert_eq!( expected, format!( "{:X}", guid ) );
     }
 
@@ -379,7 +379,7 @@ mod test {
             data3: 0xcdef,
             data4: [ 0xfe, 0xdc, 0xba, 0x09, 0x87, 0x65, 0x43, 0x21 ]
         };
-        
+
         assert_eq!( expected, format!( "{:-X}", guid ) );
     }
 }
