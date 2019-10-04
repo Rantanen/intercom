@@ -1,6 +1,6 @@
 
 use super::*;
-use type_system::{TypeSystem, TypeSystemName, AutomationTypeSystem};
+use crate::type_system::{TypeSystem, TypeSystemName, AutomationTypeSystem};
 
 /// Reference counted handle to the `ComBox` data.
 ///
@@ -78,7 +78,7 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
 #[cfg(windows)]
 impl<T: ComInterface + ?Sized> ComRc<T>
 {
-    pub fn create( clsid : GUID ) -> ::ComResult< ComRc<T> > {
+    pub fn create( clsid : GUID ) -> crate::ComResult< ComRc<T> > {
 
         // Get the IID.
         //
@@ -103,7 +103,7 @@ impl<T: ComInterface + ?Sized> ComRc<T>
 
                 // On success construct the ComRc. We are using Automation type
                 // system as that's the IID we used earlier.
-                ::raw::S_OK => {
+                crate::raw::S_OK => {
 
                     // Wrap the pointer into ComItf. This takes care of null checks.
                     let itf = ComItf::maybe_wrap::<AutomationTypeSystem>(

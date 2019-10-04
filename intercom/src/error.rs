@@ -3,7 +3,7 @@ use std::error::Error;
 use std::convert::TryFrom;
 
 use super::*;
-use type_system::{AutomationTypeSystem};
+use crate::type_system::{AutomationTypeSystem};
 
 /// Error structure containing the available information on a COM error.
 #[derive(Debug)]
@@ -160,13 +160,13 @@ mod error_store {
     extern "system" {
         pub(super) fn SetErrorInfo(
             dw_reserved: u32,
-            errorinfo: ::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
+            errorinfo: crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
         ) -> raw::HRESULT;
 
         #[allow(private_in_public)]
         pub(super) fn GetErrorInfo(
             dw_reserved: u32,
-            errorinfo: *mut ::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
+            errorinfo: *mut crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
         ) -> raw::HRESULT;
     }
 }
@@ -368,7 +368,7 @@ pub fn load_error(
 pub fn get_last_error() -> Option<ErrorInfo>
 {
     // Get the last error COM interface.
-    let mut error_ptr : ::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>
+    let mut error_ptr : crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>
             = crate::raw::InterfacePtr::null();
     match unsafe { error_store::GetErrorInfo( 0, &mut error_ptr ) } {
 

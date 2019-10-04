@@ -11,7 +11,7 @@ use std::{
 };
 
 use crate::intercom::{ComError, ComResult};
-use type_system::{ExternType, AutomationTypeSystem, RawTypeSystem, IntercomFrom, IntercomInto};
+use crate::type_system::{ExternType, AutomationTypeSystem, RawTypeSystem, IntercomFrom, IntercomInto};
 
 #[derive(Debug)]
 pub struct FormatError;
@@ -791,43 +791,43 @@ impl ComFrom<IntercomString> for String {
 // Automation type system.
 
 impl ExternType<AutomationTypeSystem> for &str {
-    type ExternInputType = ::raw::InBSTR;
-    type ExternOutputType = ::raw::OutBSTR;
+    type ExternInputType = crate::raw::InBSTR;
+    type ExternOutputType = crate::raw::OutBSTR;
     type OwnedExternType = BString;
     type OwnedNativeType = String;
 }
 
 impl ExternType<AutomationTypeSystem> for String {
-    type ExternInputType = ::raw::InBSTR;
-    type ExternOutputType = ::raw::OutBSTR;
+    type ExternInputType = crate::raw::InBSTR;
+    type ExternOutputType = crate::raw::OutBSTR;
     type OwnedExternType = BString;
     type OwnedNativeType = String;
 }
 
 impl ExternType<AutomationTypeSystem> for &BStr {
-    type ExternInputType = ::raw::InBSTR;
-    type ExternOutputType = ::raw::OutBSTR;
-    type OwnedExternType = ::raw::InBSTR;
+    type ExternInputType = crate::raw::InBSTR;
+    type ExternOutputType = crate::raw::OutBSTR;
+    type OwnedExternType = crate::raw::InBSTR;
     type OwnedNativeType = BString;
 }
 
 impl ExternType<AutomationTypeSystem> for BString {
-    type ExternInputType = ::raw::InBSTR;
-    type ExternOutputType = ::raw::OutBSTR;
+    type ExternInputType = crate::raw::InBSTR;
+    type ExternOutputType = crate::raw::OutBSTR;
     type OwnedExternType = BString;
     type OwnedNativeType = BString;
 }
 
 impl ExternType<AutomationTypeSystem> for &CStr {
-    type ExternInputType = ::raw::InBSTR;
-    type ExternOutputType = ::raw::OutBSTR;
+    type ExternInputType = crate::raw::InBSTR;
+    type ExternOutputType = crate::raw::OutBSTR;
     type OwnedExternType = BString;
     type OwnedNativeType = CString;
 }
 
 impl ExternType<AutomationTypeSystem> for CString {
-    type ExternInputType = ::raw::InBSTR;
-    type ExternOutputType = ::raw::OutBSTR;
+    type ExternInputType = crate::raw::InBSTR;
+    type ExternOutputType = crate::raw::OutBSTR;
     type OwnedExternType = BString;
     type OwnedNativeType = CString;
 }
@@ -878,8 +878,8 @@ impl ExternType<RawTypeSystem> for CString {
 
 // InBSTR -> X
 
-impl IntercomFrom<::raw::InBSTR> for String {
-    fn intercom_from( source: ::raw::InBSTR ) -> ComResult<Self> {
+impl IntercomFrom<crate::raw::InBSTR> for String {
+    fn intercom_from( source: crate::raw::InBSTR ) -> ComResult<Self> {
         unsafe {
             Ok( BStr::from_ptr( source )
                     .to_string()
@@ -888,20 +888,20 @@ impl IntercomFrom<::raw::InBSTR> for String {
     }
 }
 
-impl IntercomFrom<::raw::InBSTR> for BString {
-    fn intercom_from( source: ::raw::InBSTR ) -> ComResult<Self> {
+impl IntercomFrom<crate::raw::InBSTR> for BString {
+    fn intercom_from( source: crate::raw::InBSTR ) -> ComResult<Self> {
         unsafe { Ok( BStr::from_ptr( source ).to_owned() ) }
     }
 }
 
-impl<'a> IntercomFrom<::raw::InBSTR> for &'a BStr {
-    fn intercom_from( source: ::raw::InBSTR ) -> ComResult<Self> {
+impl<'a> IntercomFrom<crate::raw::InBSTR> for &'a BStr {
+    fn intercom_from( source: crate::raw::InBSTR ) -> ComResult<Self> {
         unsafe { Ok( BStr::from_ptr( source ) ) }
     }
 }
 
-impl IntercomFrom<::raw::InBSTR> for CString {
-    fn intercom_from( source: ::raw::InBSTR ) -> ComResult<Self> {
+impl IntercomFrom<crate::raw::InBSTR> for CString {
+    fn intercom_from( source: crate::raw::InBSTR ) -> ComResult<Self> {
         unsafe {
             CString::new(
                     BStr::from_ptr( source ).to_string()
@@ -919,7 +919,7 @@ impl<TPtr, TTarget> IntercomFrom<*mut TPtr> for TTarget
                 ( source as *const TPtr ).intercom_into();
 
         // Free the buffer.
-        unsafe { ::alloc::free( source as *mut _ ); }
+        unsafe { crate::alloc::free( source as *mut _ ); }
 
         bstring
     }
@@ -1025,25 +1025,25 @@ impl<'a> IntercomFrom<*const c_char> for &'a CStr {
 
 // X -> BSTR
 
-impl IntercomFrom<&BStr> for ::raw::InBSTR {
+impl IntercomFrom<&BStr> for crate::raw::InBSTR {
     fn intercom_from( source: &BStr ) -> ComResult<Self> {
         Ok( source.as_ptr() )
     }
 }
 
-impl IntercomFrom<&BString> for ::raw::InBSTR {
+impl IntercomFrom<&BString> for crate::raw::InBSTR {
     fn intercom_from( source: &BString ) -> ComResult<Self> {
         Ok( source.as_ptr() )
     }
 }
 
-impl IntercomFrom<BString> for ::raw::OutBSTR {
+impl IntercomFrom<BString> for crate::raw::OutBSTR {
     fn intercom_from( source: BString ) -> ComResult<Self> {
         Ok( source.into_ptr() )
     }
 }
 
-impl IntercomFrom<CString> for ::raw::OutBSTR {
+impl IntercomFrom<CString> for crate::raw::OutBSTR {
     fn intercom_from( source: CString ) -> ComResult<Self> {
         let bstr : BString = source.intercom_into()?;
         Ok( bstr.into_ptr() )

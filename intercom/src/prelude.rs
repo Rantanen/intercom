@@ -1,2 +1,2 @@
 
-pub use ::ComResult;
+pub use crate::ComResult;

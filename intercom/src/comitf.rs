@@ -1,7 +1,7 @@
 
 use super::*;
 use std::marker::PhantomData;
-use type_system::{TypeSystem, RawTypeSystem, AutomationTypeSystem};
+use crate::type_system::{TypeSystem, RawTypeSystem, AutomationTypeSystem};
 
 /// An incoming COM interface pointer.
 ///
@@ -153,13 +153,13 @@ trait PointerOperations : TypeSystem + Sized {
 
     /// Wraps a raw interface pointer into a ComItf.
     fn wrap_ptr<I: ?Sized>(
-        ptr: ::raw::InterfacePtr<Self, I>
+        ptr: crate::raw::InterfacePtr<Self, I>
     ) -> ComItf<I>;
 
     /// Gets a raw interface pointer from a ComItf.
     fn get_ptr<I: ?Sized>(
         itf: &ComItf<I>
-    ) -> ::raw::InterfacePtr<Self, I>;
+    ) -> crate::raw::InterfacePtr<Self, I>;
 }
 
 /// A generic implementation that ensures _every_ type system has some
@@ -174,7 +174,7 @@ trait PointerOperations : TypeSystem + Sized {
 impl<TS: TypeSystem> PointerOperations for TS {
 
     default fn wrap_ptr<I: ?Sized>(
-        _ptr: ::raw::InterfacePtr<Self, I>
+        _ptr: crate::raw::InterfacePtr<Self, I>
     ) -> ComItf<I>
     {
         panic!( "Not implemented" );
@@ -182,7 +182,7 @@ impl<TS: TypeSystem> PointerOperations for TS {
 
     default fn get_ptr<I: ?Sized>(
         _itf: &ComItf<I>
-    ) -> ::raw::InterfacePtr<Self, I>
+    ) -> crate::raw::InterfacePtr<Self, I>
     {
         panic!( "Not implemented" );
     }
@@ -191,7 +191,7 @@ impl<TS: TypeSystem> PointerOperations for TS {
 impl PointerOperations for AutomationTypeSystem {
 
     fn wrap_ptr<I: ?Sized>(
-        ptr: ::raw::InterfacePtr<Self, I>
+        ptr: crate::raw::InterfacePtr<Self, I>
     ) -> ComItf<I>
     {
         // Construct a ComItf from a automation pointer.
@@ -226,7 +226,7 @@ impl PointerOperations for RawTypeSystem {
 
     fn get_ptr<I: ?Sized>(
         itf: &ComItf<I>
-    ) -> ::raw::InterfacePtr<Self, I>
+    ) -> crate::raw::InterfacePtr<Self, I>
     {
         // Get an automation pointer form the ComItf.
         itf.raw_ptr
@@ -286,12 +286,12 @@ extern "system" {
 
     #[doc(hidden)]
     pub fn CoCreateInstance(
-        clsid : ::guid::GUID,
+        clsid : crate::guid::GUID,
         outer : RawComPtr,
         cls_context: u32,
-        riid : ::REFIID,
+        riid : crate::REFIID,
         out : &mut RawComPtr,
-    ) -> ::raw::HRESULT;
+    ) -> crate::raw::HRESULT;
 }
 
 impl<T: ComInterface + ?Sized> AsRef<ComItf<dyn IUnknown>> for ComItf<T>

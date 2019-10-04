@@ -176,7 +176,7 @@ pub mod raw {
         }
     }
 
-    impl<TS: TypeSystem, I: ::ComInterface + ?Sized> InterfacePtr<TS, I> {
+    impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> InterfacePtr<TS, I> {
         pub fn as_unknown( self ) -> InterfacePtr<TS, dyn crate::IUnknown> {
             InterfacePtr::new( self.ptr )
         }

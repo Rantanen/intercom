@@ -2,7 +2,7 @@
 use crate::*;
 use std::convert::TryFrom;
 use std::time::{SystemTime};
-use type_system::{TypeSystem, ExternType, IntercomFrom};
+use crate::type_system::{TypeSystem, ExternType, IntercomFrom};
 
 #[derive(Debug, Clone)]
 pub enum Variant
@@ -49,8 +49,8 @@ impl Variant {
 }
 
 impl<TS: TypeSystem> ExternType<TS> for Variant {
-    type ExternInputType = ::raw::Variant<TS>;
-    type ExternOutputType = ::raw::Variant<TS>;
+    type ExternInputType = crate::raw::Variant<TS>;
+    type ExternOutputType = crate::raw::Variant<TS>;
     type OwnedExternType = Variant;
     type OwnedNativeType = Variant;
 }
@@ -510,7 +510,7 @@ pub mod raw {
 
     use std;
     use std::time::{SystemTime, Duration};
-    use type_system::{TypeSystem};
+    use crate::type_system::{TypeSystem};
 
     #[repr(C)]
     #[derive(Copy, Clone)]
@@ -635,7 +635,7 @@ pub mod raw {
         //cyVal : CY,
         pub date : VariantDate,
         pub bstrVal : *mut u16,
-        pub punkVal : ::raw::InterfacePtr<TS, dyn crate::IUnknown>,
+        pub punkVal : crate::raw::InterfacePtr<TS, dyn crate::IUnknown>,
         //*pdispVal : ComItf<IDispatch>,
         //parray : SafeArray,
         pub pbVal : *mut i8,
@@ -649,7 +649,7 @@ pub mod raw {
         //*pcyVal : CY,
         pub pdate : *mut VariantDate,
         pub pbstrVal : *mut *mut u16,
-        pub ppunkVal : *mut ::raw::InterfacePtr<TS, dyn crate::IUnknown>,
+        pub ppunkVal : *mut crate::raw::InterfacePtr<TS, dyn crate::IUnknown>,
         //ppdispVal : *mut ComItf<IDispatch>,
         //pparray : *mut SafeArray,
         pub pvarVal : *mut Variant<TS>,

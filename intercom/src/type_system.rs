@@ -1,5 +1,5 @@
 
-use prelude::*;
+use crate::prelude::*;
 
 pub enum TypeSystemName {
     Automation,
@@ -108,8 +108,8 @@ self_extern!( u64 );
 self_extern!( usize );
 self_extern!( f32 );
 self_extern!( f64 );
-self_extern!( ::raw::HRESULT );
-self_extern!( ::GUID );
+self_extern!( crate::raw::HRESULT );
+self_extern!( crate::GUID );
 
 // Any raw pointer is passed as is.
 
@@ -129,7 +129,7 @@ impl<TS: TypeSystem, TPtr> ExternType<TS> for *const TPtr {
 
 /// `ComItf` extern type implementation.
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternType<TS>
-        for ::ComItf<I> {
+        for crate::ComItf<I> {
 
     type ExternInputType = crate::raw::InterfacePtr<TS, I>;
     type ExternOutputType = crate::raw::InterfacePtr<TS, I>;
@@ -138,7 +138,7 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternType<TS>
 }
 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
-    IntercomFrom<::ComItf<I>> for crate::raw::InterfacePtr<TS, I>
+    IntercomFrom<crate::ComItf<I>> for crate::raw::InterfacePtr<TS, I>
 {
     fn intercom_from( source: crate::ComItf<I> ) -> ComResult<Self> {
         Ok( crate::ComItf::ptr( &source ) )
@@ -146,15 +146,15 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
 }
 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
-    IntercomFrom<&::ComItf<I>> for crate::raw::InterfacePtr<TS, I>
+    IntercomFrom<&crate::ComItf<I>> for crate::raw::InterfacePtr<TS, I>
 {
-    fn intercom_from( source: &::ComItf<I> ) -> ComResult<Self> {
-        Ok( ::ComItf::ptr( source ) )
+    fn intercom_from( source: &crate::ComItf<I> ) -> ComResult<Self> {
+        Ok( crate::ComItf::ptr( source ) )
     }
 }
 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
-    IntercomFrom<::raw::InterfacePtr<TS, I>> for crate::ComItf<I>
+    IntercomFrom<crate::raw::InterfacePtr<TS, I>> for crate::ComItf<I>
 {
     fn intercom_from( source: crate::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
         crate::ComItf::maybe_wrap( source )
@@ -163,9 +163,9 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
 }
 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
-    IntercomFrom<&::raw::InterfacePtr<TS, I>> for crate::ComItf<I>
+    IntercomFrom<&crate::raw::InterfacePtr<TS, I>> for crate::ComItf<I>
 {
-    fn intercom_from( source: &::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
+    fn intercom_from( source: &crate::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
         crate::ComItf::maybe_wrap( source.clone() )
                 .ok_or_else( || crate::ComError::E_INVALIDARG )
     }
