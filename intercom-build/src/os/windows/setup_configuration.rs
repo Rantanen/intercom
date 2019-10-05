@@ -137,9 +137,7 @@ fn get_compiler_paths( paths : &[ PathBuf ] ) -> Vec<PathBuf>
 {
     // Get the directory paths from the file paths.
     let mut dir_paths = paths.iter()
-        .filter_map(
-            |p| p.parent().and_then(
-                |p| Some( p.to_owned() ) ) )
+        .filter_map( |p| p.parent().map( |p| p.to_owned() ) )
         .collect::<Vec<_>>();
 
     // De-duplicate the directories.
