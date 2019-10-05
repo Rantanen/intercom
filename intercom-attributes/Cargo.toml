@@ -12,8 +12,8 @@ proc-macro = true
 
 [dependencies]
 intercom-common = { version = "0.3", path = "../intercom-common" }
-syn = { version = "0.15", features = [ "full" ] }
-quote = { version = "0.6" }
+syn = { version = "1.0", features = [ "full" ] }
+quote = { version = "1.0" }
 
 [dev-dependencies]
 difference = "2"

@@ -285,9 +285,9 @@ impl ComCrate
 
             // Test for 'com_library' macro.
             if let ::syn::Item::Macro( m ) = item {
-                if let Ok( ref ident ) = m.mac.path.get_ident() {
+                if let Some( ident ) = m.mac.path.get_ident() {
                     if ident == "com_library" {
-                        b.libs.push(ComLibrary::parse(crate_name, m.mac.tts.clone())?);
+                        b.libs.push(ComLibrary::parse(crate_name, m.mac.tokens.clone())?);
                     }
                 }
             }
@@ -297,11 +297,11 @@ impl ComCrate
                 match attr.path.get_ident().unwrap().to_string().as_ref() {
                     "com_interface" =>
                         b.interfaces.push( ComInterface::from_ast(
-                                crate_name, attr.tts.clone(), item )? ),
+                                crate_name, attr.tokens.clone(), item )? ),
                     "com_class" =>
                         if let ::syn::Item::Struct( ref s ) = *item {
                             b.structs.push( ComStruct::from_ast(
-                                    crate_name, attr.tts.clone(), s )? )
+                                    crate_name, attr.tokens.clone(), s )? )
                         } else {
                             return Err( ParseError::ComStruct(
                                     item.get_ident().unwrap().to_string(),
