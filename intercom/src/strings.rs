@@ -914,7 +914,7 @@ impl IntercomFrom<crate::raw::InBSTR> for CString {
 impl<TPtr, TTarget> IntercomFrom<*mut TPtr> for TTarget
         where TTarget: IntercomFrom<*const TPtr>
 {
-    fn intercom_from( source: *mut TPtr ) -> ComResult<Self> {
+    default fn intercom_from( source: *mut TPtr ) -> ComResult<Self> {
         let bstring : ComResult<TTarget> =
                 ( source as *const TPtr ).intercom_into();
 
@@ -922,6 +922,37 @@ impl<TPtr, TTarget> IntercomFrom<*mut TPtr> for TTarget
         unsafe { crate::alloc::free( source as *mut _ ); }
 
         bstring
+    }
+}
+
+// The *mut u16 strings should be BSTRs and must not be freed using the
+// normal `alloc::free`.
+
+impl IntercomFrom<*mut u16> for BString
+{
+    fn intercom_from( source: *mut u16 ) -> ComResult<Self> {
+        unsafe {
+            Ok( BString::from_ptr( source ) )
+        }
+    }
+}
+
+impl IntercomFrom<*mut u16> for String
+{
+    fn intercom_from( source: *mut u16 ) -> ComResult<Self> {
+        unsafe {
+            BString::from_ptr( source )
+                    .to_string()
+                    .map_err( |_| ComError::E_INVALIDARG )
+        }
+    }
+}
+
+impl IntercomFrom<*mut u16> for CString
+{
+    fn intercom_from( source: *mut u16 ) -> ComResult<Self> {
+        CString::new( String::intercom_from( source )? )
+            .map_err( |_| ComError::E_INVALIDARG )
     }
 }
 

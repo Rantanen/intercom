@@ -49,7 +49,7 @@ fn get_com_interface_for_Foo_Automation()
     intercom::serialization::ComInterfaceVariant::new("Foo_Automation".to_string(),
                                                       <::intercom::type_system::AutomationTypeSystem
                                                           as
-                                                          type_system::TypeSystem>::key())
+                                                          ::intercom::type_system::TypeSystem>::key())
 }
 #[allow(non_camel_case_types)]
 #[repr(C)]
@@ -165,7 +165,7 @@ fn get_com_interface_for_Foo_Raw()
     intercom::serialization::ComInterfaceVariant::new("Foo_Raw".to_string(),
                                                       <::intercom::type_system::RawTypeSystem
                                                           as
-                                                          type_system::TypeSystem>::key())
+                                                          ::intercom::type_system::TypeSystem>::key())
 }
 #[allow(non_camel_case_types)]
 #[repr(C)]
@@ -1096,7 +1096,7 @@ impl ::intercom::ComInterface for Foo {
         com_itf
     }
 }
-impl BidirectionalTypeInfo for Foo {
+impl ::intercom::type_system::BidirectionalTypeInfo for Foo {
     #[doc = r" The name of the type."]
     fn type_name() -> &'static str { "Foo" }
 }

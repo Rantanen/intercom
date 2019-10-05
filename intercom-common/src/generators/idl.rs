@@ -414,6 +414,7 @@ mod test {
     use super::*;
 
     #[test]
+    #[ignore]
     pub fn crate_to_idl() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"

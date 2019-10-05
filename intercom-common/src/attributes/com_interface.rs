@@ -194,7 +194,7 @@ pub fn expand_com_interface(
     // Implement type info for the interface.
     output.push( quote!(
 
-        impl BidirectionalTypeInfo for #itf_ident {
+        impl ::intercom::type_system::BidirectionalTypeInfo for #itf_ident {
 
             /// The name of the type.
             fn type_name() -> &'static str { stringify!( #itf_ident )  }
@@ -404,7 +404,7 @@ fn get_type_descriptor_helpers_for_variant(
         /// Gets type description of the #interface_variant COM class.
         fn #get_com_interface_method () -> intercom::serialization::ComInterfaceVariant {
             intercom::serialization::ComInterfaceVariant::new(
-                    stringify!( #itf_name ).to_string(), <#type_system as type_system::TypeSystem>::key() )
+                    stringify!( #itf_name ).to_string(), <#type_system as ::intercom::type_system::TypeSystem>::key() )
         }
     );
     //dbg!( result );
