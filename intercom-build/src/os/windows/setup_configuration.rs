@@ -55,29 +55,29 @@ pub trait IEnumSetupInstances
     fn next(
         &self,
         celt : u32
-    ) -> ComResult< ( ComItf< ISetupInstance >, u32 ) >;
+    ) -> ComResult< ( ComItf< dyn ISetupInstance >, u32 ) >;
 
     fn skip( &self, celt : u32 ) -> ComResult<()>;
 
     fn reset( &self ) -> ComResult<()>;
 
-    fn clone( &self ) -> ComResult< ComItf< IEnumSetupInstances > >;
+    fn clone( &self ) -> ComResult< ComItf< dyn IEnumSetupInstances > >;
 }
 
 #[com_interface( com_iid = "26AAB78C-4A60-49D6-AF3B-3C35BC93365D" )]
 pub trait ISetupConfiguration2
 {
     fn enum_instances( &self )
-        -> ComResult< ComItf< IEnumSetupInstances > >;
+        -> ComResult< ComItf< dyn IEnumSetupInstances > >;
 
     fn get_instance_for_current_process( &self )
-        -> ComResult< ComItf< ISetupInstance > >;
+        -> ComResult< ComItf< dyn ISetupInstance > >;
 
     fn get_instance_for_path( &self, path : String )
-        -> ComResult< ComItf< ISetupInstance > >;
+        -> ComResult< ComItf< dyn ISetupInstance > >;
 
     fn enum_all_instances( &self )
-        -> ComResult< ComItf< IEnumSetupInstances > >;
+        -> ComResult< ComItf< dyn IEnumSetupInstances > >;
 }
 
 pub struct ToolPaths {
@@ -137,9 +137,7 @@ fn get_compiler_paths( paths : &[ PathBuf ] ) -> Vec<PathBuf>
 {
     // Get the directory paths from the file paths.
     let mut dir_paths = paths.iter()
-        .filter_map(
-            |p| p.parent().and_then(
-                |p| Some( p.to_owned() ) ) )
+        .filter_map( |p| p.parent().map( |p| p.to_owned() ) )
         .collect::<Vec<_>>();
 
     // De-duplicate the directories.
@@ -228,7 +226,7 @@ fn get_vs_path() -> Result<String, String> {
     let installation_path = {
 
         // Get the COM API entry point for the new VS configuration API.
-        let setup_conf = ComRc::<ISetupConfiguration2>
+        let setup_conf = ComRc::<dyn ISetupConfiguration2>
                 ::create( CLSID_SetupConfiguration ).unwrap();
 
         // Get the first instance.
@@ -307,7 +305,7 @@ mod test
         intercom::runtime::initialize().unwrap();
         {
 
-            let setup_conf = ComRc::<ISetupConfiguration2>
+            let setup_conf = ComRc::<dyn ISetupConfiguration2>
                     ::create( CLSID_SetupConfiguration ).unwrap();
             let instances = setup_conf.enum_instances().unwrap();
 
@@ -348,11 +346,12 @@ mod test
         // First attempt to get the property without the "BuildTools" product.
         // If we don't get a result then try "BuildTools" explicitly.
         // We do this in two steps to avoid issues when the developer has both the Visual Studio and the BuildTools installed.
-        match get_vswhere_property_for_products( property, &[] )
+        let v = Some("[15, 16)");
+        match get_vswhere_property_for_products( property, &[], v )
         {
             Ok( value ) => value,
             Err( _ ) => get_vswhere_property_for_products(
-                    property, &[ "Microsoft.VisualStudio.Product.BuildTools" ] ).unwrap(),
+                    property, &[ "BuildTools" ], v ).unwrap(),
         }
     }
 
@@ -360,47 +359,32 @@ mod test
     fn get_vswhere_property_for_products(
         property: &str,
         products: &[&str],
+        version: Option<&str>,
     ) -> Result<String, String>
     {
         let vswhere_path = get_intercom_root().join( "scripts/vswhere.exe" );
-        let property_from_output =
-                if products.len() == 0
-                {
-                    // No products where specified so we use the defaults which are
-                    // Community, Professional and Enterprise.
-                    Command::new( &vswhere_path )
-                            .arg( "/nologo" )
-                            .arg( "-property" ).arg( property )
-                            .output()
-                            .unwrap()
-                            .stdout
-                }
-                else
-                {
-                    Command::new( &vswhere_path )
-                            .arg( "/nologo" )
-                            .arg( "-products").args( products )
-                            .arg( "-property" ).arg( property )
-                            .output()
-                            .unwrap()
-                            .stdout
-                };
+        let mut cmd = Command::new( &vswhere_path );
+        cmd.arg( "/nologo" )
+            .arg( "-property" ).arg( property );
+        if products.len() > 0 {
+            cmd.arg( "-products" ).args( products );
+        }
+        if let Some(v) = version {
+            cmd.arg( "-version" ).arg( v );
+        }
+        let property_from_output = cmd.output().unwrap().stdout;
 
         // Ensure we got exactly one result.
         let property_from_output: String = String::from_utf8_lossy( &property_from_output ).to_owned().to_string();
-        let values: Vec<&str> = property_from_output
+        let mut values: Vec<&str> = property_from_output
                 .split( "\r\n" )
                 .filter_map( |s| { if s.is_empty() { None } else { Some( s ) } } )
                 .collect();
-        if values.len() != 1
-        {
-            Err( format!( "Found multiple products with the property: {}. Properties: {}",
-                            property, values.join( ", " ) ) )
-        }
-        else
-        {
-            Ok( values[ 0 ].to_string() )
-        }
+
+        values.sort();
+        values.first()
+                .map( |l| l.to_string() )
+                .ok_or_else( || format!( "No VS build tools installed" ) )
     }
 
     #[test]

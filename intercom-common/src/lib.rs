@@ -7,7 +7,7 @@
 #[macro_use] extern crate syn;
 extern crate proc_macro2;
 extern crate sha1;
-extern crate ordermap;
+extern crate indexmap;
 extern crate toml;
 #[macro_use] extern crate failure;
 

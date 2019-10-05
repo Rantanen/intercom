@@ -109,7 +109,7 @@ pub trait TypeHandler {
     {
         match self.rust_ty() {
             Type::Path( ref p ) => {
-                let ident = p.path.get_ident().unwrap();
+                let ident = GetIdent::get_ident(&p.path).unwrap();
                 let name = ident.to_string();
                 match name.as_ref() {
                     "RawComPtr" => quote!( ::std::ptr::null_mut() ),
@@ -148,9 +148,9 @@ impl TypeHandler for ComItfParam {
         // Extract the interface type T from the ComItf<T> type definition
         let itf_ty = match rust_ty {
             syn::Type::Path( path ) =>
-                match path.path.segments.last().unwrap().value().arguments {
+                match path.path.segments.last().unwrap().arguments {
                     syn::PathArguments::AngleBracketed( ref ab ) =>
-                            match ab.args.last().unwrap().value() {
+                            match ab.args.last().unwrap() {
                                 syn::GenericArgument::Type( ref t ) => t.clone(),
                                 _ => panic!( "ComItf generic argument must be type" ),
                             },
