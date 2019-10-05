@@ -136,6 +136,9 @@ pub const CLSID_Foo: intercom::CLSID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
+pub(crate) fn get_intercom_typeinfo_for_Foo() -> intercom::typelib::TypeInfo {
+    intercom::typelib::TypeInfo::Class(intercom::typelib::CoClass{})
+}
 #[doc = r" Gets type description of the #class_ident COM class."]
 fn get_com_class_for_Foo() -> intercom::serialization::ComClass {
     intercom::serialization::ComClass::new("Foo".to_string(),

@@ -85,6 +85,7 @@ mod interfaces;
 pub mod runtime;
 pub mod alloc;
 mod variant; pub use crate::variant::{Variant, VariantError};
+pub mod typelib;
 pub mod type_system; pub use crate::type_system::{ ComItemCategory, ItemInfo, BidirectionalTypeInfo, InputTypeInfo, OutputTypeInfo };
 pub mod serialization;
 

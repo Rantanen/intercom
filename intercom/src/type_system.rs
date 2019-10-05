@@ -3,14 +3,15 @@ extern crate serde_derive;
 use crate::prelude::*;
 use self::serde_derive::{Deserialize, Serialize};
 
+#[repr(C)]
 #[derive(
     Debug, Clone, Copy,
     Serialize, Deserialize,
     Hash, PartialOrd, PartialEq,
 )]
 pub enum TypeSystemName {
-    Automation,
-    Raw,
+    Automation = 0,
+    Raw = 1,
 }
 impl std::cmp::Eq for TypeSystemName {}
 
@@ -184,6 +185,7 @@ self_extern!( u64 );
 self_extern!( usize );
 self_extern!( f32 );
 self_extern!( f64 );
+self_extern!( bool );
 self_extern!( crate::raw::HRESULT );
 self_extern!( crate::GUID );
 
