@@ -392,10 +392,10 @@ mod tests {
     fn test_info( code : &str, ts : ModelTypeSystem) -> ComMethodInfo {
 
         let item = syn::parse_str( code ).unwrap();
-        let ( ident, decl, unsafety ) = match item {
-            Item::Fn( ref f ) => ( f.ident.clone(), f.decl.as_ref(), f.unsafety.is_some() ),
+        let sig = match item {
+            Item::Fn( ref f ) => &f.sig,
             _ => panic!( "Code isn't function" ),
         };
-        ComMethodInfo::new( decl, ts ).unwrap()
+        ComMethodInfo::new( sig, ts ).unwrap()
     }
 }
