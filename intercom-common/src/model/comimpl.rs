@@ -4,7 +4,7 @@ use super::*;
 
 use crate::ast_converters::*;
 use crate::methodinfo::ComMethodInfo;
-use ::ordermap::OrderMap;
+use ::indexmap::IndexMap;
 use ::std::iter::FromIterator;
 use crate::tyhandlers::{ModelTypeSystem};
 
@@ -14,7 +14,7 @@ pub struct ComImpl
     struct_name : Ident,
     interface_display_name : Ident,
     is_trait_impl : bool,
-    variants : OrderMap<ModelTypeSystem, ComImplVariant>,
+    variants : IndexMap<ModelTypeSystem, ComImplVariant>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -57,7 +57,7 @@ impl ComImpl
         let is_trait_impl = itf_ident_opt.is_some();
         let itf_ident = itf_ident_opt.unwrap_or_else( || struct_ident.clone() );
 
-        let variants = OrderMap::from_iter(
+        let variants = IndexMap::from_iter(
             [ ModelTypeSystem::Automation, ModelTypeSystem::Raw ].iter().map( |&ts| {
 
             let itf_unique_ident = Ident::new(
@@ -95,7 +95,7 @@ impl ComImpl
     pub fn struct_name( &self ) -> &Ident { &self.struct_name }
 
     /// Interface variants.
-    pub fn variants( &self ) -> &OrderMap<ModelTypeSystem, ComImplVariant> { &self.variants }
+    pub fn variants( &self ) -> &IndexMap<ModelTypeSystem, ComImplVariant> { &self.variants }
 
     /// Trait name that is implemented. Struct name if this is an implicit impl.
     pub fn interface_name( &self ) -> &Ident { &self.interface_display_name }

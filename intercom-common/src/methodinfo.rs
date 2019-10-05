@@ -1,7 +1,7 @@
 
 use crate::prelude::*;
 use std::rc::Rc;
-use syn::{ Receiver, FnArg, ItemFn, Signature, PathArguments, ReturnType, Type };
+use syn::{ Receiver, FnArg, Signature, PathArguments, ReturnType, Type };
 
 use crate::ast_converters::*;
 use crate::tyhandlers::{Direction, TypeContext, ModelTypeSystem, TypeHandler, get_ty_handler};

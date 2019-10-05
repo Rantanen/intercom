@@ -14,16 +14,16 @@ use crate::builtin_model;
 use ::std::path::{Path, PathBuf};
 use ::std::fs;
 use ::std::io::Read;
-use ::ordermap::OrderMap;
+use ::indexmap::IndexMap;
 use ::std::iter::FromIterator;
 use toml;
 
 #[derive(Debug, PartialEq)]
 pub struct ComCrate {
     lib : Option<ComLibrary>,
-    interfaces : OrderMap<String, ComInterface>,
-    interfaces_by_variants : OrderMap<String, String>,
-    structs : OrderMap<String, ComStruct>,
+    interfaces : IndexMap<String, ComInterface>,
+    interfaces_by_variants : IndexMap<String, String>,
+    structs : IndexMap<String, ComStruct>,
     impls : Vec<ComImpl>,
     incomplete : bool,
 }
@@ -47,7 +47,7 @@ impl ComCrateBuilder {
         }
 
         let interfaces_by_variants = {
-            OrderMap::from_iter( self.interfaces.iter()
+            IndexMap::from_iter( self.interfaces.iter()
                     .flat_map( |itf| itf.variants().iter().map( |(_, itf_variant)|
                          ( itf_variant.unique_name().to_string(),
                             itf.name().to_string() ) ).collect::<Vec<_>>() ) )
@@ -55,10 +55,10 @@ impl ComCrateBuilder {
 
         Ok( ComCrate {
             lib: self.libs.into_iter().next(),
-            interfaces: OrderMap::from_iter(
+            interfaces: IndexMap::from_iter(
                 self.interfaces.into_iter().map( |i| ( i.name().to_string(), i ) ) ),
             interfaces_by_variants,
-            structs: OrderMap::from_iter(
+            structs: IndexMap::from_iter(
                 self.structs.into_iter().map( |i| ( i.name().to_string(), i ) ) ),
             impls: self.impls,
             incomplete: self.incomplete,
@@ -319,8 +319,8 @@ impl ComCrate
 
 
     pub fn lib( &self ) -> &Option<ComLibrary> { &self.lib }
-    pub fn interfaces( &self ) -> &OrderMap<String, ComInterface> { &self.interfaces }
-    pub fn structs( &self ) -> &OrderMap<String, ComStruct> { &self.structs }
+    pub fn interfaces( &self ) -> &IndexMap<String, ComInterface> { &self.interfaces }
+    pub fn structs( &self ) -> &IndexMap<String, ComStruct> { &self.structs }
     pub fn impls( &self ) -> &Vec<ComImpl> { &self.impls }
     pub fn is_incomplete( &self ) -> bool { self.incomplete }
 

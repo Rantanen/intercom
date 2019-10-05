@@ -159,13 +159,13 @@ mod error_store {
     extern "system" {
         pub(super) fn SetErrorInfo(
             dw_reserved: u32,
-            errorinfo: ::raw::InterfacePtr<IErrorInfo>,
+            errorinfo: ::raw::InterfacePtr<dyn IErrorInfo>,
         ) -> raw::HRESULT;
 
         #[allow(private_in_public)]
         pub(super) fn GetErrorInfo(
             dw_reserved: u32,
-            errorinfo: *mut ::raw::InterfacePtr<IErrorInfo>,
+            errorinfo: *mut ::raw::InterfacePtr<dyn IErrorInfo>,
         ) -> raw::HRESULT;
     }
 }

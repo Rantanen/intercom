@@ -55,29 +55,29 @@ pub trait IEnumSetupInstances
     fn next(
         &self,
         celt : u32
-    ) -> ComResult< ( ComItf< ISetupInstance >, u32 ) >;
+    ) -> ComResult< ( ComItf< dyn ISetupInstance >, u32 ) >;
 
     fn skip( &self, celt : u32 ) -> ComResult<()>;
 
     fn reset( &self ) -> ComResult<()>;
 
-    fn clone( &self ) -> ComResult< ComItf< IEnumSetupInstances > >;
+    fn clone( &self ) -> ComResult< ComItf< dyn IEnumSetupInstances > >;
 }
 
 #[com_interface( com_iid = "26AAB78C-4A60-49D6-AF3B-3C35BC93365D" )]
 pub trait ISetupConfiguration2
 {
     fn enum_instances( &self )
-        -> ComResult< ComItf< IEnumSetupInstances > >;
+        -> ComResult< ComItf< dyn IEnumSetupInstances > >;
 
     fn get_instance_for_current_process( &self )
-        -> ComResult< ComItf< ISetupInstance > >;
+        -> ComResult< ComItf< dyn ISetupInstance > >;
 
     fn get_instance_for_path( &self, path : String )
-        -> ComResult< ComItf< ISetupInstance > >;
+        -> ComResult< ComItf< dyn ISetupInstance > >;
 
     fn enum_all_instances( &self )
-        -> ComResult< ComItf< IEnumSetupInstances > >;
+        -> ComResult< ComItf< dyn IEnumSetupInstances > >;
 }
 
 pub struct ToolPaths {
@@ -228,7 +228,7 @@ fn get_vs_path() -> Result<String, String> {
     let installation_path = {
 
         // Get the COM API entry point for the new VS configuration API.
-        let setup_conf = ComRc::<ISetupConfiguration2>
+        let setup_conf = ComRc::<dyn ISetupConfiguration2>
                 ::create( CLSID_SetupConfiguration ).unwrap();
 
         // Get the first instance.
@@ -307,7 +307,7 @@ mod test
         intercom::runtime::initialize().unwrap();
         {
 
-            let setup_conf = ComRc::<ISetupConfiguration2>
+            let setup_conf = ComRc::<dyn ISetupConfiguration2>
                     ::create( CLSID_SetupConfiguration ).unwrap();
             let instances = setup_conf.enum_instances().unwrap();
 

@@ -9,7 +9,7 @@ description = "See 'intercom'"
 [dependencies]
 failure = "0.1"
 handlebars = "2.0"
-ordermap = "0.4"
+indexmap = "1.2"
 proc-macro2 = "1.0"
 quote = "1.0"
 serde = "1.0"

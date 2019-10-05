@@ -1,6 +1,6 @@
 
 use crate::prelude::*;
-use syn::{ Attribute, FnArg, GenericArgument, Ident, Item, Pat, Path, Type, TypeReference };
+use syn::{ Attribute, FnArg, GenericArgument, Ident, Item, Pat, Path, Type};
 
 /// Extract the underlying Type from various AST types.
 pub trait GetType {
