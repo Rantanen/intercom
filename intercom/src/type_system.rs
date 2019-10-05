@@ -5,9 +5,10 @@ use crate::prelude::*;
     Debug, Clone, Copy,
     Hash, PartialOrd, PartialEq,
 )]
+#[repr(C)]
 pub enum TypeSystemName {
-    Automation,
-    Raw,
+    Automation = 0,
+    Raw = 1,
 }
 
 /// Common trait for type systems.
@@ -161,6 +162,7 @@ self_extern!( u64 );
 self_extern!( usize );
 self_extern!( f32 );
 self_extern!( f64 );
+self_extern!( bool );
 self_extern!( crate::raw::HRESULT );
 self_extern!( crate::GUID );
 

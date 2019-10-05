@@ -11,11 +11,33 @@ pub mod some {
     pub mod path {
         pub struct Type;
         pub const CLSID_Type: i8 = 0i8;
+        pub(crate) fn get_intercom_coclass_info_for_Type()
+         -> intercom::typelib::TypeInfo {
+
+
+
+            {
+                {
+                    ::std::rt::begin_panic("explicit panic",
+                                           &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_library.source.rs",
+                                             8u32, 93u32))
+                }
+            }
+        }
     }
 }
 pub struct SimpleType;
 pub const CLSID_SimpleType: i8 = 0i8;
-
+pub(crate) fn get_intercom_coclass_info_for_SimpleType()
+ -> intercom::typelib::TypeInfo {
+    {
+        {
+            ::std::rt::begin_panic("explicit panic",
+                                   &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_library.source.rs",
+                                     14u32, 91u32))
+        }
+    }
+}
 #[allow(non_upper_case_globals)]
 #[doc = "Built-in Allocator class ID."]
 pub const CLSID_Allocator: intercom::CLSID =
@@ -74,6 +96,39 @@ pub unsafe extern "C" fn DllGetClassObject(rclsid: intercom::REFCLSID,
                                                                      }
                                                                  }));
     intercom::ComBox::query_interface(com_struct.as_mut(), riid, pout);
+    intercom::raw::S_OK
+}
+pub(crate) fn get_intercom_typelib() -> intercom::typelib::TypeLib {
+    let types =
+        <[_]>::into_vec(box
+                            [some::path::get_intercom_coclass_info_for_Type(),
+                             get_intercom_coclass_info_for_SimpleType()]).into_iter().flatten().collect::<Vec<_>>();
+    intercom::typelib::TypeLib::__new("TestLib".into(),
+                                      intercom::GUID{data1: 0u32,
+                                                     data2: 0u16,
+                                                     data3: 0u16,
+                                                     data4:
+                                                         [0u8, 0u8, 0u8, 0u8,
+                                                          0u8, 0u8, 0u8,
+                                                          0u8],},
+                                      "1.0".into(), types)
+}
+#[no_mangle]
+pub unsafe extern "C" fn IntercomTypeLib(type_system:
+                                                   intercom::type_system::TypeSystemName,
+                                               out: *mut intercom::RawComPtr)
+ -> intercom::raw::HRESULT {
+    let mut tlib = intercom::ComStruct::new(get_intercom_typelib());
+    let rc =
+        intercom::ComRc::<intercom::typelib::IIntercomTypeLib>::from(&tlib);
+    let itf = intercom::ComRc::detach(rc);
+    *out =
+        match type_system {
+            intercom::type_system::TypeSystemName::Automation =>
+            intercom::ComItf::ptr::<intercom::type_system::AutomationTypeSystem>(&itf).ptr,
+            intercom::type_system::TypeSystemName::Raw =>
+            intercom::ComItf::ptr::<intercom::type_system::RawTypeSystem>(&itf).ptr,
+        };
     intercom::raw::S_OK
 }
 #[no_mangle]

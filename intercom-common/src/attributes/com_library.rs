@@ -1,6 +1,7 @@
 
 use crate::prelude::*;
 use super::common::*;
+use crate::ast_converters::ReplaceIdent;
 
 use crate::idents;
 use crate::utils;
@@ -76,6 +77,11 @@ pub fn expand_com_library(
     let dll_get_class_object = get_dll_get_class_object_function( &match_arms );
     output.push( dll_get_class_object );
 
+    // Implement get_intercom_typelib()
+    let get_typelib_fn = create_get_typelib_function( &lib )
+            .map_err( model::ParseError::ComLibrary )?;
+    output.push( get_typelib_fn );
+
     // Implement DllListClassObjects
     // DllListClassObjects returns all CLSIDs implemented in the crate.
     let list_class_objects = get_intercom_list_class_objects_function( &creatable_classes );
@@ -122,6 +128,56 @@ fn get_dll_get_class_object_function(
                 intercom::raw::S_OK
             }
         )
+}
+
+fn create_get_typelib_function(
+    lib: &model::ComLibrary,
+) -> Result<TokenStream, String>
+{
+    let lib_name = lib_name();
+    let libid = utils::get_guid_tokens(lib.libid());
+    let create_class_typeinfo = lib.coclasses()
+        .iter()
+        .map( |p| p.map_ident(|i| format!("get_intercom_coclass_info_for_{}", i)) )
+        .collect::<Result<Vec<_>, _>>()?;
+    let create_interface_typeinfo = lib.interfaces()
+        .iter()
+        .map( |p| p.map_ident(|i| format!("get_intercom_interface_info_for_{}", i)) )
+        .collect::<Result<Vec<_>, _>>()?;
+    let calling_convention = get_calling_convetion();
+    Ok(quote!(
+        pub(crate) fn get_intercom_typelib() -> intercom::typelib::TypeLib
+        {
+            let types = vec![
+                #( #create_class_typeinfo() ),*
+            ].into_iter().flatten().collect::<Vec<_>>();
+            intercom::typelib::TypeLib::__new(
+                #lib_name.into(),
+                #libid,
+                "1.0".into(),
+                types
+            )
+        }
+
+        #[no_mangle]
+        pub unsafe extern #calling_convention fn IntercomTypeLib(
+            type_system: intercom::type_system::TypeSystemName,
+            out: *mut intercom::RawComPtr,
+        ) -> intercom::raw::HRESULT
+        {
+            let mut tlib = intercom::ComStruct::new( get_intercom_typelib() );
+            let rc = intercom::ComRc::<intercom::typelib::IIntercomTypeLib>::from( &tlib );
+            let itf = intercom::ComRc::detach(rc);
+            *out = match type_system {
+                intercom::type_system::TypeSystemName::Automation =>
+                    intercom::ComItf::ptr::<intercom::type_system::AutomationTypeSystem>(&itf).ptr,
+                intercom::type_system::TypeSystemName::Raw =>
+                    intercom::ComItf::ptr::<intercom::type_system::RawTypeSystem>(&itf).ptr,
+            };
+
+            intercom::raw::S_OK
+        }
+    ))
 }
 
 fn get_intercom_list_class_objects_function(

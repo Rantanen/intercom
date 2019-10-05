@@ -85,6 +85,7 @@ mod interfaces;
 pub mod runtime;
 pub mod alloc;
 mod variant; pub use crate::variant::{Variant, VariantError};
+pub mod typelib;
 pub mod type_system; pub use type_system::{ BidirectionalTypeInfo, InputTypeInfo, OutputTypeInfo };
 
 /// The `ComInterface` trait defines the COM interface details for a COM

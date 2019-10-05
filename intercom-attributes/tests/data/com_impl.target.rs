@@ -24,6 +24,24 @@ const IID_Foo_Raw: intercom::IID =
                    data3: 0,
                    data4: [0, 0, 0, 0, 0, 0, 0, 0],};
 
+pub(crate) fn get_intercom_interface_info_for_Foo()
+ -> intercom::typelib::TypeInfo {
+
+
+
+
+
+
+    // Should be VARIANT_BOOL in Automation interface.
+
+    {
+        {
+            ::std::rt::begin_panic("explicit panic",
+                                   &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_impl.source.rs",
+                                     23u32, 86u32))
+        }
+    }
+}
 pub struct Foo;
 #[inline(always)]
 #[allow(non_snake_case)]
@@ -108,29 +126,50 @@ pub const CLSID_Foo: intercom::CLSID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
-
+pub(crate) fn get_intercom_coclass_info_for_Foo()
+ -> Vec<intercom::typelib::TypeInfo> {
+    <[_]>::into_vec(box
+                        [intercom::typelib::TypeInfo::Class(intercom::ComStruct::new(intercom::typelib::CoClass::__new("Foo".into(),
+                                                                                                                       intercom::GUID{data1:
+                                                                                                                                          0u32,
+                                                                                                                                      data2:
+                                                                                                                                          0u16,
+                                                                                                                                      data3:
+                                                                                                                                          0u16,
+                                                                                                                                      data4:
+                                                                                                                                          [0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8],},
+                                                                                                                       <[_]>::into_vec(box
+                                                                                                                                           [intercom::typelib::InterfaceRef{name:
+                                                                                                                                                                                "Foo".into(),
+                                                                                                                                                                            iid_automation:
+                                                                                                                                                                                IID_Foo_Automation,
+                                                                                                                                                                            iid_raw:
+                                                                                                                                                                                IID_Foo_Raw,}])))),
+                         get_intercom_interface_info_for_Foo()])
+}
 impl Foo {
     fn static_method(a: u16, b: i16) { }
     fn simple_method(&self) { }
     fn arg_method(&self, a: u16) { }
-
     fn simple_result_method(&self) -> u16 { 0 }
     fn com_result_method(&self) -> ComResult<u16> { Ok(0) }
     fn rust_result_method(&self) -> Result<u16, i32> { Ok(0) }
     fn tuple_result_method(&self) -> Result<(u8, u16, u32), i32> { Ok(0) }
-
     fn string_method(&self, input: String) -> String { input }
     fn string_result_method(&self, input: String) -> ComResult<String> {
         Ok(input)
     }
-
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
         Ok(true)
     }
-
-    // Should be VARIANT_BOOL in Automation interface.
     fn bool_method(&self, input: bool) -> ComResult<bool> { Ok(input) }
-
     fn variant_method(&self, input: Variant) -> ComResult<Variant> {
         Ok(input)
     }

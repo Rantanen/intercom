@@ -202,6 +202,10 @@ pub fn expand_com_interface(
 
     ) );
 
+    // Create runtime type info.
+    output.push( create_get_typeinfo_function( &itf )
+        .map_err(|e| model::ParseError::ComInterface( itf_ident.to_string(), e ) )? );
+
     Ok( tokens_to_tokenstream( item_tokens, output ) )
 }
 
@@ -383,4 +387,95 @@ fn rust_to_com_delegate(
             Err( err ) => < #return_ty as intercom::ErrorValue >::from_com_error( err ),
         };
     )
+}
+
+fn create_get_typeinfo_function(
+    itf: &model::ComInterface,
+) -> Result<TokenStream, String>
+{
+    let fn_name = Ident::new(
+            &format!("get_intercom_interface_info_for_{}", itf.name() ),
+            Span::call_site() );
+    let itf_name = itf.name().to_string();
+    let mut variant_tokens = vec![];
+    for (ts, variant) in itf.variants() {
+        variant_tokens.push( create_typeinfo_for_variant(itf, ts, variant)? );
+    }
+
+    Ok(quote!(
+        pub(crate) fn #fn_name() -> intercom::typelib::TypeInfo
+        {
+            let mut variants = vec![ #( #variant_tokens ),* ];
+
+            intercom::typelib::TypeInfo::Interface(
+                intercom::ComStruct::new( intercom::typelib::Interface {
+                    name: #itf_name.into(),
+                    variants: variants,
+                })
+            )
+        }
+    ))
+}
+
+fn create_typeinfo_for_variant(
+    itf: &model::ComInterface,
+    ts: &ModelTypeSystem,
+    itf_variant: &model::ComInterfaceVariant,
+) -> Result<TokenStream, String>
+{
+    let ts_tokens = ts.as_typesystem_tokens();
+    let ts_type = ts.as_typesystem_type();
+    let iid_tokens = utils::get_guid_tokens( itf_variant.iid() );
+    let methods = itf_variant.methods().iter().map( |m| {
+        let method_name = m.display_name.to_string();
+        let return_type = match &m.return_type {
+            Some(rt) => quote!( intercom::typelib::Arg {
+                name: "".into(),
+                ty: <
+                    <#rt as intercom::type_system::ExternType<#ts_type>>::ExternOutputType
+                    as intercom::type_system::OutputTypeInfo>::type_name().into(),
+                indirection_level: <
+                    <#rt as intercom::type_system::ExternType<#ts_type>>::ExternOutputType
+                    as intercom::type_system::OutputTypeInfo>::indirection_level(),
+            }),
+            None => quote!( intercom::typelib::Arg {
+                name: "".into(),
+                ty: "void".into(),
+                indirection_level: 0,
+            } ),
+        };
+
+        let params = m.raw_com_args().into_iter().map(|arg| {
+            let com_ty = arg.handler.com_ty(arg.dir);
+            let arg_name = arg.name.to_string();
+            let ty_info_trait = Ident::new(
+                match arg.dir {
+                    Direction::Out | Direction::Retval => "OutputTypeInfo",
+                    Direction::In => "InputTypeInfo",
+                },
+                Span::call_site() );
+
+            quote!( intercom::typelib::Arg {
+                name: #arg_name.into(),
+                ty: <#com_ty as intercom::type_system::#ty_info_trait>::type_name().into(),
+                indirection_level: <#com_ty as intercom::type_system::#ty_info_trait>::indirection_level(),
+            })
+        }).collect::<Vec<_>>();
+
+        quote!(
+            intercom::ComStruct::new(intercom::typelib::Method {
+                name: #method_name.into(),
+                return_type: #return_type,
+                parameters: vec![ #( #params ),* ],
+            })
+        )
+    }).collect::<Vec<_>>();
+
+    Ok(quote!(
+        intercom::ComStruct::new( intercom::typelib::InterfaceVariant {
+            ts: #ts_tokens,
+            iid: #iid_tokens,
+            methods: vec![ #( #methods ),* ],
+        })
+    ))
 }

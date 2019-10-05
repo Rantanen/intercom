@@ -209,5 +209,59 @@ pub fn expand_com_class(
         output.push( clsid_const );
     }
 
+    output.push( create_get_typeinfo_function( &cls )
+            .map_err( |e| model::ParseError::ComStruct( cls.name().to_string(), e ) )? );
+
     Ok( tokens_to_tokenstream( item_tokens, output ) )
+}
+
+fn create_get_typeinfo_function(
+    cls: &model::ComStruct,
+) -> Result<TokenStream, String>
+{
+    let fn_name = Ident::new(
+            &format!("get_intercom_coclass_info_for_{}", cls.name() ),
+            Span::call_site() );
+    let cls_name = cls.name().to_string();
+    let clsid = match cls.clsid() {
+        Some(guid) => guid,
+        None => return Ok(quote!(
+            pub(crate) fn #fn_name() -> Vec<intercom::typelib::TypeInfo>
+            { vec![] }
+        ))
+    };
+    let clsid_tokens = utils::get_guid_tokens( clsid );
+    let (interfaces, interface_info) : ( Vec<_>, Vec<_> )
+        = cls.interfaces().iter().map( |itf_ident| {
+            let itf_name = itf_ident.to_string();
+            let itf_automation_iid = idents::iid(
+                &Ident::new( &format!( "{}_Automation", itf_name ), Span::call_site() ) );
+            let itf_raw_iid = idents::iid(
+                &Ident::new( &format!( "{}_Raw", itf_name ), Span::call_site() ) );
+            let itf_fn = Ident::new(
+                &format!( "get_intercom_interface_info_for_{}", itf_name ), Span::call_site() );
+            (
+                quote!( intercom::typelib::InterfaceRef {
+                    name: #itf_name.into(),
+                    iid_automation: #itf_automation_iid,
+                    iid_raw: #itf_raw_iid,
+                } ),
+                quote!( #itf_fn() )
+            )
+        } ).unzip();
+    Ok(quote!(
+        pub(crate) fn #fn_name() -> Vec<intercom::typelib::TypeInfo>
+        {
+            vec![ intercom::typelib::TypeInfo::Class(
+                intercom::ComStruct::new( intercom::typelib::CoClass::__new(
+                    #cls_name.into(),
+                    #clsid_tokens,
+                    vec![
+                        #( #interfaces ),*
+                    ]
+                ) ) ),
+                #( #interface_info ),*
+            ]
+        }
+    ))
 }
