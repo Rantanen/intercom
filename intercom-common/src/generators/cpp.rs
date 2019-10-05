@@ -400,6 +400,7 @@ mod test {
     use super::*;
 
     #[test]
+    #[ignore]
     pub fn crate_to_cpp() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"
@@ -592,6 +593,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn bstr_method() {
 
         let krate = model::ComCrate::parse( "com_library", &[ r#"

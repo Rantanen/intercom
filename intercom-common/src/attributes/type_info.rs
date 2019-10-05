@@ -7,10 +7,6 @@ use tyhandlers::{Direction};
 use idents;
 use model;
 
-extern crate proc_macro;
-use self::proc_macro::TokenStream;
-
-
 /// Expands the `BidirectionalTypeInfo` derive attribute.
 ///
 /// The attribute expansion results in the following items:
