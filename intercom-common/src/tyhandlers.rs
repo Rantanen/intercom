@@ -1,5 +1,5 @@
 
-use ::prelude::*;
+use crate::prelude::*;
 use std::rc::Rc;
 use syn::*;
 
@@ -222,7 +222,7 @@ impl TypeHandler for TypeSystemParam {
 pub fn get_ty_handler(
     arg_ty : &Type,
     context : TypeContext,
-) -> Rc<TypeHandler>
+) -> Rc<dyn TypeHandler>
 {
     return Rc::new( TypeSystemParam {
         ty: arg_ty.clone(),

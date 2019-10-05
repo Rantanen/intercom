@@ -1,12 +1,12 @@
 
-use prelude::*;
+use crate::prelude::*;
 use super::common::*;
 
-use idents;
-use utils;
-use model;
+use crate::idents;
+use crate::utils;
+use crate::model;
 
-use tyhandlers::{ModelTypeSystem, get_type_systems};
+use crate::tyhandlers::{ModelTypeSystem, get_type_systems};
 
 /// Expands the `com_class` attribute.
 ///

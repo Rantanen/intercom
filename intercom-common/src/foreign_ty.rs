@@ -1,8 +1,8 @@
 extern crate std;
 
-use prelude::*;
+use crate::prelude::*;
 use syn;
-use type_parser::*;
+use crate::type_parser::*;
 
 pub trait ForeignTypeHandler
 {
@@ -34,7 +34,7 @@ impl ForeignTypeHandler for CTypeHandler
         ty: &'b syn::Type,
     ) -> Option<TypeInfo<'a>>
     {
-        ::type_parser::parse( ty )
+        crate::type_parser::parse( ty )
     }
 }
 

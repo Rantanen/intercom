@@ -1,7 +1,7 @@
 
-use prelude::*;
+use crate::prelude::*;
 use syn::*;
-use tyhandlers::ModelTypeSystem;
+use crate::tyhandlers::ModelTypeSystem;
 
 pub fn with_ts(
     ident: &Ident,

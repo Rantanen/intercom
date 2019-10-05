@@ -1,10 +1,10 @@
 extern crate intercom_attributes;
 
 
-use super::*;
+use crate::*;
 use std::convert::TryFrom;
 use std::time::{SystemTime};
-use super::type_system::{TypeSystem, ExternType, IntercomFrom, BidirectionalTypeInfo};
+use crate::type_system::{TypeSystem, ExternType, IntercomFrom, BidirectionalTypeInfo};
 use intercom_attributes::BidirectionalTypeInfo;
 
 #[derive(Debug, Clone, BidirectionalTypeInfo)]
@@ -24,7 +24,7 @@ pub enum Variant
     Bool( bool ),
     String( IntercomString ),
     SystemTime( SystemTime ),
-    IUnknown( ComRc<IUnknown> ),
+    IUnknown( ComRc<dyn IUnknown> ),
 }
 
 impl Variant {
@@ -52,8 +52,8 @@ impl Variant {
 }
 
 impl<TS: TypeSystem> ExternType<TS> for Variant {
-    type ExternInputType = ::raw::Variant<TS>;
-    type ExternOutputType = ::raw::Variant<TS>;
+    type ExternInputType = crate::raw::Variant<TS>;
+    type ExternOutputType = crate::raw::Variant<TS>;
     type OwnedExternType = Variant;
     type OwnedNativeType = Variant;
 }
@@ -82,8 +82,8 @@ impl<TS: TypeSystem> From<raw::Variant<TS>> for Variant {
                     raw::var_type::R8 => Variant::F64( src.data.dblVal ),
                     raw::var_type::BOOL => Variant::Bool( src.data.boolVal.into() ),
                     raw::var_type::BSTR =>
-                        Variant::String( ::IntercomString::BString(
-                                ::BString::from_ptr( src.data.bstrVal ) ) ),
+                        Variant::String( crate::IntercomString::BString(
+                                crate::BString::from_ptr( src.data.bstrVal ) ) ),
                     raw::var_type::DATE =>
                         Variant::SystemTime( src.data.date.into() ),
                     raw::var_type::UNKNOWN =>
@@ -108,8 +108,8 @@ impl<TS: TypeSystem> From<raw::Variant<TS>> for Variant {
                     raw::var_type::R8 => Variant::F64( *src.data.pdblVal ),
                     raw::var_type::BOOL => Variant::Bool( (*src.data.pboolVal).into() ),
                     raw::var_type::BSTR =>
-                        Variant::String( ::IntercomString::BString(
-                                ::BString::from_ptr( *src.data.pbstrVal ) ) ),
+                        Variant::String( crate::IntercomString::BString(
+                                crate::BString::from_ptr( *src.data.pbstrVal ) ) ),
                     raw::var_type::DATE =>
                         Variant::SystemTime( (*src.data.pdate).into() ),
                     raw::var_type::UNKNOWN =>
@@ -171,7 +171,7 @@ impl<TS: TypeSystem> IntercomFrom<Variant> for raw::Variant<TS> {
                     raw::VariantData { boolVal: data .into() } ),
             Variant::String( data ) => raw::Variant::new(
                     raw::VariantType::new( raw::var_type::BSTR ),
-                    raw::VariantData { bstrVal : ::BString::com_from( data )?.into_ptr() } ),
+                    raw::VariantData { bstrVal : crate::BString::com_from( data )?.into_ptr() } ),
             Variant::SystemTime( data ) => raw::Variant::new(
                     raw::VariantType::new( raw::var_type::DATE ),
                     raw::VariantData { date : data.into() } ),
@@ -393,16 +393,16 @@ impl From< f32 > for Variant {
     }
 }
 
-impl<T: HasInterface<IUnknown>> From< ComStruct<T> > for Variant {
+impl<T: HasInterface<dyn IUnknown>> From< ComStruct<T> > for Variant {
     fn from( src : ComStruct<T> ) -> Self {
-        let iunk : ComItf<IUnknown> = src.into();
+        let iunk : ComItf<dyn IUnknown> = src.into();
         Variant::IUnknown( ComRc::attach( iunk ) )
     }
 }
 
 impl<T: ComInterface + ?Sized> From< ComItf<T> > for Variant {
     fn from( src : ComItf<T> ) -> Self {
-        let iunk : &ComItf<IUnknown> = src.as_ref();
+        let iunk : &ComItf<dyn IUnknown> = src.as_ref();
         Variant::IUnknown( ComRc::copy( iunk ) )
     }
 }
@@ -513,8 +513,8 @@ pub mod raw {
 
     use std;
     use std::time::{SystemTime, Duration};
-    use super::type_system::{TypeSystem, BidirectionalTypeInfo};
-    use super::intercom_attributes::BidirectionalTypeInfo;
+    use crate::type_system::{TypeSystem, BidirectionalTypeInfo};
+    use crate::intercom_attributes::BidirectionalTypeInfo;
 
     #[repr(C)]
     #[derive(Copy, Clone)]
@@ -621,7 +621,7 @@ pub mod raw {
     #[allow(non_snake_case)]
     pub struct UserDefinedTypeValue {
         pub pvRecord : *mut std::ffi::c_void,
-        pub pRecInfo : ::RawComPtr,
+        pub pRecInfo : crate::RawComPtr,
     }
 
     #[repr(C)]
@@ -635,11 +635,11 @@ pub mod raw {
         pub fltVal : f32,
         pub dblVal : f64,
         pub boolVal : VariantBool,
-        pub scode : ::raw::HRESULT,
+        pub scode : crate::raw::HRESULT,
         //cyVal : CY,
         pub date : VariantDate,
         pub bstrVal : *mut u16,
-        pub punkVal : ::raw::InterfacePtr<TS, ::IUnknown>,
+        pub punkVal : crate::raw::InterfacePtr<TS, dyn crate::IUnknown>,
         //*pdispVal : ComItf<IDispatch>,
         //parray : SafeArray,
         pub pbVal : *mut i8,
@@ -653,7 +653,7 @@ pub mod raw {
         //*pcyVal : CY,
         pub pdate : *mut VariantDate,
         pub pbstrVal : *mut *mut u16,
-        pub ppunkVal : *mut ::raw::InterfacePtr<TS, ::IUnknown>,
+        pub ppunkVal : *mut crate::raw::InterfacePtr<TS, dyn crate::IUnknown>,
         //ppdispVal : *mut ComItf<IDispatch>,
         //pparray : *mut SafeArray,
         pub pvarVal : *mut Variant<TS>,
@@ -774,9 +774,9 @@ pub mod raw {
 
     pub struct VariantError( VariantType );
 
-    impl From<VariantError> for ::ComError
+    impl From<VariantError> for crate::ComError
     {
-        fn from( _ : VariantError ) -> Self { ::ComError::E_INVALIDARG }
+        fn from( _ : VariantError ) -> Self { crate::ComError::E_INVALIDARG }
     }
 
     impl<TS: TypeSystem> std::fmt::Debug for Variant<TS> {

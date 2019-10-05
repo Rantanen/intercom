@@ -97,7 +97,7 @@ impl IdlModel {
         all_type_systems : bool,
     ) -> Result<IdlModel, GeneratorError> {
 
-        let itf_variant_filter : Box<Fn( &( &ModelTypeSystem, &ComInterfaceVariant ) ) -> bool> =
+        let itf_variant_filter : Box<dyn Fn( &( &ModelTypeSystem, &ComInterfaceVariant ) ) -> bool> =
                 match all_type_systems {
                     true => Box::new( | _ | true ),
                     false => Box::new( | ( ts, _ ) | match ts {
@@ -231,7 +231,7 @@ impl IdlModel {
     /// - `out` - The writer to use for output.
     pub fn write(
         &self,
-        out : &mut Write
+        out : &mut dyn Write
     ) -> Result<(), GeneratorError> {
 
         let mut reg = Handlebars::new();
@@ -247,7 +247,7 @@ impl IdlModel {
     }
 }
 
-impl<'s> IdlTypeInfo<'s> {
+impl<'s> dyn IdlTypeInfo<'s> {
 
     /// Gets the name of a custom type for IDL.
     fn get_idl_name_for_custom_type(
@@ -329,7 +329,7 @@ fn get_itf_type(
     ty: &::syn::Type
 ) -> Result<Option<&::syn::Type>, GeneratorError>
 {
-    use syn::{self, Type};
+    use syn::Type;
 
     // Make sure the type is a path specifier.
     let type_path = match ty {

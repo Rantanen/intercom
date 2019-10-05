@@ -7,9 +7,9 @@ use std::path::Path;
 
 use super::GeneratorError;
 
-use model;
-use utils;
-use ast_converters::GetIdent;
+use crate::model;
+use crate::utils;
+use crate::ast_converters::GetIdent;
 
 use handlebars::Handlebars;
 
@@ -77,7 +77,7 @@ impl ManifestModel {
     /// - `out` - The writer to use for output.
     pub fn write(
         &self,
-        out : &mut Write,
+        out : &mut dyn Write,
     ) -> Result<(), GeneratorError>
     {
         let mut reg = Handlebars::new();

@@ -1,6 +1,6 @@
 [package]
 name = "intercom-common"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 license = "MIT"
 repository = "https://github.com/Rantanen/intercom"

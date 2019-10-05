@@ -17,6 +17,14 @@ const IID_IFoo_Automation: ::intercom::IID =
                      data2: 0u16,
                      data3: 0u16,
                      data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
+#[doc = r" Gets type description of the #interface_variant COM class."]
+fn get_com_interface_for_IFoo_Automation()
+ -> intercom::serialization::ComInterfaceVariant {
+    intercom::serialization::ComInterfaceVariant::new("IFoo_Automation".to_string(),
+                                                      <::intercom::type_system::AutomationTypeSystem
+                                                          as
+                                                          type_system::TypeSystem>::key())
+}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -24,7 +32,9 @@ struct __IFoo_AutomationVtbl {
     pub __base: ::intercom::IUnknownVtbl,
     pub trait_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                 ::intercom::RawComPtr)
-                                     -> (),
+                                     ->
+                                         <() as
+                                         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
 }
 #[doc = "`IFoo` interface ID."]
 #[allow(non_upper_case_globals)]
@@ -33,6 +43,14 @@ const IID_IFoo_Raw: ::intercom::IID =
                      data2: 0u16,
                      data3: 0u16,
                      data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
+#[doc = r" Gets type description of the #interface_variant COM class."]
+fn get_com_interface_for_IFoo_Raw()
+ -> intercom::serialization::ComInterfaceVariant {
+    intercom::serialization::ComInterfaceVariant::new("IFoo_Raw".to_string(),
+                                                      <::intercom::type_system::RawTypeSystem
+                                                          as
+                                                          type_system::TypeSystem>::key())
+}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -40,7 +58,9 @@ struct __IFoo_RawVtbl {
     pub __base: ::intercom::IUnknownVtbl,
     pub trait_method_Raw: unsafe extern "C" fn(self_vtable:
                                                          ::intercom::RawComPtr)
-                              -> (),
+                              ->
+                                  <() as
+                                  ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
 }
 impl IFoo for ::intercom::ComItf<IFoo> {
     fn trait_method(&self) -> () {
@@ -49,7 +69,9 @@ impl IFoo for ::intercom::ComItf<IFoo> {
         #[allow(unused_imports)]
         use ::intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<::intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __IFoo_AutomationVtbl;
             #[allow(unused_unsafe)]
             let result: Result<(), ::intercom::ComError> =
@@ -73,7 +95,9 @@ impl IFoo for ::intercom::ComItf<IFoo> {
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<::intercom::type_system::RawTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __IFoo_RawVtbl;
             #[allow(unused_unsafe)]
             let result: Result<(), ::intercom::ComError> =
@@ -102,15 +126,22 @@ impl IFoo for ::intercom::ComItf<IFoo> {
 }
 impl ::intercom::ComInterface for IFoo {
     #[doc = "Returns the IID of the requested interface."]
-    fn iid(ts: ::intercom::TypeSystem) -> Option<&'static ::intercom::IID> {
+    fn iid(ts: ::intercom::type_system::TypeSystemName)
+     -> Option<&'static ::intercom::IID> {
         match ts {
-            ::intercom::TypeSystem::Automation => Some(&IID_IFoo_Automation),
-            ::intercom::TypeSystem::Raw => Some(&IID_IFoo_Raw),
+            ::intercom::type_system::TypeSystemName::Automation =>
+            Some(&IID_IFoo_Automation),
+            ::intercom::type_system::TypeSystemName::Raw =>
+            Some(&IID_IFoo_Raw),
         }
     }
     fn deref(com_itf: &::intercom::ComItf<IFoo>) -> &(IFoo + 'static) {
         com_itf
     }
+}
+impl BidirectionalTypeInfo for IFoo {
+    #[doc = r" The name of the type."]
+    fn type_name() -> &'static str { "IFoo" }
 }
 
 struct Foo;
@@ -226,7 +257,23 @@ pub const CLSID_Foo: ::intercom::CLSID =
                      data2: 0u16,
                      data3: 0u16,
                      data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
+#[doc = r" Gets type description of the #class_ident COM class."]
+fn get_com_class_for_Foo() -> intercom::serialization::ComClass {
+    intercom::serialization::ComClass::new("Foo".to_string(),
+                                           get_interfaces_for_Foo())
+}
+#[doc = r" Gets the interfaces of the #class_ident COM class."]
+fn get_interfaces_for_Foo()
+ -> Vec<intercom::serialization::ComInterfaceVariant> {
 
+
+
+    <[_]>::into_vec(box
+                        [get_com_interface_for_Foo_Automation(),
+                         get_com_interface_for_IFoo_Automation(),
+                         get_com_interface_for_Foo_Raw(),
+                         get_com_interface_for_IFoo_Raw()])
+}
 impl Foo {
     pub fn struct_method(&self) { }
 }
@@ -235,10 +282,16 @@ impl Foo {
 unsafe extern "C" fn __Foo_Foo_Automation_query_interface(self_vtable:
                                                                     ::intercom::RawComPtr,
                                                                 riid:
-                                                                    ::intercom::REFIID,
+                                                                    <::intercom::REFIID
+                                                                    as
+                                                                    ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                                 out:
-                                                                    *mut ::intercom::RawComPtr)
- -> ::intercom::raw::HRESULT {
+                                                                    *mut <::intercom::RawComPtr
+                                                                         as
+                                                                         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::query_interface(&mut *((self_vtable as usize -
                                                            __Foo_Foo_AutomationVtbl_offset())
                                                           as *mut _), riid,
@@ -249,7 +302,9 @@ unsafe extern "C" fn __Foo_Foo_Automation_query_interface(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_add_ref(self_vtable:
                                                             ::intercom::RawComPtr)
- -> u32 {
+ ->
+     <u32 as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::add_ref(&mut *((self_vtable as usize -
                                                    __Foo_Foo_AutomationVtbl_offset())
                                                   as *mut _))
@@ -259,7 +314,9 @@ unsafe extern "C" fn __Foo_Foo_Automation_add_ref(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_release(self_vtable:
                                                             ::intercom::RawComPtr)
- -> u32 {
+ ->
+     <u32 as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::release_ptr((self_vtable as usize -
                                                 __Foo_Foo_AutomationVtbl_offset())
                                                as *mut _)
@@ -269,8 +326,14 @@ unsafe extern "C" fn __Foo_Foo_Automation_release(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_struct_method_Automation(self_vtable:
                                                                              ::intercom::RawComPtr)
- -> () {
-    let result: Result<(), ::intercom::ComError> =
+ ->
+     <() as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<() as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -285,7 +348,9 @@ unsafe extern "C" fn __Foo_Foo_Automation_struct_method_Automation(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::store_error(err)),
+        <<() as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_upper_case_globals)]
@@ -304,10 +369,16 @@ const __Foo_Foo_AutomationVtbl_INSTANCE: __Foo_AutomationVtbl =
 unsafe extern "C" fn __Foo_Foo_Raw_query_interface(self_vtable:
                                                              ::intercom::RawComPtr,
                                                          riid:
-                                                             ::intercom::REFIID,
+                                                             <::intercom::REFIID
+                                                             as
+                                                             ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                          out:
-                                                             *mut ::intercom::RawComPtr)
- -> ::intercom::raw::HRESULT {
+                                                             *mut <::intercom::RawComPtr
+                                                                  as
+                                                                  ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::query_interface(&mut *((self_vtable as usize -
                                                            __Foo_Foo_RawVtbl_offset())
                                                           as *mut _), riid,
@@ -318,7 +389,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_query_interface(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_add_ref(self_vtable:
                                                      ::intercom::RawComPtr)
- -> u32 {
+ ->
+     <u32 as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::add_ref(&mut *((self_vtable as usize -
                                                    __Foo_Foo_RawVtbl_offset())
                                                   as *mut _))
@@ -328,7 +401,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_add_ref(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_release(self_vtable:
                                                      ::intercom::RawComPtr)
- -> u32 {
+ ->
+     <u32 as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::release_ptr((self_vtable as usize -
                                                 __Foo_Foo_RawVtbl_offset()) as
                                                *mut _)
@@ -338,8 +413,14 @@ unsafe extern "C" fn __Foo_Foo_Raw_release(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_struct_method_Raw(self_vtable:
                                                                ::intercom::RawComPtr)
- -> () {
-    let result: Result<(), ::intercom::ComError> =
+ ->
+     <() as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<() as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -353,7 +434,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_struct_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::store_error(err)),
+        <<() as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_upper_case_globals)]
@@ -374,6 +457,14 @@ pub const IID_Foo_Automation: ::intercom::IID =
                      data2: 0u16,
                      data3: 0u16,
                      data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8],};
+#[doc = r" Gets type description of the #interface_variant COM class."]
+fn get_com_interface_for_Foo_Automation()
+ -> intercom::serialization::ComInterfaceVariant {
+    intercom::serialization::ComInterfaceVariant::new("Foo_Automation".to_string(),
+                                                      <::intercom::type_system::AutomationTypeSystem
+                                                          as
+                                                          type_system::TypeSystem>::key())
+}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -381,7 +472,9 @@ pub struct __Foo_AutomationVtbl {
     pub __base: ::intercom::IUnknownVtbl,
     pub struct_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                  ::intercom::RawComPtr)
-                                      -> (),
+                                      ->
+                                          <() as
+                                          ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
 }
 #[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
@@ -390,6 +483,14 @@ pub const IID_Foo_Raw: ::intercom::IID =
                      data2: 0u16,
                      data3: 0u16,
                      data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8],};
+#[doc = r" Gets type description of the #interface_variant COM class."]
+fn get_com_interface_for_Foo_Raw()
+ -> intercom::serialization::ComInterfaceVariant {
+    intercom::serialization::ComInterfaceVariant::new("Foo_Raw".to_string(),
+                                                      <::intercom::type_system::RawTypeSystem
+                                                          as
+                                                          type_system::TypeSystem>::key())
+}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -397,21 +498,26 @@ pub struct __Foo_RawVtbl {
     pub __base: ::intercom::IUnknownVtbl,
     pub struct_method_Raw: unsafe extern "C" fn(self_vtable:
                                                           ::intercom::RawComPtr)
-                               -> (),
+                               ->
+                                   <() as
+                                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
 }
 impl ::intercom::ComInterface for Foo {
     #[doc = "Returns the IID of the requested interface."]
-    fn iid(ts: ::intercom::TypeSystem) -> Option<&'static ::intercom::IID> {
+    fn iid(ts: ::intercom::type_system::TypeSystemName)
+     -> Option<&'static ::intercom::IID> {
         match ts {
-            ::intercom::TypeSystem::Automation => Some(&IID_Foo_Automation),
-            ::intercom::TypeSystem::Raw => Some(&IID_Foo_Raw),
+            ::intercom::type_system::TypeSystemName::Automation =>
+            Some(&IID_Foo_Automation),
+            ::intercom::type_system::TypeSystemName::Raw =>
+            Some(&IID_Foo_Raw),
         }
     }
     fn deref(com_itf: &::intercom::ComItf<Foo>) -> &Foo {
         let some_iunk: &::intercom::ComItf<::intercom::IUnknown> =
             com_itf.as_ref();
         let iunknown_iid =
-            ::intercom::IUnknown::iid(::intercom::TypeSystem::Automation).expect("IUnknown must have Automation IID");
+            ::intercom::IUnknown::iid(::intercom::type_system::TypeSystemName::Automation).expect("IUnknown must have Automation IID");
         let primary_iunk =
             some_iunk.query_interface(iunknown_iid).expect("All types must implement IUnknown");
         let combox: *mut ::intercom::ComBox<Foo> =
@@ -423,7 +529,10 @@ impl ::intercom::ComInterface for Foo {
         }
     }
 }
-
+impl BidirectionalTypeInfo for Foo {
+    #[doc = r" The name of the type."]
+    fn type_name() -> &'static str { "Foo" }
+}
 impl IFoo for Foo {
     fn trait_method(&self) { }
 }
@@ -432,10 +541,16 @@ impl IFoo for Foo {
 unsafe extern "C" fn __Foo_IFoo_Automation_query_interface(self_vtable:
                                                                      ::intercom::RawComPtr,
                                                                  riid:
-                                                                     ::intercom::REFIID,
+                                                                     <::intercom::REFIID
+                                                                     as
+                                                                     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                                  out:
-                                                                     *mut ::intercom::RawComPtr)
- -> ::intercom::raw::HRESULT {
+                                                                     *mut <::intercom::RawComPtr
+                                                                          as
+                                                                          ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::query_interface(&mut *((self_vtable as usize -
                                                            __Foo_IFoo_AutomationVtbl_offset())
                                                           as *mut _), riid,
@@ -446,7 +561,9 @@ unsafe extern "C" fn __Foo_IFoo_Automation_query_interface(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_IFoo_Automation_add_ref(self_vtable:
                                                              ::intercom::RawComPtr)
- -> u32 {
+ ->
+     <u32 as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::add_ref(&mut *((self_vtable as usize -
                                                    __Foo_IFoo_AutomationVtbl_offset())
                                                   as *mut _))
@@ -456,7 +573,9 @@ unsafe extern "C" fn __Foo_IFoo_Automation_add_ref(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_IFoo_Automation_release(self_vtable:
                                                              ::intercom::RawComPtr)
- -> u32 {
+ ->
+     <u32 as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::release_ptr((self_vtable as usize -
                                                 __Foo_IFoo_AutomationVtbl_offset())
                                                as *mut _)
@@ -466,8 +585,14 @@ unsafe extern "C" fn __Foo_IFoo_Automation_release(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_IFoo_Automation_trait_method_Automation(self_vtable:
                                                                              ::intercom::RawComPtr)
- -> () {
-    let result: Result<(), ::intercom::ComError> =
+ ->
+     <() as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<() as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -482,7 +607,9 @@ unsafe extern "C" fn __Foo_IFoo_Automation_trait_method_Automation(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::store_error(err)),
+        <<() as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_upper_case_globals)]
@@ -501,10 +628,16 @@ const __Foo_IFoo_AutomationVtbl_INSTANCE: __IFoo_AutomationVtbl =
 unsafe extern "C" fn __Foo_IFoo_Raw_query_interface(self_vtable:
                                                               ::intercom::RawComPtr,
                                                           riid:
-                                                              ::intercom::REFIID,
+                                                              <::intercom::REFIID
+                                                              as
+                                                              ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                           out:
-                                                              *mut ::intercom::RawComPtr)
- -> ::intercom::raw::HRESULT {
+                                                              *mut <::intercom::RawComPtr
+                                                                   as
+                                                                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::query_interface(&mut *((self_vtable as usize -
                                                            __Foo_IFoo_RawVtbl_offset())
                                                           as *mut _), riid,
@@ -515,7 +648,9 @@ unsafe extern "C" fn __Foo_IFoo_Raw_query_interface(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_IFoo_Raw_add_ref(self_vtable:
                                                       ::intercom::RawComPtr)
- -> u32 {
+ ->
+     <u32 as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::add_ref(&mut *((self_vtable as usize -
                                                    __Foo_IFoo_RawVtbl_offset())
                                                   as *mut _))
@@ -525,7 +660,9 @@ unsafe extern "C" fn __Foo_IFoo_Raw_add_ref(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_IFoo_Raw_release(self_vtable:
                                                       ::intercom::RawComPtr)
- -> u32 {
+ ->
+     <u32 as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::release_ptr((self_vtable as usize -
                                                 __Foo_IFoo_RawVtbl_offset())
                                                as *mut _)
@@ -535,8 +672,14 @@ unsafe extern "C" fn __Foo_IFoo_Raw_release(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_IFoo_Raw_trait_method_Raw(self_vtable:
                                                                ::intercom::RawComPtr)
- -> () {
-    let result: Result<(), ::intercom::ComError> =
+ ->
+     <() as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<() as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -550,7 +693,9 @@ unsafe extern "C" fn __Foo_IFoo_Raw_trait_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::store_error(err)),
+        <<() as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_upper_case_globals)]
@@ -564,4 +709,3 @@ const __Foo_IFoo_RawVtbl_INSTANCE: __IFoo_RawVtbl =
                                                     __Foo_IFoo_Raw_release,},
                    trait_method_Raw: __Foo_IFoo_Raw_trait_method_Raw,};
 impl ::intercom::HasInterface<IFoo> for Foo { }
-

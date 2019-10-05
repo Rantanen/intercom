@@ -84,10 +84,10 @@ fn run_cmd(
 /// Gets input stream for reaing the Rust code that needs to be formatted.
 fn get_input(
     matches : &ArgMatches
-) -> Result<Box<std::io::Read>, failure::Error>
+) -> Result<Box<dyn std::io::Read>, failure::Error>
 {
     // Fallback to stdin if the input parameter was not specified.
-    let input_stream: Box<std::io::Read> = match matches.value_of( "input" )
+    let input_stream: Box<dyn std::io::Read> = match matches.value_of( "input" )
     {
         Some( ref input ) => {
             let input = Path::new( input );
@@ -104,10 +104,10 @@ fn get_input(
 /// Gets output stream for writing the formatted Rust code.
 fn get_output(
     matches : &ArgMatches
-) -> Result<Box<std::io::Write>, failure::Error>
+) -> Result<Box<dyn std::io::Write>, failure::Error>
 {
     // Fallback to stdout if the output file was not specified.
-    let output_stream: Box<std::io::Write> = match matches.value_of( "output" )
+    let output_stream: Box<dyn std::io::Write> = match matches.value_of( "output" )
     {
         Some( ref output ) => {
             let output = Path::new( output );
@@ -140,7 +140,7 @@ fn generate_cargo_toml(
 
 /// Copies the input file as a source file for the project.
 fn copy_as_source(
-    input: &mut std::io::Read,
+    input: &mut dyn std::io::Read,
     dir: &Path,
 ) -> Result<Box<PathBuf>, failure::Error>
 {

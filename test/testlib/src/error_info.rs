@@ -32,7 +32,7 @@ impl ErrorTests
 {
     pub fn new() -> ErrorTests { ErrorTests }
 
-    pub fn test_comerror( &self, source : ComItf<IErrorSource> ) -> ComResult<()>
+    pub fn test_comerror( &self, source : ComItf<dyn IErrorSource> ) -> ComResult<()>
     {
         let err = source.return_comerror(
                 raw::HRESULT::new( 123 ),
@@ -57,7 +57,7 @@ impl ErrorTests
         }
     }
 
-    pub fn test_testerror( &self, source : ComItf<IErrorSource> ) -> ComResult<()>
+    pub fn test_testerror( &self, source : ComItf<dyn IErrorSource> ) -> ComResult<()>
     {
         let err = source.return_testerror(
                 raw::HRESULT::new( 123 ),
@@ -82,7 +82,7 @@ impl ErrorTests
         }
     }
 
-    pub fn test_ioerror( &self, source : ComItf<IErrorSource> ) -> ComResult<()>
+    pub fn test_ioerror( &self, source : ComItf<dyn IErrorSource> ) -> ComResult<()>
     {
         let err = source.return_ioerror(
                 raw::HRESULT::new( raw::E_ACCESSDENIED.hr ),
@@ -147,7 +147,7 @@ pub struct TestError( raw::HRESULT, String );
 
 impl std::error::Error for TestError {
     fn description( &self ) -> &str { &self.1 }
-    fn cause( &self ) -> Option<&std::error::Error> { None }
+    fn cause( &self ) -> Option<&dyn std::error::Error> { None }
 }
 
 impl std::fmt::Display for TestError {

@@ -2,6 +2,7 @@ extern crate std;
 
 use std::rc::Rc;
 use syn;
+use syn::TypeParamBound;
 
 /// Detailed information of a Rust type.
 #[derive(Clone, Debug)]
@@ -149,18 +150,19 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
             syn::Type::Array( ref arr ) => TypeInfoResolver::from_array( arr ),
             syn::Type::Path( ref p ) => TypeInfoResolver::from_path( p ),
             syn::Type::Tuple( ref t ) if t.elems.is_empty() => Some( TypeInfoResolver::void() ),
+            syn::Type::TraitObject( ref trait_object ) =>
+                    TypeInfoResolver::from_trait_object( trait_object ),
 
             syn::Type::BareFn(..)
                 | syn::Type::Never(..)
                 | syn::Type::Tuple(..)
-                | syn::Type::TraitObject(..)
                 | syn::Type::ImplTrait(..)
                 | syn::Type::Paren(..)
                 | syn::Type::Infer(..)
                 | syn::Type::Macro(..)
                 | syn::Type::Verbatim(..)
                 | syn::Type::Group(..)
-                => None,
+                => { dbg!( syn_type ); None },
         }
     }
 
@@ -336,6 +338,18 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
             // Bare type.
             _t => Some( TypeInfoResolver::new( RustType::Ident( &segment.ident ) ) ),
         }
+    }
+
+    /// Resolves the type from a trait object.
+    fn from_trait_object(
+        trait_object: &'p syn::TypeTraitObject,
+    ) -> Option<TypeInfoResolver<'s>>
+    {
+        // Find the first actual trait. Fro example lifetime parameters are ignored.
+        let trait_bound = trait_object.bounds.iter().find_map( |parameter: &TypeParamBound|
+                                                 if let syn::TypeParamBound::Trait( ref tr ) = parameter  { Some( tr ) }
+                                                 else { None } )?;
+        TypeInfoResolver::from_segment( trait_bound.path.segments.last().unwrap().value() )
     }
 
     /// Determines if the given type is mutable

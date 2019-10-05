@@ -43,6 +43,14 @@ pub const IID_Foo_Automation: ::intercom::IID =
                      data2: 0u16,
                      data3: 0u16,
                      data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
+#[doc = r" Gets type description of the #interface_variant COM class."]
+fn get_com_interface_for_Foo_Automation()
+ -> intercom::serialization::ComInterfaceVariant {
+    intercom::serialization::ComInterfaceVariant::new("Foo_Automation".to_string(),
+                                                      <::intercom::type_system::AutomationTypeSystem
+                                                          as
+                                                          type_system::TypeSystem>::key())
+}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -50,55 +58,99 @@ pub struct __Foo_AutomationVtbl {
     pub __base: ::intercom::IUnknownVtbl,
     pub simple_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                  ::intercom::RawComPtr)
-                                      -> (),
+                                      ->
+                                          <() as
+                                          ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub arg_method_Automation: unsafe extern "C" fn(self_vtable:
                                                               ::intercom::RawComPtr,
-                                                          a: u16) -> (),
+                                                          a:
+                                                              <u16 as
+                                                              ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType)
+                                   ->
+                                       <() as
+                                       ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub simple_result_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                         ::intercom::RawComPtr)
-                                             -> u16,
+                                             ->
+                                                 <u16 as
+                                                 ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub com_result_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                      ::intercom::RawComPtr,
                                                                  __out:
-                                                                     *mut u16)
-                                          -> ::intercom::raw::HRESULT,
+                                                                     *mut <u16
+                                                                          as
+                                                                          ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                          ->
+                                              <::intercom::raw::HRESULT as
+                                              ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub rust_result_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                       ::intercom::RawComPtr,
                                                                   __out:
-                                                                      *mut u16)
-                                           -> ::intercom::raw::HRESULT,
+                                                                      *mut <u16
+                                                                           as
+                                                                           ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                           ->
+                                               <::intercom::raw::HRESULT as
+                                               ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub complete_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                    ::intercom::RawComPtr,
-                                                               a: u16, b: i16,
+                                                               a:
+                                                                   <u16 as
+                                                                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                               b:
+                                                                   <i16 as
+                                                                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                                __out:
-                                                                   *mut ::intercom::raw::VariantBool)
-                                        -> ::intercom::raw::HRESULT,
+                                                                   *mut <bool
+                                                                        as
+                                                                        ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                        ->
+                                            <::intercom::raw::HRESULT as
+                                            ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub string_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                  ::intercom::RawComPtr,
                                                              msg:
-                                                                 ::intercom::raw::InBSTR)
-                                      -> ::intercom::raw::OutBSTR,
+                                                                 <String as
+                                                                 ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType)
+                                      ->
+                                          <String as
+                                          ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub comitf_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                  ::intercom::RawComPtr,
                                                              itf:
-                                                                 ::intercom::raw::InterfacePtr<Foo>,
+                                                                 <ComItf<Foo>
+                                                                 as
+                                                                 ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                              __out:
-                                                                 *mut ::intercom::raw::InterfacePtr<IUnknown>)
-                                      -> ::intercom::raw::HRESULT,
+                                                                 *mut <ComItf<IUnknown>
+                                                                      as
+                                                                      ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                      ->
+                                          <::intercom::raw::HRESULT as
+                                          ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub bool_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                ::intercom::RawComPtr,
                                                            input:
-                                                               ::intercom::raw::VariantBool,
+                                                               <bool as
+                                                               ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                            __out:
-                                                               *mut ::intercom::raw::VariantBool)
-                                    -> ::intercom::raw::HRESULT,
+                                                               *mut <bool as
+                                                                    ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                    ->
+                                        <::intercom::raw::HRESULT as
+                                        ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub variant_method_Automation: unsafe extern "C" fn(self_vtable:
                                                                   ::intercom::RawComPtr,
                                                               input:
-                                                                  ::intercom::raw::Variant,
+                                                                  <Variant as
+                                                                  ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                               __out:
-                                                                  *mut ::intercom::raw::Variant)
-                                       -> ::intercom::raw::HRESULT,
+                                                                  *mut <Variant
+                                                                       as
+                                                                       ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                       ->
+                                           <::intercom::raw::HRESULT as
+                                           ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
 }
 #[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
@@ -107,6 +159,14 @@ pub const IID_Foo_Raw: ::intercom::IID =
                      data2: 0u16,
                      data3: 0u16,
                      data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
+#[doc = r" Gets type description of the #interface_variant COM class."]
+fn get_com_interface_for_Foo_Raw()
+ -> intercom::serialization::ComInterfaceVariant {
+    intercom::serialization::ComInterfaceVariant::new("Foo_Raw".to_string(),
+                                                      <::intercom::type_system::RawTypeSystem
+                                                          as
+                                                          type_system::TypeSystem>::key())
+}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -114,50 +174,94 @@ pub struct __Foo_RawVtbl {
     pub __base: ::intercom::IUnknownVtbl,
     pub simple_method_Raw: unsafe extern "C" fn(self_vtable:
                                                           ::intercom::RawComPtr)
-                               -> (),
+                               ->
+                                   <() as
+                                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub arg_method_Raw: unsafe extern "C" fn(self_vtable:
                                                        ::intercom::RawComPtr,
-                                                   a: u16) -> (),
+                                                   a:
+                                                       <u16 as
+                                                       ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType)
+                            ->
+                                <() as
+                                ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub simple_result_method_Raw: unsafe extern "C" fn(self_vtable:
                                                                  ::intercom::RawComPtr)
-                                      -> u16,
+                                      ->
+                                          <u16 as
+                                          ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub com_result_method_Raw: unsafe extern "C" fn(self_vtable:
                                                               ::intercom::RawComPtr,
-                                                          __out: *mut u16)
-                                   -> ::intercom::raw::HRESULT,
+                                                          __out:
+                                                              *mut <u16 as
+                                                                   ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                   ->
+                                       <::intercom::raw::HRESULT as
+                                       ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub rust_result_method_Raw: unsafe extern "C" fn(self_vtable:
                                                                ::intercom::RawComPtr,
-                                                           __out: *mut u16)
-                                    -> ::intercom::raw::HRESULT,
+                                                           __out:
+                                                               *mut <u16 as
+                                                                    ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                    ->
+                                        <::intercom::raw::HRESULT as
+                                        ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub complete_method_Raw: unsafe extern "C" fn(self_vtable:
                                                             ::intercom::RawComPtr,
-                                                        a: u16, b: i16,
-                                                        __out: *mut bool)
-                                 -> ::intercom::raw::HRESULT,
+                                                        a:
+                                                            <u16 as
+                                                            ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                        b:
+                                                            <i16 as
+                                                            ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                        __out:
+                                                            *mut <bool as
+                                                                 ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                 ->
+                                     <::intercom::raw::HRESULT as
+                                     ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub string_method_Raw: unsafe extern "C" fn(self_vtable:
                                                           ::intercom::RawComPtr,
                                                       msg:
-                                                          ::intercom::raw::InCStr)
-                               -> ::intercom::raw::OutCStr,
+                                                          <String as
+                                                          ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType)
+                               ->
+                                   <String as
+                                   ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub comitf_method_Raw: unsafe extern "C" fn(self_vtable:
                                                           ::intercom::RawComPtr,
                                                       itf:
-                                                          ::intercom::raw::InterfacePtr<Foo>,
+                                                          <ComItf<Foo> as
+                                                          ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType,
                                                       __out:
-                                                          *mut ::intercom::raw::InterfacePtr<IUnknown>)
-                               -> ::intercom::raw::HRESULT,
+                                                          *mut <ComItf<IUnknown>
+                                                               as
+                                                               ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                               ->
+                                   <::intercom::raw::HRESULT as
+                                   ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub bool_method_Raw: unsafe extern "C" fn(self_vtable:
                                                         ::intercom::RawComPtr,
-                                                    input: bool,
-                                                    __out: *mut bool)
-                             -> ::intercom::raw::HRESULT,
+                                                    input:
+                                                        <bool as
+                                                        ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                    __out:
+                                                        *mut <bool as
+                                                             ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                             ->
+                                 <::intercom::raw::HRESULT as
+                                 ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub variant_method_Raw: unsafe extern "C" fn(self_vtable:
                                                            ::intercom::RawComPtr,
                                                        input:
-                                                           ::intercom::raw::Variant,
+                                                           <Variant as
+                                                           ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType,
                                                        __out:
-                                                           *mut ::intercom::raw::Variant)
-                                -> ::intercom::raw::HRESULT,
+                                                           *mut <Variant as
+                                                                ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                ->
+                                    <::intercom::raw::HRESULT as
+                                    ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
 }
 impl Foo for ::intercom::ComItf<Foo> {
     fn arg_method(&self, a: u16) -> () {
@@ -166,7 +270,9 @@ impl Foo for ::intercom::ComItf<Foo> {
         #[allow(unused_imports)]
         use ::intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<::intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
             let result: Result<(), ::intercom::ComError> =
@@ -174,7 +280,8 @@ impl Foo for ::intercom::ComItf<Foo> {
                      unsafe {
                          let __result =
                              ((**vtbl).arg_method_Automation)(comptr.ptr,
-                                                              a.into());
+                                                              (&<u16 as
+                                                                    ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::intercom_from(a)?).intercom_into()?);
                          let INTERCOM_iid =
                              ::intercom::GUID{data1: 0u32,
                                               data2: 0u16,
@@ -191,14 +298,18 @@ impl Foo for ::intercom::ComItf<Foo> {
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<::intercom::type_system::RawTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
             let result: Result<(), ::intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
-                             ((**vtbl).arg_method_Raw)(comptr.ptr, a.into());
+                             ((**vtbl).arg_method_Raw)(comptr.ptr,
+                                                       (&<u16 as
+                                                             ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::intercom_from(a)?).intercom_into()?);
                          let INTERCOM_iid =
                              ::intercom::GUID{data1: 0u32,
                                               data2: 0u16,
@@ -223,17 +334,22 @@ impl Foo for ::intercom::ComItf<Foo> {
         #[allow(unused_imports)]
         use ::intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<::intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
             let result: Result<ComResult<bool>, ::intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: ::intercom::raw::VariantBool =
-                             false.into();
+                         let mut __out:
+                                 <bool as
+                                 ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType =
+                             ::intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).bool_method_Automation)(comptr.ptr,
-                                                               input.into(),
+                                                               (&<bool as
+                                                                     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::intercom_from(input)?).intercom_into()?,
                                                                &mut __out);
                          let INTERCOM_iid =
                              ::intercom::GUID{data1: 0u32,
@@ -245,10 +361,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                          Ok({
                                 if __result == ::intercom::raw::S_OK ||
                                        __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
+                                    return Err(::intercom::load_error(self.as_ref(),
                                                                       &INTERCOM_iid,
                                                                       __result));
                                 }
@@ -262,16 +377,22 @@ impl Foo for ::intercom::ComItf<Foo> {
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<::intercom::type_system::RawTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
             let result: Result<ComResult<bool>, ::intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: bool = false;
+                         let mut __out:
+                                 <bool as
+                                 ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType =
+                             ::intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).bool_method_Raw)(comptr.ptr,
-                                                        input.into(),
+                                                        (&<bool as
+                                                              ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::intercom_from(input)?).intercom_into()?,
                                                         &mut __out);
                          let INTERCOM_iid =
                              ::intercom::GUID{data1: 0u32,
@@ -283,10 +404,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                          Ok({
                                 if __result == ::intercom::raw::S_OK ||
                                        __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
+                                    return Err(::intercom::load_error(self.as_ref(),
                                                                       &INTERCOM_iid,
                                                                       __result));
                                 }
@@ -308,13 +428,18 @@ impl Foo for ::intercom::ComItf<Foo> {
         #[allow(unused_imports)]
         use ::intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<::intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
             let result: Result<ComResult<u16>, ::intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: u16 = Default::default();
+                         let mut __out:
+                                 <u16 as
+                                 ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType =
+                             ::intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).com_result_method_Automation)(comptr.ptr,
                                                                      &mut __out);
@@ -328,10 +453,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                          Ok({
                                 if __result == ::intercom::raw::S_OK ||
                                        __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
+                                    return Err(::intercom::load_error(self.as_ref(),
                                                                       &INTERCOM_iid,
                                                                       __result));
                                 }
@@ -345,13 +469,18 @@ impl Foo for ::intercom::ComItf<Foo> {
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<::intercom::type_system::RawTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
             let result: Result<ComResult<u16>, ::intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: u16 = Default::default();
+                         let mut __out:
+                                 <u16 as
+                                 ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType =
+                             ::intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).com_result_method_Raw)(comptr.ptr,
                                                               &mut __out);
@@ -365,10 +494,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                          Ok({
                                 if __result == ::intercom::raw::S_OK ||
                                        __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
+                                    return Err(::intercom::load_error(self.as_ref(),
                                                                       &INTERCOM_iid,
                                                                       __result));
                                 }
@@ -390,7 +518,9 @@ impl Foo for ::intercom::ComItf<Foo> {
         #[allow(unused_imports)]
         use ::intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<::intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
             let result:
@@ -399,12 +529,14 @@ impl Foo for ::intercom::ComItf<Foo> {
                 (||
                      unsafe {
                          let mut __out:
-                                 ::intercom::raw::InterfacePtr<IUnknown> =
-                             ::intercom::raw::InterfacePtr::new(::std::ptr::null_mut());
+                                 <ComItf<IUnknown> as
+                                 ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType =
+                             ::intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).comitf_method_Automation)(comptr.ptr,
-                                                                 ::intercom::ComItf::ptr(&itf.into(),
-                                                                                         ::intercom::TypeSystem::Automation),
+                                                                 (&<ComItf<Foo>
+                                                                       as
+                                                                       ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::intercom_from(itf)?).intercom_into()?,
                                                                  &mut __out);
                          let INTERCOM_iid =
                              ::intercom::GUID{data1: 0u32,
@@ -416,11 +548,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                          Ok({
                                 if __result == ::intercom::raw::S_OK ||
                                        __result == ::intercom::raw::S_FALSE {
-                                    Ok(::intercom::ComItf::wrap(__out,
-                                                                ::intercom::TypeSystem::Automation))
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
+                                    return Err(::intercom::load_error(self.as_ref(),
                                                                       &INTERCOM_iid,
                                                                       __result));
                                 }
@@ -434,7 +564,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<::intercom::type_system::RawTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
             let result:
@@ -443,12 +575,13 @@ impl Foo for ::intercom::ComItf<Foo> {
                 (||
                      unsafe {
                          let mut __out:
-                                 ::intercom::raw::InterfacePtr<IUnknown> =
-                             ::intercom::raw::InterfacePtr::new(::std::ptr::null_mut());
+                                 <ComItf<IUnknown> as
+                                 ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType =
+                             ::intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).comitf_method_Raw)(comptr.ptr,
-                                                          ::intercom::ComItf::ptr(&itf.into(),
-                                                                                  ::intercom::TypeSystem::Raw),
+                                                          (&<ComItf<Foo> as
+                                                                ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::intercom_from(itf)?).intercom_into()?,
                                                           &mut __out);
                          let INTERCOM_iid =
                              ::intercom::GUID{data1: 0u32,
@@ -460,11 +593,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                          Ok({
                                 if __result == ::intercom::raw::S_OK ||
                                        __result == ::intercom::raw::S_FALSE {
-                                    Ok(::intercom::ComItf::wrap(__out,
-                                                                ::intercom::TypeSystem::Raw))
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
+                                    return Err(::intercom::load_error(self.as_ref(),
                                                                       &INTERCOM_iid,
                                                                       __result));
                                 }
@@ -486,18 +617,24 @@ impl Foo for ::intercom::ComItf<Foo> {
         #[allow(unused_imports)]
         use ::intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<::intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
             let result: Result<ComResult<bool>, ::intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: ::intercom::raw::VariantBool =
-                             false.into();
+                         let mut __out:
+                                 <bool as
+                                 ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType =
+                             ::intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).complete_method_Automation)(comptr.ptr,
-                                                                   a.into(),
-                                                                   b.into(),
+                                                                   (&<u16 as
+                                                                         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::intercom_from(a)?).intercom_into()?,
+                                                                   (&<i16 as
+                                                                         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::intercom_from(b)?).intercom_into()?,
                                                                    &mut __out);
                          let INTERCOM_iid =
                              ::intercom::GUID{data1: 0u32,
@@ -509,10 +646,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                          Ok({
                                 if __result == ::intercom::raw::S_OK ||
                                        __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
+                                    return Err(::intercom::load_error(self.as_ref(),
                                                                       &INTERCOM_iid,
                                                                       __result));
                                 }
@@ -526,17 +662,24 @@ impl Foo for ::intercom::ComItf<Foo> {
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<::intercom::type_system::RawTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
             let result: Result<ComResult<bool>, ::intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: bool = false;
+                         let mut __out:
+                                 <bool as
+                                 ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType =
+                             ::intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).complete_method_Raw)(comptr.ptr,
-                                                            a.into(),
-                                                            b.into(),
+                                                            (&<u16 as
+                                                                  ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::intercom_from(a)?).intercom_into()?,
+                                                            (&<i16 as
+                                                                  ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::intercom_from(b)?).intercom_into()?,
                                                             &mut __out);
                          let INTERCOM_iid =
                              ::intercom::GUID{data1: 0u32,
@@ -548,10 +691,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                          Ok({
                                 if __result == ::intercom::raw::S_OK ||
                                        __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
+                                    return Err(::intercom::load_error(self.as_ref(),
                                                                       &INTERCOM_iid,
                                                                       __result));
                                 }
@@ -573,13 +715,18 @@ impl Foo for ::intercom::ComItf<Foo> {
         #[allow(unused_imports)]
         use ::intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<::intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
             let result: Result<Result<u16, i32>, ::intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: u16 = Default::default();
+                         let mut __out:
+                                 <u16 as
+                                 ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType =
+                             ::intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).rust_result_method_Automation)(comptr.ptr,
                                                                       &mut __out);
@@ -593,10 +740,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                          Ok({
                                 if __result == ::intercom::raw::S_OK ||
                                        __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
+                                    return Err(::intercom::load_error(self.as_ref(),
                                                                       &INTERCOM_iid,
                                                                       __result));
                                 }
@@ -610,13 +756,18 @@ impl Foo for ::intercom::ComItf<Foo> {
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<::intercom::type_system::RawTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
             let result: Result<Result<u16, i32>, ::intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: u16 = Default::default();
+                         let mut __out:
+                                 <u16 as
+                                 ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType =
+                             ::intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).rust_result_method_Raw)(comptr.ptr,
                                                                &mut __out);
@@ -630,10 +781,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                          Ok({
                                 if __result == ::intercom::raw::S_OK ||
                                        __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
+                                    return Err(::intercom::load_error(self.as_ref(),
                                                                       &INTERCOM_iid,
                                                                       __result));
                                 }
@@ -655,7 +805,9 @@ impl Foo for ::intercom::ComItf<Foo> {
         #[allow(unused_imports)]
         use ::intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<::intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
             let result: Result<(), ::intercom::ComError> =
@@ -679,7 +831,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<::intercom::type_system::RawTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
             let result: Result<(), ::intercom::ComError> =
@@ -711,7 +865,9 @@ impl Foo for ::intercom::ComItf<Foo> {
         #[allow(unused_imports)]
         use ::intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<::intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
             let result: Result<u16, ::intercom::ComError> =
@@ -726,7 +882,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                               data4:
                                                   [0u8, 0u8, 0u8, 0u8, 0u8,
                                                    0u8, 0u8, 0u8],};
-                         Ok({ __result.into() })
+                         Ok({ __result.intercom_into()? })
                      })();
             return match result {
                        Ok(v) => v,
@@ -735,7 +891,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<::intercom::type_system::RawTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
             let result: Result<u16, ::intercom::ComError> =
@@ -750,7 +908,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                               data4:
                                                   [0u8, 0u8, 0u8, 0u8, 0u8,
                                                    0u8, 0u8, 1u8],};
-                         Ok({ __result.into() })
+                         Ok({ __result.intercom_into()? })
                      })();
             return match result {
                        Ok(v) => v,
@@ -767,20 +925,18 @@ impl Foo for ::intercom::ComItf<Foo> {
         #[allow(unused_imports)]
         use ::intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<::intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
-            let mut __msg_temporary =
-                <&::intercom::BStr as
-                    ::intercom::FromWithTemporary<String>>::to_temporary(msg)?;
             #[allow(unused_unsafe)]
             let result: Result<String, ::intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
                              ((**vtbl).string_method_Automation)(comptr.ptr,
-                                                                 <&::intercom::BStr
-                                                                     as
-                                                                     ::intercom::FromWithTemporary<String>>::from_temporary(&mut __msg_temporary)?.as_ptr());
+                                                                 (&<String as
+                                                                       ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::intercom_from(msg)?).intercom_into()?);
                          let INTERCOM_iid =
                              ::intercom::GUID{data1: 0u32,
                                               data2: 0u16,
@@ -788,9 +944,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                               data4:
                                                   [0u8, 0u8, 0u8, 0u8, 0u8,
                                                    0u8, 0u8, 0u8],};
-                         Ok({
-                                ::intercom::BString::from_ptr(__result).com_into()?
-                            })
+                         Ok({ __result.intercom_into()? })
                      })();
             return match result {
                        Ok(v) => v,
@@ -800,20 +954,18 @@ impl Foo for ::intercom::ComItf<Foo> {
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<::intercom::type_system::RawTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
-            let mut __msg_temporary =
-                <&::intercom::CStr as
-                    ::intercom::FromWithTemporary<String>>::to_temporary(msg)?;
             #[allow(unused_unsafe)]
             let result: Result<String, ::intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
                              ((**vtbl).string_method_Raw)(comptr.ptr,
-                                                          <&::intercom::CStr
-                                                              as
-                                                              ::intercom::FromWithTemporary<String>>::from_temporary(&mut __msg_temporary)?.as_ptr());
+                                                          (&<String as
+                                                                ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::intercom_from(msg)?).intercom_into()?);
                          let INTERCOM_iid =
                              ::intercom::GUID{data1: 0u32,
                                               data2: 0u16,
@@ -821,9 +973,7 @@ impl Foo for ::intercom::ComItf<Foo> {
                                               data4:
                                                   [0u8, 0u8, 0u8, 0u8, 0u8,
                                                    0u8, 0u8, 1u8],};
-                         Ok({
-                                ::intercom::CString::from_raw(__result).com_into()?
-                            })
+                         Ok({ __result.intercom_into()? })
                      })();
             return match result {
                        Ok(v) => v,
@@ -841,17 +991,23 @@ impl Foo for ::intercom::ComItf<Foo> {
         #[allow(unused_imports)]
         use ::intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<::intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
             let result: Result<ComResult<Variant>, ::intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: ::intercom::raw::Variant =
-                             Default::default();
+                         let mut __out:
+                                 <Variant as
+                                 ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType =
+                             ::intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).variant_method_Automation)(comptr.ptr,
-                                                                  input.com_into()?,
+                                                                  (&<Variant
+                                                                        as
+                                                                        ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::intercom_from(input)?).intercom_into()?,
                                                                   &mut __out);
                          let INTERCOM_iid =
                              ::intercom::GUID{data1: 0u32,
@@ -863,10 +1019,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                          Ok({
                                 if __result == ::intercom::raw::S_OK ||
                                        __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
+                                    return Err(::intercom::load_error(self.as_ref(),
                                                                       &INTERCOM_iid,
                                                                       __result));
                                 }
@@ -880,17 +1035,22 @@ impl Foo for ::intercom::ComItf<Foo> {
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<::intercom::type_system::RawTypeSystem>(self)
+           {
+            use ::intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
             let result: Result<ComResult<Variant>, ::intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: ::intercom::raw::Variant =
-                             Default::default();
+                         let mut __out:
+                                 <Variant as
+                                 ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType =
+                             ::intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).variant_method_Raw)(comptr.ptr,
-                                                           input.com_into()?,
+                                                           (&<Variant as
+                                                                 ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::intercom_from(input)?).intercom_into()?,
                                                            &mut __out);
                          let INTERCOM_iid =
                              ::intercom::GUID{data1: 0u32,
@@ -902,10 +1062,9 @@ impl Foo for ::intercom::ComItf<Foo> {
                          Ok({
                                 if __result == ::intercom::raw::S_OK ||
                                        __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
+                                    return Err(::intercom::load_error(self.as_ref(),
                                                                       &INTERCOM_iid,
                                                                       __result));
                                 }
@@ -924,13 +1083,20 @@ impl Foo for ::intercom::ComItf<Foo> {
 }
 impl ::intercom::ComInterface for Foo {
     #[doc = "Returns the IID of the requested interface."]
-    fn iid(ts: ::intercom::TypeSystem) -> Option<&'static ::intercom::IID> {
+    fn iid(ts: ::intercom::type_system::TypeSystemName)
+     -> Option<&'static ::intercom::IID> {
         match ts {
-            ::intercom::TypeSystem::Automation => Some(&IID_Foo_Automation),
-            ::intercom::TypeSystem::Raw => Some(&IID_Foo_Raw),
+            ::intercom::type_system::TypeSystemName::Automation =>
+            Some(&IID_Foo_Automation),
+            ::intercom::type_system::TypeSystemName::Raw =>
+            Some(&IID_Foo_Raw),
         }
     }
     fn deref(com_itf: &::intercom::ComItf<Foo>) -> &(Foo + 'static) {
         com_itf
     }
+}
+impl BidirectionalTypeInfo for Foo {
+    #[doc = r" The name of the type."]
+    fn type_name() -> &'static str { "Foo" }
 }

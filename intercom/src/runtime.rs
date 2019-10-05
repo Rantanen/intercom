@@ -9,17 +9,17 @@ mod os {
         pub fn CoInitializeEx(
             reserved : *const ::std::os::raw::c_void,
             init : u32,
-        ) -> ::raw::HRESULT;
+        ) -> crate::raw::HRESULT;
 
         #[doc(hidden)]
         pub fn CoUninitialize();
     }
 
-    pub fn initialize() -> ::raw::HRESULT {
+    pub fn initialize() -> crate::raw::HRESULT {
         unsafe {
             let hr = CoInitializeEx( ::std::ptr::null(), 2 /* APARTMENTTHREADED */ );
             match hr {
-                ::raw::S_FALSE => ::raw::S_OK,
+                crate::raw::S_FALSE => crate::raw::S_OK,
                 other => other
             }
         }
@@ -34,14 +34,14 @@ mod os {
 
 #[cfg(not(windows))]
 mod os {
-    pub fn initialize() -> ::raw::HRESULT { ::raw::S_OK }
+    pub fn initialize() -> crate::raw::HRESULT { crate::raw::S_OK }
 
     pub fn uninitialize() {}
 }
 
-pub fn initialize() -> ::RawComResult<()> {
+pub fn initialize() -> crate::RawComResult<()> {
     match os::initialize() {
-        ::raw::S_OK => Ok( () ),
+        crate::raw::S_OK => Ok( () ),
         e => Err( e )
     }
 }

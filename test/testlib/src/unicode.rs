@@ -27,16 +27,15 @@ impl UnicodeConversion {
 
         let utf16 : Vec<_> = rust_str.encode_utf16().collect();
         let buffer_len = ( utf16.len() + 1 ) * 2;
-        let buffer = intercom::alloc::allocate( ( utf16.len() + 1 ) * 2 ) as *mut u16;
 
         unsafe {
+            let buffer = intercom::alloc::allocate( ( utf16.len() + 1 ) * 2 ) as *mut u16;
             std::ptr::copy_nonoverlapping(
                     utf16.as_ptr() as *const c_char,
                     buffer as *mut c_char,
                     buffer_len );
+            Ok( buffer )
         }
-
-        Ok( buffer )
     }
 
     fn utf16_to_utf8(
@@ -63,14 +62,13 @@ impl UnicodeConversion {
         let cstring = CString::new( s ).map_err( |_| ComError::E_INVALIDARG )?;
         let utf8bytes = cstring.to_bytes();
 
-        let buffer = intercom::alloc::allocate( utf8bytes.len() + 1 ) as *mut c_char;
         unsafe {
+            let buffer = intercom::alloc::allocate( utf8bytes.len() + 1 ) as *mut c_char;
             std::ptr::copy_nonoverlapping(
                     utf8bytes.as_ptr() as *const c_char,
                     buffer as *mut c_char,
                     utf8bytes.len() + 1 );
+            Ok( buffer )
         }
-
-        Ok( buffer )
     }
 }

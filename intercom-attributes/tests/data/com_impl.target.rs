@@ -24,6 +24,34 @@ const IID_Foo_Raw: intercom::IID =
                    data3: 0,
                    data4: [0, 0, 0, 0, 0, 0, 0, 0],};
 
+fn get_com_interface_for_Foo_Automation()
+ -> intercom::serialization::ComInterfaceVariant {
+
+
+
+
+
+
+    // Should be VARIANT_BOOL in Automation interface.
+
+    {
+        {
+            ::std::rt::begin_panic("explicit panic",
+                                   &("C:\\dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_impl.source.rs",
+                                     23u32, 93u32))
+        }
+    }
+}
+fn get_com_interface_for_Foo_Raw()
+ -> intercom::serialization::ComInterfaceVariant {
+    {
+        {
+            ::std::rt::begin_panic("explicit panic",
+                                   &("C:\\dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_impl.source.rs",
+                                     24u32, 86u32))
+        }
+    }
+}
 pub struct Foo;
 #[inline(always)]
 #[allow(non_snake_case)]
@@ -109,29 +137,34 @@ pub const CLSID_Foo: ::intercom::CLSID =
                      data2: 0u16,
                      data3: 0u16,
                      data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
-
+#[doc = r" Gets type description of the #class_ident COM class."]
+fn get_com_class_for_Foo() -> intercom::serialization::ComClass {
+    intercom::serialization::ComClass::new("Foo".to_string(),
+                                           get_interfaces_for_Foo())
+}
+#[doc = r" Gets the interfaces of the #class_ident COM class."]
+fn get_interfaces_for_Foo()
+ -> Vec<intercom::serialization::ComInterfaceVariant> {
+    <[_]>::into_vec(box
+                        [get_com_interface_for_Foo_Automation(),
+                         get_com_interface_for_Foo_Raw()])
+}
 impl Foo {
     fn static_method(a: u16, b: i16) { }
     fn simple_method(&self) { }
     fn arg_method(&self, a: u16) { }
-
     fn simple_result_method(&self) -> u16 { 0 }
     fn com_result_method(&self) -> ComResult<u16> { Ok(0) }
     fn rust_result_method(&self) -> Result<u16, i32> { Ok(0) }
     fn tuple_result_method(&self) -> Result<(u8, u16, u32), i32> { Ok(0) }
-
     fn string_method(&self, input: String) -> String { input }
     fn string_result_method(&self, input: String) -> ComResult<String> {
         Ok(input)
     }
-
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
         Ok(true)
     }
-
-    // Should be VARIANT_BOOL in Automation interface.
     fn bool_method(&self, input: bool) -> ComResult<bool> { Ok(input) }
-
     fn variant_method(&self, input: Variant) -> ComResult<Variant> {
         Ok(input)
     }
@@ -141,10 +174,16 @@ impl Foo {
 unsafe extern "C" fn __Foo_Foo_Automation_query_interface(self_vtable:
                                                                     ::intercom::RawComPtr,
                                                                 riid:
-                                                                    ::intercom::REFIID,
+                                                                    <::intercom::REFIID
+                                                                    as
+                                                                    ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                                 out:
-                                                                    *mut ::intercom::RawComPtr)
- -> ::intercom::raw::HRESULT {
+                                                                    *mut <::intercom::RawComPtr
+                                                                         as
+                                                                         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::query_interface(&mut *((self_vtable as usize -
                                                            __Foo_Foo_AutomationVtbl_offset())
                                                           as *mut _), riid,
@@ -155,7 +194,9 @@ unsafe extern "C" fn __Foo_Foo_Automation_query_interface(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_add_ref(self_vtable:
                                                             ::intercom::RawComPtr)
- -> u32 {
+ ->
+     <u32 as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::add_ref(&mut *((self_vtable as usize -
                                                    __Foo_Foo_AutomationVtbl_offset())
                                                   as *mut _))
@@ -165,7 +206,9 @@ unsafe extern "C" fn __Foo_Foo_Automation_add_ref(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_release(self_vtable:
                                                             ::intercom::RawComPtr)
- -> u32 {
+ ->
+     <u32 as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::release_ptr((self_vtable as usize -
                                                 __Foo_Foo_AutomationVtbl_offset())
                                                as *mut _)
@@ -175,8 +218,14 @@ unsafe extern "C" fn __Foo_Foo_Automation_release(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_simple_method_Automation(self_vtable:
                                                                              ::intercom::RawComPtr)
- -> () {
-    let result: Result<(), ::intercom::ComError> =
+ ->
+     <() as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<() as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -191,7 +240,9 @@ unsafe extern "C" fn __Foo_Foo_Automation_simple_method_Automation(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::store_error(err)),
+        <<() as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -199,9 +250,18 @@ unsafe extern "C" fn __Foo_Foo_Automation_simple_method_Automation(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_arg_method_Automation(self_vtable:
                                                                           ::intercom::RawComPtr,
-                                                                      a: u16)
- -> () {
-    let result: Result<(), ::intercom::ComError> =
+                                                                      a:
+                                                                          <u16
+                                                                          as
+                                                                          ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType)
+ ->
+     <() as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<() as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -209,14 +269,18 @@ unsafe extern "C" fn __Foo_Foo_Automation_arg_method_Automation(self_vtable:
                           __Foo_Foo_AutomationVtbl_offset()) as
                          *mut ::intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
-                 let __result = self_struct.arg_method(a.into());
+                 let __result =
+                     self_struct.arg_method((&<<u16 as
+                                               ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(a)?).intercom_into()?);
                  Ok({ })
              })();
     use ::intercom::ErrorValue;
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::store_error(err)),
+        <<() as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -224,8 +288,14 @@ unsafe extern "C" fn __Foo_Foo_Automation_arg_method_Automation(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_simple_result_method_Automation(self_vtable:
                                                                                     ::intercom::RawComPtr)
- -> u16 {
-    let result: Result<u16, ::intercom::ComError> =
+ ->
+     <u16 as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<u16 as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -234,13 +304,15 @@ unsafe extern "C" fn __Foo_Foo_Automation_simple_result_method_Automation(self_v
                          *mut ::intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result = self_struct.simple_result_method();
-                 Ok({ __result.into() })
+                 Ok({ __result.intercom_into()? })
              })();
     use ::intercom::ErrorValue;
     match result {
         Ok(v) => v,
         Err(err) =>
-        <u16 as ErrorValue>::from_error(::intercom::store_error(err)),
+        <<u16 as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -249,9 +321,17 @@ unsafe extern "C" fn __Foo_Foo_Automation_simple_result_method_Automation(self_v
 unsafe extern "C" fn __Foo_Foo_Automation_com_result_method_Automation(self_vtable:
                                                                                  ::intercom::RawComPtr,
                                                                              __out:
-                                                                                 *mut u16)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                                                 *mut <u16
+                                                                                      as
+                                                                                      ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -263,11 +343,12 @@ unsafe extern "C" fn __Foo_Foo_Automation_com_result_method_Automation(self_vtab
                  Ok({
                         match __result {
                             Ok(v1) => {
-                                *__out = v1.into();
+                                *__out = v1.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out = Default::default();
+                                *__out =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -277,8 +358,9 @@ unsafe extern "C" fn __Foo_Foo_Automation_com_result_method_Automation(self_vtab
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -287,9 +369,17 @@ unsafe extern "C" fn __Foo_Foo_Automation_com_result_method_Automation(self_vtab
 unsafe extern "C" fn __Foo_Foo_Automation_rust_result_method_Automation(self_vtable:
                                                                                   ::intercom::RawComPtr,
                                                                               __out:
-                                                                                  *mut u16)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                                                  *mut <u16
+                                                                                       as
+                                                                                       ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -301,11 +391,12 @@ unsafe extern "C" fn __Foo_Foo_Automation_rust_result_method_Automation(self_vta
                  Ok({
                         match __result {
                             Ok(v1) => {
-                                *__out = v1.into();
+                                *__out = v1.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out = Default::default();
+                                *__out =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -315,8 +406,9 @@ unsafe extern "C" fn __Foo_Foo_Automation_rust_result_method_Automation(self_vta
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -325,13 +417,25 @@ unsafe extern "C" fn __Foo_Foo_Automation_rust_result_method_Automation(self_vta
 unsafe extern "C" fn __Foo_Foo_Automation_tuple_result_method_Automation(self_vtable:
                                                                                    ::intercom::RawComPtr,
                                                                                __out1:
-                                                                                   *mut u8,
+                                                                                   *mut <u8
+                                                                                        as
+                                                                                        ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
                                                                                __out2:
-                                                                                   *mut u16,
+                                                                                   *mut <u16
+                                                                                        as
+                                                                                        ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
                                                                                __out3:
-                                                                                   *mut u32)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                                                   *mut <u32
+                                                                                        as
+                                                                                        ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -343,15 +447,18 @@ unsafe extern "C" fn __Foo_Foo_Automation_tuple_result_method_Automation(self_vt
                  Ok({
                         match __result {
                             Ok((v1, v2, v3)) => {
-                                *__out1 = v1.into();
-                                *__out2 = v2.into();
-                                *__out3 = v3.into();
+                                *__out1 = v1.intercom_into()?;
+                                *__out2 = v2.intercom_into()?;
+                                *__out3 = v3.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out1 = Default::default();
-                                *__out2 = Default::default();
-                                *__out3 = Default::default();
+                                *__out1 =
+                                    ::intercom::type_system::ExternDefault::extern_default();
+                                *__out2 =
+                                    ::intercom::type_system::ExternDefault::extern_default();
+                                *__out3 =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -361,8 +468,9 @@ unsafe extern "C" fn __Foo_Foo_Automation_tuple_result_method_Automation(self_vt
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -371,32 +479,36 @@ unsafe extern "C" fn __Foo_Foo_Automation_tuple_result_method_Automation(self_vt
 unsafe extern "C" fn __Foo_Foo_Automation_string_method_Automation(self_vtable:
                                                                              ::intercom::RawComPtr,
                                                                          input:
-                                                                             ::intercom::raw::InBSTR)
- -> ::intercom::raw::OutBSTR {
-    let result: Result<::intercom::raw::OutBSTR, ::intercom::ComError> =
+                                                                             <String
+                                                                             as
+                                                                             ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType)
+ ->
+     <String as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<String as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
                      (self_vtable as usize -
                           __Foo_Foo_AutomationVtbl_offset()) as
                          *mut ::intercom::ComBox<Foo>;
-                 let mut __input_temporary =
-                     <String as
-                         ::intercom::FromWithTemporary<&::intercom::BStr>>::to_temporary(::intercom::BStr::from_ptr(input))?;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.string_method(<String as
-                                                   ::intercom::FromWithTemporary<&::intercom::BStr>>::from_temporary(&mut __input_temporary)?);
-                 Ok({
-                        ::intercom::ComInto::<::intercom::BString>::com_into(__result)?.into_ptr()
-                    })
+                     self_struct.string_method((&<<String as
+                                                  ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
+                 Ok({ __result.intercom_into()? })
              })();
     use ::intercom::ErrorValue;
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::OutBSTR as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<String as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -405,33 +517,40 @@ unsafe extern "C" fn __Foo_Foo_Automation_string_method_Automation(self_vtable:
 unsafe extern "C" fn __Foo_Foo_Automation_string_result_method_Automation(self_vtable:
                                                                                     ::intercom::RawComPtr,
                                                                                 input:
-                                                                                    ::intercom::raw::InBSTR,
+                                                                                    <String
+                                                                                    as
+                                                                                    ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                                                 __out:
-                                                                                    *mut ::intercom::raw::OutBSTR)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                                                    *mut <String
+                                                                                         as
+                                                                                         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
                      (self_vtable as usize -
                           __Foo_Foo_AutomationVtbl_offset()) as
                          *mut ::intercom::ComBox<Foo>;
-                 let mut __input_temporary =
-                     <String as
-                         ::intercom::FromWithTemporary<&::intercom::BStr>>::to_temporary(::intercom::BStr::from_ptr(input))?;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.string_result_method(<String as
-                                                          ::intercom::FromWithTemporary<&::intercom::BStr>>::from_temporary(&mut __input_temporary)?);
+                     self_struct.string_result_method((&<<String as
+                                                         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
-                                *__out =
-                                    ::intercom::ComInto::<::intercom::BString>::com_into(v1)?.into_ptr();
+                                *__out = v1.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out = ::std::ptr::null_mut();
+                                *__out =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -441,8 +560,9 @@ unsafe extern "C" fn __Foo_Foo_Automation_string_result_method_Automation(self_v
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -451,13 +571,25 @@ unsafe extern "C" fn __Foo_Foo_Automation_string_result_method_Automation(self_v
 unsafe extern "C" fn __Foo_Foo_Automation_complete_method_Automation(self_vtable:
                                                                                ::intercom::RawComPtr,
                                                                            a:
-                                                                               u16,
+                                                                               <u16
+                                                                               as
+                                                                               ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                                            b:
-                                                                               i16,
+                                                                               <i16
+                                                                               as
+                                                                               ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                                            __out:
-                                                                               *mut ::intercom::raw::VariantBool)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                                               *mut <bool
+                                                                                    as
+                                                                                    ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -466,15 +598,19 @@ unsafe extern "C" fn __Foo_Foo_Automation_complete_method_Automation(self_vtable
                          *mut ::intercom::ComBox<Foo>;
                  let self_struct: &mut Foo = &mut **self_combox;
                  let __result =
-                     self_struct.complete_method(a.into(), b.into());
+                     self_struct.complete_method((&<<u16 as
+                                                    ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(a)?).intercom_into()?,
+                                                 (&<<i16 as
+                                                    ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(b)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
-                                *__out = v1.into();
+                                *__out = v1.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out = false.into();
+                                *__out =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -484,8 +620,9 @@ unsafe extern "C" fn __Foo_Foo_Automation_complete_method_Automation(self_vtable
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -494,11 +631,21 @@ unsafe extern "C" fn __Foo_Foo_Automation_complete_method_Automation(self_vtable
 unsafe extern "C" fn __Foo_Foo_Automation_bool_method_Automation(self_vtable:
                                                                            ::intercom::RawComPtr,
                                                                        input:
-                                                                           ::intercom::raw::VariantBool,
+                                                                           <bool
+                                                                           as
+                                                                           ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                                        __out:
-                                                                           *mut ::intercom::raw::VariantBool)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                                           *mut <bool
+                                                                                as
+                                                                                ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -506,15 +653,18 @@ unsafe extern "C" fn __Foo_Foo_Automation_bool_method_Automation(self_vtable:
                           __Foo_Foo_AutomationVtbl_offset()) as
                          *mut ::intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
-                 let __result = self_struct.bool_method(input.into());
+                 let __result =
+                     self_struct.bool_method((&<<bool as
+                                                ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
-                                *__out = v1.into();
+                                *__out = v1.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out = false.into();
+                                *__out =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -524,8 +674,9 @@ unsafe extern "C" fn __Foo_Foo_Automation_bool_method_Automation(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -534,11 +685,21 @@ unsafe extern "C" fn __Foo_Foo_Automation_bool_method_Automation(self_vtable:
 unsafe extern "C" fn __Foo_Foo_Automation_variant_method_Automation(self_vtable:
                                                                               ::intercom::RawComPtr,
                                                                           input:
-                                                                              ::intercom::raw::Variant,
+                                                                              <Variant
+                                                                              as
+                                                                              ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                                           __out:
-                                                                              *mut ::intercom::raw::Variant)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                                              *mut <Variant
+                                                                                   as
+                                                                                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -546,15 +707,18 @@ unsafe extern "C" fn __Foo_Foo_Automation_variant_method_Automation(self_vtable:
                           __Foo_Foo_AutomationVtbl_offset()) as
                          *mut ::intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
-                 let __result = self_struct.variant_method(input.into());
+                 let __result =
+                     self_struct.variant_method((&<<Variant as
+                                                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
-                                *__out = v1.com_into()?;
+                                *__out = v1.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out = Default::default();
+                                *__out =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -564,8 +728,9 @@ unsafe extern "C" fn __Foo_Foo_Automation_variant_method_Automation(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_upper_case_globals)]
@@ -604,10 +769,16 @@ const __Foo_Foo_AutomationVtbl_INSTANCE: __Foo_AutomationVtbl =
 unsafe extern "C" fn __Foo_Foo_Raw_query_interface(self_vtable:
                                                              ::intercom::RawComPtr,
                                                          riid:
-                                                             ::intercom::REFIID,
+                                                             <::intercom::REFIID
+                                                             as
+                                                             ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                          out:
-                                                             *mut ::intercom::RawComPtr)
- -> ::intercom::raw::HRESULT {
+                                                             *mut <::intercom::RawComPtr
+                                                                  as
+                                                                  ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::query_interface(&mut *((self_vtable as usize -
                                                            __Foo_Foo_RawVtbl_offset())
                                                           as *mut _), riid,
@@ -618,7 +789,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_query_interface(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_add_ref(self_vtable:
                                                      ::intercom::RawComPtr)
- -> u32 {
+ ->
+     <u32 as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::add_ref(&mut *((self_vtable as usize -
                                                    __Foo_Foo_RawVtbl_offset())
                                                   as *mut _))
@@ -628,7 +801,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_add_ref(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_release(self_vtable:
                                                      ::intercom::RawComPtr)
- -> u32 {
+ ->
+     <u32 as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
     ::intercom::ComBox::<Foo>::release_ptr((self_vtable as usize -
                                                 __Foo_Foo_RawVtbl_offset()) as
                                                *mut _)
@@ -638,8 +813,14 @@ unsafe extern "C" fn __Foo_Foo_Raw_release(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_simple_method_Raw(self_vtable:
                                                                ::intercom::RawComPtr)
- -> () {
-    let result: Result<(), ::intercom::ComError> =
+ ->
+     <() as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<() as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -653,7 +834,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_simple_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::store_error(err)),
+        <<() as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -661,22 +844,35 @@ unsafe extern "C" fn __Foo_Foo_Raw_simple_method_Raw(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_arg_method_Raw(self_vtable:
                                                             ::intercom::RawComPtr,
-                                                        a: u16) -> () {
-    let result: Result<(), ::intercom::ComError> =
+                                                        a:
+                                                            <u16 as
+                                                            ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType)
+ ->
+     <() as
+     ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<() as
+                   ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
                      (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
                          *mut ::intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
-                 let __result = self_struct.arg_method(a.into());
+                 let __result =
+                     self_struct.arg_method((&<<u16 as
+                                               ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(a)?).intercom_into()?);
                  Ok({ })
              })();
     use ::intercom::ErrorValue;
     match result {
         Ok(v) => v,
         Err(err) =>
-        <() as ErrorValue>::from_error(::intercom::store_error(err)),
+        <<() as
+         ::intercom::type_system::ExternType<::intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -684,8 +880,14 @@ unsafe extern "C" fn __Foo_Foo_Raw_arg_method_Raw(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_simple_result_method_Raw(self_vtable:
                                                                       ::intercom::RawComPtr)
- -> u16 {
-    let result: Result<u16, ::intercom::ComError> =
+ ->
+     <u16 as
+     ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<u16 as
+                   ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -693,13 +895,15 @@ unsafe extern "C" fn __Foo_Foo_Raw_simple_result_method_Raw(self_vtable:
                          *mut ::intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result = self_struct.simple_result_method();
-                 Ok({ __result.into() })
+                 Ok({ __result.intercom_into()? })
              })();
     use ::intercom::ErrorValue;
     match result {
         Ok(v) => v,
         Err(err) =>
-        <u16 as ErrorValue>::from_error(::intercom::store_error(err)),
+        <<u16 as
+         ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -708,9 +912,17 @@ unsafe extern "C" fn __Foo_Foo_Raw_simple_result_method_Raw(self_vtable:
 unsafe extern "C" fn __Foo_Foo_Raw_com_result_method_Raw(self_vtable:
                                                                    ::intercom::RawComPtr,
                                                                __out:
-                                                                   *mut u16)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                                   *mut <u16
+                                                                        as
+                                                                        ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -721,11 +933,12 @@ unsafe extern "C" fn __Foo_Foo_Raw_com_result_method_Raw(self_vtable:
                  Ok({
                         match __result {
                             Ok(v1) => {
-                                *__out = v1.into();
+                                *__out = v1.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out = Default::default();
+                                *__out =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -735,8 +948,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_com_result_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -745,9 +959,17 @@ unsafe extern "C" fn __Foo_Foo_Raw_com_result_method_Raw(self_vtable:
 unsafe extern "C" fn __Foo_Foo_Raw_rust_result_method_Raw(self_vtable:
                                                                     ::intercom::RawComPtr,
                                                                 __out:
-                                                                    *mut u16)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                                    *mut <u16
+                                                                         as
+                                                                         ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -758,11 +980,12 @@ unsafe extern "C" fn __Foo_Foo_Raw_rust_result_method_Raw(self_vtable:
                  Ok({
                         match __result {
                             Ok(v1) => {
-                                *__out = v1.into();
+                                *__out = v1.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out = Default::default();
+                                *__out =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -772,8 +995,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_rust_result_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -782,13 +1006,25 @@ unsafe extern "C" fn __Foo_Foo_Raw_rust_result_method_Raw(self_vtable:
 unsafe extern "C" fn __Foo_Foo_Raw_tuple_result_method_Raw(self_vtable:
                                                                      ::intercom::RawComPtr,
                                                                  __out1:
-                                                                     *mut u8,
+                                                                     *mut <u8
+                                                                          as
+                                                                          ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
                                                                  __out2:
-                                                                     *mut u16,
+                                                                     *mut <u16
+                                                                          as
+                                                                          ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
                                                                  __out3:
-                                                                     *mut u32)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                                     *mut <u32
+                                                                          as
+                                                                          ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -799,15 +1035,18 @@ unsafe extern "C" fn __Foo_Foo_Raw_tuple_result_method_Raw(self_vtable:
                  Ok({
                         match __result {
                             Ok((v1, v2, v3)) => {
-                                *__out1 = v1.into();
-                                *__out2 = v2.into();
-                                *__out3 = v3.into();
+                                *__out1 = v1.intercom_into()?;
+                                *__out2 = v2.intercom_into()?;
+                                *__out3 = v3.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out1 = Default::default();
-                                *__out2 = Default::default();
-                                *__out3 = Default::default();
+                                *__out1 =
+                                    ::intercom::type_system::ExternDefault::extern_default();
+                                *__out2 =
+                                    ::intercom::type_system::ExternDefault::extern_default();
+                                *__out3 =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -817,8 +1056,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_tuple_result_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -827,31 +1067,34 @@ unsafe extern "C" fn __Foo_Foo_Raw_tuple_result_method_Raw(self_vtable:
 unsafe extern "C" fn __Foo_Foo_Raw_string_method_Raw(self_vtable:
                                                                ::intercom::RawComPtr,
                                                            input:
-                                                               ::intercom::raw::InCStr)
- -> ::intercom::raw::OutCStr {
-    let result: Result<::intercom::raw::OutCStr, ::intercom::ComError> =
+                                                               <String as
+                                                               ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType)
+ ->
+     <String as
+     ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<String as
+                   ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
                      (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
                          *mut ::intercom::ComBox<Foo>;
-                 let mut __input_temporary =
-                     <String as
-                         ::intercom::FromWithTemporary<&::intercom::CStr>>::to_temporary(::intercom::CStr::from_ptr(input))?;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.string_method(<String as
-                                                   ::intercom::FromWithTemporary<&::intercom::CStr>>::from_temporary(&mut __input_temporary)?);
-                 Ok({
-                        ::intercom::ComInto::<::intercom::CString>::com_into(__result)?.into_raw()
-                    })
+                     self_struct.string_method((&<<String as
+                                                  ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
+                 Ok({ __result.intercom_into()? })
              })();
     use ::intercom::ErrorValue;
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::OutCStr as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<String as
+         ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -860,32 +1103,39 @@ unsafe extern "C" fn __Foo_Foo_Raw_string_method_Raw(self_vtable:
 unsafe extern "C" fn __Foo_Foo_Raw_string_result_method_Raw(self_vtable:
                                                                       ::intercom::RawComPtr,
                                                                   input:
-                                                                      ::intercom::raw::InCStr,
+                                                                      <String
+                                                                      as
+                                                                      ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType,
                                                                   __out:
-                                                                      *mut ::intercom::raw::OutCStr)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                                      *mut <String
+                                                                           as
+                                                                           ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
                      (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
                          *mut ::intercom::ComBox<Foo>;
-                 let mut __input_temporary =
-                     <String as
-                         ::intercom::FromWithTemporary<&::intercom::CStr>>::to_temporary(::intercom::CStr::from_ptr(input))?;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.string_result_method(<String as
-                                                          ::intercom::FromWithTemporary<&::intercom::CStr>>::from_temporary(&mut __input_temporary)?);
+                     self_struct.string_result_method((&<<String as
+                                                         ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
-                                *__out =
-                                    ::intercom::ComInto::<::intercom::CString>::com_into(v1)?.into_raw();
+                                *__out = v1.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out = ::std::ptr::null_mut();
+                                *__out =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -895,8 +1145,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_string_result_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -904,10 +1155,23 @@ unsafe extern "C" fn __Foo_Foo_Raw_string_result_method_Raw(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_complete_method_Raw(self_vtable:
                                                                  ::intercom::RawComPtr,
-                                                             a: u16, b: i16,
-                                                             __out: *mut bool)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                             a:
+                                                                 <u16 as
+                                                                 ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                             b:
+                                                                 <i16 as
+                                                                 ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                             __out:
+                                                                 *mut <bool as
+                                                                      ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
@@ -915,15 +1179,19 @@ unsafe extern "C" fn __Foo_Foo_Raw_complete_method_Raw(self_vtable:
                          *mut ::intercom::ComBox<Foo>;
                  let self_struct: &mut Foo = &mut **self_combox;
                  let __result =
-                     self_struct.complete_method(a.into(), b.into());
+                     self_struct.complete_method((&<<u16 as
+                                                    ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(a)?).intercom_into()?,
+                                                 (&<<i16 as
+                                                    ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(b)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
-                                *__out = v1.into();
+                                *__out = v1.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out = false;
+                                *__out =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -933,8 +1201,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_complete_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -942,25 +1211,38 @@ unsafe extern "C" fn __Foo_Foo_Raw_complete_method_Raw(self_vtable:
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_bool_method_Raw(self_vtable:
                                                              ::intercom::RawComPtr,
-                                                         input: bool,
-                                                         __out: *mut bool)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                         input:
+                                                             <bool as
+                                                             ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                         __out:
+                                                             *mut <bool as
+                                                                  ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
                      (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
                          *mut ::intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
-                 let __result = self_struct.bool_method(input.into());
+                 let __result =
+                     self_struct.bool_method((&<<bool as
+                                                ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
-                                *__out = v1.into();
+                                *__out = v1.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out = false;
+                                *__out =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -970,8 +1252,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_bool_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_snake_case)]
@@ -980,26 +1263,38 @@ unsafe extern "C" fn __Foo_Foo_Raw_bool_method_Raw(self_vtable:
 unsafe extern "C" fn __Foo_Foo_Raw_variant_method_Raw(self_vtable:
                                                                 ::intercom::RawComPtr,
                                                             input:
-                                                                ::intercom::raw::Variant,
+                                                                <Variant as
+                                                                ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternInputType,
                                                             __out:
-                                                                *mut ::intercom::raw::Variant)
- -> ::intercom::raw::HRESULT {
-    let result: Result<::intercom::raw::HRESULT, ::intercom::ComError> =
+                                                                *mut <Variant
+                                                                     as
+                                                                     ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType)
+ ->
+     <::intercom::raw::HRESULT as
+     ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType {
+    use ::intercom::type_system::{IntercomFrom, IntercomInto};
+    let result:
+            Result<<::intercom::raw::HRESULT as
+                   ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType,
+                   ::intercom::ComError> =
         (||
              {
                  let self_combox =
                      (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
                          *mut ::intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
-                 let __result = self_struct.variant_method(input.into());
+                 let __result =
+                     self_struct.variant_method((&<<Variant as
+                                                   ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
-                                *__out = v1.com_into()?;
+                                *__out = v1.intercom_into()?;
                                 ::intercom::raw::S_OK
                             }
                             Err(e) => {
-                                *__out = Default::default();
+                                *__out =
+                                    ::intercom::type_system::ExternDefault::extern_default();
                                 ::intercom::store_error(e).hresult
                             }
                         }
@@ -1009,8 +1304,9 @@ unsafe extern "C" fn __Foo_Foo_Raw_variant_method_Raw(self_vtable:
     match result {
         Ok(v) => v,
         Err(err) =>
-        <::intercom::raw::HRESULT as
-            ErrorValue>::from_error(::intercom::store_error(err)),
+        <<::intercom::raw::HRESULT as
+         ::intercom::type_system::ExternType<::intercom::type_system::RawTypeSystem>>::ExternOutputType
+            as ErrorValue>::from_error(::intercom::store_error(err)),
     }
 }
 #[allow(non_upper_case_globals)]

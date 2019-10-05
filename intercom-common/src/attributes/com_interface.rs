@@ -1,15 +1,15 @@
 
-use prelude::*;
+use crate::prelude::*;
 use super::common::*;
 
 use std::iter;
 use std::collections::BTreeMap;
 
-use idents;
-use utils;
-use tyhandlers::{Direction, ModelTypeSystem};
-use model;
-use methodinfo::ComMethodInfo;
+use crate::idents;
+use crate::utils;
+use crate::tyhandlers::{Direction, ModelTypeSystem};
+use crate::model;
+use crate::methodinfo::ComMethodInfo;
 
 extern crate proc_macro;
 
@@ -374,7 +374,7 @@ fn rust_to_com_delegate(
         // us to handle the results here immediately.
         #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
         let result : Result< #return_ty, ::intercom::ComError > = ( || unsafe {
-            #( #out_arg_declarations )*;
+            #( #out_arg_declarations )*
             let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
 
             let INTERCOM_iid = #iid_tokens;

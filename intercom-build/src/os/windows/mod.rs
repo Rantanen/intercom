@@ -7,8 +7,8 @@ use ::std::fs::File;
 use ::std::process::Command;
 use ::std::io::Write;
 
-use ::host;
-use ::BuildError;
+use crate::host;
+use crate::BuildError;
 
 mod setup_configuration;
 

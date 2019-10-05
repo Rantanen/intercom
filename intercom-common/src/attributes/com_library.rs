@@ -1,11 +1,11 @@
 
-use prelude::*;
+use crate::prelude::*;
 use super::common::*;
 
-use idents;
-use utils;
-use model;
-use builtin_model;
+use crate::idents;
+use crate::utils;
+use crate::model;
+use crate::builtin_model;
 use std::iter::FromIterator;
 
 extern crate quote;

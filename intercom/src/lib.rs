@@ -46,7 +46,7 @@
 //! ```
 
 #![crate_type="dylib"]
-#![feature(try_from, specialization, non_exhaustive, integer_atomics, associated_type_defaults)]
+#![feature(specialization, non_exhaustive, integer_atomics, associated_type_defaults)]
 #![allow(clippy::match_bool)]
 
 #[cfg(not(windows))]
@@ -73,25 +73,25 @@ pub use intercom_attributes::*;
 
 pub mod prelude;
 
-mod classfactory; pub use classfactory::*;
-mod combox; pub use combox::*;
-mod comrc; pub use comrc::*;
-mod comitf; pub use comitf::*;
-mod strings; pub use strings::*;
-mod guid; pub use guid::GUID;
-pub mod error; pub use error::{ComError, store_error, load_error, ErrorValue};
+mod classfactory; pub use crate::classfactory::*;
+mod combox; pub use crate::combox::*;
+mod comrc; pub use crate::comrc::*;
+mod comitf; pub use crate::comitf::*;
+mod strings; pub use crate::strings::*;
+mod guid; pub use crate::guid::GUID;
+pub mod error; pub use crate::error::{ComError, store_error, load_error, ErrorValue};
 mod interfaces;
 pub mod runtime;
 pub mod alloc;
-mod variant; pub use variant::{Variant, VariantError};
-pub mod type_system; pub use type_system::{ ComItemCategory, ItemInfo, BidirectionalTypeInfo, InputTypeInfo, OutputTypeInfo };
+mod variant; pub use crate::variant::{Variant, VariantError};
+pub mod type_system; pub use crate::type_system::{ ComItemCategory, ItemInfo, BidirectionalTypeInfo, InputTypeInfo, OutputTypeInfo };
 pub mod serialization;
 
 // intercom_attributes use "intercom::" to qualify things in this crate.
 // Declare such module here and import everything we have in it to make those
 // references valid.
 mod intercom {
-    pub use ::*;
+    pub use crate::*;
 }
 
 /// The `ComInterface` trait defines the COM interface details for a COM
@@ -132,9 +132,9 @@ pub mod raw {
     pub type InCStr = *const ::std::os::raw::c_char;
     pub type OutCStr = *mut ::std::os::raw::c_char;
 
-    pub use variant::raw::*;
-    pub use error::raw::*;
-    pub use type_system::TypeSystem;
+    pub use crate::variant::raw::*;
+    pub use crate::error::raw::*;
+    pub use crate::type_system::TypeSystem;
 
     #[repr(C)]
     #[derive(PartialEq, Eq)]
@@ -177,8 +177,8 @@ pub mod raw {
         }
     }
 
-    impl<TS: TypeSystem, I: ::ComInterface + ?Sized> InterfacePtr<TS, I> {
-        pub fn as_unknown( self ) -> InterfacePtr<TS, ::IUnknown> {
+    impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> InterfacePtr<TS, I> {
+        pub fn as_unknown( self ) -> InterfacePtr<TS, dyn crate::IUnknown> {
             InterfacePtr::new( self.ptr )
         }
     }
@@ -199,13 +199,13 @@ pub const IID_IErrorInfo : GUID = GUID {
     data4: [ 0x8E, 0x65, 0x08, 0x00, 0x2B, 0x2B, 0xD1, 0x19 ]
 };
 
-pub use interfaces::__IUnknown_AutomationVtbl as IUnknownVtbl;
-pub use interfaces::IID_IUnknown_Automation as IID_IUnknown;
-pub use interfaces::IUnknown;
+pub use crate::interfaces::__IUnknown_AutomationVtbl as IUnknownVtbl;
+pub use crate::interfaces::IID_IUnknown_Automation as IID_IUnknown;
+pub use crate::interfaces::IUnknown;
 
-pub use interfaces::__ISupportErrorInfo_AutomationVtbl as ISupportErrorInfoVtbl;
-pub use interfaces::IID_ISupportErrorInfo_Automation as IID_ISupportErrorInfo;
-pub use interfaces::ISupportErrorInfo;
+pub use crate::interfaces::__ISupportErrorInfo_AutomationVtbl as ISupportErrorInfoVtbl;
+pub use crate::interfaces::IID_ISupportErrorInfo_Automation as IID_ISupportErrorInfo;
+pub use crate::interfaces::ISupportErrorInfo;
 
 // Do we need this? Would rather not export this through an extern crate
 // for another dll.

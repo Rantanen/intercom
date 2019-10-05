@@ -1,9 +1,9 @@
 
-use prelude::*;
+use crate::prelude::*;
 use syn::{ Type };
-use methodinfo::{ComArg};
-use tyhandlers::{self, TypeContext, ModelTypeSystem, Direction};
-use utils;
+use crate::methodinfo::{ComArg};
+use crate::tyhandlers::{self, TypeContext, ModelTypeSystem, Direction};
+use crate::utils;
 
 /// Defines return handler for handling various different return type schemes.
 pub trait ReturnHandler : ::std::fmt::Debug {
@@ -246,7 +246,7 @@ pub fn get_return_handler(
     retval_ty : &Option< Type >,
     return_ty : &Option< Type >,
     type_system : ModelTypeSystem,
-) -> Result< Box<ReturnHandler>, () >
+) -> Result< Box<dyn ReturnHandler>, () >
 {
     Ok( match ( retval_ty, return_ty ) {
         ( &None, &None ) => Box::new( VoidHandler ),

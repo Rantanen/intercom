@@ -1,7 +1,7 @@
 
 use super::*;
 use std::sync::atomic::{ AtomicU32, Ordering };
-use type_system::TypeSystemName;
+use crate::type_system::TypeSystemName;
 
 /// Trait required by any COM coclass type.
 ///
@@ -209,6 +209,7 @@ impl<T: CoClass> ComBox<T> {
     ///
     /// Returns the reference count after the release.
     pub unsafe fn release( this : *mut Self ) -> u32 {
+        eprintln!( "Call release" );
 
         // Ensure we're not releasing an interface that has no references.
         //
