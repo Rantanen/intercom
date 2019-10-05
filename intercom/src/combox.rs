@@ -209,7 +209,6 @@ impl<T: CoClass> ComBox<T> {
     ///
     /// Returns the reference count after the release.
     pub unsafe fn release( this : *mut Self ) -> u32 {
-        eprintln!( "Call release" );
 
         // Ensure we're not releasing an interface that has no references.
         //

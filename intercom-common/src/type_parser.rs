@@ -162,6 +162,7 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
                 | syn::Type::Macro(..)
                 | syn::Type::Verbatim(..)
                 | syn::Type::Group(..)
+                | syn::Type::__Nonexhaustive
                 => { dbg!( syn_type ); None },
         }
     }
@@ -244,7 +245,7 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         }
 
         // Determine the TypeInfo of the nested type.
-        let nested_type = match **args.first().unwrap().value() {
+        let nested_type = match *args.first().unwrap() {
                                     syn::GenericArgument::Type( ref t ) => t,
                                     _ => return None,
                             };
@@ -302,7 +303,7 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         type_path: &'p syn::TypePath,
     ) -> Option<TypeInfoResolver<'s>>
     {
-        TypeInfoResolver::from_segment( type_path.path.segments.last().unwrap().value() )
+        TypeInfoResolver::from_segment( type_path.path.segments.last().unwrap() )
     }
 
     fn from_segment(
@@ -349,7 +350,7 @@ impl<'s, 'p: 's> TypeInfoResolver<'s> {
         let trait_bound = trait_object.bounds.iter().find_map( |parameter: &TypeParamBound|
                                                  if let syn::TypeParamBound::Trait( ref tr ) = parameter  { Some( tr ) }
                                                  else { None } )?;
-        TypeInfoResolver::from_segment( trait_bound.path.segments.last().unwrap().value() )
+        TypeInfoResolver::from_segment( trait_bound.path.segments.last().unwrap() )
     }
 
     /// Determines if the given type is mutable
