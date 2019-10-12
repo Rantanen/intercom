@@ -83,7 +83,7 @@ impl ComCrateBuilder {
                         None
                     } ) {
 
-                lib.add_coclass( parse_quote!( ::intercom::#clsid ) )
+                lib.add_coclass( parse_quote!( intercom::#clsid ) )
             }
         }
     }

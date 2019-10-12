@@ -77,7 +77,7 @@ pub fn build( all_type_systems : bool ) -> Result<(), BuildError> {
                         format!( "Failed to create file {}",
                                  &idl_path.to_string_lossy() ),
                         e ) )?;
-        let model = ::intercom_common::generators::idl::IdlModel::from_path(
+        let model = intercom_common::generators::idl::IdlModel::from_path(
                     Path::new( &toml_dir ), all_type_systems )
                 .map_err( |e| BuildError::ParseError( e.to_string() ) )?;
         model.write( &mut idl )

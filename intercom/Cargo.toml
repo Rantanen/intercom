@@ -3,6 +3,7 @@ name = "intercom"
 version = "0.3.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 license = "MIT"
+edition = "2018"
 repository = "https://github.com/Rantanen/intercom"
 description = "Utilities for writing COM visible Rust components."
 

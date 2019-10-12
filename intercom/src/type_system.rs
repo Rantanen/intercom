@@ -187,7 +187,7 @@ impl<TS: TypeSystem, TPtr> ExternType<TS> for *const TPtr where TPtr: Bidirectio
 /// `ComItf` extern type implementation.
 
 
-impl<I: ::ComInterface + ?Sized> BidirectionalTypeInfo for ::ComItf<I>
+impl<I: crate::ComInterface + ?Sized> BidirectionalTypeInfo for crate::ComItf<I>
     where I: BidirectionalTypeInfo
 {
 
@@ -196,7 +196,7 @@ impl<I: ::ComInterface + ?Sized> BidirectionalTypeInfo for ::ComItf<I>
 }
 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternType<TS>
-        for ::ComItf<I>
+        for crate::ComItf<I>
     where I: BidirectionalTypeInfo
 {
 
@@ -206,7 +206,7 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternType<TS>
     type OwnedNativeType = crate::raw::InterfacePtr<TS, I>;
 }
 
-impl<TS: TypeSystem, I: ::ComInterface + ?Sized> BidirectionalTypeInfo for ::raw::InterfacePtr<TS, I>
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> BidirectionalTypeInfo for crate::raw::InterfacePtr<TS, I>
     where I: BidirectionalTypeInfo
 {
 

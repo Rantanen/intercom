@@ -102,24 +102,24 @@ pub fn expand_com_interface(
                 ) -> #return_ty {
 
                     #[allow(unused_imports)]
-                    use ::intercom::ComInto;
+                    use intercom::ComInto;
                     #[allow(unused_imports)]
-                    use ::intercom::ErrorValue;
+                    use intercom::ErrorValue;
 
                     // Try the available type systems.
                     #( #impl_branches )*
 
                     // None of the type system pointers were available,
                     // which means this is a null reference.
-                    < #return_ty as ::intercom::ErrorValue >::from_com_error(
-                            ::intercom::ComError::E_POINTER.into() )
+                    < #return_ty as intercom::ErrorValue >::from_com_error(
+                            intercom::ComError::E_POINTER.into() )
                 }
             ) );
         }
 
         let unsafety = if itf.is_unsafe() { quote!( unsafe ) } else { quote!() };
         output.push( quote!(
-            #unsafety impl #itf_ident for ::intercom::ComItf< #itf_ident > {
+            #unsafety impl #itf_ident for intercom::ComItf< #itf_ident > {
                 #( #impls )*
             }
         ) );
@@ -145,21 +145,21 @@ pub fn expand_com_interface(
         // the possibility to do 'implicit' interfaces by just impling the struct.
         (
             quote!(
-                let some_iunk : &::intercom::ComItf<::intercom::IUnknown> = com_itf.as_ref();
-                let iunknown_iid = ::intercom::IUnknown::iid(
-                        ::intercom::type_system::TypeSystemName::Automation )
+                let some_iunk : &intercom::ComItf<intercom::IUnknown> = com_itf.as_ref();
+                let iunknown_iid = intercom::IUnknown::iid(
+                        intercom::type_system::TypeSystemName::Automation )
                             .expect( "IUnknown must have Automation IID" );
                 let primary_iunk = some_iunk.query_interface( iunknown_iid )
                         .expect( "All types must implement IUnknown" );
 
-                let combox : *mut ::intercom::ComBox< #itf_ident > =
-                        primary_iunk as *mut ::intercom::ComBox< #itf_ident >;
+                let combox : *mut intercom::ComBox< #itf_ident > =
+                        primary_iunk as *mut intercom::ComBox< #itf_ident >;
                 unsafe {
 
                     // We are already holding a reference to the 'self', which should
                     // keep this alive. We don't need to maintain a lifetime of the
                     // queried interface.
-                    ::intercom::ComBox::release( combox );
+                    intercom::ComBox::release( combox );
 
                     // Deref.
                     use std::ops::Deref;
@@ -171,12 +171,12 @@ pub fn expand_com_interface(
     };
 
     output.push( quote!(
-        impl ::intercom::ComInterface for #itf_ident {
+        impl intercom::ComInterface for #itf_ident {
 
             #[doc = "Returns the IID of the requested interface."]
             fn iid(
-                ts : ::intercom::type_system::TypeSystemName
-            ) -> Option< &'static ::intercom::IID >
+                ts : intercom::type_system::TypeSystemName
+            ) -> Option< &'static intercom::IID >
             {
                 match ts {
                     #( #iid_arms ),*
@@ -184,7 +184,7 @@ pub fn expand_com_interface(
             }
 
             fn deref(
-                com_itf : &::intercom::ComItf< #itf_ident >
+                com_itf : &intercom::ComItf< #itf_ident >
             ) -> #deref_ret {
                 #deref_impl
             }
@@ -194,7 +194,7 @@ pub fn expand_com_interface(
     // Implement type info for the interface.
     output.push( quote!(
 
-        impl ::intercom::type_system::BidirectionalTypeInfo for #itf_ident {
+        impl intercom::type_system::BidirectionalTypeInfo for #itf_ident {
 
             /// The name of the type.
             fn type_name() -> &'static str { stringify!( #itf_ident )  }
@@ -233,7 +233,7 @@ fn process_itf_variant(
     output.push( quote!(
         #[doc = #iid_doc]
         #[allow(non_upper_case_globals)]
-        #visibility const #iid_ident : ::intercom::IID = #iid_tokens;
+        #visibility const #iid_ident : intercom::IID = #iid_tokens;
     ) );
 
     // Construct the iid(ts) match arm for this type system.
@@ -245,7 +245,7 @@ fn process_itf_variant(
     let mut vtbl_fields = vec![];
     if let Some( ref base ) = *itf.base_interface() {
         let vtbl = match base.to_string().as_ref() {
-            "IUnknown" => quote!( ::intercom::IUnknownVtbl ),
+            "IUnknown" => quote!( intercom::IUnknownVtbl ),
             _ => { let vtbl = idents::vtable_struct( &base ); quote!( #vtbl ) }
         };
         vtbl_fields.push( quote!( pub __base : #vtbl ) );
@@ -267,7 +267,7 @@ fn process_itf_variant(
                     };
                     quote!( #name : #dir #com_ty )
                 } );
-        let self_arg = quote!( self_vtable : ::intercom::RawComPtr );
+        let self_arg = quote!( self_vtable : intercom::RawComPtr );
         let args = iter::once( self_arg ).chain( in_out_args );
 
         // Create the vtable field and add it to the vector of fields.
@@ -361,7 +361,7 @@ fn rust_to_com_delegate(
 
     // Construct the final method.
     quote!(
-        use ::intercom::type_system::{IntercomFrom, IntercomInto};
+        use intercom::type_system::{IntercomFrom, IntercomInto};
         let vtbl = comptr.ptr as *const *const #vtable_ident;
 
         #( #temporaries )*
@@ -370,7 +370,7 @@ fn rust_to_com_delegate(
         // substitutions might end up using ?'s for error handling. The IIFE allows
         // us to handle the results here immediately.
         #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
-        let result : Result< #return_ty, ::intercom::ComError > = ( || unsafe {
+        let result : Result< #return_ty, intercom::ComError > = ( || unsafe {
             #( #out_arg_declarations )*
             let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
 
@@ -380,7 +380,7 @@ fn rust_to_com_delegate(
 
         return match result {
             Ok( v ) => v,
-            Err( err ) => < #return_ty as ::intercom::ErrorValue >::from_com_error( err ),
+            Err( err ) => < #return_ty as intercom::ErrorValue >::from_com_error( err ),
         };
     )
 }

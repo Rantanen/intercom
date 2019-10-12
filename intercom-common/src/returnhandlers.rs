@@ -97,8 +97,8 @@ impl ReturnHandler for ErrorResultHandler {
     fn com_ty( &self ) -> Type {
         let ts = self.type_system.as_typesystem_type();
         parse_quote!(
-            < ::intercom::raw::HRESULT as
-                ::intercom::type_system::ExternType< #ts >>
+            < intercom::raw::HRESULT as
+                intercom::type_system::ExternType< #ts >>
                     ::ExternOutputType )
     }
 
@@ -118,10 +118,10 @@ impl ReturnHandler for ErrorResultHandler {
         // yields either Ok or Err Result based on that.
         quote!(
             // TODO: HRESULT::succeeded
-            if #result == ::intercom::raw::S_OK || #result == ::intercom::raw::S_FALSE {
+            if #result == intercom::raw::S_OK || #result == intercom::raw::S_FALSE {
                 Ok( #ok_tokens )
             } else {
-                return Err( ::intercom::load_error(
+                return Err( intercom::load_error(
                         self.as_ref(),
                         &INTERCOM_iid,
                         #result ) );
@@ -159,10 +159,10 @@ impl ReturnHandler for ErrorResultHandler {
             self.com_out_args() );
         quote!(
             match #result {
-                Ok( #ok_pattern ) => { #( #ok_writes );*; ::intercom::raw::S_OK },
+                Ok( #ok_pattern ) => { #( #ok_writes );*; intercom::raw::S_OK },
                 Err( e ) => {
                     #( #err_writes );*;
-                    ::intercom::store_error( e ).hresult
+                    intercom::store_error( e ).hresult
                 },
             }
         )

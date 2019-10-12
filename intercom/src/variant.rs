@@ -1,9 +1,9 @@
 
 
-use ::*;
+use crate::*;
 use std::convert::TryFrom;
 use std::time::{SystemTime};
-use type_system::{TypeSystem, ExternType, IntercomFrom};
+use crate::type_system::{TypeSystem, ExternType, IntercomFrom};
 use intercom_attributes::BidirectionalTypeInfo;
 
 #[derive(Debug, Clone, BidirectionalTypeInfo)]

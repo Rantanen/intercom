@@ -1,11 +1,11 @@
 
-use prelude::*;
+use crate::prelude::*;
 
 use std::iter;
 
-use tyhandlers::{Direction};
-use idents;
-use model;
+use crate::tyhandlers::{Direction};
+use crate::idents;
+use crate::model;
 
 /// Expands the `BidirectionalTypeInfo` derive attribute.
 ///

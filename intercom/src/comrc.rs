@@ -118,7 +118,7 @@ impl<T: ComInterface + ?Sized> ComRc<T>
     }
 }
 
-impl<T : ComInterface + ?Sized > ::std::ops::Deref for crate::intercom::ComRc< T > {
+impl<T : ComInterface + ?Sized > ::std::ops::Deref for ComRc< T > {
     type Target = ComItf< T >;
     fn deref( &self ) -> &Self::Target {
         &self.itf

@@ -55,21 +55,21 @@ pub fn expand_com_impl(
                 #[allow(non_snake_case)]
                 #[doc(hidden)]
                 unsafe extern #calling_convetion fn #query_interface_ident(
-                    self_vtable : ::intercom::RawComPtr,
-                    riid : <::intercom::REFIID as ::intercom::type_system::ExternType<
-                            ::intercom::type_system::AutomationTypeSystem>>
+                    self_vtable : intercom::RawComPtr,
+                    riid : <intercom::REFIID as intercom::type_system::ExternType<
+                            intercom::type_system::AutomationTypeSystem>>
                                 ::ExternInputType,
-                    out : *mut <::intercom::RawComPtr as ::intercom::type_system::ExternType<
-                            ::intercom::type_system::AutomationTypeSystem>>
+                    out : *mut <intercom::RawComPtr as intercom::type_system::ExternType<
+                            intercom::type_system::AutomationTypeSystem>>
                                 ::ExternOutputType,
-                ) -> <::intercom::raw::HRESULT as ::intercom::type_system::ExternType<
-                        ::intercom::type_system::AutomationTypeSystem>>
+                ) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
+                        intercom::type_system::AutomationTypeSystem>>
                             ::ExternOutputType
                 {
                     // Get the primary iunk interface by offsetting the current
                     // self_vtable with the vtable offset. Once we have the primary
                     // pointer we can delegate the call to the primary implementation.
-                    ::intercom::ComBox::< #struct_ident >::query_interface(
+                    intercom::ComBox::< #struct_ident >::query_interface(
                             &mut *(( self_vtable as usize - #vtable_offset() ) as *mut _ ),
                             riid,
                             out )
@@ -84,12 +84,12 @@ pub fn expand_com_impl(
                 #[allow(dead_code)]
                 #[doc(hidden)]
                 unsafe extern #calling_convetion fn #add_ref_ident(
-                    self_vtable : ::intercom::RawComPtr
-                ) -> <u32 as ::intercom::type_system::ExternType<
-                        ::intercom::type_system::AutomationTypeSystem>>
+                    self_vtable : intercom::RawComPtr
+                ) -> <u32 as intercom::type_system::ExternType<
+                        intercom::type_system::AutomationTypeSystem>>
                             ::ExternOutputType
                 {
-                    ::intercom::ComBox::< #struct_ident >::add_ref(
+                    intercom::ComBox::< #struct_ident >::add_ref(
                             &mut *(( self_vtable as usize - #vtable_offset() ) as *mut _ ) )
                 }
             ) );
@@ -102,12 +102,12 @@ pub fn expand_com_impl(
                 #[allow(dead_code)]
                 #[doc(hidden)]
                 unsafe extern #calling_convetion fn #release_ident(
-                    self_vtable : ::intercom::RawComPtr
-                ) -> <u32 as ::intercom::type_system::ExternType<
-                        ::intercom::type_system::AutomationTypeSystem>>
+                    self_vtable : intercom::RawComPtr
+                ) -> <u32 as intercom::type_system::ExternType<
+                        intercom::type_system::AutomationTypeSystem>>
                             ::ExternOutputType
                 {
-                    ::intercom::ComBox::< #struct_ident >::release_ptr(
+                    intercom::ComBox::< #struct_ident >::release_ptr(
                             ( self_vtable as usize - #vtable_offset() ) as *mut _ )
                 }
             ) );
@@ -117,7 +117,7 @@ pub fn expand_com_impl(
         // we only support IUnknown.
         let mut vtable_fields = vec![
             quote!(
-                __base : ::intercom::IUnknownVtbl {
+                __base : intercom::IUnknownVtbl {
                     query_interface_Automation : #query_interface_ident,
                     add_ref_Automation : #add_ref_ident,
                     release_Automation : #release_ident,
@@ -151,7 +151,7 @@ pub fn expand_com_impl(
                         };
                         quote!( #name : #dir #com_ty )
                     } );
-            let self_arg = quote!( self_vtable : ::intercom::RawComPtr );
+            let self_arg = quote!( self_vtable : intercom::RawComPtr );
             let args = iter::once( self_arg ).chain( in_out_args );
 
             // Format the in and out parameters for the Rust call.
@@ -188,12 +188,12 @@ pub fn expand_com_impl(
                 unsafe extern #calling_convetion fn #method_impl_ident(
                     #( #args ),*
                 ) -> #ret_ty {
-                    use ::intercom::type_system::{IntercomFrom, IntercomInto};
-                    let result : Result< #ret_ty, ::intercom::ComError > = ( || {
+                    use intercom::type_system::{IntercomFrom, IntercomInto};
+                    let result : Result< #ret_ty, intercom::ComError > = ( || {
                         // Acquire the reference to the ComBox. For this we need
                         // to offset the current 'self_vtable' vtable pointer.
                         let self_combox = ( self_vtable as usize - #vtable_offset() )
-                                as *mut ::intercom::ComBox< #struct_ident >;
+                                as *mut intercom::ComBox< #struct_ident >;
 
                         #( #in_temporaries )*
 
@@ -203,11 +203,11 @@ pub fn expand_com_impl(
                         Ok( { #return_statement } )
                     } )();
 
-                    use ::intercom::ErrorValue;
+                    use intercom::ErrorValue;
                     match result {
                         Ok( v ) => v,
                         Err( err ) => < #ret_ty as ErrorValue >::from_error(
-                                ::intercom::store_error( err ) ),
+                                intercom::store_error( err ) ),
                     }
                 }
             ) );
@@ -226,7 +226,7 @@ pub fn expand_com_impl(
     }
 
     output.push( quote!(
-        impl ::intercom::HasInterface< #itf_ident > for #struct_ident {}
+        impl intercom::HasInterface< #itf_ident > for #struct_ident {}
     ) );
 
     Ok( tokens_to_tokenstream( item_tokens, output ) )

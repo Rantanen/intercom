@@ -49,6 +49,8 @@
 #![feature(specialization, non_exhaustive, integer_atomics, associated_type_defaults)]
 #![allow(clippy::match_bool)]
 
+extern crate self as intercom;
+
 #[cfg(not(windows))]
 extern crate libc;
 
@@ -64,7 +66,6 @@ extern crate libc;
 #[allow(clippy::useless_attribute)]
 #[allow(unused_imports)]
 extern crate intercom_attributes;
-/// Foo
 pub use intercom_attributes::*;
 
 #[allow(clippy::useless_attribute)]
@@ -85,13 +86,6 @@ pub mod runtime;
 pub mod alloc;
 mod variant; pub use crate::variant::{Variant, VariantError};
 pub mod type_system; pub use type_system::{ BidirectionalTypeInfo, InputTypeInfo, OutputTypeInfo };
-
-// intercom_attributes use "intercom::" to qualify things in this crate.
-// Declare such module here and import everything we have in it to make those
-// references valid.
-mod intercom {
-    pub use crate::*;
-}
 
 /// The `ComInterface` trait defines the COM interface details for a COM
 /// interface trait.
