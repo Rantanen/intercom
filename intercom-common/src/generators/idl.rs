@@ -6,13 +6,13 @@ use std::path::Path;
 
 use super::GeneratorError;
 
-use utils;
-use model;
-use model::{ComInterfaceVariant};
-use ast_converters::GetIdent;
-use tyhandlers::{Direction, ModelTypeSystem, ModelTypeSystemConfig};
-use foreign_ty::*;
-use type_parser::*;
+use crate::utils;
+use crate::model;
+use crate::model::{ComInterfaceVariant};
+use crate::ast_converters::GetIdent;
+use crate::tyhandlers::{Direction, ModelTypeSystem, ModelTypeSystemConfig};
+use crate::foreign_ty::*;
+use crate::type_parser::*;
 
 use handlebars::Handlebars;
 

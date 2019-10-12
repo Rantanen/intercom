@@ -1,5 +1,5 @@
 
-use prelude::*;
+use crate::prelude::*;
 
 extern crate proc_macro;
 

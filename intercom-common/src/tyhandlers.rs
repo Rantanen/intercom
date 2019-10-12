@@ -63,9 +63,9 @@ impl ModelTypeSystem {
     pub fn as_typesystem_tokens( self ) -> TokenStream {
         match self {
             ModelTypeSystem::Automation =>
-                    quote!( ::intercom::type_system::TypeSystemName::Automation ),
+                    quote!( intercom::type_system::TypeSystemName::Automation ),
             ModelTypeSystem::Raw =>
-                    quote!( ::intercom::type_system::TypeSystemName::Raw ),
+                    quote!( intercom::type_system::TypeSystemName::Raw ),
         }
     }
 
@@ -73,9 +73,9 @@ impl ModelTypeSystem {
     pub fn as_typesystem_type( self ) -> Type {
         match self {
             ModelTypeSystem::Automation =>
-                    parse_quote!( ::intercom::type_system::AutomationTypeSystem ),
+                    parse_quote!( intercom::type_system::AutomationTypeSystem ),
             ModelTypeSystem::Raw =>
-                    parse_quote!( ::intercom::type_system::RawTypeSystem ),
+                    parse_quote!( intercom::type_system::RawTypeSystem ),
         }
     }
 }
@@ -136,7 +136,7 @@ pub trait TypeHandler {
     /// Gets the default value for the type.
     fn default_value( &self ) -> TokenStream
     {
-        quote!( ::intercom::type_system::ExternDefault::extern_default() )
+        quote!( intercom::type_system::ExternDefault::extern_default() )
     }
 }
 
@@ -157,7 +157,7 @@ impl TypeHandler for TypeSystemParam {
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type();
         let ts_trait = quote!(
-            <#ty as ::intercom::type_system::ExternType< #ts > > );
+            <#ty as intercom::type_system::ExternType< #ts > > );
 
         // Get the final type based on the parameter direction.
         match dir {
@@ -174,7 +174,7 @@ impl TypeHandler for TypeSystemParam {
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type();
         let ts_trait = quote!(
-            <#ty as ::intercom::type_system::ExternType< #ts > > );
+            <#ty as intercom::type_system::ExternType< #ts > > );
 
         TypeConversion {
             temporary: None,
@@ -200,7 +200,7 @@ impl TypeHandler for TypeSystemParam {
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type();
         let ts_trait = quote!(
-            <#ty as ::intercom::type_system::ExternType< #ts > > );
+            <#ty as intercom::type_system::ExternType< #ts > > );
 
         TypeConversion {
             temporary: None,

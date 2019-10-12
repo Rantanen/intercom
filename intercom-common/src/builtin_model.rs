@@ -18,13 +18,13 @@ pub fn builtin_intercom_types( lib_name: &str ) -> Vec<BuiltinTypeInfo> {
             interface: allocator_interface( lib_name ),
             class: allocator_class( lib_name ),
             implementation: allocator_impl(),
-            ctor: quote!( ::intercom::alloc::Allocator::default() ),
+            ctor: quote!( intercom::alloc::Allocator::default() ),
         },
         BuiltinTypeInfo {
             interface: errorstore_interface( lib_name ),
             class: errorstore_class( lib_name ),
             implementation: errorstore_impl(),
-            ctor: quote!( ::intercom::error::ErrorStore::default() ),
+            ctor: quote!( intercom::error::ErrorStore::default() ),
         },
     ]
 }

@@ -213,7 +213,7 @@ impl<TS: TypeSystem, TPtr> ExternType<TS> for *const TPtr where TPtr: Bidirectio
 /// `ComItf` extern type implementation.
 
 
-impl<I: ::ComInterface + ?Sized> BidirectionalTypeInfo for ::ComItf<I>
+impl<I: crate::ComInterface + ?Sized> BidirectionalTypeInfo for crate::ComItf<I>
     where I: BidirectionalTypeInfo
 {
 
@@ -232,7 +232,7 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternType<TS>
     type OwnedNativeType = crate::raw::InterfacePtr<TS, I>;
 }
 
-impl<TS: TypeSystem, I: ::ComInterface + ?Sized> BidirectionalTypeInfo for ::raw::InterfacePtr<TS, I>
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> BidirectionalTypeInfo for crate::raw::InterfacePtr<TS, I>
     where I: BidirectionalTypeInfo
 {
 
@@ -249,7 +249,7 @@ IntercomFrom<crate::ComItf<I>> for crate::raw::InterfacePtr<TS, I>
 }
 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
-    IntercomFrom<&::ComItf<I>> for crate::raw::InterfacePtr<TS, I>
+    IntercomFrom<&crate::ComItf<I>> for crate::raw::InterfacePtr<TS, I>
 {
     fn intercom_from( source: &crate::ComItf<I> ) -> ComResult<Self> {
         Ok( crate::ComItf::ptr( source ) )
@@ -266,7 +266,7 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
 }
 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
-    IntercomFrom<&::raw::InterfacePtr<TS, I>> for crate::ComItf<I>
+    IntercomFrom<&crate::raw::InterfacePtr<TS, I>> for crate::ComItf<I>
 {
     fn intercom_from( source: &crate::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
         crate::ComItf::maybe_wrap( source.clone() )

@@ -1,6 +1,6 @@
 
 use intercom::*;
-use std::convert::{TryInto};
+use std::convert::{TryInto, TryFrom};
 use std::time::SystemTime;
 use chrono::prelude::*;
 
@@ -50,10 +50,10 @@ impl VariantTests
         let r = match vt {
             0 => Ok( true ),
             1 => Ok( true ),
-            2 => Ok( -1i16 == variant.try_into()? ),
-            3 => Ok( -1i32 == variant.try_into()? ),
-            4 => Ok( -1.234f32 == variant.try_into()? ),
-            5 => Ok( -1.234f64 == variant.try_into()? ),
+            2 => Ok( -1i16 == i16::try_from( variant )? ),
+            3 => Ok( -1i32 == i32::try_from( variant )? ),
+            4 => Ok( -1.234f32 == f32::try_from( variant )? ),
+            5 => Ok( -1.234f64 == f64::try_from( variant )? ),
             6 => Ok( true ),
             701 => Ok( {
                 let st = DateTime::<Utc>::from( SystemTime::try_from( variant )? );
@@ -90,22 +90,22 @@ impl VariantTests
                 DateTime::<Utc>::from( st ) == expected
             } ),
             8 => Ok( {
-                let bstr : BString = variant.try_into()?;
+                let bstr : BString = BString::try_from( variant )?;
                 let string : String = bstr.com_into()?;
                 "text" == string
             } ),
             9 => Ok( true ),
             10 => Ok( true ),
-            11 => Ok( true == variant.try_into()? ),
+            11 => Ok( true == bool::try_from( variant )? ),
             12 => Ok( true ),
             13 => Ok( true ),
             14 => Ok( true ),  // DECIMAL
-            16 => Ok( -1i8 == variant.try_into()? ),
-            17 => Ok( 129u8 == variant.try_into()? ),
-            18 => Ok( 12929u16 == variant.try_into()? ),
-            19 => Ok( 1292929u32 == variant.try_into()? ),
-            20 => Ok( -1i64 == variant.try_into()? ),
-            21 => Ok( 129292929u64 == variant.try_into()? ),
+            16 => Ok( -1i8 == i8::try_from( variant )? ),
+            17 => Ok( 129u8 == u8::try_from( variant )? ),
+            18 => Ok( 12929u16 == u16::try_from( variant )? ),
+            19 => Ok( 1292929u32 == u32::try_from( variant )? ),
+            20 => Ok( -1i64 == i64::try_from( variant )? ),
+            21 => Ok( 129292929u64 == u64::try_from( variant )? ),
             _ => Err( ComError::E_NOTIMPL )?,
         };
 
