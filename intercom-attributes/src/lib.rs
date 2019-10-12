@@ -152,3 +152,15 @@ pub fn named_type_derive(
         Err(e) => panic!( "{}", e ),
     }
 }
+
+/// Derives the implementation of the trait ExternType for a type.
+#[proc_macro_derive(ExternType)]
+pub fn derive_extern_type(
+    input: proc_macro::TokenStream
+) -> proc_macro::TokenStream {
+
+    match expand_derive_extern_type( input ) {
+        Ok(t) => t,
+        Err(e) => panic!( "{}", e ),
+    }
+}
