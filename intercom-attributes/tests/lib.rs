@@ -131,8 +131,8 @@ fn check_expansions() {
                 } else {
                     println!( "{}", changeset );
                 }
+                failed += 1;
             }
-            failed += 1;
         }
     }
 
