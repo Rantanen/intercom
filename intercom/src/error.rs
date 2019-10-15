@@ -3,7 +3,10 @@ use std::error::Error;
 use std::convert::TryFrom;
 
 use super::*;
-use crate::type_system::{AutomationTypeSystem};
+use crate::type_system::{
+    TypeSystem, AutomationTypeSystem, ExternType,
+    IntercomFrom
+};
 
 /// Error structure containing the available information on a COM error.
 #[derive(Debug)]
@@ -14,6 +17,47 @@ pub struct ComError {
 
     /// Possible detailed error info.
     pub error_info : Option<ErrorInfo>,
+}
+
+impl std::error::Error for ComError {
+    fn description(&self) -> &str { "ComError (Use Display for more information)" }
+    fn cause(&self) -> Option<&dyn Error> { None }
+    fn source(&self) -> Option<&(dyn Error + 'static)> { None }
+}
+
+impl std::fmt::Display for ComError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!( f, "COM error ({:#x})", self.hresult.hr )
+    }
+}
+
+impl<TS: TypeSystem> ExternType<TS> for ComError {
+    type ExternInputType = raw::HRESULT;
+    type ExternOutputType = raw::HRESULT;
+    type OwnedNativeType = ComError;
+    type OwnedExternType = ComError;
+}
+
+impl<TS: TypeSystem> ExternType<TS> for std::io::Error {
+    type ExternInputType = raw::HRESULT;
+    type ExternOutputType = raw::HRESULT;
+    type OwnedNativeType = std::io::Error;
+    type OwnedExternType = std::io::Error;
+}
+
+impl IntercomFrom<error::raw::HRESULT> for ComError {
+    default fn intercom_from( source: error::raw::HRESULT ) -> ComResult<ComError> {
+        Ok( ComError {
+            hresult: source,
+            error_info: None,
+        } )
+    }
+}
+
+impl IntercomFrom<error::raw::HRESULT> for std::io::Error {
+    default fn intercom_from( source: error::raw::HRESULT ) -> ComResult<std::io::Error> {
+        Ok(ComError::intercom_from(source)?.into())
+    }
 }
 
 impl ComError {
