@@ -1,6 +1,10 @@
 
 use crate::prelude::*;
 
+#[derive(
+    Debug, Clone, Copy,
+    Hash, PartialOrd, PartialEq,
+)]
 pub enum TypeSystemName {
     Automation,
     Raw,
@@ -34,6 +38,7 @@ pub trait BidirectionalTypeInfo {
 
     /// The name of the type.
     fn type_name() -> &'static str;
+    fn indirection_level() -> u32 { 0 }
 }
 
 /// Defines details of the type that specify how to pass it as an input parameter.
@@ -41,6 +46,7 @@ pub trait InputTypeInfo {
 
     /// The name of the type.
     fn type_name() -> &'static str;
+    fn indirection_level() -> u32 { 0 }
 }
 
 /// Defines details of the type that specify how to pass it as an output parameter.
@@ -48,6 +54,7 @@ pub trait OutputTypeInfo {
 
     /// The name of the type.
     fn type_name() -> &'static str;
+    fn indirection_level() -> u32 { 0 }
 }
 
 /// Defines a type that is compatible with Intercom interfaces.
@@ -105,6 +112,7 @@ impl<BT> InputTypeInfo for BT where BT: BidirectionalTypeInfo {
 
     /// The name of the type.
     fn type_name() -> &'static str { <BT as BidirectionalTypeInfo>::type_name() }
+    fn indirection_level() -> u32 { <BT as BidirectionalTypeInfo>::indirection_level() }
 }
 
 /// Bidirectional types can be used as output types.
@@ -112,6 +120,7 @@ impl<BT> OutputTypeInfo for BT where BT: BidirectionalTypeInfo {
 
     /// The name of the type.
     fn type_name() -> &'static str { <BT as BidirectionalTypeInfo>::type_name() }
+    fn indirection_level() -> u32 { <BT as BidirectionalTypeInfo>::indirection_level() }
 }
 
 /// A quick macro for implementing ExternType for various basic types that
@@ -154,7 +163,9 @@ self_extern!( f32 );
 self_extern!( f64 );
 self_extern!( crate::raw::HRESULT );
 self_extern!( crate::GUID );
+
 self_extern!( std::ffi::c_void );
+self_extern!(TypeSystemName);
 
 // Any raw pointer is passed as is.
 
@@ -162,6 +173,7 @@ impl<TPtr> BidirectionalTypeInfo for *mut TPtr where TPtr: BidirectionalTypeInfo
 
     /// The name of the type.
     fn type_name() -> &'static str { <TPtr as BidirectionalTypeInfo>::type_name() }
+    fn indirection_level() -> u32 { <TPtr as BidirectionalTypeInfo>::indirection_level() + 1 }
 }
 
 impl<TS: TypeSystem, TPtr> ExternType<TS> for *mut TPtr where TPtr: BidirectionalTypeInfo {
@@ -175,6 +187,7 @@ impl<TPtr> BidirectionalTypeInfo for *const TPtr where TPtr: BidirectionalTypeIn
 
     /// The name of the type.
     fn type_name() -> &'static str { <TPtr as BidirectionalTypeInfo>::type_name() }
+    fn indirection_level() -> u32 { <TPtr as BidirectionalTypeInfo>::indirection_level() + 1 }
 }
 
 impl<TS: TypeSystem, TPtr> ExternType<TS> for *const TPtr where TPtr: BidirectionalTypeInfo {
@@ -186,17 +199,48 @@ impl<TS: TypeSystem, TPtr> ExternType<TS> for *const TPtr where TPtr: Bidirectio
 
 /// `ComItf` extern type implementation.
 
-
 impl<I: crate::ComInterface + ?Sized> BidirectionalTypeInfo for crate::ComItf<I>
     where I: BidirectionalTypeInfo
 {
 
     /// The name of the type.
     fn type_name() -> &'static str { <I as BidirectionalTypeInfo>::type_name() }
+    fn indirection_level() -> u32 { <I as BidirectionalTypeInfo>::indirection_level() + 1 }
 }
 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternType<TS>
         for crate::ComItf<I>
+    where I: BidirectionalTypeInfo
+{
+
+    type ExternInputType = crate::raw::InterfacePtr<TS, I>;
+    type ExternOutputType = crate::raw::InterfacePtr<TS, I>;
+    type OwnedExternType = crate::raw::InterfacePtr<TS, I>;
+    type OwnedNativeType = crate::raw::InterfacePtr<TS, I>;
+}
+
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternType<TS>
+        for crate::raw::InterfacePtr<TS, I>
+    where I: BidirectionalTypeInfo
+{
+
+    type ExternInputType = crate::raw::InterfacePtr<TS, I>;
+    type ExternOutputType = crate::raw::InterfacePtr<TS, I>;
+    type OwnedExternType = crate::raw::InterfacePtr<TS, I>;
+    type OwnedNativeType = crate::raw::InterfacePtr<TS, I>;
+}
+
+impl<I: crate::ComInterface + ?Sized> BidirectionalTypeInfo for crate::ComRc<I>
+    where I: BidirectionalTypeInfo
+{
+
+    /// The name of the type.
+    fn type_name() -> &'static str { <I as BidirectionalTypeInfo>::type_name() }
+    fn indirection_level() -> u32 { <I as BidirectionalTypeInfo>::indirection_level() + 1 }
+}
+
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternType<TS>
+        for crate::ComRc<I>
     where I: BidirectionalTypeInfo
 {
 
@@ -212,6 +256,7 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> BidirectionalTypeInfo for 
 
     /// The name of the type.
     fn type_name() -> &'static str { <I as BidirectionalTypeInfo>::type_name() }
+    fn indirection_level() -> u32 { <I as BidirectionalTypeInfo>::indirection_level() + 1 }
 }
 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
@@ -227,6 +272,24 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
 {
     fn intercom_from( source: &crate::ComItf<I> ) -> ComResult<Self> {
         Ok( crate::ComItf::ptr( source ) )
+    }
+}
+
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
+IntercomFrom<crate::ComRc<I>> for crate::raw::InterfacePtr<TS, I>
+{
+    fn intercom_from( source: crate::ComRc<I> ) -> ComResult<Self> {
+        Ok( crate::ComItf::ptr( &crate::ComRc::detach( source ) ) )
+    }
+}
+
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
+    IntercomFrom<crate::raw::InterfacePtr<TS, I>> for crate::ComRc<I>
+{
+    fn intercom_from( source: crate::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
+        Ok( crate::ComRc::attach(
+            crate::ComItf::maybe_wrap( source )
+                .ok_or_else( || crate::ComError::E_INVALIDARG )? ) )
     }
 }
 
