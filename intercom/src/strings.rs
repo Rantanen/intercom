@@ -1219,7 +1219,7 @@ impl IntercomFrom<String> for *mut c_char {
                 bytes.as_ptr(),
                 buffer,
                 bytes.len() );
-            *buffer.offset( ( bytes.len() + 1 ) as isize ) = 0;
+            *buffer.offset( ( bytes.len() ) as isize ) = 0;
 
             Ok( buffer as *mut c_char )
         }
@@ -1233,8 +1233,8 @@ impl IntercomFrom<String> for *mut u16 {
 }
 
 /*
-impl IntercomFrom<::raw::OutBSTR> for String {
-    fn intercom_from( source: ::raw::OutBSTR ) -> ComResult<Self> {
+impl IntercomFrom<intercom::raw::OutBSTR> for String {
+    fn intercom_from( source: intercom::raw::OutBSTR ) -> ComResult<Self> {
 
         // TODO:
         // We really shouldn't blanket unsafe here.
