@@ -145,6 +145,20 @@ impl IErrorSource for ErrorTests
 #[derive(Debug)]
 pub struct TestError( raw::HRESULT, String );
 
+impl<TS: intercom::type_system::TypeSystem>
+        intercom::type_system::ExternType<TS> for TestError {
+    type ExternInputType = raw::HRESULT;
+    type ExternOutputType = raw::HRESULT;
+    type OwnedNativeType = TestError;
+    type OwnedExternType = TestError;
+}
+
+impl intercom::type_system::IntercomFrom<error::raw::HRESULT> for TestError {
+    default fn intercom_from( source: error::raw::HRESULT ) -> ComResult<TestError> {
+        Ok(TestError(source, "".to_string()))
+    }
+}
+
 impl std::error::Error for TestError {
     fn description( &self ) -> &str { &self.1 }
     fn cause( &self ) -> Option<&dyn std::error::Error> { None }
