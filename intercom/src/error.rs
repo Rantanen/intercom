@@ -518,7 +518,7 @@ impl IErrorStore for ErrorStore
     fn set_error_message( &self, msg : &str ) -> ComResult<()>
     {
         let info = ComStruct::< ErrorInfo >::new( ErrorInfo::new( msg.to_string() ) );
-        let itf : ComItf< dyn IErrorInfo > = info.into();
+        let itf = ComItf::< dyn IErrorInfo >::from( &info );
         self.set_error_info( itf )
     }
 }

@@ -53,6 +53,14 @@ impl< T: CoClass > ComStruct<T>
     }
 }
 
+impl<T: CoClass + std::fmt::Debug> std::fmt::Debug for ComStruct<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ComStruct(")?;
+        self.as_ref().fmt(f)?;
+        write!(f, ")")
+    }
+}
+
 impl< T: CoClass > Drop for ComStruct<T>
 {
     /// Decreases the reference count by one. If this is the last reference
@@ -78,9 +86,9 @@ impl<T: CoClass> AsRef<ComBox<T>> for ComStruct<T>
     }
 }
 
-impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComItf<I> {
+impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<&ComStruct<T>> for ComItf<I> {
 
-    fn from( source : ComStruct<T> ) -> ComItf<I> {
+    fn from( source : &ComStruct<T> ) -> ComItf<I> {
 
         let ( automation_ptr, raw_ptr ) = {
             let vtbl = &source.as_ref().vtable_list;
@@ -113,9 +121,9 @@ impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComItf
     }
 }
 
-impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComRc<I> {
-    fn from( combox : ComStruct<T> ) -> Self {
-        ComRc::attach( ComItf::from( combox ) )
+impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<&ComStruct<T>> for ComRc<I> {
+    fn from( combox : &ComStruct<T> ) -> Self {
+        ComRc::copy( &ComItf::from( combox ) )
     }
 }
 

@@ -395,7 +395,7 @@ impl From< f32 > for Variant {
 
 impl<T: HasInterface<dyn IUnknown>> From< ComStruct<T> > for Variant {
     fn from( src : ComStruct<T> ) -> Self {
-        let iunk : ComItf<dyn IUnknown> = src.into();
+        let iunk = ComItf::<dyn IUnknown>::from( &src );
         Variant::IUnknown( ComRc::attach( iunk ) )
     }
 }
