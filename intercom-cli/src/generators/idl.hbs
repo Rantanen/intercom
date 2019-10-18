@@ -1,0 +1,58 @@
+[
+    uuid( {{lib_id}} )
+]
+library {{lib_name}}
+{
+    importlib("stdole2.tlb");
+
+    // Not sure if these should go somewhere else. Although this feels like as
+    // good of a place as any for our hard coded values for now.
+    typedef int8 i8;
+    typedef uint8 u8;
+    typedef int16 i16;
+    typedef uint16 u16;
+    typedef int32 i32;
+    typedef uint32 u32;
+    typedef int64 i64;
+    typedef uint64 u64;
+    typedef float f32;
+    typedef double f64;
+    typedef size_t usize;
+
+{{#each interfaces}}
+    interface {{name}};
+{{/each}}
+
+{{#each interfaces}}
+    [
+        object,
+        uuid( {{iid}} ),
+        nonextensible,
+        pointer_default(unique)
+    ]
+    interface {{name}}{{#if base}} : {{base}}{{/if}}
+    {
+
+    {{~#each methods}}
+        [id({{idx}})]
+        {{ret_type}} {{name}}(
+        {{~#each args~}}
+            [{{attributes}}] {{arg_type}} {{name}}{{#unless @last}}, {{/unless}}
+        {{~/each~}}
+        );
+    {{/each}}
+    }
+{{/each}}
+
+{{#each coclasses}}
+    [
+        uuid( {{clsid}} )
+    ]
+    coclass {{name}}
+    {
+    {{#each interfaces}}
+        interface {{this}};
+    {{~/each}}
+    }
+{{/each}}
+}

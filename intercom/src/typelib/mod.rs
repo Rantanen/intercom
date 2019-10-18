@@ -137,14 +137,19 @@ pub struct Arg {
     pub name: Cow<'static, str>,
     pub ty: Cow<'static, str>,
     pub indirection_level: u32,
+    pub direction: Direction,
 }
+
+#[derive(Debug, Clone, Copy, intercom::ExternType, intercom::BidirectionalTypeInfo)]
+#[repr(C)]
+pub enum Direction { In, Out, Retval }
 
 #[com_interface]
 pub trait IIntercomMethod {
     fn get_name(&self) -> ComResult<String>;
     fn get_return_type(&self) -> ComResult<(String, u32)>;
     fn get_parameter_count(&self) -> ComResult<u32>;
-    fn get_parameter(&self, idx: u32) -> ComResult<(String, String, u32)>;
+    fn get_parameter(&self, idx: u32) -> ComResult<(String, String, u32, Direction)>;
 }
 
 // Impls
@@ -256,9 +261,9 @@ impl IIntercomMethod for Method {
     fn get_parameter_count(&self) -> ComResult<u32> {
         Ok(self.parameters.len() as u32)
     }
-    fn get_parameter(&self, idx: u32) -> ComResult<(String, String, u32)> {
+    fn get_parameter(&self, idx: u32) -> ComResult<(String, String, u32, Direction)> {
         let arg = &self.parameters[idx as usize];
-        Ok((arg.name.to_string(), arg.ty.to_string(), arg.indirection_level))
+        Ok((arg.name.to_string(), arg.ty.to_string(), arg.indirection_level, arg.direction))
     }
 }
 

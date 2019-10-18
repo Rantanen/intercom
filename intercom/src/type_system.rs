@@ -186,8 +186,12 @@ self_extern!( usize );
 self_extern!( f32 );
 self_extern!( f64 );
 self_extern!( bool );
-self_extern!( crate::raw::HRESULT );
-self_extern!( crate::GUID );
+
+use crate::raw::HRESULT;
+self_extern!( HRESULT );
+
+use crate::GUID;
+self_extern!( GUID );
 
 #[cfg(not(windows))]
 self_extern!( libc::c_void );

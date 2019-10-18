@@ -440,28 +440,35 @@ fn create_typeinfo_for_variant(
                 indirection_level: <
                     <#rt as intercom::type_system::ExternType<#ts_type>>::ExternOutputType
                     as intercom::type_system::OutputTypeInfo>::indirection_level(),
+                direction: intercom::typelib::Direction::Retval,
             }),
             None => quote!( intercom::typelib::Arg {
                 name: "".into(),
                 ty: "void".into(),
                 indirection_level: 0,
+                direction: intercom::typelib::Direction::Retval,
             } ),
         };
 
         let params = m.raw_com_args().into_iter().map(|arg| {
             let com_ty = arg.handler.com_ty(arg.dir);
             let arg_name = arg.name.to_string();
-            let ty_info_trait = Ident::new(
-                match arg.dir {
-                    Direction::Out | Direction::Retval => "OutputTypeInfo",
-                    Direction::In => "InputTypeInfo",
-                },
-                Span::call_site() );
+            let dir_ident = Ident::new( match arg.dir {
+                Direction::In => "In",
+                Direction::Out => "Out",
+                Direction::Retval => "Retval"
+            }, Span::call_site() );
+
+            let ty_info_trait = Ident::new( match arg.dir {
+                Direction::Out | Direction::Retval => "OutputTypeInfo",
+                Direction::In => "InputTypeInfo",
+            }, Span::call_site() );
 
             quote!( intercom::typelib::Arg {
                 name: #arg_name.into(),
                 ty: <#com_ty as intercom::type_system::#ty_info_trait>::type_name().into(),
                 indirection_level: <#com_ty as intercom::type_system::#ty_info_trait>::indirection_level(),
+                direction: intercom::typelib::Direction::#dir_ident,
             })
         }).collect::<Vec<_>>();
 

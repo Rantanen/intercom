@@ -2,9 +2,11 @@
 // <3 winapi
 // (Re-defining these here as not to pull the whole winapi as runtime dependency)
 
+use serde_derive::Serialize;
+
 /// Binary GUID format as defined for the COM interfaces.
 #[repr(C)]
-#[derive(Eq, PartialEq, Debug, Clone)]
+#[derive(Eq, PartialEq, Debug, Clone, Serialize)]
 pub struct GUID {
     pub data1: u32,
     pub data2: u16,

@@ -2,6 +2,7 @@
 use super::*;
 use std::sync::atomic::{ AtomicU32, Ordering };
 use crate::type_system::TypeSystemName;
+use serde::{Serialize, Serializer};
 
 /// Trait required by any COM coclass type.
 ///
@@ -34,6 +35,13 @@ pub trait HasInterface<T: ComInterface + ?Sized> : CoClass { }
 /// the `ComStruct` type is _the_ COM-compatible object handle.
 pub struct ComStruct< T: CoClass > {
     data : *mut ComBox< T >
+}
+
+impl<T: CoClass + Serialize> Serialize for ComStruct<T> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    {
+        self.as_ref().serialize(serializer)
+    }
 }
 
 impl< T: CoClass > ComStruct<T>

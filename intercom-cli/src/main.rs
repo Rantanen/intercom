@@ -2,16 +2,14 @@ use std::io;
 use std::path::Path;
 use std::fs::File;
 
-extern crate intercom_common;
 #[macro_use] extern crate failure;
-
-use intercom_common::generators;
 
 #[macro_use]
 extern crate clap;
 use clap::{App, AppSettings, SubCommand, Arg, ArgMatches};
 
 mod typelib;
+mod generators;
 
 
 /// Main entry point.
@@ -86,26 +84,20 @@ fn run_cmd( matches : &ArgMatches ) -> Result<(), failure::Error>
         },
         ( "idl", Some( args ) ) => {
             let path = Path::new( args.value_of( "path" ).unwrap() );
-            let all = args.is_present( "all" );
-            let model = generators::idl::IdlModel::from_path( path, all )?;
-            model.write( &mut io::stdout() )?;
-        },
-        ( "manifest", Some( args ) ) => {
-            let path = Path::new( args.value_of( "path" ).unwrap() );
-            let model = generators::manifest::ManifestModel::from_path( path )?;
-            model.write( &mut io::stdout() )?;
-        },
-        ( "cpp", Some( args ) ) => {
-            let path = Path::new( args.value_of( "path" ).unwrap() );
-            let all = args.is_present( "all" );
-            let model = generators::cpp::CppModel::from_path( path, all )?;
-
-            let output = Path::new( args.value_of( "output" ).unwrap() );
-            std::fs::create_dir_all( output ).expect( "Preparing output failed." );
-            model.write_header( &mut File::create(
-                    output.join( format!( "{}.hpp", model.lib_name ) ) )? )?;
-            model.write_source( &mut File::create(
-                    output.join( format!( "{}.cpp", model.lib_name ) ) )? )?;
+            let lib = typelib::read_typelib( path )?;
+            let opts = generators::ModelOptions {
+                type_systems: vec![
+                    generators::TypeSystemOptions {
+                        ts: intercom::type_system::TypeSystemName::Automation,
+                        use_full_name: false,
+                    },
+                    generators::TypeSystemOptions {
+                        ts: intercom::type_system::TypeSystemName::Raw,
+                        use_full_name: true,
+                    },
+                ]
+            };
+            generators::idl::write( lib, opts, &mut io::stdout() )?;
         },
         _ => unreachable!(),
     }
