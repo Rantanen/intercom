@@ -218,6 +218,7 @@ pub extern "stdcall" fn DllMain(
     true
 }
 
+
 /// Basic COM result type.
 ///
 /// The `ComResult` maps the Rust concept of `Ok` and `Err` values to COM

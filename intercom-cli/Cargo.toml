@@ -5,9 +5,11 @@ edition = "2018"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 
 [dependencies]
-intercom-common = { path = "../intercom-common", version = "0.3" }
 intercom = { path = "../intercom", version = "0.3" }
 clap = { version = "2.27.1", default-features = false }
+serde = "*"
+serde_derive = "*"
 failure = "0.1"
 libloading = "0.5"
+handlebars = "*"
 

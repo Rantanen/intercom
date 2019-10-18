@@ -100,11 +100,12 @@ impl Method {
         let mut parameters = vec![];
         for p in 0..ti.get_parameter_count()? {
 
-            let (name, ty, indirection_level) = ti.get_parameter(p)?;
+            let (name, ty, indirection_level, direction) = ti.get_parameter(p)?;
             parameters.push( Arg {
                 name: name.into(),
                 ty: ty.into(),
                 indirection_level,
+                direction,
             } );
         }
 
@@ -115,6 +116,7 @@ impl Method {
                 name: "".into(),
                 ty: return_ty.into(),
                 indirection_level: return_indirection_level,
+                direction: Direction::Retval,
             },
             parameters
         } )
