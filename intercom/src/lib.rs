@@ -32,11 +32,19 @@
 //!     fn add(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a + b) }
 //!     fn sub(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a - b) }
 //! }
-//! # // Without 'main()' doctests wraps the whole thing into a main,
+//! # // Without 'main()' doctests wraps the whole thing into a function,
 //! # // which would end up expanding com_library!(..) into a statement.
 //! # // And proc macros into statements are not allowed.
-//! # #[allow(clippy::needless_doctest_main)]
-//! # fn main() {}
+//! # //
+//! # // In addition to that, if we just have `fn main()` followed by open
+//! # // brace _anywhere_ in this doctest (yes, including these comments),
+//! # // clippy would discover that and yell at us for "needless doctest main".
+//! # // Allowing that with a specific #[allow(..)] attribute is impossible
+//! # // since this is crate-level documentation.
+//! # //
+//! # // Fortunately we can hide this from clippy by specifying the (empty)
+//! # // return type.
+//! # fn main() -> () { panic!(); }
 //! ```
 //!
 //! The above library can be used for example from C# in the following manner.
@@ -58,17 +66,6 @@ extern crate self as intercom;
 #[cfg(not(windows))]
 extern crate libc;
 
-// The crate doesn't really need the macros. However Rust will complain that
-// the import does nothing if we don't define #[macro_use]. Once we define
-// #[macro_use] to get rid of that warning, Rust will complain that the
-// #[macro_use] does nothing. Fortunately THAT warning comes with a named
-// warning option so we can allow that explicitly.
-//
-// Unfortunately clippy disagrees on the macro_use being unused and claims that
-// the unused_imports attribute is useless. So now we also need to tell clippy
-// to ignore useless attributes in this scenario! \:D/
-#[allow(clippy::useless_attribute)]
-#[allow(unused_imports)]
 extern crate intercom_attributes;
 pub use intercom_attributes::*;
 
