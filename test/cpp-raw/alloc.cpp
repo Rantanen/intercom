@@ -17,10 +17,10 @@ TEST_CASE( "Library supports allocator" )
     REQUIRE( hr == S_OK );
     REQUIRE( pAllocator != nullptr );
 
-    IAllocTests* pAllocTests = nullptr;
+    IAllocTests_Automation* pAllocTests = nullptr;
     hr = CreateInstance(
         CLSID_AllocTests,
-        IID_IAllocTests,
+        IID_IAllocTests_Automation,
         &pAllocTests );
     REQUIRE( hr == S_OK );
     REQUIRE( pAllocTests != nullptr );

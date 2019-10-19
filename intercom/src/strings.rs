@@ -17,7 +17,6 @@ use crate::type_system::{ExternType, AutomationTypeSystem, RawTypeSystem, Interc
 pub struct FormatError;
 
 /// Represents a borrowed BSTR string.
-#[repr(C)]
 #[derive(PartialEq)]
 pub struct BStr(
     // Invariant 1: .0.as_ptr() must be a valid BSTR pointer _or_ 0x1 if len == 0.
@@ -123,7 +122,6 @@ impl BStr {
     }
 }
 
-#[repr(C)]
 /// An owned BSTR string Rust type.
 ///
 /// Used for passing strings with their ownership through the COM interfaces.
@@ -808,7 +806,7 @@ impl ExternType<AutomationTypeSystem> for &BStr {
     type ExternInputType = crate::raw::InBSTR;
     type ExternOutputType = crate::raw::OutBSTR;
     type OwnedExternType = crate::raw::InBSTR;
-    type OwnedNativeType = BString;
+    type OwnedNativeType = crate::raw::InBSTR;
 }
 
 impl ExternType<AutomationTypeSystem> for BString {
@@ -866,7 +864,7 @@ impl ExternType<RawTypeSystem> for &CStr {
     type ExternInputType = *const c_char;
     type ExternOutputType = *mut c_char;
     type OwnedExternType = *const c_char;
-    type OwnedNativeType = CString;
+    type OwnedNativeType = *const c_char;
 }
 
 impl ExternType<RawTypeSystem> for CString {
@@ -881,7 +879,7 @@ impl ExternType<RawTypeSystem> for CString {
 impl IntercomFrom<crate::raw::InBSTR> for String {
     fn intercom_from( source: crate::raw::InBSTR ) -> ComResult<Self> {
         unsafe {
-            Ok( BStr::from_ptr( source )
+            Ok( BStr::from_ptr( source.0 )
                     .to_string()
                     .map_err( |_| ComError::E_INVALIDARG )? )
         }
@@ -890,13 +888,19 @@ impl IntercomFrom<crate::raw::InBSTR> for String {
 
 impl IntercomFrom<crate::raw::InBSTR> for BString {
     fn intercom_from( source: crate::raw::InBSTR ) -> ComResult<Self> {
-        unsafe { Ok( BStr::from_ptr( source ).to_owned() ) }
+        unsafe { Ok( BStr::from_ptr( source.0 ).to_owned() ) }
+    }
+}
+
+impl<'a> IntercomFrom<&'a crate::raw::InBSTR> for &'a BStr {
+    fn intercom_from( source: &'a crate::raw::InBSTR ) -> ComResult<Self> {
+        unsafe { Ok( BStr::from_ptr( source.0 ) ) }
     }
 }
 
 impl<'a> IntercomFrom<crate::raw::InBSTR> for &'a BStr {
     fn intercom_from( source: crate::raw::InBSTR ) -> ComResult<Self> {
-        unsafe { Ok( BStr::from_ptr( source ) ) }
+        unsafe { Ok( BStr::from_ptr( source.0 ) ) }
     }
 }
 
@@ -904,7 +908,7 @@ impl IntercomFrom<crate::raw::InBSTR> for CString {
     fn intercom_from( source: crate::raw::InBSTR ) -> ComResult<Self> {
         unsafe {
             CString::new(
-                    BStr::from_ptr( source ).to_string()
+                    BStr::from_ptr( source.0 ).to_string()
                         .map_err( |_| ComError::E_INVALIDARG )?
                 ).map_err( |_| ComError::E_INVALIDARG )
         }
@@ -928,29 +932,29 @@ impl<TPtr, TTarget> IntercomFrom<*mut TPtr> for TTarget
 // The *mut u16 strings should be BSTRs and must not be freed using the
 // normal `alloc::free`.
 
-impl IntercomFrom<*mut u16> for BString
+impl IntercomFrom<intercom::raw::OutBSTR> for BString
 {
-    fn intercom_from( source: *mut u16 ) -> ComResult<Self> {
+    fn intercom_from( source: intercom::raw::OutBSTR ) -> ComResult<Self> {
         unsafe {
-            Ok( BString::from_ptr( source ) )
+            Ok( BString::from_ptr( source.0 ) )
         }
     }
 }
 
-impl IntercomFrom<*mut u16> for String
+impl IntercomFrom<intercom::raw::OutBSTR> for String
 {
-    fn intercom_from( source: *mut u16 ) -> ComResult<Self> {
+    fn intercom_from( source: intercom::raw::OutBSTR ) -> ComResult<Self> {
         unsafe {
-            BString::from_ptr( source )
+            BString::from_ptr( source.0 )
                     .to_string()
                     .map_err( |_| ComError::E_INVALIDARG )
         }
     }
 }
 
-impl IntercomFrom<*mut u16> for CString
+impl IntercomFrom<intercom::raw::OutBSTR> for CString
 {
-    fn intercom_from( source: *mut u16 ) -> ComResult<Self> {
+    fn intercom_from( source: intercom::raw::OutBSTR ) -> ComResult<Self> {
         CString::new( String::intercom_from( source )? )
             .map_err( |_| ComError::E_INVALIDARG )
     }
@@ -1026,27 +1030,18 @@ impl<'a> IntercomFrom<*const c_char> for CString {
     }
 }
 
-/*
+/* We don't know where the *mut c_char is coming from so we shouldn't really
+ * give it to CString given CString assumes it has reserved the memory on
+ * its own.
+ * */
 impl IntercomFrom<*mut c_char> for CString {
     fn intercom_from( source: *mut c_char ) -> ComResult<CString> {
 
-        // TODO:
-        // We really shouldn't blanket unsafe here.
-        // The intercom_from should turn into an unsafe function instead.
         unsafe {
-
-            // Convert the string. Maintain the result for now.
-            let cstring : ComResult<CString> =
-                    ( source as *const c_char ).intercom_into();
-
-            // Free the buffer.
-            ::alloc::free( source as *mut _ );
-
-            cstring
+            Ok( CString::from_raw( source ) )
         }
     }
 }
-*/
 
 impl<'a> IntercomFrom<*const c_char> for &'a CStr {
     fn intercom_from( source: *const c_char ) -> ComResult<Self> {
@@ -1054,30 +1049,36 @@ impl<'a> IntercomFrom<*const c_char> for &'a CStr {
     }
 }
 
+impl<'a> IntercomFrom<&*const c_char> for &'a CStr {
+    fn intercom_from( source: &*const c_char ) -> ComResult<Self> {
+        unsafe { Ok( CStr::from_ptr( *source ) ) }
+    }
+}
+
 // X -> BSTR
 
 impl IntercomFrom<&BStr> for crate::raw::InBSTR {
     fn intercom_from( source: &BStr ) -> ComResult<Self> {
-        Ok( source.as_ptr() )
+        Ok( crate::raw::InBSTR( source.as_ptr() ) )
     }
 }
 
 impl IntercomFrom<&BString> for crate::raw::InBSTR {
     fn intercom_from( source: &BString ) -> ComResult<Self> {
-        Ok( source.as_ptr() )
+        Ok( crate::raw::InBSTR( source.as_ptr() ) )
     }
 }
 
 impl IntercomFrom<BString> for crate::raw::OutBSTR {
     fn intercom_from( source: BString ) -> ComResult<Self> {
-        Ok( source.into_ptr() )
+        Ok( crate::raw::OutBSTR( source.into_ptr() ) )
     }
 }
 
 impl IntercomFrom<CString> for crate::raw::OutBSTR {
     fn intercom_from( source: CString ) -> ComResult<Self> {
         let bstr : BString = source.intercom_into()?;
-        Ok( bstr.into_ptr() )
+        Ok( crate::raw::OutBSTR( bstr.into_ptr() ) )
     }
 }
 
@@ -1097,6 +1098,11 @@ impl IntercomFrom<&CString> for *const c_char {
 
 impl IntercomFrom<CString> for *mut c_char {
     fn intercom_from( source: CString ) -> ComResult<Self> {
+        let ptr = source.as_ptr();
+        std::mem::forget( source );
+        Ok( ptr as _ )
+
+        /* We really should do the following I believe:
         let bytes = source.as_bytes();
 
         // We just allocated the memory. This is safe.
@@ -1110,6 +1116,7 @@ impl IntercomFrom<CString> for *mut c_char {
 
             Ok( buffer as *mut c_char )
         }
+        */
     }
 }
 
@@ -1226,27 +1233,11 @@ impl IntercomFrom<String> for *mut c_char {
     }
 }
 
-impl IntercomFrom<String> for *mut u16 {
+impl IntercomFrom<String> for intercom::raw::OutBSTR {
     fn intercom_from( source: String ) -> ComResult<Self> {
-        Ok( BString::from( source ).into_ptr() )
+        Ok( intercom::raw::OutBSTR( BString::from( source ).into_ptr() ) )
     }
 }
-
-/*
-impl IntercomFrom<intercom::raw::OutBSTR> for String {
-    fn intercom_from( source: intercom::raw::OutBSTR ) -> ComResult<Self> {
-
-        // TODO:
-        // We really shouldn't blanket unsafe here.
-        // The intercom_from should turn into an unsafe function instead.
-        unsafe {
-            BString::from_ptr( source )
-                .to_string()
-                .map_err( |_| ComError::E_INVALIDARG )
-        }
-    }
-}
-*/
 
 
 #[cfg(test)]

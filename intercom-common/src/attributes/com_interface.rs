@@ -404,6 +404,7 @@ fn create_get_typeinfo_function(
     for (ts, variant) in itf.variants() {
         variant_tokens.push( create_typeinfo_for_variant(itf, ts, variant)? );
     }
+    let is_impl_interface = itf.item_type() == utils::InterfaceType::Struct;
 
     Ok(quote!(
         pub(crate) fn #fn_name() -> intercom::typelib::TypeInfo
@@ -414,6 +415,10 @@ fn create_get_typeinfo_function(
                 intercom::ComStruct::new( intercom::typelib::Interface {
                     name: #itf_name.into(),
                     variants: variants,
+                    options: intercom::typelib::InterfaceOptions {
+                        class_impl_interface: #is_impl_interface,
+                        ..Default::default()
+                    }
                 })
             )
         }
@@ -440,13 +445,13 @@ fn create_typeinfo_for_variant(
                 indirection_level: <
                     <#rt as intercom::type_system::ExternType<#ts_type>>::ExternOutputType
                     as intercom::type_system::OutputTypeInfo>::indirection_level(),
-                direction: intercom::typelib::Direction::Retval,
+                direction: intercom::typelib::Direction::Return,
             }),
             None => quote!( intercom::typelib::Arg {
                 name: "".into(),
                 ty: "void".into(),
                 indirection_level: 0,
-                direction: intercom::typelib::Direction::Retval,
+                direction: intercom::typelib::Direction::Return,
             } ),
         };
 

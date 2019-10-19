@@ -18,7 +18,7 @@ impl<T: ComInterface + ?Sized> std::fmt::Debug for ComRc<T> {
 impl<T: ComInterface + ?Sized> Clone for ComRc<T> {
     fn clone( &self ) -> Self {
         let rc = ComRc { itf : self.itf };
-        rc.itf.as_ref().release();
+        rc.itf.as_ref().add_ref();
         rc
     }
 }

@@ -386,7 +386,7 @@ pub fn load_error(
 {
     // Do not try to load error if this is IUnknown or ISupportErrorInfo.
     // Both of these are used during error handling and may fail.
-    if *iid == IID_IUnknown || *iid == IID_ISupportErrorInfo {
+    if *iid == IID_IUnknown || *iid == intercom::interfaces::IID_IUnknown_Raw || *iid == IID_ISupportErrorInfo || *iid == intercom::interfaces::IID_ISupportErrorInfo_Raw {
         return ComError { hresult : err, error_info: None }
     }
 
@@ -518,8 +518,8 @@ impl IErrorStore for ErrorStore
     fn set_error_message( &self, msg : &str ) -> ComResult<()>
     {
         let info = ComStruct::< ErrorInfo >::new( ErrorInfo::new( msg.to_string() ) );
-        let itf = ComItf::< dyn IErrorInfo >::from( &info );
-        self.set_error_info( itf )
+        let itf = ComRc::< dyn IErrorInfo >::from( &info );
+        self.set_error_info( *itf )
     }
 }
 

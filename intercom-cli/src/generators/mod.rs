@@ -8,13 +8,22 @@ use intercom::type_system::TypeSystemName;
 #[derive(Fail, Debug)]
 pub enum GeneratorError {
 
-    #[fail( display = "{}", _0 )]
+    #[fail( display = "IoError: {}", _0 )]
     IoError( #[cause] ::std::io::Error ),
+
+    #[fail( display = "Invalid type library: {}", _0 )]
+    LibraryError( String ),
 }
 
 impl From<::std::io::Error> for GeneratorError {
     fn from( e : ::std::io::Error ) -> GeneratorError {
         GeneratorError::IoError( e )
+    }
+}
+
+impl From<String> for GeneratorError {
+    fn from( s : String ) -> GeneratorError {
+        GeneratorError::LibraryError( s )
     }
 }
 

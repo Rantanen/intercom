@@ -1,5 +1,6 @@
 
 use super::*;
+use intercom::raw::OutBSTR;
 use std::os::raw;
 
 /// A memory allocator to be used for allocating/deallocating memory shared
@@ -12,8 +13,8 @@ pub struct Allocator;
         com_iid = "18EE22B3-B0C6-44A5-A94A-7A417676FB66",
         raw_iid = "7A6F6564-04B5-4455-A223-EA0512B8CC63" )]
 pub trait IAllocator {
-    unsafe fn alloc_bstr( &self, text : *const u16, len : u32 ) -> *mut u16;
-    unsafe fn free_bstr( &self, bstr : *mut u16 );
+    unsafe fn alloc_bstr( &self, text : *const u16, len : u32 ) -> OutBSTR;
+    unsafe fn free_bstr( &self, bstr : OutBSTR );
     unsafe fn alloc( &self, len : usize ) -> *mut raw::c_void;
     unsafe fn free( &self, ptr : *mut raw::c_void );
 }
@@ -34,8 +35,12 @@ impl IAllocator for Allocator {
     /// to the given `len`. The returned value must be freed using BSTR aware
     /// free function, such as the `free_bstr` in this interface or the
     /// `SysFreeString` function on Windows.
-    unsafe fn alloc_bstr( &self, text : *const u16, len : u32 ) -> *mut u16 {
-        os::alloc_bstr( text, len )
+    unsafe fn alloc_bstr(
+        &self,
+        text : *const u16,
+        len : u32
+    ) -> OutBSTR {
+        OutBSTR( os::alloc_bstr( text, len ) )
     }
 
     /// Frees a BSTR value.
@@ -47,8 +52,8 @@ impl IAllocator for Allocator {
     /// # Safety
     ///
     /// The function is safe as long as the `bstr` is a valid BSTR value.
-    unsafe fn free_bstr( &self, bstr : *mut u16 ) {
-        os::free_bstr( bstr )
+    unsafe fn free_bstr( &self, bstr: OutBSTR ) {
+        os::free_bstr( bstr.0 )
     }
 
     /// Allocates a segment of memory that is safe to pass through intercom

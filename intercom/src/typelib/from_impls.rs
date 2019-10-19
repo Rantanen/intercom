@@ -70,6 +70,7 @@ impl Interface {
 
         Ok( Interface {
             name: ti.get_name()?.into(),
+            options: ti.get_options()?,
             variants,
         } )
     }
@@ -116,7 +117,7 @@ impl Method {
                 name: "".into(),
                 ty: return_ty.into(),
                 indirection_level: return_indirection_level,
-                direction: Direction::Retval,
+                direction: Direction::Return,
             },
             parameters
         } )

@@ -4,6 +4,8 @@
 use std::io::Write;
 use std::path::Path;
 use std::convert::TryFrom;
+use std::collections::HashMap;
+use std::borrow::Cow;
 
 use super::GeneratorError;
 use super::{ModelOptions, TypeSystemOptions, pascal_case};
@@ -51,17 +53,47 @@ struct IdlClass {
     pub interfaces : Vec<String>,
 }
 
+struct LibraryContext<'a> {
+    pub itfs_by_ref: &'a HashMap<String, &'a Interface>,
+    pub itfs_by_name: &'a HashMap<String, &'a Interface>,
+}
+
 impl IdlLibrary {
 
-    fn try_from(lib : TypeLib, opts: &ModelOptions) -> Result<Self, GeneratorError> {
+    fn try_from(
+        lib : TypeLib,
+        opts: &ModelOptions
+    ) -> Result<Self, GeneratorError> {
+
+        let itfs_by_name : HashMap<String, &Interface>
+            = lib.types.iter()
+                .filter_map( |t| match t {
+                    TypeInfo::Interface(itf) => Some(itf),
+                    _ => None
+                } )
+                .map( |itf| ( itf.as_ref().name.to_string(), &**(itf.as_ref()) ) )
+                .collect();
+        let itfs_by_ref : HashMap<String, &Interface>
+            = lib.types.iter()
+                .filter_map( |t| match t {
+                    TypeInfo::Class(cls) => Some(cls),
+                    _ => None
+                } )
+                .flat_map( |cls| &cls.as_ref().interfaces )
+                .map( |itf_ref| ( itf_ref.name.to_string(), itfs_by_name[ itf_ref.name.as_ref() ] ) )
+                .collect();
+        let context = LibraryContext {
+            itfs_by_name: &itfs_by_name,
+            itfs_by_ref: &itfs_by_ref };
+
         let mut interfaces = vec![];
         let mut coclasses = vec![];
-        for t in lib.types {
+        for t in &lib.types {
             match t {
                 TypeInfo::Class(cls)
-                    => coclasses.push(IdlClass::try_from(cls.as_ref(), opts)?),
+                    => coclasses.push(IdlClass::try_from(cls.as_ref(), opts, &context)?),
                 TypeInfo::Interface(itf)
-                    => interfaces.push(IdlInterface::gather(itf.as_ref(), opts)?),
+                    => interfaces.push(IdlInterface::gather(itf.as_ref(), opts, &context)?),
             }
         }
         let interfaces = interfaces
@@ -82,12 +114,13 @@ impl IdlInterface {
 
     fn gather(
         itf: &Interface,
-        opts: &ModelOptions
+        opts: &ModelOptions,
+        ctx: &LibraryContext,
     ) -> Result<Vec<Self>, GeneratorError>
     {
         Ok( opts.type_systems.iter().map( |ts_opts| {
             match itf.variants.iter().find(|v| v.as_ref().ts == ts_opts.ts) {
-                Some(v) => Some( IdlInterface::try_from(&itf, v.as_ref(), ts_opts) ),
+                Some(v) => Some( IdlInterface::try_from(&itf, v.as_ref(), ts_opts, ctx) ),
                 None => None
             }
         } ).filter_map(|i| i).collect::<Result<Vec<_>, _>>()? )
@@ -97,21 +130,31 @@ impl IdlInterface {
         itf: &Interface,
         itf_variant: &InterfaceVariant,
         ts_opts: &TypeSystemOptions,
+        ctx: &LibraryContext,
     ) -> Result<Self, GeneratorError>
     {
         Ok( Self {
-            name: Self::final_name( &itf.name, ts_opts ),
+            name: Self::final_name( &itf, ts_opts ),
             iid: format!( "{:-X}", itf_variant.iid ),
             base: Some("IUnknown".to_string()),
             methods: itf_variant.methods
                 .iter()
                 .enumerate()
-                .map(|(i, m)| IdlMethod::try_from(i, m.as_ref()))
+                .map(|(i, m)| IdlMethod::try_from(i, m.as_ref(), ts_opts, ctx))
                 .collect::<Result<Vec<_>, _>>()?
         } )
     }
 
-    fn final_name(base_name: &str, opts: &TypeSystemOptions) -> String {
+    pub fn final_name(
+        itf: &Interface,
+        opts: &TypeSystemOptions,
+    ) -> String {
+        let base_name = if itf.options.class_impl_interface {
+            Cow::from( format!("I{}", itf.name) )
+        } else {
+            itf.name.clone()
+        };
+
         match opts.use_full_name {
             true => format!( "{}_{:?}", base_name, opts.ts ),
             false => base_name.to_string(),
@@ -122,16 +165,18 @@ impl IdlInterface {
 impl IdlMethod {
     fn try_from(
         idx: usize,
-        method: &Method
+        method: &Method,
+        opts: &TypeSystemOptions,
+        ctx: &LibraryContext,
     ) -> Result<Self, GeneratorError>
     {
         Ok( Self {
             name: pascal_case( &method.name ),
             idx,
-            ret_type: IdlArg::idl_type(&method.return_type),
+            ret_type: IdlArg::idl_type(&method.return_type, opts, ctx),
             args: method.parameters
                 .iter()
-                .map(IdlArg::try_from)
+                .map(|arg| IdlArg::try_from(arg, opts, ctx))
                 .collect::<Result<Vec<_>, _>>()?
         } )
     }
@@ -139,7 +184,9 @@ impl IdlMethod {
 
 impl IdlArg {
     fn try_from(
-        arg: &Arg
+        arg: &Arg,
+        opts: &TypeSystemOptions,
+        ctx: &LibraryContext,
     ) -> Result<Self, GeneratorError>
     {
         let mut attrs = vec![];
@@ -149,31 +196,60 @@ impl IdlArg {
             Direction::Retval => {
                 attrs.push( "out" );
                 attrs.push( "retval" );
+            },
+            Direction::Return => {
+                Err( "Direction::Return is invalid direction for arguments".to_string() )?
             }
         }
 
         Ok( Self {
             name: arg.name.to_string(),
-            arg_type: Self::idl_type(arg),
+            arg_type: Self::idl_type(arg, opts, ctx),
             attributes: attrs.join(", "),
         } )
     }
 
-    fn idl_type(arg: &Arg) -> String {
-        format!( "{}{}", arg.ty, "*".repeat(arg.indirection_level as usize) )
+    fn idl_type(
+        arg: &Arg,
+        opts: &TypeSystemOptions,
+        ctx: &LibraryContext,
+    ) -> String {
+        let base_name = ctx.itfs_by_name.get(arg.ty.as_ref())
+            .map(|itf| IdlInterface::final_name(itf, opts))
+            .unwrap_or_else(|| arg.ty.to_string());
+        let mut indirection = match arg.direction {
+            Direction::In | Direction::Return => arg.indirection_level,
+            Direction::Out | Direction::Retval => arg.indirection_level + 1,
+        };
+
+        let base_name = match base_name.as_ref() {
+            "std::ffi::c_void" => "void".to_string(),
+            other => other.to_string()
+        };
+
+        format!( "{}{}", base_name, "*".repeat(indirection as usize) )
     }
 }
 
 impl IdlClass {
     fn try_from(
         cls: &CoClass,
-        opts: &ModelOptions
+        opts: &ModelOptions,
+        ctx: &LibraryContext,
     ) -> Result<Self, GeneratorError>
     {
+        let interfaces = cls.interfaces
+            .iter()
+            .flat_map(|itf_ref| {
+                opts.type_systems.iter().map(|opt| {
+                    let itf = ctx.itfs_by_ref[itf_ref.name.as_ref()];
+                    IdlInterface::final_name(itf, opt)
+                }).collect::<Vec<_>>()
+            }).collect();
         Ok(IdlClass {
             name: cls.name.to_string(),
             clsid: format!("{:-X}", cls.clsid),
-            interfaces: cls.interfaces.iter().map(|itf_ref| itf_ref.name.to_string()).collect(),
+            interfaces: interfaces,
         })
     }
 }

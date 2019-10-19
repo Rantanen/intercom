@@ -7,6 +7,9 @@ use std::time::{SystemTime};
 use crate::type_system::{TypeSystem, ExternType, IntercomFrom, BidirectionalTypeInfo};
 use intercom_attributes::BidirectionalTypeInfo;
 
+#[derive(Debug, Clone, Copy)]
+pub struct Currency(i64);
+
 #[derive(Debug, Clone, BidirectionalTypeInfo)]
 pub enum Variant
 {
@@ -22,6 +25,7 @@ pub enum Variant
     F32( f32 ),
     F64( f64 ),
     Bool( bool ),
+    Currency( Currency ),
     String( IntercomString ),
     SystemTime( SystemTime ),
     IUnknown( ComRc<dyn IUnknown> ),
@@ -46,6 +50,7 @@ impl Variant {
             Variant::Bool( .. ) => raw::var_type::BOOL,
             Variant::String( .. ) => raw::var_type::BSTR,
             Variant::SystemTime( .. ) => raw::var_type::DATE,
+            Variant::Currency( .. ) => raw::var_type::CY,
             Variant::IUnknown( .. ) => raw::var_type::UNKNOWN,
         }
     }
@@ -84,6 +89,8 @@ impl<TS: TypeSystem> From<raw::Variant<TS>> for Variant {
                     raw::var_type::BSTR =>
                         Variant::String( crate::IntercomString::BString(
                                 crate::BString::from_ptr( src.data.bstrVal ) ) ),
+                    raw::var_type::CY =>
+                        Variant::Currency( Currency( src.data.cyVal ) ),
                     raw::var_type::DATE =>
                         Variant::SystemTime( src.data.date.into() ),
                     raw::var_type::UNKNOWN =>
@@ -112,6 +119,8 @@ impl<TS: TypeSystem> From<raw::Variant<TS>> for Variant {
                                 crate::BString::from_ptr( *src.data.pbstrVal ) ) ),
                     raw::var_type::DATE =>
                         Variant::SystemTime( (*src.data.pdate).into() ),
+                    raw::var_type::CY =>
+                        Variant::Currency( Currency( *src.data.pcyVal ) ),
                     raw::var_type::UNKNOWN =>
                         match ComRc::wrap( *src.data.ppunkVal ) {
                             Some( rc ) => Variant::IUnknown( rc ),
@@ -169,6 +178,9 @@ impl<TS: TypeSystem> IntercomFrom<Variant> for raw::Variant<TS> {
             Variant::Bool( data ) => raw::Variant::new(
                     raw::VariantType::new( raw::var_type::BOOL ),
                     raw::VariantData { boolVal: data .into() } ),
+            Variant::Currency( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::CY ),
+                    raw::VariantData { cyVal : data.0 } ),
             Variant::String( data ) => raw::Variant::new(
                     raw::VariantType::new( raw::var_type::BSTR ),
                     raw::VariantData { bstrVal : crate::BString::com_from( data )?.into_ptr() } ),
@@ -395,8 +407,7 @@ impl From< f32 > for Variant {
 
 impl<T: HasInterface<dyn IUnknown>> From< ComStruct<T> > for Variant {
     fn from( src : ComStruct<T> ) -> Self {
-        let iunk = ComItf::<dyn IUnknown>::from( &src );
-        Variant::IUnknown( ComRc::attach( iunk ) )
+        Variant::IUnknown( ComRc::from( src ) )
     }
 }
 
@@ -636,7 +647,7 @@ pub mod raw {
         pub dblVal : f64,
         pub boolVal : VariantBool,
         pub scode : crate::raw::HRESULT,
-        //cyVal : CY,
+        pub cyVal : i64,
         pub date : VariantDate,
         pub bstrVal : *mut u16,
         pub punkVal : crate::raw::InterfacePtr<TS, dyn crate::IUnknown>,
@@ -650,7 +661,7 @@ pub mod raw {
         pub pdblVal : *mut f64,
         pub pboolVal : *mut VariantBool,
         //*pscode : SCODE,
-        //*pcyVal : CY,
+        pub pcyVal : *mut i64,
         pub pdate : *mut VariantDate,
         pub pbstrVal : *mut *mut u16,
         pub ppunkVal : *mut crate::raw::InterfacePtr<TS, dyn crate::IUnknown>,

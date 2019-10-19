@@ -8,6 +8,8 @@ use std::fs::File;
 extern crate clap;
 use clap::{App, AppSettings, SubCommand, Arg, ArgMatches};
 
+mod host;
+mod embed;
 mod typelib;
 mod generators;
 
@@ -24,6 +26,13 @@ fn main() {
                 .about( "Reads the type library." )
                 .arg( Arg::with_name( "path" )
                    .help( "Path to the type library." )
+                   .index( 1 )
+                )
+            )
+            .subcommand( SubCommand::with_name( "embed-typelib" )
+                .about( "Builds and embeds the typelib into a DLL" )
+                .arg( Arg::with_name( "path" )
+                   .help( "Path to the DLL." )
                    .index( 1 )
                 )
             )
@@ -77,26 +86,30 @@ fn main() {
 
 fn run_cmd( matches : &ArgMatches ) -> Result<(), failure::Error>
 {
+    let opts = generators::ModelOptions {
+        type_systems: vec![
+            generators::TypeSystemOptions {
+                ts: intercom::type_system::TypeSystemName::Automation,
+                use_full_name: true,
+            },
+            generators::TypeSystemOptions {
+                ts: intercom::type_system::TypeSystemName::Raw,
+                use_full_name: true,
+            },
+        ]
+    };
+
     match matches.subcommand() {
         ( "read-typelib", Some( args ) ) => {
             let path = Path::new( args.value_of( "path" ).unwrap() );
-            println!( "{:?}", typelib::read_typelib( path )? );
+            println!( "{:#?}", typelib::read_typelib( path )? );
+        },
+        ( "embed-typelib", Some( args ) ) => {
+            embed::embed_typelib( Path::new( args.value_of("path").unwrap() ), opts )?;
         },
         ( "idl", Some( args ) ) => {
             let path = Path::new( args.value_of( "path" ).unwrap() );
             let lib = typelib::read_typelib( path )?;
-            let opts = generators::ModelOptions {
-                type_systems: vec![
-                    generators::TypeSystemOptions {
-                        ts: intercom::type_system::TypeSystemName::Automation,
-                        use_full_name: false,
-                    },
-                    generators::TypeSystemOptions {
-                        ts: intercom::type_system::TypeSystemName::Raw,
-                        use_full_name: true,
-                    },
-                ]
-            };
             generators::idl::write( lib, opts, &mut io::stdout() )?;
         },
         _ => unreachable!(),
