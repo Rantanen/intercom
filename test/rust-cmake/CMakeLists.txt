@@ -8,13 +8,14 @@ set(INTERCOM_ROOT "${WORKSPACE_ROOT}/..")
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     set(BUILD_DIR "${WORKSPACE_ROOT}/target/release")
+    set(TARGET_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/release")
     set(BUILD_ARGUMENTS "--release")
 else()
     set(BUILD_DIR "${WORKSPACE_ROOT}/target/debug")
+    set(TARGET_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/debug")
     set(BUILD_ARGUMENTS "")
 endif()
 
-set(TARGET_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}")
 
 # Turn the lib names into binary names
 

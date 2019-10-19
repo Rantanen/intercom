@@ -3,7 +3,11 @@ project (cpp-utility)
 set (PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
 set (PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set (INTERCOM_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
-set (TESTLIB_TARGET_DIR ${INTERCOM_ROOT}/test/target/${CMAKE_BUILD_TYPE})
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    set (TESTLIB_TARGET_DIR ${INTERCOM_ROOT}/test/target/release)
+else()
+    set (TESTLIB_TARGET_DIR ${INTERCOM_ROOT}/test/target/debug)
+endif()
 
 # C++14 support
 set(CMAKE_CXX_STANDARD 14)
