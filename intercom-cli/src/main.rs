@@ -1,3 +1,5 @@
+#![feature(inner_deref)]
+
 use std::io;
 use std::path::Path;
 use std::fs::File;
@@ -65,10 +67,15 @@ fn main() {
                    .default_value( "." )
                    .index( 1 )
                 )
-                .arg( Arg::with_name( "output" )
-                   .help( "Target where the C++ header file and associated library implementation are generated." )
-                   .default_value( "." )
-                   .index( 2 )
+                .arg( Arg::with_name( "source" )
+                   .long( "source" )
+                   .value_name( "source_file" )
+                   .help( "File path for the generated source file. '-' for stdout." )
+                )
+                .arg( Arg::with_name( "header" )
+                   .long( "header" )
+                   .value_name( "header_file" )
+                   .help( "File path for the generated header file. '-' for stdout." )
                 )
                 .arg( Arg::with_name( "all" )
                     .long( "all" )
@@ -111,6 +118,37 @@ fn run_cmd( matches : &ArgMatches ) -> Result<(), failure::Error>
             let path = Path::new( args.value_of( "path" ).unwrap() );
             let lib = typelib::read_typelib( path )?;
             generators::idl::write( lib, opts, &mut io::stdout() )?;
+        },
+        ( "cpp", Some( args ) ) => {
+            let path = Path::new( args.value_of( "path" ).unwrap() );
+            let lib = typelib::read_typelib( path )?;
+
+            let header_writer : Result<_, failure::Error>
+                = args.value_of("header").map(|path|
+                    if path == "-" {
+                        Ok(Box::new(io::stdout()) as Box<dyn io::Write>)
+                    } else {
+                        Ok(Box::new(File::create(path)?) as Box<dyn io::Write>)
+                    })
+                    .map_or(Ok(None), |v| v.map(Some));
+            let source_writer : Result<_, failure::Error>
+                = args.value_of("source").map(|path|
+                    if path == "-" {
+                        Ok(Box::new(io::stdout()) as Box<dyn io::Write>)
+                    } else {
+                        Ok(Box::new(File::create(path)?) as Box<dyn io::Write>)
+                    })
+                    .map_or(Ok(None), |v| v.map(Some));
+
+            {
+                let mut header_writer = header_writer?;
+                let mut source_writer = source_writer?;
+                return Ok( generators::cpp::write(
+                    lib, opts,
+                    header_writer.as_mut().map(|b| b as &mut io::Write),
+                    source_writer.as_mut().map(|b| b as &mut io::Write),
+                )? );
+            }
         },
         _ => unreachable!(),
     }
