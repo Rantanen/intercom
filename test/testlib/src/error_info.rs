@@ -154,7 +154,7 @@ impl<TS: intercom::type_system::TypeSystem>
 }
 
 impl intercom::type_system::IntercomFrom<error::raw::HRESULT> for TestError {
-    default fn intercom_from( source: error::raw::HRESULT ) -> ComResult<TestError> {
+    default unsafe fn intercom_from( source: error::raw::HRESULT ) -> ComResult<TestError> {
         Ok(TestError(source, "".to_string()))
     }
 }
