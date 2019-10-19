@@ -69,73 +69,65 @@ impl Default for Variant {
     }
 }
 
-impl<TS: TypeSystem> From<raw::Variant<TS>> for Variant {
-    fn from( src: raw::Variant<TS> ) -> Variant {
-        unsafe {
-            if src.vt.0 & raw::var_type::BYREF == 0 {
-                match src.vt.0 & raw::var_type::TYPEMASK {
-                    raw::var_type::EMPTY | raw::var_type::NULL => Variant::None,
-                    raw::var_type::I1 => Variant::I8( src.data.bVal ),
-                    raw::var_type::I2 => Variant::I16( src.data.iVal ),
-                    raw::var_type::I4 => Variant::I32( src.data.lVal ),
-                    raw::var_type::I8 => Variant::I64( src.data.llVal ),
-                    raw::var_type::UI1 => Variant::U8( src.data.cVal ),
-                    raw::var_type::UI2 => Variant::U16( src.data.uiVal ),
-                    raw::var_type::UI4 => Variant::U32( src.data.ulVal ),
-                    raw::var_type::UI8 => Variant::U64( src.data.ullVal ),
-                    raw::var_type::R4 => Variant::F32( src.data.fltVal ),
-                    raw::var_type::R8 => Variant::F64( src.data.dblVal ),
-                    raw::var_type::BOOL => Variant::Bool( src.data.boolVal.into() ),
-                    raw::var_type::BSTR =>
-                        Variant::String( crate::IntercomString::BString(
-                                crate::BString::from_ptr( src.data.bstrVal ) ) ),
-                    raw::var_type::CY =>
-                        Variant::Currency( Currency( src.data.cyVal ) ),
-                    raw::var_type::DATE =>
-                        Variant::SystemTime( src.data.date.into() ),
-                    raw::var_type::UNKNOWN =>
-                        match ComRc::wrap( src.data.punkVal ) {
-                            Some( rc ) => Variant::IUnknown( rc ),
-                            None => Variant::None,
-                        }
-                    _ => panic!( "Unsupported variant type" ),
-                }
-            } else {
-                match src.vt.0 & raw::var_type::TYPEMASK {
-                    raw::var_type::EMPTY | raw::var_type::NULL => Variant::None,
-                    raw::var_type::I1 => Variant::I8( *src.data.pbVal ),
-                    raw::var_type::I2 => Variant::I16( *src.data.piVal ),
-                    raw::var_type::I4 => Variant::I32( *src.data.plVal ),
-                    raw::var_type::I8 => Variant::I64( *src.data.pllVal ),
-                    raw::var_type::UI1 => Variant::U8( *src.data.pcVal ),
-                    raw::var_type::UI2 => Variant::U16( *src.data.puiVal ),
-                    raw::var_type::UI4 => Variant::U32( *src.data.pulVal ),
-                    raw::var_type::UI8 => Variant::U64( *src.data.pullVal ),
-                    raw::var_type::R4 => Variant::F32( *src.data.pfltVal ),
-                    raw::var_type::R8 => Variant::F64( *src.data.pdblVal ),
-                    raw::var_type::BOOL => Variant::Bool( (*src.data.pboolVal).into() ),
-                    raw::var_type::BSTR =>
-                        Variant::String( crate::IntercomString::BString(
-                                crate::BString::from_ptr( *src.data.pbstrVal ) ) ),
-                    raw::var_type::DATE =>
-                        Variant::SystemTime( (*src.data.pdate).into() ),
-                    raw::var_type::CY =>
-                        Variant::Currency( Currency( *src.data.pcyVal ) ),
-                    raw::var_type::UNKNOWN =>
-                        match ComRc::wrap( *src.data.ppunkVal ) {
-                            Some( rc ) => Variant::IUnknown( rc ),
-                            None => Variant::None,
-                        }
-                    _ => panic!( "Unsupported variant type" ),
-                }
-            }
-        }
-    }
-}
-
 impl<TS: TypeSystem> IntercomFrom<raw::Variant<TS>> for Variant {
-    unsafe fn intercom_from( src: raw::Variant<TS> ) -> ComResult<Self> {
-        Ok( src.into() )
+    unsafe fn intercom_from( src: raw::Variant<TS> ) -> Result<Variant, ComError> {
+        Ok( if src.vt.0 & raw::var_type::BYREF == 0 {
+            match src.vt.0 & raw::var_type::TYPEMASK {
+                raw::var_type::EMPTY | raw::var_type::NULL => Variant::None,
+                raw::var_type::I1 => Variant::I8( src.data.bVal ),
+                raw::var_type::I2 => Variant::I16( src.data.iVal ),
+                raw::var_type::I4 => Variant::I32( src.data.lVal ),
+                raw::var_type::I8 => Variant::I64( src.data.llVal ),
+                raw::var_type::UI1 => Variant::U8( src.data.cVal ),
+                raw::var_type::UI2 => Variant::U16( src.data.uiVal ),
+                raw::var_type::UI4 => Variant::U32( src.data.ulVal ),
+                raw::var_type::UI8 => Variant::U64( src.data.ullVal ),
+                raw::var_type::R4 => Variant::F32( src.data.fltVal ),
+                raw::var_type::R8 => Variant::F64( src.data.dblVal ),
+                raw::var_type::BOOL => Variant::Bool( src.data.boolVal.into() ),
+                raw::var_type::BSTR =>
+                    Variant::String( crate::IntercomString::BString(
+                            crate::BString::from_ptr( src.data.bstrVal ) ) ),
+                raw::var_type::CY =>
+                    Variant::Currency( Currency( src.data.cyVal ) ),
+                raw::var_type::DATE =>
+                    Variant::SystemTime( src.data.date.into() ),
+                raw::var_type::UNKNOWN =>
+                    match ComRc::wrap( src.data.punkVal ) {
+                        Some( rc ) => Variant::IUnknown( rc ),
+                        None => Variant::None,
+                    }
+                _ => return Err( ComError::E_NOTIMPL ),
+            }
+        } else {
+            match src.vt.0 & raw::var_type::TYPEMASK {
+                raw::var_type::EMPTY | raw::var_type::NULL => Variant::None,
+                raw::var_type::I1 => Variant::I8( *src.data.pbVal ),
+                raw::var_type::I2 => Variant::I16( *src.data.piVal ),
+                raw::var_type::I4 => Variant::I32( *src.data.plVal ),
+                raw::var_type::I8 => Variant::I64( *src.data.pllVal ),
+                raw::var_type::UI1 => Variant::U8( *src.data.pcVal ),
+                raw::var_type::UI2 => Variant::U16( *src.data.puiVal ),
+                raw::var_type::UI4 => Variant::U32( *src.data.pulVal ),
+                raw::var_type::UI8 => Variant::U64( *src.data.pullVal ),
+                raw::var_type::R4 => Variant::F32( *src.data.pfltVal ),
+                raw::var_type::R8 => Variant::F64( *src.data.pdblVal ),
+                raw::var_type::BOOL => Variant::Bool( (*src.data.pboolVal).into() ),
+                raw::var_type::BSTR =>
+                    Variant::String( crate::IntercomString::BString(
+                            crate::BString::from_ptr( *src.data.pbstrVal ) ) ),
+                raw::var_type::DATE =>
+                    Variant::SystemTime( (*src.data.pdate).into() ),
+                raw::var_type::CY =>
+                    Variant::Currency( Currency( *src.data.pcyVal ) ),
+                raw::var_type::UNKNOWN =>
+                    match ComRc::wrap( *src.data.ppunkVal ) {
+                        Some( rc ) => Variant::IUnknown( rc ),
+                        None => Variant::None,
+                    }
+                _ => return Err( ComError::E_NOTIMPL ),
+            }
+        } )
     }
 }
 
