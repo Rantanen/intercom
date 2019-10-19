@@ -9,7 +9,6 @@ use super::*;
 /// For Rust code, Intercom implements the interface automatically.
 #[com_interface( com_iid = "00000000-0000-0000-C000-000000000046", base = NO_BASE )]
 pub trait IUnknown {
-
     /// Tries to get a different COM interface for the current object.
     ///
     /// COM objects may (and do) implement multiple interfaces. COM defines
@@ -20,12 +19,12 @@ pub trait IUnknown {
     ///
     /// Returns `Ok( interface_ptr )` if the object supports the specified
     /// interface or `Err( E_NOINTERFACE )` if it doesn't.
-    fn query_interface( &self, riid : crate::REFIID ) -> crate::RawComResult< crate::RawComPtr >;
+    fn query_interface(&self, riid: crate::REFIID) -> crate::RawComResult<crate::RawComPtr>;
 
     /// Increments the reference count of the object.
     ///
     /// Returns the reference count after the incrementation.
-    fn add_ref( &self ) -> u32;
+    fn add_ref(&self) -> u32;
 
     /// Decreases the reference count of the object.
     ///
@@ -34,7 +33,7 @@ pub trait IUnknown {
     /// If the reference count reaches zero, the object will deallocate
     /// itself. As the call might deallocate the object, the caller must
     /// ensure that the released reference is not used afterwards.
-    fn release( &self ) -> u32;
+    fn release(&self) -> u32;
 }
 
 /// The `ISupportErrorInfo` COM interface.
@@ -56,9 +55,8 @@ pub trait IUnknown {
 /// specified interfaces automatically. Only methods that return a
 /// two-parameter `Result<S,E>` value will store the detailed `IErrorInfo`.
 /// Other methods will set a null `IErrorInfo` value.
-#[com_interface( com_iid = "DF0B3D60-548F-101B-8E65-08002B2BD119" )]
+#[com_interface(com_iid = "DF0B3D60-548F-101B-8E65-08002B2BD119")]
 pub trait ISupportErrorInfo {
-
     /// Informs the current COM class supports `IErrorInfo` for a specific
     /// interface.
     ///
@@ -79,5 +77,5 @@ pub trait ISupportErrorInfo {
     /// for all custom interfaces the user defines. This includes returning
     /// `S_OK` from this method.
     ///
-    fn interface_supports_error_info( &self, riid : crate::REFIID ) -> crate::raw::HRESULT;
+    fn interface_supports_error_info(&self, riid: crate::REFIID) -> crate::raw::HRESULT;
 }

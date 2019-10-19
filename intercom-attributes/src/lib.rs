@@ -1,4 +1,3 @@
-
 //! Procedural macro attributes for defining intercom libraries.
 //!
 //! These macros implement various low level items that enable the associated
@@ -17,7 +16,7 @@ extern crate intercom_common;
 use intercom_common::attributes::*;
 
 extern crate proc_macro;
-use proc_macro::{TokenStream, LexError};
+use proc_macro::{LexError, TokenStream};
 
 // Note the rustdoc comments on the [proc_macro_attribute] functions document
 // "attributes", not "functions".
@@ -50,14 +49,10 @@ use proc_macro::{TokenStream, LexError};
 /// which provides the clients a way to perform reference counting and the
 /// ability to query for other interfaces the object might implement.
 #[proc_macro_attribute]
-pub fn com_interface(
-    attr: TokenStream,
-    tokens: TokenStream,
-) -> TokenStream
-{
-    match expand_com_interface( attr, tokens ) {
+pub fn com_interface(attr: TokenStream, tokens: TokenStream) -> TokenStream {
+    match expand_com_interface(attr, tokens) {
         Ok(t) => t,
-        Err(e) => panic!( "{}", e ),
+        Err(e) => panic!("{}", e),
     }
 }
 
@@ -76,14 +71,10 @@ pub fn com_interface(
 /// FFI layer handles conversion between these types and FFI compatible types.
 #[proc_macro_attribute]
 #[allow(clippy::needless_pass_by_value)]
-pub fn com_impl(
-    attr: TokenStream,
-    tokens: TokenStream,
-) -> TokenStream
-{
-    match expand_com_impl( &attr, tokens ) {
+pub fn com_impl(attr: TokenStream, tokens: TokenStream) -> TokenStream {
+    match expand_com_impl(&attr, tokens) {
         Ok(t) => t,
-        Err(e) => panic!( "{}", e ),
+        Err(e) => panic!("{}", e),
     }
 }
 
@@ -105,14 +96,10 @@ pub fn com_impl(
 /// by the clients. It can still be returned as a return value from other
 /// intercom methods.
 #[proc_macro_attribute]
-pub fn com_class(
-    attr: TokenStream,
-    tokens: TokenStream,
-) -> TokenStream
-{
-    match expand_com_class( attr, tokens ) {
+pub fn com_class(attr: TokenStream, tokens: TokenStream) -> TokenStream {
+    match expand_com_class(attr, tokens) {
         Ok(t) => t,
-        Err(e) => panic!( "{}", e ),
+        Err(e) => panic!("{}", e),
     }
 }
 
@@ -131,36 +118,27 @@ pub fn com_class(
 /// infrastructure that allows external clients to load the library and
 /// instantiate the specified types.
 #[proc_macro]
-pub fn com_library(
-    args: TokenStream,
-) -> TokenStream
-{
-    match expand_com_library( args ) {
+pub fn com_library(args: TokenStream) -> TokenStream {
+    match expand_com_library(args) {
         Ok(t) => t,
-        Err(e) => panic!( "{}", e ),
+        Err(e) => panic!("{}", e),
     }
 }
 
 /// Derives the implementation of the trait BidirectionalTypeInfo for a type.
 #[proc_macro_derive(BidirectionalTypeInfo)]
-pub fn named_type_derive(
-    input: proc_macro::TokenStream
-) -> proc_macro::TokenStream {
-
-    match expand_bidirectional_type_info( input ) {
+pub fn named_type_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    match expand_bidirectional_type_info(input) {
         Ok(t) => t,
-        Err(e) => panic!( "{}", e ),
+        Err(e) => panic!("{}", e),
     }
 }
 
 /// Derives the implementation of the trait ExternType for a type.
 #[proc_macro_derive(ExternType)]
-pub fn derive_extern_type(
-    input: proc_macro::TokenStream
-) -> proc_macro::TokenStream {
-
-    match expand_derive_extern_type( input ) {
+pub fn derive_extern_type(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    match expand_derive_extern_type(input) {
         Ok(t) => t,
-        Err(e) => panic!( "{}", e ),
+        Err(e) => panic!("{}", e),
     }
 }

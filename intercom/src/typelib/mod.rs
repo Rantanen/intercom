@@ -1,17 +1,14 @@
-
 use crate::{
-    com_class, com_interface, com_impl,
-    ComRc, ComItf, ComStruct,
-    ComResult, ComError, GUID,
-    type_system::TypeSystemName,
+    com_class, com_impl, com_interface, type_system::TypeSystemName, ComError, ComItf, ComRc,
+    ComResult, ComStruct, GUID,
 };
 
 use std::borrow::Cow;
 
 #[derive(Fail, Debug)]
 pub enum TypeLibError {
-    #[fail( display = "COM error occurred: {}", _0 )]
-    ComError(ComError)
+    #[fail(display = "COM error occurred: {}", _0)]
+    ComError(ComError),
 }
 
 impl From<ComError> for TypeLibError {
@@ -27,9 +24,9 @@ mod from_impls;
 
 #[derive(Debug)]
 pub struct InterfaceRef {
-    pub name : Cow<'static, str>,
-    pub iid_automation : GUID,
-    pub iid_raw : GUID,
+    pub name: Cow<'static, str>,
+    pub iid_automation: GUID,
+    pub iid_raw: GUID,
 }
 
 // TypeLib
@@ -37,10 +34,10 @@ pub struct InterfaceRef {
 #[com_class(IIntercomTypeLib)]
 #[derive(Debug)]
 pub struct TypeLib {
-    pub name : Cow<'static, str>,
-    pub libid : GUID,
+    pub name: Cow<'static, str>,
+    pub libid: GUID,
     pub version: Cow<'static, str>,
-    pub types : Vec<TypeInfo>,
+    pub types: Vec<TypeInfo>,
 }
 
 #[com_interface]
@@ -61,7 +58,10 @@ pub enum TypeInfo {
 
 #[derive(intercom::ExternType, intercom::BidirectionalTypeInfo, Debug)]
 #[repr(C)]
-pub enum TypeInfoKind { CoClass, Interface }
+pub enum TypeInfoKind {
+    CoClass,
+    Interface,
+}
 
 #[com_interface]
 pub trait IIntercomTypeInfo {
@@ -74,9 +74,9 @@ pub trait IIntercomTypeInfo {
 #[com_class(IIntercomTypeInfo, IIntercomCoClass)]
 #[derive(Debug)]
 pub struct CoClass {
-    pub name : Cow<'static, str>,
-    pub clsid : GUID,
-    pub interfaces : Vec<InterfaceRef>,
+    pub name: Cow<'static, str>,
+    pub clsid: GUID,
+    pub interfaces: Vec<InterfaceRef>,
 }
 
 #[com_interface]
@@ -152,9 +152,16 @@ pub struct Arg {
     pub direction: Direction,
 }
 
-#[derive(Debug, Clone, Copy, intercom::ExternType, intercom::BidirectionalTypeInfo, PartialEq, Eq)]
+#[derive(
+    Debug, Clone, Copy, intercom::ExternType, intercom::BidirectionalTypeInfo, PartialEq, Eq,
+)]
 #[repr(C)]
-pub enum Direction { In, Out, Retval, Return }
+pub enum Direction {
+    In,
+    Out,
+    Retval,
+    Return,
+}
 
 #[com_interface]
 pub trait IIntercomMethod {
@@ -169,7 +176,11 @@ pub trait IIntercomMethod {
 #[com_impl]
 impl IIntercomTypeLib for TypeLib {
     fn get_info(&self) -> ComResult<(String, GUID, String)> {
-        Ok((self.name.to_string(), self.libid.clone(), self.version.to_string()))
+        Ok((
+            self.name.to_string(),
+            self.libid.clone(),
+            self.version.to_string(),
+        ))
     }
 
     fn get_type_count(&self) -> ComResult<u32> {
@@ -201,17 +212,22 @@ impl IIntercomCoClass for CoClass {
         Ok(self.name.to_string())
     }
 
-    fn get_clsid(&self) -> ComResult<GUID> { Ok(self.clsid.clone()) }
+    fn get_clsid(&self) -> ComResult<GUID> {
+        Ok(self.clsid.clone())
+    }
     fn get_interface_count(&self) -> ComResult<u32> {
         Ok(self.interfaces.len() as u32)
     }
 
     fn get_interface_ref(&self, idx: u32, ts: TypeSystemName) -> ComResult<(String, GUID)> {
         let itf = &self.interfaces[idx as usize];
-        Ok(( itf.name.to_string(), match ts {
-            TypeSystemName::Automation => itf.iid_automation.clone(),
-            TypeSystemName::Raw => itf.iid_raw.clone(),
-        }))
+        Ok((
+            itf.name.to_string(),
+            match ts {
+                TypeSystemName::Automation => itf.iid_automation.clone(),
+                TypeSystemName::Raw => itf.iid_raw.clone(),
+            },
+        ))
     }
 }
 
@@ -248,19 +264,19 @@ impl IIntercomInterface for Interface {
 #[com_impl]
 impl IIntercomInterfaceVariant for InterfaceVariant {
     fn get_type_system(&self) -> ComResult<TypeSystemName> {
-        Ok( self.ts )
+        Ok(self.ts)
     }
 
     fn get_iid(&self) -> ComResult<GUID> {
-        Ok( self.iid.clone() )
+        Ok(self.iid.clone())
     }
 
     fn get_method_count(&self) -> ComResult<u32> {
-        Ok( self.methods.len() as u32 )
+        Ok(self.methods.len() as u32)
     }
 
     fn get_method(&self, idx: u32) -> ComResult<ComRc<dyn IIntercomMethod>> {
-        Ok( ComRc::from(&self.methods[idx as usize]) )
+        Ok(ComRc::from(&self.methods[idx as usize]))
     }
 }
 
@@ -271,7 +287,10 @@ impl IIntercomMethod for Method {
     }
 
     fn get_return_type(&self) -> ComResult<(String, u32)> {
-        Ok((self.return_type.ty.to_string(), self.return_type.indirection_level))
+        Ok((
+            self.return_type.ty.to_string(),
+            self.return_type.indirection_level,
+        ))
     }
 
     fn get_parameter_count(&self) -> ComResult<u32> {
@@ -279,34 +298,45 @@ impl IIntercomMethod for Method {
     }
     fn get_parameter(&self, idx: u32) -> ComResult<(String, String, u32, Direction)> {
         let arg = &self.parameters[idx as usize];
-        Ok((arg.name.to_string(), arg.ty.to_string(), arg.indirection_level, arg.direction))
+        Ok((
+            arg.name.to_string(),
+            arg.ty.to_string(),
+            arg.indirection_level,
+            arg.direction,
+        ))
     }
 }
 
 impl CoClass {
-
-    pub fn __new( name: Cow<'static, str>, clsid: GUID, interfaces: Vec< InterfaceRef > ) -> Self {
-        Self { name, clsid, interfaces }
+    pub fn __new(name: Cow<'static, str>, clsid: GUID, interfaces: Vec<InterfaceRef>) -> Self {
+        Self {
+            name,
+            clsid,
+            interfaces,
+        }
     }
 }
 
 impl TypeLib {
-
     pub fn __new(
         name: Cow<'static, str>,
         libid: GUID,
         version: Cow<'static, str>,
-        mut types: Vec<TypeInfo>
+        mut types: Vec<TypeInfo>,
     ) -> TypeLib {
         types.sort_by_key(|item| match item {
-            TypeInfo::Class(cls) => ( "class", cls.as_ref().name.to_string() ),
-            TypeInfo::Interface(itf) => ( "itf", itf.as_ref().name.to_string() ),
+            TypeInfo::Class(cls) => ("class", cls.as_ref().name.to_string()),
+            TypeInfo::Interface(itf) => ("itf", itf.as_ref().name.to_string()),
         });
         types.dedup_by_key(|item| match item {
-            TypeInfo::Class(cls) => ( "class", cls.as_ref().name.to_string() ),
-            TypeInfo::Interface(itf) => ( "itf", itf.as_ref().name.to_string() ),
+            TypeInfo::Class(cls) => ("class", cls.as_ref().name.to_string()),
+            TypeInfo::Interface(itf) => ("itf", itf.as_ref().name.to_string()),
         });
-        TypeLib { name, libid, version, types }
+        TypeLib {
+            name,
+            libid,
+            version,
+            types,
+        }
     }
 }
-

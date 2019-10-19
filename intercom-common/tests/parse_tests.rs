@@ -1,43 +1,37 @@
-
 extern crate intercom_common;
 
-use std::path::{Path, PathBuf};
 use intercom_common::model;
+use std::path::{Path, PathBuf};
 
 #[test]
 fn parsing_crate_with_single_file_by_package_path() {
-
-    let crate_path = test_path().join( "single_file_lib" );
-    let model = model::ComCrate::parse_package( crate_path.as_ref() ).unwrap();
-    assert_eq!( model, expected_crate( "single_file_lib" ) );
+    let crate_path = test_path().join("single_file_lib");
+    let model = model::ComCrate::parse_package(crate_path.as_ref()).unwrap();
+    assert_eq!(model, expected_crate("single_file_lib"));
 }
 
 #[test]
 fn parsing_crate_with_single_file_by_toml_path() {
-
-    let crate_path = test_path().join( "single_file_lib/Cargo.toml" );
-    let model = model::ComCrate::parse_package( crate_path.as_ref() ).unwrap();
-    assert_eq!( model, expected_crate( "single_file_lib" ) );
+    let crate_path = test_path().join("single_file_lib/Cargo.toml");
+    let model = model::ComCrate::parse_package(crate_path.as_ref()).unwrap();
+    assert_eq!(model, expected_crate("single_file_lib"));
 }
 
 #[test]
 fn parsing_crate_with_multi_file_by_package_path() {
-
-    let crate_path = test_path().join( "multi_file_lib" );
-    let model = model::ComCrate::parse_package( crate_path.as_ref() ).unwrap();
-    assert_eq!( model, expected_crate( "multi_file_lib" ) );
+    let crate_path = test_path().join("multi_file_lib");
+    let model = model::ComCrate::parse_package(crate_path.as_ref()).unwrap();
+    assert_eq!(model, expected_crate("multi_file_lib"));
 }
 
 #[test]
 fn parsing_crate_with_multi_file_by_toml_path() {
-
-    let crate_path = test_path().join( "multi_file_lib/Cargo.toml" );
-    let model = model::ComCrate::parse_package( crate_path.as_ref() ).unwrap();
-    assert_eq!( model, expected_crate( "multi_file_lib" ) );
+    let crate_path = test_path().join("multi_file_lib/Cargo.toml");
+    let model = model::ComCrate::parse_package(crate_path.as_ref()).unwrap();
+    assert_eq!(model, expected_crate("multi_file_lib"));
 }
 
-fn expected_crate( lib_name : &str ) -> model::ComCrate {
-
+fn expected_crate(lib_name: &str) -> model::ComCrate {
     model::ComCrate::parse( lib_name, &[
         r#"
             use cls1::Class1;
@@ -102,11 +96,11 @@ fn expected_crate( lib_name : &str ) -> model::ComCrate {
 
 fn test_path() -> PathBuf {
     let mut current_path = std::env::current_dir().unwrap();
-    let relative_path = Path::new( file!() ).parent().unwrap();
+    let relative_path = Path::new(file!()).parent().unwrap();
 
-    while ! current_path.join( relative_path ).exists() {
+    while !current_path.join(relative_path).exists() {
         current_path = current_path.parent().unwrap().to_owned();
     }
 
-    current_path.join( relative_path )
+    current_path.join(relative_path)
 }

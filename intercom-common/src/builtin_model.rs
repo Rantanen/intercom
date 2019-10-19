@@ -2,52 +2,51 @@
 //! Defines the default Intercom type model.
 //!
 
+use crate::model::{ComImpl, ComInterface, ComStruct};
 use crate::prelude::*;
-use crate::model::{ ComInterface, ComStruct, ComImpl };
 
 pub struct BuiltinTypeInfo {
     pub interface: ComInterface,
     pub class: ComStruct,
     pub implementation: ComImpl,
-    pub ctor : TokenStream,
+    pub ctor: TokenStream,
 }
 
-pub fn builtin_intercom_types( lib_name: &str ) -> Vec<BuiltinTypeInfo> {
+pub fn builtin_intercom_types(lib_name: &str) -> Vec<BuiltinTypeInfo> {
     vec![
         BuiltinTypeInfo {
-            interface: allocator_interface( lib_name ),
-            class: allocator_class( lib_name ),
+            interface: allocator_interface(lib_name),
+            class: allocator_class(lib_name),
             implementation: allocator_impl(),
-            ctor: quote!( intercom::alloc::Allocator::default() ),
+            ctor: quote!(intercom::alloc::Allocator::default()),
         },
         BuiltinTypeInfo {
-            interface: errorstore_interface( lib_name ),
-            class: errorstore_class( lib_name ),
+            interface: errorstore_interface(lib_name),
+            class: errorstore_class(lib_name),
             implementation: errorstore_impl(),
-            ctor: quote!( intercom::error::ErrorStore::default() ),
+            ctor: quote!(intercom::error::ErrorStore::default()),
         },
     ]
 }
 
-fn allocator_interface( lib_name: &str ) -> ComInterface {
+fn allocator_interface(lib_name: &str) -> ComInterface {
     ComInterface::parse(
-            lib_name,
-            quote!( (
-                com_iid = "18EE22B3-B0C6-44A5-A94A-7A417676FB66",
-                raw_iid = "7A6F6564-04B5-4455-A223-EA0512B8CC63",
-            ) ),
-            allocator_impl_code() ).unwrap()
+        lib_name,
+        quote!((
+            com_iid = "18EE22B3-B0C6-44A5-A94A-7A417676FB66",
+            raw_iid = "7A6F6564-04B5-4455-A223-EA0512B8CC63",
+        )),
+        allocator_impl_code(),
+    )
+    .unwrap()
 }
 
 fn allocator_impl() -> ComImpl {
-    ComImpl::parse( allocator_impl_code() ).unwrap()
+    ComImpl::parse(allocator_impl_code()).unwrap()
 }
 
-fn allocator_class( lib_name: &str ) -> ComStruct {
-    ComStruct::parse(
-            lib_name,
-            quote!( Allocator ),
-            "pub struct Allocator;" ).unwrap()
+fn allocator_class(lib_name: &str) -> ComStruct {
+    ComStruct::parse(lib_name, quote!(Allocator), "pub struct Allocator;").unwrap()
 }
 
 fn allocator_impl_code() -> &'static str {
@@ -61,25 +60,24 @@ fn allocator_impl_code() -> &'static str {
     "#
 }
 
-fn errorstore_interface( lib_name: &str ) -> ComInterface {
+fn errorstore_interface(lib_name: &str) -> ComInterface {
     ComInterface::parse(
-            lib_name,
-            quote!( (
-                com_iid = "d7f996c5-0b51-4053-82f8-19a7261793a9",
-                raw_iid = "7586c49a-abbd-4a06-b588-e3d02b431f01",
-            ) ),
-            errorstore_impl_code() ).unwrap()
+        lib_name,
+        quote!((
+            com_iid = "d7f996c5-0b51-4053-82f8-19a7261793a9",
+            raw_iid = "7586c49a-abbd-4a06-b588-e3d02b431f01",
+        )),
+        errorstore_impl_code(),
+    )
+    .unwrap()
 }
 
 fn errorstore_impl() -> ComImpl {
-    ComImpl::parse( errorstore_impl_code() ).unwrap()
+    ComImpl::parse(errorstore_impl_code()).unwrap()
 }
 
-fn errorstore_class( lib_name: &str ) -> ComStruct {
-    ComStruct::parse(
-            lib_name,
-            quote!( ErrorStore ),
-            "pub struct ErrorStore;" ).unwrap()
+fn errorstore_class(lib_name: &str) -> ComStruct {
+    ComStruct::parse(lib_name, quote!(ErrorStore), "pub struct ErrorStore;").unwrap()
 }
 
 fn errorstore_impl_code() -> &'static str {
@@ -92,4 +90,3 @@ fn errorstore_impl_code() -> &'static str {
     }
     "#
 }
-

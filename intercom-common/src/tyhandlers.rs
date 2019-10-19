@@ -1,39 +1,40 @@
-
 use crate::prelude::*;
 use std::rc::Rc;
 use syn::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Direction { In, Out, Retval }
+pub enum Direction {
+    In,
+    Out,
+    Retval,
+}
 
 pub struct TypeConversion {
-
     /// Possible temporary values that need to be kept alive for the duration
     /// of the conversion result usage.
     pub temporary: Option<TokenStream>,
 
     /// Conversion result value. Possibly referencing the temporary value.
-    pub value : TokenStream,
+    pub value: TokenStream,
 }
 
 #[derive(PartialEq, Eq, Debug, Hash)]
 pub struct ModelTypeSystemConfig {
-    pub effective_system : ModelTypeSystem,
-    pub is_default : bool,
+    pub effective_system: ModelTypeSystem,
+    pub is_default: bool,
 }
 
 impl ModelTypeSystemConfig {
-    pub fn get_unique_name( &self, base : &str ) -> String {
+    pub fn get_unique_name(&self, base: &str) -> String {
         match self.is_default {
             true => base.to_string(),
-            false => format!( "{}_{:?}", base, self.effective_system ),
+            false => format!("{}_{:?}", base, self.effective_system),
         }
     }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash, PartialOrd, Ord)]
 pub enum ModelTypeSystem {
-
     /// COM Automation compatible type system.
     Automation,
 
@@ -42,47 +43,46 @@ pub enum ModelTypeSystem {
 }
 
 impl ModelTypeSystem {
-
     /// Gets the name of the type system.
-    pub fn name( self ) -> Ident {
+    pub fn name(self) -> Ident {
         match self {
-            ModelTypeSystem::Automation => Ident::new( stringify!( Automation ), Span::call_site() ),
-            ModelTypeSystem::Raw => Ident::new( stringify!( Raw ), Span::call_site() ),
+            ModelTypeSystem::Automation => Ident::new(stringify!(Automation), Span::call_site()),
+            ModelTypeSystem::Raw => Ident::new(stringify!(Raw), Span::call_site()),
         }
     }
 
     /// Converts the model type system into public type system tokens.
-    pub fn as_tokens( self ) -> TokenStream {
+    pub fn as_tokens(self) -> TokenStream {
         match self {
-            ModelTypeSystem::Automation => quote!( Automation ),
-            ModelTypeSystem::Raw => quote!( Raw ),
+            ModelTypeSystem::Automation => quote!(Automation),
+            ModelTypeSystem::Raw => quote!(Raw),
         }
     }
 
     /// Converts the model type system into public type system tokens.
-    pub fn as_typesystem_tokens( self ) -> TokenStream {
+    pub fn as_typesystem_tokens(self) -> TokenStream {
         match self {
-            ModelTypeSystem::Automation =>
-                    quote!( intercom::type_system::TypeSystemName::Automation ),
-            ModelTypeSystem::Raw =>
-                    quote!( intercom::type_system::TypeSystemName::Raw ),
+            ModelTypeSystem::Automation => {
+                quote!(intercom::type_system::TypeSystemName::Automation)
+            }
+            ModelTypeSystem::Raw => quote!(intercom::type_system::TypeSystemName::Raw),
         }
     }
 
     /// Returns the intercom type that represents the type system.
-    pub fn as_typesystem_type( self ) -> Type {
+    pub fn as_typesystem_type(self) -> Type {
         match self {
-            ModelTypeSystem::Automation =>
-                    parse_quote!( intercom::type_system::AutomationTypeSystem ),
-            ModelTypeSystem::Raw =>
-                    parse_quote!( intercom::type_system::RawTypeSystem ),
+            ModelTypeSystem::Automation => {
+                parse_quote!(intercom::type_system::AutomationTypeSystem)
+            }
+            ModelTypeSystem::Raw => parse_quote!(intercom::type_system::RawTypeSystem),
         }
     }
 }
 
 /// Gets available type system.
 pub fn get_type_systems() -> &'static [ModelTypeSystem] {
-    &[ ModelTypeSystem::Automation, ModelTypeSystem::Raw ]
+    &[ModelTypeSystem::Automation, ModelTypeSystem::Raw]
 }
 
 /// Type usage context.
@@ -91,7 +91,7 @@ pub struct TypeContext {
 }
 
 impl TypeContext {
-    pub fn new( type_system : ModelTypeSystem ) -> TypeContext {
+    pub fn new(type_system: ModelTypeSystem) -> TypeContext {
         TypeContext { type_system }
     }
 }
@@ -99,23 +99,16 @@ impl TypeContext {
 /// Defines Type-specific logic for handling the various parameter types in the
 /// Rust/COM interface.
 pub trait TypeHandler {
-
     /// The Rust type.
-    fn rust_ty( &self ) -> Type;
+    fn rust_ty(&self) -> Type;
 
     /// The COM type.
-    fn com_ty( &self, _dir: Direction ) -> Type
-    {
+    fn com_ty(&self, _dir: Direction) -> Type {
         self.rust_ty()
     }
 
     /// Converts a COM parameter named by the ident into a Rust type.
-    fn com_to_rust(
-        &self,
-        ident : &Ident,
-        _dir: Direction,
-    ) -> TypeConversion
-    {
+    fn com_to_rust(&self, ident: &Ident, _dir: Direction) -> TypeConversion {
         TypeConversion {
             temporary: None,
             value: quote!( #ident.into() ),
@@ -123,36 +116,31 @@ pub trait TypeHandler {
     }
 
     /// Converts a Rust parameter named by the ident into a COM type.
-    fn rust_to_com(
-        &self, ident : &Ident, _dir: Direction
-    ) -> TypeConversion
-    {
+    fn rust_to_com(&self, ident: &Ident, _dir: Direction) -> TypeConversion {
         TypeConversion {
             temporary: None,
-            value: quote!( #ident.into() )
+            value: quote!( #ident.into() ),
         }
     }
 
     /// Gets the default value for the type.
-    fn default_value( &self ) -> TokenStream
-    {
-        quote!( intercom::type_system::ExternDefault::extern_default() )
+    fn default_value(&self) -> TokenStream {
+        quote!(intercom::type_system::ExternDefault::extern_default())
     }
 }
 
 /// Replacement type handler that uses the Rust type system for representing
 /// the various type system type conversions.
 struct TypeSystemParam {
-    ty : Type,
-    context : TypeContext,
+    ty: Type,
+    context: TypeContext,
 }
 impl TypeHandler for TypeSystemParam {
-    fn rust_ty( &self ) -> Type {
+    fn rust_ty(&self) -> Type {
         self.ty.clone()
     }
 
-    fn com_ty( &self, dir: Direction ) -> Type {
-
+    fn com_ty(&self, dir: Direction) -> Type {
         // Construct bits for the quote.
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type();
@@ -161,15 +149,12 @@ impl TypeHandler for TypeSystemParam {
 
         // Get the final type based on the parameter direction.
         match dir {
-            Direction::In
-                => parse_quote!( #ts_trait::ExternInputType ),
-            Direction::Out | Direction::Retval
-                => parse_quote!( #ts_trait::ExternOutputType ),
+            Direction::In => parse_quote!( #ts_trait::ExternInputType ),
+            Direction::Out | Direction::Retval => parse_quote!( #ts_trait::ExternOutputType ),
         }
     }
 
-    fn com_to_rust( &self, ident : &Ident, dir: Direction ) -> TypeConversion
-    {
+    fn com_to_rust(&self, ident: &Ident, dir: Direction) -> TypeConversion {
         // Construct bits for the quote.
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type();
@@ -184,18 +169,17 @@ impl TypeHandler for TypeSystemParam {
                     let intermediate = quote!(
                         < #ts_trait::OwnedNativeType >::intercom_from( #ident )? );
                     quote!( ( & #intermediate ).intercom_into()? )
-                },
+                }
                 Direction::Out | Direction::Retval => {
                     // Output arguments must not use an intermediate type
                     // as these must outlive the current function.
                     quote!( #ident.intercom_into()? )
-                },
-            }
+                }
+            },
         }
     }
 
-    fn rust_to_com( &self, ident : &Ident, dir: Direction ) -> TypeConversion
-    {
+    fn rust_to_com(&self, ident: &Ident, dir: Direction) -> TypeConversion {
         // Construct bits for the quote.
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type();
@@ -209,23 +193,17 @@ impl TypeHandler for TypeSystemParam {
                     let intermediate = quote!(
                         #ts_trait::OwnedExternType::intercom_from( #ident )? );
                     quote!( ( & #intermediate ).intercom_into()? )
-                },
-                Direction::Out | Direction::Retval => {
-                    quote!( #ident.intercom_into()? )
-                },
-            }
+                }
+                Direction::Out | Direction::Retval => quote!( #ident.intercom_into()? ),
+            },
         }
     }
 }
 
 /// Resolves the `TypeHandler` to use.
-pub fn get_ty_handler(
-    arg_ty : &Type,
-    context : TypeContext,
-) -> Rc<dyn TypeHandler>
-{
-    Rc::new( TypeSystemParam {
+pub fn get_ty_handler(arg_ty: &Type, context: TypeContext) -> Rc<dyn TypeHandler> {
+    Rc::new(TypeSystemParam {
         ty: arg_ty.clone(),
-        context
-    } )
+        context,
+    })
 }
