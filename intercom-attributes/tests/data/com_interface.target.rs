@@ -43,103 +43,106 @@ pub const IID_Foo_Automation: intercom::IID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
+#[doc = r" Gets type description of the #interface_variant COM class."]
+pub(crate) fn get_com_interface_for_Foo_Automation()
+ -> intercom::serialization::ComInterfaceVariant {
+    intercom::serialization::ComInterfaceVariant::new("Foo_Automation".to_string(),
+                                                      <intercom::type_system::AutomationTypeSystem
+                                                          as
+                                                          intercom::type_system::TypeSystem>::key())
+}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
 pub struct __Foo_AutomationVtbl {
     pub __base: intercom::IUnknownVtbl,
     pub simple_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                 intercom::RawComPtr)
+                                                           intercom::RawComPtr)
                                       ->
                                           <() as
                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub arg_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                              intercom::RawComPtr,
-                                                          a:
-                                                              <u16 as
-                                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
+                                                        intercom::RawComPtr,
+                                                    a:
+                                                        <u16 as
+                                                        intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
                                    ->
                                        <() as
                                        intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub simple_result_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                        intercom::RawComPtr)
+                                                                  intercom::RawComPtr)
                                              ->
                                                  <u16 as
                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub com_result_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                     intercom::RawComPtr,
-                                                                 __out:
-                                                                     *mut <u16
-                                                                          as
-                                                                          intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                               intercom::RawComPtr,
+                                                           __out:
+                                                               *mut <u16 as
+                                                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
                                           ->
                                               <intercom::raw::HRESULT as
                                               intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub rust_result_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                      intercom::RawComPtr,
-                                                                  __out:
-                                                                      *mut <u16
-                                                                           as
-                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                                intercom::RawComPtr,
+                                                            __out:
+                                                                *mut <u16 as
+                                                                     intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
                                            ->
                                                <intercom::raw::HRESULT as
                                                intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub complete_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                   intercom::RawComPtr,
-                                                               a:
-                                                                   <u16 as
-                                                                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                               b:
-                                                                   <i16 as
-                                                                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                               __out:
-                                                                   *mut <bool
-                                                                        as
-                                                                        intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                             intercom::RawComPtr,
+                                                         a:
+                                                             <u16 as
+                                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                         b:
+                                                             <i16 as
+                                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                         __out:
+                                                             *mut <bool as
+                                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
                                         ->
                                             <intercom::raw::HRESULT as
                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub string_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                 intercom::RawComPtr,
-                                                             msg:
-                                                                 <String as
-                                                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
+                                                           intercom::RawComPtr,
+                                                       msg:
+                                                           <String as
+                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
                                       ->
                                           <String as
                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub comitf_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                 intercom::RawComPtr,
-                                                             itf:
-                                                                 <ComItf<Foo>
-                                                                 as
-                                                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                             __out:
-                                                                 *mut <ComItf<IUnknown>
-                                                                      as
-                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                           intercom::RawComPtr,
+                                                       itf:
+                                                           <ComItf<Foo> as
+                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                       __out:
+                                                           *mut <ComItf<IUnknown>
+                                                                as
+                                                                intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
                                       ->
                                           <intercom::raw::HRESULT as
                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub bool_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                               intercom::RawComPtr,
-                                                           input:
-                                                               <bool as
-                                                               intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                           __out:
-                                                               *mut <bool as
-                                                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                         intercom::RawComPtr,
+                                                     input:
+                                                         <bool as
+                                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                     __out:
+                                                         *mut <bool as
+                                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
                                     ->
                                         <intercom::raw::HRESULT as
                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub variant_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                  intercom::RawComPtr,
-                                                              input:
-                                                                  <Variant as
-                                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                              __out:
-                                                                  *mut <Variant
-                                                                       as
-                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                            intercom::RawComPtr,
+                                                        input:
+                                                            <Variant as
+                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                        __out:
+                                                            *mut <Variant as
+                                                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
                                        ->
                                            <intercom::raw::HRESULT as
                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
@@ -151,98 +154,104 @@ pub const IID_Foo_Raw: intercom::IID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
+#[doc = r" Gets type description of the #interface_variant COM class."]
+pub(crate) fn get_com_interface_for_Foo_Raw()
+ -> intercom::serialization::ComInterfaceVariant {
+    intercom::serialization::ComInterfaceVariant::new("Foo_Raw".to_string(),
+                                                      <intercom::type_system::RawTypeSystem
+                                                          as
+                                                          intercom::type_system::TypeSystem>::key())
+}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
 pub struct __Foo_RawVtbl {
     pub __base: intercom::IUnknownVtbl,
     pub simple_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                          intercom::RawComPtr)
+                                                    intercom::RawComPtr)
                                ->
                                    <() as
                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-    pub arg_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                       intercom::RawComPtr,
-                                                   a:
-                                                       <u16 as
-                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
+    pub arg_method_Raw: unsafe extern "C" fn(self_vtable: intercom::RawComPtr,
+                                             a:
+                                                 <u16 as
+                                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
                             ->
                                 <() as
                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub simple_result_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                                 intercom::RawComPtr)
+                                                           intercom::RawComPtr)
                                       ->
                                           <u16 as
                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub com_result_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                              intercom::RawComPtr,
-                                                          __out:
-                                                              *mut <u16 as
-                                                                   intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                        intercom::RawComPtr,
+                                                    __out:
+                                                        *mut <u16 as
+                                                             intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
                                    ->
                                        <intercom::raw::HRESULT as
                                        intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub rust_result_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                               intercom::RawComPtr,
-                                                           __out:
-                                                               *mut <u16 as
-                                                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                         intercom::RawComPtr,
+                                                     __out:
+                                                         *mut <u16 as
+                                                              intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
                                     ->
                                         <intercom::raw::HRESULT as
                                         intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub complete_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                            intercom::RawComPtr,
-                                                        a:
-                                                            <u16 as
-                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                        b:
-                                                            <i16 as
-                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                        __out:
-                                                            *mut <bool as
-                                                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                      intercom::RawComPtr,
+                                                  a:
+                                                      <u16 as
+                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                  b:
+                                                      <i16 as
+                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                  __out:
+                                                      *mut <bool as
+                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
                                  ->
                                      <intercom::raw::HRESULT as
                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub string_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                          intercom::RawComPtr,
-                                                      msg:
-                                                          <String as
-                                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
+                                                    intercom::RawComPtr,
+                                                msg:
+                                                    <String as
+                                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
                                ->
                                    <String as
                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub comitf_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                          intercom::RawComPtr,
-                                                      itf:
-                                                          <ComItf<Foo> as
-                                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                      __out:
-                                                          *mut <ComItf<IUnknown>
-                                                               as
-                                                               intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                    intercom::RawComPtr,
+                                                itf:
+                                                    <ComItf<Foo> as
+                                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                __out:
+                                                    *mut <ComItf<IUnknown> as
+                                                         intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
                                ->
                                    <intercom::raw::HRESULT as
                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub bool_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                        intercom::RawComPtr,
-                                                    input:
-                                                        <bool as
-                                                        intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                    __out:
-                                                        *mut <bool as
-                                                             intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                  intercom::RawComPtr,
+                                              input:
+                                                  <bool as
+                                                  intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                              __out:
+                                                  *mut <bool as
+                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
                              ->
                                  <intercom::raw::HRESULT as
                                  intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub variant_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                           intercom::RawComPtr,
-                                                       input:
-                                                           <Variant as
-                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                       __out:
-                                                           *mut <Variant as
-                                                                intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                     intercom::RawComPtr,
+                                                 input:
+                                                     <Variant as
+                                                     intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                 __out:
+                                                     *mut <Variant as
+                                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
                                 ->
                                     <intercom::raw::HRESULT as
                                     intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
@@ -1109,7 +1118,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                  ty:
                                                                                                                                                                                                      "void".into(),
                                                                                                                                                                                                  indirection_level:
-                                                                                                                                                                                                     0,},
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               []),}),
@@ -1121,7 +1132,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                  ty:
                                                                                                                                                                                                      "void".into(),
                                                                                                                                                                                                  indirection_level:
-                                                                                                                                                                                                     0,},
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1137,7 +1150,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "simple_result_method".into(),
                                                                                                                                                                       return_type:
@@ -1154,7 +1169,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               []),}),
@@ -1174,7 +1191,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1190,7 +1209,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "rust_result_method".into(),
                                                                                                                                                                       return_type:
@@ -1207,7 +1228,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1223,7 +1246,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "complete_method".into(),
                                                                                                                                                                       return_type:
@@ -1240,7 +1265,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1256,7 +1283,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
                                                                                                                                                                                                intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "b".into(),
                                                                                                                                                                                                                       ty:
@@ -1270,7 +1299,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
                                                                                                                                                                                                intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "__out".into(),
                                                                                                                                                                                                                       ty:
@@ -1284,7 +1315,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "string_method".into(),
                                                                                                                                                                       return_type:
@@ -1301,7 +1334,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1317,7 +1352,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "comitf_method".into(),
                                                                                                                                                                       return_type:
@@ -1334,7 +1371,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1350,7 +1389,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
                                                                                                                                                                                                intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "__out".into(),
                                                                                                                                                                                                                       ty:
@@ -1364,7 +1405,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "bool_method".into(),
                                                                                                                                                                       return_type:
@@ -1381,7 +1424,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1397,7 +1442,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
                                                                                                                                                                                                intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "__out".into(),
                                                                                                                                                                                                                       ty:
@@ -1411,7 +1458,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "variant_method".into(),
                                                                                                                                                                       return_type:
@@ -1428,7 +1477,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1444,7 +1495,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
                                                                                                                                                                                                intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "__out".into(),
                                                                                                                                                                                                                       ty:
@@ -1458,7 +1511,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),}]),})]),}),
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),})]),}),
                              intercom::ComStruct::new(intercom::typelib::InterfaceVariant{ts:
                                                                                               intercom::type_system::TypeSystemName::Raw,
                                                                                           iid:
@@ -1487,7 +1542,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                  ty:
                                                                                                                                                                                                      "void".into(),
                                                                                                                                                                                                  indirection_level:
-                                                                                                                                                                                                     0,},
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               []),}),
@@ -1499,7 +1556,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                  ty:
                                                                                                                                                                                                      "void".into(),
                                                                                                                                                                                                  indirection_level:
-                                                                                                                                                                                                     0,},
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1515,7 +1574,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "simple_result_method".into(),
                                                                                                                                                                       return_type:
@@ -1532,7 +1593,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               []),}),
@@ -1552,7 +1615,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1568,7 +1633,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "rust_result_method".into(),
                                                                                                                                                                       return_type:
@@ -1585,7 +1652,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1601,7 +1670,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "complete_method".into(),
                                                                                                                                                                       return_type:
@@ -1618,7 +1689,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1634,7 +1707,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
                                                                                                                                                                                                intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "b".into(),
                                                                                                                                                                                                                       ty:
@@ -1648,7 +1723,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
                                                                                                                                                                                                intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "__out".into(),
                                                                                                                                                                                                                       ty:
@@ -1662,7 +1739,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "string_method".into(),
                                                                                                                                                                       return_type:
@@ -1679,7 +1758,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1695,7 +1776,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "comitf_method".into(),
                                                                                                                                                                       return_type:
@@ -1712,7 +1795,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1728,7 +1813,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
                                                                                                                                                                                                intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "__out".into(),
                                                                                                                                                                                                                       ty:
@@ -1742,7 +1829,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "bool_method".into(),
                                                                                                                                                                       return_type:
@@ -1759,7 +1848,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1775,7 +1866,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
                                                                                                                                                                                                intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "__out".into(),
                                                                                                                                                                                                                       ty:
@@ -1789,7 +1882,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),}]),}),
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
                                                                                                                    intercom::ComStruct::new(intercom::typelib::Method{name:
                                                                                                                                                                           "variant_method".into(),
                                                                                                                                                                       return_type:
@@ -1806,7 +1901,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                       as
                                                                                                                                                                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                          as
-                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               [intercom::typelib::Arg{name:
@@ -1822,7 +1919,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),},
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
                                                                                                                                                                                                intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "__out".into(),
                                                                                                                                                                                                                       ty:
@@ -1836,9 +1935,15 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
-                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),}]),})]),})]);
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),})]),})]);
     intercom::typelib::TypeInfo::Interface(intercom::ComStruct::new(intercom::typelib::Interface{name:
                                                                                                      "Foo".into(),
                                                                                                  variants:
-                                                                                                     variants,}))
+                                                                                                     variants,
+                                                                                                 options:
+                                                                                                     intercom::typelib::InterfaceOptions{class_impl_interface:
+                                                                                                                                             false,
+                                                                                                                                                      ..Default::default()},}))
 }

@@ -9,8 +9,6 @@ use std::path::PathBuf;
 use std::ffi::OsString;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
 
-use crate::host;
-
 #[allow(dead_code)]
 #[allow(non_upper_case_globals)]
 const CLSID_SetupConfiguration : GUID = GUID {
@@ -123,7 +121,7 @@ fn find_path( roots : &[&PathBuf], path : &str ) -> Option< PathBuf > {
         let pattern = format!( "{}/**/{}", root_str, path );
 
         // Go through all entries.
-        for entry in glob::glob_with( &pattern, &options ).unwrap() {
+        for entry in glob::glob_with( &pattern, options ).unwrap() {
             if let Ok( entry_path ) = entry {
 
                 // The first entry we find, we'll return.

@@ -1,6 +1,6 @@
 
 use super::*;
-use crate::type_system::{TypeSystem, TypeSystemName, AutomationTypeSystem};
+use crate::type_system::TypeSystem;
 
 /// Reference counted handle to the `ComBox` data.
 ///
@@ -78,6 +78,9 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
 impl<T: ComInterface + ?Sized> ComRc<T>
 {
     pub fn create( clsid : GUID ) -> crate::ComResult< ComRc<T> > {
+
+        // Only needed on Windows so have these here.
+        use crate::type_system::{TypeSystemName, AutomationTypeSystem};
 
         // Get the IID.
         //

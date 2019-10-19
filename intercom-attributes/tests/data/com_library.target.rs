@@ -19,7 +19,7 @@ pub mod some {
             {
                 {
                     ::std::rt::begin_panic("explicit panic",
-                                           &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_library.source.rs",
+                                           &("/home/wace/projects/intercom/intercom-attributes/tests/data/com_library.source.rs",
                                              8u32, 93u32))
                 }
             }
@@ -33,37 +33,18 @@ pub(crate) fn get_intercom_coclass_info_for_SimpleType()
     {
         {
             ::std::rt::begin_panic("explicit panic",
-                                   &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_library.source.rs",
+                                   &("/home/wace/projects/intercom/intercom-attributes/tests/data/com_library.source.rs",
                                      14u32, 91u32))
         }
     }
 }
-#[allow(non_upper_case_globals)]
-#[doc = "Built-in Allocator class ID."]
-pub const CLSID_Allocator: intercom::CLSID =
-    intercom::GUID{data1: 611004625u32,
-                   data2: 64989u16,
-                   data3: 14555u16,
-                   data4:
-                       [95u8, 81u8, 222u8, 241u8, 175u8, 60u8, 148u8,
-                        102u8],};
-#[allow(non_upper_case_globals)]
-#[doc = "Built-in ErrorStore class ID."]
-pub const CLSID_ErrorStore: intercom::CLSID =
-    intercom::GUID{data1: 4043109527u32,
-                   data2: 48586u16,
-                   data3: 13069u16,
-                   data4:
-                       [65u8, 93u8, 255u8, 115u8, 129u8, 121u8, 178u8,
-                        133u8],};
 #[no_mangle]
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
 pub unsafe extern "C" fn DllGetClassObject(rclsid: intercom::REFCLSID,
-                                                 riid: intercom::REFIID,
-                                                 pout:
-                                                     *mut intercom::RawComPtr)
+                                           riid: intercom::REFIID,
+                                           pout: *mut intercom::RawComPtr)
  -> intercom::raw::HRESULT {
     let mut com_struct =
         intercom::ComStruct::new(intercom::ClassFactory::new(rclsid,
@@ -81,12 +62,12 @@ pub unsafe extern "C" fn DllGetClassObject(rclsid: intercom::REFCLSID,
                                                                          Ok(intercom::ComBox::new(SimpleType::new())
                                                                                 as
                                                                                 intercom::RawComPtr),
-                                                                         self::CLSID_Allocator
+                                                                         intercom::alloc::CLSID_Allocator
                                                                          =>
                                                                          Ok(intercom::ComBox::new(intercom::alloc::Allocator::default())
                                                                                 as
                                                                                 intercom::RawComPtr),
-                                                                         self::CLSID_ErrorStore
+                                                                         intercom::error::CLSID_ErrorStore
                                                                          =>
                                                                          Ok(intercom::ComBox::new(intercom::error::ErrorStore::default())
                                                                                 as
@@ -101,7 +82,9 @@ pub unsafe extern "C" fn DllGetClassObject(rclsid: intercom::REFCLSID,
 pub(crate) fn get_intercom_typelib() -> intercom::typelib::TypeLib {
     let types =
         <[_]>::into_vec(box
-                            [some::path::get_intercom_coclass_info_for_Type(),
+                            [intercom::alloc::get_intercom_coclass_info_for_Allocator(),
+                             intercom::error::get_intercom_coclass_info_for_ErrorStore(),
+                             some::path::get_intercom_coclass_info_for_Type(),
                              get_intercom_coclass_info_for_SimpleType()]).into_iter().flatten().collect::<Vec<_>>();
     intercom::typelib::TypeLib::__new("TestLib".into(),
                                       intercom::GUID{data1: 0u32,
@@ -115,8 +98,8 @@ pub(crate) fn get_intercom_typelib() -> intercom::typelib::TypeLib {
 }
 #[no_mangle]
 pub unsafe extern "C" fn IntercomTypeLib(type_system:
-                                                   intercom::type_system::TypeSystemName,
-                                               out: *mut intercom::RawComPtr)
+                                             intercom::type_system::TypeSystemName,
+                                         out: *mut intercom::RawComPtr)
  -> intercom::raw::HRESULT {
     let mut tlib = intercom::ComStruct::new(get_intercom_typelib());
     let rc =
@@ -136,14 +119,14 @@ pub unsafe extern "C" fn IntercomTypeLib(type_system:
 #[allow(dead_code)]
 #[doc(hidden)]
 pub unsafe extern "C" fn IntercomListClassObjects(pcount: *mut usize,
-                                                        pclsids:
-                                                            *mut *const intercom::CLSID)
+                                                  pclsids:
+                                                      *mut *const intercom::CLSID)
  -> intercom::raw::HRESULT {
     if pcount.is_null() { return intercom::raw::E_POINTER; }
     if pclsids.is_null() { return intercom::raw::E_POINTER; }
     static AVAILABLE_CLASSES: [::intercom::CLSID; 4usize] =
-        [some::path::CLSID_Type, CLSID_SimpleType, CLSID_Allocator,
-         CLSID_ErrorStore];
+        [some::path::CLSID_Type, CLSID_SimpleType,
+         intercom::alloc::CLSID_Allocator, intercom::error::CLSID_ErrorStore];
     *pcount = 4usize;
     *pclsids = AVAILABLE_CLASSES.as_ptr();
     intercom::raw::S_OK

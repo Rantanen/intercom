@@ -17,13 +17,21 @@ const IID_IFoo_Automation: intercom::IID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
+#[doc = r" Gets type description of the #interface_variant COM class."]
+pub(crate) fn get_com_interface_for_IFoo_Automation()
+ -> intercom::serialization::ComInterfaceVariant {
+    intercom::serialization::ComInterfaceVariant::new("IFoo_Automation".to_string(),
+                                                      <intercom::type_system::AutomationTypeSystem
+                                                          as
+                                                          intercom::type_system::TypeSystem>::key())
+}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
 struct __IFoo_AutomationVtbl {
     pub __base: intercom::IUnknownVtbl,
     pub trait_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                intercom::RawComPtr)
+                                                          intercom::RawComPtr)
                                      ->
                                          <() as
                                          intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
@@ -35,13 +43,21 @@ const IID_IFoo_Raw: intercom::IID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
+#[doc = r" Gets type description of the #interface_variant COM class."]
+pub(crate) fn get_com_interface_for_IFoo_Raw()
+ -> intercom::serialization::ComInterfaceVariant {
+    intercom::serialization::ComInterfaceVariant::new("IFoo_Raw".to_string(),
+                                                      <intercom::type_system::RawTypeSystem
+                                                          as
+                                                          intercom::type_system::TypeSystem>::key())
+}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
 struct __IFoo_RawVtbl {
     pub __base: intercom::IUnknownVtbl,
     pub trait_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                         intercom::RawComPtr)
+                                                   intercom::RawComPtr)
                               ->
                                   <() as
                                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
@@ -161,7 +177,9 @@ pub(crate) fn get_intercom_interface_info_for_IFoo()
                                                                                                                                                                                                  ty:
                                                                                                                                                                                                      "void".into(),
                                                                                                                                                                                                  indirection_level:
-                                                                                                                                                                                                     0,},
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               []),})]),}),
@@ -193,14 +211,20 @@ pub(crate) fn get_intercom_interface_info_for_IFoo()
                                                                                                                                                                                                  ty:
                                                                                                                                                                                                      "void".into(),
                                                                                                                                                                                                  indirection_level:
-                                                                                                                                                                                                     0,},
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               []),})]),})]);
     intercom::typelib::TypeInfo::Interface(intercom::ComStruct::new(intercom::typelib::Interface{name:
                                                                                                      "IFoo".into(),
                                                                                                  variants:
-                                                                                                     variants,}))
+                                                                                                     variants,
+                                                                                                 options:
+                                                                                                     intercom::typelib::InterfaceOptions{class_impl_interface:
+                                                                                                                                             false,
+                                                                                                                                                      ..Default::default()},}))
 }
 struct Foo;
 #[inline(always)]
@@ -313,7 +337,7 @@ pub const CLSID_Foo: intercom::CLSID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
-pub(crate) fn get_intercom_coclass_info_for_Foo()
+pub fn get_intercom_coclass_info_for_Foo()
  -> Vec<intercom::typelib::TypeInfo> {
     <[_]>::into_vec(box
                         [intercom::typelib::TypeInfo::Class(intercom::ComStruct::new(intercom::typelib::CoClass::__new("Foo".into(),
@@ -348,21 +372,35 @@ pub(crate) fn get_intercom_coclass_info_for_Foo()
                          get_intercom_interface_info_for_Foo(),
                          get_intercom_interface_info_for_IFoo()])
 }
+#[doc = r" Gets type description of the #class_ident COM class."]
+fn get_com_class_for_Foo() -> intercom::serialization::ComClass {
+    intercom::serialization::ComClass::new("Foo".to_string(),
+                                           get_interfaces_for_Foo())
+}
+#[doc = r" Gets the interfaces of the #class_ident COM class."]
+fn get_interfaces_for_Foo()
+ -> Vec<intercom::serialization::ComInterfaceVariant> {
+    <[_]>::into_vec(box
+                        [get_com_interface_for_Foo_Automation(),
+                         get_com_interface_for_IFoo_Automation(),
+                         get_com_interface_for_Foo_Raw(),
+                         get_com_interface_for_IFoo_Raw()])
+}
 impl Foo {
     pub fn struct_method(&self) { }
 }
 #[allow(non_snake_case)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_query_interface(self_vtable:
-                                                                    intercom::RawComPtr,
-                                                                riid:
-                                                                    <intercom::REFIID
-                                                                    as
-                                                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                                out:
-                                                                    *mut <intercom::RawComPtr
-                                                                         as
-                                                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                              intercom::RawComPtr,
+                                                          riid:
+                                                              <intercom::REFIID
+                                                              as
+                                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                          out:
+                                                              *mut <intercom::RawComPtr
+                                                                   as
+                                                                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -374,7 +412,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_query_interface(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_add_ref(self_vtable:
-                                                            intercom::RawComPtr)
+                                                      intercom::RawComPtr)
  ->
      <u32 as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -386,7 +424,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_add_ref(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_release(self_vtable:
-                                                            intercom::RawComPtr)
+                                                      intercom::RawComPtr)
  ->
      <u32 as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -398,7 +436,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_release(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_struct_method_Automation(self_vtable:
-                                                                             intercom::RawComPtr)
+                                                                       intercom::RawComPtr)
  ->
      <() as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -440,15 +478,14 @@ const __Foo_Foo_AutomationVtbl_INSTANCE: __Foo_AutomationVtbl =
 #[allow(non_snake_case)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_query_interface(self_vtable:
-                                                             intercom::RawComPtr,
-                                                         riid:
-                                                             <intercom::REFIID
-                                                             as
-                                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                         out:
-                                                             *mut <intercom::RawComPtr
-                                                                  as
-                                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                       intercom::RawComPtr,
+                                                   riid:
+                                                       <intercom::REFIID as
+                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                   out:
+                                                       *mut <intercom::RawComPtr
+                                                            as
+                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -459,8 +496,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_query_interface(self_vtable:
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "C" fn __Foo_Foo_Raw_add_ref(self_vtable:
-                                                     intercom::RawComPtr)
+unsafe extern "C" fn __Foo_Foo_Raw_add_ref(self_vtable: intercom::RawComPtr)
  ->
      <u32 as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -471,8 +507,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_add_ref(self_vtable:
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "C" fn __Foo_Foo_Raw_release(self_vtable:
-                                                     intercom::RawComPtr)
+unsafe extern "C" fn __Foo_Foo_Raw_release(self_vtable: intercom::RawComPtr)
  ->
      <u32 as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -484,7 +519,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_release(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_struct_method_Raw(self_vtable:
-                                                               intercom::RawComPtr)
+                                                         intercom::RawComPtr)
  ->
      <() as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -529,13 +564,21 @@ pub const IID_Foo_Automation: intercom::IID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8],};
+#[doc = r" Gets type description of the #interface_variant COM class."]
+pub(crate) fn get_com_interface_for_Foo_Automation()
+ -> intercom::serialization::ComInterfaceVariant {
+    intercom::serialization::ComInterfaceVariant::new("Foo_Automation".to_string(),
+                                                      <intercom::type_system::AutomationTypeSystem
+                                                          as
+                                                          intercom::type_system::TypeSystem>::key())
+}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
 pub struct __Foo_AutomationVtbl {
     pub __base: intercom::IUnknownVtbl,
     pub struct_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                 intercom::RawComPtr)
+                                                           intercom::RawComPtr)
                                       ->
                                           <() as
                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
@@ -547,13 +590,21 @@ pub const IID_Foo_Raw: intercom::IID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8],};
+#[doc = r" Gets type description of the #interface_variant COM class."]
+pub(crate) fn get_com_interface_for_Foo_Raw()
+ -> intercom::serialization::ComInterfaceVariant {
+    intercom::serialization::ComInterfaceVariant::new("Foo_Raw".to_string(),
+                                                      <intercom::type_system::RawTypeSystem
+                                                          as
+                                                          intercom::type_system::TypeSystem>::key())
+}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
 pub struct __Foo_RawVtbl {
     pub __base: intercom::IUnknownVtbl,
     pub struct_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                          intercom::RawComPtr)
+                                                    intercom::RawComPtr)
                                ->
                                    <() as
                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
@@ -620,7 +671,9 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                  ty:
                                                                                                                                                                                                      "void".into(),
                                                                                                                                                                                                  indirection_level:
-                                                                                                                                                                                                     0,},
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               []),})]),}),
@@ -652,14 +705,20 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                  ty:
                                                                                                                                                                                                      "void".into(),
                                                                                                                                                                                                  indirection_level:
-                                                                                                                                                                                                     0,},
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
                                                                                                                                                                       parameters:
                                                                                                                                                                           <[_]>::into_vec(box
                                                                                                                                                                                               []),})]),})]);
     intercom::typelib::TypeInfo::Interface(intercom::ComStruct::new(intercom::typelib::Interface{name:
                                                                                                      "Foo".into(),
                                                                                                  variants:
-                                                                                                     variants,}))
+                                                                                                     variants,
+                                                                                                 options:
+                                                                                                     intercom::typelib::InterfaceOptions{class_impl_interface:
+                                                                                                                                             true,
+                                                                                                                                                     ..Default::default()},}))
 }
 impl IFoo for Foo {
     fn trait_method(&self) { }
@@ -667,15 +726,15 @@ impl IFoo for Foo {
 #[allow(non_snake_case)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_IFoo_Automation_query_interface(self_vtable:
-                                                                     intercom::RawComPtr,
-                                                                 riid:
-                                                                     <intercom::REFIID
-                                                                     as
-                                                                     intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                                 out:
-                                                                     *mut <intercom::RawComPtr
-                                                                          as
-                                                                          intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                               intercom::RawComPtr,
+                                                           riid:
+                                                               <intercom::REFIID
+                                                               as
+                                                               intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                           out:
+                                                               *mut <intercom::RawComPtr
+                                                                    as
+                                                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -687,7 +746,7 @@ unsafe extern "C" fn __Foo_IFoo_Automation_query_interface(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_IFoo_Automation_add_ref(self_vtable:
-                                                             intercom::RawComPtr)
+                                                       intercom::RawComPtr)
  ->
      <u32 as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -699,7 +758,7 @@ unsafe extern "C" fn __Foo_IFoo_Automation_add_ref(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_IFoo_Automation_release(self_vtable:
-                                                             intercom::RawComPtr)
+                                                       intercom::RawComPtr)
  ->
      <u32 as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -711,7 +770,7 @@ unsafe extern "C" fn __Foo_IFoo_Automation_release(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_IFoo_Automation_trait_method_Automation(self_vtable:
-                                                                             intercom::RawComPtr)
+                                                                       intercom::RawComPtr)
  ->
      <() as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -753,15 +812,14 @@ const __Foo_IFoo_AutomationVtbl_INSTANCE: __IFoo_AutomationVtbl =
 #[allow(non_snake_case)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_IFoo_Raw_query_interface(self_vtable:
-                                                              intercom::RawComPtr,
-                                                          riid:
-                                                              <intercom::REFIID
-                                                              as
-                                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                          out:
-                                                              *mut <intercom::RawComPtr
-                                                                   as
-                                                                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                        intercom::RawComPtr,
+                                                    riid:
+                                                        <intercom::REFIID as
+                                                        intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                    out:
+                                                        *mut <intercom::RawComPtr
+                                                             as
+                                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -772,8 +830,7 @@ unsafe extern "C" fn __Foo_IFoo_Raw_query_interface(self_vtable:
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "C" fn __Foo_IFoo_Raw_add_ref(self_vtable:
-                                                      intercom::RawComPtr)
+unsafe extern "C" fn __Foo_IFoo_Raw_add_ref(self_vtable: intercom::RawComPtr)
  ->
      <u32 as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -784,8 +841,7 @@ unsafe extern "C" fn __Foo_IFoo_Raw_add_ref(self_vtable:
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "C" fn __Foo_IFoo_Raw_release(self_vtable:
-                                                      intercom::RawComPtr)
+unsafe extern "C" fn __Foo_IFoo_Raw_release(self_vtable: intercom::RawComPtr)
  ->
      <u32 as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -797,7 +853,7 @@ unsafe extern "C" fn __Foo_IFoo_Raw_release(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_IFoo_Raw_trait_method_Raw(self_vtable:
-                                                               intercom::RawComPtr)
+                                                         intercom::RawComPtr)
  ->
      <() as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {

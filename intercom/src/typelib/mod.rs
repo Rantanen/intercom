@@ -296,8 +296,16 @@ impl TypeLib {
         name: Cow<'static, str>,
         libid: GUID,
         version: Cow<'static, str>,
-        types: Vec<TypeInfo>
+        mut types: Vec<TypeInfo>
     ) -> TypeLib {
+        types.sort_by_key(|item| match item {
+            TypeInfo::Class(cls) => ( "class", cls.as_ref().name.to_string() ),
+            TypeInfo::Interface(itf) => ( "itf", itf.as_ref().name.to_string() ),
+        });
+        types.dedup_by_key(|item| match item {
+            TypeInfo::Class(cls) => ( "class", cls.as_ref().name.to_string() ),
+            TypeInfo::Interface(itf) => ( "itf", itf.as_ref().name.to_string() ),
+        });
         TypeLib { name, libid, version, types }
     }
 }

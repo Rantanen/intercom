@@ -20,7 +20,9 @@ const IID_Foo_Raw: intercom::IID = intercom::GUID {
     data4: [0, 0, 0, 0, 0, 0, 0, 0],
 };
 
-pub(crate) fn get_intercom_interface_info_for_Foo() -> intercom::typelib::TypeInfo { panic!() }
+fn get_com_interface_for_Foo_Automation() -> intercom::serialization::ComInterfaceVariant { panic!() }
+fn get_com_interface_for_Foo_Raw() -> intercom::serialization::ComInterfaceVariant { panic!() }
+fn get_intercom_interface_info_for_Foo() -> Vec<intercom::typelib::TypeInfo> { panic!() }
 
 #[com_class( clsid = "{00000000-0000-0000-0000-000000000000}", Foo)]
 pub struct Foo;

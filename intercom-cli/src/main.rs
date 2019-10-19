@@ -11,8 +11,9 @@ use std::fs::File;
 extern crate clap;
 use clap::{App, AppSettings, SubCommand, Arg, ArgMatches};
 
-mod host;
+#[cfg(windows)]
 mod embed;
+
 mod typelib;
 mod generators;
 
@@ -21,7 +22,7 @@ mod generators;
 fn main() {
 
     // Define the command line arguments using clap.
-    let matches = App::new( "Rust COM utility" )
+    let app = App::new( "Rust COM utility" )
             .version( crate_version!() )
             .author( "Mikko Rantanen <rantanen@jubjubnest.net>" )
             .setting( AppSettings::SubcommandRequiredElseHelp )
@@ -29,13 +30,6 @@ fn main() {
                 .about( "Reads the type library." )
                 .arg( Arg::with_name( "path" )
                    .help( "Path to the type library." )
-                   .index( 1 )
-                )
-            )
-            .subcommand( SubCommand::with_name( "embed-typelib" )
-                .about( "Builds and embeds the typelib into a DLL" )
-                .arg( Arg::with_name( "path" )
-                   .help( "Path to the DLL." )
                    .index( 1 )
                 )
             )
@@ -83,11 +77,19 @@ fn main() {
                     .help( "Include both Automation and Raw type systems in the C++ implementation.{n}\
                            Normally the implementation only includes the Raw type system interfaces." )
                 )
+            );
+
+    #[cfg(windows)]
+    let app = app.subcommand( SubCommand::with_name( "embed-typelib" )
+            .about( "Builds and embeds the typelib into a DLL" )
+            .arg( Arg::with_name( "path" )
+               .help( "Path to the DLL." )
+               .index( 1 )
             )
-        .get_matches();
+        );
 
     // Run the command and report possible errors.
-    if let Err( e ) = run_cmd( &matches ) {
+    if let Err( e ) = run_cmd( &app.get_matches() ) {
         eprintln!( "{}", e );
     }
 }
@@ -112,6 +114,7 @@ fn run_cmd( matches : &ArgMatches ) -> Result<(), failure::Error>
             let path = Path::new( args.value_of( "path" ).unwrap() );
             println!( "{:#?}", typelib::read_typelib( path )? );
         },
+        #[cfg(windows)]
         ( "embed-typelib", Some( args ) ) => {
             embed::embed_typelib( Path::new( args.value_of("path").unwrap() ), opts )?;
         },
