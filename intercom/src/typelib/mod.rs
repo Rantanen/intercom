@@ -95,6 +95,14 @@ pub trait IIntercomCoClass {
 pub struct Interface {
     pub name: Cow<'static, str>,
     pub variants: Vec<ComStruct<InterfaceVariant>>,
+    pub options: InterfaceOptions,
+}
+
+#[derive(Debug, Clone, Default, intercom::ExternType, intercom::BidirectionalTypeInfo)]
+#[repr(C)]
+pub struct InterfaceOptions {
+    pub class_impl_interface: bool,
+    pub __non_exhaustive: (),
 }
 
 #[com_class(IIntercomInterfaceVariant)]
@@ -109,6 +117,7 @@ pub struct InterfaceVariant {
 pub trait IIntercomInterface {
     // FIXME: Support interface inheritance
     fn get_name(&self) -> ComResult<String>;
+    fn get_options(&self) -> ComResult<InterfaceOptions>;
 
     fn get_variant_count(&self) -> ComResult<u32>;
     fn get_variant(&self, idx: u32) -> ComResult<ComRc<IIntercomInterfaceVariant>>;
@@ -140,9 +149,9 @@ pub struct Arg {
     pub direction: Direction,
 }
 
-#[derive(Debug, Clone, Copy, intercom::ExternType, intercom::BidirectionalTypeInfo)]
+#[derive(Debug, Clone, Copy, intercom::ExternType, intercom::BidirectionalTypeInfo, PartialEq, Eq)]
 #[repr(C)]
-pub enum Direction { In, Out, Retval }
+pub enum Direction { In, Out, Retval, Return }
 
 #[com_interface]
 pub trait IIntercomMethod {
@@ -218,6 +227,10 @@ impl IIntercomTypeInfo for Interface {
 impl IIntercomInterface for Interface {
     fn get_name(&self) -> ComResult<String> {
         Ok(self.name.to_string())
+    }
+
+    fn get_options(&self) -> ComResult<InterfaceOptions> {
+        Ok(self.options.clone())
     }
 
     fn get_variant_count(&self) -> ComResult<u32> {

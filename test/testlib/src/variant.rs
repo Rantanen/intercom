@@ -14,6 +14,7 @@ pub trait IVariantInterface {
 
 #[com_class( IVariantInterface )]
 pub struct VariantImpl;
+impl VariantImpl { pub fn new() -> Self { VariantImpl } }
 
 #[com_impl]
 impl IVariantInterface for VariantImpl

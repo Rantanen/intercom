@@ -44,6 +44,7 @@ pub fn expand_com_library(
     }
 
     // Generate built-in type data.
+    /*
     for bti in builtin_model::builtin_intercom_types( lib.name() ) {
 
         // CLSID
@@ -67,6 +68,15 @@ pub fn expand_com_library(
         // Include also built-in classes. They have a custom CLSID in every library.
         creatable_classes.push( quote!( #builtin_clsid ) );
     }
+    */
+    match_arms.push( quote!(
+        intercom::alloc::CLSID_Allocator =>
+                Ok( intercom::ComBox::new( intercom::alloc::Allocator::default() )
+                    as intercom::RawComPtr ) ) );
+    match_arms.push( quote!(
+        intercom::error::CLSID_ErrorStore =>
+                Ok( intercom::ComBox::new( intercom::error::ErrorStore::default() )
+                    as intercom::RawComPtr ) ) );
 
     // Implement DllGetClassObject.
     //
@@ -140,15 +150,13 @@ fn create_get_typelib_function(
         .iter()
         .map( |p| p.map_ident(|i| format!("get_intercom_coclass_info_for_{}", i)) )
         .collect::<Result<Vec<_>, _>>()?;
-    let create_interface_typeinfo = lib.interfaces()
-        .iter()
-        .map( |p| p.map_ident(|i| format!("get_intercom_interface_info_for_{}", i)) )
-        .collect::<Result<Vec<_>, _>>()?;
     let calling_convention = get_calling_convetion();
     Ok(quote!(
         pub(crate) fn get_intercom_typelib() -> intercom::typelib::TypeLib
         {
             let types = vec![
+                intercom::alloc::get_intercom_coclass_info_for_Allocator(),
+                intercom::error::get_intercom_coclass_info_for_ErrorStore(),
                 #( #create_class_typeinfo() ),*
             ].into_iter().flatten().collect::<Vec<_>>();
             intercom::typelib::TypeLib::__new(

@@ -120,8 +120,14 @@ pub type CLSID = GUID;
 pub type REFCLSID = *const IID;
 
 pub mod raw {
-    pub type InBSTR = *const u16;
-    pub type OutBSTR = *mut u16;
+
+    #[derive(Clone, Copy, intercom_attributes::ExternType, intercom_attributes::BidirectionalTypeInfo)]
+    #[repr(transparent)]
+    pub struct InBSTR( pub *const u16 );
+
+    #[derive(Clone, Copy, intercom_attributes::ExternType, intercom_attributes::BidirectionalTypeInfo)]
+    #[repr(transparent)]
+    pub struct OutBSTR( pub *mut u16 );
 
     pub type InCStr = *const ::std::os::raw::c_char;
     pub type OutCStr = *mut ::std::os::raw::c_char;

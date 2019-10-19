@@ -51,6 +51,38 @@ impl< T: CoClass > ComStruct<T>
         // Return the struct.
         ComStruct { data: cb }
     }
+
+    fn as_comitf<I: ComInterface + ?Sized>(&self) -> ComItf<I>
+        where T: HasInterface<I>
+    {
+        let ( automation_ptr, raw_ptr ) = {
+            let vtbl = &self.as_ref().vtable_list;
+
+            let automation_ptr = match I::iid( TypeSystemName::Automation ) {
+                Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
+                    Ok( itf ) => itf,
+                    Err( _ ) => ::std::ptr::null_mut(),
+                },
+                None => ::std::ptr::null_mut(),
+            };
+
+            let raw_ptr = match I::iid( TypeSystemName::Raw ) {
+                Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
+                    Ok( itf ) => itf,
+                    Err( _ ) => ::std::ptr::null_mut(),
+                },
+                None => ::std::ptr::null_mut(),
+            };
+
+            ( automation_ptr, raw_ptr )
+        };
+
+        unsafe {
+            ComItf::new(
+                raw::InterfacePtr::new( automation_ptr ),
+                raw::InterfacePtr::new( raw_ptr ) )
+        }
+    }
 }
 
 impl<T: CoClass + std::fmt::Debug> std::fmt::Debug for ComStruct<T> {
@@ -86,44 +118,20 @@ impl<T: CoClass> AsRef<ComBox<T>> for ComStruct<T>
     }
 }
 
-impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<&ComStruct<T>> for ComItf<I> {
+impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComRc<I> {
 
-    fn from( source : &ComStruct<T> ) -> ComItf<I> {
-
-        let ( automation_ptr, raw_ptr ) = {
-            let vtbl = &source.as_ref().vtable_list;
-
-            let automation_ptr = match I::iid( TypeSystemName::Automation ) {
-                Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
-                    Ok( itf ) => itf,
-                    Err( _ ) => ::std::ptr::null_mut(),
-                },
-                None => ::std::ptr::null_mut(),
-            };
-
-            let raw_ptr = match I::iid( TypeSystemName::Raw ) {
-                Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
-                    Ok( itf ) => itf,
-                    Err( _ ) => ::std::ptr::null_mut(),
-                },
-                None => ::std::ptr::null_mut(),
-            };
-
-            ( automation_ptr, raw_ptr )
-        };
-
-        std::mem::forget( source );
+    fn from( source : ComStruct<T> ) -> ComRc<I> {
         unsafe {
-            ComItf::new(
-                raw::InterfacePtr::new( automation_ptr ),
-                raw::InterfacePtr::new( raw_ptr ) )
+            let rc = ComRc::attach( source.as_comitf() );
+            std::mem::forget( source );
+            rc
         }
     }
 }
 
 impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<&ComStruct<T>> for ComRc<I> {
     fn from( combox : &ComStruct<T> ) -> Self {
-        ComRc::copy( &ComItf::from( combox ) )
+        ComRc::copy( &combox.as_comitf() )
     }
 }
 

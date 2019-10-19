@@ -250,7 +250,7 @@ fn create_get_typeinfo_function(
             )
         } ).unzip();
     Ok(quote!(
-        pub(crate) fn #fn_name() -> Vec<intercom::typelib::TypeInfo>
+        pub fn #fn_name() -> Vec<intercom::typelib::TypeInfo>
         {
             vec![ intercom::typelib::TypeInfo::Class(
                 intercom::ComStruct::new( intercom::typelib::CoClass::__new(
