@@ -1,5 +1,5 @@
 setlocal enableextensions
-FOR /F "tokens=* delims= " %%i in ( 'scripts\vswhere -format value -property installationPath' ) do ( set installdir=%%i )
+FOR /F "tokens=* delims= " %%i in ( 'scripts\vswhere -format value -property installationPath -version "[15.0,16.0)"' ) do ( set installdir=%%i )
 pushd %installdir%
 call .\VC\Auxiliary\Build\vcvars64.bat
 popd

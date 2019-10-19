@@ -3,7 +3,7 @@ project (cpp-utility)
 set (PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
 set (PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set (INTERCOM_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
-set (TESTLIB_TARGET_DIR ${INTERCOM_ROOT}/test/target/debug)
+set (TESTLIB_TARGET_DIR ${INTERCOM_ROOT}/test/target/${CMAKE_BUILD_TYPE})
 
 # C++14 support
 set(CMAKE_CXX_STANDARD 14)
@@ -29,13 +29,14 @@ else()
 endif()
 
 # Use the intercom-cli as code generator for test_lib.h/test_lib.cpp
-add_custom_target(
-    cpp-utility-generated-src-dir ALL COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/generated)
+add_custom_command(
+    OUTPUT ${PROJECT_SOURCE_DIR}/generated
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/generated)
 add_custom_command(
     OUTPUT ${PROJECT_SOURCE_DIR}/generated/test_lib.hpp ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
     COMMAND cargo run --release cpp ${TESTLIB_LIB} --all --header ${PROJECT_SOURCE_DIR}/generated/test_lib.hpp --source ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
     WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
-    DEPENDS ${TESTLIB_LIB} cpp-utility-generated-src-dir)
+    DEPENDS ${TESTLIB_LIB} ${PROJECT_SOURCE_DIR}/generated)
 
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_INCLUDE_DIR}")
