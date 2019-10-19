@@ -27,8 +27,8 @@ env:
 script:
     - rustup component add rustfmt-preview
     - rustup component add clippy-preview
-    - cargo clippy --all-features --all -- -D warnings
-    - cargo test --all-features
+    - cargo clippy --all -- -D warnings
+    - cargo test
     - mkdir build
     - ( cd build && cmake .. && make )
     - ( cd bin/x86_64 && ldd ./cpp-raw && valgrind --error-exitcode=1 ./cpp-raw )
