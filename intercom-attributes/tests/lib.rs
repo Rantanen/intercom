@@ -1,3 +1,4 @@
+#![cfg(not(windows))]  // No one likes Rustfmt. :(
 
 extern crate difference;
 extern crate regex;
