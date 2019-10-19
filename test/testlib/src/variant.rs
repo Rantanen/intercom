@@ -37,11 +37,6 @@ impl VariantTests
         variant : Variant
     ) -> Result<(), ComError> {
 
-        use std::io::Write;
-        let mut f = std::fs::OpenOptions::new().append(true).open(r"C:\temp\log.txt").unwrap();
-        writeln!(&mut f, "Called");
-        writeln!(&mut f, "{:#?}", &variant).unwrap();
-
         let vt_type = if vt > 100 { vt / 100 } else { vt };
         if variant.raw_type() != vt_type {
             return Err( ComError::E_INVALIDARG.with_message(
