@@ -193,8 +193,6 @@ self_extern!( HRESULT );
 use crate::GUID;
 self_extern!( GUID );
 
-#[cfg(not(windows))]
-self_extern!( libc::c_void );
 self_extern!( std::ffi::c_void );
 self_extern!(TypeSystemName);
 

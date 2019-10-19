@@ -9,8 +9,6 @@ use std::path::PathBuf;
 use std::ffi::OsString;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
 
-use crate::host;
-
 #[allow(dead_code)]
 #[allow(non_upper_case_globals)]
 const CLSID_SetupConfiguration : GUID = GUID {

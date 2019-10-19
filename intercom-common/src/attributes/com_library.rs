@@ -69,14 +69,16 @@ pub fn expand_com_library(
         creatable_classes.push( quote!( #builtin_clsid ) );
     }
     */
-    match_arms.push( quote!(
-        intercom::alloc::CLSID_Allocator =>
-                Ok( intercom::ComBox::new( intercom::alloc::Allocator::default() )
-                    as intercom::RawComPtr ) ) );
-    match_arms.push( quote!(
-        intercom::error::CLSID_ErrorStore =>
-                Ok( intercom::ComBox::new( intercom::error::ErrorStore::default() )
-                    as intercom::RawComPtr ) ) );
+    for (clsid, path) in &[
+        ( quote!( intercom::alloc::CLSID_Allocator ), quote!( intercom::alloc::Allocator ) ),
+        ( quote!( intercom::error::CLSID_ErrorStore ), quote!( intercom::error::ErrorStore ) ),
+    ] {
+        match_arms.push( quote!(
+            #clsid =>
+                    Ok( intercom::ComBox::new( #path::default() )
+                        as intercom::RawComPtr ) ) );
+        creatable_classes.push( quote!( #clsid ) );
+    }
 
     // Implement DllGetClassObject.
     //

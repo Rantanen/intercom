@@ -244,7 +244,7 @@ mod error_store {
 
     pub(super) unsafe fn SetErrorInfo(
         _dw_reserved: u32,
-        errorinfo: ::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
+        errorinfo: crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
     ) -> raw::HRESULT {
 
         reset_error_store(ComItf::maybe_wrap( errorinfo ) );
@@ -260,6 +260,7 @@ mod error_store {
         ERROR_STORE.with( |store| {
 
             if let Some( itf ) = store.get() {
+                ComItf::as_unknown( &itf ).add_ref();
                 *errorinfo = ComItf::ptr( &itf );
                 reset_error_store( None );
                 raw::S_OK
@@ -497,7 +498,7 @@ pub struct ErrorStore;
         raw_iid = "7586c49a-abbd-4a06-b588-e3d02b431f01" )]
 pub trait IErrorStore
 {
-    fn get_error_info( &self ) -> ComResult<ComItf<dyn IErrorInfo>>;
+    fn get_error_info( &self ) -> ComResult<ComRc<dyn IErrorInfo>>;
     fn set_error_info( &self, info : ComItf<dyn IErrorInfo> ) -> ComResult<()>;
     fn set_error_message( &self, msg : &str ) -> ComResult<()>;
 }
@@ -505,9 +506,9 @@ pub trait IErrorStore
 #[com_impl]
 impl IErrorStore for ErrorStore
 {
-    fn get_error_info( &self ) -> ComResult<ComItf<dyn IErrorInfo>>
+    fn get_error_info( &self ) -> ComResult<ComRc<dyn IErrorInfo>>
     {
-        Ok( ComRc::detach( get_error_info()? ) )
+        get_error_info()
     }
 
     fn set_error_info( &self, info : ComItf<dyn IErrorInfo> ) -> ComResult<()>

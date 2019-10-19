@@ -3,8 +3,7 @@ project (cpp-dl)
 set (PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
 set (PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set (INTERCOM_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
-set (MULTILIB_DIR ${INTERCOM_ROOT}/test/multilib)
-set (TESTLIB_DIR ${INTERCOM_ROOT}/test/testlib)
+set (TESTLIB_TARGET_DIR ${INTERCOM_ROOT}/test/target/debug)
 
 # C++14 support
 set(CMAKE_CXX_STANDARD 14)
@@ -17,21 +16,29 @@ ${PROJECT_SOURCE_DIR}/generated/multi_lib.cpp
 ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
 ${PROJECT_SOURCE_DIR}/shared_functions.cpp
 )
+
+# Specify additional platform specific paths.
+if( WIN32 )
+    set (TESTLIB_LIB ${TESTLIB_TARGET_DIR}/test_lib.dll)
+    set (MULTILIB_LIB ${TESTLIB_TARGET_DIR}/multi_lib.dll)
+else()
+    set (TESTLIB_LIB ${TESTLIB_TARGET_DIR}/libtest_lib.so)
+    set (MULTILIB_LIB ${TESTLIB_TARGET_DIR}/libmulti_lib.so)
+endif()
+
 # Use the intercom-cli as code generator for multi_lib.h/multi_lib.cpp
-file(GLOB multilib_sources ${MULTILIB_DIR}/src)
 add_custom_command(
     OUTPUT ${PROJECT_SOURCE_DIR}/generated/multi_lib.h ${PROJECT_SOURCE_DIR}/generated/multi_lib.cpp
-    COMMAND cargo run --release cpp ${MULTILIB_DIR} ${PROJECT_SOURCE_DIR}/generated
+    COMMAND cargo run --release cpp ${MULTILIB_LIB} --header ${PROJECT_SOURCE_DIR}/generated/multi_lib.hpp --source ${PROJECT_SOURCE_DIR}/generated/multi_lib.cpp
     WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
-    DEPENDS ${multilib_sources})
+    DEPENDS ${MULTILIB_LIB})
 
 # Use the intercom-cli as code generator for test_lib.h/test_lib.cpp
-file(GLOB testlib_sources ${TESTLIB_DIR}/src)
 add_custom_command(
     OUTPUT ${PROJECT_SOURCE_DIR}/generated/test_lib.h ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
-    COMMAND cargo run --release cpp ${TESTLIB_DIR} ${PROJECT_SOURCE_DIR}/generated
+    COMMAND cargo run --release cpp ${TESTLIB_LIB} --header ${PROJECT_SOURCE_DIR}/generated/test_lib.hpp --source ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
     WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
-    DEPENDS ${testlib_sources})
+    DEPENDS ${TESTLIB_LIB})
 
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_INCLUDE_DIR}")

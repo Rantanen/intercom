@@ -22,10 +22,12 @@ set(TESTLIB_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${TE
 set(TESTLIB_IMPORT_LOCATION "${TESTLIB_LOCATION}.lib" )
 
 # Build instructions for the library.
+file(GLOB testlib_sources ${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_custom_command(
         OUTPUT ${TESTLIB_BINARY_BUILD_PATH}
         COMMAND "cargo" ARGS "build" ${TESTLIB_BUILD_ARGUMENT_RELEASE}
-        WORKING_DIRECTORY ${TESTLIB_WORKSPACE_DIR} )
+        WORKING_DIRECTORY ${TESTLIB_WORKSPACE_DIR}
+        DEPENDS ${testlib_sources})
 add_custom_command(
         OUTPUT ${TESTLIB_LOCATION}
         COMMAND ${CMAKE_COMMAND} -E copy

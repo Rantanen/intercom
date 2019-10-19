@@ -78,7 +78,7 @@ impl CppLibrary {
                 .collect::<Vec<CppInterface>>();
 
         Ok( Self {
-            lib_name: pascal_case( lib.name ),
+            lib_name: lib.name.to_string(),
             interfaces,
             coclass_count: coclasses.len(),
             coclasses,
@@ -198,6 +198,7 @@ impl CppArg {
 
         let base_name = match base_name.as_ref() {
             "std::ffi::c_void" => "void".to_string(),
+            "HRESULT" => "intercom::HRESULT".to_string(),
             other => other.to_string()
         };
 
