@@ -211,7 +211,7 @@ pub fn get_ty_handler(
     context : TypeContext,
 ) -> Rc<dyn TypeHandler>
 {
-    return Rc::new( TypeSystemParam {
+    Rc::new( TypeSystemParam {
         ty: arg_ty.clone(),
         context
     } )

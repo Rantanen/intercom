@@ -3,7 +3,7 @@ use super::*;
 
 impl TypeLib {
 
-    pub fn from_comrc(lib: &ComRc<IIntercomTypeLib>) -> Result<TypeLib, TypeLibError> {
+    pub fn from_comrc(lib: &ComRc<dyn IIntercomTypeLib>) -> Result<TypeLib, TypeLibError> {
 
         let mut types = vec![];
         for t in 0..lib.get_type_count()? {
@@ -35,7 +35,7 @@ impl TypeLib {
 
 impl CoClass {
 
-    pub fn from_comrc(ti: &ComRc<IIntercomCoClass>) -> Result<CoClass, TypeLibError> {
+    pub fn from_comrc(ti: &ComRc<dyn IIntercomCoClass>) -> Result<CoClass, TypeLibError> {
 
         let mut interfaces = vec![];
         for i in 0..ti.get_interface_count()? {
@@ -45,8 +45,8 @@ impl CoClass {
 
             interfaces.push(InterfaceRef {
                 name: name.into(),
-                iid_automation: iid_automation,
-                iid_raw: iid_raw,
+                iid_automation,
+                iid_raw,
             });
         }
 
@@ -60,7 +60,7 @@ impl CoClass {
 
 impl Interface {
 
-    pub fn from_comrc(ti: &ComRc<IIntercomInterface>) -> Result<Interface, TypeLibError> {
+    pub fn from_comrc(ti: &ComRc<dyn IIntercomInterface>) -> Result<Interface, TypeLibError> {
 
         let mut variants = vec![];
         for v in 0..ti.get_variant_count()? {
@@ -78,7 +78,7 @@ impl Interface {
 
 impl InterfaceVariant {
 
-    pub fn from_comrc(ti: &ComRc<IIntercomInterfaceVariant>) -> Result<InterfaceVariant, TypeLibError> {
+    pub fn from_comrc(ti: &ComRc<dyn IIntercomInterfaceVariant>) -> Result<InterfaceVariant, TypeLibError> {
 
         let mut methods = vec![];
         for m in 0..ti.get_method_count()? {
@@ -96,7 +96,7 @@ impl InterfaceVariant {
 
 impl Method {
 
-    pub fn from_comrc(ti: &ComRc<IIntercomMethod>) -> Result<Method, TypeLibError> {
+    pub fn from_comrc(ti: &ComRc<dyn IIntercomMethod>) -> Result<Method, TypeLibError> {
 
         let mut parameters = vec![];
         for p in 0..ti.get_parameter_count()? {

@@ -67,6 +67,9 @@ impl< T: Fn( REFCLSID ) -> RawComResult< RawComPtr > > ClassFactory<T> {
         Self { clsid, create_instance }
     }
 
+    /// # Safety
+    ///
+    /// The pointers _must_ be valid.
     #[cfg(windows)]
     pub unsafe extern "stdcall" fn create_instance(
         self_vtbl : RawComPtr,
@@ -78,6 +81,9 @@ impl< T: Fn( REFCLSID ) -> RawComResult< RawComPtr > > ClassFactory<T> {
         Self::create_instance_agnostic(self_vtbl, _outer, riid, out)
     }
 
+    /// # Safety
+    ///
+    /// The pointers _must_ be valid.
     #[cfg(not(windows))]
     pub unsafe extern "C" fn create_instance(
         self_vtbl : RawComPtr,
@@ -89,6 +95,9 @@ impl< T: Fn( REFCLSID ) -> RawComResult< RawComPtr > > ClassFactory<T> {
         Self::create_instance_agnostic(self_vtbl, _outer, riid, out)
     }
 
+    /// # Safety
+    ///
+    /// The pointers _must_ be valid.
     #[cfg(windows)]
     pub unsafe extern "stdcall" fn lock_server(
         self_vtbl : RawComPtr,
@@ -98,6 +107,9 @@ impl< T: Fn( REFCLSID ) -> RawComResult< RawComPtr > > ClassFactory<T> {
         Self::lock_server_agnostic(self_vtbl, lock)
     }
 
+    /// # Safety
+    ///
+    /// The pointers _must_ be valid.
     #[cfg(not(windows))]
     pub unsafe extern "C" fn lock_server(
         self_vtbl : RawComPtr,
@@ -119,6 +131,9 @@ impl< T: Fn( REFCLSID ) -> RawComResult< RawComPtr > > ClassFactory<T> {
         }
     }
 
+    /// # Safety
+    ///
+    /// The pointers _must_ be valid.
     unsafe fn create_instance_agnostic(
         self_vtbl : RawComPtr,
         _outer : RawComPtr,
@@ -150,6 +165,9 @@ impl< T: Fn( REFCLSID ) -> RawComResult< RawComPtr > > ClassFactory<T> {
         query_result
     }
 
+    /// # Safety
+    ///
+    /// The pointers _must_ be valid.
     unsafe fn lock_server_agnostic(
         self_vtbl : RawComPtr,
         lock : bool

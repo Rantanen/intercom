@@ -44,6 +44,7 @@ pub struct TypeLib {
 }
 
 #[com_interface]
+#[allow(bare_trait_objects)]
 pub trait IIntercomTypeLib {
     fn get_info(&self) -> ComResult<(String, GUID, String)>;
     fn get_type_count(&self) -> ComResult<u32>;
@@ -114,6 +115,7 @@ pub struct InterfaceVariant {
 }
 
 #[com_interface]
+#[allow(bare_trait_objects)]
 pub trait IIntercomInterface {
     // FIXME: Support interface inheritance
     fn get_name(&self) -> ComResult<String>;
@@ -124,6 +126,7 @@ pub trait IIntercomInterface {
 }
 
 #[com_interface]
+#[allow(bare_trait_objects)]
 pub trait IIntercomInterfaceVariant {
     fn get_type_system(&self) -> ComResult<TypeSystemName>;
     fn get_iid(&self) -> ComResult<GUID>;
@@ -173,7 +176,7 @@ impl IIntercomTypeLib for TypeLib {
         Ok(self.types.len() as u32)
     }
 
-    fn get_type(&self, idx: u32) -> ComResult<ComRc<IIntercomTypeInfo>> {
+    fn get_type(&self, idx: u32) -> ComResult<ComRc<dyn IIntercomTypeInfo>> {
         Ok(match &self.types[idx as usize] {
             TypeInfo::Class(cls) => ComRc::from(cls),
             TypeInfo::Interface(itf) => ComRc::from(itf),
@@ -237,7 +240,7 @@ impl IIntercomInterface for Interface {
         Ok(self.variants.len() as u32)
     }
 
-    fn get_variant(&self, idx: u32) -> ComResult<ComRc<IIntercomInterfaceVariant>> {
+    fn get_variant(&self, idx: u32) -> ComResult<ComRc<dyn IIntercomInterfaceVariant>> {
         Ok(ComRc::from(&self.variants[idx as usize]))
     }
 }
@@ -256,7 +259,7 @@ impl IIntercomInterfaceVariant for InterfaceVariant {
         Ok( self.methods.len() as u32 )
     }
 
-    fn get_method(&self, idx: u32) -> ComResult<ComRc<IIntercomMethod>> {
+    fn get_method(&self, idx: u32) -> ComResult<ComRc<dyn IIntercomMethod>> {
         Ok( ComRc::from(&self.methods[idx as usize]) )
     }
 }

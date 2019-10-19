@@ -6,7 +6,6 @@ use crate::ast_converters::ReplaceIdent;
 use crate::idents;
 use crate::utils;
 use crate::model;
-use crate::builtin_model;
 use std::iter::FromIterator;
 
 extern crate quote;

@@ -37,5 +37,4 @@ impl From<::std::io::Error> for GeneratorError {
 }
 
 pub mod idl;
-pub mod manifest;
 pub mod cpp;

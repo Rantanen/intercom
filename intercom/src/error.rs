@@ -46,7 +46,7 @@ impl<TS: TypeSystem> ExternType<TS> for std::io::Error {
 }
 
 impl IntercomFrom<error::raw::HRESULT> for ComError {
-    default fn intercom_from( source: error::raw::HRESULT ) -> ComResult<ComError> {
+    unsafe fn intercom_from( source: error::raw::HRESULT ) -> ComResult<ComError> {
         Ok( ComError {
             hresult: source,
             error_info: None,
@@ -55,7 +55,7 @@ impl IntercomFrom<error::raw::HRESULT> for ComError {
 }
 
 impl IntercomFrom<error::raw::HRESULT> for std::io::Error {
-    default fn intercom_from( source: error::raw::HRESULT ) -> ComResult<std::io::Error> {
+    unsafe fn intercom_from( source: error::raw::HRESULT ) -> ComResult<std::io::Error> {
         Ok(ComError::intercom_from(source)?.into())
     }
 }
@@ -308,9 +308,9 @@ impl<'a> TryFrom<&'a dyn IErrorInfo> for ErrorInfo {
 
         Ok( ErrorInfo {
             guid: source.get_guid()?,
-            source: source.get_source()?.to_owned(),
-            description: source.get_description()?.to_owned(),
-            help_file: source.get_help_file()?.to_owned(),
+            source: source.get_source()?,
+            description: source.get_description()?,
+            help_file: source.get_help_file()?,
             help_context: source.get_help_context()?,
         } )
     }

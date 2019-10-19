@@ -1,4 +1,5 @@
 #![feature(inner_deref)]
+#![allow(clippy::match_bool)]
 
 use std::io;
 use std::path::Path;
@@ -145,8 +146,8 @@ fn run_cmd( matches : &ArgMatches ) -> Result<(), failure::Error>
                 let mut source_writer = source_writer?;
                 return Ok( generators::cpp::write(
                     lib, opts,
-                    header_writer.as_mut().map(|b| b as &mut io::Write),
-                    source_writer.as_mut().map(|b| b as &mut io::Write),
+                    header_writer.as_mut().map(|b| b as &mut dyn io::Write),
+                    source_writer.as_mut().map(|b| b as &mut dyn io::Write),
                 )? );
             }
         },

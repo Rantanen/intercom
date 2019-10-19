@@ -133,13 +133,13 @@ impl<TS: TypeSystem> From<raw::Variant<TS>> for Variant {
 }
 
 impl<TS: TypeSystem> IntercomFrom<raw::Variant<TS>> for Variant {
-    fn intercom_from( src: raw::Variant<TS> ) -> ComResult<Self> {
+    unsafe fn intercom_from( src: raw::Variant<TS> ) -> ComResult<Self> {
         Ok( src.into() )
     }
 }
 
 impl<TS: TypeSystem> IntercomFrom<Variant> for raw::Variant<TS> {
-    fn intercom_from( src: Variant ) -> ComResult<Self> {
+    unsafe fn intercom_from( src: Variant ) -> ComResult<Self> {
         Ok( match src {
             Variant::None => raw::Variant::new(
                     raw::VariantType::new( raw::var_type::EMPTY ),

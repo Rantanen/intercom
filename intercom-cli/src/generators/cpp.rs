@@ -6,7 +6,6 @@ extern crate std;
 
 use std::borrow::Cow;
 use std::io::Write;
-use std::path::Path;
 
 use super::GeneratorError;
 use super::{ModelOptions, TypeSystemOptions, LibraryContext, pascal_case};
@@ -60,7 +59,7 @@ impl CppLibrary {
         opts: &ModelOptions
     ) -> Result<Self, GeneratorError> {
 
-        let ctx = LibraryContext::try_from(&lib, opts)?;
+        let ctx = LibraryContext::try_from(&lib)?;
 
         let mut interfaces = vec![];
         let mut coclasses = vec![];
@@ -115,8 +114,7 @@ impl CppInterface {
             base: Some("IUnknown".to_string()),
             methods: itf_variant.methods
                 .iter()
-                .enumerate()
-                .map(|(i, m)| CppMethod::try_from(i, m.as_ref(), ts_opts, ctx))
+                .map(|m| CppMethod::try_from(m.as_ref(), ts_opts, ctx))
                 .collect::<Result<Vec<_>, _>>()?
         } )
     }
@@ -140,7 +138,6 @@ impl CppInterface {
 
 impl CppMethod {
     fn try_from(
-        idx: usize,
         method: &Method,
         opts: &TypeSystemOptions,
         ctx: &LibraryContext,
@@ -173,7 +170,7 @@ impl CppArg {
                 attrs.push( "retval" );
             },
             Direction::Return => {
-                Err( "Direction::Return is invalid direction for arguments".to_string() )?
+                return Err( "Direction::Return is invalid direction for arguments".to_string().into() );
             }
         }
 
@@ -191,7 +188,7 @@ impl CppArg {
         let base_name = ctx.itfs_by_name.get(arg.ty.as_ref())
             .map(|itf| CppInterface::final_name(itf, opts))
             .unwrap_or_else(|| arg.ty.to_string());
-        let mut indirection = match arg.direction {
+        let indirection = match arg.direction {
             Direction::In | Direction::Return => arg.indirection_level,
             Direction::Out | Direction::Retval => arg.indirection_level + 1,
         };
@@ -224,7 +221,7 @@ impl CppClass {
             name: cls.name.to_string(),
             clsid_struct: guid_as_struct( &cls.clsid ),
             interface_count: interfaces.len(),
-            interfaces: interfaces,
+            interfaces,
         })
     }
 }

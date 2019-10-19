@@ -2,8 +2,6 @@
 //! Enables the generation of IDL file that describes intercom library.
 
 use std::io::Write;
-use std::path::Path;
-use std::convert::TryFrom;
 use std::borrow::Cow;
 
 use super::GeneratorError;
@@ -59,7 +57,7 @@ impl IdlLibrary {
         opts: &ModelOptions
     ) -> Result<Self, GeneratorError> {
 
-        let ctx = LibraryContext::try_from(&lib, opts)?;
+        let ctx = LibraryContext::try_from(&lib)?;
 
         let mut interfaces = vec![];
         let mut coclasses = vec![];
@@ -173,7 +171,7 @@ impl IdlArg {
                 attrs.push( "retval" );
             },
             Direction::Return => {
-                Err( "Direction::Return is invalid direction for arguments".to_string() )?
+                return Err( "Direction::Return is invalid direction for arguments".to_string().into() );
             }
         }
 
@@ -192,7 +190,7 @@ impl IdlArg {
         let base_name = ctx.itfs_by_name.get(arg.ty.as_ref())
             .map(|itf| IdlInterface::final_name(itf, opts))
             .unwrap_or_else(|| arg.ty.to_string());
-        let mut indirection = match arg.direction {
+        let indirection = match arg.direction {
             Direction::In | Direction::Return => arg.indirection_level,
             Direction::Out | Direction::Retval => arg.indirection_level + 1,
         };
@@ -224,7 +222,7 @@ impl IdlClass {
         Ok(IdlClass {
             name: cls.name.to_string(),
             clsid: format!("{:-X}", cls.clsid),
-            interfaces: interfaces,
+            interfaces,
         })
     }
 }
