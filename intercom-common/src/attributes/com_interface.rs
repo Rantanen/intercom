@@ -402,7 +402,7 @@ fn create_get_typeinfo_function(
     let itf_name = itf.name().to_string();
     let mut variant_tokens = vec![];
     for (ts, variant) in itf.variants() {
-        variant_tokens.push( create_typeinfo_for_variant(itf, ts, variant)? );
+        variant_tokens.push( create_typeinfo_for_variant(itf, *ts, variant)? );
     }
     let is_impl_interface = itf.item_type() == utils::InterfaceType::Struct;
 
@@ -426,8 +426,8 @@ fn create_get_typeinfo_function(
 }
 
 fn create_typeinfo_for_variant(
-    itf: &model::ComInterface,
-    ts: &ModelTypeSystem,
+    _itf: &model::ComInterface,
+    ts: ModelTypeSystem,
     itf_variant: &model::ComInterfaceVariant,
 ) -> Result<TokenStream, String>
 {

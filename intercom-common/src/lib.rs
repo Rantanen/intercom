@@ -5,17 +5,8 @@
 
 #[macro_use] extern crate quote;
 #[macro_use] extern crate syn;
-extern crate proc_macro2;
-extern crate sha1;
-extern crate indexmap;
-extern crate toml;
 #[macro_use] extern crate failure;
 
-extern crate serde;
-#[macro_use] extern crate serde_derive;
-extern crate handlebars;
-
-pub mod generators;
 pub mod guid;
 pub mod error;
 pub mod idents;

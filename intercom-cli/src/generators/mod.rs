@@ -47,7 +47,6 @@ pub struct LibraryContext<'a> {
 impl<'a> LibraryContext<'a> {
     fn try_from(
         lib: &'a TypeLib,
-        opts: &ModelOptions
     ) -> Result<LibraryContext<'a>, GeneratorError> {
 
         let itfs_by_name : HashMap<String, &Interface>
@@ -68,8 +67,8 @@ impl<'a> LibraryContext<'a> {
                 .map( |itf_ref| ( itf_ref.name.to_string(), itfs_by_name[ itf_ref.name.as_ref() ] ) )
                 .collect();
         Ok( LibraryContext {
-            itfs_by_name: itfs_by_name,
-            itfs_by_ref: itfs_by_ref,
+            itfs_by_name,
+            itfs_by_ref,
         } )
     }
 }

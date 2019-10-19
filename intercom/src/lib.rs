@@ -32,7 +32,6 @@
 //!     fn add(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a + b) }
 //!     fn sub(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a - b) }
 //! }
-//! # fn main() {}
 //! ```
 //!
 //! The above library can be used for example from C# in the following manner.

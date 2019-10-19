@@ -63,7 +63,7 @@ impl ComClass {
                 HashMap::with_capacity( interfaces.len() );
         for itf in interfaces {
             let entry = itf_by_type_system.entry( itf.type_system );
-            let interfaces = entry.or_insert( vec![] );
+            let interfaces = entry.or_insert_with( || vec![] );
             interfaces.push( itf );
         }
 

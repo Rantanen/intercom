@@ -52,8 +52,7 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
     pub unsafe fn wrap<TS: TypeSystem>(
         ptr : raw::InterfacePtr<TS, T>
     ) -> Option<ComRc<T>> {
-        ComItf::maybe_wrap( ptr )
-            .map( |itf| ComRc::attach( itf ) )
+        ComItf::maybe_wrap( ptr ).map(ComRc::attach)
     }
 
     pub fn copy( itf : &ComItf<T> ) -> ComRc<T> {

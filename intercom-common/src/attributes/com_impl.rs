@@ -181,7 +181,6 @@ pub fn expand_com_impl(
                     quote!( let self_struct : &mut #itf_ident = &mut **self_combox )
                 };
 
-            let method_name = method_impl_ident.to_string();
             output.push( quote!(
                 #[allow(non_snake_case)]
                 #[allow(dead_code)]

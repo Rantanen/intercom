@@ -129,11 +129,9 @@ impl<T: CoClass> AsRef<ComBox<T>> for ComStruct<T>
 impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComRc<I> {
 
     fn from( source : ComStruct<T> ) -> ComRc<I> {
-        unsafe {
-            let rc = ComRc::attach( source.as_comitf() );
-            std::mem::forget( source );
-            rc
-        }
+        let rc = ComRc::attach( source.as_comitf() );
+        std::mem::forget( source );
+        rc
     }
 }
 
@@ -196,6 +194,8 @@ impl<T: CoClass> ComBox<T> {
     /// The acquired interface must be released explicitly when not needed
     /// anymore.
     ///
+    /// # Safety
+    ///
     /// The method isn't technically unsafe in regard to Rust unsafety, but
     /// it's marked as unsafe to discourage it's use due to high risks of
     /// memory leaks.
@@ -215,6 +215,8 @@ impl<T: CoClass> ComBox<T> {
     ///
     /// Returns the reference count after the increment.
     ///
+    /// # Safety
+    ///
     /// The method isn't technically unsafe in regard to Rust unsafety, but
     /// it's marked as unsafe to discourage it's use due to high risks of
     /// memory leaks.
@@ -232,6 +234,12 @@ impl<T: CoClass> ComBox<T> {
     /// zero.
     ///
     /// Returns the reference count after the release.
+    ///
+    /// # Safety
+    ///
+    /// The pointer must be valid and not previously released. After the call
+    /// completes, the struct may have been deallocated and the pointer should
+    /// be considered dangling.
     pub unsafe fn release( this : *mut Self ) -> u32 {
 
         // Ensure we're not releasing an interface that has no references.
@@ -265,7 +273,7 @@ impl<T: CoClass> ComBox<T> {
 
     /// Checks whether the given interface identified by the IID supports error
     /// info through IErrorInfo.
-    pub unsafe fn interface_supports_error_info(
+    pub fn interface_supports_error_info(
         _this : &mut Self,
         riid : REFIID,
     ) -> raw::HRESULT {
@@ -277,6 +285,8 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Converts a RawComPtr to a ComBox reference.
+    ///
+    /// # Safety
     ///
     /// The method is unsafe in two different ways:
     ///
@@ -296,6 +306,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `query_interface` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(windows)]
     pub unsafe extern "stdcall" fn query_interface_ptr(
         self_iunk : RawComPtr,
@@ -307,6 +321,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `query_interface` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(not(windows))]
     pub unsafe extern "C" fn query_interface_ptr(
         self_iunk : RawComPtr,
@@ -318,6 +336,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `add_ref` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(windows)]
     pub unsafe extern "stdcall" fn add_ref_ptr(
         self_iunk : RawComPtr
@@ -327,6 +349,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `add_ref` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(not(windows))]
     pub unsafe extern "C" fn add_ref_ptr(
         self_iunk : RawComPtr
@@ -336,6 +362,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `release` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(windows)]
     pub unsafe extern "stdcall" fn release_ptr(
         self_iunk : RawComPtr
@@ -345,6 +375,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `release` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(not(windows))]
     pub unsafe extern "C" fn release_ptr(
         self_iunk : RawComPtr
@@ -354,6 +388,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `release` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(windows)]
     pub unsafe extern "stdcall" fn interface_supports_error_info_ptr(
         self_iunk : RawComPtr,
@@ -366,6 +404,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `release` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(not(windows))]
     pub unsafe extern "C" fn interface_supports_error_info_ptr(
         self_iunk : RawComPtr,
@@ -377,12 +419,14 @@ impl<T: CoClass> ComBox<T> {
                 riid )
     }
 
-    /// Returns a reference to the virtual on the ComBox.
-    pub unsafe fn vtable( ct : &ComStruct<T> ) -> &T::VTableList {
-        &(*ct.data).vtable_list
+    /// Returns a reference to the virtual table on the ComBox.
+    pub fn vtable( ct : &ComStruct<T> ) -> &T::VTableList {
+        unsafe { &(*ct.data).vtable_list }
     }
 
     /// Gets the ComBox holding the value.
+    ///
+    /// # Safety
     ///
     /// This is unsafe for two reasons:
     ///
@@ -410,6 +454,8 @@ impl<T: CoClass> ComBox<T> {
 
     /// Gets the ComBox holding the value.
     ///
+    /// # Safety
+    ///
     /// This is unsafe for two reasons:
     ///
     /// - There is no way for the method to check that the value is actually
@@ -435,6 +481,8 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Returns a reference to a null-ComBox vtable pointer list.
+    ///
+    /// # Safety
     ///
     /// **The reference itself is invalid and must not be dereferenced.**
     ///

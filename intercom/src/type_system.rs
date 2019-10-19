@@ -101,31 +101,41 @@ pub trait ExternType<TS: TypeSystem> : Sized {
 
 /// A conversion that may fail by resulting in a `ComError .
 pub trait IntercomFrom<TSource> : Sized {
-    fn intercom_from( source : TSource ) -> ComResult<Self>;
+    /// # Safety
+    ///
+    /// The use of this functions performs may perform pointer dereferencing
+    /// and other magic common with C-types. The caller is responsible for
+    /// ensuring the parameters fulfill the requirements of the target type.
+    unsafe fn intercom_from( source : TSource ) -> ComResult<Self>;
 }
 
 /// Default identity blanket implementation.
 impl<T> IntercomFrom<T> for T {
-    default fn intercom_from( source: T ) -> ComResult<T> { Ok( source ) }
+    default unsafe fn intercom_from( source: T ) -> ComResult<T> { Ok( source ) }
 }
 
 /// Blanket implementation for all cloneable instance references.
 impl<TSource: Clone> IntercomFrom<&TSource> for TSource {
-    fn intercom_from( source: &TSource ) -> ComResult<Self> {
+    unsafe fn intercom_from( source: &TSource ) -> ComResult<Self> {
         Ok( source.clone() )
     }
 }
 
 /// A conversion that may fail by resulting in a `ComError .
 pub trait IntercomInto<TTarget> {
-    fn intercom_into( self : Self ) -> ComResult<TTarget>;
+    /// # Safety
+    ///
+    /// The use of this functions performs may perform pointer dereferencing
+    /// and other magic common with C-types. The caller is responsible for
+    /// ensuring the parameters fulfill the requirements of the target type.
+    unsafe fn intercom_into(self : Self) -> ComResult<TTarget>;
 }
 
 /// Blanket implementation for reversing IntercomFrom into IntercomInto.
 impl<TSource, TTarget: IntercomFrom<TSource>>
         IntercomInto<TTarget> for TSource
 {
-    default fn intercom_into( self: Self ) -> ComResult<TTarget> {
+    default unsafe fn intercom_into( self: Self ) -> ComResult<TTarget> {
         TTarget::intercom_from( self )
     }
 }
@@ -291,7 +301,7 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> BidirectionalTypeInfo for 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
 IntercomFrom<crate::ComItf<I>> for crate::raw::InterfacePtr<TS, I>
 {
-    fn intercom_from( source: crate::ComItf<I> ) -> ComResult<Self> {
+    unsafe fn intercom_from( source: crate::ComItf<I> ) -> ComResult<Self> {
         Ok( crate::ComItf::ptr( &source ) )
     }
 }
@@ -299,7 +309,7 @@ IntercomFrom<crate::ComItf<I>> for crate::raw::InterfacePtr<TS, I>
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
     IntercomFrom<&crate::ComItf<I>> for crate::raw::InterfacePtr<TS, I>
 {
-    fn intercom_from( source: &crate::ComItf<I> ) -> ComResult<Self> {
+    unsafe fn intercom_from( source: &crate::ComItf<I> ) -> ComResult<Self> {
         Ok( crate::ComItf::ptr( source ) )
     }
 }
@@ -307,7 +317,7 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
 IntercomFrom<crate::ComRc<I>> for crate::raw::InterfacePtr<TS, I>
 {
-    fn intercom_from( source: crate::ComRc<I> ) -> ComResult<Self> {
+    unsafe fn intercom_from( source: crate::ComRc<I> ) -> ComResult<Self> {
         Ok( crate::ComItf::ptr( &crate::ComRc::detach( source ) ) )
     }
 }
@@ -315,7 +325,7 @@ IntercomFrom<crate::ComRc<I>> for crate::raw::InterfacePtr<TS, I>
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
     IntercomFrom<crate::raw::InterfacePtr<TS, I>> for crate::ComRc<I>
 {
-    fn intercom_from( source: crate::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
+    unsafe fn intercom_from( source: crate::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
         Ok( crate::ComRc::attach(
             crate::ComItf::maybe_wrap( source )
                 .ok_or_else( || crate::ComError::E_INVALIDARG )? ) )
@@ -325,7 +335,7 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
     IntercomFrom<crate::raw::InterfacePtr<TS, I>> for crate::ComItf<I>
 {
-    fn intercom_from( source: crate::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
+    unsafe fn intercom_from( source: crate::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
         crate::ComItf::maybe_wrap( source )
                 .ok_or_else( || crate::ComError::E_INVALIDARG )
     }
@@ -334,8 +344,8 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
     IntercomFrom<&crate::raw::InterfacePtr<TS, I>> for crate::ComItf<I>
 {
-    fn intercom_from( source: &crate::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
-        crate::ComItf::maybe_wrap( source.clone() )
+    unsafe fn intercom_from( source: &crate::raw::InterfacePtr<TS, I> ) -> ComResult<Self> {
+        crate::ComItf::maybe_wrap(*source)
                 .ok_or_else( || crate::ComError::E_INVALIDARG )
     }
 }
@@ -343,6 +353,10 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
 /// Defines the uninitialized values for out parameters when calling into
 /// Intercom interfaces.
 pub trait ExternDefault {
+    /// # Safety
+    ///
+    /// This results in zeroed values. This should only be used for types that
+    /// are okay being zeroed (mainly `#[repr(C)]` types).
     unsafe fn extern_default() -> Self;
 }
 
