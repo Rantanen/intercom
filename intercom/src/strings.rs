@@ -688,12 +688,12 @@ mod os {
     pub unsafe fn SysAllocStringLen(
         psz: *const u16,
         len: u32
-    ) -> BString
+    ) -> crate::raw::OutBSTR
     {
         // Match the SysAllocStringLen implementation on Windows when
         // psz is null.
         if psz.is_null() {
-            return BString( std::ptr::null_mut() );
+            return crate::raw::OutBSTR( std::ptr::null_mut() );
         }
 
         // Length prefix + data length + null-terminator.
@@ -702,7 +702,7 @@ mod os {
         let buffer_length: usize = 4 + data_length + 2;
         let buffer = libc::malloc( buffer_length );
         if buffer.is_null() {
-            return BString( std::ptr::null_mut() );
+            return crate::raw::OutBSTR( std::ptr::null_mut() );
         }
 
         // Set the length prefix.
@@ -719,7 +719,7 @@ mod os {
         libc::memcpy( buffer.offset( 4 + data_length as isize ), null_terminator, 2 );
 
         let buffer = buffer.offset( 4 ) as *mut u16;
-        BString( buffer )
+        crate::raw::OutBSTR( buffer )
     }
 
     #[doc(hidden)]
@@ -727,7 +727,8 @@ mod os {
         pbstr: *mut u16
     ) {
         if ! pbstr.is_null() {
-            libc::free( pbstr.offset( -2 ) as *mut libc::c_void );
+            let ptr = pbstr.offset(-2) as *mut libc::c_void;
+            libc::free(ptr);
         }
     }
 

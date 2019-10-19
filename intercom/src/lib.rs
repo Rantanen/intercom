@@ -44,7 +44,7 @@
 //! # //
 //! # // Fortunately we can hide this from clippy by specifying the (empty)
 //! # // return type.
-//! # fn main() -> () { panic!(); }
+//! # fn main() -> () {}
 //! ```
 //!
 //! The above library can be used for example from C# in the following manner.

@@ -114,8 +114,8 @@ fn run_cmd( matches : &ArgMatches ) -> Result<(), failure::Error>
             let path = Path::new( args.value_of( "path" ).unwrap() );
             println!( "{:#?}", typelib::read_typelib( path )? );
         },
+        #[cfg(windows)]
         ( "embed-typelib", Some( args ) ) => {
-            #[cfg(windows)]
             embed::embed_typelib( Path::new( args.value_of("path").unwrap() ), opts )?;
         },
         ( "idl", Some( args ) ) => {

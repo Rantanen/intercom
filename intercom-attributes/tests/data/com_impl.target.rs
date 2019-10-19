@@ -37,7 +37,7 @@ fn get_com_interface_for_Foo_Automation()
     {
         {
             ::std::rt::begin_panic("explicit panic",
-                                   &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_impl.source.rs",
+                                   &("/home/wace/projects/intercom/intercom-attributes/tests/data/com_impl.source.rs",
                                      23u32, 93u32))
         }
     }
@@ -47,7 +47,7 @@ fn get_com_interface_for_Foo_Raw()
     {
         {
             ::std::rt::begin_panic("explicit panic",
-                                   &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_impl.source.rs",
+                                   &("/home/wace/projects/intercom/intercom-attributes/tests/data/com_impl.source.rs",
                                      24u32, 86u32))
         }
     }
@@ -56,7 +56,7 @@ fn get_intercom_interface_info_for_Foo() -> Vec<intercom::typelib::TypeInfo> {
     {
         {
             ::std::rt::begin_panic("explicit panic",
-                                   &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_impl.source.rs",
+                                   &("/home/wace/projects/intercom/intercom-attributes/tests/data/com_impl.source.rs",
                                      25u32, 80u32))
         }
     }
@@ -208,15 +208,15 @@ impl Foo {
 #[allow(non_snake_case)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_query_interface(self_vtable:
-                                                                    intercom::RawComPtr,
-                                                                riid:
-                                                                    <intercom::REFIID
-                                                                    as
-                                                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                                out:
-                                                                    *mut <intercom::RawComPtr
-                                                                         as
-                                                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                              intercom::RawComPtr,
+                                                          riid:
+                                                              <intercom::REFIID
+                                                              as
+                                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                          out:
+                                                              *mut <intercom::RawComPtr
+                                                                   as
+                                                                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -228,7 +228,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_query_interface(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_add_ref(self_vtable:
-                                                            intercom::RawComPtr)
+                                                      intercom::RawComPtr)
  ->
      <u32 as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -240,7 +240,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_add_ref(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_release(self_vtable:
-                                                            intercom::RawComPtr)
+                                                      intercom::RawComPtr)
  ->
      <u32 as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -252,7 +252,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_release(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_simple_method_Automation(self_vtable:
-                                                                             intercom::RawComPtr)
+                                                                       intercom::RawComPtr)
  ->
      <() as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -284,11 +284,10 @@ unsafe extern "C" fn __Foo_Foo_Automation_simple_method_Automation(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_arg_method_Automation(self_vtable:
-                                                                          intercom::RawComPtr,
-                                                                      a:
-                                                                          <u16
-                                                                          as
-                                                                          intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
+                                                                    intercom::RawComPtr,
+                                                                a:
+                                                                    <u16 as
+                                                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
  ->
      <() as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -322,7 +321,7 @@ unsafe extern "C" fn __Foo_Foo_Automation_arg_method_Automation(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_simple_result_method_Automation(self_vtable:
-                                                                                    intercom::RawComPtr)
+                                                                              intercom::RawComPtr)
  ->
      <u16 as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -354,11 +353,11 @@ unsafe extern "C" fn __Foo_Foo_Automation_simple_result_method_Automation(self_v
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_com_result_method_Automation(self_vtable:
-                                                                                 intercom::RawComPtr,
-                                                                             __out:
-                                                                                 *mut <u16
-                                                                                      as
-                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                                           intercom::RawComPtr,
+                                                                       __out:
+                                                                           *mut <u16
+                                                                                as
+                                                                                intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -402,11 +401,11 @@ unsafe extern "C" fn __Foo_Foo_Automation_com_result_method_Automation(self_vtab
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_rust_result_method_Automation(self_vtable:
-                                                                                  intercom::RawComPtr,
-                                                                              __out:
-                                                                                  *mut <u16
-                                                                                       as
-                                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                                            intercom::RawComPtr,
+                                                                        __out:
+                                                                            *mut <u16
+                                                                                 as
+                                                                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -450,19 +449,19 @@ unsafe extern "C" fn __Foo_Foo_Automation_rust_result_method_Automation(self_vta
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_tuple_result_method_Automation(self_vtable:
-                                                                                   intercom::RawComPtr,
-                                                                               __out1:
-                                                                                   *mut <u8
-                                                                                        as
-                                                                                        intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-                                                                               __out2:
-                                                                                   *mut <u16
-                                                                                        as
-                                                                                        intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-                                                                               __out3:
-                                                                                   *mut <u32
-                                                                                        as
-                                                                                        intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                                             intercom::RawComPtr,
+                                                                         __out1:
+                                                                             *mut <u8
+                                                                                  as
+                                                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                                                                         __out2:
+                                                                             *mut <u16
+                                                                                  as
+                                                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                                                                         __out3:
+                                                                             *mut <u32
+                                                                                  as
+                                                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -512,11 +511,11 @@ unsafe extern "C" fn __Foo_Foo_Automation_tuple_result_method_Automation(self_vt
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_string_method_Automation(self_vtable:
-                                                                             intercom::RawComPtr,
-                                                                         input:
-                                                                             <String
-                                                                             as
-                                                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
+                                                                       intercom::RawComPtr,
+                                                                   input:
+                                                                       <String
+                                                                       as
+                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
  ->
      <String as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -550,15 +549,15 @@ unsafe extern "C" fn __Foo_Foo_Automation_string_method_Automation(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_string_result_method_Automation(self_vtable:
-                                                                                    intercom::RawComPtr,
-                                                                                input:
-                                                                                    <String
-                                                                                    as
-                                                                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                                                __out:
-                                                                                    *mut <String
-                                                                                         as
-                                                                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                                              intercom::RawComPtr,
+                                                                          input:
+                                                                              <String
+                                                                              as
+                                                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                                          __out:
+                                                                              *mut <String
+                                                                                   as
+                                                                                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -604,19 +603,19 @@ unsafe extern "C" fn __Foo_Foo_Automation_string_result_method_Automation(self_v
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_complete_method_Automation(self_vtable:
-                                                                               intercom::RawComPtr,
-                                                                           a:
-                                                                               <u16
-                                                                               as
-                                                                               intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                                           b:
-                                                                               <i16
-                                                                               as
-                                                                               intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                                           __out:
-                                                                               *mut <bool
-                                                                                    as
-                                                                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                                         intercom::RawComPtr,
+                                                                     a:
+                                                                         <u16
+                                                                         as
+                                                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                                     b:
+                                                                         <i16
+                                                                         as
+                                                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                                     __out:
+                                                                         *mut <bool
+                                                                              as
+                                                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -664,15 +663,14 @@ unsafe extern "C" fn __Foo_Foo_Automation_complete_method_Automation(self_vtable
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_bool_method_Automation(self_vtable:
-                                                                           intercom::RawComPtr,
-                                                                       input:
-                                                                           <bool
-                                                                           as
-                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                                       __out:
-                                                                           *mut <bool
-                                                                                as
-                                                                                intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                                     intercom::RawComPtr,
+                                                                 input:
+                                                                     <bool as
+                                                                     intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                                 __out:
+                                                                     *mut <bool
+                                                                          as
+                                                                          intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -718,15 +716,15 @@ unsafe extern "C" fn __Foo_Foo_Automation_bool_method_Automation(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Automation_variant_method_Automation(self_vtable:
-                                                                              intercom::RawComPtr,
-                                                                          input:
-                                                                              <Variant
-                                                                              as
-                                                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                                          __out:
-                                                                              *mut <Variant
-                                                                                   as
-                                                                                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                                        intercom::RawComPtr,
+                                                                    input:
+                                                                        <Variant
+                                                                        as
+                                                                        intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                                    __out:
+                                                                        *mut <Variant
+                                                                             as
+                                                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -802,15 +800,14 @@ const __Foo_Foo_AutomationVtbl_INSTANCE: __Foo_AutomationVtbl =
 #[allow(non_snake_case)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_query_interface(self_vtable:
-                                                             intercom::RawComPtr,
-                                                         riid:
-                                                             <intercom::REFIID
-                                                             as
-                                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                         out:
-                                                             *mut <intercom::RawComPtr
-                                                                  as
-                                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                       intercom::RawComPtr,
+                                                   riid:
+                                                       <intercom::REFIID as
+                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                   out:
+                                                       *mut <intercom::RawComPtr
+                                                            as
+                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -821,8 +818,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_query_interface(self_vtable:
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "C" fn __Foo_Foo_Raw_add_ref(self_vtable:
-                                                     intercom::RawComPtr)
+unsafe extern "C" fn __Foo_Foo_Raw_add_ref(self_vtable: intercom::RawComPtr)
  ->
      <u32 as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -833,8 +829,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_add_ref(self_vtable:
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "C" fn __Foo_Foo_Raw_release(self_vtable:
-                                                     intercom::RawComPtr)
+unsafe extern "C" fn __Foo_Foo_Raw_release(self_vtable: intercom::RawComPtr)
  ->
      <u32 as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -846,7 +841,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_release(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_simple_method_Raw(self_vtable:
-                                                               intercom::RawComPtr)
+                                                         intercom::RawComPtr)
  ->
      <() as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -877,10 +872,10 @@ unsafe extern "C" fn __Foo_Foo_Raw_simple_method_Raw(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_arg_method_Raw(self_vtable:
-                                                            intercom::RawComPtr,
-                                                        a:
-                                                            <u16 as
-                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
+                                                      intercom::RawComPtr,
+                                                  a:
+                                                      <u16 as
+                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
  ->
      <() as
      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType {
@@ -913,7 +908,7 @@ unsafe extern "C" fn __Foo_Foo_Raw_arg_method_Raw(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_simple_result_method_Raw(self_vtable:
-                                                                      intercom::RawComPtr)
+                                                                intercom::RawComPtr)
  ->
      <u16 as
      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType {
@@ -944,11 +939,10 @@ unsafe extern "C" fn __Foo_Foo_Raw_simple_result_method_Raw(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_com_result_method_Raw(self_vtable:
-                                                                   intercom::RawComPtr,
-                                                               __out:
-                                                                   *mut <u16
-                                                                        as
-                                                                        intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                             intercom::RawComPtr,
+                                                         __out:
+                                                             *mut <u16 as
+                                                                  intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType {
@@ -991,11 +985,10 @@ unsafe extern "C" fn __Foo_Foo_Raw_com_result_method_Raw(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_rust_result_method_Raw(self_vtable:
-                                                                    intercom::RawComPtr,
-                                                                __out:
-                                                                    *mut <u16
-                                                                         as
-                                                                         intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                              intercom::RawComPtr,
+                                                          __out:
+                                                              *mut <u16 as
+                                                                   intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType {
@@ -1038,19 +1031,16 @@ unsafe extern "C" fn __Foo_Foo_Raw_rust_result_method_Raw(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_tuple_result_method_Raw(self_vtable:
-                                                                     intercom::RawComPtr,
-                                                                 __out1:
-                                                                     *mut <u8
-                                                                          as
-                                                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
-                                                                 __out2:
-                                                                     *mut <u16
-                                                                          as
-                                                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
-                                                                 __out3:
-                                                                     *mut <u32
-                                                                          as
-                                                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                               intercom::RawComPtr,
+                                                           __out1:
+                                                               *mut <u8 as
+                                                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
+                                                           __out2:
+                                                               *mut <u16 as
+                                                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
+                                                           __out3:
+                                                               *mut <u32 as
+                                                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType {
@@ -1099,10 +1089,10 @@ unsafe extern "C" fn __Foo_Foo_Raw_tuple_result_method_Raw(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_string_method_Raw(self_vtable:
-                                                               intercom::RawComPtr,
-                                                           input:
-                                                               <String as
-                                                               intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
+                                                         intercom::RawComPtr,
+                                                     input:
+                                                         <String as
+                                                         intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
  ->
      <String as
      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType {
@@ -1135,15 +1125,14 @@ unsafe extern "C" fn __Foo_Foo_Raw_string_method_Raw(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_string_result_method_Raw(self_vtable:
-                                                                      intercom::RawComPtr,
-                                                                  input:
-                                                                      <String
-                                                                      as
-                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                                  __out:
-                                                                      *mut <String
-                                                                           as
-                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                                intercom::RawComPtr,
+                                                            input:
+                                                                <String as
+                                                                intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                            __out:
+                                                                *mut <String
+                                                                     as
+                                                                     intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType {
@@ -1188,16 +1177,16 @@ unsafe extern "C" fn __Foo_Foo_Raw_string_result_method_Raw(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_complete_method_Raw(self_vtable:
-                                                                 intercom::RawComPtr,
-                                                             a:
-                                                                 <u16 as
-                                                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                             b:
-                                                                 <i16 as
-                                                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                             __out:
-                                                                 *mut <bool as
-                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                           intercom::RawComPtr,
+                                                       a:
+                                                           <u16 as
+                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                       b:
+                                                           <i16 as
+                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                       __out:
+                                                           *mut <bool as
+                                                                intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType {
@@ -1244,13 +1233,13 @@ unsafe extern "C" fn __Foo_Foo_Raw_complete_method_Raw(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_bool_method_Raw(self_vtable:
-                                                             intercom::RawComPtr,
-                                                         input:
-                                                             <bool as
-                                                             intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                         __out:
-                                                             *mut <bool as
-                                                                  intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                       intercom::RawComPtr,
+                                                   input:
+                                                       <bool as
+                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                   __out:
+                                                       *mut <bool as
+                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType {
@@ -1295,14 +1284,13 @@ unsafe extern "C" fn __Foo_Foo_Raw_bool_method_Raw(self_vtable:
 #[allow(dead_code)]
 #[doc(hidden)]
 unsafe extern "C" fn __Foo_Foo_Raw_variant_method_Raw(self_vtable:
-                                                                intercom::RawComPtr,
-                                                            input:
-                                                                <Variant as
-                                                                intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                            __out:
-                                                                *mut <Variant
-                                                                     as
-                                                                     intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                          intercom::RawComPtr,
+                                                      input:
+                                                          <Variant as
+                                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                      __out:
+                                                          *mut <Variant as
+                                                               intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
  ->
      <intercom::raw::HRESULT as
      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType {

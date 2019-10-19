@@ -19,7 +19,7 @@ pub mod some {
             {
                 {
                     ::std::rt::begin_panic("explicit panic",
-                                           &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_library.source.rs",
+                                           &("/home/wace/projects/intercom/intercom-attributes/tests/data/com_library.source.rs",
                                              8u32, 93u32))
                 }
             }
@@ -33,7 +33,7 @@ pub(crate) fn get_intercom_coclass_info_for_SimpleType()
     {
         {
             ::std::rt::begin_panic("explicit panic",
-                                   &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_library.source.rs",
+                                   &("/home/wace/projects/intercom/intercom-attributes/tests/data/com_library.source.rs",
                                      14u32, 91u32))
         }
     }
@@ -43,9 +43,8 @@ pub(crate) fn get_intercom_coclass_info_for_SimpleType()
 #[allow(dead_code)]
 #[doc(hidden)]
 pub unsafe extern "C" fn DllGetClassObject(rclsid: intercom::REFCLSID,
-                                                 riid: intercom::REFIID,
-                                                 pout:
-                                                     *mut intercom::RawComPtr)
+                                           riid: intercom::REFIID,
+                                           pout: *mut intercom::RawComPtr)
  -> intercom::raw::HRESULT {
     let mut com_struct =
         intercom::ComStruct::new(intercom::ClassFactory::new(rclsid,
@@ -99,8 +98,8 @@ pub(crate) fn get_intercom_typelib() -> intercom::typelib::TypeLib {
 }
 #[no_mangle]
 pub unsafe extern "C" fn IntercomTypeLib(type_system:
-                                                   intercom::type_system::TypeSystemName,
-                                               out: *mut intercom::RawComPtr)
+                                             intercom::type_system::TypeSystemName,
+                                         out: *mut intercom::RawComPtr)
  -> intercom::raw::HRESULT {
     let mut tlib = intercom::ComStruct::new(get_intercom_typelib());
     let rc =
@@ -120,8 +119,8 @@ pub unsafe extern "C" fn IntercomTypeLib(type_system:
 #[allow(dead_code)]
 #[doc(hidden)]
 pub unsafe extern "C" fn IntercomListClassObjects(pcount: *mut usize,
-                                                        pclsids:
-                                                            *mut *const intercom::CLSID)
+                                                  pclsids:
+                                                      *mut *const intercom::CLSID)
  -> intercom::raw::HRESULT {
     if pcount.is_null() { return intercom::raw::E_POINTER; }
     if pclsids.is_null() { return intercom::raw::E_POINTER; }
