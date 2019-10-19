@@ -1,58 +1,59 @@
 
-//! Enables the generation of IDL file that describes intercom library.
+//! Enables the generation of header and source files for using intercom
+//! libraries from C++ projects.
 
+extern crate std;
+
+use std::borrow::Cow;
 use std::io::Write;
 use std::path::Path;
-use std::convert::TryFrom;
-use std::borrow::Cow;
 
 use super::GeneratorError;
 use super::{ModelOptions, TypeSystemOptions, LibraryContext, pascal_case};
 
+use intercom::typelib::{TypeLib, TypeInfo, CoClass, Interface, InterfaceVariant, Method, Arg, Direction};
+
 use handlebars::Handlebars;
 use serde_derive::Serialize;
 
-use intercom::typelib::{TypeLib, TypeInfo, CoClass, Interface, InterfaceVariant, Method, Arg, Direction};
-
-#[derive(Debug, Serialize)]
-struct IdlLibrary {
-    pub lib_name: String,
-    pub lib_id: String,
-    pub interfaces: Vec<IdlInterface>,
-    pub coclasses: Vec<IdlClass>,
+#[derive(PartialEq, Serialize, Debug)]
+pub struct CppLibrary {
+    pub lib_name : String,
+    pub interfaces: Vec<CppInterface>,
+    pub coclass_count : usize,
+    pub coclasses: Vec<CppClass>,
 }
 
-#[derive(Debug, Serialize)]
-struct IdlInterface {
-    name: String,
-    base: Option<String>,
-    iid: String,
-    methods: Vec<IdlMethod>,
-}
-
-#[derive(Debug, Serialize)]
-struct IdlMethod {
-    pub name: String,
-    pub idx: usize,
-    pub ret_type: String,
-    pub args: Vec<IdlArg>,
-}
-
-#[derive(Debug, Serialize)]
-struct IdlArg {
-    pub name: String,
-    pub arg_type: String,
-    pub attributes: String,
-}
-
-#[derive(Debug, Serialize)]
-struct IdlClass {
+#[derive(PartialEq, Serialize, Debug)]
+pub struct CppInterface {
     pub name : String,
-    pub clsid : String,
+    pub iid_struct : String,
+    pub base : Option<String>,
+    pub methods : Vec<CppMethod>,
+}
+
+#[derive(PartialEq, Serialize, Debug)]
+pub struct CppMethod {
+    pub name : String,
+    pub ret_type : String,
+    pub args : Vec<CppArg>,
+}
+
+#[derive(PartialEq, Serialize, Debug)]
+pub struct CppArg {
+    pub name : String,
+    pub arg_type : String,
+}
+
+#[derive(PartialEq, Serialize, Debug)]
+pub struct CppClass {
+    pub name : String,
+    pub clsid_struct : String,
+    pub interface_count : usize,
     pub interfaces : Vec<String>,
 }
 
-impl IdlLibrary {
+impl CppLibrary {
 
     fn try_from(
         lib : TypeLib,
@@ -66,26 +67,26 @@ impl IdlLibrary {
         for t in &lib.types {
             match t {
                 TypeInfo::Class(cls)
-                    => coclasses.push(IdlClass::try_from(cls.as_ref(), opts, &ctx)?),
+                    => coclasses.push(CppClass::try_from(cls.as_ref(), opts, &ctx)?),
                 TypeInfo::Interface(itf)
-                    => interfaces.push(IdlInterface::gather(itf.as_ref(), opts, &ctx)?),
+                    => interfaces.push(CppInterface::gather(itf.as_ref(), opts, &ctx)?),
             }
         }
         let interfaces = interfaces
                 .into_iter()
                 .flatten()
-                .collect::<Vec<IdlInterface>>();
+                .collect::<Vec<CppInterface>>();
 
         Ok( Self {
             lib_name: pascal_case( lib.name ),
-            lib_id: format!( "{:-X}", lib.libid ),
             interfaces,
+            coclass_count: coclasses.len(),
             coclasses,
         } )
     }
 }
 
-impl IdlInterface {
+impl CppInterface {
 
     fn gather(
         itf: &Interface,
@@ -95,7 +96,7 @@ impl IdlInterface {
     {
         Ok( opts.type_systems.iter().map( |ts_opts| {
             match itf.variants.iter().find(|v| v.as_ref().ts == ts_opts.ts) {
-                Some(v) => Some( IdlInterface::try_from(&itf, v.as_ref(), ts_opts, ctx) ),
+                Some(v) => Some( CppInterface::try_from(&itf, v.as_ref(), ts_opts, ctx) ),
                 None => None
             }
         } ).filter_map(|i| i).collect::<Result<Vec<_>, _>>()? )
@@ -110,12 +111,12 @@ impl IdlInterface {
     {
         Ok( Self {
             name: Self::final_name( &itf, ts_opts ),
-            iid: format!( "{:-X}", itf_variant.iid ),
+            iid_struct: guid_as_struct( &itf_variant.iid ),
             base: Some("IUnknown".to_string()),
             methods: itf_variant.methods
                 .iter()
                 .enumerate()
-                .map(|(i, m)| IdlMethod::try_from(i, m.as_ref(), ts_opts, ctx))
+                .map(|(i, m)| CppMethod::try_from(i, m.as_ref(), ts_opts, ctx))
                 .collect::<Result<Vec<_>, _>>()?
         } )
     }
@@ -137,7 +138,7 @@ impl IdlInterface {
     }
 }
 
-impl IdlMethod {
+impl CppMethod {
     fn try_from(
         idx: usize,
         method: &Method,
@@ -147,17 +148,16 @@ impl IdlMethod {
     {
         Ok( Self {
             name: pascal_case( &method.name ),
-            idx,
-            ret_type: IdlArg::idl_type(&method.return_type, opts, ctx),
+            ret_type: CppArg::cpp_type(&method.return_type, opts, ctx),
             args: method.parameters
                 .iter()
-                .map(|arg| IdlArg::try_from(arg, opts, ctx))
+                .map(|arg| CppArg::try_from(arg, opts, ctx))
                 .collect::<Result<Vec<_>, _>>()?
         } )
     }
 }
 
-impl IdlArg {
+impl CppArg {
     fn try_from(
         arg: &Arg,
         opts: &TypeSystemOptions,
@@ -179,18 +179,17 @@ impl IdlArg {
 
         Ok( Self {
             name: arg.name.to_string(),
-            arg_type: Self::idl_type(arg, opts, ctx),
-            attributes: attrs.join(", "),
+            arg_type: Self::cpp_type(arg, opts, ctx),
         } )
     }
 
-    fn idl_type(
+    fn cpp_type(
         arg: &Arg,
         opts: &TypeSystemOptions,
         ctx: &LibraryContext,
     ) -> String {
         let base_name = ctx.itfs_by_name.get(arg.ty.as_ref())
-            .map(|itf| IdlInterface::final_name(itf, opts))
+            .map(|itf| CppInterface::final_name(itf, opts))
             .unwrap_or_else(|| arg.ty.to_string());
         let mut indirection = match arg.direction {
             Direction::In | Direction::Return => arg.indirection_level,
@@ -206,7 +205,7 @@ impl IdlArg {
     }
 }
 
-impl IdlClass {
+impl CppClass {
     fn try_from(
         cls: &CoClass,
         opts: &ModelOptions,
@@ -218,12 +217,13 @@ impl IdlClass {
             .flat_map(|itf_ref| {
                 opts.type_systems.iter().map(|opt| {
                     let itf = ctx.itfs_by_ref[itf_ref.name.as_ref()];
-                    IdlInterface::final_name(itf, opt)
+                    CppInterface::final_name(itf, opt)
                 }).collect::<Vec<_>>()
-            }).collect();
-        Ok(IdlClass {
+            }).collect::<Vec<_>>();
+        Ok(CppClass {
             name: cls.name.to_string(),
-            clsid: format!("{:-X}", cls.clsid),
+            clsid_struct: guid_as_struct( &cls.clsid ),
+            interface_count: interfaces.len(),
             interfaces: interfaces,
         })
     }
@@ -235,19 +235,43 @@ impl IdlClass {
 pub fn write(
     lib : intercom::typelib::TypeLib,
     opts: ModelOptions,
-    out : &mut dyn Write,
+    out_header : Option< &mut dyn Write >,
+    out_source : Option< &mut dyn Write >,
 ) -> Result<(), GeneratorError> {
 
     let mut reg = Handlebars::new();
-    reg.register_template_string( "idl", include_str!( "idl.hbs" ) )
-            .expect( "Error in the built-in IDL template." );
+    reg.register_template_string( "cpp_header", include_str!( "cpp_header.hbs" ) )
+            .expect( "Error in the built-in C++ template." );
+    reg.register_template_string( "cpp_source", include_str!( "cpp_source.hbs" ) )
+            .expect( "Error in the built-in C++ template." );
 
-    let idl_model = IdlLibrary::try_from( lib, &opts )?;
+    let cpp_model = CppLibrary::try_from( lib, &opts )?;
 
-    let rendered = reg
-            .render( "idl", &idl_model )
-            .expect( "Rendering a valid ComCrate to IDL failed" );
-    write!( out, "{}", rendered )?;
+    if let Some( out_header ) = out_header {
+        let rendered = reg
+                .render( "cpp_header", &cpp_model )
+                .expect( "Rendering a valid ComCrate to C++ failed" );
+        write!( out_header, "{}", rendered )?;
+    }
+
+    if let Some( out_source ) = out_source {
+        let rendered = reg
+                .render( "cpp_source", &cpp_model )
+                .expect( "Rendering a valid ComCrate to C++ failed" );
+        write!( out_source, "{}", rendered )?;
+    }
 
     Ok(())
 }
+
+/// Converts a guid to binarys representation.
+pub fn guid_as_struct(
+    g: &intercom::GUID
+) -> String {
+
+    format!( "{{0x{:08x},0x{:04x},0x{:04x},{{0x{:02x},0x{:02x},0x{:02x},0x{:02x},0x{:02x},0x{:02x},0x{:02x},0x{:02x}}}}}",
+            g.data1, g.data2, g.data3,
+            g.data4[0], g.data4[1], g.data4[2], g.data4[3],
+            g.data4[4], g.data4[5], g.data4[6], g.data4[7] )
+}
+
