@@ -18,7 +18,7 @@ const IID_IFoo_Automation: intercom::IID =
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
 #[doc = r" Gets type description of the #interface_variant COM class."]
-fn get_com_interface_for_IFoo_Automation()
+pub(crate) fn get_com_interface_for_IFoo_Automation()
  -> intercom::serialization::ComInterfaceVariant {
     intercom::serialization::ComInterfaceVariant::new("IFoo_Automation".to_string(),
                                                       <intercom::type_system::AutomationTypeSystem
@@ -44,7 +44,7 @@ const IID_IFoo_Raw: intercom::IID =
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
 #[doc = r" Gets type description of the #interface_variant COM class."]
-fn get_com_interface_for_IFoo_Raw()
+pub(crate) fn get_com_interface_for_IFoo_Raw()
  -> intercom::serialization::ComInterfaceVariant {
     intercom::serialization::ComInterfaceVariant::new("IFoo_Raw".to_string(),
                                                       <intercom::type_system::RawTypeSystem
@@ -142,7 +142,90 @@ impl intercom::type_system::BidirectionalTypeInfo for IFoo {
     #[doc = r" The name of the type."]
     fn type_name() -> &'static str { "IFoo" }
 }
+pub(crate) fn get_intercom_interface_info_for_IFoo()
+ -> intercom::typelib::TypeInfo {
+    let mut variants =
 
+
+
+        <[_]>::into_vec(box
+                            [intercom::ComStruct::new(intercom::typelib::InterfaceVariant{ts:
+                                                                                              intercom::type_system::TypeSystemName::Automation,
+                                                                                          iid:
+                                                                                              intercom::GUID{data1:
+                                                                                                                 0u32,
+                                                                                                             data2:
+                                                                                                                 0u16,
+                                                                                                             data3:
+                                                                                                                 0u16,
+                                                                                                             data4:
+                                                                                                                 [0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8],},
+                                                                                          methods:
+                                                                                              <[_]>::into_vec(box
+                                                                                                                  [intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "trait_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     "void".into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              []),})]),}),
+                             intercom::ComStruct::new(intercom::typelib::InterfaceVariant{ts:
+                                                                                              intercom::type_system::TypeSystemName::Raw,
+                                                                                          iid:
+                                                                                              intercom::GUID{data1:
+                                                                                                                 0u32,
+                                                                                                             data2:
+                                                                                                                 0u16,
+                                                                                                             data3:
+                                                                                                                 0u16,
+                                                                                                             data4:
+                                                                                                                 [0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  1u8],},
+                                                                                          methods:
+                                                                                              <[_]>::into_vec(box
+                                                                                                                  [intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "trait_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     "void".into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              []),})]),})]);
+    intercom::typelib::TypeInfo::Interface(intercom::ComStruct::new(intercom::typelib::Interface{name:
+                                                                                                     "IFoo".into(),
+                                                                                                 variants:
+                                                                                                     variants,
+                                                                                                 options:
+                                                                                                     intercom::typelib::InterfaceOptions{class_impl_interface:
+                                                                                                                                             false,
+                                                                                                                                                      ..Default::default()},}))
+}
 struct Foo;
 #[inline(always)]
 #[allow(non_snake_case)]
@@ -254,8 +337,40 @@ pub const CLSID_Foo: intercom::CLSID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
-pub(crate) fn get_intercom_typeinfo_for_Foo() -> intercom::typelib::TypeInfo {
-    intercom::typelib::TypeInfo::Class(intercom::typelib::CoClass{})
+pub fn get_intercom_coclass_info_for_Foo()
+ -> Vec<intercom::typelib::TypeInfo> {
+    <[_]>::into_vec(box
+                        [intercom::typelib::TypeInfo::Class(intercom::ComStruct::new(intercom::typelib::CoClass::__new("Foo".into(),
+                                                                                                                       intercom::GUID{data1:
+                                                                                                                                          0u32,
+                                                                                                                                      data2:
+                                                                                                                                          0u16,
+                                                                                                                                      data3:
+                                                                                                                                          0u16,
+                                                                                                                                      data4:
+                                                                                                                                          [0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8],},
+                                                                                                                       <[_]>::into_vec(box
+                                                                                                                                           [intercom::typelib::InterfaceRef{name:
+                                                                                                                                                                                "Foo".into(),
+                                                                                                                                                                            iid_automation:
+                                                                                                                                                                                IID_Foo_Automation,
+                                                                                                                                                                            iid_raw:
+                                                                                                                                                                                IID_Foo_Raw,},
+                                                                                                                                            intercom::typelib::InterfaceRef{name:
+                                                                                                                                                                                "IFoo".into(),
+                                                                                                                                                                            iid_automation:
+                                                                                                                                                                                IID_IFoo_Automation,
+                                                                                                                                                                            iid_raw:
+                                                                                                                                                                                IID_IFoo_Raw,}])))),
+                         get_intercom_interface_info_for_Foo(),
+                         get_intercom_interface_info_for_IFoo()])
 }
 #[doc = r" Gets type description of the #class_ident COM class."]
 fn get_com_class_for_Foo() -> intercom::serialization::ComClass {
@@ -265,9 +380,6 @@ fn get_com_class_for_Foo() -> intercom::serialization::ComClass {
 #[doc = r" Gets the interfaces of the #class_ident COM class."]
 fn get_interfaces_for_Foo()
  -> Vec<intercom::serialization::ComInterfaceVariant> {
-
-
-
     <[_]>::into_vec(box
                         [get_com_interface_for_Foo_Automation(),
                          get_com_interface_for_IFoo_Automation(),
@@ -456,7 +568,7 @@ pub const IID_Foo_Automation: intercom::IID =
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8],};
 #[doc = r" Gets type description of the #interface_variant COM class."]
-fn get_com_interface_for_Foo_Automation()
+pub(crate) fn get_com_interface_for_Foo_Automation()
  -> intercom::serialization::ComInterfaceVariant {
     intercom::serialization::ComInterfaceVariant::new("Foo_Automation".to_string(),
                                                       <intercom::type_system::AutomationTypeSystem
@@ -482,7 +594,7 @@ pub const IID_Foo_Raw: intercom::IID =
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8],};
 #[doc = r" Gets type description of the #interface_variant COM class."]
-fn get_com_interface_for_Foo_Raw()
+pub(crate) fn get_com_interface_for_Foo_Raw()
  -> intercom::serialization::ComInterfaceVariant {
     intercom::serialization::ComInterfaceVariant::new("Foo_Raw".to_string(),
                                                       <intercom::type_system::RawTypeSystem
@@ -529,6 +641,87 @@ impl intercom::ComInterface for Foo {
 impl intercom::type_system::BidirectionalTypeInfo for Foo {
     #[doc = r" The name of the type."]
     fn type_name() -> &'static str { "Foo" }
+}
+pub(crate) fn get_intercom_interface_info_for_Foo()
+ -> intercom::typelib::TypeInfo {
+    let mut variants =
+        <[_]>::into_vec(box
+                            [intercom::ComStruct::new(intercom::typelib::InterfaceVariant{ts:
+                                                                                              intercom::type_system::TypeSystemName::Automation,
+                                                                                          iid:
+                                                                                              intercom::GUID{data1:
+                                                                                                                 0u32,
+                                                                                                             data2:
+                                                                                                                 0u16,
+                                                                                                             data3:
+                                                                                                                 0u16,
+                                                                                                             data4:
+                                                                                                                 [0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  2u8],},
+                                                                                          methods:
+                                                                                              <[_]>::into_vec(box
+                                                                                                                  [intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "struct_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     "void".into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              []),})]),}),
+                             intercom::ComStruct::new(intercom::typelib::InterfaceVariant{ts:
+                                                                                              intercom::type_system::TypeSystemName::Raw,
+                                                                                          iid:
+                                                                                              intercom::GUID{data1:
+                                                                                                                 0u32,
+                                                                                                             data2:
+                                                                                                                 0u16,
+                                                                                                             data3:
+                                                                                                                 0u16,
+                                                                                                             data4:
+                                                                                                                 [0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  3u8],},
+                                                                                          methods:
+                                                                                              <[_]>::into_vec(box
+                                                                                                                  [intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "struct_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     "void".into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              []),})]),})]);
+    intercom::typelib::TypeInfo::Interface(intercom::ComStruct::new(intercom::typelib::Interface{name:
+                                                                                                     "Foo".into(),
+                                                                                                 variants:
+                                                                                                     variants,
+                                                                                                 options:
+                                                                                                     intercom::typelib::InterfaceOptions{class_impl_interface:
+                                                                                                                                             true,
+                                                                                                                                                     ..Default::default()},}))
 }
 impl IFoo for Foo {
     fn trait_method(&self) { }

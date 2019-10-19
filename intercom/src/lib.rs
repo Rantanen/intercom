@@ -32,6 +32,11 @@
 //!     fn add(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a + b) }
 //!     fn sub(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a - b) }
 //! }
+//! # // Without 'main()' doctests wraps the whole thing into a main,
+//! # // which would end up expanding com_library!(..) into a statement.
+//! # // And proc macros into statements are not allowed.
+//! # #[allow(clippy::needless_doctest_main)]
+//! # fn main() {}
 //! ```
 //!
 //! The above library can be used for example from C# in the following manner.

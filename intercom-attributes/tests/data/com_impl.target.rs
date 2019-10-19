@@ -37,7 +37,7 @@ fn get_com_interface_for_Foo_Automation()
     {
         {
             ::std::rt::begin_panic("explicit panic",
-                                   &("C:\\dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_impl.source.rs",
+                                   &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_impl.source.rs",
                                      23u32, 93u32))
         }
     }
@@ -47,8 +47,17 @@ fn get_com_interface_for_Foo_Raw()
     {
         {
             ::std::rt::begin_panic("explicit panic",
-                                   &("C:\\dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_impl.source.rs",
+                                   &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_impl.source.rs",
                                      24u32, 86u32))
+        }
+    }
+}
+fn get_intercom_interface_info_for_Foo() -> Vec<intercom::typelib::TypeInfo> {
+    {
+        {
+            ::std::rt::begin_panic("explicit panic",
+                                   &("C:\\Dev\\Projects\\rust-com\\intercom-attributes\\tests/data\\com_impl.source.rs",
+                                     25u32, 80u32))
         }
     }
 }
@@ -136,8 +145,33 @@ pub const CLSID_Foo: intercom::CLSID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
-pub(crate) fn get_intercom_typeinfo_for_Foo() -> intercom::typelib::TypeInfo {
-    intercom::typelib::TypeInfo::Class(intercom::typelib::CoClass{})
+pub fn get_intercom_coclass_info_for_Foo()
+ -> Vec<intercom::typelib::TypeInfo> {
+    <[_]>::into_vec(box
+                        [intercom::typelib::TypeInfo::Class(intercom::ComStruct::new(intercom::typelib::CoClass::__new("Foo".into(),
+                                                                                                                       intercom::GUID{data1:
+                                                                                                                                          0u32,
+                                                                                                                                      data2:
+                                                                                                                                          0u16,
+                                                                                                                                      data3:
+                                                                                                                                          0u16,
+                                                                                                                                      data4:
+                                                                                                                                          [0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8,
+                                                                                                                                           0u8],},
+                                                                                                                       <[_]>::into_vec(box
+                                                                                                                                           [intercom::typelib::InterfaceRef{name:
+                                                                                                                                                                                "Foo".into(),
+                                                                                                                                                                            iid_automation:
+                                                                                                                                                                                IID_Foo_Automation,
+                                                                                                                                                                            iid_raw:
+                                                                                                                                                                                IID_Foo_Raw,}])))),
+                         get_intercom_interface_info_for_Foo()])
 }
 #[doc = r" Gets type description of the #class_ident COM class."]
 fn get_com_class_for_Foo() -> intercom::serialization::ComClass {

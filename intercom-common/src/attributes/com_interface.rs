@@ -478,7 +478,7 @@ fn create_typeinfo_for_variant(
         }).collect::<Vec<_>>();
 
         quote!(
-            ComStruct::new(intercom::typelib::Method {
+            intercom::ComStruct::new(intercom::typelib::Method {
                 name: #method_name.into(),
                 return_type: #return_type,
                 parameters: vec![ #( #params ),* ],
