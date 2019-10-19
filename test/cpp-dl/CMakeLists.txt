@@ -26,19 +26,23 @@ else()
     set (MULTILIB_LIB ${TESTLIB_TARGET_DIR}/libmulti_lib.so)
 endif()
 
+# Create the target dirs for the generated output.
+add_custom_target(
+    cpp-dl-generated-src-dir ALL COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/generated)
+
 # Use the intercom-cli as code generator for multi_lib.h/multi_lib.cpp
 add_custom_command(
     OUTPUT ${PROJECT_SOURCE_DIR}/generated/multi_lib.h ${PROJECT_SOURCE_DIR}/generated/multi_lib.cpp
     COMMAND cargo run --release cpp ${MULTILIB_LIB} --header ${PROJECT_SOURCE_DIR}/generated/multi_lib.hpp --source ${PROJECT_SOURCE_DIR}/generated/multi_lib.cpp
     WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
-    DEPENDS ${MULTILIB_LIB})
+    DEPENDS ${MULTILIB_LIB} cpp-dl-generated-src-dir)
 
 # Use the intercom-cli as code generator for test_lib.h/test_lib.cpp
 add_custom_command(
     OUTPUT ${PROJECT_SOURCE_DIR}/generated/test_lib.h ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
     COMMAND cargo run --release cpp ${TESTLIB_LIB} --header ${PROJECT_SOURCE_DIR}/generated/test_lib.hpp --source ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
     WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
-    DEPENDS ${TESTLIB_LIB})
+    DEPENDS ${TESTLIB_LIB} cpp-dl-generated-src-dir)
 
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_INCLUDE_DIR}")
