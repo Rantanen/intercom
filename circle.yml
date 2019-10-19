@@ -23,7 +23,7 @@ jobs:
                 name: "Cargo test"
                 command: |
                     export RUST_BACKTRACE=1
-                    cargo test --all-features
+                    cargo test
             - run:
                 name: "C++ test"
                 command: |
