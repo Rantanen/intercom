@@ -6,38 +6,28 @@ use ::std::prelude::v1::*;
 extern crate std;
 extern crate intercom;
 use intercom::*;
+use std::mem::MaybeUninit;
 
 pub mod some {
     pub mod path {
+        use std::mem::MaybeUninit;
         pub struct Type;
         pub const CLSID_Type: i8 = 0i8;
         pub(crate) fn get_intercom_coclass_info_for_Type()
          -> intercom::typelib::TypeInfo {
-
-
-
-            {
-                {
-                    ::std::rt::begin_panic("explicit panic",
-                                           &("/home/wace/projects/intercom/intercom-attributes/tests/data/com_library.source.rs",
-                                             8u32, 93u32))
-                }
-            }
+            unsafe { MaybeUninit::uninit().assume_init() }
         }
     }
 }
 pub struct SimpleType;
 pub const CLSID_SimpleType: i8 = 0i8;
+
 pub(crate) fn get_intercom_coclass_info_for_SimpleType()
  -> intercom::typelib::TypeInfo {
-    {
-        {
-            ::std::rt::begin_panic("explicit panic",
-                                   &("/home/wace/projects/intercom/intercom-attributes/tests/data/com_library.source.rs",
-                                     14u32, 91u32))
-        }
-    }
+    unsafe { MaybeUninit::uninit().assume_init() }
 }
+
+
 #[no_mangle]
 #[allow(non_snake_case)]
 #[allow(dead_code)]

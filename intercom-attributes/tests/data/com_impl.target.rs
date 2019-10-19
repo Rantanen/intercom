@@ -6,6 +6,7 @@ use ::std::prelude::v1::*;
 extern crate std;
 extern crate intercom;
 use intercom::*;
+use std::mem::MaybeUninit;
 
 // We need the IID and Vtbl to ensure this compiles.
 //
@@ -26,41 +27,16 @@ const IID_Foo_Raw: intercom::IID =
 
 fn get_com_interface_for_Foo_Automation()
  -> intercom::serialization::ComInterfaceVariant {
-
-
-
-
-
-
-    // Should be VARIANT_BOOL in Automation interface.
-
-    {
-        {
-            ::std::rt::begin_panic("explicit panic",
-                                   &("/home/wace/projects/intercom/intercom-attributes/tests/data/com_impl.source.rs",
-                                     23u32, 93u32))
-        }
-    }
+    unsafe { MaybeUninit::uninit().assume_init() }
 }
 fn get_com_interface_for_Foo_Raw()
  -> intercom::serialization::ComInterfaceVariant {
-    {
-        {
-            ::std::rt::begin_panic("explicit panic",
-                                   &("/home/wace/projects/intercom/intercom-attributes/tests/data/com_impl.source.rs",
-                                     24u32, 86u32))
-        }
-    }
+    unsafe { MaybeUninit::uninit().assume_init() }
 }
 fn get_intercom_interface_info_for_Foo() -> Vec<intercom::typelib::TypeInfo> {
-    {
-        {
-            ::std::rt::begin_panic("explicit panic",
-                                   &("/home/wace/projects/intercom/intercom-attributes/tests/data/com_impl.source.rs",
-                                     25u32, 80u32))
-        }
-    }
+    unsafe { MaybeUninit::uninit().assume_init() }
 }
+
 pub struct Foo;
 #[inline(always)]
 #[allow(non_snake_case)]
@@ -147,6 +123,13 @@ pub const CLSID_Foo: intercom::CLSID =
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
 pub fn get_intercom_coclass_info_for_Foo()
  -> Vec<intercom::typelib::TypeInfo> {
+
+
+
+
+
+    // Should be VARIANT_BOOL in Automation interface.
+
     <[_]>::into_vec(box
                         [intercom::typelib::TypeInfo::Class(intercom::ComStruct::new(intercom::typelib::CoClass::__new("Foo".into(),
                                                                                                                        intercom::GUID{data1:
