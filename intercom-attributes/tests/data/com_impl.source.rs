@@ -1,5 +1,6 @@
 extern crate intercom;
 use intercom::*;
+use std::mem::MaybeUninit;
 
 // We need the IID and Vtbl to ensure this compiles.
 //
@@ -20,9 +21,15 @@ const IID_Foo_Raw: intercom::IID = intercom::GUID {
     data4: [0, 0, 0, 0, 0, 0, 0, 0],
 };
 
-fn get_com_interface_for_Foo_Automation() -> intercom::serialization::ComInterfaceVariant { panic!() }
-fn get_com_interface_for_Foo_Raw() -> intercom::serialization::ComInterfaceVariant { panic!() }
-fn get_intercom_interface_info_for_Foo() -> Vec<intercom::typelib::TypeInfo> { panic!() }
+fn get_com_interface_for_Foo_Automation() -> intercom::serialization::ComInterfaceVariant {
+    unsafe { MaybeUninit::uninit().assume_init() }
+}
+fn get_com_interface_for_Foo_Raw() -> intercom::serialization::ComInterfaceVariant {
+    unsafe { MaybeUninit::uninit().assume_init() }
+}
+fn get_intercom_interface_info_for_Foo() -> Vec<intercom::typelib::TypeInfo> {
+    unsafe { MaybeUninit::uninit().assume_init() }
+}
 
 #[com_class( clsid = "{00000000-0000-0000-0000-000000000000}", Foo)]
 pub struct Foo;
