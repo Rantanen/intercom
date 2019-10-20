@@ -26,7 +26,7 @@ pub fn expand_bidirectional_type_info(
 
     // Immpl requires the the generics in particular way.
     let (impl_generics, ty_generics, where_clause ) = input.generics.split_for_impl();
-    let result = quote!{ impl #impl_generics BidirectionalTypeInfo for #name #ty_generics #where_clause {
+    let result = quote!{ impl #impl_generics ::intercom::type_system::BidirectionalTypeInfo for #name #ty_generics #where_clause {
 
                 /// The default name is the name of the type.
                 fn type_name() -> &'static str { stringify!( #name ) }

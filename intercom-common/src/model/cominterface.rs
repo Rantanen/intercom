@@ -7,7 +7,7 @@ use crate::guid::GUID;
 use crate::ast_converters::*;
 use crate::methodinfo::ComMethodInfo;
 use ::syn::{ Ident, Visibility, LitStr };
-use ::ordermap::OrderMap;
+use ::indexmap::IndexMap;
 use ::std::iter::FromIterator;
 use crate::tyhandlers::{ModelTypeSystem};
 
@@ -36,7 +36,7 @@ pub struct ComInterface
     display_name : Ident,
     visibility : Visibility,
     base_interface : Option<Ident>,
-    variants : OrderMap<ModelTypeSystem, ComInterfaceVariant>,
+    variants : IndexMap<ModelTypeSystem, ComInterfaceVariant>,
     item_type: crate::utils::InterfaceType,
     is_unsafe : bool,
 }
@@ -117,7 +117,7 @@ impl ComInterface
                     parse_quote!( pub )
                 };
 
-        let variants = OrderMap::from_iter(
+        let variants = IndexMap::from_iter(
             [ ModelTypeSystem::Automation, ModelTypeSystem::Raw ].iter().map( |&ts| {
 
             let itf_unique_ident = Ident::new(
@@ -186,7 +186,7 @@ impl ComInterface
     pub fn base_interface( &self ) -> &Option<Ident> { &self.base_interface }
 
     /// Interface variants.
-    pub fn variants( &self ) -> &OrderMap<ModelTypeSystem, ComInterfaceVariant> { &self.variants }
+    pub fn variants( &self ) -> &IndexMap<ModelTypeSystem, ComInterfaceVariant> { &self.variants }
 
     /// The type of the associated item for the #[com_interface] attribute.
     ///

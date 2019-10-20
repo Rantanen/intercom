@@ -12,7 +12,7 @@ pub enum InterfaceType { Trait, Struct }
 
 pub type InterfaceData<'a> = (
     Ident,
-    Vec< &'a MethodSig >,
+    Vec< &'a Signature >,
     InterfaceType,
     Option<Token!(unsafe)>,
 );
@@ -44,7 +44,7 @@ pub fn get_ident_and_fns(
                 .. } )
             => {
 
-            let methods : Option< Vec< &MethodSig > > = items
+            let methods : Option< Vec< &Signature > > = items
                     .iter()
                     .map( |i| get_trait_method( i ) )
                     .collect();
@@ -66,7 +66,7 @@ pub fn get_ident_and_fns(
 pub type ImplData<'a> = (
     Option<Ident>,
     Ident,
-    Vec< &'a MethodSig >
+    Vec< &'a Signature >
 );
 
 pub fn get_impl_data(
@@ -88,11 +88,11 @@ fn get_impl_data_raw<'a>(
 
     let struct_ident = struct_ty.get_ident().unwrap();
     let trait_ident = match *trait_ref {
-        Some( ( _, ref path, _ ) ) => path.get_ident().ok(),
+        Some( ( _, ref path, _ ) ) => path.get_ident().cloned(),
         None => None
     };
 
-    let methods_opt : Option< Vec< &MethodSig > > = items
+    let methods_opt : Option< Vec< &Signature > > = items
             .iter()
             .map( |i| get_impl_method( i ) )
             .collect();
@@ -103,7 +103,7 @@ fn get_impl_data_raw<'a>(
 
 pub fn get_impl_method(
     i : &ImplItem
-) -> Option< &MethodSig >
+) -> Option< &Signature >
 {
     match *i {
         ImplItem::Method( ref itm ) => Some( &itm.sig ),
@@ -113,7 +113,7 @@ pub fn get_impl_method(
 
 pub fn get_trait_method(
     i : &TraitItem
-) -> Option< &MethodSig >
+) -> Option< &Signature >
 {
     match *i {
         TraitItem::Method( ref tim ) => Some( &tim.sig ),

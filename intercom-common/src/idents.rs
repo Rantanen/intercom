@@ -14,8 +14,7 @@ pub fn with_ts(
 pub fn clsid_path(struct_path: &Path) -> Path {
     let mut clsid_path = struct_path.clone();
     if let Some( mut last ) = clsid_path.segments.last_mut() {
-        let v = last.value_mut();
-        v.ident = clsid( &v.ident );
+        last.ident = clsid( &last.ident );
     }
     clsid_path
 }

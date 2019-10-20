@@ -154,7 +154,7 @@ self_extern!( f32 );
 self_extern!( f64 );
 self_extern!( crate::raw::HRESULT );
 self_extern!( crate::GUID );
-self_extern!( libc::c_void );
+self_extern!( std::ffi::c_void );
 
 // Any raw pointer is passed as is.
 
@@ -196,7 +196,7 @@ impl<I: ::ComInterface + ?Sized> BidirectionalTypeInfo for ::ComItf<I>
 }
 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternType<TS>
-        for ::ComItf<I> {
+        for ::ComItf<I>
     where I: BidirectionalTypeInfo
 {
 

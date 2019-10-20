@@ -1,7 +1,7 @@
 
 use crate::prelude::*;
 use std::rc::Rc;
-use syn::{ ArgSelfRef, FnArg, FnDecl, MethodSig, PathArguments, ReturnType, Type };
+use syn::{ Receiver, FnArg, Signature, PathArguments, ReturnType, Type };
 
 use crate::ast_converters::*;
 use crate::tyhandlers::{Direction, TypeContext, ModelTypeSystem, TypeHandler, get_ty_handler};
@@ -139,7 +139,7 @@ pub struct ComMethodInfo {
     pub is_const: bool,
 
     /// Rust self argument.
-    pub rust_self_arg: ArgSelfRef,
+    pub rust_self_arg: Receiver,
 
     /// Rust return type.
     pub rust_return_ty: Type,
@@ -182,17 +182,7 @@ impl ComMethodInfo {
 
     /// Constructs new COM method info from a Rust method signature.
     pub fn new(
-        m : &MethodSig,
-        type_system : ModelTypeSystem,
-    ) -> Result<ComMethodInfo, ComMethodInfoError>
-    {
-        Self::new_from_parts( m.ident.clone(), &m.decl, m.unsafety.is_some(), type_system )
-    }
-
-    pub fn new_from_parts(
-        n: Ident,
-        decl: &FnDecl,
-        unsafety: bool,
+        decl : &Signature,
         type_system : ModelTypeSystem,
     ) -> Result<ComMethodInfo, ComMethodInfoError>
     {
@@ -200,12 +190,14 @@ impl ComMethodInfo {
         // In Rust this includes the 'self' argument and the actual function
         // arguments. For COM the self is implicit so we'll handle it
         // separately.
+        let n = decl.ident.clone();
+        let unsafety = decl.unsafety.is_some();
         let mut iter = decl.inputs.iter();
         let rust_self_arg = iter.next()
                 .ok_or_else( || ComMethodInfoError::TooFewArguments )?;
 
         let ( is_const, rust_self_arg ) = match *rust_self_arg {
-            FnArg::SelfRef( ref self_arg ) => (
+            FnArg::Receiver( ref self_arg ) => (
                 self_arg.mutability.is_none(),
                 self_arg.clone()
             ),
@@ -283,13 +275,13 @@ fn try_parse_result( ty : &Type ) -> Option<( Type, Type )>
     // good ways to ensure it is an actual Result type but at least we can
     // use this to discount things like Option<>, etc.
     let last_segment = path.segments.last()?;
-    if ! last_segment.value().ident.to_string().contains( "Result" ) {
+    if ! last_segment.ident.to_string().contains( "Result" ) {
         return None;
     }
 
     // Ensure the Result has angle bracket arguments.
     if let PathArguments::AngleBracketed( ref data )
-            = last_segment.value().arguments {
+            = last_segment.arguments {
 
         // The returned types depend on how many arguments the Result has.
         return Some( match data.args.len() {
@@ -400,11 +392,10 @@ mod tests {
     fn test_info( code : &str, ts : ModelTypeSystem) -> ComMethodInfo {
 
         let item = syn::parse_str( code ).unwrap();
-        let ( ident, decl, unsafety ) = match item {
-            Item::Fn( ref f ) => ( f.ident.clone(), f.decl.as_ref(), f.unsafety.is_some() ),
+        let sig = match item {
+            Item::Fn( ref f ) => &f.sig,
             _ => panic!( "Code isn't function" ),
         };
-        ComMethodInfo::new_from_parts(
-                ident, decl, unsafety, ts ).unwrap()
+        ComMethodInfo::new( sig, ts ).unwrap()
     }
 }

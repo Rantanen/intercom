@@ -180,8 +180,7 @@ impl IdlModel {
         let classes = lib.coclasses().iter().map(|class_path| {
 
             // Get the class details by matching the name.
-            let class_name = class_path
-                    .get_ident()
+            let class_name = GetIdent::get_ident(class_path)
                     .expect( "coclass had no name" )
                     .to_string();
             let coclass = &c.structs().get( &class_name )
@@ -349,13 +348,13 @@ fn get_itf_type(
     };
 
     // We only recognize ComItf and ComRc as interface types.
-    let ident = &last_segment.value().ident;
+    let ident = &last_segment.ident;
     if ident != "ComItf" && ident != "ComRc" {
         return Ok( None );
     }
 
     // ComItf and ComRc must have only one argument.
-    let arg_list = match last_segment.value().arguments {
+    let arg_list = match last_segment.arguments {
         syn::PathArguments::AngleBracketed( ref args ) => args,
         _ => Err( GeneratorError::UnsupportedType( format!(
                 "Unrecognized generic arguments: {:?}", ty ) ) )?,
@@ -368,7 +367,7 @@ fn get_itf_type(
             .expect( "Argument list should have one argument." );
 
     // Return the interface.
-    match arg.value() {
+    match arg {
         syn::GenericArgument::Type( ref t ) => Ok( Some( t ) ),
         _ => Err( GeneratorError::UnsupportedType( "Unsupported generic argument".to_string() ) ),
     }

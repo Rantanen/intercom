@@ -291,8 +291,7 @@ impl CppModel {
         let classes = lib.coclasses().iter().map( |class_path| {
 
             // Get the class details by matching the name.
-            let class_name = class_path
-                    .get_ident()
+            let class_name = GetIdent::get_ident(class_path)
                     .expect( "coclass had no name" )
                     .to_string();
             let coclass = &c.structs().get( &class_name )

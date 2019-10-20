@@ -7,16 +7,16 @@ repository = "https://github.com/Rantanen/intercom"
 description = "See 'intercom'"
 
 [dependencies]
-syn = { version = "0.15", features = [ "full", "extra-traits", "parsing" ] }
-quote = { version = "0.6" }
-proc-macro2 = "0.4"
-sha1 = "0.3.0"
-ordermap = "0.3"
-toml = "0.4.5"
 failure = "0.1"
+handlebars = "2.0"
+indexmap = "1.2"
+proc-macro2 = "1.0"
+quote = "1.0"
 serde = "1.0"
 serde_derive = "1.0"
-handlebars = "0.29"
+sha1 = "0.6.0"
+syn = { version = "1.0", features = [ "full", "extra-traits", "parsing" ] }
+toml = "0.5"
 
 [dev-dependencies]
 difference = "1.0.0"
