@@ -306,8 +306,7 @@ impl<T: CoClass> ComBox<T> {
     /// # Safety
     ///
     /// The `self_iunk` _must_ be a valid COM pointer.
-    #[cfg(windows)]
-    pub unsafe extern "stdcall" fn query_interface_ptr(
+    pub unsafe extern "system" fn query_interface_ptr(
         self_iunk : RawComPtr,
         riid : REFIID,
         out : *mut RawComPtr,
@@ -316,41 +315,12 @@ impl<T: CoClass> ComBox<T> {
         ComBox::query_interface( ComBox::<T>::from_ptr( self_iunk ), riid, out )
     }
 
-    /// Pointer variant of the `query_interface` function.
-    ///
-    /// # Safety
-    ///
-    /// The `self_iunk` _must_ be a valid COM pointer.
-    #[cfg(not(windows))]
-    pub unsafe extern "C" fn query_interface_ptr(
-        self_iunk : RawComPtr,
-        riid : REFIID,
-        out : *mut RawComPtr
-    ) -> raw::HRESULT
-    {
-        ComBox::query_interface( ComBox::<T>::from_ptr( self_iunk ), riid, out )
-    }
-
     /// Pointer variant of the `add_ref` function.
     ///
     /// # Safety
     ///
     /// The `self_iunk` _must_ be a valid COM pointer.
-    #[cfg(windows)]
-    pub unsafe extern "stdcall" fn add_ref_ptr(
-        self_iunk : RawComPtr
-    ) -> u32
-    {
-        ComBox::add_ref( ComBox::<T>::from_ptr( self_iunk ) )
-    }
-
-    /// Pointer variant of the `add_ref` function.
-    ///
-    /// # Safety
-    ///
-    /// The `self_iunk` _must_ be a valid COM pointer.
-    #[cfg(not(windows))]
-    pub unsafe extern "C" fn add_ref_ptr(
+    pub unsafe extern "system" fn add_ref_ptr(
         self_iunk : RawComPtr
     ) -> u32
     {
@@ -362,8 +332,7 @@ impl<T: CoClass> ComBox<T> {
     /// # Safety
     ///
     /// The `self_iunk` _must_ be a valid COM pointer.
-    #[cfg(windows)]
-    pub unsafe extern "stdcall" fn release_ptr(
+    pub unsafe extern "system" fn release_ptr(
         self_iunk : RawComPtr
     ) -> u32
     {
@@ -375,37 +344,7 @@ impl<T: CoClass> ComBox<T> {
     /// # Safety
     ///
     /// The `self_iunk` _must_ be a valid COM pointer.
-    #[cfg(not(windows))]
-    pub unsafe extern "C" fn release_ptr(
-        self_iunk : RawComPtr
-    ) -> u32
-    {
-        ComBox::release( self_iunk as *mut ComBox< T > )
-    }
-
-    /// Pointer variant of the `release` function.
-    ///
-    /// # Safety
-    ///
-    /// The `self_iunk` _must_ be a valid COM pointer.
-    #[cfg(windows)]
-    pub unsafe extern "stdcall" fn interface_supports_error_info_ptr(
-        self_iunk : RawComPtr,
-        riid : REFIID,
-    ) -> raw::HRESULT
-    {
-        ComBox::interface_supports_error_info(
-                ComBox::<T>::from_ptr( self_iunk ),
-                riid )
-    }
-
-    /// Pointer variant of the `release` function.
-    ///
-    /// # Safety
-    ///
-    /// The `self_iunk` _must_ be a valid COM pointer.
-    #[cfg(not(windows))]
-    pub unsafe extern "C" fn interface_supports_error_info_ptr(
+    pub unsafe extern "system" fn interface_supports_error_info_ptr(
         self_iunk : RawComPtr,
         riid : REFIID,
     ) -> raw::HRESULT

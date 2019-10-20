@@ -10,20 +10,10 @@ use super::*;
 
 #[allow(non_camel_case_types)]
 #[doc(hidden)]
-#[cfg(windows)]
 pub struct ClassFactoryVtbl {
     pub __base: IUnknownVtbl,
-    pub create_instance: unsafe extern "stdcall" fn( RawComPtr, RawComPtr, REFIID, *mut RawComPtr ) -> raw::HRESULT,
-    pub lock_server: unsafe extern "stdcall" fn( RawComPtr, bool ) -> raw::HRESULT
-}
-
-#[allow(non_camel_case_types)]
-#[doc(hidden)]
-#[cfg(not(windows))]
-pub struct ClassFactoryVtbl {
-    pub __base: IUnknownVtbl,
-    pub create_instance: unsafe extern "C" fn( RawComPtr, RawComPtr, REFIID, *mut RawComPtr ) -> raw::HRESULT,
-    pub lock_server: unsafe extern "C" fn( RawComPtr, bool ) -> raw::HRESULT
+    pub create_instance: unsafe extern "system" fn( RawComPtr, RawComPtr, REFIID, *mut RawComPtr ) -> raw::HRESULT,
+    pub lock_server: unsafe extern "system" fn( RawComPtr, bool ) -> raw::HRESULT
 }
 
 #[doc(hidden)]
@@ -70,71 +60,7 @@ impl< T: Fn( REFCLSID ) -> RawComResult< RawComPtr > > ClassFactory<T> {
     /// # Safety
     ///
     /// The pointers _must_ be valid.
-    #[cfg(windows)]
-    pub unsafe extern "stdcall" fn create_instance(
-        self_vtbl : RawComPtr,
-        _outer : RawComPtr,
-        riid : REFIID,
-        out : *mut RawComPtr,
-    ) -> raw::HRESULT
-    {
-        Self::create_instance_agnostic(self_vtbl, _outer, riid, out)
-    }
-
-    /// # Safety
-    ///
-    /// The pointers _must_ be valid.
-    #[cfg(not(windows))]
-    pub unsafe extern "C" fn create_instance(
-        self_vtbl : RawComPtr,
-        _outer : RawComPtr,
-        riid : REFIID,
-        out : *mut RawComPtr,
-    ) -> raw::HRESULT
-    {
-        Self::create_instance_agnostic(self_vtbl, _outer, riid, out)
-    }
-
-    /// # Safety
-    ///
-    /// The pointers _must_ be valid.
-    #[cfg(windows)]
-    pub unsafe extern "stdcall" fn lock_server(
-        self_vtbl : RawComPtr,
-        lock : bool
-    ) -> raw::HRESULT
-    {
-        Self::lock_server_agnostic(self_vtbl, lock)
-    }
-
-    /// # Safety
-    ///
-    /// The pointers _must_ be valid.
-    #[cfg(not(windows))]
-    pub unsafe extern "C" fn lock_server(
-        self_vtbl : RawComPtr,
-        lock : bool
-    ) -> raw::HRESULT
-    {
-        Self::lock_server_agnostic(self_vtbl, lock)
-    }
-
-    pub fn create_vtable() -> &'static ClassFactoryVtbl {
-        &ClassFactoryVtbl {
-            __base : IUnknownVtbl {
-                query_interface_Automation : ComBox::< Self >::query_interface_ptr,
-                add_ref_Automation : ComBox::< Self >::add_ref_ptr,
-                release_Automation : ComBox::< Self >::release_ptr,
-            },
-            create_instance : Self::create_instance,
-            lock_server : Self::lock_server
-        }
-    }
-
-    /// # Safety
-    ///
-    /// The pointers _must_ be valid.
-    unsafe fn create_instance_agnostic(
+    pub unsafe extern "system" fn create_instance(
         self_vtbl : RawComPtr,
         _outer : RawComPtr,
         riid : REFIID,
@@ -168,7 +94,7 @@ impl< T: Fn( REFCLSID ) -> RawComResult< RawComPtr > > ClassFactory<T> {
     /// # Safety
     ///
     /// The pointers _must_ be valid.
-    unsafe fn lock_server_agnostic(
+    pub unsafe extern "system" fn lock_server(
         self_vtbl : RawComPtr,
         lock : bool
     ) -> raw::HRESULT
@@ -179,6 +105,18 @@ impl< T: Fn( REFCLSID ) -> RawComResult< RawComPtr > > ClassFactory<T> {
             ComBox::<Self>::release_ptr( self_vtbl );
         }
         raw::S_OK
+    }
+
+    pub fn create_vtable() -> &'static ClassFactoryVtbl {
+        &ClassFactoryVtbl {
+            __base : IUnknownVtbl {
+                query_interface_Automation : ComBox::< Self >::query_interface_ptr,
+                add_ref_Automation : ComBox::< Self >::add_ref_ptr,
+                release_Automation : ComBox::< Self >::release_ptr,
+            },
+            create_instance : Self::create_instance,
+            lock_server : Self::lock_server
+        }
     }
 }
 
