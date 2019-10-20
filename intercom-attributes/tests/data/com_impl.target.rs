@@ -25,14 +25,6 @@ const IID_Foo_Raw: intercom::IID =
                    data3: 0,
                    data4: [0, 0, 0, 0, 0, 0, 0, 0],};
 
-fn get_com_interface_for_Foo_Automation()
- -> intercom::serialization::ComInterfaceVariant {
-    unsafe { MaybeUninit::uninit().assume_init() }
-}
-fn get_com_interface_for_Foo_Raw()
- -> intercom::serialization::ComInterfaceVariant {
-    unsafe { MaybeUninit::uninit().assume_init() }
-}
 fn get_intercom_interface_info_for_Foo() -> Vec<intercom::typelib::TypeInfo> {
     unsafe { MaybeUninit::uninit().assume_init() }
 }
@@ -156,18 +148,6 @@ pub fn get_intercom_coclass_info_for_Foo()
                                                                                                                                                                                 IID_Foo_Raw,}])))),
                          get_intercom_interface_info_for_Foo()])
 }
-#[doc = r" Gets type description of the #class_ident COM class."]
-fn get_com_class_for_Foo() -> intercom::serialization::ComClass {
-    intercom::serialization::ComClass::new("Foo".to_string(),
-                                           get_interfaces_for_Foo())
-}
-#[doc = r" Gets the interfaces of the #class_ident COM class."]
-fn get_interfaces_for_Foo()
- -> Vec<intercom::serialization::ComInterfaceVariant> {
-    <[_]>::into_vec(box
-                        [get_com_interface_for_Foo_Automation(),
-                         get_com_interface_for_Foo_Raw()])
-}
 impl Foo {
     fn static_method(a: u16, b: i16) { }
     fn simple_method(&self) { }
@@ -287,8 +267,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_arg_method_Automation(self_vtable:
                          *mut intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.arg_method((&<<u16 as
-                                               intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(a)?).intercom_into()?);
+                     self_struct.arg_method((&<u16 as
+                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(a)?).intercom_into()?);
                  Ok({ })
              })();
     use intercom::ErrorValue;
@@ -515,8 +495,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_string_method_Automation(self_vtable:
                          *mut intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.string_method((&<<String as
-                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
+                     self_struct.string_method((&<String as
+                                                     intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(input)?).intercom_into()?);
                  Ok({ __result.intercom_into()? })
              })();
     use intercom::ErrorValue;
@@ -557,8 +537,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_string_result_method_Automation(self_v
                          *mut intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.string_result_method((&<<String as
-                                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
+                     self_struct.string_result_method((&<String as
+                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(input)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
@@ -615,10 +595,10 @@ unsafe extern "C" fn __Foo_Foo_Automation_complete_method_Automation(self_vtable
                          *mut intercom::ComBox<Foo>;
                  let self_struct: &mut Foo = &mut **self_combox;
                  let __result =
-                     self_struct.complete_method((&<<u16 as
-                                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(a)?).intercom_into()?,
-                                                 (&<<i16 as
-                                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(b)?).intercom_into()?);
+                     self_struct.complete_method((&<u16 as
+                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(a)?).intercom_into()?,
+                                                 (&<i16 as
+                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(b)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
@@ -670,8 +650,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_bool_method_Automation(self_vtable:
                          *mut intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.bool_method((&<<bool as
-                                                intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
+                     self_struct.bool_method((&<bool as
+                                                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(input)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
@@ -724,8 +704,8 @@ unsafe extern "C" fn __Foo_Foo_Automation_variant_method_Automation(self_vtable:
                          *mut intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.variant_method((&<<Variant as
-                                                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
+                     self_struct.variant_method((&<Variant as
+                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(input)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
@@ -874,8 +854,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_arg_method_Raw(self_vtable:
                          *mut intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.arg_method((&<<u16 as
-                                               intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(a)?).intercom_into()?);
+                     self_struct.arg_method((&<u16 as
+                                                  intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(a)?).intercom_into()?);
                  Ok({ })
              })();
     use intercom::ErrorValue;
@@ -1091,8 +1071,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_string_method_Raw(self_vtable:
                          *mut intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.string_method((&<<String as
-                                                  intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
+                     self_struct.string_method((&<String as
+                                                     intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(input)?).intercom_into()?);
                  Ok({ __result.intercom_into()? })
              })();
     use intercom::ErrorValue;
@@ -1131,8 +1111,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_string_result_method_Raw(self_vtable:
                          *mut intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.string_result_method((&<<String as
-                                                         intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
+                     self_struct.string_result_method((&<String as
+                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(input)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
@@ -1185,10 +1165,10 @@ unsafe extern "C" fn __Foo_Foo_Raw_complete_method_Raw(self_vtable:
                          *mut intercom::ComBox<Foo>;
                  let self_struct: &mut Foo = &mut **self_combox;
                  let __result =
-                     self_struct.complete_method((&<<u16 as
-                                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(a)?).intercom_into()?,
-                                                 (&<<i16 as
-                                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(b)?).intercom_into()?);
+                     self_struct.complete_method((&<u16 as
+                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(a)?).intercom_into()?,
+                                                 (&<i16 as
+                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(b)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
@@ -1238,8 +1218,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_bool_method_Raw(self_vtable:
                          *mut intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.bool_method((&<<bool as
-                                                intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
+                     self_struct.bool_method((&<bool as
+                                                   intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(input)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {
@@ -1289,8 +1269,8 @@ unsafe extern "C" fn __Foo_Foo_Raw_variant_method_Raw(self_vtable:
                          *mut intercom::ComBox<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
-                     self_struct.variant_method((&<<Variant as
-                                                   intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::OwnedNativeType>::intercom_from(input)?).intercom_into()?);
+                     self_struct.variant_method((&<Variant as
+                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(input)?).intercom_into()?);
                  Ok({
                         match __result {
                             Ok(v1) => {

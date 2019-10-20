@@ -17,14 +17,6 @@ const IID_IFoo_Automation: intercom::IID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
-#[doc = r" Gets type description of the #interface_variant COM class."]
-pub(crate) fn get_com_interface_for_IFoo_Automation()
- -> intercom::serialization::ComInterfaceVariant {
-    intercom::serialization::ComInterfaceVariant::new("IFoo_Automation".to_string(),
-                                                      <intercom::type_system::AutomationTypeSystem
-                                                          as
-                                                          intercom::type_system::TypeSystem>::key())
-}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -43,14 +35,6 @@ const IID_IFoo_Raw: intercom::IID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
-#[doc = r" Gets type description of the #interface_variant COM class."]
-pub(crate) fn get_com_interface_for_IFoo_Raw()
- -> intercom::serialization::ComInterfaceVariant {
-    intercom::serialization::ComInterfaceVariant::new("IFoo_Raw".to_string(),
-                                                      <intercom::type_system::RawTypeSystem
-                                                          as
-                                                          intercom::type_system::TypeSystem>::key())
-}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -64,8 +48,6 @@ struct __IFoo_RawVtbl {
 }
 impl IFoo for intercom::ComItf<IFoo> {
     fn trait_method(&self) -> () {
-        #[allow(unused_imports)]
-        use intercom::ComInto;
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
@@ -372,20 +354,6 @@ pub fn get_intercom_coclass_info_for_Foo()
                          get_intercom_interface_info_for_Foo(),
                          get_intercom_interface_info_for_IFoo()])
 }
-#[doc = r" Gets type description of the #class_ident COM class."]
-fn get_com_class_for_Foo() -> intercom::serialization::ComClass {
-    intercom::serialization::ComClass::new("Foo".to_string(),
-                                           get_interfaces_for_Foo())
-}
-#[doc = r" Gets the interfaces of the #class_ident COM class."]
-fn get_interfaces_for_Foo()
- -> Vec<intercom::serialization::ComInterfaceVariant> {
-    <[_]>::into_vec(box
-                        [get_com_interface_for_Foo_Automation(),
-                         get_com_interface_for_IFoo_Automation(),
-                         get_com_interface_for_Foo_Raw(),
-                         get_com_interface_for_IFoo_Raw()])
-}
 impl Foo {
     pub fn struct_method(&self) { }
 }
@@ -564,14 +532,6 @@ pub const IID_Foo_Automation: intercom::IID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8],};
-#[doc = r" Gets type description of the #interface_variant COM class."]
-pub(crate) fn get_com_interface_for_Foo_Automation()
- -> intercom::serialization::ComInterfaceVariant {
-    intercom::serialization::ComInterfaceVariant::new("Foo_Automation".to_string(),
-                                                      <intercom::type_system::AutomationTypeSystem
-                                                          as
-                                                          intercom::type_system::TypeSystem>::key())
-}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -590,14 +550,6 @@ pub const IID_Foo_Raw: intercom::IID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8],};
-#[doc = r" Gets type description of the #interface_variant COM class."]
-pub(crate) fn get_com_interface_for_Foo_Raw()
- -> intercom::serialization::ComInterfaceVariant {
-    intercom::serialization::ComInterfaceVariant::new("Foo_Raw".to_string(),
-                                                      <intercom::type_system::RawTypeSystem
-                                                          as
-                                                          intercom::type_system::TypeSystem>::key())
-}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]

@@ -43,14 +43,6 @@ pub const IID_Foo_Automation: intercom::IID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
-#[doc = r" Gets type description of the #interface_variant COM class."]
-pub(crate) fn get_com_interface_for_Foo_Automation()
- -> intercom::serialization::ComInterfaceVariant {
-    intercom::serialization::ComInterfaceVariant::new("Foo_Automation".to_string(),
-                                                      <intercom::type_system::AutomationTypeSystem
-                                                          as
-                                                          intercom::type_system::TypeSystem>::key())
-}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -154,14 +146,6 @@ pub const IID_Foo_Raw: intercom::IID =
                    data2: 0u16,
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
-#[doc = r" Gets type description of the #interface_variant COM class."]
-pub(crate) fn get_com_interface_for_Foo_Raw()
- -> intercom::serialization::ComInterfaceVariant {
-    intercom::serialization::ComInterfaceVariant::new("Foo_Raw".to_string(),
-                                                      <intercom::type_system::RawTypeSystem
-                                                          as
-                                                          intercom::type_system::TypeSystem>::key())
-}
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
@@ -259,8 +243,6 @@ pub struct __Foo_RawVtbl {
 impl Foo for intercom::ComItf<Foo> {
     fn arg_method(&self, a: u16) -> () {
         #[allow(unused_imports)]
-        use intercom::ComInto;
-        #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
                ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
@@ -322,8 +304,6 @@ impl Foo for intercom::ComItf<Foo> {
             intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn bool_method(&self, input: bool) -> ComResult<bool> {
-        #[allow(unused_imports)]
-        use intercom::ComInto;
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
@@ -417,8 +397,6 @@ impl Foo for intercom::ComItf<Foo> {
     }
     fn com_result_method(&self) -> ComResult<u16> {
         #[allow(unused_imports)]
-        use intercom::ComInto;
-        #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
                ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
@@ -506,8 +484,6 @@ impl Foo for intercom::ComItf<Foo> {
             intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn comitf_method(&self, itf: ComItf<Foo>) -> ComResult<ComItf<IUnknown>> {
-        #[allow(unused_imports)]
-        use intercom::ComInto;
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
@@ -603,8 +579,6 @@ impl Foo for intercom::ComItf<Foo> {
             intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
-        #[allow(unused_imports)]
-        use intercom::ComInto;
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
@@ -702,8 +676,6 @@ impl Foo for intercom::ComItf<Foo> {
     }
     fn rust_result_method(&self) -> Result<u16, i32> {
         #[allow(unused_imports)]
-        use intercom::ComInto;
-        #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
                ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
@@ -792,8 +764,6 @@ impl Foo for intercom::ComItf<Foo> {
     }
     fn simple_method(&self) -> () {
         #[allow(unused_imports)]
-        use intercom::ComInto;
-        #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
                ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
@@ -852,8 +822,6 @@ impl Foo for intercom::ComItf<Foo> {
     }
     fn simple_result_method(&self) -> u16 {
         #[allow(unused_imports)]
-        use intercom::ComInto;
-        #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
                ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
@@ -911,8 +879,6 @@ impl Foo for intercom::ComItf<Foo> {
             intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn string_method(&self, msg: String) -> String {
-        #[allow(unused_imports)]
-        use intercom::ComInto;
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
@@ -975,8 +941,6 @@ impl Foo for intercom::ComItf<Foo> {
             intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn variant_method(&self, input: Variant) -> ComResult<Variant> {
-        #[allow(unused_imports)]
-        use intercom::ComInto;
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =

@@ -21,12 +21,6 @@ const IID_Foo_Raw: intercom::IID = intercom::GUID {
     data4: [0, 0, 0, 0, 0, 0, 0, 0],
 };
 
-fn get_com_interface_for_Foo_Automation() -> intercom::serialization::ComInterfaceVariant {
-    unsafe { MaybeUninit::uninit().assume_init() }
-}
-fn get_com_interface_for_Foo_Raw() -> intercom::serialization::ComInterfaceVariant {
-    unsafe { MaybeUninit::uninit().assume_init() }
-}
 fn get_intercom_interface_info_for_Foo() -> Vec<intercom::typelib::TypeInfo> {
     unsafe { MaybeUninit::uninit().assume_init() }
 }
