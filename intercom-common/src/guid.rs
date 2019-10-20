@@ -54,6 +54,7 @@ impl GUID {
         //
         // Some(_) values correspond to required characters while None values
         // correspond to the hexadecimal digits themselves.
+        #[rustfmt::skip]
         let format = match guid_format {
             GuidFormat::Braces => vec![
                 Some( b'{' ), None, None, None, None, None, None, None, None,

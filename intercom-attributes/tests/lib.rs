@@ -146,6 +146,7 @@ fn build( cwd: &str, path : &str ) -> String {
     let conf = "release";
 
     // Launch rustc.
+    #[rustfmt::skip]
     let output = std::process::Command::new( "rustc" )
             .current_dir( cwd )
             .env( "CARGO_PKG_NAME", "TestLib" )
