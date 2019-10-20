@@ -61,29 +61,29 @@ pub trait IEnumSetupInstances
     fn next(
         &self,
         celt : u32
-    ) -> ComResult< ( ComItf<dyn ISetupInstance>, u32 ) >;
+    ) -> ComResult< ( ComRc<dyn ISetupInstance>, u32 ) >;
 
     fn skip( &self, celt : u32 ) -> ComResult<()>;
 
     fn reset( &self ) -> ComResult<()>;
 
-    fn clone( &self ) -> ComResult< ComItf<dyn IEnumSetupInstances> >;
+    fn clone( &self ) -> ComResult< ComRc<dyn IEnumSetupInstances> >;
 }
 
 #[com_interface( com_iid = "26AAB78C-4A60-49D6-AF3B-3C35BC93365D" )]
 pub trait ISetupConfiguration2
 {
     fn enum_instances( &self )
-        -> ComResult< ComItf<dyn IEnumSetupInstances> >;
+        -> ComResult< ComRc<dyn IEnumSetupInstances> >;
 
     fn get_instance_for_current_process( &self )
-        -> ComResult< ComItf<dyn ISetupInstance> >;
+        -> ComResult< ComRc<dyn ISetupInstance> >;
 
     fn get_instance_for_path( &self, path : String )
-        -> ComResult< ComItf<dyn ISetupInstance> >;
+        -> ComResult< ComRc<dyn ISetupInstance> >;
 
     fn enum_all_instances( &self )
-        -> ComResult< ComItf<dyn IEnumSetupInstances> >;
+        -> ComResult< ComRc<dyn IEnumSetupInstances> >;
 }
 
 pub struct ToolPaths {
