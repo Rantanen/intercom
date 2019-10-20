@@ -48,93 +48,98 @@ pub const IID_Foo_Automation: intercom::IID =
 #[doc(hidden)]
 pub struct __Foo_AutomationVtbl {
     pub __base: intercom::IUnknownVtbl,
-    pub simple_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                           intercom::RawComPtr)
+    pub simple_method_Automation: unsafe extern "system" fn(self_vtable:
+                                                                intercom::RawComPtr)
                                       ->
                                           <() as
                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-    pub arg_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                        intercom::RawComPtr,
-                                                    a:
-                                                        <u16 as
-                                                        intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
-                                   ->
-                                       <() as
-                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-    pub simple_result_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                  intercom::RawComPtr)
-                                             ->
-                                                 <u16 as
-                                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-    pub com_result_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                               intercom::RawComPtr,
-                                                           __out:
-                                                               *mut <u16 as
-                                                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
-                                          ->
-                                              <intercom::raw::HRESULT as
-                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-    pub rust_result_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                intercom::RawComPtr,
-                                                            __out:
-                                                                *mut <u16 as
-                                                                     intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
-                                           ->
-                                               <intercom::raw::HRESULT as
-                                               intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-    pub complete_method_Automation: unsafe extern "C" fn(self_vtable:
+    pub arg_method_Automation: unsafe extern "system" fn(self_vtable:
                                                              intercom::RawComPtr,
                                                          a:
                                                              <u16 as
-                                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                         b:
-                                                             <i16 as
-                                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                         __out:
-                                                             *mut <bool as
-                                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
+                                   ->
+                                       <() as
+                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+    pub simple_result_method_Automation: unsafe extern "system" fn(self_vtable:
+                                                                       intercom::RawComPtr)
+                                             ->
+                                                 <u16 as
+                                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+    pub com_result_method_Automation: unsafe extern "system" fn(self_vtable:
+                                                                    intercom::RawComPtr,
+                                                                __out:
+                                                                    *mut <u16
+                                                                         as
+                                                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                          ->
+                                              <intercom::raw::HRESULT as
+                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+    pub rust_result_method_Automation: unsafe extern "system" fn(self_vtable:
+                                                                     intercom::RawComPtr,
+                                                                 __out:
+                                                                     *mut <u16
+                                                                          as
+                                                                          intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                           ->
+                                               <intercom::raw::HRESULT as
+                                               intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+    pub complete_method_Automation: unsafe extern "system" fn(self_vtable:
+                                                                  intercom::RawComPtr,
+                                                              a:
+                                                                  <u16 as
+                                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                              b:
+                                                                  <i16 as
+                                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                              __out:
+                                                                  *mut <bool
+                                                                       as
+                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
                                         ->
                                             <intercom::raw::HRESULT as
                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-    pub string_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                           intercom::RawComPtr,
-                                                       msg:
-                                                           <String as
-                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
+    pub string_method_Automation: unsafe extern "system" fn(self_vtable:
+                                                                intercom::RawComPtr,
+                                                            msg:
+                                                                <String as
+                                                                intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
                                       ->
                                           <String as
                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-    pub comitf_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                           intercom::RawComPtr,
-                                                       itf:
-                                                           <ComItf<Foo> as
-                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                       __out:
-                                                           *mut <ComItf<IUnknown>
+    pub comitf_method_Automation: unsafe extern "system" fn(self_vtable:
+                                                                intercom::RawComPtr,
+                                                            itf:
+                                                                <ComItf<Foo>
                                                                 as
-                                                                intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                                                intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                            __out:
+                                                                *mut <ComItf<IUnknown>
+                                                                     as
+                                                                     intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
                                       ->
                                           <intercom::raw::HRESULT as
                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-    pub bool_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                         intercom::RawComPtr,
-                                                     input:
-                                                         <bool as
-                                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                     __out:
-                                                         *mut <bool as
-                                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+    pub bool_method_Automation: unsafe extern "system" fn(self_vtable:
+                                                              intercom::RawComPtr,
+                                                          input:
+                                                              <bool as
+                                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                          __out:
+                                                              *mut <bool as
+                                                                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
                                     ->
                                         <intercom::raw::HRESULT as
                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-    pub variant_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                            intercom::RawComPtr,
-                                                        input:
-                                                            <Variant as
-                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
-                                                        __out:
-                                                            *mut <Variant as
-                                                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+    pub variant_method_Automation: unsafe extern "system" fn(self_vtable:
+                                                                 intercom::RawComPtr,
+                                                             input:
+                                                                 <Variant as
+                                                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                             __out:
+                                                                 *mut <Variant
+                                                                      as
+                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
                                        ->
                                            <intercom::raw::HRESULT as
                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
@@ -151,91 +156,93 @@ pub const IID_Foo_Raw: intercom::IID =
 #[doc(hidden)]
 pub struct __Foo_RawVtbl {
     pub __base: intercom::IUnknownVtbl,
-    pub simple_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                    intercom::RawComPtr)
+    pub simple_method_Raw: unsafe extern "system" fn(self_vtable:
+                                                         intercom::RawComPtr)
                                ->
                                    <() as
                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-    pub arg_method_Raw: unsafe extern "C" fn(self_vtable: intercom::RawComPtr,
-                                             a:
-                                                 <u16 as
-                                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
-                            ->
-                                <() as
-                                intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
-    pub simple_result_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                           intercom::RawComPtr)
-                                      ->
-                                          <u16 as
-                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
-    pub com_result_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                        intercom::RawComPtr,
-                                                    __out:
-                                                        *mut <u16 as
-                                                             intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
-                                   ->
-                                       <intercom::raw::HRESULT as
-                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
-    pub rust_result_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                         intercom::RawComPtr,
-                                                     __out:
-                                                         *mut <u16 as
-                                                              intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
-                                    ->
-                                        <intercom::raw::HRESULT as
-                                        intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
-    pub complete_method_Raw: unsafe extern "C" fn(self_vtable:
+    pub arg_method_Raw: unsafe extern "system" fn(self_vtable:
                                                       intercom::RawComPtr,
                                                   a:
                                                       <u16 as
-                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                  b:
-                                                      <i16 as
-                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                  __out:
-                                                      *mut <bool as
-                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
+                            ->
+                                <() as
+                                intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+    pub simple_result_method_Raw: unsafe extern "system" fn(self_vtable:
+                                                                intercom::RawComPtr)
+                                      ->
+                                          <u16 as
+                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
+    pub com_result_method_Raw: unsafe extern "system" fn(self_vtable:
+                                                             intercom::RawComPtr,
+                                                         __out:
+                                                             *mut <u16 as
+                                                                  intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                   ->
+                                       <intercom::raw::HRESULT as
+                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
+    pub rust_result_method_Raw: unsafe extern "system" fn(self_vtable:
+                                                              intercom::RawComPtr,
+                                                          __out:
+                                                              *mut <u16 as
+                                                                   intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                    ->
+                                        <intercom::raw::HRESULT as
+                                        intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
+    pub complete_method_Raw: unsafe extern "system" fn(self_vtable:
+                                                           intercom::RawComPtr,
+                                                       a:
+                                                           <u16 as
+                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                       b:
+                                                           <i16 as
+                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                       __out:
+                                                           *mut <bool as
+                                                                intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
                                  ->
                                      <intercom::raw::HRESULT as
                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
-    pub string_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                    intercom::RawComPtr,
-                                                msg:
-                                                    <String as
-                                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
+    pub string_method_Raw: unsafe extern "system" fn(self_vtable:
+                                                         intercom::RawComPtr,
+                                                     msg:
+                                                         <String as
+                                                         intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
                                ->
                                    <String as
                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
-    pub comitf_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                    intercom::RawComPtr,
-                                                itf:
-                                                    <ComItf<Foo> as
-                                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                __out:
-                                                    *mut <ComItf<IUnknown> as
-                                                         intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+    pub comitf_method_Raw: unsafe extern "system" fn(self_vtable:
+                                                         intercom::RawComPtr,
+                                                     itf:
+                                                         <ComItf<Foo> as
+                                                         intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                     __out:
+                                                         *mut <ComItf<IUnknown>
+                                                              as
+                                                              intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
                                ->
                                    <intercom::raw::HRESULT as
                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
-    pub bool_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                  intercom::RawComPtr,
-                                              input:
-                                                  <bool as
-                                                  intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                              __out:
-                                                  *mut <bool as
-                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+    pub bool_method_Raw: unsafe extern "system" fn(self_vtable:
+                                                       intercom::RawComPtr,
+                                                   input:
+                                                       <bool as
+                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                   __out:
+                                                       *mut <bool as
+                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
                              ->
                                  <intercom::raw::HRESULT as
                                  intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
-    pub variant_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                     intercom::RawComPtr,
-                                                 input:
-                                                     <Variant as
-                                                     intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
-                                                 __out:
-                                                     *mut <Variant as
-                                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+    pub variant_method_Raw: unsafe extern "system" fn(self_vtable:
+                                                          intercom::RawComPtr,
+                                                      input:
+                                                          <Variant as
+                                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                      __out:
+                                                          *mut <Variant as
+                                                               intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
                                 ->
                                     <intercom::raw::HRESULT as
                                     intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,

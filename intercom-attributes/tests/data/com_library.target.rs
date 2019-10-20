@@ -32,9 +32,10 @@ pub(crate) fn get_intercom_coclass_info_for_SimpleType()
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-pub unsafe extern "C" fn DllGetClassObject(rclsid: intercom::REFCLSID,
-                                           riid: intercom::REFIID,
-                                           pout: *mut intercom::RawComPtr)
+pub unsafe extern "system" fn DllGetClassObject(rclsid: intercom::REFCLSID,
+                                                riid: intercom::REFIID,
+                                                pout:
+                                                    *mut intercom::RawComPtr)
  -> intercom::raw::HRESULT {
     let mut com_struct =
         intercom::ComStruct::new(intercom::ClassFactory::new(rclsid,
@@ -87,9 +88,9 @@ pub(crate) fn get_intercom_typelib() -> intercom::typelib::TypeLib {
                                       "1.0".into(), types)
 }
 #[no_mangle]
-pub unsafe extern "C" fn IntercomTypeLib(type_system:
-                                             intercom::type_system::TypeSystemName,
-                                         out: *mut intercom::RawComPtr)
+pub unsafe extern "system" fn IntercomTypeLib(type_system:
+                                                  intercom::type_system::TypeSystemName,
+                                              out: *mut intercom::RawComPtr)
  -> intercom::raw::HRESULT {
     let mut tlib = intercom::ComStruct::new(get_intercom_typelib());
     let rc =
@@ -108,9 +109,9 @@ pub unsafe extern "C" fn IntercomTypeLib(type_system:
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-pub unsafe extern "C" fn IntercomListClassObjects(pcount: *mut usize,
-                                                  pclsids:
-                                                      *mut *const intercom::CLSID)
+pub unsafe extern "system" fn IntercomListClassObjects(pcount: *mut usize,
+                                                       pclsids:
+                                                           *mut *const intercom::CLSID)
  -> intercom::raw::HRESULT {
     if pcount.is_null() { return intercom::raw::E_POINTER; }
     if pclsids.is_null() { return intercom::raw::E_POINTER; }
