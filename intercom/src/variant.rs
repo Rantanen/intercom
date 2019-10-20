@@ -402,10 +402,10 @@ impl<T: HasInterface<dyn IUnknown>> From< ComStruct<T> > for Variant {
     }
 }
 
-impl<T: ComInterface + ?Sized> From< ComItf<T> > for Variant {
-    fn from( src : ComItf<T> ) -> Self {
+impl<T: ComInterface + ?Sized> From< &ComItf<T> > for Variant {
+    fn from( src : &ComItf<T> ) -> Self {
         let iunk : &ComItf<dyn IUnknown> = src.as_ref();
-        Variant::IUnknown( ComRc::copy( iunk ) )
+        Variant::IUnknown( ComRc::from( iunk ) )
     }
 }
 

@@ -220,26 +220,20 @@ mod error_store {
 mod error_store {
 
     use super::*;
-    use std::cell::Cell;
+    use std::cell::RefCell;
 
     thread_local! {
-        static ERROR_STORE: Cell< Option< ComItf<dyn IErrorInfo> > > = Cell::new( None );
+        static ERROR_STORE: RefCell< Option< ComRc<dyn IErrorInfo> > > = RefCell::new( None );
     }
 
-    fn reset_error_store( value : Option< ComItf< dyn IErrorInfo > > ) {
-
+    fn reset_error_store( value : Option< ComRc< dyn IErrorInfo > > ) {
         ERROR_STORE.with( |store| {
-
-            if let Some( itf ) = store.get() {
-                ComItf::as_unknown( &itf ).release();
-            }
-
-            store.set( value );
-
-            if let Some( itf ) = value {
-                ComItf::as_unknown( &itf ).add_ref();
-            }
+            store.replace( value );
         } );
+    }
+
+    fn take_error() -> Option< ComRc< dyn IErrorInfo > > {
+        ERROR_STORE.with( |store| { store.replace( None ) } )
     }
 
     pub(super) unsafe fn SetErrorInfo(
@@ -247,8 +241,7 @@ mod error_store {
         errorinfo: crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
     ) -> raw::HRESULT {
 
-        reset_error_store(ComItf::maybe_wrap( errorinfo ) );
-
+        reset_error_store(ComItf::maybe_wrap(errorinfo).map(|i| ComRc::from(&i)));
         raw::S_OK
     }
 
@@ -257,18 +250,10 @@ mod error_store {
         errorinfo: *mut crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
     ) -> raw::HRESULT {
 
-        ERROR_STORE.with( |store| {
-
-            if let Some( itf ) = store.get() {
-                ComItf::as_unknown( &itf ).add_ref();
-                *errorinfo = ComItf::ptr( &itf );
-                reset_error_store( None );
-                raw::S_OK
-            } else {
-                *errorinfo = crate::raw::InterfacePtr::null();
-                raw::S_FALSE
-            }
-        } )
+        match take_error() {
+            Some(rc) => { *errorinfo = ComItf::ptr( &ComRc::detach(rc) ); raw::S_OK },
+            None => { *errorinfo = crate::raw::InterfacePtr::null(); raw::S_FALSE },
+        }
     }
 }
 
@@ -499,7 +484,7 @@ pub struct ErrorStore;
 pub trait IErrorStore
 {
     fn get_error_info( &self ) -> ComResult<ComRc<dyn IErrorInfo>>;
-    fn set_error_info( &self, info : ComItf<dyn IErrorInfo> ) -> ComResult<()>;
+    fn set_error_info( &self, info : &ComItf<dyn IErrorInfo> ) -> ComResult<()>;
     fn set_error_message( &self, msg : &str ) -> ComResult<()>;
 }
 
@@ -511,7 +496,7 @@ impl IErrorStore for ErrorStore
         get_error_info()
     }
 
-    fn set_error_info( &self, info : ComItf<dyn IErrorInfo> ) -> ComResult<()>
+    fn set_error_info( &self, info : &ComItf<dyn IErrorInfo> ) -> ComResult<()>
     {
         set_error_info( &info )
     }
@@ -520,7 +505,7 @@ impl IErrorStore for ErrorStore
     {
         let info = ComStruct::< ErrorInfo >::new( ErrorInfo::new( msg.to_string() ) );
         let itf = ComRc::< dyn IErrorInfo >::from( &info );
-        self.set_error_info( *itf )
+        self.set_error_info( &*itf )
     }
 }
 

@@ -215,7 +215,7 @@ impl<TS: TypeSystem, TPtr> ExternType<TS> for *const TPtr where TPtr: Bidirectio
 
 /// `ComItf` extern type implementation.
 
-impl<I: crate::ComInterface + ?Sized> BidirectionalTypeInfo for crate::ComItf<I>
+impl<I: crate::ComInterface + ?Sized> BidirectionalTypeInfo for &crate::ComItf<I>
     where I: BidirectionalTypeInfo
 {
 
@@ -224,15 +224,15 @@ impl<I: crate::ComInterface + ?Sized> BidirectionalTypeInfo for crate::ComItf<I>
     fn indirection_level() -> u32 { <I as BidirectionalTypeInfo>::indirection_level() + 1 }
 }
 
-impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternType<TS>
-        for crate::ComItf<I>
+impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternType<TS>
+        for &'a crate::ComItf<I>
     where I: BidirectionalTypeInfo
 {
 
     type ExternInputType = crate::raw::InterfacePtr<TS, I>;
     type ExternOutputType = crate::raw::InterfacePtr<TS, I>;
-    type OwnedExternType = crate::raw::InterfacePtr<TS, I>;
-    type OwnedNativeType = crate::raw::InterfacePtr<TS, I>;
+    type OwnedExternType = &'a crate::ComItf<I>;
+    type OwnedNativeType = crate::ComItf<I>;
 }
 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternType<TS>
@@ -288,6 +288,14 @@ impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
 {
     unsafe fn intercom_from( source: &crate::ComItf<I> ) -> ComResult<Self> {
         Ok( crate::ComItf::ptr( source ) )
+    }
+}
+
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized>
+    IntercomFrom<&&crate::ComItf<I>> for crate::raw::InterfacePtr<TS, I>
+{
+    unsafe fn intercom_from( source: &&crate::ComItf<I> ) -> ComResult<Self> {
+        Ok( crate::ComItf::ptr( *source ) )
     }
 }
 

@@ -17,9 +17,13 @@ impl<T: ComInterface + ?Sized> std::fmt::Debug for ComRc<T> {
 
 impl<T: ComInterface + ?Sized> Clone for ComRc<T> {
     fn clone( &self ) -> Self {
-        let rc = ComRc { itf : self.itf };
-        rc.itf.as_ref().add_ref();
-        rc
+        ComRc::from( &self.itf )
+    }
+}
+
+impl<T: ComInterface + ?Sized> From<&ComItf<T>> for ComRc<T> {
+    fn from(source: &ComItf<T>) -> Self {
+        ComItf::as_rc(source)
     }
 }
 
@@ -29,7 +33,14 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
     /// reference counting.
     ///
     /// Does not increment the reference count.
-    pub fn attach( itf : ComItf<T> ) -> ComRc<T> {
+    ///
+    /// # Safety
+    ///
+    /// Given this does not increment the reference count, it must be used
+    /// only if the `ComItf` is one that would leave the reference dangling.
+    /// If something already owns the `ComItf` and will do `release` on it,
+    /// the drop of the returned `ComRc` will result in a double-release.
+    pub unsafe fn attach( itf : ComItf<T> ) -> ComRc<T> {
         ComRc { itf }
     }
 
@@ -38,7 +49,9 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
     ///
     /// Does not increment the reference count.
     pub fn detach( mut rc : ComRc<T> ) -> ComItf<T> {
-        unsafe { std::mem::replace( &mut rc.itf, ComItf::null_itf() ) }
+        unsafe {
+            std::mem::replace(&mut rc.itf, ComItf::null_itf())
+        }
     }
 
     /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
@@ -52,25 +65,19 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
     pub unsafe fn wrap<TS: TypeSystem>(
         ptr : raw::InterfacePtr<TS, T>
     ) -> Option<ComRc<T>> {
-        ComItf::maybe_wrap( ptr ).map(ComRc::attach)
-    }
-
-    pub fn copy( itf : &ComItf<T> ) -> ComRc<T> {
-
-        let iunk : &ComItf<dyn IUnknown> = itf.as_ref();
-        iunk.add_ref();
-        ComRc::attach( *itf )
+        ComItf::maybe_wrap( ptr ).map( |itf| ComRc::attach(itf) )
     }
 
     // ComRc is a smart pointer and shouldn't introduce methods on 'self'.
     #[allow(clippy::wrong_self_convention)]
     pub fn into_unknown( mut other : ComRc<T> ) -> ComRc<dyn IUnknown> {
 
-        let itf = unsafe {
-            std::mem::replace( &mut other.itf, ComItf::null_itf() )
-        };
-
-        ComRc::attach( ComItf::as_unknown( &itf ) )
+        // We'll steal the interface off the current ComRc. This prevents the
+        // current ComRc from releasing it so we are free to do attach here.
+        unsafe {
+            let itf = std::mem::replace( &mut other.itf, ComItf::null_itf() );
+            ComRc::attach( ComItf::as_unknown( &itf ) )
+        }
     }
 }
 
