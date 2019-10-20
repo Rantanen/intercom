@@ -227,10 +227,13 @@ mod error_store {
     }
 
     fn reset_error_store( value : Option< ComRc< dyn IErrorInfo > > ) {
-
         ERROR_STORE.with( |store| {
             store.replace( value );
         } );
+    }
+
+    fn take_error() -> Option< ComRc< dyn IErrorInfo > > {
+        ERROR_STORE.with( |store| { store.replace( None ) } )
     }
 
     pub(super) unsafe fn SetErrorInfo(
@@ -238,7 +241,7 @@ mod error_store {
         errorinfo: crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
     ) -> raw::HRESULT {
 
-        reset_error_store( ComRc::wrap( errorinfo ) );
+        reset_error_store(ComItf::maybe_wrap(errorinfo).map(|i| ComRc::from(&i)));
         raw::S_OK
     }
 
@@ -247,18 +250,10 @@ mod error_store {
         errorinfo: *mut crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
     ) -> raw::HRESULT {
 
-        ERROR_STORE.with( |store| {
-
-            if let Some( itf ) = &*store.borrow() {
-                ComItf::as_unknown( &itf ).add_ref();
-                *errorinfo = ComItf::ptr( &itf );
-                reset_error_store( None );
-                raw::S_OK
-            } else {
-                *errorinfo = crate::raw::InterfacePtr::null();
-                raw::S_FALSE
-            }
-        } )
+        match take_error() {
+            Some(rc) => { *errorinfo = ComItf::ptr( &ComRc::detach(rc) ); raw::S_OK },
+            None => { *errorinfo = crate::raw::InterfacePtr::null(); raw::S_FALSE },
+        }
     }
 }
 
