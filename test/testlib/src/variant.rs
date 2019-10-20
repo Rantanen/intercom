@@ -1,5 +1,6 @@
 
 use intercom::*;
+use intercom::type_system::IntercomFrom;
 use std::convert::{TryFrom};
 use std::time::SystemTime;
 use chrono::prelude::*;
@@ -92,7 +93,7 @@ impl VariantTests
             } ),
             8 => Ok( {
                 let bstr : BString = BString::try_from( variant )?;
-                let string : String = bstr.com_into()?;
+                let string = unsafe { String::intercom_from(bstr)? };
                 "text" == string
             } ),
             9 => Ok( true ),

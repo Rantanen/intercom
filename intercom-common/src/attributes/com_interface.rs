@@ -102,8 +102,6 @@ pub fn expand_com_interface(
                 ) -> #return_ty {
 
                     #[allow(unused_imports)]
-                    use intercom::ComInto;
-                    #[allow(unused_imports)]
                     use intercom::ErrorValue;
 
                     // Try the available type systems.

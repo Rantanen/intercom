@@ -302,356 +302,21 @@ impl Drop for BString {
     }
 }
 
-pub trait FromWithTemporary<'a, TSource>
-    where Self: Sized
-{
-    type Temporary;
-    fn to_temporary( source : TSource ) -> Result<Self::Temporary, ComError>;
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError>;
-}
-
-impl<'a, T: Copy> FromWithTemporary<'a, T> for T {
-
-    type Temporary = T;
-
-    fn to_temporary( source : T ) -> Result<Self::Temporary, ComError> { Ok(source) }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( *temp )
+impl IntercomFrom<BString> for String {
+    unsafe fn intercom_from( source : BString ) -> Result<Self, ComError> {
+        source.to_string().map_err( |_| ComError::E_INVALIDARG )
     }
 }
 
-impl<'a> FromWithTemporary<'a, &'a BStr >
-        for BString {
 
-    type Temporary = &'a BStr;
-
-    fn to_temporary( bstr : &'a BStr ) -> Result<Self::Temporary, ComError> { Ok(bstr) }
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( (*temp).to_owned() )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, &'a BStr>
-        for &'a str {
-
-    type Temporary = String;
-
-    fn to_temporary( bstr : &'a BStr ) -> Result<Self::Temporary, ComError> {
-        bstr.to_string().map_err( |_| ComError::E_INVALIDARG )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, &'a BStr>
-        for String {
-
-    type Temporary = &'a BStr;
-
-    fn to_temporary( bstr : &'a BStr ) -> Result<Self::Temporary, ComError> {
-        Ok( bstr )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        temp.to_string().map_err( |_| ComError::E_INVALIDARG )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, BString >
-        for &'a BStr {
-
-    type Temporary = BString;
-
-    fn to_temporary( source : BString ) -> Result<Self::Temporary, ComError> {
-        Ok( source )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, CString >
-        for &'a BStr {
-
-    type Temporary = BString;
-
-    fn to_temporary( source : CString ) -> Result<Self::Temporary, ComError> {
-        source.com_into()
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, &'a str>
-        for &'a BStr {
-
-    type Temporary = BString;
-
-    fn to_temporary( source : &'a str ) -> Result<Self::Temporary, ComError> {
-        BString::from_str( source ).map_err( |_| ComError::E_INVALIDARG )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, String>
-        for &'a BStr {
-
-    type Temporary = BString;
-
-    fn to_temporary( source : String ) -> Result<Self::Temporary, ComError> {
-        BString::from_str( &source ).map_err( |_| ComError::E_INVALIDARG )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, &'a CStr>
-        for &'a BStr {
-
-    type Temporary = BString;
-
-    fn to_temporary( source : &'a CStr ) -> Result<Self::Temporary, ComError> {
-        source.to_str()
-            .map( |s| s.into() )
-            .map_err( |_| ComError::E_INVALIDARG )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, &'a BStr>
-        for &'a CStr {
-
-    type Temporary = CString;
-
-    fn to_temporary( source : &'a BStr ) -> Result<Self::Temporary, ComError> {
-        let string = source.to_string()
-                .map_err( |_| ComError::E_INVALIDARG )?;
-
-        CString::new( string )
-                .map_err( |_| ComError::E_INVALIDARG )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, &'a BStr>
-        for CString {
-
-    type Temporary = &'a BStr;
-
-    fn to_temporary( source : &'a BStr ) -> Result<Self::Temporary, ComError> {
-        Ok( source )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        let string = temp.to_string()
-                .map_err( |_| ComError::E_INVALIDARG )?;
-
-        CString::new( string )
-                .map_err( |_| ComError::E_INVALIDARG )
-    }
-}
-
-pub trait ComFrom<TSource> : Sized {
-    fn com_from( source : TSource ) -> Result<Self, ComError>;
-}
-
-pub trait ComInto<TTarget> {
-    fn com_into( self ) -> Result<TTarget, ComError>;
-}
-
-impl<TTarget, TSource> ComInto<TTarget> for TSource
-    where TTarget : ComFrom< TSource > {
-
-    fn com_into( self ) -> Result<TTarget, ComError> {
-        TTarget::com_from( self )
-    }
-}
-
-impl<T> ComFrom<T> for T {
-    fn com_from( source : T ) -> Result<T, ComError> {
-        Ok( source )
-    }
-}
-
-impl ComFrom<BString> for String {
-    fn com_from( source : BString ) -> Result<Self, ComError> {
-        let mut bstr : &BStr = &source;
-        < String as FromWithTemporary<&BStr> >::from_temporary( &mut bstr )
-    }
-}
-
-impl ComFrom<String> for BString {
-    fn com_from( source : String ) -> Result<Self, ComError> {
-        Ok( BString::from( source ) )
-    }
-}
-
-impl ComFrom<CString> for String {
-    fn com_from( source : CString ) -> Result<Self, ComError> {
+impl IntercomFrom<CString> for String {
+    unsafe fn intercom_from( source : CString ) -> Result<Self, ComError> {
         source.into_string()
                 .map_err( |_| ComError::E_INVALIDARG )
     }
 }
-
-impl ComFrom<String> for CString {
-    fn com_from( source: String ) -> Result<Self, ComError> {
-        CString::new( source )
-                .map_err( |_| ComError::E_INVALIDARG )
-    }
-}
-
-impl ComFrom<CString> for BString {
-    fn com_from( source : CString ) -> Result<Self, ComError> {
-        source.to_str()
-                .map( BString::from )
-                .map_err( |_| ComError::E_INVALIDARG )
-    }
-}
-
-impl ComFrom<BString> for CString {
-    fn com_from( source : BString ) -> Result<Self, ComError> {
-        let string = source.to_string()
-                .map_err( |_| ComError::E_INVALIDARG )?;
-
-        CString::new( string )
-                .map_err( |_| ComError::E_INVALIDARG )
-    }
-}
-
 pub type CStr = std::ffi::CStr;
 pub type CString = std::ffi::CString;
-
-impl<'a> FromWithTemporary<'a, &'a CStr >
-        for CString {
-
-    type Temporary = &'a CStr;
-
-    fn to_temporary( cstr : &'a CStr ) -> Result<Self::Temporary, ComError> { Ok(cstr) }
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( (*temp).to_owned() )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, &'a CStr>
-        for &'a str {
-
-    type Temporary = String;
-
-    fn to_temporary( cstr : &'a CStr ) -> Result<Self::Temporary, ComError> {
-        cstr.to_str()
-            .map( ToString::to_string )
-            .map_err( |_| ComError::E_INVALIDARG )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, &'a CStr>
-        for String {
-
-    type Temporary = &'a CStr;
-
-    fn to_temporary( cstr : &'a CStr ) -> Result<Self::Temporary, ComError> {
-        Ok( cstr )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        temp.to_str()
-            .map( ToString::to_string )
-            .map_err( |_| ComError::E_INVALIDARG )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, CString >
-        for &'a CStr {
-
-    type Temporary = CString;
-
-    fn to_temporary( source : CString ) -> Result<Self::Temporary, ComError> {
-        Ok( source )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, BString >
-        for &'a CStr {
-
-    type Temporary = CString;
-
-    fn to_temporary( source : BString ) -> Result<Self::Temporary, ComError> {
-        source.com_into()
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, &'a str>
-        for &'a CStr {
-
-    type Temporary = CString;
-
-    fn to_temporary( source : &'a str ) -> Result<Self::Temporary, ComError> {
-        CString::new( source ).map_err( |_| ComError::E_INVALIDARG )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, String>
-        for &'a CStr {
-
-    type Temporary = CString;
-
-    fn to_temporary( source : String ) -> Result<Self::Temporary, ComError> {
-        CString::new( source ).map_err( |_| ComError::E_INVALIDARG )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        Ok( &**temp )
-    }
-}
-
-impl<'a> FromWithTemporary<'a, &'a CStr>
-        for BString {
-
-    type Temporary = &'a CStr;
-
-    fn to_temporary( source : &'a CStr ) -> Result<Self::Temporary, ComError> {
-        Ok( source )
-    }
-
-    fn from_temporary( temp : &'a mut Self::Temporary ) -> Result<Self, ComError> {
-        temp.to_str()
-            .map( |s| s.into() )
-            .map_err( |_| ComError::E_INVALIDARG )
-    }
-}
 
 //////////////////////////////////////////
 // OS specific string allocation.
@@ -772,32 +437,32 @@ impl From<CString> for IntercomString {
     }
 }
 
-impl ComFrom<IntercomString> for BString {
-    fn com_from( source : IntercomString ) -> Result<Self, ComError> {
+impl IntercomFrom<IntercomString> for BString {
+    unsafe fn intercom_from( source : IntercomString ) -> Result<Self, ComError> {
         match source {
-            IntercomString::BString( bstring ) => bstring.com_into(),
-            IntercomString::CString( cstring ) => cstring.com_into(),
-            IntercomString::String( string ) => string.com_into()
+            IntercomString::BString( bstring ) => bstring.intercom_into(),
+            IntercomString::CString( cstring ) => cstring.intercom_into(),
+            IntercomString::String( string ) => string.intercom_into()
         }
     }
 }
 
-impl ComFrom<IntercomString> for CString {
-    fn com_from( source : IntercomString ) -> Result<Self, ComError> {
+impl IntercomFrom<IntercomString> for CString {
+    unsafe fn intercom_from( source : IntercomString ) -> Result<Self, ComError> {
         match source {
-            IntercomString::BString( bstring ) => bstring.com_into(),
-            IntercomString::CString( cstring ) => cstring.com_into(),
-            IntercomString::String( string ) => string.com_into()
+            IntercomString::BString( bstring ) => bstring.intercom_into(),
+            IntercomString::CString( cstring ) => cstring.intercom_into(),
+            IntercomString::String( string ) => string.intercom_into()
         }
     }
 }
 
-impl ComFrom<IntercomString> for String {
-    fn com_from( source : IntercomString ) -> Result<Self, ComError> {
+impl IntercomFrom<IntercomString> for String {
+    unsafe fn intercom_from( source : IntercomString ) -> Result<Self, ComError> {
         match source {
-            IntercomString::BString( bstring ) => bstring.com_into(),
-            IntercomString::CString( cstring ) => cstring.com_into(),
-            IntercomString::String( string ) => string.com_into()
+            IntercomString::BString( bstring ) => bstring.intercom_into(),
+            IntercomString::CString( cstring ) => cstring.intercom_into(),
+            IntercomString::String( string ) => string.intercom_into()
         }
     }
 }

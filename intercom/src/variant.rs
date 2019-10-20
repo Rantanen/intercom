@@ -174,7 +174,7 @@ impl<TS: TypeSystem> IntercomFrom<Variant> for raw::Variant<TS> {
                     raw::VariantData { cyVal : data.0 } ),
             Variant::String( data ) => raw::Variant::new(
                     raw::VariantType::new( raw::var_type::BSTR ),
-                    raw::VariantData { bstrVal : crate::BString::com_from( data )?.into_ptr() } ),
+                    raw::VariantData { bstrVal : crate::BString::intercom_from( data )?.into_ptr() } ),
             Variant::SystemTime( data ) => raw::Variant::new(
                     raw::VariantType::new( raw::var_type::DATE ),
                     raw::VariantData { date : data.into() } ),
@@ -476,8 +476,10 @@ impl TryFrom< Variant > for String {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< String, Self::Error > {
         match src {
-            Variant::String( data ) => String::com_from( data )
-                    .map_err( |_| VariantError ),
+            Variant::String( data ) => unsafe {
+                // Variant should hold a valid string, making this safe.
+                String::intercom_from( data ).map_err( |_| VariantError )
+            },
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -487,8 +489,10 @@ impl TryFrom< Variant > for BString {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< BString, Self::Error > {
         match src {
-            Variant::String( data ) => BString::com_from( data )
-                    .map_err( |_| VariantError ),
+            Variant::String( data ) => unsafe {
+                // Variant should hold a valid string, making this safe.
+                BString::intercom_from( data ).map_err( |_| VariantError )
+            },
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -498,8 +502,10 @@ impl TryFrom< Variant > for CString {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< CString, Self::Error > {
         match src {
-            Variant::String( data ) => CString::com_from( data )
-                    .map_err( |_| VariantError ),
+            Variant::String( data ) => unsafe {
+                // Variant should hold a valid string, making this safe.
+                CString::intercom_from( data ).map_err( |_| VariantError )
+            },
             _ => Err( VariantError::from( &src ) )
         }
     }
