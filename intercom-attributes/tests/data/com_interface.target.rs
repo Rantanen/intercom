@@ -38,219 +38,307 @@ pub trait Foo {
 }
 #[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
-pub const IID_Foo_Automation: ::intercom::IID =
-    ::intercom::GUID{data1: 0u32,
-                     data2: 0u16,
-                     data3: 0u16,
-                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
+pub const IID_Foo_Automation: intercom::IID =
+    intercom::GUID{data1: 0u32,
+                   data2: 0u16,
+                   data3: 0u16,
+                   data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
 pub struct __Foo_AutomationVtbl {
-    pub __base: ::intercom::IUnknownVtbl,
+    pub __base: intercom::IUnknownVtbl,
     pub simple_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                 ::intercom::RawComPtr)
-                                      -> (),
+                                                           intercom::RawComPtr)
+                                      ->
+                                          <() as
+                                          intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub arg_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                              ::intercom::RawComPtr,
-                                                          a: u16) -> (),
+                                                        intercom::RawComPtr,
+                                                    a:
+                                                        <u16 as
+                                                        intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
+                                   ->
+                                       <() as
+                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub simple_result_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                        ::intercom::RawComPtr)
-                                             -> u16,
+                                                                  intercom::RawComPtr)
+                                             ->
+                                                 <u16 as
+                                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub com_result_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                     ::intercom::RawComPtr,
-                                                                 __out:
-                                                                     *mut u16)
-                                          -> ::intercom::raw::HRESULT,
-    pub rust_result_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                      ::intercom::RawComPtr,
-                                                                  __out:
-                                                                      *mut u16)
-                                           -> ::intercom::raw::HRESULT,
-    pub complete_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                   ::intercom::RawComPtr,
-                                                               a: u16, b: i16,
-                                                               __out:
-                                                                   *mut ::intercom::raw::VariantBool)
-                                        -> ::intercom::raw::HRESULT,
-    pub string_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                 ::intercom::RawComPtr,
-                                                             msg:
-                                                                 ::intercom::raw::InBSTR)
-                                      -> ::intercom::raw::OutBSTR,
-    pub comitf_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                 ::intercom::RawComPtr,
-                                                             itf:
-                                                                 ::intercom::raw::InterfacePtr<Foo>,
-                                                             __out:
-                                                                 *mut ::intercom::raw::InterfacePtr<IUnknown>)
-                                      -> ::intercom::raw::HRESULT,
-    pub bool_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                               ::intercom::RawComPtr,
-                                                           input:
-                                                               ::intercom::raw::VariantBool,
+                                                               intercom::RawComPtr,
                                                            __out:
-                                                               *mut ::intercom::raw::VariantBool)
-                                    -> ::intercom::raw::HRESULT,
+                                                               *mut <u16 as
+                                                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                          ->
+                                              <intercom::raw::HRESULT as
+                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+    pub rust_result_method_Automation: unsafe extern "C" fn(self_vtable:
+                                                                intercom::RawComPtr,
+                                                            __out:
+                                                                *mut <u16 as
+                                                                     intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                           ->
+                                               <intercom::raw::HRESULT as
+                                               intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+    pub complete_method_Automation: unsafe extern "C" fn(self_vtable:
+                                                             intercom::RawComPtr,
+                                                         a:
+                                                             <u16 as
+                                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                         b:
+                                                             <i16 as
+                                                             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                         __out:
+                                                             *mut <bool as
+                                                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                        ->
+                                            <intercom::raw::HRESULT as
+                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+    pub string_method_Automation: unsafe extern "C" fn(self_vtable:
+                                                           intercom::RawComPtr,
+                                                       msg:
+                                                           <String as
+                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType)
+                                      ->
+                                          <String as
+                                          intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+    pub comitf_method_Automation: unsafe extern "C" fn(self_vtable:
+                                                           intercom::RawComPtr,
+                                                       itf:
+                                                           <ComItf<Foo> as
+                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                       __out:
+                                                           *mut <ComItf<IUnknown>
+                                                                as
+                                                                intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                      ->
+                                          <intercom::raw::HRESULT as
+                                          intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+    pub bool_method_Automation: unsafe extern "C" fn(self_vtable:
+                                                         intercom::RawComPtr,
+                                                     input:
+                                                         <bool as
+                                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                     __out:
+                                                         *mut <bool as
+                                                              intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                    ->
+                                        <intercom::raw::HRESULT as
+                                        intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub variant_method_Automation: unsafe extern "C" fn(self_vtable:
-                                                                  ::intercom::RawComPtr,
-                                                              input:
-                                                                  ::intercom::raw::Variant,
-                                                              __out:
-                                                                  *mut ::intercom::raw::Variant)
-                                       -> ::intercom::raw::HRESULT,
+                                                            intercom::RawComPtr,
+                                                        input:
+                                                            <Variant as
+                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
+                                                        __out:
+                                                            *mut <Variant as
+                                                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
+                                       ->
+                                           <intercom::raw::HRESULT as
+                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
 }
 #[doc = "`Foo` interface ID."]
 #[allow(non_upper_case_globals)]
-pub const IID_Foo_Raw: ::intercom::IID =
-    ::intercom::GUID{data1: 0u32,
-                     data2: 0u16,
-                     data3: 0u16,
-                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
+pub const IID_Foo_Raw: intercom::IID =
+    intercom::GUID{data1: 0u32,
+                   data2: 0u16,
+                   data3: 0u16,
+                   data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
 #[allow(non_camel_case_types)]
 #[repr(C)]
 #[doc(hidden)]
 pub struct __Foo_RawVtbl {
-    pub __base: ::intercom::IUnknownVtbl,
+    pub __base: intercom::IUnknownVtbl,
     pub simple_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                          ::intercom::RawComPtr)
-                               -> (),
-    pub arg_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                       ::intercom::RawComPtr,
-                                                   a: u16) -> (),
+                                                    intercom::RawComPtr)
+                               ->
+                                   <() as
+                                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+    pub arg_method_Raw: unsafe extern "C" fn(self_vtable: intercom::RawComPtr,
+                                             a:
+                                                 <u16 as
+                                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
+                            ->
+                                <() as
+                                intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
     pub simple_result_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                                 ::intercom::RawComPtr)
-                                      -> u16,
+                                                           intercom::RawComPtr)
+                                      ->
+                                          <u16 as
+                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub com_result_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                              ::intercom::RawComPtr,
-                                                          __out: *mut u16)
-                                   -> ::intercom::raw::HRESULT,
+                                                        intercom::RawComPtr,
+                                                    __out:
+                                                        *mut <u16 as
+                                                             intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                   ->
+                                       <intercom::raw::HRESULT as
+                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub rust_result_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                               ::intercom::RawComPtr,
-                                                           __out: *mut u16)
-                                    -> ::intercom::raw::HRESULT,
+                                                         intercom::RawComPtr,
+                                                     __out:
+                                                         *mut <u16 as
+                                                              intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                    ->
+                                        <intercom::raw::HRESULT as
+                                        intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub complete_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                            ::intercom::RawComPtr,
-                                                        a: u16, b: i16,
-                                                        __out: *mut bool)
-                                 -> ::intercom::raw::HRESULT,
+                                                      intercom::RawComPtr,
+                                                  a:
+                                                      <u16 as
+                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                  b:
+                                                      <i16 as
+                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                  __out:
+                                                      *mut <bool as
+                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                 ->
+                                     <intercom::raw::HRESULT as
+                                     intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub string_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                          ::intercom::RawComPtr,
-                                                      msg:
-                                                          ::intercom::raw::InCStr)
-                               -> ::intercom::raw::OutCStr,
+                                                    intercom::RawComPtr,
+                                                msg:
+                                                    <String as
+                                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType)
+                               ->
+                                   <String as
+                                   intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub comitf_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                          ::intercom::RawComPtr,
-                                                      itf:
-                                                          ::intercom::raw::InterfacePtr<Foo>,
-                                                      __out:
-                                                          *mut ::intercom::raw::InterfacePtr<IUnknown>)
-                               -> ::intercom::raw::HRESULT,
+                                                    intercom::RawComPtr,
+                                                itf:
+                                                    <ComItf<Foo> as
+                                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                __out:
+                                                    *mut <ComItf<IUnknown> as
+                                                         intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                               ->
+                                   <intercom::raw::HRESULT as
+                                   intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub bool_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                        ::intercom::RawComPtr,
-                                                    input: bool,
-                                                    __out: *mut bool)
-                             -> ::intercom::raw::HRESULT,
+                                                  intercom::RawComPtr,
+                                              input:
+                                                  <bool as
+                                                  intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                              __out:
+                                                  *mut <bool as
+                                                       intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                             ->
+                                 <intercom::raw::HRESULT as
+                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
     pub variant_method_Raw: unsafe extern "C" fn(self_vtable:
-                                                           ::intercom::RawComPtr,
-                                                       input:
-                                                           ::intercom::raw::Variant,
-                                                       __out:
-                                                           *mut ::intercom::raw::Variant)
-                                -> ::intercom::raw::HRESULT,
+                                                     intercom::RawComPtr,
+                                                 input:
+                                                     <Variant as
+                                                     intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
+                                                 __out:
+                                                     *mut <Variant as
+                                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
+                                ->
+                                    <intercom::raw::HRESULT as
+                                    intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType,
 }
-impl Foo for ::intercom::ComItf<Foo> {
+impl Foo for intercom::ComItf<Foo> {
     fn arg_method(&self, a: u16) -> () {
         #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
+        use intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<(), ::intercom::ComError> =
+            let result: Result<(), intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
                              ((**vtbl).arg_method_Automation)(comptr.ptr,
-                                                              a.into());
+                                                              (&<u16 as
+                                                                    intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(a)?).intercom_into()?);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 0u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 0u8],};
                          Ok({ })
                      })();
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <() as ::intercom::ErrorValue>::from_com_error(err),
+                       <() as intercom::ErrorValue>::from_com_error(err),
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<(), ::intercom::ComError> =
+            let result: Result<(), intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
-                             ((**vtbl).arg_method_Raw)(comptr.ptr, a.into());
+                             ((**vtbl).arg_method_Raw)(comptr.ptr,
+                                                       (&<u16 as
+                                                             intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(a)?).intercom_into()?);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 1u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 1u8],};
                          Ok({ })
                      })();
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <() as ::intercom::ErrorValue>::from_com_error(err),
+                       <() as intercom::ErrorValue>::from_com_error(err),
                    };
         }
         <() as
-            ::intercom::ErrorValue>::from_com_error(::intercom::ComError::E_POINTER.into())
+            intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn bool_method(&self, input: bool) -> ComResult<bool> {
         #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
+        use intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<ComResult<bool>, ::intercom::ComError> =
+            let result: Result<ComResult<bool>, intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: ::intercom::raw::VariantBool =
-                             false.into();
+                         let mut __out:
+                                 <bool as
+                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType =
+                             intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).bool_method_Automation)(comptr.ptr,
-                                                               input.into(),
+                                                               (&<bool as
+                                                                     intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(input)?).intercom_into()?,
                                                                &mut __out);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 0u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 0u8],};
                          Ok({
-                                if __result == ::intercom::raw::S_OK ||
-                                       __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                if __result == intercom::raw::S_OK ||
+                                       __result == intercom::raw::S_FALSE {
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
-                                                                      &INTERCOM_iid,
-                                                                      __result));
+                                    return Err(intercom::load_error(self.as_ref(),
+                                                                    &INTERCOM_iid,
+                                                                    __result));
                                 }
                             })
                      })();
@@ -258,37 +346,42 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<bool> as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                           intercom::ErrorValue>::from_com_error(err),
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<ComResult<bool>, ::intercom::ComError> =
+            let result: Result<ComResult<bool>, intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: bool = false;
+                         let mut __out:
+                                 <bool as
+                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType =
+                             intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).bool_method_Raw)(comptr.ptr,
-                                                        input.into(),
+                                                        (&<bool as
+                                                              intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(input)?).intercom_into()?,
                                                         &mut __out);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 1u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 1u8],};
                          Ok({
-                                if __result == ::intercom::raw::S_OK ||
-                                       __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                if __result == intercom::raw::S_OK ||
+                                       __result == intercom::raw::S_FALSE {
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
-                                                                      &INTERCOM_iid,
-                                                                      __result));
+                                    return Err(intercom::load_error(self.as_ref(),
+                                                                    &INTERCOM_iid,
+                                                                    __result));
                                 }
                             })
                      })();
@@ -296,44 +389,46 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<bool> as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                           intercom::ErrorValue>::from_com_error(err),
                    };
         }
         <ComResult<bool> as
-            ::intercom::ErrorValue>::from_com_error(::intercom::ComError::E_POINTER.into())
+            intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn com_result_method(&self) -> ComResult<u16> {
         #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
+        use intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<ComResult<u16>, ::intercom::ComError> =
+            let result: Result<ComResult<u16>, intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: u16 = Default::default();
+                         let mut __out:
+                                 <u16 as
+                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType =
+                             intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).com_result_method_Automation)(comptr.ptr,
                                                                      &mut __out);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 0u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 0u8],};
                          Ok({
-                                if __result == ::intercom::raw::S_OK ||
-                                       __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                if __result == intercom::raw::S_OK ||
+                                       __result == intercom::raw::S_FALSE {
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
-                                                                      &INTERCOM_iid,
-                                                                      __result));
+                                    return Err(intercom::load_error(self.as_ref(),
+                                                                    &INTERCOM_iid,
+                                                                    __result));
                                 }
                             })
                      })();
@@ -341,36 +436,40 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<u16> as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                           intercom::ErrorValue>::from_com_error(err),
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<ComResult<u16>, ::intercom::ComError> =
+            let result: Result<ComResult<u16>, intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: u16 = Default::default();
+                         let mut __out:
+                                 <u16 as
+                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType =
+                             intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).com_result_method_Raw)(comptr.ptr,
                                                               &mut __out);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 1u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 1u8],};
                          Ok({
-                                if __result == ::intercom::raw::S_OK ||
-                                       __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                if __result == intercom::raw::S_OK ||
+                                       __result == intercom::raw::S_FALSE {
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
-                                                                      &INTERCOM_iid,
-                                                                      __result));
+                                    return Err(intercom::load_error(self.as_ref(),
+                                                                    &INTERCOM_iid,
+                                                                    __result));
                                 }
                             })
                      })();
@@ -378,51 +477,50 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<u16> as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                           intercom::ErrorValue>::from_com_error(err),
                    };
         }
         <ComResult<u16> as
-            ::intercom::ErrorValue>::from_com_error(::intercom::ComError::E_POINTER.into())
+            intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn comitf_method(&self, itf: ComItf<Foo>) -> ComResult<ComItf<IUnknown>> {
         #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
+        use intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
             let result:
-                    Result<ComResult<ComItf<IUnknown>>,
-                           ::intercom::ComError> =
+                    Result<ComResult<ComItf<IUnknown>>, intercom::ComError> =
                 (||
                      unsafe {
                          let mut __out:
-                                 ::intercom::raw::InterfacePtr<IUnknown> =
-                             ::intercom::raw::InterfacePtr::new(::std::ptr::null_mut());
+                                 <ComItf<IUnknown> as
+                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType =
+                             intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).comitf_method_Automation)(comptr.ptr,
-                                                                 ::intercom::ComItf::ptr(&itf.into(),
-                                                                                         ::intercom::TypeSystem::Automation),
+                                                                 (&<ComItf<Foo>
+                                                                       as
+                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(itf)?).intercom_into()?,
                                                                  &mut __out);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 0u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 0u8],};
                          Ok({
-                                if __result == ::intercom::raw::S_OK ||
-                                       __result == ::intercom::raw::S_FALSE {
-                                    Ok(::intercom::ComItf::wrap(__out,
-                                                                ::intercom::TypeSystem::Automation))
+                                if __result == intercom::raw::S_OK ||
+                                       __result == intercom::raw::S_FALSE {
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
-                                                                      &INTERCOM_iid,
-                                                                      __result));
+                                    return Err(intercom::load_error(self.as_ref(),
+                                                                    &INTERCOM_iid,
+                                                                    __result));
                                 }
                             })
                      })();
@@ -430,43 +528,43 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<ComItf<IUnknown>> as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                           intercom::ErrorValue>::from_com_error(err),
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
             let result:
-                    Result<ComResult<ComItf<IUnknown>>,
-                           ::intercom::ComError> =
+                    Result<ComResult<ComItf<IUnknown>>, intercom::ComError> =
                 (||
                      unsafe {
                          let mut __out:
-                                 ::intercom::raw::InterfacePtr<IUnknown> =
-                             ::intercom::raw::InterfacePtr::new(::std::ptr::null_mut());
+                                 <ComItf<IUnknown> as
+                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType =
+                             intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).comitf_method_Raw)(comptr.ptr,
-                                                          ::intercom::ComItf::ptr(&itf.into(),
-                                                                                  ::intercom::TypeSystem::Raw),
+                                                          (&<ComItf<Foo> as
+                                                                intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(itf)?).intercom_into()?,
                                                           &mut __out);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 1u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 1u8],};
                          Ok({
-                                if __result == ::intercom::raw::S_OK ||
-                                       __result == ::intercom::raw::S_FALSE {
-                                    Ok(::intercom::ComItf::wrap(__out,
-                                                                ::intercom::TypeSystem::Raw))
+                                if __result == intercom::raw::S_OK ||
+                                       __result == intercom::raw::S_FALSE {
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
-                                                                      &INTERCOM_iid,
-                                                                      __result));
+                                    return Err(intercom::load_error(self.as_ref(),
+                                                                    &INTERCOM_iid,
+                                                                    __result));
                                 }
                             })
                      })();
@@ -474,47 +572,50 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<ComItf<IUnknown>> as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                           intercom::ErrorValue>::from_com_error(err),
                    };
         }
         <ComResult<ComItf<IUnknown>> as
-            ::intercom::ErrorValue>::from_com_error(::intercom::ComError::E_POINTER.into())
+            intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
         #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
+        use intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<ComResult<bool>, ::intercom::ComError> =
+            let result: Result<ComResult<bool>, intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: ::intercom::raw::VariantBool =
-                             false.into();
+                         let mut __out:
+                                 <bool as
+                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType =
+                             intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).complete_method_Automation)(comptr.ptr,
-                                                                   a.into(),
-                                                                   b.into(),
+                                                                   (&<u16 as
+                                                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(a)?).intercom_into()?,
+                                                                   (&<i16 as
+                                                                         intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(b)?).intercom_into()?,
                                                                    &mut __out);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 0u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 0u8],};
                          Ok({
-                                if __result == ::intercom::raw::S_OK ||
-                                       __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                if __result == intercom::raw::S_OK ||
+                                       __result == intercom::raw::S_FALSE {
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
-                                                                      &INTERCOM_iid,
-                                                                      __result));
+                                    return Err(intercom::load_error(self.as_ref(),
+                                                                    &INTERCOM_iid,
+                                                                    __result));
                                 }
                             })
                      })();
@@ -522,38 +623,44 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<bool> as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                           intercom::ErrorValue>::from_com_error(err),
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<ComResult<bool>, ::intercom::ComError> =
+            let result: Result<ComResult<bool>, intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: bool = false;
+                         let mut __out:
+                                 <bool as
+                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType =
+                             intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).complete_method_Raw)(comptr.ptr,
-                                                            a.into(),
-                                                            b.into(),
+                                                            (&<u16 as
+                                                                  intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(a)?).intercom_into()?,
+                                                            (&<i16 as
+                                                                  intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(b)?).intercom_into()?,
                                                             &mut __out);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 1u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 1u8],};
                          Ok({
-                                if __result == ::intercom::raw::S_OK ||
-                                       __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                if __result == intercom::raw::S_OK ||
+                                       __result == intercom::raw::S_FALSE {
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
-                                                                      &INTERCOM_iid,
-                                                                      __result));
+                                    return Err(intercom::load_error(self.as_ref(),
+                                                                    &INTERCOM_iid,
+                                                                    __result));
                                 }
                             })
                      })();
@@ -561,44 +668,46 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<bool> as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                           intercom::ErrorValue>::from_com_error(err),
                    };
         }
         <ComResult<bool> as
-            ::intercom::ErrorValue>::from_com_error(::intercom::ComError::E_POINTER.into())
+            intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn rust_result_method(&self) -> Result<u16, i32> {
         #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
+        use intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<Result<u16, i32>, ::intercom::ComError> =
+            let result: Result<Result<u16, i32>, intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: u16 = Default::default();
+                         let mut __out:
+                                 <u16 as
+                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType =
+                             intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).rust_result_method_Automation)(comptr.ptr,
                                                                       &mut __out);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 0u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 0u8],};
                          Ok({
-                                if __result == ::intercom::raw::S_OK ||
-                                       __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                if __result == intercom::raw::S_OK ||
+                                       __result == intercom::raw::S_FALSE {
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
-                                                                      &INTERCOM_iid,
-                                                                      __result));
+                                    return Err(intercom::load_error(self.as_ref(),
+                                                                    &INTERCOM_iid,
+                                                                    __result));
                                 }
                             })
                      })();
@@ -606,36 +715,40 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <Result<u16, i32> as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                           intercom::ErrorValue>::from_com_error(err),
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<Result<u16, i32>, ::intercom::ComError> =
+            let result: Result<Result<u16, i32>, intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: u16 = Default::default();
+                         let mut __out:
+                                 <u16 as
+                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType =
+                             intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).rust_result_method_Raw)(comptr.ptr,
                                                                &mut __out);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 1u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 1u8],};
                          Ok({
-                                if __result == ::intercom::raw::S_OK ||
-                                       __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                if __result == intercom::raw::S_OK ||
+                                       __result == intercom::raw::S_FALSE {
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
-                                                                      &INTERCOM_iid,
-                                                                      __result));
+                                    return Err(intercom::load_error(self.as_ref(),
+                                                                    &INTERCOM_iid,
+                                                                    __result));
                                 }
                             })
                      })();
@@ -643,232 +756,227 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <Result<u16, i32> as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                           intercom::ErrorValue>::from_com_error(err),
                    };
         }
         <Result<u16, i32> as
-            ::intercom::ErrorValue>::from_com_error(::intercom::ComError::E_POINTER.into())
+            intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn simple_method(&self) -> () {
         #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
+        use intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<(), ::intercom::ComError> =
+            let result: Result<(), intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
                              ((**vtbl).simple_method_Automation)(comptr.ptr);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 0u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 0u8],};
                          Ok({ })
                      })();
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <() as ::intercom::ErrorValue>::from_com_error(err),
+                       <() as intercom::ErrorValue>::from_com_error(err),
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<(), ::intercom::ComError> =
+            let result: Result<(), intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
                              ((**vtbl).simple_method_Raw)(comptr.ptr);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 1u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 1u8],};
                          Ok({ })
                      })();
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <() as ::intercom::ErrorValue>::from_com_error(err),
+                       <() as intercom::ErrorValue>::from_com_error(err),
                    };
         }
         <() as
-            ::intercom::ErrorValue>::from_com_error(::intercom::ComError::E_POINTER.into())
+            intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn simple_result_method(&self) -> u16 {
         #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
+        use intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<u16, ::intercom::ComError> =
+            let result: Result<u16, intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
                              ((**vtbl).simple_result_method_Automation)(comptr.ptr);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 0u8],};
-                         Ok({ __result.into() })
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 0u8],};
+                         Ok({ __result.intercom_into()? })
                      })();
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <u16 as ::intercom::ErrorValue>::from_com_error(err),
+                       <u16 as intercom::ErrorValue>::from_com_error(err),
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<u16, ::intercom::ComError> =
+            let result: Result<u16, intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
                              ((**vtbl).simple_result_method_Raw)(comptr.ptr);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 1u8],};
-                         Ok({ __result.into() })
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 1u8],};
+                         Ok({ __result.intercom_into()? })
                      })();
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <u16 as ::intercom::ErrorValue>::from_com_error(err),
+                       <u16 as intercom::ErrorValue>::from_com_error(err),
                    };
         }
         <u16 as
-            ::intercom::ErrorValue>::from_com_error(::intercom::ComError::E_POINTER.into())
+            intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn string_method(&self, msg: String) -> String {
         #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
+        use intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
-            let mut __msg_temporary =
-                <&::intercom::BStr as
-                    ::intercom::FromWithTemporary<String>>::to_temporary(msg)?;
             #[allow(unused_unsafe)]
-            let result: Result<String, ::intercom::ComError> =
+            let result: Result<String, intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
                              ((**vtbl).string_method_Automation)(comptr.ptr,
-                                                                 <&::intercom::BStr
-                                                                     as
-                                                                     ::intercom::FromWithTemporary<String>>::from_temporary(&mut __msg_temporary)?.as_ptr());
+                                                                 (&<String as
+                                                                       intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(msg)?).intercom_into()?);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 0u8],};
-                         Ok({
-                                ::intercom::BString::from_ptr(__result).com_into()?
-                            })
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 0u8],};
+                         Ok({ __result.intercom_into()? })
                      })();
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <String as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                       <String as intercom::ErrorValue>::from_com_error(err),
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
-            let mut __msg_temporary =
-                <&::intercom::CStr as
-                    ::intercom::FromWithTemporary<String>>::to_temporary(msg)?;
             #[allow(unused_unsafe)]
-            let result: Result<String, ::intercom::ComError> =
+            let result: Result<String, intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
                              ((**vtbl).string_method_Raw)(comptr.ptr,
-                                                          <&::intercom::CStr
-                                                              as
-                                                              ::intercom::FromWithTemporary<String>>::from_temporary(&mut __msg_temporary)?.as_ptr());
+                                                          (&<String as
+                                                                intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(msg)?).intercom_into()?);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 1u8],};
-                         Ok({
-                                ::intercom::CString::from_raw(__result).com_into()?
-                            })
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 1u8],};
+                         Ok({ __result.intercom_into()? })
                      })();
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <String as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                       <String as intercom::ErrorValue>::from_com_error(err),
                    };
         }
         <String as
-            ::intercom::ErrorValue>::from_com_error(::intercom::ComError::E_POINTER.into())
+            intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn variant_method(&self, input: Variant) -> ComResult<Variant> {
         #[allow(unused_imports)]
-        use ::intercom::ComInto;
-        #[allow(unused_imports)]
-        use ::intercom::ErrorValue;
+        use intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Automation) {
+               ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<ComResult<Variant>, ::intercom::ComError> =
+            let result: Result<ComResult<Variant>, intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: ::intercom::raw::Variant =
-                             Default::default();
+                         let mut __out:
+                                 <Variant as
+                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType =
+                             intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).variant_method_Automation)(comptr.ptr,
-                                                                  input.com_into()?,
+                                                                  (&<Variant
+                                                                        as
+                                                                        intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(input)?).intercom_into()?,
                                                                   &mut __out);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 0u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 0u8],};
                          Ok({
-                                if __result == ::intercom::raw::S_OK ||
-                                       __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                if __result == intercom::raw::S_OK ||
+                                       __result == intercom::raw::S_FALSE {
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
-                                                                      &INTERCOM_iid,
-                                                                      __result));
+                                    return Err(intercom::load_error(self.as_ref(),
+                                                                    &INTERCOM_iid,
+                                                                    __result));
                                 }
                             })
                      })();
@@ -876,38 +984,42 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<Variant> as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                           intercom::ErrorValue>::from_com_error(err),
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr(self, ::intercom::TypeSystem::Raw) {
+               ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
+           {
+            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<ComResult<Variant>, ::intercom::ComError> =
+            let result: Result<ComResult<Variant>, intercom::ComError> =
                 (||
                      unsafe {
-                         let mut __out: ::intercom::raw::Variant =
-                             Default::default();
+                         let mut __out:
+                                 <Variant as
+                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType =
+                             intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).variant_method_Raw)(comptr.ptr,
-                                                           input.com_into()?,
+                                                           (&<Variant as
+                                                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(input)?).intercom_into()?,
                                                            &mut __out);
                          let INTERCOM_iid =
-                             ::intercom::GUID{data1: 0u32,
-                                              data2: 0u16,
-                                              data3: 0u16,
-                                              data4:
-                                                  [0u8, 0u8, 0u8, 0u8, 0u8,
-                                                   0u8, 0u8, 1u8],};
+                             intercom::GUID{data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4:
+                                                [0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                                                 0u8, 1u8],};
                          Ok({
-                                if __result == ::intercom::raw::S_OK ||
-                                       __result == ::intercom::raw::S_FALSE {
-                                    Ok(__out.into())
+                                if __result == intercom::raw::S_OK ||
+                                       __result == intercom::raw::S_FALSE {
+                                    Ok(__out.intercom_into()?)
                                 } else {
-                                    return Err(::intercom::load_error(&ComItf::wrap(comptr.as_unknown(),
-                                                                                    ::intercom::TypeSystem::Automation),
-                                                                      &INTERCOM_iid,
-                                                                      __result));
+                                    return Err(intercom::load_error(self.as_ref(),
+                                                                    &INTERCOM_iid,
+                                                                    __result));
                                 }
                             })
                      })();
@@ -915,22 +1027,887 @@ impl Foo for ::intercom::ComItf<Foo> {
                        Ok(v) => v,
                        Err(err) =>
                        <ComResult<Variant> as
-                           ::intercom::ErrorValue>::from_com_error(err),
+                           intercom::ErrorValue>::from_com_error(err),
                    };
         }
         <ComResult<Variant> as
-            ::intercom::ErrorValue>::from_com_error(::intercom::ComError::E_POINTER.into())
+            intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
 }
-impl ::intercom::ComInterface for Foo {
+impl intercom::ComInterface for Foo {
     #[doc = "Returns the IID of the requested interface."]
-    fn iid(ts: ::intercom::TypeSystem) -> Option<&'static ::intercom::IID> {
+    fn iid(ts: intercom::type_system::TypeSystemName)
+     -> Option<&'static intercom::IID> {
         match ts {
-            ::intercom::TypeSystem::Automation => Some(&IID_Foo_Automation),
-            ::intercom::TypeSystem::Raw => Some(&IID_Foo_Raw),
+            intercom::type_system::TypeSystemName::Automation =>
+            Some(&IID_Foo_Automation),
+            intercom::type_system::TypeSystemName::Raw => Some(&IID_Foo_Raw),
         }
     }
-    fn deref(com_itf: &::intercom::ComItf<Foo>) -> &(Foo + 'static) {
-        com_itf
-    }
+    fn deref(com_itf: &intercom::ComItf<Foo>) -> &(Foo + 'static) { com_itf }
+}
+impl intercom::type_system::BidirectionalTypeInfo for Foo {
+    #[doc = r" The name of the type."]
+    fn type_name() -> &'static str { "Foo" }
+}
+pub(crate) fn get_intercom_interface_info_for_Foo()
+ -> intercom::typelib::TypeInfo {
+    let mut variants =
+        <[_]>::into_vec(box
+                            [intercom::ComStruct::new(intercom::typelib::InterfaceVariant{ts:
+                                                                                              intercom::type_system::TypeSystemName::Automation,
+                                                                                          iid:
+                                                                                              intercom::GUID{data1:
+                                                                                                                 0u32,
+                                                                                                             data2:
+                                                                                                                 0u16,
+                                                                                                             data3:
+                                                                                                                 0u16,
+                                                                                                             data4:
+                                                                                                                 [0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8],},
+                                                                                          methods:
+                                                                                              <[_]>::into_vec(box
+                                                                                                                  [intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "simple_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     "void".into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              []),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "arg_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     "void".into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "a".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "simple_result_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<u16
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<u16
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              []),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "com_result_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "__out".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "rust_result_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<i32
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<i32
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "__out".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "complete_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "a".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
+                                                                                                                                                                                               intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "b".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<i16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<i16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
+                                                                                                                                                                                               intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "__out".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<bool
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<bool
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "string_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<String
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<String
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "msg".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<String
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<String
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "comitf_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "itf".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<ComItf<Foo>
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<ComItf<Foo>
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
+                                                                                                                                                                                               intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "__out".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<ComItf<IUnknown>
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<ComItf<IUnknown>
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "bool_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "input".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<bool
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<bool
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
+                                                                                                                                                                                               intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "__out".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<bool
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<bool
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "variant_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "input".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<Variant
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<Variant
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
+                                                                                                                                                                                               intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "__out".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<Variant
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<Variant
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),})]),}),
+                             intercom::ComStruct::new(intercom::typelib::InterfaceVariant{ts:
+                                                                                              intercom::type_system::TypeSystemName::Raw,
+                                                                                          iid:
+                                                                                              intercom::GUID{data1:
+                                                                                                                 0u32,
+                                                                                                             data2:
+                                                                                                                 0u16,
+                                                                                                             data3:
+                                                                                                                 0u16,
+                                                                                                             data4:
+                                                                                                                 [0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  0u8,
+                                                                                                                  1u8],},
+                                                                                          methods:
+                                                                                              <[_]>::into_vec(box
+                                                                                                                  [intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "simple_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     "void".into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              []),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "arg_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     "void".into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     0,
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "a".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "simple_result_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<u16
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<u16
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              []),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "com_result_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "__out".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "rust_result_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<i32
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<i32
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "__out".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "complete_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "a".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<u16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
+                                                                                                                                                                                               intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "b".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<i16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<i16
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
+                                                                                                                                                                                               intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "__out".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<bool
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<bool
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "string_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<String
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<String
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "msg".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<String
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<String
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "comitf_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "itf".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<ComItf<Foo>
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<ComItf<Foo>
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
+                                                                                                                                                                                               intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "__out".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<ComItf<IUnknown>
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<ComItf<IUnknown>
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "bool_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "input".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<bool
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<bool
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
+                                                                                                                                                                                               intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "__out".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<bool
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<bool
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),}),
+                                                                                                                   intercom::ComStruct::new(intercom::typelib::Method{name:
+                                                                                                                                                                          "variant_method".into(),
+                                                                                                                                                                      return_type:
+                                                                                                                                                                          intercom::typelib::Arg{name:
+                                                                                                                                                                                                     "".into(),
+                                                                                                                                                                                                 ty:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                 indirection_level:
+                                                                                                                                                                                                     <<intercom::raw::HRESULT
+                                                                                                                                                                                                      as
+                                                                                                                                                                                                      intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                         as
+                                                                                                                                                                                                         intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                 direction:
+                                                                                                                                                                                                     intercom::typelib::Direction::Return,},
+                                                                                                                                                                      parameters:
+                                                                                                                                                                          <[_]>::into_vec(box
+                                                                                                                                                                                              [intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "input".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<Variant
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<Variant
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::InputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::In,},
+                                                                                                                                                                                               intercom::typelib::Arg{name:
+                                                                                                                                                                                                                          "__out".into(),
+                                                                                                                                                                                                                      ty:
+                                                                                                                                                                                                                          <<Variant
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::type_name().into(),
+                                                                                                                                                                                                                      indirection_level:
+                                                                                                                                                                                                                          <<Variant
+                                                                                                                                                                                                                           as
+                                                                                                                                                                                                                           intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
+                                                                                                                                                                                                                              as
+                                                                                                                                                                                                                              intercom::type_system::OutputTypeInfo>::indirection_level(),
+                                                                                                                                                                                                                      direction:
+                                                                                                                                                                                                                          intercom::typelib::Direction::Retval,}]),})]),})]);
+    intercom::typelib::TypeInfo::Interface(intercom::ComStruct::new(intercom::typelib::Interface{name:
+                                                                                                     "Foo".into(),
+                                                                                                 variants:
+                                                                                                     variants,
+                                                                                                 options:
+                                                                                                     intercom::typelib::InterfaceOptions{class_impl_interface:
+                                                                                                                                             false,
+                                                                                                                                                      ..Default::default()},}))
 }

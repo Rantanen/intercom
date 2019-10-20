@@ -246,7 +246,7 @@ pub fn get_guid_tokens(
     let d4_6 = g.data4[ 6 ];
     let d4_7 = g.data4[ 7 ];
     quote!(
-        ::intercom::GUID {
+        intercom::GUID {
             data1: #d1, data2: #d2, data3: #d3,
             data4: [ #d4_0, #d4_1, #d4_2, #d4_3, #d4_4, #d4_5, #d4_6, #d4_7 ]
         }

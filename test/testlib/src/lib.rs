@@ -1,5 +1,5 @@
 #![crate_type="dylib"]
-#![feature(type_ascription)]
+#![feature(type_ascription, specialization)]
 
 
 extern crate intercom;
@@ -33,5 +33,6 @@ com_library!(
     strings::StringTests,
     type_system_callbacks::TypeSystemCaller,
     variant::VariantTests,
+    variant::VariantImpl,
     unicode::UnicodeConversion,
 );

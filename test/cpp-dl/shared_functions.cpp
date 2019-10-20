@@ -3,6 +3,7 @@
 #include "../cpp-utility/catch.hpp"
 
 #include "libraries.hpp"
+#include "generated/multi_lib.hpp"
 #include "generated/test_lib.hpp"
 
 #include <intercom.hpp>
@@ -70,7 +71,9 @@ TEST_CASE( "IntercomListClassObjects" )
         }
     }
 
-    REQUIRE( total_class_count == unique_classes.size() );
+    // Both libs expose the Allocator and ErrorStore.
+    // These are classes implemented by intercom and should be equal.
+    REQUIRE( total_class_count == unique_classes.size() + 2);
 
     SECTION( "Invalid parameters" )
     {

@@ -38,4 +38,3 @@ mod comlibrary; pub use self::comlibrary::*;
 mod comstruct; pub use self::comstruct::*;
 mod cominterface; pub use self::cominterface::*;
 mod comimpl; pub use self::comimpl::*;
-mod comcrate; pub use self::comcrate::*;

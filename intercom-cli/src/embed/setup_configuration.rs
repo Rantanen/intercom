@@ -1,17 +1,13 @@
 
-extern crate glob;
-extern crate winapi;
-use self::winapi::shared::minwindef::{DWORD, HKEY};
-use self::winapi::um::winnt::{KEY_READ};
-use self::winapi::um::winreg;
+use winapi::shared::minwindef::{DWORD, HKEY};
+use winapi::um::winnt::{KEY_READ};
+use winapi::um::winreg;
 
-extern crate intercom;
 use intercom::*;
 
 use std::path::PathBuf;
 use std::ffi::OsString;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
-use ::host;
 
 #[allow(dead_code)]
 #[allow(non_upper_case_globals)]
@@ -23,10 +19,20 @@ const CLSID_SetupConfiguration : GUID = GUID {
 };
 
 #[repr(C)]
-#[derive(Default)]
+#[derive(Default, BidirectionalTypeInfo, Debug)]
 pub struct FILETIME {
     low_part : u32,
     high_part : u32,
+}
+
+impl<TS: intercom::type_system::TypeSystem>
+        intercom::type_system::ExternType<TS>
+        for FILETIME {
+
+    type ExternInputType = Self;
+    type ExternOutputType = Self;
+    type OwnedExternType = Self;
+    type OwnedNativeType = Self;
 }
 
 #[com_interface( com_iid = "B41463C3-8866-43B5-BC33-2B0676F7F42E" )]
@@ -55,29 +61,29 @@ pub trait IEnumSetupInstances
     fn next(
         &self,
         celt : u32
-    ) -> ComResult< ( ComItf< dyn ISetupInstance >, u32 ) >;
+    ) -> ComResult< ( ComItf<dyn ISetupInstance>, u32 ) >;
 
     fn skip( &self, celt : u32 ) -> ComResult<()>;
 
     fn reset( &self ) -> ComResult<()>;
 
-    fn clone( &self ) -> ComResult< ComItf< dyn IEnumSetupInstances > >;
+    fn clone( &self ) -> ComResult< ComItf<dyn IEnumSetupInstances> >;
 }
 
 #[com_interface( com_iid = "26AAB78C-4A60-49D6-AF3B-3C35BC93365D" )]
 pub trait ISetupConfiguration2
 {
     fn enum_instances( &self )
-        -> ComResult< ComItf< dyn IEnumSetupInstances > >;
+        -> ComResult< ComItf<dyn IEnumSetupInstances> >;
 
     fn get_instance_for_current_process( &self )
-        -> ComResult< ComItf< dyn ISetupInstance > >;
+        -> ComResult< ComItf<dyn ISetupInstance> >;
 
     fn get_instance_for_path( &self, path : String )
-        -> ComResult< ComItf< dyn ISetupInstance > >;
+        -> ComResult< ComItf<dyn ISetupInstance> >;
 
     fn enum_all_instances( &self )
-        -> ComResult< ComItf< dyn IEnumSetupInstances > >;
+        -> ComResult< ComItf<dyn IEnumSetupInstances> >;
 }
 
 pub struct ToolPaths {
@@ -115,7 +121,7 @@ fn find_path( roots : &[&PathBuf], path : &str ) -> Option< PathBuf > {
         let pattern = format!( "{}/**/{}", root_str, path );
 
         // Go through all entries.
-        for entry in glob::glob_with( &pattern, &options ).unwrap() {
+        for entry in glob::glob_with( &pattern, options ).unwrap() {
             if let Ok( entry_path ) = entry {
 
                 // The first entry we find, we'll return.
@@ -161,14 +167,14 @@ fn get_kit_path() -> Result<( String, String ), String> {
                     .collect::<Vec<_>>();
 
         // Open the Installed Roots registry key.
-        let mut hkey_roots : HKEY = ::std::ptr::null_mut();
+        let mut hkey_roots : HKEY = std::ptr::null_mut();
         let mut disp : DWORD = 0;
         winreg::RegCreateKeyExW(
             winreg::HKEY_LOCAL_MACHINE,
             key.as_slice().as_ptr(),
-            0, ::std::ptr::null_mut(), 0,
+            0,::std::ptr::null_mut(), 0,
             KEY_READ,
-            ::std::ptr::null_mut(),
+            std::ptr::null_mut(),
             &mut hkey_roots,
             &mut disp );
         if hkey_roots.is_null() {
@@ -179,8 +185,8 @@ fn get_kit_path() -> Result<( String, String ), String> {
         let mut buf = Vec::with_capacity( 250 );
         let mut buf_len : DWORD = 250;
         let hr = winreg::RegQueryValueExW(
-                hkey_roots, value.as_slice().as_ptr(), ::std::ptr::null_mut(),
-                ::std::ptr::null_mut(),
+                hkey_roots, value.as_slice().as_ptr(), std::ptr::null_mut(),
+                std::ptr::null_mut(),
                 buf.as_mut_ptr() as *mut _,
                 &mut buf_len );
         if hr != 0 {
@@ -200,10 +206,10 @@ fn get_kit_path() -> Result<( String, String ), String> {
         let hr = winreg::RegEnumKeyExW(
             hkey_roots, 0,
             buf.as_mut_ptr(), &mut buf_len,
-            ::std::ptr::null_mut(),
-            ::std::ptr::null_mut(),
-            ::std::ptr::null_mut(),
-            ::std::ptr::null_mut() );
+            std::ptr::null_mut(),
+            std::ptr::null_mut(),
+            std::ptr::null_mut(),
+            std::ptr::null_mut() );
         if hr != 0 {
             return Err( "Could not read Windows Kits versions".to_owned() );
         }
@@ -268,28 +274,20 @@ pub fn get_tool_paths() -> Result<ToolPaths, String> {
 
     // Resolve the required include directories.
     let incs = get_compiler_paths( &[
-            find_path( &[ &kit_include_root ], r"oaidl.idl" ).unwrap(),
-            find_path( &[ &kit_include_root ], r"wtypes.idl" ).unwrap(),
-        ] );
+        find_path( &[ &kit_include_root ], r"oaidl.idl" ).unwrap(),
+        find_path( &[ &kit_include_root ], r"wtypes.idl" ).unwrap(),
+    ] );
 
     // We'll need the C compiler for the preprocessing of the IDL.
     let mut vs_bin = find_path( &[ &vsroot ], r"Hostx64\x64\cl.exe" ).unwrap();
     vs_bin.pop();
 
-    // Resource compiler depends on the toolchain.
-    let host = host::get_host();
-    let rc = match host.compiler {
-        host::Compiler::Msvc =>
-            kitroot.join( format!( r"bin\{}\x64\rc.exe", kitversion ) ),
-        host::Compiler::Gnu =>
-            PathBuf::from( "windres.exe" ),  // Needs to be on PATH.
-    };
-
     Ok( ToolPaths {
         mt: kitroot.join( format!( r"bin\{}\x64\mt.exe", kitversion ) ),
         midl: kitroot.join( format!( r"bin\{}\x64\midl.exe", kitversion ) ),
+        rc : kitroot.join( format!( r"bin\{}\x64\rc.exe", kitversion ) ),
 
-        rc, vs_bin, libs, incs
+        vs_bin, libs, incs
     } )
 }
 
@@ -297,8 +295,8 @@ pub fn get_tool_paths() -> Result<ToolPaths, String> {
 mod test
 {
     use super::*;
-    use ::std::process::Command;
-    use ::std::path::PathBuf;
+    use std::process::Command;
+    use std::path::PathBuf;
 
     #[test]
     fn get_vs_2017_details() {
@@ -327,9 +325,9 @@ mod test
     }
 
     fn get_intercom_root() -> PathBuf {
-        let mut root_path = ::std::env::current_exe().unwrap();
+        let mut root_path = std::env::current_exe().unwrap();
         loop {
-            if root_path.join( "intercom-build" ).exists() {
+            if root_path.join( "intercom-cli" ).exists() {
                 break;
             }
             assert!( root_path.pop() );
@@ -393,7 +391,7 @@ mod test
 
         // The HOST env variable is set for build.rs, not for tests.
         // We need to fake one here.
-        ::std::env::set_var( "HOST", "x86_64-pc-windows-msvc" );
+        std::env::set_var( "HOST", "x86_64-pc-windows-msvc" );
 
         let paths = get_tool_paths().unwrap();
         assert!( paths.mt.exists() );

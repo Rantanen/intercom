@@ -2,7 +2,6 @@
 name = "multi_lib"
 version = "0.1.0"
 authors = ["Juha Lepola <fluxe@fluxie.fi>"]
-build = "build.rs"
 
 [lib]
 crate-type = [ "cdylib" ]
@@ -10,6 +9,3 @@ crate-type = [ "cdylib" ]
 [dependencies]
 intercom = { path = "../../intercom" }
 winapi = "0.2.8"
-
-[build-dependencies]
-intercom-build = { path = "../../intercom-build" }

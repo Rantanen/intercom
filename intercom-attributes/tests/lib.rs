@@ -1,3 +1,4 @@
+#![cfg(not(windows))]  // No one likes Rustfmt. :(
 
 extern crate difference;
 extern crate regex;
@@ -131,8 +132,8 @@ fn check_expansions() {
                 } else {
                     println!( "{}", changeset );
                 }
+                failed += 1;
             }
-            failed += 1;
         }
     }
 

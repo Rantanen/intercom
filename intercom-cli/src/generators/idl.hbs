@@ -5,6 +5,22 @@ library {{lib_name}}
 {
     importlib("stdole2.tlb");
 
+    // Not sure if these should go somewhere else. Although this feels like as
+    // good of a place as any for our hard coded values for now.
+    typedef int8 i8;
+    typedef uint8 u8;
+    typedef int16 i16;
+    typedef uint16 u16;
+    typedef int32 i32;
+    typedef uint32 u32;
+    typedef int64 i64;
+    typedef uint64 u64;
+    typedef float f32;
+    typedef double f64;
+    typedef size_t usize;
+    typedef BSTR InBSTR;
+    typedef BSTR OutBSTR;
+
 {{#each interfaces}}
     interface {{name}};
 {{/each}}

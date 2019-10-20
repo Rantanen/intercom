@@ -22,10 +22,12 @@ set(TESTLIB_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${TE
 set(TESTLIB_IMPORT_LOCATION "${TESTLIB_LOCATION}.lib" )
 
 # Build instructions for the library.
+file(GLOB testlib_sources ${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_custom_command(
         OUTPUT ${TESTLIB_BINARY_BUILD_PATH}
         COMMAND "cargo" ARGS "build" ${TESTLIB_BUILD_ARGUMENT_RELEASE}
-        WORKING_DIRECTORY ${TESTLIB_WORKSPACE_DIR} )
+        WORKING_DIRECTORY ${TESTLIB_WORKSPACE_DIR}
+        DEPENDS ${testlib_sources})
 add_custom_command(
         OUTPUT ${TESTLIB_LOCATION}
         COMMAND ${CMAKE_COMMAND} -E copy
@@ -46,6 +48,16 @@ if( WIN32 )
             DEPENDS ${TESTLIB_BINARY_BUILD_PATH} )
     add_custom_target( testlib DEPENDS ${TESTLIB_LOCATION} ${TESTLIB_IMPORT_LOCATION} )
 
+    add_custom_command(
+            TARGET testlib POST_BUILD
+            COMMAND "cargo" "run" embed-typelib ${TESTLIB_BINARY_BUILD_PATH}
+            WORKING_DIRECTORY ${TESTLIB_WORKSPACE_DIR}/../intercom-cli
+    )
+    add_custom_command(
+            TARGET testlib POST_BUILD
+            COMMAND "cargo" "run" embed-typelib ${TESTLIB_LOCATION}
+            WORKING_DIRECTORY ${TESTLIB_WORKSPACE_DIR}/../intercom-cli
+    )
 else()
 
     # No need to depend on the import library.

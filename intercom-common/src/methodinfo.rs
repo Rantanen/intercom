@@ -26,7 +26,7 @@ pub struct RustArg {
     pub ty: Type,
 
     /// Type handler.
-    pub handler: Rc<dyn TypeHandler>,
+    pub handler: Rc<TypeHandler>,
 }
 
 impl PartialEq for RustArg {
@@ -67,7 +67,7 @@ pub struct ComArg {
     pub ty: Type,
 
     /// Type handler.
-    pub handler: Rc<dyn TypeHandler>,
+    pub handler: Rc<TypeHandler>,
 
     /// Argument direction. COM uses OUT params while Rust uses return values.
     pub dir : Direction
@@ -296,7 +296,7 @@ fn try_parse_result( ty : &Type ) -> Option<( Type, Type )>
 }
 
 fn hresult_ty() -> Type {
-    parse_quote!( ::intercom::raw::HRESULT )
+    parse_quote!( intercom::raw::HRESULT )
 }
 
 #[cfg(test)]
@@ -366,7 +366,7 @@ mod tests {
                 Some( parse_quote!( String ) ) );
         assert_eq!(
                 info.return_type,
-                Some( parse_quote!( ::intercom::raw::HRESULT ) ) );
+                Some( parse_quote!( intercom::raw::HRESULT ) ) );
     }
 
     #[test]

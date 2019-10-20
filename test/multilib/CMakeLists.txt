@@ -48,6 +48,26 @@ if( WIN32 )
                 DEPENDS ${LIB_IMPORT_BINARY_BUILD_PATH} )
         add_custom_target(multilib DEPENDS ${LIB_LOCATION} ${LIB_IMPORT_LOCATION})
 
+        add_custom_command(
+                TARGET multilib POST_BUILD
+                COMMAND "cargo" "run" embed-typelib ${LIB_BINARY_BUILD_PATH}
+                WORKING_DIRECTORY ${MULTILIB_WORKSPACE_DIR}/../intercom-cli
+        )
+        add_custom_command(
+                TARGET multilib POST_BUILD
+                COMMAND "cargo" "run" embed-typelib ${LIB_BINARY_BUILD_DIRECTORY}/test_lib.dll
+                WORKING_DIRECTORY ${MULTILIB_WORKSPACE_DIR}/../intercom-cli
+        )
+        add_custom_command(
+                TARGET multilib POST_BUILD
+                COMMAND "cargo" "run" embed-typelib ${LIB_LOCATION}
+                WORKING_DIRECTORY ${MULTILIB_WORKSPACE_DIR}/../intercom-cli
+        )
+        add_custom_command(
+                TARGET multilib POST_BUILD
+                COMMAND "cargo" "run" embed-typelib ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/test_lib.dll
+                WORKING_DIRECTORY ${MULTILIB_WORKSPACE_DIR}/../intercom-cli
+        )
 else()
 
         # No need to depend on the import library.

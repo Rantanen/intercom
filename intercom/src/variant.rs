@@ -1,9 +1,15 @@
 
+
 use crate::*;
 use std::convert::TryFrom;
 use std::time::{SystemTime};
+use crate::type_system::{TypeSystem, ExternType, IntercomFrom};
+use intercom_attributes::BidirectionalTypeInfo;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
+pub struct Currency(i64);
+
+#[derive(Debug, Clone, BidirectionalTypeInfo)]
 pub enum Variant
 {
     None,
@@ -18,10 +24,10 @@ pub enum Variant
     F32( f32 ),
     F64( f64 ),
     Bool( bool ),
+    Currency( Currency ),
     String( IntercomString ),
     SystemTime( SystemTime ),
     IUnknown( ComRc<dyn IUnknown> ),
-    Raw( raw::Variant ),
 }
 
 impl Variant {
@@ -43,10 +49,17 @@ impl Variant {
             Variant::Bool( .. ) => raw::var_type::BOOL,
             Variant::String( .. ) => raw::var_type::BSTR,
             Variant::SystemTime( .. ) => raw::var_type::DATE,
+            Variant::Currency( .. ) => raw::var_type::CY,
             Variant::IUnknown( .. ) => raw::var_type::UNKNOWN,
-            Variant::Raw( raw ) => raw.vt.0,
         }
     }
+}
+
+impl<TS: TypeSystem> ExternType<TS> for Variant {
+    type ExternInputType = crate::raw::Variant<TS>;
+    type ExternOutputType = crate::raw::Variant<TS>;
+    type OwnedExternType = Variant;
+    type OwnedNativeType = Variant;
 }
 
 impl Default for Variant {
@@ -55,68 +68,70 @@ impl Default for Variant {
     }
 }
 
-impl From<raw::Variant> for Variant {
-    fn from( src: raw::Variant ) -> Variant {
-        unsafe {
-            if src.vt.0 & raw::var_type::BYREF == 0 {
-                match src.vt.0 & raw::var_type::TYPEMASK {
-                    raw::var_type::EMPTY | raw::var_type::NULL => Variant::None,
-                    raw::var_type::I1 => Variant::I8( src.data.bVal ),
-                    raw::var_type::I2 => Variant::I16( src.data.iVal ),
-                    raw::var_type::I4 => Variant::I32( src.data.lVal ),
-                    raw::var_type::I8 => Variant::I64( src.data.llVal ),
-                    raw::var_type::UI1 => Variant::U8( src.data.cVal ),
-                    raw::var_type::UI2 => Variant::U16( src.data.uiVal ),
-                    raw::var_type::UI4 => Variant::U32( src.data.ulVal ),
-                    raw::var_type::UI8 => Variant::U64( src.data.ullVal ),
-                    raw::var_type::R4 => Variant::F32( src.data.fltVal ),
-                    raw::var_type::R8 => Variant::F64( src.data.dblVal ),
-                    raw::var_type::BOOL => Variant::Bool( src.data.boolVal.into() ),
-                    raw::var_type::BSTR =>
-                        Variant::String( crate::IntercomString::BString(
-                                crate::BString::from_ptr( src.data.bstrVal ) ) ),
-                    raw::var_type::DATE =>
-                        Variant::SystemTime( src.data.date.into() ),
-                    raw::var_type::UNKNOWN =>
-                        match ComRc::wrap( src.data.punkVal, TypeSystem::Automation ) {
-                            Some( rc ) => Variant::IUnknown( rc ),
-                            None => Variant::None,
-                        }
-                    _ => Variant::Raw( src ),
-                }
-            } else {
-                match src.vt.0 & raw::var_type::TYPEMASK {
-                    raw::var_type::EMPTY | raw::var_type::NULL => Variant::None,
-                    raw::var_type::I1 => Variant::I8( *src.data.pbVal ),
-                    raw::var_type::I2 => Variant::I16( *src.data.piVal ),
-                    raw::var_type::I4 => Variant::I32( *src.data.plVal ),
-                    raw::var_type::I8 => Variant::I64( *src.data.pllVal ),
-                    raw::var_type::UI1 => Variant::U8( *src.data.pcVal ),
-                    raw::var_type::UI2 => Variant::U16( *src.data.puiVal ),
-                    raw::var_type::UI4 => Variant::U32( *src.data.pulVal ),
-                    raw::var_type::UI8 => Variant::U64( *src.data.pullVal ),
-                    raw::var_type::R4 => Variant::F32( *src.data.pfltVal ),
-                    raw::var_type::R8 => Variant::F64( *src.data.pdblVal ),
-                    raw::var_type::BOOL => Variant::Bool( (*src.data.pboolVal).into() ),
-                    raw::var_type::BSTR =>
-                        Variant::String( crate::IntercomString::BString(
-                                crate::BString::from_ptr( *src.data.pbstrVal ) ) ),
-                    raw::var_type::DATE =>
-                        Variant::SystemTime( (*src.data.pdate).into() ),
-                    raw::var_type::UNKNOWN =>
-                        match ComRc::wrap( *src.data.ppunkVal, TypeSystem::Automation ) {
-                            Some( rc ) => Variant::IUnknown( rc ),
-                            None => Variant::None,
-                        }
-                    _ => Variant::Raw( src ),
-                }
+impl<TS: TypeSystem> IntercomFrom<raw::Variant<TS>> for Variant {
+    unsafe fn intercom_from( src: raw::Variant<TS> ) -> Result<Variant, ComError> {
+        Ok( if src.vt.0 & raw::var_type::BYREF == 0 {
+            match src.vt.0 & raw::var_type::TYPEMASK {
+                raw::var_type::EMPTY | raw::var_type::NULL => Variant::None,
+                raw::var_type::I1 => Variant::I8( src.data.bVal ),
+                raw::var_type::I2 => Variant::I16( src.data.iVal ),
+                raw::var_type::I4 => Variant::I32( src.data.lVal ),
+                raw::var_type::I8 => Variant::I64( src.data.llVal ),
+                raw::var_type::UI1 => Variant::U8( src.data.cVal ),
+                raw::var_type::UI2 => Variant::U16( src.data.uiVal ),
+                raw::var_type::UI4 => Variant::U32( src.data.ulVal ),
+                raw::var_type::UI8 => Variant::U64( src.data.ullVal ),
+                raw::var_type::R4 => Variant::F32( src.data.fltVal ),
+                raw::var_type::R8 => Variant::F64( src.data.dblVal ),
+                raw::var_type::BOOL => Variant::Bool( src.data.boolVal.into() ),
+                raw::var_type::BSTR =>
+                    Variant::String( crate::IntercomString::BString(
+                            crate::BString::from_ptr( src.data.bstrVal ) ) ),
+                raw::var_type::CY =>
+                    Variant::Currency( Currency( src.data.cyVal ) ),
+                raw::var_type::DATE =>
+                    Variant::SystemTime( src.data.date.into() ),
+                raw::var_type::UNKNOWN =>
+                    match ComRc::wrap( src.data.punkVal ) {
+                        Some( rc ) => Variant::IUnknown( rc ),
+                        None => Variant::None,
+                    }
+                _ => return Err( ComError::E_NOTIMPL ),
             }
-        }
+        } else {
+            match src.vt.0 & raw::var_type::TYPEMASK {
+                raw::var_type::EMPTY | raw::var_type::NULL => Variant::None,
+                raw::var_type::I1 => Variant::I8( *src.data.pbVal ),
+                raw::var_type::I2 => Variant::I16( *src.data.piVal ),
+                raw::var_type::I4 => Variant::I32( *src.data.plVal ),
+                raw::var_type::I8 => Variant::I64( *src.data.pllVal ),
+                raw::var_type::UI1 => Variant::U8( *src.data.pcVal ),
+                raw::var_type::UI2 => Variant::U16( *src.data.puiVal ),
+                raw::var_type::UI4 => Variant::U32( *src.data.pulVal ),
+                raw::var_type::UI8 => Variant::U64( *src.data.pullVal ),
+                raw::var_type::R4 => Variant::F32( *src.data.pfltVal ),
+                raw::var_type::R8 => Variant::F64( *src.data.pdblVal ),
+                raw::var_type::BOOL => Variant::Bool( (*src.data.pboolVal).into() ),
+                raw::var_type::BSTR =>
+                    Variant::String( crate::IntercomString::BString(
+                            crate::BString::from_ptr( *src.data.pbstrVal ) ) ),
+                raw::var_type::DATE =>
+                    Variant::SystemTime( (*src.data.pdate).into() ),
+                raw::var_type::CY =>
+                    Variant::Currency( Currency( *src.data.pcyVal ) ),
+                raw::var_type::UNKNOWN =>
+                    match ComRc::wrap( *src.data.ppunkVal ) {
+                        Some( rc ) => Variant::IUnknown( rc ),
+                        None => Variant::None,
+                    }
+                _ => return Err( ComError::E_NOTIMPL ),
+            }
+        } )
     }
 }
 
-impl ComFrom<Variant> for raw::Variant {
-    fn com_from( src: Variant ) -> Result< Self, ComError > {
+impl<TS: TypeSystem> IntercomFrom<Variant> for raw::Variant<TS> {
+    unsafe fn intercom_from( src: Variant ) -> ComResult<Self> {
         Ok( match src {
             Variant::None => raw::Variant::new(
                     raw::VariantType::new( raw::var_type::EMPTY ),
@@ -154,9 +169,12 @@ impl ComFrom<Variant> for raw::Variant {
             Variant::Bool( data ) => raw::Variant::new(
                     raw::VariantType::new( raw::var_type::BOOL ),
                     raw::VariantData { boolVal: data .into() } ),
+            Variant::Currency( data ) => raw::Variant::new(
+                    raw::VariantType::new( raw::var_type::CY ),
+                    raw::VariantData { cyVal : data.0 } ),
             Variant::String( data ) => raw::Variant::new(
                     raw::VariantType::new( raw::var_type::BSTR ),
-                    raw::VariantData { bstrVal : crate::BString::com_from( data )?.into_ptr() } ),
+                    raw::VariantData { bstrVal : crate::BString::intercom_from( data )?.into_ptr() } ),
             Variant::SystemTime( data ) => raw::Variant::new(
                     raw::VariantType::new( raw::var_type::DATE ),
                     raw::VariantData { date : data.into() } ),
@@ -165,7 +183,7 @@ impl ComFrom<Variant> for raw::Variant {
                 let v = raw::Variant::new(
                     raw::VariantType::new( raw::var_type::UNKNOWN ),
                     raw::VariantData {
-                        punkVal : ComItf::ptr( &data, TypeSystem::Automation )
+                        punkVal : ComItf::ptr( &data )
                     } );
 
                 // We didn't add_ref the punkVal so avoid release by forgetting
@@ -173,8 +191,7 @@ impl ComFrom<Variant> for raw::Variant {
                 std::mem::forget( data );
 
                 v
-            }
-            Variant::Raw( src ) => src,
+            },
         } )
     }
 }
@@ -381,8 +398,7 @@ impl From< f32 > for Variant {
 
 impl<T: HasInterface<dyn IUnknown>> From< ComStruct<T> > for Variant {
     fn from( src : ComStruct<T> ) -> Self {
-        let iunk : ComItf<dyn IUnknown> = src.into();
-        Variant::IUnknown( ComRc::attach( iunk ) )
+        Variant::IUnknown( ComRc::from( src ) )
     }
 }
 
@@ -460,8 +476,10 @@ impl TryFrom< Variant > for String {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< String, Self::Error > {
         match src {
-            Variant::String( data ) => String::com_from( data )
-                    .map_err( |_| VariantError ),
+            Variant::String( data ) => unsafe {
+                // Variant should hold a valid string, making this safe.
+                String::intercom_from( data ).map_err( |_| VariantError )
+            },
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -471,8 +489,10 @@ impl TryFrom< Variant > for BString {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< BString, Self::Error > {
         match src {
-            Variant::String( data ) => BString::com_from( data )
-                    .map_err( |_| VariantError ),
+            Variant::String( data ) => unsafe {
+                // Variant should hold a valid string, making this safe.
+                BString::intercom_from( data ).map_err( |_| VariantError )
+            },
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -482,8 +502,10 @@ impl TryFrom< Variant > for CString {
     type Error = VariantError;
     fn try_from( src : Variant ) -> Result< CString, Self::Error > {
         match src {
-            Variant::String( data ) => CString::com_from( data )
-                    .map_err( |_| VariantError ),
+            Variant::String( data ) => unsafe {
+                // Variant should hold a valid string, making this safe.
+                CString::intercom_from( data ).map_err( |_| VariantError )
+            },
             _ => Err( VariantError::from( &src ) )
         }
     }
@@ -499,6 +521,8 @@ pub mod raw {
 
     use std;
     use std::time::{SystemTime, Duration};
+    use crate::type_system::{TypeSystem};
+    use super::intercom_attributes::BidirectionalTypeInfo;
 
     #[repr(C)]
     #[derive(Copy, Clone)]
@@ -611,7 +635,7 @@ pub mod raw {
     #[repr(C)]
     #[derive(Copy, Clone)]
     #[allow(non_snake_case)]
-    pub union VariantData {
+    pub union VariantData<TS: TypeSystem> {
         pub llVal : i64,
         pub lVal : i32,
         pub bVal : i8,
@@ -620,10 +644,10 @@ pub mod raw {
         pub dblVal : f64,
         pub boolVal : VariantBool,
         pub scode : crate::raw::HRESULT,
-        //cyVal : CY,
+        pub cyVal : i64,
         pub date : VariantDate,
         pub bstrVal : *mut u16,
-        pub punkVal : crate::raw::InterfacePtr<dyn (crate::IUnknown)>,
+        pub punkVal : crate::raw::InterfacePtr<TS, dyn crate::IUnknown>,
         //*pdispVal : ComItf<IDispatch>,
         //parray : SafeArray,
         pub pbVal : *mut i8,
@@ -634,13 +658,13 @@ pub mod raw {
         pub pdblVal : *mut f64,
         pub pboolVal : *mut VariantBool,
         //*pscode : SCODE,
-        //*pcyVal : CY,
+        pub pcyVal : *mut i64,
         pub pdate : *mut VariantDate,
         pub pbstrVal : *mut *mut u16,
-        pub ppunkVal : *mut crate::raw::InterfacePtr<dyn (crate::IUnknown)>,
+        pub ppunkVal : *mut crate::raw::InterfacePtr<TS, dyn crate::IUnknown>,
         //ppdispVal : *mut ComItf<IDispatch>,
         //pparray : *mut SafeArray,
-        pub pvarVal : *mut Variant,
+        pub pvarVal : *mut Variant<TS>,
         pub byref : *mut std::os::raw::c_void,
         pub cVal : u8,
         pub uiVal : u16,
@@ -659,17 +683,17 @@ pub mod raw {
     }
 
     #[repr(C)]
-    #[derive(Copy, Clone)]
-    pub struct Variant {
+    #[derive(Copy, Clone, BidirectionalTypeInfo)]
+    pub struct Variant<TS: TypeSystem> {
         pub vt : VariantType,
         reserved1 : u16,
         reserved2 : u16,
         reserved3 : u16,
-        pub data : VariantData,
+        pub data : VariantData<TS>,
     }
 
-    impl Variant {
-        pub fn new( vt : VariantType, data : VariantData ) -> Variant {
+    impl<TS: TypeSystem> Variant<TS> {
+        pub fn new( vt : VariantType, data : VariantData<TS> ) -> Variant<TS> {
             Variant {
                 vt,
                 data,
@@ -680,8 +704,8 @@ pub mod raw {
         }
     }
 
-    impl Default for Variant {
-        fn default() -> Variant {
+    impl<TS: TypeSystem> Default for Variant<TS> {
+        fn default() -> Variant<TS> {
             Variant::new(
                 VariantType::new( var_type::EMPTY ),
                 VariantData { lVal : 0 }
@@ -763,7 +787,7 @@ pub mod raw {
         fn from( _ : VariantError ) -> Self { crate::ComError::E_INVALIDARG }
     }
 
-    impl std::fmt::Debug for Variant {
+    impl<TS: TypeSystem> std::fmt::Debug for Variant<TS> {
         fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
             write!( f, "Variant::Raw(type = {})", self.vt.0 )
         }

@@ -1,6 +1,0 @@
-[package]
-name = "multi_file_lib"
-version = "0.1.0"
-authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
-
-[dependencies]

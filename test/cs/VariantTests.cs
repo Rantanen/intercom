@@ -30,15 +30,18 @@ namespace cs
             variantTest.VariantParameter( 705,
                     DateTime.Parse( "1800-01-01T00:00:00" ) );
             variantTest.VariantParameter( 8, "text" );
-            variantTest.VariantParameter( 9, new object() );
             variantTest.VariantParameter( 11, true );
-            variantTest.VariantParameter( 14, 1.0m );
             variantTest.VariantParameter( 16, (sbyte) -1 );
             variantTest.VariantParameter( 17, (byte) 129 );
             variantTest.VariantParameter( 18, (ushort) 12929 );
             variantTest.VariantParameter( 19, 1292929u );
             variantTest.VariantParameter( 20, -1L );
             variantTest.VariantParameter( 21, 129292929UL );
+
+            Assert.ThrowsException<NotImplementedException>(() =>
+                variantTest.VariantParameter( 9, new object() ) );  // IDispatch
+            Assert.ThrowsException<NotImplementedException>(() =>
+                variantTest.VariantParameter( 14, 1.0m ) );  // Decimal
         }
 
         [TestMethod]

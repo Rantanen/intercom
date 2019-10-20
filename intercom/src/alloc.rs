@@ -1,25 +1,18 @@
 
 use super::*;
+use intercom::raw::OutBSTR;
 use std::os::raw;
 
 /// A memory allocator to be used for allocating/deallocating memory shared
 /// with intercom libraries.
-#[com_class( IAllocator )]
+#[crate::com_class( IAllocator )]
 #[derive(Default)]
 pub struct Allocator;
 
-#[com_interface(
+#[crate::com_interface(
         com_iid = "18EE22B3-B0C6-44A5-A94A-7A417676FB66",
         raw_iid = "7A6F6564-04B5-4455-A223-EA0512B8CC63" )]
 pub trait IAllocator {
-    unsafe fn alloc_bstr( &self, text : *const u16, len : u32 ) -> *mut u16;
-    unsafe fn free_bstr( &self, bstr : *mut u16 );
-    unsafe fn alloc( &self, len : usize ) -> *mut raw::c_void;
-    unsafe fn free( &self, ptr : *mut raw::c_void );
-}
-
-#[com_impl]
-impl IAllocator for Allocator {
 
     /// Allocates a new BSTR based on an existing string value.
     ///
@@ -34,9 +27,7 @@ impl IAllocator for Allocator {
     /// to the given `len`. The returned value must be freed using BSTR aware
     /// free function, such as the `free_bstr` in this interface or the
     /// `SysFreeString` function on Windows.
-    unsafe fn alloc_bstr( &self, text : *const u16, len : u32 ) -> *mut u16 {
-        os::alloc_bstr( text, len )
-    }
+    unsafe fn alloc_bstr( &self, text : *const u16, len : u32 ) -> OutBSTR;
 
     /// Frees a BSTR value.
     ///
@@ -47,9 +38,7 @@ impl IAllocator for Allocator {
     /// # Safety
     ///
     /// The function is safe as long as the `bstr` is a valid BSTR value.
-    unsafe fn free_bstr( &self, bstr : *mut u16 ) {
-        os::free_bstr( bstr )
-    }
+    unsafe fn free_bstr( &self, bstr : OutBSTR );
 
     /// Allocates a segment of memory that is safe to pass through intercom
     /// interfaces.
@@ -62,9 +51,7 @@ impl IAllocator for Allocator {
     ///
     /// The returned value must be freed using the `free` method in this
     /// interface or the intercom `alloc::free` function.
-    unsafe fn alloc( &self, len : usize ) -> *mut raw::c_void {
-        os::alloc( len )
-    }
+    unsafe fn alloc( &self, len : usize ) -> *mut raw::c_void;
 
     /// Frees a segment of memory received through intercom interfaces.
     ///
@@ -76,6 +63,28 @@ impl IAllocator for Allocator {
     ///
     /// The memory must have been allocated using the `alloc` method in this
     /// interface or the intercom `alloc::allocate` function.
+    unsafe fn free( &self, ptr : *mut raw::c_void );
+}
+
+#[crate::com_impl]
+impl IAllocator for Allocator {
+
+    unsafe fn alloc_bstr(
+        &self,
+        text : *const u16,
+        len : u32
+    ) -> OutBSTR {
+        OutBSTR( os::alloc_bstr( text, len ) )
+    }
+
+    unsafe fn free_bstr( &self, bstr: OutBSTR ) {
+        os::free_bstr( bstr.0 )
+    }
+
+    unsafe fn alloc( &self, len : usize ) -> *mut raw::c_void {
+        os::alloc( len )
+    }
+
     unsafe fn free( &self, ptr : *mut raw::c_void ) {
         os::free( ptr )
     }
@@ -110,9 +119,6 @@ pub unsafe fn free( ptr : *mut raw::c_void ) { os::free( ptr ) }
 mod os {
     use std::os::raw;
 
-    /// # Safety
-    ///
-    /// See IAllocator above.
     pub unsafe fn alloc_bstr(
         psz: *const u16,
         len: u32
@@ -120,27 +126,18 @@ mod os {
         SysAllocStringLen( psz, len )
     }
 
-    /// # Safety
-    ///
-    /// See IAllocator above.
     pub unsafe fn free_bstr(
         bstr : *mut u16
     ) {
         SysFreeString( bstr )
     }
 
-    /// # Safety
-    ///
-    /// See IAllocator above.
     pub unsafe fn alloc(
         len: usize
     ) -> *mut raw::c_void {
         CoTaskMemAlloc( len )
     }
 
-    /// # Safety
-    ///
-    /// See IAllocator above.
     pub unsafe fn free(
         ptr : *mut raw::c_void
     ) {

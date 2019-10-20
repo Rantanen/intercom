@@ -1,6 +1,7 @@
 
 use super::*;
 use std::sync::atomic::{ AtomicU32, Ordering };
+use crate::type_system::TypeSystemName;
 
 /// Trait required by any COM coclass type.
 ///
@@ -50,6 +51,46 @@ impl< T: CoClass > ComStruct<T>
         // Return the struct.
         ComStruct { data: cb }
     }
+
+    fn as_comitf<I: ComInterface + ?Sized>(&self) -> ComItf<I>
+        where T: HasInterface<I>
+    {
+        let ( automation_ptr, raw_ptr ) = {
+            let vtbl = &self.as_ref().vtable_list;
+
+            let automation_ptr = match I::iid( TypeSystemName::Automation ) {
+                Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
+                    Ok( itf ) => itf,
+                    Err( _ ) => ::std::ptr::null_mut(),
+                },
+                None => ::std::ptr::null_mut(),
+            };
+
+            let raw_ptr = match I::iid( TypeSystemName::Raw ) {
+                Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
+                    Ok( itf ) => itf,
+                    Err( _ ) => ::std::ptr::null_mut(),
+                },
+                None => ::std::ptr::null_mut(),
+            };
+
+            ( automation_ptr, raw_ptr )
+        };
+
+        unsafe {
+            ComItf::new(
+                raw::InterfacePtr::new( automation_ptr ),
+                raw::InterfacePtr::new( raw_ptr ) )
+        }
+    }
+}
+
+impl<T: CoClass + std::fmt::Debug> std::fmt::Debug for ComStruct<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ComStruct(")?;
+        self.as_ref().fmt(f)?;
+        write!(f, ")")
+    }
 }
 
 impl< T: CoClass > Drop for ComStruct<T>
@@ -77,42 +118,18 @@ impl<T: CoClass> AsRef<ComBox<T>> for ComStruct<T>
     }
 }
 
-impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComItf<I> {
+impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComRc<I> {
 
-    fn from( source : ComStruct<T> ) -> ComItf<I> {
-
-        let ( automation_ptr, raw_ptr ) = {
-            let vtbl = &source.as_ref().vtable_list;
-
-            let automation_ptr = match I::iid( TypeSystem::Automation ) {
-                Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
-                    Ok( itf ) => itf,
-                    Err( _ ) => ::std::ptr::null_mut(),
-                },
-                None => ::std::ptr::null_mut(),
-            };
-
-            let raw_ptr = match I::iid( TypeSystem::Raw ) {
-                Some( iid ) => match <T as CoClass>::query_interface( &vtbl, iid ) {
-                    Ok( itf ) => itf,
-                    Err( _ ) => ::std::ptr::null_mut(),
-                },
-                None => ::std::ptr::null_mut(),
-            };
-
-            ( automation_ptr, raw_ptr )
-        };
-
+    fn from( source : ComStruct<T> ) -> ComRc<I> {
+        let rc = ComRc::attach( source.as_comitf() );
         std::mem::forget( source );
-        unsafe { ComItf::new(
-                raw::InterfacePtr::new( automation_ptr ),
-                raw::InterfacePtr::new( raw_ptr ) ) }
+        rc
     }
 }
 
-impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComRc<I> {
-    fn from( combox : ComStruct<T> ) -> Self {
-        ComRc::attach( ComItf::from( combox ) )
+impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<&ComStruct<T>> for ComRc<I> {
+    fn from( combox : &ComStruct<T> ) -> Self {
+        ComRc::copy( &combox.as_comitf() )
     }
 }
 
@@ -169,6 +186,8 @@ impl<T: CoClass> ComBox<T> {
     /// The acquired interface must be released explicitly when not needed
     /// anymore.
     ///
+    /// # Safety
+    ///
     /// The method isn't technically unsafe in regard to Rust unsafety, but
     /// it's marked as unsafe to discourage it's use due to high risks of
     /// memory leaks.
@@ -188,6 +207,8 @@ impl<T: CoClass> ComBox<T> {
     ///
     /// Returns the reference count after the increment.
     ///
+    /// # Safety
+    ///
     /// The method isn't technically unsafe in regard to Rust unsafety, but
     /// it's marked as unsafe to discourage it's use due to high risks of
     /// memory leaks.
@@ -205,6 +226,12 @@ impl<T: CoClass> ComBox<T> {
     /// zero.
     ///
     /// Returns the reference count after the release.
+    ///
+    /// # Safety
+    ///
+    /// The pointer must be valid and not previously released. After the call
+    /// completes, the struct may have been deallocated and the pointer should
+    /// be considered dangling.
     pub unsafe fn release( this : *mut Self ) -> u32 {
 
         // Ensure we're not releasing an interface that has no references.
@@ -238,7 +265,7 @@ impl<T: CoClass> ComBox<T> {
 
     /// Checks whether the given interface identified by the IID supports error
     /// info through IErrorInfo.
-    pub unsafe fn interface_supports_error_info(
+    pub fn interface_supports_error_info(
         _this : &mut Self,
         riid : REFIID,
     ) -> raw::HRESULT {
@@ -250,6 +277,8 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Converts a RawComPtr to a ComBox reference.
+    ///
+    /// # Safety
     ///
     /// The method is unsafe in two different ways:
     ///
@@ -269,6 +298,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `query_interface` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(windows)]
     pub unsafe extern "stdcall" fn query_interface_ptr(
         self_iunk : RawComPtr,
@@ -280,17 +313,25 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `query_interface` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(not(windows))]
     pub unsafe extern "C" fn query_interface_ptr(
         self_iunk : RawComPtr,
         riid : REFIID,
-        out : *mut RawComPtr,
+        out : *mut RawComPtr
     ) -> raw::HRESULT
     {
         ComBox::query_interface( ComBox::<T>::from_ptr( self_iunk ), riid, out )
     }
 
     /// Pointer variant of the `add_ref` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(windows)]
     pub unsafe extern "stdcall" fn add_ref_ptr(
         self_iunk : RawComPtr
@@ -300,6 +341,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `add_ref` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(not(windows))]
     pub unsafe extern "C" fn add_ref_ptr(
         self_iunk : RawComPtr
@@ -309,6 +354,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `release` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(windows)]
     pub unsafe extern "stdcall" fn release_ptr(
         self_iunk : RawComPtr
@@ -318,6 +367,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `release` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(not(windows))]
     pub unsafe extern "C" fn release_ptr(
         self_iunk : RawComPtr
@@ -327,6 +380,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `release` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(windows)]
     pub unsafe extern "stdcall" fn interface_supports_error_info_ptr(
         self_iunk : RawComPtr,
@@ -339,6 +396,10 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Pointer variant of the `release` function.
+    ///
+    /// # Safety
+    ///
+    /// The `self_iunk` _must_ be a valid COM pointer.
     #[cfg(not(windows))]
     pub unsafe extern "C" fn interface_supports_error_info_ptr(
         self_iunk : RawComPtr,
@@ -350,12 +411,14 @@ impl<T: CoClass> ComBox<T> {
                 riid )
     }
 
-    /// Returns a reference to the virtual on the ComBox.
-    pub unsafe fn vtable( ct : &ComStruct<T> ) -> &T::VTableList {
-        &(*ct.data).vtable_list
+    /// Returns a reference to the virtual table on the ComBox.
+    pub fn vtable( ct : &ComStruct<T> ) -> &T::VTableList {
+        unsafe { &(*ct.data).vtable_list }
     }
 
     /// Gets the ComBox holding the value.
+    ///
+    /// # Safety
     ///
     /// This is unsafe for two reasons:
     ///
@@ -383,6 +446,8 @@ impl<T: CoClass> ComBox<T> {
 
     /// Gets the ComBox holding the value.
     ///
+    /// # Safety
+    ///
     /// This is unsafe for two reasons:
     ///
     /// - There is no way for the method to check that the value is actually
@@ -408,6 +473,8 @@ impl<T: CoClass> ComBox<T> {
     }
 
     /// Returns a reference to a null-ComBox vtable pointer list.
+    ///
+    /// # Safety
     ///
     /// **The reference itself is invalid and must not be dereferenced.**
     ///

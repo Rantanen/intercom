@@ -12,3 +12,7 @@ pub use self::com_impl::expand_com_impl;
 
 mod com_library;
 pub use self::com_library::expand_com_library;
+
+mod type_info;
+pub use self::type_info::expand_bidirectional_type_info;
+pub use self::type_info::expand_derive_extern_type;

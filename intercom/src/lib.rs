@@ -32,7 +32,19 @@
 //!     fn add(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a + b) }
 //!     fn sub(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a - b) }
 //! }
-//! # fn main() {}
+//! # // Without 'main()' doctests wraps the whole thing into a function,
+//! # // which would end up expanding com_library!(..) into a statement.
+//! # // And proc macros into statements are not allowed.
+//! # //
+//! # // In addition to that, if we just have `fn main()` followed by open
+//! # // brace _anywhere_ in this doctest (yes, including these comments),
+//! # // clippy would discover that and yell at us for "needless doctest main".
+//! # // Allowing that with a specific #[allow(..)] attribute is impossible
+//! # // since this is crate-level documentation.
+//! # //
+//! # // Fortunately we can hide this from clippy by specifying the (empty)
+//! # // return type.
+//! # fn main() -> () { }
 //! ```
 //!
 //! The above library can be used for example from C# in the following manner.
@@ -46,30 +58,22 @@
 //! ```
 
 #![crate_type="dylib"]
-#![feature(specialization, non_exhaustive, integer_atomics)]
+#![feature(specialization, non_exhaustive, integer_atomics, associated_type_defaults)]
 #![allow(clippy::match_bool)]
+
+extern crate self as intercom;
 
 #[cfg(not(windows))]
 extern crate libc;
 
-// The crate doesn't really need the macros. However Rust will complain that
-// the import does nothing if we don't define #[macro_use]. Once we define
-// #[macro_use] to get rid of that warning, Rust will complain that the
-// #[macro_use] does nothing. Fortunately THAT warning comes with a named
-// warning option so we can allow that explicitly.
-//
-// Unfortunately clippy disagrees on the macro_use being unused and claims that
-// the unused_imports attribute is useless. So now we also need to tell clippy
-// to ignore useless attributes in this scenario! \:D/
-#[allow(clippy::useless_attribute)]
-#[allow(unused_imports)]
 extern crate intercom_attributes;
-/// Foo
 pub use intercom_attributes::*;
 
 #[allow(clippy::useless_attribute)]
 #[allow(unused_imports)]
 #[macro_use] extern crate failure;
+
+pub mod prelude;
 
 mod classfactory; pub use crate::classfactory::*;
 mod combox; pub use crate::combox::*;
@@ -82,20 +86,15 @@ mod interfaces;
 pub mod runtime;
 pub mod alloc;
 mod variant; pub use crate::variant::{Variant, VariantError};
-
-// intercom_attributes use "intercom::" to qualify things in this crate.
-// Declare such module here and import everything we have in it to make those
-// references valid.
-mod intercom {
-    pub use crate::*;
-}
+pub mod typelib;
+pub mod type_system; pub use type_system::{ BidirectionalTypeInfo, InputTypeInfo, OutputTypeInfo };
 
 /// The `ComInterface` trait defines the COM interface details for a COM
 /// interface trait.
 pub trait ComInterface {
 
     /// IID of the COM interface.
-    fn iid( ts : TypeSystem ) -> Option< &'static IID >;
+    fn iid( ts : type_system::TypeSystemName ) -> Option< &'static IID >;
 
     /// Dereferences a `ComItf<T>` into a `&T`.
     ///
@@ -122,40 +121,52 @@ pub type CLSID = GUID;
 pub type REFCLSID = *const IID;
 
 pub mod raw {
-    pub type InBSTR = *const u16;
-    pub type OutBSTR = *mut u16;
+
+    #[derive(Clone, Copy, intercom_attributes::ExternType, intercom_attributes::BidirectionalTypeInfo)]
+    #[repr(transparent)]
+    pub struct InBSTR( pub *const u16 );
+
+    #[derive(Clone, Copy, intercom_attributes::ExternType, intercom_attributes::BidirectionalTypeInfo)]
+    #[repr(transparent)]
+    pub struct OutBSTR( pub *mut u16 );
 
     pub type InCStr = *const ::std::os::raw::c_char;
     pub type OutCStr = *mut ::std::os::raw::c_char;
 
     pub use crate::variant::raw::*;
     pub use crate::error::raw::*;
+    pub use crate::type_system::TypeSystem;
 
     #[repr(C)]
     #[derive(PartialEq, Eq)]
-    pub struct InterfacePtr<I: ?Sized> {
+    pub struct InterfacePtr<TS: TypeSystem, I: ?Sized> {
         pub ptr : super::RawComPtr,
-        phantom : ::std::marker::PhantomData<I>,
+        phantom_itf : ::std::marker::PhantomData<I>,
+        phantom_ts : ::std::marker::PhantomData<TS>,
     }
 
-    impl<I: ?Sized> Clone for InterfacePtr<I>
+    impl<TS: TypeSystem, I: ?Sized> Clone for InterfacePtr<TS, I>
     {
         fn clone( &self ) -> Self {
             InterfacePtr::new( self.ptr )
         }
     }
 
-    impl<I: ?Sized> Copy for InterfacePtr<I> {}
+    impl<TS: TypeSystem, I: ?Sized> Copy for InterfacePtr<TS, I> {}
 
-    impl<I: ?Sized> std::fmt::Debug for InterfacePtr<I> {
+    impl<TS: TypeSystem, I: ?Sized> std::fmt::Debug for InterfacePtr<TS, I> {
         fn fmt( &self, f : &mut std::fmt::Formatter ) -> std::fmt::Result {
             write!( f, "InterfacePtr({:?})", self.ptr )
         }
     }
 
-    impl<I: ?Sized> InterfacePtr<I> {
-        pub fn new( ptr : super::RawComPtr ) -> InterfacePtr<I> {
-            InterfacePtr { ptr, phantom: ::std::marker::PhantomData }
+    impl<TS: TypeSystem, I: ?Sized> InterfacePtr<TS, I> {
+        pub fn new( ptr : super::RawComPtr ) -> InterfacePtr<TS, I> {
+            InterfacePtr {
+                ptr,
+                phantom_itf: ::std::marker::PhantomData,
+                phantom_ts: ::std::marker::PhantomData,
+            }
         }
 
         pub fn null() -> Self {
@@ -167,9 +178,9 @@ pub mod raw {
         }
     }
 
-    impl<I: crate::ComInterface + ?Sized> InterfacePtr<I> {
-        pub fn as_unknown( self ) -> InterfacePtr<dyn (crate::IUnknown)> {
-            InterfacePtr { ptr : self.ptr, phantom: ::std::marker::PhantomData }
+    impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> InterfacePtr<TS, I> {
+        pub fn as_unknown( self ) -> InterfacePtr<TS, dyn crate::IUnknown> {
+            InterfacePtr::new( self.ptr )
         }
     }
 }
@@ -213,6 +224,7 @@ pub extern "stdcall" fn DllMain(
 {
     true
 }
+
 
 /// Basic COM result type.
 ///

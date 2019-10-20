@@ -134,6 +134,21 @@ impl GetAttributes for Item {
     }
 }
 
+pub trait ReplaceIdent : Sized {
+    fn map_ident(&self, f: impl FnOnce(&Ident) -> String) -> Result<Self, String>;
+}
+
+impl ReplaceIdent for syn::Path {
+    fn map_ident(&self, f: impl FnOnce(&Ident) -> String) -> Result<Self, String> {
+
+        let mut result = self.clone();
+        let mut last = result.segments.last_mut()
+            .ok_or_else( || format!( "Path {:?} is empty", self) )?;
+        last.ident = Ident::new(&f(&last.ident), Span::call_site());
+        Ok(result)
+    }
+}
+
 fn self_ty() -> Type {
     parse_quote!( Self )
 }
