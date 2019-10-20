@@ -1,0 +1,31 @@
+
+import os
+
+env = Environment(ENV = { 'PATH' : os.environ['PATH'] })
+
+test_dir = os.path.dirname(os.path.abspath(__file__))
+intercom_dir = os.path.dirname(test_dir)
+
+def dylib(name):
+    return "lib{}.so".format(name)
+
+def run_intercom_cli(cmd):
+    "cargo run --manifest-path {}/intercom-cli {}".format(intercom_dir, cmd)
+
+testlib = "target/debug/{}".format(dylib("test_lib"))
+multilib = "target/debug/{}".format(dylib("multi_lib"))
+com_libs = [testlib, multilib]
+
+env.Command(
+    target=com_libs,
+    source=Glob("test/**/Cargo.toml") + Glob("test/**/*.rs"),
+    action="cargo build")
+
+if os.name == 'windows':
+    for lib in com_libs:
+        env.Command(
+            target=[lib, lib + ".embedded"]
+            source=Glob("test/**/Cargo.toml") + Glob("test/**/*.rs"),
+            action=[
+                run_intercom_cli("embed-typelib {}".format(lib)),
+                "touch {}.embedded".format(lib)])
