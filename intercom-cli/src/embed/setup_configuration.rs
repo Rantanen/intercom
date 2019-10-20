@@ -327,7 +327,7 @@ mod test
     fn get_intercom_root() -> PathBuf {
         let mut root_path = std::env::current_exe().unwrap();
         loop {
-            if root_path.join( "intercom-build" ).exists() {
+            if root_path.join( "intercom-cli" ).exists() {
                 break;
             }
             assert!( root_path.pop() );
