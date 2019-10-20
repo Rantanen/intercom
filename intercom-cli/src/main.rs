@@ -91,6 +91,7 @@ fn main() {
     // Run the command and report possible errors.
     if let Err( e ) = run_cmd( &app.get_matches() ) {
         eprintln!( "{}", e );
+        std::process::exit(1);
     }
 }
 
