@@ -33,6 +33,13 @@ impl<T : ComInterface + ?Sized> ComRc<T> {
     /// reference counting.
     ///
     /// Does not increment the reference count.
+    ///
+    /// # Safety
+    ///
+    /// Given this does not increment the reference count, it must be used
+    /// only if the `ComItf` is one that would leave the reference dangling.
+    /// If something already owns the `ComItf` and will do `release` on it,
+    /// the drop of the returned `ComRc` will result in a double-release.
     pub unsafe fn attach( itf : ComItf<T> ) -> ComRc<T> {
         ComRc { itf }
     }
