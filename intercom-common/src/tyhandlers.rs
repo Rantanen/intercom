@@ -6,16 +6,6 @@ use syn::*;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Direction { In, Out, Retval }
 
-pub struct TypeConversion {
-
-    /// Possible temporary values that need to be kept alive for the duration
-    /// of the conversion result usage.
-    pub temporary: Option<TokenStream>,
-
-    /// Conversion result value. Possibly referencing the temporary value.
-    pub value : TokenStream,
-}
-
 #[derive(PartialEq, Eq, Debug, Hash)]
 pub struct ModelTypeSystemConfig {
     pub effective_system : ModelTypeSystem,
@@ -85,60 +75,20 @@ impl TypeContext {
 
 /// Defines Type-specific logic for handling the various parameter types in the
 /// Rust/COM interface.
-pub trait TypeHandler {
-
-    /// The Rust type.
-    fn rust_ty( &self ) -> Type;
-
-    /// The COM type.
-    fn com_ty( &self, _dir: Direction ) -> Type
-    {
-        self.rust_ty()
-    }
-
-    /// Converts a COM parameter named by the ident into a Rust type.
-    fn com_to_rust(
-        &self,
-        ident : &Ident,
-        _dir: Direction,
-    ) -> TypeConversion
-    {
-        TypeConversion {
-            temporary: None,
-            value: quote!( #ident.into() ),
-        }
-    }
-
-    /// Converts a Rust parameter named by the ident into a COM type.
-    fn rust_to_com(
-        &self, ident : &Ident, _dir: Direction
-    ) -> TypeConversion
-    {
-        TypeConversion {
-            temporary: None,
-            value: quote!( #ident.into() )
-        }
-    }
-
-    /// Gets the default value for the type.
-    fn default_value( &self ) -> TokenStream
-    {
-        quote!( intercom::type_system::ExternDefault::extern_default() )
-    }
-}
-
-/// Replacement type handler that uses the Rust type system for representing
-/// the various type system type conversions.
-struct TypeSystemParam {
+pub struct TypeHandler {
     ty : Type,
     context : TypeContext,
 }
-impl TypeHandler for TypeSystemParam {
-    fn rust_ty( &self ) -> Type {
+
+impl TypeHandler {
+
+    /// The Rust type.
+    pub fn rust_ty( &self ) -> Type {
         self.ty.clone()
     }
 
-    fn com_ty( &self, dir: Direction ) -> Type {
+    /// The COM type.
+    pub fn com_ty( &self, dir: Direction ) -> Type {
 
         // Construct bits for the quote.
         let ty = &self.ty;
@@ -155,7 +105,8 @@ impl TypeHandler for TypeSystemParam {
         }
     }
 
-    fn com_to_rust( &self, ident : &Ident, dir: Direction ) -> TypeConversion
+    /// Converts a COM parameter named by the ident into a Rust type.
+    pub fn com_to_rust( &self, ident : &Ident, dir: Direction ) -> TokenStream
     {
         // Construct bits for the quote.
         let ty = &self.ty;
@@ -163,25 +114,23 @@ impl TypeHandler for TypeSystemParam {
         let ts_trait = quote!(
             <#ty as intercom::type_system::ExternType< #ts > > );
 
-        TypeConversion {
-            temporary: None,
-            value: match dir {
-                Direction::In => {
-                    // Input arguments may use an intermediate type.
-                    let intermediate = quote!(
-                        < #ts_trait::OwnedNativeType >::intercom_from( #ident )? );
-                    quote!( ( & #intermediate ).intercom_into()? )
-                },
-                Direction::Out | Direction::Retval => {
-                    // Output arguments must not use an intermediate type
-                    // as these must outlive the current function.
-                    quote!( #ident.intercom_into()? )
-                },
-            }
+        match dir {
+            Direction::In => {
+                // Input arguments may use an intermediate type.
+                let intermediate = quote!(
+                    #ts_trait::OwnedNativeType::intercom_from( #ident )? );
+                quote!( ( & #intermediate ).intercom_into()? )
+            },
+            Direction::Out | Direction::Retval => {
+                // Output arguments must not use an intermediate type
+                // as these must outlive the current function.
+                quote!( #ident.intercom_into()? )
+            },
         }
     }
 
-    fn rust_to_com( &self, ident : &Ident, dir: Direction ) -> TypeConversion
+    /// Converts a Rust parameter named by the ident into a COM type.
+    pub fn rust_to_com( &self, ident : &Ident, dir: Direction ) -> TokenStream
     {
         // Construct bits for the quote.
         let ty = &self.ty;
@@ -189,29 +138,33 @@ impl TypeHandler for TypeSystemParam {
         let ts_trait = quote!(
             <#ty as intercom::type_system::ExternType< #ts > > );
 
-        TypeConversion {
-            temporary: None,
-            value: match dir {
-                Direction::In => {
-                    let intermediate = quote!(
-                        #ts_trait::OwnedExternType::intercom_from( #ident )? );
-                    quote!( ( & #intermediate ).intercom_into()? )
-                },
-                Direction::Out | Direction::Retval => {
-                    quote!( #ident.intercom_into()? )
-                },
-            }
+        match dir {
+            Direction::In => {
+                let intermediate = quote!(
+                    #ts_trait::OwnedExternType::intercom_from( #ident )? );
+                quote!( ( & #intermediate ).intercom_into()? )
+            },
+            Direction::Out | Direction::Retval => {
+                quote!( #ident.intercom_into()? )
+            },
         }
+    }
+
+    /// Gets the default value for the type.
+    pub fn default_value( &self ) -> TokenStream
+    {
+        quote!( intercom::type_system::ExternDefault::extern_default() )
     }
 }
+
 
 /// Resolves the `TypeHandler` to use.
 pub fn get_ty_handler(
     arg_ty : &Type,
     context : TypeContext,
-) -> Rc<dyn TypeHandler>
+) -> Rc<TypeHandler>
 {
-    Rc::new( TypeSystemParam {
+    Rc::new( TypeHandler {
         ty: arg_ty.clone(),
         context
     } )

@@ -155,13 +155,12 @@ pub fn expand_com_impl(
             let args = iter::once( self_arg ).chain( in_out_args );
 
             // Format the in and out parameters for the Rust call.
-            let ( in_temporaries, in_params ) : ( Vec<_>, Vec<_> ) = method_info.args
+            let in_params : Vec<_> = method_info.args
                     .iter()
                     .map( |ca| {
-                        let conversion = ca.handler.com_to_rust( &ca.name, Direction::In );
-                        ( conversion.temporary, conversion.value )
+                        ca.handler.com_to_rust( &ca.name, Direction::In )
                     } )
-                    .unzip();
+                    .collect();
 
             let return_ident = Ident::new( "__result", Span::call_site() );
             let return_statement = method_info
@@ -194,8 +193,6 @@ pub fn expand_com_impl(
                         // to offset the current 'self_vtable' vtable pointer.
                         let self_combox = ( self_vtable as usize - #vtable_offset() )
                                 as *mut intercom::ComBox< #struct_ident >;
-
-                        #( #in_temporaries )*
 
                         #self_struct_stmt;
                         let #return_ident = self_struct.#method_rust_ident( #( #in_params ),* );

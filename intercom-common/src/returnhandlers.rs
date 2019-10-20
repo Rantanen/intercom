@@ -55,27 +55,17 @@ impl ReturnHandler for ReturnOnlyHandler {
     fn rust_ty( &self ) -> Type { self.0.clone() }
 
     fn com_to_rust_return( &self, result : &Ident ) -> TokenStream {
-        let conversion = tyhandlers::get_ty_handler(
+        tyhandlers::get_ty_handler(
                     &self.rust_ty(),
                     TypeContext::new( self.1 )
-                ).com_to_rust( result, Direction::Retval );
-        if conversion.temporary.is_some() {
-            panic!( "Return values cannot depend on temporaries" );
-        }
-
-        conversion.value
+                ).com_to_rust( result, Direction::Retval )
     }
 
     fn rust_to_com_return( &self, result : &Ident ) -> TokenStream {
-        let conversion = tyhandlers::get_ty_handler(
+        tyhandlers::get_ty_handler(
                     &self.rust_ty(),
                     TypeContext::new( self.1 ),
-                ).rust_to_com( result, Direction::Retval );
-        if conversion.temporary.is_some() {
-            panic!( "Return values cannot depend on temporaries" );
-        }
-
-        conversion.value
+                ).rust_to_com( result, Direction::Retval )
     }
 
     fn com_out_args( &self ) -> Vec<ComArg> { vec![] }
@@ -208,14 +198,9 @@ fn write_out_values(
     for ( ident, out_arg ) in idents.iter().zip( out_args ) {
 
         let arg_name = out_arg.name;
-        let ok_conversion = out_arg.handler.rust_to_com( ident, Direction::Out );
+        let ok_value = out_arg.handler.rust_to_com( ident, Direction::Out );
         let err_value = out_arg.handler.default_value();
 
-        if ok_conversion.temporary.is_some() {
-            panic!( "Return values cannot depend on temporaries" );
-        }
-
-        let ok_value = ok_conversion.value;
         ok_tokens.push( quote!( *#arg_name = #ok_value ) );
         err_tokens.push( quote!( *#arg_name = #err_value ) );
     }
@@ -231,12 +216,8 @@ fn get_rust_ok_values(
     let mut tokens = vec![];
     for out_arg in out_args {
 
-        let conversion = out_arg.handler.com_to_rust( &out_arg.name, Direction::Retval );
-        if conversion.temporary.is_some() {
-            panic!( "Return values cannot depend on temporaries" );
-        }
-
-        tokens.push( conversion.value );
+        let value = out_arg.handler.com_to_rust( &out_arg.name, Direction::Retval );
+        tokens.push( value );
     }
     tokens
 }

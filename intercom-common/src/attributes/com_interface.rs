@@ -332,20 +332,19 @@ fn rust_to_com_delegate(
             } ).collect::<Vec<_>>();
 
     // Format the in and out parameters for the COM call.
-    let ( temporaries, params ) : ( Vec<_>, Vec<_> ) = method_info.raw_com_args()
+    let params : Vec<_> = method_info.raw_com_args()
             .into_iter()
             .map( |com_arg| {
                 let name = com_arg.name;
                 match com_arg.dir {
                     Direction::In => {
-                        let param = com_arg.handler.rust_to_com( &name, Direction::In );
-                        ( param.temporary, param.value )
+                        com_arg.handler.rust_to_com( &name, Direction::In )
                     },
                     Direction::Out | Direction::Retval
-                        => ( None, quote!( &mut #name ) ),
+                        => quote!( &mut #name ),
                 }
             } )
-            .unzip();
+            .collect();
 
     // Combine the parameters into the final parameter list.
     // This includes the 'this' pointer and both the IN and OUT
@@ -367,8 +366,6 @@ fn rust_to_com_delegate(
     quote!(
         use intercom::type_system::{IntercomFrom, IntercomInto};
         let vtbl = comptr.ptr as *const *const #vtable_ident;
-
-        #( #temporaries )*
 
         // Use an IIFE to act as a try/catch block. The various template
         // substitutions might end up using ?'s for error handling. The IIFE allows
