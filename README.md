@@ -19,14 +19,14 @@ Rust COM server:
 ```rust
 pub use intercom::*;
 
-#[com_library(AUTO_GUID, Calculator)]
+#[com_library(Calculator)]
 
-#[com_class(AUTO_GUID)]
+#[com_class(Calculator)]
 struct Calculator {
     value: i32
 }
 
-#[com_interface(AUTO_GUID)]
+#[com_interface]
 #[com_impl]
 impl Calculator {
     pub fn new() -> Calculator { Calculator { value: 0 } }
