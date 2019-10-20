@@ -25,10 +25,12 @@ pub fn tokens_to_tokenstream<T: IntoIterator<Item=TokenStream>>(
             .chain( tokens.into_iter().map( Into::into ) ) )
 }
 
-// https://msdn.microsoft.com/en-us/library/984x0h58.aspx
-#[cfg(windows)]
-pub fn get_calling_convetion() -> &'static str { "stdcall" }
-
-#[cfg(not(windows))]
-pub fn get_calling_convetion() -> &'static str { "C" }
+pub fn get_calling_convetion() -> &'static str {
+    // https://msdn.microsoft.com/en-us/library/984x0h58.aspx
+    //
+    // This equals __stdcall on 32-bit Windows, 'C' call everywhere else.
+    // Microsoft only has one 64-bit calling convention so it doesn't
+    // matter there.
+    "system"
+}
 
