@@ -32,7 +32,7 @@ impl ErrorTests
 {
     pub fn new() -> ErrorTests { ErrorTests }
 
-    pub fn test_comerror( &self, source : ComItf<dyn IErrorSource> ) -> ComResult<()>
+    pub fn test_comerror( &self, source : &ComItf<dyn IErrorSource> ) -> ComResult<()>
     {
         let err = source.return_comerror(
                 raw::HRESULT::new( 123 ),
@@ -57,7 +57,7 @@ impl ErrorTests
         }
     }
 
-    pub fn test_testerror( &self, source : ComItf<dyn IErrorSource> ) -> ComResult<()>
+    pub fn test_testerror( &self, source : &ComItf<dyn IErrorSource> ) -> ComResult<()>
     {
         let err = source.return_testerror(
                 raw::HRESULT::new( 123 ),
@@ -82,7 +82,7 @@ impl ErrorTests
         }
     }
 
-    pub fn test_ioerror( &self, source : ComItf<dyn IErrorSource> ) -> ComResult<()>
+    pub fn test_ioerror( &self, source : &ComItf<dyn IErrorSource> ) -> ComResult<()>
     {
         let err = source.return_ioerror(
                 raw::HRESULT::new( raw::E_ACCESSDENIED.hr ),

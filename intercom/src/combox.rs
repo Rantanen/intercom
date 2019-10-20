@@ -121,15 +121,19 @@ impl<T: CoClass> AsRef<ComBox<T>> for ComStruct<T>
 impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComRc<I> {
 
     fn from( source : ComStruct<T> ) -> ComRc<I> {
-        let rc = ComRc::attach( source.as_comitf() );
-        std::mem::forget( source );
-        rc
+        // as_comitf does not change the reference count so attach is safe
+        // as long as we forget the source so it won't release it either.
+        unsafe {
+            let rc = ComRc::attach( source.as_comitf() );
+            std::mem::forget( source );
+            rc
+        }
     }
 }
 
 impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<&ComStruct<T>> for ComRc<I> {
     fn from( combox : &ComStruct<T> ) -> Self {
-        ComRc::copy( &combox.as_comitf() )
+        ComRc::from( &combox.as_comitf() )
     }
 }
 

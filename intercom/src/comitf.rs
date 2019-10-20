@@ -24,18 +24,6 @@ impl<T: ?Sized> std::fmt::Debug for ComItf<T> {
     }
 }
 
-impl<T: ?Sized> Clone for ComItf<T> {
-    fn clone( &self ) -> Self {
-        ComItf {
-            raw_ptr: self.raw_ptr,
-            automation_ptr: self.automation_ptr,
-            phantom: PhantomData
-        }
-    }
-}
-
-impl<T: ?Sized> Copy for ComItf<T> { }
-
 impl<T: ?Sized> ComItf<T> {
 
     /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
@@ -137,10 +125,15 @@ impl ComItf<dyn IUnknown> {
 
                 // Interface was available. Convert the raw pointer into
                 // a strong type-system specific InterfacePtr.
-                let target_itf = raw::InterfacePtr::<TS, TTarget>::new( ptr );
-                let itf = ComItf::maybe_wrap( target_itf )
-                        .ok_or_else( || ComError::E_POINTER )?;
-                Ok( ComRc::attach( itf ) )
+                //
+                // The pointer has already been addref'd by query_interface
+                // so it's safe to attach it here.
+                unsafe {
+                    let target_itf = raw::InterfacePtr::<TS, TTarget>::new( ptr );
+                    let itf = ComItf::maybe_wrap( target_itf )
+                            .ok_or_else( || ComError::E_POINTER )?;
+                    Ok( ComRc::attach( itf ) )
+                }
             },
             Err( e ) => Err( e.into() )
         }
@@ -268,6 +261,23 @@ impl<T: ComInterface + ?Sized> ComItf<T> {
             raw_ptr: this.raw_ptr.as_unknown(),
             automation_ptr: this.automation_ptr.as_unknown(),
             phantom: PhantomData,
+        }
+    }
+
+    pub fn as_rc(this: &Self) -> ComRc<T> {
+        let iunk : &ComItf<dyn IUnknown> = this.as_ref();
+
+        // Calling `add_ref` makes the pointer safe for attach.
+        //
+        // ComRc::copy, etc. depend on this function so we can't just delegate
+        // this there. :)
+        unsafe {
+            iunk.add_ref();
+            ComRc::attach( ComItf {
+                automation_ptr: this.automation_ptr,
+                raw_ptr: this.raw_ptr,
+                phantom: PhantomData,
+            } )
         }
     }
 }
