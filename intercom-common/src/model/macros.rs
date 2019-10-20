@@ -1,4 +1,3 @@
-
 use syn::parse::{Parse, ParseStream, Result};
 
 /// An empty type that cannot be parsed.
@@ -6,32 +5,36 @@ use syn::parse::{Parse, ParseStream, Result};
 /// Used especially with attributes that don't take positional arguments.
 #[derive(Debug)]
 pub enum NoParams {}
-impl Parse for NoParams {
-    fn parse( input: ParseStream ) -> Result<Self> {
-        Err( input.error( "Attribute does not accept positional parameters" ) )
+impl Parse for NoParams
+{
+    fn parse(input: ParseStream) -> Result<Self>
+    {
+        Err(input.error("Attribute does not accept positional parameters"))
     }
 }
 
 /// Literal string or 'None' if there should be no value.
 #[derive(Debug)]
-pub enum StrOption {
-    Str( ::syn::LitStr ),
-    None
+pub enum StrOption
+{
+    Str(::syn::LitStr),
+    None,
 }
 
-impl Parse for StrOption {
-    fn parse( input: ParseStream ) -> Result<Self> {
-
-        if input.peek( ::syn::LitStr ) {
-            return Ok( StrOption::Str( input.parse()? ) );
+impl Parse for StrOption
+{
+    fn parse(input: ParseStream) -> Result<Self>
+    {
+        if input.peek(::syn::LitStr) {
+            return Ok(StrOption::Str(input.parse()?));
         }
 
-        let ident : ::syn::Ident = input.parse()?;
+        let ident: ::syn::Ident = input.parse()?;
         if ident == "None" {
-            return Ok( StrOption::None );
+            return Ok(StrOption::None);
         }
 
-        Err( input.error( "Expected string or `None`" ) )
+        Err(input.error("Expected string or `None`"))
     }
 }
 
@@ -210,4 +213,3 @@ macro_rules! intercom_attribute {
         }
     }
 }
-

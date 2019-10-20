@@ -1,20 +1,22 @@
 #![feature(non_exhaustive)]
-#![recursion_limit="128"]
-
+#![recursion_limit = "128"]
 #![allow(clippy::match_bool)]
 
-#[macro_use] extern crate quote;
-#[macro_use] extern crate syn;
-#[macro_use] extern crate failure;
+#[macro_use]
+extern crate quote;
+#[macro_use]
+extern crate syn;
+#[macro_use]
+extern crate failure;
 
-pub mod guid;
-pub mod error;
-pub mod idents;
-pub mod tyhandlers;
-pub mod returnhandlers;
-pub mod utils;
 pub mod ast_converters;
+pub mod attributes;
+pub mod error;
+pub mod guid;
+pub mod idents;
 pub mod methodinfo;
 pub mod model;
-pub mod attributes;
 pub mod prelude;
+pub mod returnhandlers;
+pub mod tyhandlers;
+pub mod utils;
