@@ -38,7 +38,7 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/generated)
 add_custom_command(
     OUTPUT ${PROJECT_SOURCE_DIR}/generated/test_lib.hpp ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
-    COMMAND cargo run --release cpp ${TESTLIB_LIB} --all --header ${PROJECT_SOURCE_DIR}/generated/test_lib.hpp --source ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
+    COMMAND cargo run cpp ${TESTLIB_LIB} --all --header ${PROJECT_SOURCE_DIR}/generated/test_lib.hpp --source ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
     WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
     DEPENDS ${TESTLIB_LIB} ${PROJECT_SOURCE_DIR}/generated)
 

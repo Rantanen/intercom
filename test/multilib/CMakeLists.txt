@@ -37,12 +37,12 @@ if( WIN32 )
 
         add_custom_command(
                 TARGET multilib POST_BUILD
-                COMMAND "cargo" "run" embed-typelib ${LIB_BINARY_BUILD_PATH}
+                COMMAND cargo run embed-typelib ${LIB_BINARY_BUILD_PATH}
                 WORKING_DIRECTORY ${MULTILIB_WORKSPACE_DIR}/../intercom-cli
         )
         add_custom_command(
                 TARGET multilib POST_BUILD
-                COMMAND "cargo" "run" embed-typelib ${LIB_BINARY_BUILD_DIRECTORY}/test_lib.dll
+                COMMAND cargo run embed-typelib ${LIB_BINARY_BUILD_DIRECTORY}/test_lib.dll
                 WORKING_DIRECTORY ${MULTILIB_WORKSPACE_DIR}/../intercom-cli
         )
 
