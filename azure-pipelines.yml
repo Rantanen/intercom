@@ -1,0 +1,66 @@
+trigger:
+- master
+
+strategy:
+    matrix:
+        linux:
+            imageName: "ubuntu-16.04"
+            cmake_generator_opts:
+        windows:
+            imageName: "vs2017-win2016"
+            cmake_generator_opts: -DCMAKE_GENERATOR_PLATFORM=x64
+
+pool:
+  vmImage: $(imageName)
+
+steps:
+- script: |
+    curl -sSf -o rustup-init.exe https://win.rustup.rs
+    rustup-init.exe --default-toolchain nightly -y
+  displayName: 'Update Rustup (Windows)'
+  condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
+
+- script: |
+    rustup -V
+    rustup self update
+    rustup set profile minimal
+    rustup toolchain install nightly -c rustfmt -c clippy
+    rustup default nightly
+    cargo -V
+    rustc -V
+    cargo clippy -V
+    cargo fmt -- -V
+  displayName: 'Setup environment'
+
+- script: cargo fmt -- --check
+  displayName: 'Check style'
+
+- script: cargo clippy
+  displayName: 'Run build'
+
+- script: cargo test
+  displayName: 'Run unit tests'
+
+- script: |
+    mkdir build
+    cd build
+    cmake .. $(cmake_generator_opts)
+    cmake --build .
+  displayName: "Build integration tests"
+
+# Run tests on Linux (raw file name)
+- script: |
+    build/bin/cpp-raw
+    build/bin/cpp-dl
+    build/bin/cpp-wrapper
+  displayName: "Run integration tests (Linux)"
+  condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT' ))
+
+# Run tests on Windows (.exe suffix)
+- script:
+    dir
+    build\bin\cpp-raw.exe
+    build\bin\cpp-dl.exe
+    build\bin\cpp-wrapper.exe
+  displayName: "Run integration tests (Windows)"
+  condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
