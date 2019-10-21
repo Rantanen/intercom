@@ -9,26 +9,25 @@ echo on
 REM Build Intercom and the C++ test suite
 del /s /q build\x64
 mkdir build
-mkdir build\x64
-pushd build\x64
+pushd build
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-cmake "..\.." -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=Release
+cmake ".." -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=Release
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-msbuild intercom.sln /p:Platform=x64 /p:Configuration=Release
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-popd
-
-REM Build C# test suite
-pushd test\cs
-
-tlbimp ..\target\release\test_lib.dll /MACHINE:X64 /out:TestLib.Interop.dll
-
-nuget restore
-msbuild /p:Platform=x64 /p:Configuration=Release
+cmake --build . --config Release
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 popd
+
+REM REM Build C# test suite
+REM pushd test\cs
+REM
+REM tlbimp ..\target\release\test_lib.dll /MACHINE:X64 /out:TestLib.Interop.dll
+REM
+REM nuget restore
+REM msbuild /p:Platform=x64 /p:Configuration=Release
+REM if %errorlevel% neq 0 exit /b %errorlevel%
+REM
+REM popd
 
