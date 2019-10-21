@@ -1,19 +1,19 @@
-
 use super::*;
 use intercom::raw::OutBSTR;
 use std::os::raw;
 
 /// A memory allocator to be used for allocating/deallocating memory shared
 /// with intercom libraries.
-#[crate::com_class( IAllocator )]
+#[crate::com_class(IAllocator)]
 #[derive(Default)]
 pub struct Allocator;
 
 #[crate::com_interface(
-        com_iid = "18EE22B3-B0C6-44A5-A94A-7A417676FB66",
-        raw_iid = "7A6F6564-04B5-4455-A223-EA0512B8CC63" )]
-pub trait IAllocator {
-
+    com_iid = "18EE22B3-B0C6-44A5-A94A-7A417676FB66",
+    raw_iid = "7A6F6564-04B5-4455-A223-EA0512B8CC63"
+)]
+pub trait IAllocator
+{
     /// Allocates a new BSTR based on an existing string value.
     ///
     /// # Arguments
@@ -27,7 +27,7 @@ pub trait IAllocator {
     /// to the given `len`. The returned value must be freed using BSTR aware
     /// free function, such as the `free_bstr` in this interface or the
     /// `SysFreeString` function on Windows.
-    unsafe fn alloc_bstr( &self, text : *const u16, len : u32 ) -> OutBSTR;
+    unsafe fn alloc_bstr(&self, text: *const u16, len: u32) -> OutBSTR;
 
     /// Frees a BSTR value.
     ///
@@ -38,7 +38,7 @@ pub trait IAllocator {
     /// # Safety
     ///
     /// The function is safe as long as the `bstr` is a valid BSTR value.
-    unsafe fn free_bstr( &self, bstr : OutBSTR );
+    unsafe fn free_bstr(&self, bstr: OutBSTR);
 
     /// Allocates a segment of memory that is safe to pass through intercom
     /// interfaces.
@@ -51,7 +51,7 @@ pub trait IAllocator {
     ///
     /// The returned value must be freed using the `free` method in this
     /// interface or the intercom `alloc::free` function.
-    unsafe fn alloc( &self, len : usize ) -> *mut raw::c_void;
+    unsafe fn alloc(&self, len: usize) -> *mut raw::c_void;
 
     /// Frees a segment of memory received through intercom interfaces.
     ///
@@ -63,30 +63,30 @@ pub trait IAllocator {
     ///
     /// The memory must have been allocated using the `alloc` method in this
     /// interface or the intercom `alloc::allocate` function.
-    unsafe fn free( &self, ptr : *mut raw::c_void );
+    unsafe fn free(&self, ptr: *mut raw::c_void);
 }
 
 #[crate::com_impl]
-impl IAllocator for Allocator {
-
-    unsafe fn alloc_bstr(
-        &self,
-        text : *const u16,
-        len : u32
-    ) -> OutBSTR {
-        OutBSTR( os::alloc_bstr( text, len ) )
+impl IAllocator for Allocator
+{
+    unsafe fn alloc_bstr(&self, text: *const u16, len: u32) -> OutBSTR
+    {
+        OutBSTR(os::alloc_bstr(text, len))
     }
 
-    unsafe fn free_bstr( &self, bstr: OutBSTR ) {
-        os::free_bstr( bstr.0 )
+    unsafe fn free_bstr(&self, bstr: OutBSTR)
+    {
+        os::free_bstr(bstr.0)
     }
 
-    unsafe fn alloc( &self, len : usize ) -> *mut raw::c_void {
-        os::alloc( len )
+    unsafe fn alloc(&self, len: usize) -> *mut raw::c_void
+    {
+        os::alloc(len)
     }
 
-    unsafe fn free( &self, ptr : *mut raw::c_void ) {
-        os::free( ptr )
+    unsafe fn free(&self, ptr: *mut raw::c_void)
+    {
+        os::free(ptr)
     }
 }
 
@@ -101,7 +101,10 @@ impl IAllocator for Allocator {
 ///
 /// The returned value must be freed using the `free` method in this
 /// module or the `IAllocator::free` method.
-pub unsafe fn allocate( len : usize ) -> *mut raw::c_void { os::alloc( len ) }
+pub unsafe fn allocate(len: usize) -> *mut raw::c_void
+{
+    os::alloc(len)
+}
 
 /// Frees a segment of memory received through intercom interfaces.
 ///
@@ -113,88 +116,82 @@ pub unsafe fn allocate( len : usize ) -> *mut raw::c_void { os::alloc( len ) }
 ///
 /// The memory must have been allocated using the `allocate` method in this
 /// module or the `IAllocator::alloc` method.
-pub unsafe fn free( ptr : *mut raw::c_void ) { os::free( ptr ) }
+pub unsafe fn free(ptr: *mut raw::c_void)
+{
+    os::free(ptr)
+}
 
 #[cfg(windows)]
-mod os {
+mod os
+{
     use std::os::raw;
 
-    pub unsafe fn alloc_bstr(
-        psz: *const u16,
-        len: u32
-    ) -> *mut u16 {
-        SysAllocStringLen( psz, len )
+    pub unsafe fn alloc_bstr(psz: *const u16, len: u32) -> *mut u16
+    {
+        SysAllocStringLen(psz, len)
     }
 
-    pub unsafe fn free_bstr(
-        bstr : *mut u16
-    ) {
-        SysFreeString( bstr )
+    pub unsafe fn free_bstr(bstr: *mut u16)
+    {
+        SysFreeString(bstr)
     }
 
-    pub unsafe fn alloc(
-        len: usize
-    ) -> *mut raw::c_void {
-        CoTaskMemAlloc( len )
+    pub unsafe fn alloc(len: usize) -> *mut raw::c_void
+    {
+        CoTaskMemAlloc(len)
     }
 
-    pub unsafe fn free(
-        ptr : *mut raw::c_void
-    ) {
-        CoTaskMemFree( ptr )
+    pub unsafe fn free(ptr: *mut raw::c_void)
+    {
+        CoTaskMemFree(ptr)
     }
 
     #[doc(hidden)]
     #[link(name = "oleaut32")]
     extern "system" {
-        pub fn SysAllocStringLen( psz: *const u16, len: u32) -> *mut u16;
-        pub fn SysFreeString( bstr: *mut u16 );
+        pub fn SysAllocStringLen(psz: *const u16, len: u32) -> *mut u16;
+        pub fn SysFreeString(bstr: *mut u16);
     }
 
     #[doc(hidden)]
     #[link(name = "ole32")]
     extern "system" {
-        pub fn CoTaskMemAlloc( len : usize ) -> *mut raw::c_void;
-        pub fn CoTaskMemFree( ptr : *mut raw::c_void );
+        pub fn CoTaskMemAlloc(len: usize) -> *mut raw::c_void;
+        pub fn CoTaskMemFree(ptr: *mut raw::c_void);
     }
 }
 
 #[cfg(not(windows))]
-mod os {
-    use std::os::raw;
+mod os
+{
     use libc;
+    use std::os::raw;
 
     /// # Safety
     ///
     /// See IAllocator above.
-    pub unsafe fn alloc_bstr(
-        psz: *const u16,
-        len: u32
-    ) -> *mut u16
+    pub unsafe fn alloc_bstr(psz: *const u16, len: u32) -> *mut u16
     {
         // text size in bytes.
-        let text_size : usize = ( len * 2 ) as usize;
+        let text_size: usize = (len * 2) as usize;
 
         // BSTR layout:
         //
         // | Length:u32 | Text data...:[u16] | Zero termiantion:u16 |
         //
         // As bytes this is 4 + len * 2 + 2, or:
-        let ptr = libc::malloc( text_size + 6 );
-        let text_data = ( ptr as usize + 4 ) as *mut u16;
+        let ptr = libc::malloc(text_size + 6);
+        let text_data = (ptr as usize + 4) as *mut u16;
 
         // Store the length.
-        *( ptr as *mut u32 ) = text_size as u32;
+        *(ptr as *mut u32) = text_size as u32;
 
         // Copy text data to the buffer. Size is indicates as bytes, so
         // double the amount of u16-chars.
-        libc::memcpy(
-                text_data as *mut _,
-                psz as *mut _,
-                text_size );
+        libc::memcpy(text_data as *mut _, psz as *mut _, text_size);
 
         // Zero termination.
-        *(( text_data as usize + text_size ) as *mut _ ) = 0u16;
+        *((text_data as usize + text_size) as *mut _) = 0u16;
 
         // Return a pointer to the text data as per BSTR spec.
         text_data
@@ -203,36 +200,32 @@ mod os {
     /// # Safety
     ///
     /// See IAllocator above.
-    pub unsafe fn free_bstr(
-        bstr : *mut u16
-    ) {
+    pub unsafe fn free_bstr(bstr: *mut u16)
+    {
         // Ignore null pointers. The offset would make these non-null and crash
         // the application.
         if bstr.is_null() {
-            return
+            return;
         }
 
         // Offset the ptr back to the start of the reserved memory and free it.
-        let ptr = ( bstr as usize - 4 ) as *mut _;
-        libc::free( ptr )
+        let ptr = (bstr as usize - 4) as *mut _;
+        libc::free(ptr)
     }
 
     /// # Safety
     ///
     /// See IAllocator above.
-    pub unsafe fn alloc(
-        len: usize
-    ) -> *mut raw::c_void {
-        libc::malloc( len ) as *mut _
+    pub unsafe fn alloc(len: usize) -> *mut raw::c_void
+    {
+        libc::malloc(len) as *mut _
     }
 
     /// # Safety
     ///
     /// See IAllocator above.
-    pub unsafe fn free(
-        ptr : *mut raw::c_void
-    ) {
-        libc::free( ptr as *mut _ )
+    pub unsafe fn free(ptr: *mut raw::c_void)
+    {
+        libc::free(ptr as *mut _)
     }
 }
-

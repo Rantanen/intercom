@@ -16,9 +16,10 @@ jobs:
                     rustc -vV
                     cargo -vV
             - run:
-                name: "Install rustfmt"
+                name: "Run rustfmt"
                 command: |
                     rustup component add rustfmt-preview
+                    cargo fmt -- --check
             - run:
                 name: "Cargo test"
                 command: |
