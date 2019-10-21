@@ -1,4 +1,4 @@
-pushd bin\AMD64\Release
+pushd build\bin
 ./cpp-raw.exe
 $cpp_raw_ok = $?
 ./cpp-wrapper.exe
