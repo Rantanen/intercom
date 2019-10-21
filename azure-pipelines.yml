@@ -3,10 +3,10 @@ trigger:
 
 strategy:
     matrix:
-        linux:
+        Linux:
             imageName: "ubuntu-16.04"
             cmake_generator_opts:
-        windows:
+        Windows:
             imageName: "vs2017-win2016"
             cmake_generator_opts: -DCMAKE_GENERATOR_PLATFORM=x64
 
