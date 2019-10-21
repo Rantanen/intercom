@@ -7,7 +7,6 @@ popd
 echo on
 
 REM Build Intercom and the C++ test suite
-del /s /q build\x64
 mkdir build
 pushd build
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -21,13 +20,13 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 popd
 
 REM REM Build C# test suite
-REM pushd test\cs
-REM
-REM tlbimp ..\target\release\test_lib.dll /MACHINE:X64 /out:TestLib.Interop.dll
-REM
-REM nuget restore
-REM msbuild /p:Platform=x64 /p:Configuration=Release
-REM if %errorlevel% neq 0 exit /b %errorlevel%
-REM
-REM popd
+pushd test\cs
+
+tlbimp ..\target\release\test_lib.dll /MACHINE:X64 /out:TestLib.Interop.dll
+
+nuget restore
+msbuild /p:Platform=x64 /p:Configuration=Release
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+popd
 

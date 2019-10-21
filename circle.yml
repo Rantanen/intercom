@@ -37,5 +37,7 @@ jobs:
                     cd build
                     cmake ..
                     make
-                    cd ../bin/x86_64
+                    cd bin
                     ./cpp-raw
+                    ./cpp-dl
+                    ./cpp-wrapper
