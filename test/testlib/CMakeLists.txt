@@ -18,7 +18,7 @@ endif()
 set(TESTLIB_BINARY_BUILD_PATH "${TESTLIB_BINARY_BUILD_DIRECTORY}/${TESTLIB_BINARY_BUILD_NAME}" )
 set(TESTLIB_IMPORT_BUILD_PATH "${TESTLIB_BINARY_BUILD_PATH}.lib" )
 
-set(TESTLIB_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${TESTLIB_BINARY_BUILD_NAME}" )
+set(TESTLIB_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${TESTLIB_BINARY_BUILD_NAME}" )
 set(TESTLIB_IMPORT_LOCATION "${TESTLIB_LOCATION}.lib" )
 
 # Build instructions for the library.
@@ -28,50 +28,40 @@ add_custom_command(
         COMMAND "cargo" ARGS "build" ${TESTLIB_BUILD_ARGUMENT_RELEASE}
         WORKING_DIRECTORY ${TESTLIB_WORKSPACE_DIR}
         DEPENDS ${testlib_sources})
-add_custom_command(
-        OUTPUT ${TESTLIB_LOCATION}
-        COMMAND ${CMAKE_COMMAND} -E copy
-                ${TESTLIB_BINARY_BUILD_PATH}
-                ${TESTLIB_LOCATION}
-        DEPENDS ${TESTLIB_BINARY_BUILD_PATH} )
 
 # On Windows the DLLs are linked with the help of an import library.
 # Carge sets the name of the import library to "<library>.dll.lib".
 if( WIN32 )
 
     # Import library is required.
-    add_custom_command(
-            OUTPUT ${TESTLIB_IMPORT_LOCATION}
-            COMMAND ${CMAKE_COMMAND} -E copy
-                    ${TESTLIB_IMPORT_BUILD_PATH}
-                    ${TESTLIB_IMPORT_LOCATION}
-            DEPENDS ${TESTLIB_BINARY_BUILD_PATH} )
-    add_custom_target( testlib DEPENDS ${TESTLIB_LOCATION} ${TESTLIB_IMPORT_LOCATION} )
+    add_custom_target( testlib DEPENDS ${TESTLIB_BINARY_BUILD_PATH} ${TESTLIB_IMPORT_BUILD_PATH} )
 
     add_custom_command(
             TARGET testlib POST_BUILD
-            COMMAND "cargo" "run" embed-typelib ${TESTLIB_BINARY_BUILD_PATH}
+            COMMAND cargo run embed-typelib ${TESTLIB_BINARY_BUILD_PATH}
             WORKING_DIRECTORY ${TESTLIB_WORKSPACE_DIR}/../intercom-cli
     )
-    add_custom_command(
-            TARGET testlib POST_BUILD
-            COMMAND "cargo" "run" embed-typelib ${TESTLIB_LOCATION}
-            WORKING_DIRECTORY ${TESTLIB_WORKSPACE_DIR}/../intercom-cli
-    )
+
 else()
 
     # No need to depend on the import library.
-    add_custom_target( testlib DEPENDS ${TESTLIB_LOCATION} )
+    add_custom_target( testlib DEPENDS ${TESTLIB_BINARY_BUILD_PATH} )
 
 endif()
 
+add_custom_command(
+        TARGET testlib POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${TESTLIB_BINARY_BUILD_PATH}
+                ${TESTLIB_LOCATION}
+        DEPENDS ${TESTLIB_BINARY_BUILD_PATH} )
 
 message( "${TESTLIB_IMPORT_LOCATION}" )
 # Publish as a library.
 add_library(test_lib SHARED IMPORTED GLOBAL)
 add_dependencies(test_lib testlib)
-set_target_properties(test_lib PROPERTIES IMPORTED_LOCATION "${TESTLIB_LOCATION}")
-set_target_properties(test_lib PROPERTIES IMPORTED_IMPLIB "${TESTLIB_IMPORT_LOCATION}")
+set_target_properties(test_lib PROPERTIES IMPORTED_LOCATION "${TESTLIB_BINARY_BUILD_PATH}")
+set_target_properties(test_lib PROPERTIES IMPORTED_IMPLIB "${TESTLIB_IMPORT_BUILD_PATH}")
 
 # Unfortunately Rust has a poor support for "soname".
 # See the following discussions
