@@ -40,14 +40,14 @@ add_custom_command(
 # Use the intercom-cli as code generator for multi_lib.h/multi_lib.cpp
 add_custom_command(
     OUTPUT ${PROJECT_SOURCE_DIR}/generated/multi_lib.h ${PROJECT_SOURCE_DIR}/generated/multi_lib.cpp
-    COMMAND cargo run --release cpp ${MULTILIB_LIB} --header ${PROJECT_SOURCE_DIR}/generated/multi_lib.hpp --source ${PROJECT_SOURCE_DIR}/generated/multi_lib.cpp
+    COMMAND cargo run cpp ${MULTILIB_LIB} --header ${PROJECT_SOURCE_DIR}/generated/multi_lib.hpp --source ${PROJECT_SOURCE_DIR}/generated/multi_lib.cpp
     WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
     DEPENDS ${MULTILIB_LIB} ${PROJECT_SOURCE_DIR}/generated)
 
 # Use the intercom-cli as code generator for test_lib.h/test_lib.cpp
 add_custom_command(
     OUTPUT ${PROJECT_SOURCE_DIR}/generated/test_lib.h ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
-    COMMAND cargo run --release cpp ${TESTLIB_LIB} --header ${PROJECT_SOURCE_DIR}/generated/test_lib.hpp --source ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
+    COMMAND cargo run cpp ${TESTLIB_LIB} --header ${PROJECT_SOURCE_DIR}/generated/test_lib.hpp --source ${PROJECT_SOURCE_DIR}/generated/test_lib.cpp
     WORKING_DIRECTORY ${INTERCOM_ROOT}/intercom-cli
     DEPENDS ${TESTLIB_LIB} ${PROJECT_SOURCE_DIR}/generated)
 
