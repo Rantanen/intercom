@@ -30,7 +30,7 @@ pub fn expand_com_impl(
 
     for (_, impl_variant) in imp.variants() {
         let itf_unique_ident = impl_variant.interface_unique_name();
-        let vtable_struct_ident = idents::vtable_struct(&itf_unique_ident);
+        let vtable_struct_ident = idents::vtable_struct(&itf_unique_ident, Span::call_site());
         let vtable_instance_ident = idents::vtable_instance(&struct_ident, &itf_unique_ident);
         let vtable_offset = idents::vtable_offset(&struct_ident, &itf_unique_ident);
 
@@ -136,7 +136,7 @@ pub fn expand_com_impl(
 
             let in_out_args = method_info.raw_com_args().into_iter().map(|com_arg| {
                 let name = &com_arg.name;
-                let com_ty = &com_arg.handler.com_ty(com_arg.dir);
+                let com_ty = &com_arg.handler.com_ty(com_arg.span, com_arg.dir);
                 let dir = match com_arg.dir {
                     Direction::In => quote!(),
                     Direction::Out | Direction::Retval => quote!( *mut ),
@@ -150,7 +150,7 @@ pub fn expand_com_impl(
             let in_params: Vec<_> = method_info
                 .args
                 .iter()
-                .map(|ca| ca.handler.com_to_rust(&ca.name, Direction::In))
+                .map(|ca| ca.handler.com_to_rust(&ca.name, ca.span, Direction::In))
                 .collect();
 
             let return_ident = Ident::new("__result", Span::call_site());
@@ -199,7 +199,10 @@ pub fn expand_com_impl(
             ));
 
             // Include the delegating method in the virtual table fields.
-            vtable_fields.push(quote!( #method_ident : #method_impl_ident, ));
+            vtable_fields.push(quote!(
+                #[allow(non_snake_case)]
+                #method_ident : #method_impl_ident,
+            ));
         }
 
         // Now that we've gathered all the virtual table fields, we can finally

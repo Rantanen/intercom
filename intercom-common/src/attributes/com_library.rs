@@ -146,7 +146,7 @@ fn get_dll_get_class_object_function(match_arms: &[TokenStream]) -> TokenStream
 fn create_get_typelib_function(lib: &model::ComLibrary) -> Result<TokenStream, String>
 {
     let lib_name = lib_name();
-    let libid = utils::get_guid_tokens(lib.libid());
+    let libid = utils::get_guid_tokens(lib.libid(), Span::call_site());
     let create_class_typeinfo = lib
         .coclasses()
         .iter()

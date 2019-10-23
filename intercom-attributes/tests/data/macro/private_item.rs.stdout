@@ -18,6 +18,7 @@ const IID_IFoo_Automation: intercom::IID =
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],};
 #[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
 #[repr(C)]
 #[doc(hidden)]
 struct __IFoo_AutomationVtbl {
@@ -36,6 +37,7 @@ const IID_IFoo_Raw: intercom::IID =
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],};
 #[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
 #[repr(C)]
 #[doc(hidden)]
 struct __IFoo_RawVtbl {
@@ -46,22 +48,23 @@ struct __IFoo_RawVtbl {
                                   <() as
                                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
 }
-impl IFoo for intercom::ComItf<IFoo> {
+impl IFoo for intercom::ComItf<dyn IFoo> {
     fn trait_method(&self) -> () {
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
                ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
            {
+            #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __IFoo_AutomationVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<(), intercom::ComError> =
+            let __intercom_result: Result<(), intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
                              ((**vtbl).trait_method_Automation)(comptr.ptr);
-                         let INTERCOM_iid =
+                         let __intercom_iid =
                              intercom::GUID{data1: 0u32,
                                             data2: 0u16,
                                             data3: 0u16,
@@ -70,7 +73,7 @@ impl IFoo for intercom::ComItf<IFoo> {
                                                  0u8, 0u8],};
                          Ok({ })
                      })();
-            return match result {
+            return match __intercom_result {
                        Ok(v) => v,
                        Err(err) =>
                        <() as intercom::ErrorValue>::from_com_error(err),
@@ -79,15 +82,16 @@ impl IFoo for intercom::ComItf<IFoo> {
         if let Some(comptr) =
                ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
            {
+            #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr as *const *const __IFoo_RawVtbl;
             #[allow(unused_unsafe)]
-            let result: Result<(), intercom::ComError> =
+            let __intercom_result: Result<(), intercom::ComError> =
                 (||
                      unsafe {
                          let __result =
                              ((**vtbl).trait_method_Raw)(comptr.ptr);
-                         let INTERCOM_iid =
+                         let __intercom_iid =
                              intercom::GUID{data1: 0u32,
                                             data2: 0u16,
                                             data3: 0u16,
@@ -96,7 +100,7 @@ impl IFoo for intercom::ComItf<IFoo> {
                                                  0u8, 1u8],};
                          Ok({ })
                      })();
-            return match result {
+            return match __intercom_result {
                        Ok(v) => v,
                        Err(err) =>
                        <() as intercom::ErrorValue>::from_com_error(err),
@@ -106,7 +110,7 @@ impl IFoo for intercom::ComItf<IFoo> {
             intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
 }
-impl intercom::ComInterface for IFoo {
+impl intercom::ComInterface for dyn IFoo {
     #[doc = "Returns the IID of the requested interface."]
     fn iid(ts: intercom::type_system::TypeSystemName)
      -> Option<&'static intercom::IID> {
@@ -116,17 +120,19 @@ impl intercom::ComInterface for IFoo {
             intercom::type_system::TypeSystemName::Raw => Some(&IID_IFoo_Raw),
         }
     }
-    fn deref(com_itf: &intercom::ComItf<IFoo>) -> &(IFoo + 'static) {
+    fn deref(com_itf: &intercom::ComItf<dyn IFoo>) -> &(dyn IFoo + 'static) {
         com_itf
     }
 }
-impl intercom::type_system::BidirectionalTypeInfo for IFoo {
+impl intercom::type_system::BidirectionalTypeInfo for dyn IFoo {
     #[doc = r" The name of the type."]
     fn type_name() -> &'static str { "IFoo" }
 }
+#[allow(non_snake_case)]
+#[allow(dead_code)]
 pub(crate) fn get_intercom_interface_info_for_IFoo()
  -> intercom::typelib::TypeInfo {
-    let mut variants =
+    let variants =
 
 
 
@@ -536,6 +542,7 @@ pub const IID_Foo_Automation: intercom::IID =
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8],};
 #[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
 #[repr(C)]
 #[doc(hidden)]
 pub struct __Foo_AutomationVtbl {
@@ -554,6 +561,7 @@ pub const IID_Foo_Raw: intercom::IID =
                    data3: 0u16,
                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8],};
 #[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
 #[repr(C)]
 #[doc(hidden)]
 pub struct __Foo_RawVtbl {
@@ -575,7 +583,7 @@ impl intercom::ComInterface for Foo {
         }
     }
     fn deref(com_itf: &intercom::ComItf<Foo>) -> &Foo {
-        let some_iunk: &intercom::ComItf<intercom::IUnknown> =
+        let some_iunk: &intercom::ComItf<dyn intercom::IUnknown> =
             com_itf.as_ref();
         let iunknown_iid =
             intercom::IUnknown::iid(intercom::type_system::TypeSystemName::Automation).expect("IUnknown must have Automation IID");
@@ -594,9 +602,11 @@ impl intercom::type_system::BidirectionalTypeInfo for Foo {
     #[doc = r" The name of the type."]
     fn type_name() -> &'static str { "Foo" }
 }
+#[allow(non_snake_case)]
+#[allow(dead_code)]
 pub(crate) fn get_intercom_interface_info_for_Foo()
  -> intercom::typelib::TypeInfo {
-    let mut variants =
+    let variants =
         <[_]>::into_vec(box
                             [intercom::ComStruct::new(intercom::typelib::InterfaceVariant{ts:
                                                                                               intercom::type_system::TypeSystemName::Automation,

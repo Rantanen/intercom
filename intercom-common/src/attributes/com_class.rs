@@ -71,8 +71,8 @@ pub fn expand_com_class(
             // Various idents.
             let itf_variant = Ident::new(&format!("{}_{:?}", itf, ts), Span::call_site());
             let offset_ident = idents::vtable_offset(struct_ident, &itf_variant);
-            let iid_ident = idents::iid(&itf_variant);
-            let vtable_struct_ident = idents::vtable_struct(&itf_variant);
+            let iid_ident = idents::iid(&itf_variant, Span::call_site());
+            let vtable_struct_ident = idents::vtable_struct(&itf_variant, Span::call_site());
             let vtable_instance_ident = idents::vtable_instance(struct_ident, &itf_variant);
 
             // Store the field offset globally. We need this offset when implementing
@@ -197,7 +197,7 @@ pub fn expand_com_class(
     // CLSID constant for the class.
     let clsid_ident = idents::clsid(struct_ident);
     if let Some(ref guid) = *cls.clsid() {
-        let clsid_guid_tokens = utils::get_guid_tokens(guid);
+        let clsid_guid_tokens = utils::get_guid_tokens(guid, Span::call_site());
         let clsid_doc = format!("`{}` class ID.", struct_ident);
         let clsid_const = quote!(
             #[allow(non_upper_case_globals)]
@@ -231,18 +231,20 @@ fn create_get_typeinfo_function(cls: &model::ComStruct) -> Result<TokenStream, S
             ))
         }
     };
-    let clsid_tokens = utils::get_guid_tokens(clsid);
+    let clsid_tokens = utils::get_guid_tokens(clsid, Span::call_site());
     let (interfaces, interface_info): (Vec<_>, Vec<_>) = cls
         .interfaces()
         .iter()
         .map(|itf_ident| {
             let itf_name = itf_ident.to_string();
-            let itf_automation_iid = idents::iid(&Ident::new(
-                &format!("{}_Automation", itf_name),
+            let itf_automation_iid = idents::iid(
+                &Ident::new(&format!("{}_Automation", itf_name), Span::call_site()),
                 Span::call_site(),
-            ));
-            let itf_raw_iid =
-                idents::iid(&Ident::new(&format!("{}_Raw", itf_name), Span::call_site()));
+            );
+            let itf_raw_iid = idents::iid(
+                &Ident::new(&format!("{}_Raw", itf_name), Span::call_site()),
+                Span::call_site(),
+            );
             let itf_fn = Ident::new(
                 &format!("get_intercom_interface_info_for_{}", itf_name),
                 Span::call_site(),
