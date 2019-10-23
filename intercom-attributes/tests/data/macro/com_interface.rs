@@ -18,7 +18,7 @@ pub trait Foo {
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool>;
 
     fn string_method(&self, msg: String) -> String;
-    fn comitf_method(&self, itf: ComItf<Foo>) -> ComResult<ComItf<IUnknown>>;
+    fn comitf_method(&self, itf: ComItf<dyn Foo>) -> ComResult<ComItf<dyn IUnknown>>;
 
     // Should be VARIANT_BOOL in Automation interface.
     fn bool_method(&self, input : bool) -> ComResult<bool>;

@@ -26,8 +26,8 @@ pub trait Foo {
 
     fn string_method(&self, msg: String)
     -> String;
-    fn comitf_method(&self, itf: ComItf<Foo>)
-    -> ComResult<ComItf<IUnknown>>;
+    fn comitf_method(&self, itf: ComItf<dyn Foo>)
+    -> ComResult<ComItf<dyn IUnknown>>;
 
     // Should be VARIANT_BOOL in Automation interface.
     fn bool_method(&self, input: bool)
@@ -110,11 +110,11 @@ pub struct __Foo_AutomationVtbl {
     pub comitf_method_Automation: unsafe extern "system" fn(self_vtable:
                                                                 intercom::RawComPtr,
                                                             itf:
-                                                                <ComItf<Foo>
+                                                                <ComItf<dyn Foo>
                                                                 as
                                                                 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType,
                                                             __out:
-                                                                *mut <ComItf<IUnknown>
+                                                                *mut <ComItf<dyn IUnknown>
                                                                      as
                                                                      intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType)
                                       ->
@@ -215,10 +215,10 @@ pub struct __Foo_RawVtbl {
     pub comitf_method_Raw: unsafe extern "system" fn(self_vtable:
                                                          intercom::RawComPtr,
                                                      itf:
-                                                         <ComItf<Foo> as
+                                                         <ComItf<dyn Foo> as
                                                          intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType,
                                                      __out:
-                                                         *mut <ComItf<IUnknown>
+                                                         *mut <ComItf<dyn IUnknown>
                                                               as
                                                               intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType)
                                ->
@@ -490,7 +490,8 @@ impl Foo for intercom::ComItf<Foo> {
         <ComResult<u16> as
             intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
-    fn comitf_method(&self, itf: ComItf<Foo>) -> ComResult<ComItf<IUnknown>> {
+    fn comitf_method(&self, itf: ComItf<dyn Foo>)
+     -> ComResult<ComItf<dyn IUnknown>> {
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
@@ -500,16 +501,17 @@ impl Foo for intercom::ComItf<Foo> {
             let vtbl = comptr.ptr as *const *const __Foo_AutomationVtbl;
             #[allow(unused_unsafe)]
             let result:
-                    Result<ComResult<ComItf<IUnknown>>, intercom::ComError> =
+                    Result<ComResult<ComItf<dyn IUnknown>>,
+                           intercom::ComError> =
                 (||
                      unsafe {
                          let mut __out:
-                                 <ComItf<IUnknown> as
+                                 <ComItf<dyn IUnknown> as
                                  intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType =
                              intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).comitf_method_Automation)(comptr.ptr,
-                                                                 (&<ComItf<Foo>
+                                                                 (&<ComItf<dyn Foo>
                                                                        as
                                                                        intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::intercom_from(itf)?).intercom_into()?,
                                                                  &mut __out);
@@ -534,7 +536,7 @@ impl Foo for intercom::ComItf<Foo> {
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <ComResult<ComItf<IUnknown>> as
+                       <ComResult<ComItf<dyn IUnknown>> as
                            intercom::ErrorValue>::from_com_error(err),
                    };
         }
@@ -545,16 +547,18 @@ impl Foo for intercom::ComItf<Foo> {
             let vtbl = comptr.ptr as *const *const __Foo_RawVtbl;
             #[allow(unused_unsafe)]
             let result:
-                    Result<ComResult<ComItf<IUnknown>>, intercom::ComError> =
+                    Result<ComResult<ComItf<dyn IUnknown>>,
+                           intercom::ComError> =
                 (||
                      unsafe {
                          let mut __out:
-                                 <ComItf<IUnknown> as
+                                 <ComItf<dyn IUnknown> as
                                  intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType =
                              intercom::type_system::ExternDefault::extern_default();
                          let __result =
                              ((**vtbl).comitf_method_Raw)(comptr.ptr,
-                                                          (&<ComItf<Foo> as
+                                                          (&<ComItf<dyn Foo>
+                                                                as
                                                                 intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::intercom_from(itf)?).intercom_into()?,
                                                           &mut __out);
                          let INTERCOM_iid =
@@ -578,11 +582,11 @@ impl Foo for intercom::ComItf<Foo> {
             return match result {
                        Ok(v) => v,
                        Err(err) =>
-                       <ComResult<ComItf<IUnknown>> as
+                       <ComResult<ComItf<dyn IUnknown>> as
                            intercom::ErrorValue>::from_com_error(err),
                    };
         }
-        <ComResult<ComItf<IUnknown>> as
+        <ComResult<ComItf<dyn IUnknown>> as
             intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
@@ -1350,13 +1354,13 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                               [intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "itf".into(),
                                                                                                                                                                                                                       ty:
-                                                                                                                                                                                                                          <<ComItf<Foo>
+                                                                                                                                                                                                                          <<ComItf<dyn Foo>
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
                                                                                                                                                                                                                               intercom::type_system::InputTypeInfo>::type_name().into(),
                                                                                                                                                                                                                       indirection_level:
-                                                                                                                                                                                                                          <<ComItf<Foo>
+                                                                                                                                                                                                                          <<ComItf<dyn Foo>
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
@@ -1366,13 +1370,13 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "__out".into(),
                                                                                                                                                                                                                       ty:
-                                                                                                                                                                                                                          <<ComItf<IUnknown>
+                                                                                                                                                                                                                          <<ComItf<dyn IUnknown>
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
                                                                                                                                                                                                                               intercom::type_system::OutputTypeInfo>::type_name().into(),
                                                                                                                                                                                                                       indirection_level:
-                                                                                                                                                                                                                          <<ComItf<IUnknown>
+                                                                                                                                                                                                                          <<ComItf<dyn IUnknown>
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
@@ -1774,13 +1778,13 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                               [intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "itf".into(),
                                                                                                                                                                                                                       ty:
-                                                                                                                                                                                                                          <<ComItf<Foo>
+                                                                                                                                                                                                                          <<ComItf<dyn Foo>
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
                                                                                                                                                                                                                               intercom::type_system::InputTypeInfo>::type_name().into(),
                                                                                                                                                                                                                       indirection_level:
-                                                                                                                                                                                                                          <<ComItf<Foo>
+                                                                                                                                                                                                                          <<ComItf<dyn Foo>
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternInputType
                                                                                                                                                                                                                               as
@@ -1790,13 +1794,13 @@ pub(crate) fn get_intercom_interface_info_for_Foo()
                                                                                                                                                                                                intercom::typelib::Arg{name:
                                                                                                                                                                                                                           "__out".into(),
                                                                                                                                                                                                                       ty:
-                                                                                                                                                                                                                          <<ComItf<IUnknown>
+                                                                                                                                                                                                                          <<ComItf<dyn IUnknown>
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
                                                                                                                                                                                                                               intercom::type_system::OutputTypeInfo>::type_name().into(),
                                                                                                                                                                                                                       indirection_level:
-                                                                                                                                                                                                                          <<ComItf<IUnknown>
+                                                                                                                                                                                                                          <<ComItf<dyn IUnknown>
                                                                                                                                                                                                                            as
                                                                                                                                                                                                                            intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::ExternOutputType
                                                                                                                                                                                                                               as
