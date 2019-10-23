@@ -79,7 +79,7 @@ pub fn expand_com_interface(
             for (ts, method_ts_impl) in method.impls.iter() {
                 let ts_tokens = ts.as_typesystem_type(method.info.signature_span);
                 impl_branches.push(quote_spanned!(method.info.signature_span =>
-                    if let Some( comptr ) = ComItf::maybe_ptr::<#ts_tokens>( self ) {
+                    if let Some( comptr ) = intercom::ComItf::maybe_ptr::<#ts_tokens>( self ) {
                         #method_ts_impl
                     }
                 ));

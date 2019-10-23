@@ -53,7 +53,7 @@ impl IFoo for intercom::ComItf<dyn IFoo> {
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
-               ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
+               intercom::ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
            {
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
@@ -80,7 +80,7 @@ impl IFoo for intercom::ComItf<dyn IFoo> {
                    };
         }
         if let Some(comptr) =
-               ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
+               intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
            {
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
