@@ -5,9 +5,10 @@ extern crate term;
 use difference::{Changeset, Difference};
 
 use std::fs;
-use std::io::{Cursor, Read};
+use std::io::{Cursor, Write};
 use std::path::{PathBuf, Path};
 use std::process::{Command, Stdio};
+use term::Terminal;
 
 // Given the default Rust test runner doesn't expose programmatic test cases
 // we are using single "check_expansions" test to process all the data files.
@@ -59,7 +60,7 @@ struct OutputResult
 impl OutputResult {
 
     /// Prints the diff.
-    pub fn show_diff(&self, ctx_size: usize) {
+    pub fn show_diff(&self, ctx_size: usize, t: &mut dyn Terminal<Output = std::io::Stdout>) {
 
         enum Lines
         {
@@ -109,7 +110,6 @@ impl OutputResult {
             ctx_lines.push(ctx_counter);
         }
 
-        let mut t = term::stdout().unwrap();
         let mut skip = false;
         for i in 0..all_lines.len() {
             if ctx_lines[i+ctx_size] == 0 {
@@ -135,6 +135,7 @@ impl OutputResult {
                 }
             }
         }
+        t.reset().unwrap();
     }
 }
 
@@ -327,16 +328,24 @@ fn test_path(config: &TestConfig, sub_path: &str, mode: TestMode) -> usize
 
         // If these were equal, there's only one "Same" diff segment.
         // If there is more than one, they differed.
+        let mut t = term::stdout().unwrap();
         for r in results {
             if std::env::var("UPDATE_TARGETS").is_ok() && r.expected_path.is_some() {
                 // The user wants to update the targets.
-                use std::io::Write;
                 let mut target_file = fs::File::create(r.expected_path.as_ref().unwrap()).unwrap();
                 target_file
                     .write_all(r.actual.as_bytes())
-                    .expect(&format!("Writing target file {} failed", &r.expected_path.unwrap()));
+                    .expect(&format!("Writing target file {} failed", r.expected_path.as_ref().unwrap()));
+                writeln!(t, "-----------------------------------------------------------------").unwrap();
+                writeln!(t, "UPDATED: {}", r.expected_path.unwrap()).unwrap();
+                writeln!(t, "-----------------------------------------------------------------").unwrap();
             } else {
-                r.show_diff(5);
+                writeln!(t, "-----------------------------------------------------------------").unwrap();
+                writeln!(t, "FAIL: {}", r.message).unwrap();
+                writeln!(t, "").unwrap();
+                r.show_diff(5, &mut *t);
+                writeln!(t, "").unwrap();
+                writeln!(t, "-----------------------------------------------------------------").unwrap();
                 failed += 1;
             }
         }
@@ -386,8 +395,8 @@ fn assert_output(actual: String, actual_path: &str, output_kind: &str) -> Option
 fn assert_output_with(actual: String, actual_path: &str, output_kind: &str, sanitize: impl Fn(String) -> String) -> Option<OutputResult> {
 
     let name = Path::new(actual_path).file_name().unwrap().to_string_lossy();
-    let expected_path = format!("{}.{}", actual_path, output_kind);
-    let expected_path = Path::new(&expected_path);
+    let expected_path_string = format!("{}.{}", actual_path, output_kind);
+    let expected_path = Path::new(&expected_path_string);
     if expected_path.exists() {
         let expected = std::fs::read_to_string(expected_path).unwrap().replace("\r", "");
         if expected != actual {
@@ -399,7 +408,7 @@ fn assert_output_with(actual: String, actual_path: &str, output_kind: &str, sani
                     "\n",
                 ),
                 actual: actual,
-                expected_path: None,
+                expected_path: Some(expected_path_string),
             })
         } else {
             None
