@@ -750,7 +750,7 @@ unsafe extern "system" fn __Foo_IFoo_Automation_trait_method_Automation(self_vta
                      (self_vtable as usize -
                           __Foo_IFoo_AutomationVtbl_offset()) as
                          *mut intercom::ComBox<Foo>;
-                 let self_struct: &IFoo = &**self_combox;
+                 let self_struct: &dyn IFoo = &**self_combox;
                  let __result = self_struct.trait_method();
                  Ok({ })
              })();
@@ -835,7 +835,7 @@ unsafe extern "system" fn __Foo_IFoo_Raw_trait_method_Raw(self_vtable:
                  let self_combox =
                      (self_vtable as usize - __Foo_IFoo_RawVtbl_offset()) as
                          *mut intercom::ComBox<Foo>;
-                 let self_struct: &IFoo = &**self_combox;
+                 let self_struct: &dyn IFoo = &**self_combox;
                  let __result = self_struct.trait_method();
                  Ok({ })
              })();
@@ -858,4 +858,4 @@ const __Foo_IFoo_RawVtbl_INSTANCE: __IFoo_RawVtbl =
                                               release_Automation:
                                                   __Foo_IFoo_Raw_release,},
                    trait_method_Raw: __Foo_IFoo_Raw_trait_method_Raw,};
-impl intercom::HasInterface<IFoo> for Foo { }
+impl intercom::HasInterface<dyn IFoo> for Foo { }

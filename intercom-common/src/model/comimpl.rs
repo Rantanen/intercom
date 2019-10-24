@@ -7,13 +7,17 @@ use crate::tyhandlers::ModelTypeSystem;
 use ::indexmap::IndexMap;
 use ::std::iter::FromIterator;
 
-#[derive(Debug, PartialEq)]
+use proc_macro2::Span;
+use syn::spanned::Spanned;
+
+#[derive(Debug)]
 pub struct ComImpl
 {
     struct_name: Ident,
     interface_display_name: Ident,
     is_trait_impl: bool,
     variants: IndexMap<ModelTypeSystem, ComImplVariant>,
+    pub impl_span: Span,
 }
 
 #[derive(Debug, PartialEq)]
@@ -27,10 +31,10 @@ pub struct ComImplVariant
 impl ComImpl
 {
     /// Parses the associated item of the #[com_impl] attribute.
-    pub fn parse(item: &str) -> ParseResult<ComImpl>
+    pub fn parse(item: TokenStream) -> ParseResult<ComImpl>
     {
         // Get the item details from the associated item.
-        let item: ::syn::Item = ::syn::parse_str(item).map_err(|_| {
+        let item: ::syn::Item = ::syn::parse2(item).map_err(|_| {
             ParseError::ComImpl(
                 "<Unknown>".into(),
                 "<Unknown>".into(),
@@ -38,15 +42,9 @@ impl ComImpl
             )
         })?;
 
-        Self::from_ast(&item)
-    }
-
-    /// Creates ComImpl from AST elements.
-    pub fn from_ast(item: &::syn::Item) -> ParseResult<ComImpl>
-    {
         // Resolve the idents and functions.
         let (itf_ident_opt, struct_ident, fns) =
-            crate::utils::get_impl_data(item).ok_or_else(|| {
+            crate::utils::get_impl_data(&item).ok_or_else(|| {
                 ParseError::ComImpl(
                     item.get_ident().unwrap().to_string(),
                     "<Unknown>".into(),
@@ -86,9 +84,14 @@ impl ComImpl
                 }),
         );
 
+        let impl_span = match item {
+            syn::Item::Impl(i) => i.impl_token.span().join(i.self_ty.span()),
+            _ => None,
+        }.unwrap_or_else(Span::call_site);
         Ok(ComImpl {
             struct_name: struct_ident,
             interface_display_name: itf_ident,
+            impl_span,
             variants,
             is_trait_impl,
         })
@@ -149,7 +152,8 @@ mod test
     #[test]
     fn parse_com_impl_for_struct()
     {
-        let itf = ComImpl::parse("impl Foo { fn foo( &self ) {} fn bar( &self ) {} }")
+        let itf = ComImpl::parse(
+            quote!(impl Foo { fn foo( &self ) {} fn bar( &self ) {} }))
             .expect("com_impl attribute parsing failed");
 
         assert_eq!(itf.struct_name(), "Foo");
@@ -176,7 +180,8 @@ mod test
     #[test]
     fn parse_com_impl_for_trait()
     {
-        let itf = ComImpl::parse("impl IFoo for Bar { fn one( &self ) {} fn two( &self ) {} }")
+        let itf = ComImpl::parse(
+            quote!(impl IFoo for Bar { fn one( &self ) {} fn two( &self ) {} }))
             .expect("com_impl attribute parsing failed");
 
         assert_eq!(itf.struct_name(), "Bar");
