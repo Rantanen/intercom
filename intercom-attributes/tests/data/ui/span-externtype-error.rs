@@ -2,6 +2,8 @@
 extern crate intercom;
 use intercom::*;
 
+// The NotExternType does not implement ExternType trait so it cannot be used
+// as input/output type.
 struct NotExternType;
 
 #[com_interface]
