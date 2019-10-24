@@ -21,7 +21,7 @@ pub fn expand_com_class(
 {
     // Parse the attribute.
     let mut output = vec![];
-    let cls = model::ComStruct::parse(&lib_name(), attr_tokens.into(), &item_tokens.to_string())?;
+    let cls = model::ComStruct::parse(&lib_name(), attr_tokens.into(), item_tokens.clone().into())?;
     let struct_ident = cls.name();
 
     // IUnknown vtable match. As the primary query_interface is implemented
@@ -56,7 +56,7 @@ pub fn expand_com_class(
     // ISupportErrorInfo virtual table and having that at the beginning.
     let isupporterrorinfo_ident = Ident::new("ISupportErrorInfo", Span::call_site());
     let isupporterrorinfo_vtable_instance_ident =
-        idents::vtable_instance(&struct_ident, &isupporterrorinfo_ident);
+        idents::vtable_instance(&struct_ident, &isupporterrorinfo_ident, Span::call_site());
     let mut vtable_list_field_decls = vec![quote!(
         _ISupportErrorInfo: &'static intercom::ISupportErrorInfoVtbl
     )];
@@ -69,11 +69,11 @@ pub fn expand_com_class(
     for itf in cls.interfaces() {
         for &ts in &[ModelTypeSystem::Automation, ModelTypeSystem::Raw] {
             // Various idents.
-            let itf_variant = Ident::new(&format!("{}_{:?}", itf, ts), Span::call_site());
-            let offset_ident = idents::vtable_offset(struct_ident, &itf_variant);
-            let iid_ident = idents::iid(&itf_variant, Span::call_site());
-            let vtable_struct_ident = idents::vtable_struct(&itf_variant, Span::call_site());
-            let vtable_instance_ident = idents::vtable_instance(struct_ident, &itf_variant);
+            let itf_variant = Ident::new(&format!("{}_{:?}", itf, ts), itf.span());
+            let offset_ident = idents::vtable_offset(struct_ident, &itf_variant, itf.span());
+            let iid_ident = idents::iid(&itf_variant, itf.span());
+            let vtable_struct_ident = idents::vtable_struct(&itf_variant, itf.span());
+            let vtable_instance_ident = idents::vtable_instance(struct_ident, &itf_variant, itf.span());
 
             // Store the field offset globally. We need this offset when implementing
             // the delegating query_interface methods. The only place where we know
@@ -239,15 +239,15 @@ fn create_get_typeinfo_function(cls: &model::ComStruct) -> Result<TokenStream, S
             let itf_name = itf_ident.to_string();
             let itf_automation_iid = idents::iid(
                 &Ident::new(&format!("{}_Automation", itf_name), Span::call_site()),
-                Span::call_site(),
+                itf_ident.span(),
             );
             let itf_raw_iid = idents::iid(
                 &Ident::new(&format!("{}_Raw", itf_name), Span::call_site()),
-                Span::call_site(),
+                itf_ident.span(),
             );
             let itf_fn = Ident::new(
                 &format!("get_intercom_interface_info_for_{}", itf_name),
-                Span::call_site(),
+                itf_ident.span(),
             );
             (
                 quote!( intercom::typelib::InterfaceRef {

@@ -1,0 +1,58 @@
+error[E0412]: cannot find type `__IDoesNotExist_AutomationVtbl` in this scope
+ --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comclass-unknown-interface.rs:5:13
+  |
+5 | #[com_class(IDoesNotExist)]
+  |             ^^^^^^^^^^^^^ not found in this scope
+
+error[E0412]: cannot find type `__IDoesNotExist_RawVtbl` in this scope
+ --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comclass-unknown-interface.rs:5:13
+  |
+5 | #[com_class(IDoesNotExist)]
+  |             ^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `__S_IDoesNotExist_AutomationVtbl_INSTANCE` in this scope
+ --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comclass-unknown-interface.rs:5:13
+  |
+5 | #[com_class(IDoesNotExist)]
+  |             ^^^^^^^^^^^^^ help: a function with a similar name exists: `__S_IDoesNotExist_AutomationVtbl_offset`
+
+error[E0425]: cannot find value `__S_IDoesNotExist_RawVtbl_INSTANCE` in this scope
+ --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comclass-unknown-interface.rs:5:13
+  |
+5 | #[com_class(IDoesNotExist)]
+  |             ^^^^^^^^^^^^^ help: a function with a similar name exists: `__S_IDoesNotExist_RawVtbl_offset`
+
+error[E0531]: cannot find unit struct/variant or constant `IID_IDoesNotExist_Automation` in module `self`
+ --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comclass-unknown-interface.rs:5:13
+  |
+5 | #[com_class(IDoesNotExist)]
+  |             ^^^^^^^^^^^^^ not found in `self`
+
+error[E0531]: cannot find unit struct/variant or constant `IID_IDoesNotExist_Raw` in module `self`
+ --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comclass-unknown-interface.rs:5:13
+  |
+5 | #[com_class(IDoesNotExist)]
+  |             ^^^^^^^^^^^^^ not found in `self`
+
+error[E0425]: cannot find value `IID_IDoesNotExist_Automation` in this scope
+ --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comclass-unknown-interface.rs:5:13
+  |
+5 | #[com_class(IDoesNotExist)]
+  |             ^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `IID_IDoesNotExist_Raw` in this scope
+ --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comclass-unknown-interface.rs:5:13
+  |
+5 | #[com_class(IDoesNotExist)]
+  |             ^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `get_intercom_interface_info_for_IDoesNotExist` in this scope
+ --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comclass-unknown-interface.rs:5:13
+  |
+5 | #[com_class(IDoesNotExist)]
+  |             ^^^^^^^^^^^^^ not found in this scope
+
+error: aborting due to 9 previous errors
+
+Some errors have detailed explanations: E0412, E0425, E0531.
+For more information about an error, try `rustc --explain E0412`.
