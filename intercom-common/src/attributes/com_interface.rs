@@ -127,6 +127,7 @@ pub fn expand_com_interface(
             quote!()
         };
         output.push(quote_spanned!(itf.span =>
+            #[allow(clippy::all)]
             #unsafety impl #itf_ident for intercom::ComItf<dyn #itf_ident> {
                 #( #impls )*
             }
@@ -315,6 +316,7 @@ fn process_itf_variant(
     output.push(quote_spanned!(itf.span =>
         #[allow(non_camel_case_types)]
         #[allow(non_snake_case)]
+        #[allow(clippy::all)]
         #[repr(C)]
         #[doc(hidden)]
         #visibility struct #vtable_ident { #( #vtbl_fields )* }
