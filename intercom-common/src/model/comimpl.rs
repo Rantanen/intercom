@@ -87,7 +87,8 @@ impl ComImpl
         let impl_span = match item {
             syn::Item::Impl(i) => i.impl_token.span().join(i.self_ty.span()),
             _ => None,
-        }.unwrap_or_else(Span::call_site);
+        }
+        .unwrap_or_else(Span::call_site);
         Ok(ComImpl {
             struct_name: struct_ident,
             interface_display_name: itf_ident,
@@ -152,8 +153,7 @@ mod test
     #[test]
     fn parse_com_impl_for_struct()
     {
-        let itf = ComImpl::parse(
-            quote!(impl Foo { fn foo( &self ) {} fn bar( &self ) {} }))
+        let itf = ComImpl::parse(quote!(impl Foo { fn foo( &self ) {} fn bar( &self ) {} }))
             .expect("com_impl attribute parsing failed");
 
         assert_eq!(itf.struct_name(), "Foo");
@@ -180,9 +180,9 @@ mod test
     #[test]
     fn parse_com_impl_for_trait()
     {
-        let itf = ComImpl::parse(
-            quote!(impl IFoo for Bar { fn one( &self ) {} fn two( &self ) {} }))
-            .expect("com_impl attribute parsing failed");
+        let itf =
+            ComImpl::parse(quote!(impl IFoo for Bar { fn one( &self ) {} fn two( &self ) {} }))
+                .expect("com_impl attribute parsing failed");
 
         assert_eq!(itf.struct_name(), "Bar");
         assert_eq!(itf.interface_name(), "IFoo");

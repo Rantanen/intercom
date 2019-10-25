@@ -35,8 +35,10 @@ pub fn expand_com_impl(
     for (_, impl_variant) in imp.variants() {
         let itf_unique_ident = impl_variant.interface_unique_name();
         let vtable_struct_ident = idents::vtable_struct(&itf_unique_ident, itf_ident.span());
-        let vtable_instance_ident = idents::vtable_instance(&struct_ident, &itf_unique_ident, itf_ident.span());
-        let vtable_offset = idents::vtable_offset(&struct_ident, &itf_unique_ident, itf_ident.span());
+        let vtable_instance_ident =
+            idents::vtable_instance(&struct_ident, &itf_unique_ident, itf_ident.span());
+        let vtable_offset =
+            idents::vtable_offset(&struct_ident, &itf_unique_ident, itf_ident.span());
 
         /////////////////////
         // #itf::QueryInterface, AddRef & Release

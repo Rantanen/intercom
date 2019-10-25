@@ -38,7 +38,10 @@ pub fn vtable_struct(itf_ident: &Ident, span: Span) -> Ident
 
 pub fn vtable_instance(struct_name: &Ident, itf_ident: &Ident, span: Span) -> Ident
 {
-    Ident::new(&format!("__{}_{}Vtbl_INSTANCE", struct_name, itf_ident), span)
+    Ident::new(
+        &format!("__{}_{}Vtbl_INSTANCE", struct_name, itf_ident),
+        span,
+    )
 }
 
 pub fn vtable_list(struct_ident: &Ident) -> Ident

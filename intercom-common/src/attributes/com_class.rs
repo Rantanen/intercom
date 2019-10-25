@@ -73,7 +73,8 @@ pub fn expand_com_class(
             let offset_ident = idents::vtable_offset(struct_ident, &itf_variant, itf.span());
             let iid_ident = idents::iid(&itf_variant, itf.span());
             let vtable_struct_ident = idents::vtable_struct(&itf_variant, itf.span());
-            let vtable_instance_ident = idents::vtable_instance(struct_ident, &itf_variant, itf.span());
+            let vtable_instance_ident =
+                idents::vtable_instance(struct_ident, &itf_variant, itf.span());
 
             // Store the field offset globally. We need this offset when implementing
             // the delegating query_interface methods. The only place where we know
