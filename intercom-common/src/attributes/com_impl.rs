@@ -48,7 +48,7 @@ pub fn expand_com_impl(
         // this vtable, the self_vtable pointer will point to this vtable and not
         // the start of the CoClass instance.
         //
-        // We can convert these to the ComBox references by offsetting the pointer
+        // We can convert these to the ComBoxData references by offsetting the pointer
         // by the known vtable offset.
 
         // QueryInterface
@@ -73,7 +73,7 @@ pub fn expand_com_impl(
                 // Get the primary iunk interface by offsetting the current
                 // self_vtable with the vtable offset. Once we have the primary
                 // pointer we can delegate the call to the primary implementation.
-                intercom::ComBox::< #struct_ident >::query_interface(
+                intercom::ComBoxData::< #struct_ident >::query_interface(
                         &mut *(( self_vtable as usize - #vtable_offset() ) as *mut _ ),
                         riid,
                         out )
@@ -92,7 +92,7 @@ pub fn expand_com_impl(
                     intercom::type_system::AutomationTypeSystem>>
                         ::ExternOutputType
             {
-                intercom::ComBox::< #struct_ident >::add_ref(
+                intercom::ComBoxData::< #struct_ident >::add_ref(
                         &mut *(( self_vtable as usize - #vtable_offset() ) as *mut _ ) )
             }
         ));
@@ -109,7 +109,7 @@ pub fn expand_com_impl(
                     intercom::type_system::AutomationTypeSystem>>
                         ::ExternOutputType
             {
-                intercom::ComBox::< #struct_ident >::release_ptr(
+                intercom::ComBoxData::< #struct_ident >::release_ptr(
                         ( self_vtable as usize - #vtable_offset() ) as *mut _ )
             }
         ));
@@ -184,10 +184,10 @@ pub fn expand_com_impl(
                 ) -> #ret_ty {
                     use intercom::type_system::{IntercomFrom, IntercomInto};
                     let result : Result< #ret_ty, intercom::ComError > = ( || {
-                        // Acquire the reference to the ComBox. For this we need
+                        // Acquire the reference to the ComBoxData. For this we need
                         // to offset the current 'self_vtable' vtable pointer.
                         let self_combox = ( self_vtable as usize - #vtable_offset() )
-                                as *mut intercom::ComBox< #struct_ident >;
+                                as *mut intercom::ComBoxData< #struct_ident >;
 
                         #self_struct_stmt;
                         let #return_ident = self_struct.#method_rust_ident( #( #in_params ),* );

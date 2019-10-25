@@ -30,7 +30,7 @@ pub fn expand_com_library(
         let clsid_path = idents::clsid_path(struct_path);
         match_arms.push(quote!(
             self::#clsid_path =>
-                Ok( intercom::ComBox::new(
+                Ok( intercom::ComBoxData::new(
                         #struct_path::new()
                     ) as intercom::RawComPtr )
         ));
@@ -78,7 +78,7 @@ pub fn expand_com_library(
     ] {
         match_arms.push(quote!(
             #clsid =>
-                    Ok( intercom::ComBox::new( #path::default() )
+                    Ok( intercom::ComBoxData::new( #path::default() )
                         as intercom::RawComPtr ) ));
         creatable_classes.push(quote!( #clsid ));
     }
@@ -122,14 +122,14 @@ fn get_dll_get_class_object_function(match_arms: &[TokenStream]) -> TokenStream
             // Create new class factory.
             // Specify a create function that is able to create all the
             // contained coclasses.
-            let mut com_struct = intercom::ComStruct::new(
+            let mut com_struct = intercom::ComBox::new(
                 intercom::ClassFactory::new( rclsid, | clsid | {
                     match *clsid {
                         #( #match_arms, )*
                         _ => Err( intercom::raw::E_NOINTERFACE ),
                     }
                 } ) );
-            intercom::ComBox::query_interface(
+            intercom::ComBoxData::query_interface(
                     com_struct.as_mut(),
                     riid,
                     pout );
@@ -175,7 +175,7 @@ fn create_get_typelib_function(lib: &model::ComLibrary) -> Result<TokenStream, S
             out: *mut intercom::RawComPtr,
         ) -> intercom::raw::HRESULT
         {
-            let mut tlib = intercom::ComStruct::new( get_intercom_typelib() );
+            let mut tlib = intercom::ComBox::new( get_intercom_typelib() );
             let rc = intercom::ComRc::<intercom::typelib::IIntercomTypeLib>::from( &tlib );
             let itf = intercom::ComRc::detach(rc);
             *out = match type_system {

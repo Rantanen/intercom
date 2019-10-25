@@ -4,7 +4,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 
 /// Trait required by any COM coclass type.
 ///
-/// Used to specify the virtual table for the `ComBox`.
+/// Used to specify the virtual table for the `ComBoxData`.
 pub trait CoClass
 {
     type VTableList;
@@ -24,30 +24,30 @@ pub trait HasInterface<T: ComInterface + ?Sized>: CoClass
 /// target struct instance.
 ///
 /// This is done by requiring each COM-enabled Rust object is constructed
-/// through a `ComStruct<T>` type.
+/// through a `ComBox<T>` type.
 ///
-/// Technically the memory layout is specified by the [`ComBox`](struct.ComBox.html)
+/// Technically the memory layout is specified by the [`ComBoxData`](struct.ComBoxData.html)
 /// type, however that type shouldn't be needed by the user. For all intents
-/// the `ComStruct` type is _the_ COM-compatible object handle.
-pub struct ComStruct<T: CoClass>
+/// the `ComBox` type is _the_ COM-compatible object handle.
+pub struct ComBox<T: CoClass>
 {
-    data: *mut ComBox<T>,
+    data: *mut ComBoxData<T>,
 }
 
-impl<T: CoClass> ComStruct<T>
+impl<T: CoClass> ComBox<T>
 {
-    /// Constructs a new `ComStruct` by placing the `value` into reference
+    /// Constructs a new `ComBox` by placing the `value` into reference
     /// counted memory.
     ///
     /// - `value` - The initial state to use for the COM object.
-    pub fn new(value: T) -> ComStruct<T>
+    pub fn new(value: T) -> ComBox<T>
     {
-        // Construct a ComBox in memory and track the reference on it.
-        let cb = ComBox::new(value);
-        unsafe { ComBox::add_ref(&mut *cb) };
+        // Construct a ComBoxData in memory and track the reference on it.
+        let cb = ComBoxData::new(value);
+        unsafe { ComBoxData::add_ref(&mut *cb) };
 
         // Return the struct.
-        ComStruct { data: cb }
+        ComBox { data: cb }
     }
 
     /// Acquires a ComItf for this struct.
@@ -89,47 +89,47 @@ impl<T: CoClass> ComStruct<T>
     }
 }
 
-impl<T: CoClass + std::fmt::Debug> std::fmt::Debug for ComStruct<T>
+impl<T: CoClass + std::fmt::Debug> std::fmt::Debug for ComBox<T>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
     {
-        write!(f, "ComStruct(")?;
+        write!(f, "ComBox(")?;
         self.as_ref().fmt(f)?;
         write!(f, ")")
     }
 }
 
-impl<T: CoClass> Drop for ComStruct<T>
+impl<T: CoClass> Drop for ComBox<T>
 {
     /// Decreases the reference count by one. If this is the last reference
     /// the memory will be deallocated.
     fn drop(&mut self)
     {
-        unsafe { ComBox::release(self.data) };
+        unsafe { ComBoxData::release(self.data) };
     }
 }
 
-impl<T: CoClass> AsMut<ComBox<T>> for ComStruct<T>
+impl<T: CoClass> AsMut<ComBoxData<T>> for ComBox<T>
 {
-    fn as_mut(&mut self) -> &mut ComBox<T>
+    fn as_mut(&mut self) -> &mut ComBoxData<T>
     {
         // 'data' should always be valid pointer.
-        unsafe { self.data.as_mut().expect("ComStruct had null reference") }
+        unsafe { self.data.as_mut().expect("ComBox had null reference") }
     }
 }
 
-impl<T: CoClass> AsRef<ComBox<T>> for ComStruct<T>
+impl<T: CoClass> AsRef<ComBoxData<T>> for ComBox<T>
 {
-    fn as_ref(&self) -> &ComBox<T>
+    fn as_ref(&self) -> &ComBoxData<T>
     {
         // 'data' should always be valid pointer.
-        unsafe { self.data.as_ref().expect("ComStruct had null reference") }
+        unsafe { self.data.as_ref().expect("ComBox had null reference") }
     }
 }
 
-impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComRc<I>
+impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComBox<T>> for ComRc<I>
 {
-    fn from(source: ComStruct<T>) -> ComRc<I>
+    fn from(source: ComBox<T>) -> ComRc<I>
     {
         // as_comitf does not change the reference count so attach is safe
         // as long as we forget the source so it won't release it either.
@@ -141,9 +141,9 @@ impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<ComStruct<T>> for ComRc<
     }
 }
 
-impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<&ComStruct<T>> for ComRc<I>
+impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<&ComBox<T>> for ComRc<I>
 {
-    fn from(combox: &ComStruct<T>) -> Self
+    fn from(combox: &ComBox<T>) -> Self
     {
         // The ComItf temporary doesn't outlive self, making this safe.
         unsafe {
@@ -164,34 +164,34 @@ impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<&ComStruct<T>> for ComRc
 /// able to enforce.
 ///
 /// The methods that handle `RawComPtr` types must only be invoked with correct
-/// pointer values. There's no type checking for the pointers and the `ComBox`
+/// pointer values. There's no type checking for the pointers and the `ComBoxData`
 /// will make serious assumptions on the pointers passed in.
 ///
 /// Furthermore the `new_ptr` constructor and the `IUnknown` methods `add_ref`
 /// and `release` must be used correctly together. Failure to do so will result
 /// either in memory leaks or access to dangling pointers.
 #[repr(C)]
-pub struct ComBox<T: CoClass>
+pub struct ComBoxData<T: CoClass>
 {
     vtable_list: T::VTableList,
     ref_count: AtomicU32,
     value: T,
 }
 
-impl<T: CoClass> ComBox<T>
+impl<T: CoClass> ComBoxData<T>
 {
-    /// Creates a new ComBox and returns a pointer to it.
+    /// Creates a new ComBoxData and returns a pointer to it.
     ///
     /// The box is initialized with a reference count of zero. In most cases
-    /// the ComBox creation is followed by query_interface, which increments the
+    /// the ComBoxData creation is followed by query_interface, which increments the
     /// ref_count.
     ///
     /// The value should be cleaned by calling 'release'.
-    pub fn new(value: T) -> *mut ComBox<T>
+    pub fn new(value: T) -> *mut ComBoxData<T>
     {
         // TODO: Fix this to use raw heap allocation at some point. There's
         // no need to construct and immediately detach a Box.
-        Box::into_raw(Box::new(ComBox {
+        Box::into_raw(Box::new(ComBoxData {
             vtable_list: T::create_vtable_list(),
             ref_count: AtomicU32::new(0),
             value,
@@ -280,7 +280,7 @@ impl<T: CoClass> ComBox<T>
         }
 
         // Decrease the ref count and store a copy of it. We'll need a local
-        // copy for a return value in case we end up dropping the ComBox
+        // copy for a return value in case we end up dropping the ComBoxData
         // instance. after the drop referencing *this would be undeterministic.
         let previous_value = (*this).ref_count.fetch_sub(1, Ordering::Relaxed);
         let rc = previous_value - 1;
@@ -304,25 +304,25 @@ impl<T: CoClass> ComBox<T>
         }
     }
 
-    /// Converts a RawComPtr to a ComBox reference.
+    /// Converts a RawComPtr to a ComBoxData reference.
     ///
     /// # Safety
     ///
     /// The method is unsafe in two different ways:
     ///
     /// - There is no way for the method to ensure the RawComPtr points to
-    ///   a valid ComBox<T> instance. It's the caller's responsibility to
+    ///   a valid ComBoxData<T> instance. It's the caller's responsibility to
     ///   ensure the method is not called with invalid pointers.
     ///
     /// - As the pointers have no lifetime tied to them, the borrow checker
-    ///   is unable to enforce the lifetime of the ComBox reference. If the
-    ///   ComBox is free'd by calling release on the pointer, the ComBox
+    ///   is unable to enforce the lifetime of the ComBoxData reference. If the
+    ///   ComBoxData is free'd by calling release on the pointer, the ComBoxData
     ///   reference will still reference the old, now free'd value. The caller
     ///   must ensure that the returned reference won't be used in case the
-    ///   ComBox is released.
-    pub unsafe fn from_ptr<'a>(ptr: RawComPtr) -> &'a mut ComBox<T>
+    ///   ComBoxData is released.
+    pub unsafe fn from_ptr<'a>(ptr: RawComPtr) -> &'a mut ComBoxData<T>
     {
-        &mut *(ptr as *mut ComBox<T>)
+        &mut *(ptr as *mut ComBoxData<T>)
     }
 
     /// Pointer variant of the `query_interface` function.
@@ -336,7 +336,7 @@ impl<T: CoClass> ComBox<T>
         out: *mut RawComPtr,
     ) -> raw::HRESULT
     {
-        ComBox::query_interface(ComBox::<T>::from_ptr(self_iunk), riid, out)
+        ComBoxData::query_interface(ComBoxData::<T>::from_ptr(self_iunk), riid, out)
     }
 
     /// Pointer variant of the `add_ref` function.
@@ -346,7 +346,7 @@ impl<T: CoClass> ComBox<T>
     /// The `self_iunk` _must_ be a valid COM pointer.
     pub unsafe extern "system" fn add_ref_ptr(self_iunk: RawComPtr) -> u32
     {
-        ComBox::add_ref(ComBox::<T>::from_ptr(self_iunk))
+        ComBoxData::add_ref(ComBoxData::<T>::from_ptr(self_iunk))
     }
 
     /// Pointer variant of the `release` function.
@@ -356,7 +356,7 @@ impl<T: CoClass> ComBox<T>
     /// The `self_iunk` _must_ be a valid COM pointer.
     pub unsafe extern "system" fn release_ptr(self_iunk: RawComPtr) -> u32
     {
-        ComBox::release(self_iunk as *mut ComBox<T>)
+        ComBoxData::release(self_iunk as *mut ComBoxData<T>)
     }
 
     /// Pointer variant of the `release` function.
@@ -369,70 +369,70 @@ impl<T: CoClass> ComBox<T>
         riid: REFIID,
     ) -> raw::HRESULT
     {
-        ComBox::interface_supports_error_info(ComBox::<T>::from_ptr(self_iunk), riid)
+        ComBoxData::interface_supports_error_info(ComBoxData::<T>::from_ptr(self_iunk), riid)
     }
 
-    /// Returns a reference to the virtual table on the ComBox.
-    pub fn vtable(ct: &ComStruct<T>) -> &T::VTableList
+    /// Returns a reference to the virtual table on the ComBoxData.
+    pub fn vtable(ct: &ComBox<T>) -> &T::VTableList
     {
         unsafe { &(*ct.data).vtable_list }
     }
 
-    /// Gets the ComBox holding the value.
+    /// Gets the ComBoxData holding the value.
     ///
     /// # Safety
     ///
     /// This is unsafe for two reasons:
     ///
     /// - There is no way for the method to check that the value is actually
-    ///   contained in a `ComBox`. It is up to the caller to ensure this method
-    ///   is only called with values that exist within a `ComBox`.
+    ///   contained in a `ComBoxData`. It is up to the caller to ensure this method
+    ///   is only called with values that exist within a `ComBoxData`.
     ///
-    /// - The method returns a mutable reference to the ComBox containing the
+    /// - The method returns a mutable reference to the ComBoxData containing the
     ///   value. As demonstrated by the parameter type, the caller already has
     ///   a mutable reference to the value itself. As a result the caller will
     ///   end up with two different mutable references to the value - the direct
     ///   one given as a parameter and an indirect one available through the
     ///   return value. The caller should not attempt to access the value data
-    ///   through the returned `ComBox` reference.
-    pub unsafe fn of(value: &T) -> &ComBox<T>
+    ///   through the returned `ComBoxData` reference.
+    pub unsafe fn of(value: &T) -> &ComBoxData<T>
     {
         // Resolve the offset of the 'value' field.
-        let null_combox = std::ptr::null() as *const ComBox<T>;
+        let null_combox = std::ptr::null() as *const ComBoxData<T>;
         let value_offset = &((*null_combox).value) as *const _ as usize;
 
         let combox_loc = value as *const T as usize - value_offset;
-        &mut *(combox_loc as *mut ComBox<T>)
+        &mut *(combox_loc as *mut ComBoxData<T>)
     }
 
-    /// Gets the ComBox holding the value.
+    /// Gets the ComBoxData holding the value.
     ///
     /// # Safety
     ///
     /// This is unsafe for two reasons:
     ///
     /// - There is no way for the method to check that the value is actually
-    ///   contained in a `ComBox`. It is up to the caller to ensure this method
-    ///   is only called with values that exist within a `ComBox`.
+    ///   contained in a `ComBoxData`. It is up to the caller to ensure this method
+    ///   is only called with values that exist within a `ComBoxData`.
     ///
-    /// - The method returns a mutable reference to the ComBox containing the
+    /// - The method returns a mutable reference to the ComBoxData containing the
     ///   value. As demonstrated by the parameter type, the caller already has
     ///   a mutable reference to the value itself. As a result the caller will
     ///   end up with two different mutable references to the value - the direct
     ///   one given as a parameter and an indirect one available through the
     ///   return value. The caller should not attempt to access the value data
-    ///   through the returned `ComBox` reference.
-    pub unsafe fn of_mut(value: &mut T) -> &mut ComBox<T>
+    ///   through the returned `ComBoxData` reference.
+    pub unsafe fn of_mut(value: &mut T) -> &mut ComBoxData<T>
     {
         // Resolve the offset of the 'value' field.
-        let null_combox = std::ptr::null() as *const ComBox<T>;
+        let null_combox = std::ptr::null() as *const ComBoxData<T>;
         let value_offset = &((*null_combox).value) as *const _ as usize;
 
         let combox_loc = value as *mut T as usize - value_offset;
-        &mut *(combox_loc as *mut ComBox<T>)
+        &mut *(combox_loc as *mut ComBoxData<T>)
     }
 
-    /// Returns a reference to a null-ComBox vtable pointer list.
+    /// Returns a reference to a null-ComBoxData vtable pointer list.
     ///
     /// # Safety
     ///
@@ -440,16 +440,16 @@ impl<T: CoClass> ComBox<T>
     ///
     /// The reference may be used to further get references to the various
     /// VTableList fields to resolve offset values between the various VTable
-    /// pointers and the actual `ComBox` containing these pointers.
+    /// pointers and the actual `ComBoxData` containing these pointers.
     #[inline]
     pub unsafe fn null_vtable() -> &'static T::VTableList
     {
-        let null_combox = std::ptr::null() as *const ComBox<T>;
+        let null_combox = std::ptr::null() as *const ComBoxData<T>;
         &(*null_combox).vtable_list
     }
 }
 
-impl<T> std::ops::Deref for ComBox<T>
+impl<T> std::ops::Deref for ComBoxData<T>
 where
     T: CoClass,
 {
@@ -460,7 +460,7 @@ where
     }
 }
 
-impl<T> std::ops::DerefMut for ComBox<T>
+impl<T> std::ops::DerefMut for ComBoxData<T>
 where
     T: CoClass,
 {
@@ -470,7 +470,7 @@ where
     }
 }
 
-impl<T> std::ops::Deref for ComStruct<T>
+impl<T> std::ops::Deref for ComBox<T>
 where
     T: CoClass,
 {
@@ -481,7 +481,7 @@ where
     }
 }
 
-impl<T> std::ops::DerefMut for ComStruct<T>
+impl<T> std::ops::DerefMut for ComBox<T>
 where
     T: CoClass,
 {

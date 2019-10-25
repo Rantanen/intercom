@@ -16,7 +16,7 @@ impl ClassCreator {
     pub fn new() -> ClassCreator { ClassCreator {} }
 
     pub fn create_root( &self, id : i32 ) -> ComResult<ComRc<CreatedClass>> {
-        Ok( ComRc::from( &ComStruct::new( CreatedClass::new_with_id( id ) ) ) )
+        Ok( ComRc::from( &ComBox::new( CreatedClass::new_with_id( id ) ) ) )
     }
 
     pub fn create_child(
@@ -25,7 +25,7 @@ impl ClassCreator {
         parent : &ComItf<dyn IParent>
     ) -> ComResult<ComRc<CreatedClass>>
     {
-        Ok( ComRc::from( &ComStruct::new(
+        Ok( ComRc::from( &ComBox::new(
             CreatedClass::new_child( id, parent.get_id() )
         ) ) )
     }
@@ -49,7 +49,7 @@ impl CreatedClass {
 impl IRefCount for CreatedClass {
     fn get_ref_count( &self ) -> u32
     {
-        let combox = unsafe { ComBox::of( self ) };
+        let combox = unsafe { ComBoxData::of( self ) };
         combox.get_ref_count()
     }
 }
@@ -73,11 +73,11 @@ impl RefCountOperations {
     pub fn new() -> RefCountOperations { RefCountOperations { } }
 
     pub fn get_new( &self ) -> ComResult<ComRc<RefCountOperations>> {
-        Ok( ComRc::from( &ComStruct::new( RefCountOperations::new() ) ) )
+        Ok( ComRc::from( &ComBox::new( RefCountOperations::new() ) ) )
     }
 
     pub fn get_ref_count( &self ) -> u32 {
-        let combox = unsafe { ComBox::of( self ) };
+        let combox = unsafe { ComBoxData::of( self ) };
         combox.get_ref_count()
     }
 }

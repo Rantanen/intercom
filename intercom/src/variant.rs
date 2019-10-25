@@ -455,9 +455,9 @@ impl From<f32> for Variant
     }
 }
 
-impl<T: HasInterface<dyn IUnknown>> From<ComStruct<T>> for Variant
+impl<T: HasInterface<dyn IUnknown>> From<ComBox<T>> for Variant
 {
-    fn from(src: ComStruct<T>) -> Self
+    fn from(src: ComBox<T>) -> Self
     {
         Variant::IUnknown(ComRc::from(src))
     }

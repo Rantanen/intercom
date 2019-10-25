@@ -37,15 +37,15 @@ pub fn from_struct_itf(itf: &ComItf<MyStruct>) {
 }
 
 pub fn from_struct(
-    s1: intercom::ComStruct<MyStruct>,
-    s2: intercom::ComStruct<MyStruct>,
+    s1: intercom::ComBox<MyStruct>,
+    s2: intercom::ComBox<MyStruct>,
 ) {
 
     let _ : ComRc<dyn MyInterface> = ComRc::from(s1);
     let _ : ComRc<MyStruct> = ComRc::from(s2);
 }
 
-pub fn from_struct_ref(s: &intercom::ComStruct<MyStruct>) {
+pub fn from_struct_ref(s: &intercom::ComBox<MyStruct>) {
     let _ : ComRc<dyn MyInterface> = ComRc::from(s);
     let _ : ComRc<MyStruct> = ComRc::from(s);
 }

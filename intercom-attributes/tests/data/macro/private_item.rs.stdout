@@ -128,7 +128,7 @@ impl intercom::type_system::BidirectionalTypeInfo for dyn IFoo {
 #[allow(dead_code)]
 pub(crate) fn get_intercom_interface_info_for_IFoo() -> intercom::typelib::TypeInfo {
     let variants = <[_]>::into_vec(box [
-        intercom::ComStruct::new(intercom::typelib::InterfaceVariant {
+        intercom::ComBox::new(intercom::typelib::InterfaceVariant {
             ts: intercom::type_system::TypeSystemName::Automation,
             iid: intercom::GUID {
                 data1: 0u32,
@@ -136,7 +136,7 @@ pub(crate) fn get_intercom_interface_info_for_IFoo() -> intercom::typelib::TypeI
                 data3: 0u16,
                 data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
             },
-            methods: <[_]>::into_vec(box [intercom::ComStruct::new(intercom::typelib::Method {
+            methods: <[_]>::into_vec(box [intercom::ComBox::new(intercom::typelib::Method {
                 name: "trait_method".into(),
                 return_type: intercom::typelib::Arg {
                     name: "".into(),
@@ -147,7 +147,7 @@ pub(crate) fn get_intercom_interface_info_for_IFoo() -> intercom::typelib::TypeI
                 parameters: <[_]>::into_vec(box []),
             })]),
         }),
-        intercom::ComStruct::new(intercom::typelib::InterfaceVariant {
+        intercom::ComBox::new(intercom::typelib::InterfaceVariant {
             ts: intercom::type_system::TypeSystemName::Raw,
             iid: intercom::GUID {
                 data1: 0u32,
@@ -155,7 +155,7 @@ pub(crate) fn get_intercom_interface_info_for_IFoo() -> intercom::typelib::TypeI
                 data3: 0u16,
                 data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
             },
-            methods: <[_]>::into_vec(box [intercom::ComStruct::new(intercom::typelib::Method {
+            methods: <[_]>::into_vec(box [intercom::ComBox::new(intercom::typelib::Method {
                 name: "trait_method".into(),
                 return_type: intercom::typelib::Arg {
                     name: "".into(),
@@ -167,7 +167,7 @@ pub(crate) fn get_intercom_interface_info_for_IFoo() -> intercom::typelib::TypeI
             })]),
         }),
     ]);
-    intercom::typelib::TypeInfo::Interface(intercom::ComStruct::new(intercom::typelib::Interface {
+    intercom::typelib::TypeInfo::Interface(intercom::ComBox::new(intercom::typelib::Interface {
         name: "IFoo".into(),
         variants: variants,
         options: intercom::typelib::InterfaceOptions {
@@ -180,33 +180,33 @@ struct Foo;
 #[inline(always)]
 #[allow(non_snake_case)]
 fn __Foo_Foo_AutomationVtbl_offset() -> usize {
-    unsafe { &intercom::ComBox::<Foo>::null_vtable().Foo_Automation as *const _ as usize }
+    unsafe { &intercom::ComBoxData::<Foo>::null_vtable().Foo_Automation as *const _ as usize }
 }
 #[inline(always)]
 #[allow(non_snake_case)]
 fn __Foo_Foo_RawVtbl_offset() -> usize {
-    unsafe { &intercom::ComBox::<Foo>::null_vtable().Foo_Raw as *const _ as usize }
+    unsafe { &intercom::ComBoxData::<Foo>::null_vtable().Foo_Raw as *const _ as usize }
 }
 #[inline(always)]
 #[allow(non_snake_case)]
 fn __Foo_IFoo_AutomationVtbl_offset() -> usize {
-    unsafe { &intercom::ComBox::<Foo>::null_vtable().IFoo_Automation as *const _ as usize }
+    unsafe { &intercom::ComBoxData::<Foo>::null_vtable().IFoo_Automation as *const _ as usize }
 }
 #[inline(always)]
 #[allow(non_snake_case)]
 fn __Foo_IFoo_RawVtbl_offset() -> usize {
-    unsafe { &intercom::ComBox::<Foo>::null_vtable().IFoo_Raw as *const _ as usize }
+    unsafe { &intercom::ComBoxData::<Foo>::null_vtable().IFoo_Raw as *const _ as usize }
 }
 #[allow(non_upper_case_globals)]
 const __Foo_ISupportErrorInfoVtbl_INSTANCE: intercom::ISupportErrorInfoVtbl =
     intercom::ISupportErrorInfoVtbl {
         __base: intercom::IUnknownVtbl {
-            query_interface_Automation: intercom::ComBox::<Foo>::query_interface_ptr,
-            add_ref_Automation: intercom::ComBox::<Foo>::add_ref_ptr,
-            release_Automation: intercom::ComBox::<Foo>::release_ptr,
+            query_interface_Automation: intercom::ComBoxData::<Foo>::query_interface_ptr,
+            add_ref_Automation: intercom::ComBoxData::<Foo>::add_ref_ptr,
+            release_Automation: intercom::ComBoxData::<Foo>::release_ptr,
         },
         interface_supports_error_info_Automation:
-            intercom::ComBox::<Foo>::interface_supports_error_info_ptr,
+            intercom::ComBoxData::<Foo>::interface_supports_error_info_ptr,
     };
 impl intercom::HasInterface<intercom::IUnknown> for Foo {}
 #[allow(non_snake_case)]
@@ -284,7 +284,7 @@ pub const CLSID_Foo: intercom::CLSID = intercom::GUID {
 };
 pub fn get_intercom_coclass_info_for_Foo() -> Vec<intercom::typelib::TypeInfo> {
     <[_]>::into_vec(box [
-        intercom::typelib::TypeInfo::Class(intercom::ComStruct::new(
+        intercom::typelib::TypeInfo::Class(intercom::ComBox::new(
             intercom::typelib::CoClass::__new(
                 "Foo".into(),
                 intercom::GUID {
@@ -327,7 +327,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_query_interface(
 ) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
-    intercom::ComBox::<Foo>::query_interface(
+    intercom::ComBoxData::<Foo>::query_interface(
         &mut *((self_vtable as usize - __Foo_Foo_AutomationVtbl_offset()) as *mut _),
         riid,
         out,
@@ -341,7 +341,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_add_ref(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBox::<Foo>::add_ref(
+    intercom::ComBoxData::<Foo>::add_ref(
         &mut *((self_vtable as usize - __Foo_Foo_AutomationVtbl_offset()) as *mut _),
     )
 }
@@ -353,7 +353,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_release(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBox::<Foo>::release_ptr(
+    intercom::ComBoxData::<Foo>::release_ptr(
         (self_vtable as usize - __Foo_Foo_AutomationVtbl_offset()) as *mut _,
     )
 }
@@ -375,7 +375,7 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
                  let self_combox =
                      (self_vtable as usize -
                           __Foo_Foo_AutomationVtbl_offset()) as
-                         *mut intercom::ComBox<Foo>;
+                         *mut intercom::ComBoxData<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result = self_struct.struct_method();
                  Ok({ })
@@ -412,7 +412,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_query_interface(
 ) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
-    intercom::ComBox::<Foo>::query_interface(
+    intercom::ComBoxData::<Foo>::query_interface(
         &mut *((self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut _),
         riid,
         out,
@@ -426,7 +426,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_add_ref(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBox::<Foo>::add_ref(
+    intercom::ComBoxData::<Foo>::add_ref(
         &mut *((self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut _),
     )
 }
@@ -438,7 +438,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_release(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBox::<Foo>::release_ptr(
+    intercom::ComBoxData::<Foo>::release_ptr(
         (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut _,
     )
 }
@@ -459,7 +459,7 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
              {
                  let self_combox =
                      (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
-                         *mut intercom::ComBox<Foo>;
+                         *mut intercom::ComBoxData<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result = self_struct.struct_method();
                  Ok({ })
@@ -544,9 +544,9 @@ impl intercom::ComInterface for Foo {
         let primary_iunk = some_iunk
             .query_interface(iunknown_iid)
             .expect("All types must implement IUnknown");
-        let combox: *mut intercom::ComBox<Foo> = primary_iunk as *mut intercom::ComBox<Foo>;
+        let combox: *mut intercom::ComBoxData<Foo> = primary_iunk as *mut intercom::ComBoxData<Foo>;
         unsafe {
-            intercom::ComBox::release(combox);
+            intercom::ComBoxData::release(combox);
             use std::ops::Deref;
             (*combox).deref()
         }
@@ -562,7 +562,7 @@ impl intercom::type_system::BidirectionalTypeInfo for Foo {
 #[allow(dead_code)]
 pub(crate) fn get_intercom_interface_info_for_Foo() -> intercom::typelib::TypeInfo {
     let variants = <[_]>::into_vec(box [
-        intercom::ComStruct::new(intercom::typelib::InterfaceVariant {
+        intercom::ComBox::new(intercom::typelib::InterfaceVariant {
             ts: intercom::type_system::TypeSystemName::Automation,
             iid: intercom::GUID {
                 data1: 0u32,
@@ -570,7 +570,7 @@ pub(crate) fn get_intercom_interface_info_for_Foo() -> intercom::typelib::TypeIn
                 data3: 0u16,
                 data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8],
             },
-            methods: <[_]>::into_vec(box [intercom::ComStruct::new(intercom::typelib::Method {
+            methods: <[_]>::into_vec(box [intercom::ComBox::new(intercom::typelib::Method {
                 name: "struct_method".into(),
                 return_type: intercom::typelib::Arg {
                     name: "".into(),
@@ -581,7 +581,7 @@ pub(crate) fn get_intercom_interface_info_for_Foo() -> intercom::typelib::TypeIn
                 parameters: <[_]>::into_vec(box []),
             })]),
         }),
-        intercom::ComStruct::new(intercom::typelib::InterfaceVariant {
+        intercom::ComBox::new(intercom::typelib::InterfaceVariant {
             ts: intercom::type_system::TypeSystemName::Raw,
             iid: intercom::GUID {
                 data1: 0u32,
@@ -589,7 +589,7 @@ pub(crate) fn get_intercom_interface_info_for_Foo() -> intercom::typelib::TypeIn
                 data3: 0u16,
                 data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8],
             },
-            methods: <[_]>::into_vec(box [intercom::ComStruct::new(intercom::typelib::Method {
+            methods: <[_]>::into_vec(box [intercom::ComBox::new(intercom::typelib::Method {
                 name: "struct_method".into(),
                 return_type: intercom::typelib::Arg {
                     name: "".into(),
@@ -601,7 +601,7 @@ pub(crate) fn get_intercom_interface_info_for_Foo() -> intercom::typelib::TypeIn
             })]),
         }),
     ]);
-    intercom::typelib::TypeInfo::Interface(intercom::ComStruct::new(intercom::typelib::Interface {
+    intercom::typelib::TypeInfo::Interface(intercom::ComBox::new(intercom::typelib::Interface {
         name: "Foo".into(),
         variants: variants,
         options: intercom::typelib::InterfaceOptions {
@@ -626,7 +626,7 @@ unsafe extern "system" fn __Foo_IFoo_Automation_query_interface(
 ) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
-    intercom::ComBox::<Foo>::query_interface(
+    intercom::ComBoxData::<Foo>::query_interface(
         &mut *((self_vtable as usize - __Foo_IFoo_AutomationVtbl_offset()) as *mut _),
         riid,
         out,
@@ -640,7 +640,7 @@ unsafe extern "system" fn __Foo_IFoo_Automation_add_ref(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBox::<Foo>::add_ref(
+    intercom::ComBoxData::<Foo>::add_ref(
         &mut *((self_vtable as usize - __Foo_IFoo_AutomationVtbl_offset()) as *mut _),
     )
 }
@@ -652,7 +652,7 @@ unsafe extern "system" fn __Foo_IFoo_Automation_release(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBox::<Foo>::release_ptr(
+    intercom::ComBoxData::<Foo>::release_ptr(
         (self_vtable as usize - __Foo_IFoo_AutomationVtbl_offset()) as *mut _,
     )
 }
@@ -674,7 +674,7 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
                  let self_combox =
                      (self_vtable as usize -
                           __Foo_IFoo_AutomationVtbl_offset()) as
-                         *mut intercom::ComBox<Foo>;
+                         *mut intercom::ComBoxData<Foo>;
                  let self_struct: &dyn IFoo = &**self_combox;
                  let __result = self_struct.trait_method();
                  Ok({ })
@@ -711,7 +711,7 @@ unsafe extern "system" fn __Foo_IFoo_Raw_query_interface(
 ) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
-    intercom::ComBox::<Foo>::query_interface(
+    intercom::ComBoxData::<Foo>::query_interface(
         &mut *((self_vtable as usize - __Foo_IFoo_RawVtbl_offset()) as *mut _),
         riid,
         out,
@@ -725,7 +725,7 @@ unsafe extern "system" fn __Foo_IFoo_Raw_add_ref(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBox::<Foo>::add_ref(
+    intercom::ComBoxData::<Foo>::add_ref(
         &mut *((self_vtable as usize - __Foo_IFoo_RawVtbl_offset()) as *mut _),
     )
 }
@@ -737,7 +737,7 @@ unsafe extern "system" fn __Foo_IFoo_Raw_release(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBox::<Foo>::release_ptr(
+    intercom::ComBoxData::<Foo>::release_ptr(
         (self_vtable as usize - __Foo_IFoo_RawVtbl_offset()) as *mut _,
     )
 }
@@ -758,7 +758,7 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
              {
                  let self_combox =
                      (self_vtable as usize - __Foo_IFoo_RawVtbl_offset()) as
-                         *mut intercom::ComBox<Foo>;
+                         *mut intercom::ComBoxData<Foo>;
                  let self_struct: &dyn IFoo = &**self_combox;
                  let __result = self_struct.trait_method();
                  Ok({ })

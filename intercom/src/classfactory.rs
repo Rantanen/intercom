@@ -85,7 +85,7 @@ impl<T: Fn(REFCLSID) -> RawComResult<RawComPtr>> ClassFactory<T>
         }
         *out = std::ptr::null_mut();
 
-        let cb = ComBox::<Self>::from_ptr(self_vtbl);
+        let cb = ComBoxData::<Self>::from_ptr(self_vtbl);
 
         let iunk_ptr = match (cb.create_instance)(cb.clsid) {
             Ok(m) => m,
@@ -108,9 +108,9 @@ impl<T: Fn(REFCLSID) -> RawComResult<RawComPtr>> ClassFactory<T>
     pub unsafe extern "system" fn lock_server(self_vtbl: RawComPtr, lock: bool) -> raw::HRESULT
     {
         if lock {
-            ComBox::<Self>::add_ref_ptr(self_vtbl);
+            ComBoxData::<Self>::add_ref_ptr(self_vtbl);
         } else {
-            ComBox::<Self>::release_ptr(self_vtbl);
+            ComBoxData::<Self>::release_ptr(self_vtbl);
         }
         raw::S_OK
     }
@@ -119,9 +119,9 @@ impl<T: Fn(REFCLSID) -> RawComResult<RawComPtr>> ClassFactory<T>
     {
         &ClassFactoryVtbl {
             __base: IUnknownVtbl {
-                query_interface_Automation: ComBox::<Self>::query_interface_ptr,
-                add_ref_Automation: ComBox::<Self>::add_ref_ptr,
-                release_Automation: ComBox::<Self>::release_ptr,
+                query_interface_Automation: ComBoxData::<Self>::query_interface_ptr,
+                add_ref_Automation: ComBoxData::<Self>::add_ref_ptr,
+                release_Automation: ComBoxData::<Self>::release_ptr,
             },
             create_instance: Self::create_instance,
             lock_server: Self::lock_server,

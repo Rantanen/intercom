@@ -51,12 +51,12 @@ pub fn expand_com_class(
     // construct the virtual table list.
     //
     // The primary IUnknown virtual table _MUST_ be at the beginning of the list.
-    // This is done to ensure the IUnknown pointer matches the ComBox pointer.
+    // This is done to ensure the IUnknown pointer matches the ComBoxData pointer.
     // We ensure this by defining the primary IUnknown methods on the
     // ISupportErrorInfo virtual table and having that at the beginning.
     let isupporterrorinfo_ident = Ident::new("ISupportErrorInfo", Span::call_site());
     let isupporterrorinfo_vtable_instance_ident =
-        idents::vtable_instance(&struct_ident, &isupporterrorinfo_ident, Span::call_site());
+        idents::vtable_instance(struct_ident, &isupporterrorinfo_ident, Span::call_site());
     let mut vtable_list_field_decls = vec![quote!(
         _ISupportErrorInfo: &'static intercom::ISupportErrorInfoVtbl
     )];
@@ -89,7 +89,7 @@ pub fn expand_com_class(
                     #[allow(non_snake_case)]
                     fn #offset_ident() -> usize {
                         unsafe {
-                            &intercom::ComBox::< #struct_ident >::null_vtable().#itf_variant
+                            &intercom::ComBoxData::< #struct_ident >::null_vtable().#itf_variant
                                     as *const _ as usize
                         }
                     }
@@ -127,17 +127,17 @@ pub fn expand_com_class(
                 = intercom::ISupportErrorInfoVtbl {
                     __base : intercom::IUnknownVtbl {
                         query_interface_Automation
-                            : intercom::ComBox::< #struct_ident >
+                            : intercom::ComBoxData::< #struct_ident >
                                 ::query_interface_ptr,
                         add_ref_Automation
-                            : intercom::ComBox::< #struct_ident >
+                            : intercom::ComBoxData::< #struct_ident >
                                 ::add_ref_ptr,
                         release_Automation
-                            : intercom::ComBox::< #struct_ident >
+                            : intercom::ComBoxData::< #struct_ident >
                                 ::release_ptr,
                     },
                     interface_supports_error_info_Automation
-                        : intercom::ComBox::< #struct_ident >
+                        : intercom::ComBoxData::< #struct_ident >
                             ::interface_supports_error_info_ptr,
                 };
     ));
@@ -264,7 +264,7 @@ fn create_get_typeinfo_function(cls: &model::ComStruct) -> Result<TokenStream, S
         pub fn #fn_name() -> Vec<intercom::typelib::TypeInfo>
         {
             vec![ intercom::typelib::TypeInfo::Class(
-                intercom::ComStruct::new( intercom::typelib::CoClass::__new(
+                intercom::ComBox::new( intercom::typelib::CoClass::__new(
                     #cls_name.into(),
                     #clsid_tokens,
                     vec![

@@ -35,23 +35,22 @@ pub unsafe extern "system" fn DllGetClassObject(
     pout: *mut intercom::RawComPtr,
 ) -> intercom::raw::HRESULT {
     let mut com_struct =
-        intercom::ComStruct::new(intercom::ClassFactory::new(rclsid, |clsid| match *clsid {
+        intercom::ComBox::new(intercom::ClassFactory::new(rclsid, |clsid| match *clsid {
             self::some::path::CLSID_Type => {
-                Ok(intercom::ComBox::new(some::path::Type::new()) as intercom::RawComPtr)
+                Ok(intercom::ComBoxData::new(some::path::Type::new()) as intercom::RawComPtr)
             }
             self::CLSID_SimpleType => {
-                Ok(intercom::ComBox::new(SimpleType::new()) as intercom::RawComPtr)
+                Ok(intercom::ComBoxData::new(SimpleType::new()) as intercom::RawComPtr)
             }
-            intercom::alloc::CLSID_Allocator => {
-                Ok(intercom::ComBox::new(intercom::alloc::Allocator::default())
-                    as intercom::RawComPtr)
-            }
-            intercom::error::CLSID_ErrorStore => Ok(intercom::ComBox::new(
+            intercom::alloc::CLSID_Allocator => Ok(intercom::ComBoxData::new(
+                intercom::alloc::Allocator::default(),
+            ) as intercom::RawComPtr),
+            intercom::error::CLSID_ErrorStore => Ok(intercom::ComBoxData::new(
                 intercom::error::ErrorStore::default(),
             ) as intercom::RawComPtr),
             _ => Err(intercom::raw::E_NOINTERFACE),
         }));
-    intercom::ComBox::query_interface(com_struct.as_mut(), riid, pout);
+    intercom::ComBoxData::query_interface(com_struct.as_mut(), riid, pout);
     intercom::raw::S_OK
 }
 pub(crate) fn get_intercom_typelib() -> intercom::typelib::TypeLib {
@@ -81,7 +80,7 @@ pub unsafe extern "system" fn IntercomTypeLib(
     type_system: intercom::type_system::TypeSystemName,
     out: *mut intercom::RawComPtr,
 ) -> intercom::raw::HRESULT {
-    let mut tlib = intercom::ComStruct::new(get_intercom_typelib());
+    let mut tlib = intercom::ComBox::new(get_intercom_typelib());
     let rc = intercom::ComRc::<intercom::typelib::IIntercomTypeLib>::from(&tlib);
     let itf = intercom::ComRc::detach(rc);
     *out = match type_system {
