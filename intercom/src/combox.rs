@@ -50,7 +50,13 @@ impl<T: CoClass> ComStruct<T>
         ComStruct { data: cb }
     }
 
-    fn as_comitf<I: ComInterface + ?Sized>(&self) -> ComItf<I>
+    /// Acquires a ComItf for this struct.
+    ///
+    /// # Safety
+    ///
+    /// The ComItf must not outlive the current instance without invoking
+    /// `add_ref`.
+    unsafe fn as_comitf<I: ComInterface + ?Sized>(&self) -> ComItf<I>
     where
         T: HasInterface<I>,
     {
@@ -76,12 +82,10 @@ impl<T: CoClass> ComStruct<T>
             (automation_ptr, raw_ptr)
         };
 
-        unsafe {
-            ComItf::new(
-                raw::InterfacePtr::new(automation_ptr),
-                raw::InterfacePtr::new(raw_ptr),
-            )
-        }
+        ComItf::new(
+            raw::InterfacePtr::new(automation_ptr),
+            raw::InterfacePtr::new(raw_ptr),
+        )
     }
 }
 
@@ -141,7 +145,10 @@ impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<&ComStruct<T>> for ComRc
 {
     fn from(combox: &ComStruct<T>) -> Self
     {
-        ComRc::from(&combox.as_comitf())
+        // The ComItf temporary doesn't outlive self, making this safe.
+        unsafe {
+            ComRc::from(&combox.as_comitf())
+        }
     }
 }
 
@@ -460,5 +467,26 @@ where
     fn deref_mut(&mut self) -> &mut T
     {
         &mut self.value
+    }
+}
+
+impl<T> std::ops::Deref for ComStruct<T>
+where
+    T: CoClass,
+{
+    type Target = T;
+    fn deref(&self) -> &T
+    {
+        unsafe { &(*self.data).value }
+    }
+}
+
+impl<T> std::ops::DerefMut for ComStruct<T>
+where
+    T: CoClass,
+{
+    fn deref_mut(&mut self) -> &mut T
+    {
+        unsafe { &mut (*self.data).value }
     }
 }

@@ -56,8 +56,9 @@ impl<T: ?Sized> ComItf<T>
     /// # Safety
     ///
     /// The `ptr` __must__ be a valid COM interface pointer for an interface
-    /// of type `T`.
-    pub fn maybe_wrap<TS: TypeSystem>(ptr: raw::InterfacePtr<TS, T>) -> Option<ComItf<T>>
+    /// of type `T`. The `ComItf` must not outlast the reference owned by the
+    /// provided pointer.
+    pub unsafe fn maybe_wrap<TS: TypeSystem>(ptr: raw::InterfacePtr<TS, T>) -> Option<ComItf<T>>
     {
         if ptr.is_null() {
             None
@@ -150,7 +151,11 @@ impl ComItf<dyn IUnknown>
 trait PointerOperations: TypeSystem + Sized
 {
     /// Wraps a raw interface pointer into a ComItf.
-    fn wrap_ptr<I: ?Sized>(ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>;
+    ///
+    /// # Safety
+    ///
+    /// The returned `ComItf` must not outlast the reference held by the pointer.
+    unsafe fn wrap_ptr<I: ?Sized>(ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>;
 
     /// Gets a raw interface pointer from a ComItf.
     fn get_ptr<I: ?Sized>(itf: &ComItf<I>) -> crate::raw::InterfacePtr<Self, I>;
@@ -167,7 +172,7 @@ trait PointerOperations: TypeSystem + Sized
 /// work correctly.
 impl<TS: TypeSystem> PointerOperations for TS
 {
-    default fn wrap_ptr<I: ?Sized>(_ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>
+    default unsafe fn wrap_ptr<I: ?Sized>(_ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>
     {
         panic!("Not implemented");
     }
@@ -180,7 +185,7 @@ impl<TS: TypeSystem> PointerOperations for TS
 
 impl PointerOperations for AutomationTypeSystem
 {
-    fn wrap_ptr<I: ?Sized>(ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>
+    unsafe fn wrap_ptr<I: ?Sized>(ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>
     {
         // Construct a ComItf from a automation pointer.
         ComItf {
@@ -199,7 +204,7 @@ impl PointerOperations for AutomationTypeSystem
 
 impl PointerOperations for RawTypeSystem
 {
-    fn wrap_ptr<I: ?Sized>(ptr: raw::InterfacePtr<Self, I>) -> ComItf<I>
+    unsafe fn wrap_ptr<I: ?Sized>(ptr: raw::InterfacePtr<Self, I>) -> ComItf<I>
     {
         // Construct a ComItf from a raw pointer.
         ComItf {
@@ -244,18 +249,6 @@ impl<T: ComInterface + ?Sized> ComItf<T>
         Err(ComError::E_NOINTERFACE)
     }
 
-    /// Get the IUnknown interface for the current interface.
-    // ComItf is a smart pointer and shouldn't introduce methods on 'self'.
-    #[allow(clippy::wrong_self_convention)]
-    pub fn as_unknown(this: &Self) -> ComItf<dyn IUnknown>
-    {
-        ComItf {
-            raw_ptr: this.raw_ptr.as_unknown(),
-            automation_ptr: this.automation_ptr.as_unknown(),
-            phantom: PhantomData,
-        }
-    }
-
     pub fn as_rc(this: &Self) -> ComRc<T>
     {
         let iunk: &ComItf<dyn IUnknown> = this.as_ref();
@@ -272,6 +265,15 @@ impl<T: ComInterface + ?Sized> ComItf<T>
                 phantom: PhantomData,
             })
         }
+    }
+}
+
+impl<T: ComInterface + ?Sized> ToOwned for ComItf<T>
+{
+    type Owned = ComRc<T>;
+
+    fn to_owned(&self) -> Self::Owned {
+        Self::Owned::from(self)
     }
 }
 
