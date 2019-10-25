@@ -61,18 +61,18 @@ pub fn expand_com_interface(
     let mut output = vec![];
     let itf =
         model::ComInterface::from_ast(&lib_name(), attr_tokens.into(), item_tokens.clone().into())?;
-    let itf_ident = itf.name();
-    let maybe_dyn = match itf.item_type() {
+    let itf_ident = &itf.display_name;
+    let maybe_dyn = match itf.item_type {
         utils::InterfaceType::Trait => quote_spanned!(itf.span => dyn),
         utils::InterfaceType::Struct => quote!(),
     };
 
     let mut itf_output = InterfaceOutput::default();
-    for (&ts, itf_variant) in itf.variants() {
-        process_itf_variant(&itf, ts, itf_variant, &mut output, &mut itf_output);
+    for (ts, itf_variant) in &itf.variants {
+        process_itf_variant(&itf, *ts, itf_variant, &mut output, &mut itf_output);
     }
 
-    if itf.item_type() == utils::InterfaceType::Trait {
+    if itf.item_type == utils::InterfaceType::Trait {
         let mut impls = vec![];
         for (_, method) in itf_output.method_impls.iter() {
             let mut impl_branches = vec![];
@@ -121,7 +121,7 @@ pub fn expand_com_interface(
             ));
         }
 
-        let unsafety = if itf.is_unsafe() {
+        let unsafety = if itf.is_unsafe {
             quote_spanned!(itf.span => unsafe)
         } else {
             quote!()
@@ -136,7 +136,7 @@ pub fn expand_com_interface(
 
     // Implement the ComInterface for the trait.
     let iid_arms = itf_output.iid_arms;
-    let (deref_impl, deref_ret) = if itf.item_type() == utils::InterfaceType::Trait {
+    let (deref_impl, deref_ret) = if itf.item_type == utils::InterfaceType::Trait {
         (
             quote_spanned!(itf.span => com_itf),
             quote_spanned!(itf.span => &( dyn #itf_ident + 'static ) ),
@@ -236,13 +236,13 @@ fn process_itf_variant(
     itf_output: &mut InterfaceOutput,
 )
 {
-    let itf_ident = itf.name();
-    let visibility = itf.visibility();
-    let iid_ident = idents::iid(itf_variant.unique_name(), itf.span);
-    let vtable_ident = idents::vtable_struct(itf_variant.unique_name(), itf.span);
+    let itf_ident = &itf.display_name;
+    let visibility = &itf.visibility;
+    let iid_ident = idents::iid(&itf_variant.unique_name, itf.span);
+    let vtable_ident = idents::vtable_struct(&itf_variant.unique_name, itf.span);
 
     // IID_IInterface GUID.
-    let iid_tokens = utils::get_guid_tokens(itf_variant.iid(), itf.span);
+    let iid_tokens = utils::get_guid_tokens(&itf_variant.iid, itf.span);
     let iid_doc = format!("`{}` interface ID.", itf_ident);
     output.push(quote_spanned!(itf.span =>
         #[doc = #iid_doc]
@@ -259,7 +259,7 @@ fn process_itf_variant(
     // Create a vector for the virtual table fields and insert the base
     // interface virtual table in it if required.
     let mut vtbl_fields = vec![];
-    if let Some(ref base) = *itf.base_interface() {
+    if let Some(ref base) = itf.base_interface {
         let vtbl = match base.to_string().as_ref() {
             "IUnknown" => quote_spanned!(itf.span =>intercom::IUnknownVtbl),
             _ => {
@@ -271,7 +271,7 @@ fn process_itf_variant(
     }
 
     // Gather all the trait methods for the remaining vtable fields.
-    for method_info in itf_variant.methods() {
+    for method_info in &itf_variant.methods {
         let method_ident = &method_info.unique_name;
         let in_out_args = method_info.raw_com_args().into_iter().map(|com_arg| {
             let name = &com_arg.name;
@@ -306,8 +306,8 @@ fn process_itf_variant(
             .get_mut(&method_name)
             .expect("We just ensured this exists three lines up... ;_;");
         method_impl.impls.insert(
-            itf_variant.type_system(),
-            rust_to_com_delegate(itf_variant, method_info, &vtable_ident),
+            itf_variant.type_system,
+            rust_to_com_delegate(itf_variant, &method_info, &vtable_ident),
         );
     }
 
@@ -380,7 +380,7 @@ fn rust_to_com_delegate(
     // Resolve some of the fields needed for quote.
     let method_ident = &method_info.unique_name;
     let return_ty = &method_info.rust_return_ty;
-    let iid_tokens = utils::get_guid_tokens(itf_variant.iid(), method_info.signature_span);
+    let iid_tokens = utils::get_guid_tokens(&itf_variant.iid, method_info.signature_span);
 
     // Construct the final method.
     quote_spanned!(method_info.signature_span =>
@@ -410,15 +410,15 @@ fn rust_to_com_delegate(
 fn create_get_typeinfo_function(itf: &model::ComInterface) -> Result<TokenStream, String>
 {
     let fn_name = Ident::new(
-        &format!("get_intercom_interface_info_for_{}", itf.name()),
+        &format!("get_intercom_interface_info_for_{}", itf.display_name),
         itf.span,
     );
-    let itf_name = itf.name().to_string();
+    let itf_name = itf.display_name.to_string();
     let mut variant_tokens = vec![];
-    for (ts, variant) in itf.variants() {
-        variant_tokens.push(create_typeinfo_for_variant(itf, *ts, variant)?);
+    for (ts, variant) in &itf.variants {
+        variant_tokens.push(create_typeinfo_for_variant(itf, *ts, &variant)?);
     }
-    let is_impl_interface = itf.item_type() == utils::InterfaceType::Struct;
+    let is_impl_interface = itf.item_type == utils::InterfaceType::Struct;
 
     Ok(quote_spanned!(itf.span =>
         #[allow(non_snake_case)]
@@ -449,8 +449,8 @@ fn create_typeinfo_for_variant(
 {
     let ts_tokens = ts.as_typesystem_tokens(itf.span);
     let ts_type = ts.as_typesystem_type(itf.span);
-    let iid_tokens = utils::get_guid_tokens(itf_variant.iid(), itf.span);
-    let methods = itf_variant.methods().iter().map( |m| {
+    let iid_tokens = utils::get_guid_tokens(&itf_variant.iid, itf.span);
+    let methods = itf_variant.methods.iter().map( |m| {
         let method_name = m.display_name.to_string();
         let return_type = match &m.return_type {
             Some(rt) => quote_spanned!(m.signature_span =>

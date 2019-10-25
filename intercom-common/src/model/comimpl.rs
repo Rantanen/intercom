@@ -13,19 +13,19 @@ use syn::spanned::Spanned;
 #[derive(Debug)]
 pub struct ComImpl
 {
-    struct_name: Ident,
-    interface_display_name: Ident,
-    is_trait_impl: bool,
-    variants: IndexMap<ModelTypeSystem, ComImplVariant>,
+    pub struct_name: Ident,
+    pub interface_name: Ident,
+    pub is_trait_impl: bool,
+    pub variants: IndexMap<ModelTypeSystem, ComImplVariant>,
     pub impl_span: Span,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct ComImplVariant
 {
-    type_system: ModelTypeSystem,
-    interface_unique_name: Ident,
-    methods: Vec<ComMethodInfo>,
+    pub type_system: ModelTypeSystem,
+    pub interface_unique_name: Ident,
+    pub methods: Vec<ComMethodInfo>,
 }
 
 impl ComImpl
@@ -91,56 +91,11 @@ impl ComImpl
         .unwrap_or_else(Span::call_site);
         Ok(ComImpl {
             struct_name: struct_ident,
-            interface_display_name: itf_ident,
+            interface_name: itf_ident,
             impl_span,
             variants,
             is_trait_impl,
         })
-    }
-
-    /// Temp accessor for the automation variant.
-    pub fn aut(&self) -> &ComImplVariant
-    {
-        &self.variants[&ModelTypeSystem::Automation]
-    }
-
-    /// Struct name that the trait is implemented for.
-    pub fn struct_name(&self) -> &Ident
-    {
-        &self.struct_name
-    }
-
-    /// Interface variants.
-    pub fn variants(&self) -> &IndexMap<ModelTypeSystem, ComImplVariant>
-    {
-        &self.variants
-    }
-
-    /// Trait name that is implemented. Struct name if this is an implicit impl.
-    pub fn interface_name(&self) -> &Ident
-    {
-        &self.interface_display_name
-    }
-
-    /// True if a valid trait is implemented, false for implicit impls.
-    pub fn is_trait_impl(&self) -> bool
-    {
-        self.is_trait_impl
-    }
-}
-
-impl ComImplVariant
-{
-    /// Implemented methods.
-    pub fn methods(&self) -> &Vec<ComMethodInfo>
-    {
-        &self.methods
-    }
-
-    /// Unique interface name.
-    pub fn interface_unique_name(&self) -> &Ident
-    {
-        &self.interface_unique_name
     }
 }
 
@@ -156,9 +111,9 @@ mod test
         let itf = ComImpl::parse(quote!(impl Foo { fn foo( &self ) {} fn bar( &self ) {} }))
             .expect("com_impl attribute parsing failed");
 
-        assert_eq!(itf.struct_name(), "Foo");
-        assert_eq!(itf.interface_name(), "Foo");
-        assert_eq!(itf.is_trait_impl(), false);
+        assert_eq!(itf.struct_name, "Foo");
+        assert_eq!(itf.interface_name, "Foo");
+        assert_eq!(itf.is_trait_impl, false);
         assert_eq!(itf.variants[&Automation].methods.len(), 2);
         assert_eq!(itf.variants[&Automation].methods[0].display_name, "foo");
         assert_eq!(
@@ -184,9 +139,9 @@ mod test
             ComImpl::parse(quote!(impl IFoo for Bar { fn one( &self ) {} fn two( &self ) {} }))
                 .expect("com_impl attribute parsing failed");
 
-        assert_eq!(itf.struct_name(), "Bar");
-        assert_eq!(itf.interface_name(), "IFoo");
-        assert_eq!(itf.is_trait_impl(), true);
+        assert_eq!(itf.struct_name, "Bar");
+        assert_eq!(itf.interface_name, "IFoo");
+        assert_eq!(itf.is_trait_impl, true);
         assert_eq!(itf.variants[&Automation].methods.len(), 2);
         assert_eq!(itf.variants[&Automation].methods[0].display_name, "one");
         assert_eq!(

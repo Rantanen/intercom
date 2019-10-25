@@ -22,7 +22,7 @@ pub fn expand_com_class(
     // Parse the attribute.
     let mut output = vec![];
     let cls = model::ComStruct::parse(&lib_name(), attr_tokens.into(), item_tokens.clone().into())?;
-    let struct_ident = cls.name();
+    let struct_ident = &cls.name;
 
     // IUnknown vtable match. As the primary query_interface is implemented
     // on the root IUnknown interface, the self_vtable here should already be
@@ -66,7 +66,7 @@ pub fn expand_com_class(
     // Create the vtable data for the additional interfaces.
     // The data should include the match-arms for the primary query_interface
     // and the vtable offsets used for the delegating query_interface impls.
-    for itf in cls.interfaces() {
+    for itf in &cls.interfaces {
         for &ts in &[ModelTypeSystem::Automation, ModelTypeSystem::Raw] {
             // Various idents.
             let itf_variant = Ident::new(&format!("{}_{:?}", itf, ts), itf.span());
@@ -153,8 +153,8 @@ pub fn expand_com_class(
     // interfaces that the coclass implements.
 
     // VTableList struct definition.
-    let vtable_list_ident = idents::vtable_list(&struct_ident);
-    let visibility = cls.visibility();
+    let vtable_list_ident = idents::vtable_list(struct_ident);
+    let visibility = &cls.visibility;
     output.push(quote!(
         #[allow(non_snake_case)]
         #[doc(hidden)]
@@ -197,7 +197,7 @@ pub fn expand_com_class(
 
     // CLSID constant for the class.
     let clsid_ident = idents::clsid(struct_ident);
-    if let Some(ref guid) = *cls.clsid() {
+    if let Some(ref guid) = cls.clsid {
         let clsid_guid_tokens = utils::get_guid_tokens(guid, Span::call_site());
         let clsid_doc = format!("`{}` class ID.", struct_ident);
         let clsid_const = quote!(
@@ -210,7 +210,7 @@ pub fn expand_com_class(
 
     output.push(
         create_get_typeinfo_function(&cls)
-            .map_err(|e| model::ParseError::ComStruct(cls.name().to_string(), e))?,
+            .map_err(|e| model::ParseError::ComStruct(cls.name.to_string(), e))?,
     );
 
     Ok(tokens_to_tokenstream(item_tokens, output))
@@ -219,11 +219,11 @@ pub fn expand_com_class(
 fn create_get_typeinfo_function(cls: &model::ComStruct) -> Result<TokenStream, String>
 {
     let fn_name = Ident::new(
-        &format!("get_intercom_coclass_info_for_{}", cls.name()),
+        &format!("get_intercom_coclass_info_for_{}", cls.name),
         Span::call_site(),
     );
-    let cls_name = cls.name().to_string();
-    let clsid = match cls.clsid() {
+    let cls_name = cls.name.to_string();
+    let clsid = match &cls.clsid {
         Some(guid) => guid,
         None => {
             return Ok(quote!(
@@ -232,9 +232,9 @@ fn create_get_typeinfo_function(cls: &model::ComStruct) -> Result<TokenStream, S
             ))
         }
     };
-    let clsid_tokens = utils::get_guid_tokens(clsid, Span::call_site());
+    let clsid_tokens = utils::get_guid_tokens(&clsid, Span::call_site());
     let (interfaces, interface_info): (Vec<_>, Vec<_>) = cls
-        .interfaces()
+        .interfaces
         .iter()
         .map(|itf_ident| {
             let itf_name = itf_ident.to_string();

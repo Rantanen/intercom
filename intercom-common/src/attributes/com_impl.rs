@@ -25,15 +25,15 @@ pub fn expand_com_impl(
     // Parse the attribute.
     let mut output = vec![];
     let imp = model::ComImpl::parse(item_tokens.clone().into())?;
-    let struct_ident = imp.struct_name();
-    let itf_ident = imp.interface_name();
-    let maybe_dyn = match imp.is_trait_impl() {
+    let struct_ident = imp.struct_name;
+    let itf_ident = imp.interface_name;
+    let maybe_dyn = match imp.is_trait_impl {
         true => quote_spanned!(itf_ident.span() => dyn),
         false => quote!(),
     };
 
-    for (_, impl_variant) in imp.variants() {
-        let itf_unique_ident = impl_variant.interface_unique_name();
+    for (_, impl_variant) in imp.variants {
+        let itf_unique_ident = impl_variant.interface_unique_name;
         let vtable_struct_ident = idents::vtable_struct(&itf_unique_ident, itf_ident.span());
         let vtable_instance_ident =
             idents::vtable_instance(&struct_ident, &itf_unique_ident, itf_ident.span());
@@ -134,7 +134,7 @@ pub fn expand_com_impl(
         // seem okay. So in case we encounter any errors we'll just skip the method
         // silently. This is done by breaking out of the 'catch' before adding the
         // method to the vtable fields.
-        for method_info in impl_variant.methods() {
+        for method_info in impl_variant.methods {
             let method_ident = &method_info.unique_name;
             let method_rust_ident = &method_info.display_name;
             let method_impl_ident =
