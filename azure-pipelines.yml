@@ -48,19 +48,8 @@ steps:
     cmake --build .
   displayName: "Build integration tests"
 
-# Run tests on Linux (raw file name)
-- script: |
+- bash: |
     build/bin/cpp-raw
     build/bin/cpp-dl
     build/bin/cpp-wrapper
-  displayName: "Run integration tests (Linux)"
-  condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT' ))
-
-# Run tests on Windows (.exe suffix)
-- script:
-    dir
-    build\bin\cpp-raw.exe
-    build\bin\cpp-dl.exe
-    build\bin\cpp-wrapper.exe
-  displayName: "Run integration tests (Windows)"
-  condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
+  displayName: "Run integration tests"
