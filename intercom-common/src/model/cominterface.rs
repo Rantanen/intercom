@@ -33,24 +33,24 @@ impl ComInterfaceAttr
 #[derive(Debug)]
 pub struct ComInterface
 {
-    display_name: Ident,
-    visibility: Visibility,
-    base_interface: Option<Ident>,
-    variants: IndexMap<ModelTypeSystem, ComInterfaceVariant>,
-    item_type: crate::utils::InterfaceType,
+    pub display_name: Ident,
+    pub visibility: Visibility,
+    pub base_interface: Option<Ident>,
+    pub variants: IndexMap<ModelTypeSystem, ComInterfaceVariant>,
+    pub item_type: crate::utils::InterfaceType,
     pub span: Span,
-    is_unsafe: bool,
+    pub is_unsafe: bool,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct ComInterfaceVariant
 {
-    display_name: Ident,
-    unique_name: Ident,
-    unique_base_interface: Option<Ident>,
-    type_system: ModelTypeSystem,
-    iid: GUID,
-    methods: Vec<ComMethodInfo>,
+    pub display_name: Ident,
+    pub unique_name: Ident,
+    pub unique_base_interface: Option<Ident>,
+    pub type_system: ModelTypeSystem,
+    pub iid: GUID,
+    pub methods: Vec<ComMethodInfo>,
 }
 
 impl ComInterface
@@ -185,83 +185,6 @@ impl ComInterface
             variants,
         })
     }
-
-    /// Temp accessor for the automation variant.
-    pub fn aut(&self) -> &ComInterfaceVariant
-    {
-        &self.variants[&ModelTypeSystem::Automation]
-    }
-
-    /// Interface name.
-    pub fn name(&self) -> &Ident
-    {
-        &self.display_name
-    }
-
-    /// Interface visibility.
-    pub fn visibility(&self) -> &Visibility
-    {
-        &self.visibility
-    }
-
-    /// The base interface.
-    pub fn base_interface(&self) -> &Option<Ident>
-    {
-        &self.base_interface
-    }
-
-    /// Interface variants.
-    pub fn variants(&self) -> &IndexMap<ModelTypeSystem, ComInterfaceVariant>
-    {
-        &self.variants
-    }
-
-    /// The type of the associated item for the #[com_interface] attribute.
-    ///
-    /// Either an impl or a trait.
-    pub fn item_type(&self) -> crate::utils::InterfaceType
-    {
-        self.item_type
-    }
-
-    /// True, if the interface requires unsafe impl.
-    pub fn is_unsafe(&self) -> bool
-    {
-        self.is_unsafe
-    }
-}
-
-impl ComInterfaceVariant
-{
-    /// Interface unique name.
-    pub fn unique_name(&self) -> &Ident
-    {
-        &self.unique_name
-    }
-
-    /// Interface base interface variant unique name.
-    pub fn unique_base_interface(&self) -> &Option<Ident>
-    {
-        &self.unique_base_interface
-    }
-
-    /// Implemented methods.
-    pub fn methods(&self) -> &Vec<ComMethodInfo>
-    {
-        &self.methods
-    }
-
-    /// Interface IID.
-    pub fn iid(&self) -> &GUID
-    {
-        &self.iid
-    }
-
-    /// Gets the type system this interface variant represents.
-    pub fn type_system(&self) -> ModelTypeSystem
-    {
-        self.type_system
-    }
 }
 
 #[cfg(test)]
@@ -289,14 +212,14 @@ mod test
         )
         .expect("com_interface attribute parsing failed");
 
-        assert_eq!(itf.name(), "ITrait");
-        assert_eq!(itf.visibility(), &Visibility::Inherited);
-        assert_eq!(itf.base_interface().as_ref().unwrap(), "IUnknown");
+        assert_eq!(itf.display_name, "ITrait");
+        assert_eq!(itf.visibility, Visibility::Inherited);
+        assert_eq!(itf.base_interface.as_ref().unwrap(), "IUnknown");
 
         let variant = &itf.variants[&Automation];
         assert_eq!(
-            variant.iid(),
-            &GUID::parse("12345678-1234-1234-1234-567890ABCDEF").unwrap()
+            variant.iid,
+            GUID::parse("12345678-1234-1234-1234-567890ABCDEF").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].display_name, "foo");
@@ -304,8 +227,8 @@ mod test
 
         let variant = &itf.variants[&Raw];
         assert_eq!(
-            variant.iid(),
-            &GUID::parse("12345678-1234-1234-1234-567890FEDCBA").unwrap()
+            variant.iid,
+            GUID::parse("12345678-1234-1234-1234-567890FEDCBA").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].display_name, "foo");
@@ -328,16 +251,16 @@ mod test
         )
         .expect("com_interface attribute parsing failed");
 
-        assert_eq!(itf.name(), "IAutoGuid");
+        assert_eq!(itf.display_name, "IAutoGuid");
 
         let pub_visibility: Visibility = parse_quote!(pub);
-        assert_eq!(itf.visibility(), &pub_visibility);
-        assert_eq!(itf.base_interface().as_ref().unwrap(), "IUnknown");
+        assert_eq!(itf.visibility, pub_visibility);
+        assert_eq!(itf.base_interface.as_ref().unwrap(), "IUnknown");
 
         let variant = &itf.variants[&Automation];
         assert_eq!(
-            variant.iid(),
-            &GUID::parse("3DC87B73-0998-30B6-75EA-D4F564454D4B").unwrap()
+            variant.iid,
+            GUID::parse("3DC87B73-0998-30B6-75EA-D4F564454D4B").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].display_name, "one");
@@ -345,8 +268,8 @@ mod test
 
         let variant = &itf.variants[&Raw];
         assert_eq!(
-            variant.iid(),
-            &GUID::parse("D552E455-9FB2-34A2-61C0-34BDE0A9095D").unwrap()
+            variant.iid,
+            GUID::parse("D552E455-9FB2-34A2-61C0-34BDE0A9095D").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].display_name, "one");
@@ -369,16 +292,16 @@ mod test
         )
         .expect("com_interface attribute parsing failed");
 
-        assert_eq!(itf.name(), "IAutoGuid");
+        assert_eq!(itf.display_name, "IAutoGuid");
 
         let pub_visibility: Visibility = parse_quote!(pub);
-        assert_eq!(itf.visibility(), &pub_visibility);
-        assert_eq!(itf.base_interface().as_ref().unwrap(), "IBase");
+        assert_eq!(itf.visibility, pub_visibility);
+        assert_eq!(itf.base_interface.as_ref().unwrap(), "IBase");
 
         let variant = &itf.variants[&ModelTypeSystem::Automation];
         assert_eq!(
-            variant.iid(),
-            &GUID::parse("3DC87B73-0998-30B6-75EA-D4F564454D4B").unwrap()
+            variant.iid,
+            GUID::parse("3DC87B73-0998-30B6-75EA-D4F564454D4B").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].display_name, "one");
@@ -388,8 +311,8 @@ mod test
 
         let variant = &itf.variants[&ModelTypeSystem::Raw];
         assert_eq!(
-            variant.iid(),
-            &GUID::parse("D552E455-9FB2-34A2-61C0-34BDE0A9095D").unwrap()
+            variant.iid,
+            GUID::parse("D552E455-9FB2-34A2-61C0-34BDE0A9095D").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].display_name, "one");
@@ -414,16 +337,16 @@ mod test
         )
         .expect("com_interface attribute parsing failed");
 
-        assert_eq!(itf.name(), "IAutoGuid");
+        assert_eq!(itf.display_name, "IAutoGuid");
 
         let pub_visibility: Visibility = parse_quote!(pub);
-        assert_eq!(itf.visibility(), &pub_visibility);
-        assert_eq!(itf.base_interface(), &None);
+        assert_eq!(itf.visibility, pub_visibility);
+        assert_eq!(itf.base_interface, None);
 
         let variant = &itf.variants[&Automation];
         assert_eq!(
-            variant.iid(),
-            &GUID::parse("3DC87B73-0998-30B6-75EA-D4F564454D4B").unwrap()
+            variant.iid,
+            GUID::parse("3DC87B73-0998-30B6-75EA-D4F564454D4B").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].unique_name, "one_Automation");
@@ -431,8 +354,8 @@ mod test
 
         let variant = &itf.variants[&Raw];
         assert_eq!(
-            variant.iid(),
-            &GUID::parse("D552E455-9FB2-34A2-61C0-34BDE0A9095D").unwrap()
+            variant.iid,
+            GUID::parse("D552E455-9FB2-34A2-61C0-34BDE0A9095D").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].unique_name, "one_Raw");

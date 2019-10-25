@@ -15,10 +15,10 @@ intercom_attribute!(
 #[derive(Debug, PartialEq)]
 pub struct ComStruct
 {
-    name: Ident,
-    clsid: Option<GUID>,
-    visibility: Visibility,
-    interfaces: Vec<Ident>,
+    pub name: Ident,
+    pub clsid: Option<GUID>,
+    pub visibility: Visibility,
+    pub interfaces: Vec<Ident>,
 }
 
 impl ComStruct
@@ -66,30 +66,6 @@ impl ComStruct
             interfaces,
         })
     }
-
-    /// Struct name.
-    pub fn name(&self) -> &Ident
-    {
-        &self.name
-    }
-
-    /// Struct CLSID.
-    pub fn clsid(&self) -> &Option<GUID>
-    {
-        &self.clsid
-    }
-
-    /// Struct visibility.
-    pub fn visibility(&self) -> &::syn::Visibility
-    {
-        &self.visibility
-    }
-
-    /// Interfaces implemented by the struct.
-    pub fn interfaces(&self) -> &[Ident]
-    {
-        &self.interfaces
-    }
 }
 
 #[cfg(test)]
@@ -109,14 +85,14 @@ mod test
         )
         .expect("com_class attribute parsing failed");
 
-        assert_eq!(cls.name(), "S");
+        assert_eq!(cls.name, "S");
         assert_eq!(
-            cls.clsid(),
-            &Some(GUID::parse("12345678-1234-1234-1234-567890ABCDEF").unwrap())
+            cls.clsid,
+            Some(GUID::parse("12345678-1234-1234-1234-567890ABCDEF").unwrap())
         );
-        assert_eq!(cls.interfaces().len(), 2);
-        assert_eq!(cls.interfaces()[0], "Foo");
-        assert_eq!(cls.interfaces()[1], "Bar");
+        assert_eq!(cls.interfaces.len(), 2);
+        assert_eq!(cls.interfaces[0], "Foo");
+        assert_eq!(cls.interfaces[1], "Bar");
     }
 
     #[test]
@@ -139,15 +115,15 @@ mod test
         )
         .expect("com_class attribute parsing failed");
 
-        assert_eq!(cls.name(), "MyStruct");
+        assert_eq!(cls.name, "MyStruct");
         assert_eq!(
-            cls.clsid(),
-            &Some(GUID::parse("28F57CBA-6AF4-3D3F-7C55-1CF1394D5C7A").unwrap())
+            cls.clsid,
+            Some(GUID::parse("28F57CBA-6AF4-3D3F-7C55-1CF1394D5C7A").unwrap())
         );
-        assert_eq!(cls.interfaces().len(), 3);
-        assert_eq!(cls.interfaces()[0], "MyStruct");
-        assert_eq!(cls.interfaces()[1], "IThings");
-        assert_eq!(cls.interfaces()[2], "IStuff");
+        assert_eq!(cls.interfaces.len(), 3);
+        assert_eq!(cls.interfaces[0], "MyStruct");
+        assert_eq!(cls.interfaces[1], "IThings");
+        assert_eq!(cls.interfaces[2], "IStuff");
     }
 
     #[test]
@@ -162,9 +138,9 @@ mod test
         )
         .expect("com_class attribute parsing failed");
 
-        assert_eq!(cls.name(), "EmptyType");
-        assert_eq!(cls.clsid(), &None);
-        assert_eq!(cls.interfaces().len(), 0);
+        assert_eq!(cls.name, "EmptyType");
+        assert_eq!(cls.clsid, None);
+        assert_eq!(cls.interfaces.len(), 0);
     }
 
     #[test]
@@ -179,8 +155,8 @@ mod test
         )
         .expect("com_class attribute parsing failed");
 
-        assert_eq!(cls.name(), "EmptyType");
-        assert_eq!(cls.clsid(), &None);
-        assert_eq!(cls.interfaces().len(), 1);
+        assert_eq!(cls.name, "EmptyType");
+        assert_eq!(cls.clsid, None);
+        assert_eq!(cls.interfaces.len(), 1);
     }
 }
