@@ -1,47 +1,47 @@
 error[E0425]: cannot find function `__S_NotComTrait_AutomationVtbl_offset` in this scope
-  --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comimpl-no-interface.rs:10:6
+  --> span-comimpl-no-interface.rs:10:6
    |
 10 | impl NotComTrait for S {}
    |      ^^^^^^^^^^^ help: a constant with a similar name exists: `__S_NotComTrait_AutomationVtbl_INSTANCE`
 
 error[E0412]: cannot find type `__NotComTrait_AutomationVtbl` in this scope
-  --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comimpl-no-interface.rs:10:6
+  --> span-comimpl-no-interface.rs:10:6
    |
 10 | impl NotComTrait for S {}
    |      ^^^^^^^^^^^ not found in this scope
 
 error[E0422]: cannot find struct, variant or union type `__NotComTrait_AutomationVtbl` in this scope
-  --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comimpl-no-interface.rs:10:6
+  --> span-comimpl-no-interface.rs:10:6
    |
 10 | impl NotComTrait for S {}
    |      ^^^^^^^^^^^ not found in this scope
 
 error[E0425]: cannot find function `__S_NotComTrait_RawVtbl_offset` in this scope
-  --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comimpl-no-interface.rs:10:6
+  --> span-comimpl-no-interface.rs:10:6
    |
 10 | impl NotComTrait for S {}
    |      ^^^^^^^^^^^ help: a constant with a similar name exists: `__S_NotComTrait_RawVtbl_INSTANCE`
 
 error[E0412]: cannot find type `__NotComTrait_RawVtbl` in this scope
-  --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comimpl-no-interface.rs:10:6
+  --> span-comimpl-no-interface.rs:10:6
    |
 10 | impl NotComTrait for S {}
    |      ^^^^^^^^^^^ not found in this scope
 
 error[E0422]: cannot find struct, variant or union type `__NotComTrait_RawVtbl` in this scope
-  --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comimpl-no-interface.rs:10:6
+  --> span-comimpl-no-interface.rs:10:6
    |
 10 | impl NotComTrait for S {}
    |      ^^^^^^^^^^^ not found in this scope
 
 error[E0277]: the trait bound `(dyn NotComTrait + 'static): intercom::ComInterface` is not satisfied
-  --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comimpl-no-interface.rs:10:1
+  --> span-comimpl-no-interface.rs:10:1
    |
 10 | impl NotComTrait for S {}
    | ^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::ComInterface` is not implemented for `(dyn NotComTrait + 'static)`
 
 error[E0277]: the trait bound `S: intercom::CoClass` is not satisfied
-  --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-comimpl-no-interface.rs:10:1
+  --> span-comimpl-no-interface.rs:10:1
    |
 10 | impl NotComTrait for S {}
    | ^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::CoClass` is not implemented for `S`

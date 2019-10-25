@@ -1,5 +1,5 @@
 error[E0038]: the trait `IFoo` cannot be made into an object
-  --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-no-self-error.rs:9:7
+  --> span-no-self-error.rs:9:7
    |
 9  | trait IFoo {
    |       ^^^^ the trait `IFoo` cannot be made into an object
@@ -7,7 +7,7 @@ error[E0038]: the trait `IFoo` cannot be made into an object
    |        -------- associated function `arg_type` has no `self` parameter
 
 error[E0038]: the trait `IFoo` cannot be made into an object
-  --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-no-self-error.rs:9:1
+  --> span-no-self-error.rs:9:1
    |
 9  | trait IFoo {
    | ^^^^^^^^^^ the trait `IFoo` cannot be made into an object

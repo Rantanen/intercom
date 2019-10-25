@@ -433,16 +433,25 @@ fn assert_output_with(
         .file_name()
         .unwrap()
         .to_string_lossy();
+    let actual = sanitize(actual.clone());
     let expected_path_string = format!("{}.{}", actual_path, output_kind);
     let expected_path = Path::new(&expected_path_string);
     if expected_path.exists() {
         let expected = std::fs::read_to_string(expected_path)
             .unwrap()
             .replace("\r", "");
-        if expected != actual {
+        let expected = sanitize(expected);
+        if std::env::var("FORCE_UPDATE_TARGETS").is_ok() {
+            Some(OutputResult {
+                message: format!("Forcing update"),
+                changeset: Changeset::new(&actual, &expected, "\n"),
+                actual: actual,
+                expected_path: Some(expected_path_string),
+            })
+        } else if expected != actual {
             Some(OutputResult {
                 message: format!("{} {} output differs", name, output_kind),
-                changeset: Changeset::new(&sanitize(actual.clone()), &sanitize(expected), "\n"),
+                changeset: Changeset::new(&actual, &expected, "\n"),
                 actual: actual,
                 expected_path: Some(expected_path_string),
             })
@@ -452,7 +461,7 @@ fn assert_output_with(
     } else if !actual.is_empty() {
         Some(OutputResult {
             message: format!("{} {} output was not expected", name, output_kind),
-            changeset: Changeset::new(&sanitize(actual.clone()), "", "\n"),
+            changeset: Changeset::new(&actual, "", "\n"),
             actual: actual,
             expected_path: None,
         })
@@ -464,5 +473,6 @@ fn assert_output_with(
 fn strip_path(path: &str, source: String) -> String
 {
     let root = Path::new(path).parent().unwrap().to_string_lossy() + "/";
+    eprintln!("{}", root);
     source.replace(root.as_ref(), "")
 }

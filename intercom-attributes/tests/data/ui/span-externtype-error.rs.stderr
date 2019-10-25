@@ -1,11 +1,11 @@
 error[E0277]: the trait bound `NotExternType: intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>` is not satisfied
-  --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-externtype-error.rs:12:5
+  --> span-externtype-error.rs:12:5
    |
 12 |     fn arg_type(&self, bad_type: NotExternType);
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>` is not implemented for `NotExternType`
 
 error[E0277]: the trait bound `NotExternType: intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>` is not satisfied
-  --> C:/Dev/Projects/rust-com/intercom-attributes/tests/data/ui/span-externtype-error.rs:12:5
+  --> span-externtype-error.rs:12:5
    |
 12 |     fn arg_type(&self, bad_type: NotExternType);
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>` is not implemented for `NotExternType`
