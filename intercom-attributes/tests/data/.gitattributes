@@ -1,0 +1,5 @@
+# The output references should never use autocrlf on Windows.
+# Our test framework ensures these are consistent. Any problems should be
+# fixed in the intercom-common/tests/lib.rs
+*.stdout    binary
+*.stderr    binary
