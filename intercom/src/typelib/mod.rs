@@ -1,6 +1,6 @@
 use crate::{
-    com_class, com_impl, com_interface, type_system::TypeSystemName, ComError, ComItf, ComRc,
-    ComResult, ComBox, GUID,
+    com_class, com_impl, com_interface, type_system::TypeSystemName, ComBox, ComError, ComItf,
+    ComRc, ComResult, GUID,
 };
 
 use std::borrow::Cow;

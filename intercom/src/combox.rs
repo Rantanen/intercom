@@ -146,9 +146,7 @@ impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<&ComBox<T>> for ComRc<I>
     fn from(combox: &ComBox<T>) -> Self
     {
         // The ComItf temporary doesn't outlive self, making this safe.
-        unsafe {
-            ComRc::from(&combox.as_comitf())
-        }
+        unsafe { ComRc::from(&combox.as_comitf()) }
     }
 }
 

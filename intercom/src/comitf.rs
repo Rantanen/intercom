@@ -272,7 +272,8 @@ impl<T: ComInterface + ?Sized> ToOwned for ComItf<T>
 {
     type Owned = ComRc<T>;
 
-    fn to_owned(&self) -> Self::Owned {
+    fn to_owned(&self) -> Self::Owned
+    {
         Self::Owned::from(self)
     }
 }
