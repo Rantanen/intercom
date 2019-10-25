@@ -3,6 +3,7 @@ use crate::tyhandlers::ModelTypeSystem;
 use syn::*;
 
 use super::*;
+use proc_macro2::Span;
 
 use crate::ast_converters::*;
 
@@ -190,12 +191,12 @@ pub fn is_unit(tk: &Type) -> bool
     }
 }
 
-pub fn unit_ty() -> Type
+pub fn unit_ty(span: Span) -> Type
 {
-    parse_quote!(())
+    syn::parse2(quote_spanned!(span => ())).unwrap()
 }
 
-pub fn get_guid_tokens(g: &guid::GUID) -> TokenStream
+pub fn get_guid_tokens(g: &guid::GUID, span: Span) -> TokenStream
 {
     let d1 = g.data1;
     let d2 = g.data2;
@@ -208,7 +209,7 @@ pub fn get_guid_tokens(g: &guid::GUID) -> TokenStream
     let d4_5 = g.data4[5];
     let d4_6 = g.data4[6];
     let d4_7 = g.data4[7];
-    quote!(
+    quote_spanned!(span =>
         intercom::GUID {
             data1: #d1, data2: #d2, data3: #d3,
             data4: [ #d4_0, #d4_1, #d4_2, #d4_3, #d4_4, #d4_5, #d4_6, #d4_7 ]

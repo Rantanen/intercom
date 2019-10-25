@@ -24,15 +24,21 @@ pub fn expand_com_impl(
 {
     // Parse the attribute.
     let mut output = vec![];
-    let imp = model::ComImpl::parse(&item_tokens.to_string())?;
+    let imp = model::ComImpl::parse(item_tokens.clone().into())?;
     let struct_ident = imp.struct_name();
     let itf_ident = imp.interface_name();
+    let maybe_dyn = match imp.is_trait_impl() {
+        true => quote_spanned!(itf_ident.span() => dyn),
+        false => quote!(),
+    };
 
     for (_, impl_variant) in imp.variants() {
         let itf_unique_ident = impl_variant.interface_unique_name();
-        let vtable_struct_ident = idents::vtable_struct(&itf_unique_ident);
-        let vtable_instance_ident = idents::vtable_instance(&struct_ident, &itf_unique_ident);
-        let vtable_offset = idents::vtable_offset(&struct_ident, &itf_unique_ident);
+        let vtable_struct_ident = idents::vtable_struct(&itf_unique_ident, itf_ident.span());
+        let vtable_instance_ident =
+            idents::vtable_instance(&struct_ident, &itf_unique_ident, itf_ident.span());
+        let vtable_offset =
+            idents::vtable_offset(&struct_ident, &itf_unique_ident, itf_ident.span());
 
         /////////////////////
         // #itf::QueryInterface, AddRef & Release
@@ -49,7 +55,7 @@ pub fn expand_com_impl(
         let calling_convetion = get_calling_convetion();
         let query_interface_ident =
             idents::method_impl(&struct_ident, &itf_unique_ident, "query_interface");
-        output.push(quote!(
+        output.push(quote_spanned!(struct_ident.span() =>
             #[allow(non_snake_case)]
             #[doc(hidden)]
             unsafe extern #calling_convetion fn #query_interface_ident(
@@ -76,7 +82,7 @@ pub fn expand_com_impl(
 
         // AddRef
         let add_ref_ident = idents::method_impl(&struct_ident, &itf_unique_ident, "add_ref");
-        output.push(quote!(
+        output.push(quote_spanned!(struct_ident.span() =>
             #[allow(non_snake_case)]
             #[allow(dead_code)]
             #[doc(hidden)]
@@ -93,7 +99,7 @@ pub fn expand_com_impl(
 
         // Release
         let release_ident = idents::method_impl(&struct_ident, &itf_unique_ident, "release");
-        output.push(quote!(
+        output.push(quote_spanned!(struct_ident.span() =>
             #[allow(non_snake_case)]
             #[allow(dead_code)]
             #[doc(hidden)]
@@ -111,7 +117,7 @@ pub fn expand_com_impl(
         // Start the definition fo the vtable fields. The base interface is always
         // IUnknown at this point. We might support IDispatch later, but for now
         // we only support IUnknown.
-        let mut vtable_fields = vec![quote!(
+        let mut vtable_fields = vec![quote_spanned!(struct_ident.span() =>
             __base : intercom::IUnknownVtbl {
                 query_interface_Automation : #query_interface_ident,
                 add_ref_Automation : #add_ref_ident,
@@ -136,7 +142,7 @@ pub fn expand_com_impl(
 
             let in_out_args = method_info.raw_com_args().into_iter().map(|com_arg| {
                 let name = &com_arg.name;
-                let com_ty = &com_arg.handler.com_ty(com_arg.dir);
+                let com_ty = &com_arg.handler.com_ty(com_arg.span, com_arg.dir);
                 let dir = match com_arg.dir {
                     Direction::In => quote!(),
                     Direction::Out | Direction::Retval => quote!( *mut ),
@@ -150,7 +156,7 @@ pub fn expand_com_impl(
             let in_params: Vec<_> = method_info
                 .args
                 .iter()
-                .map(|ca| ca.handler.com_to_rust(&ca.name, Direction::In))
+                .map(|ca| ca.handler.com_to_rust(&ca.name, ca.span, Direction::In))
                 .collect();
 
             let return_ident = Ident::new("__result", Span::call_site());
@@ -164,9 +170,9 @@ pub fn expand_com_impl(
             // with the vtable offset.
             let ret_ty = method_info.returnhandler.com_ty();
             let self_struct_stmt = if method_info.is_const {
-                quote!( let self_struct : &#itf_ident = &**self_combox )
+                quote!( let self_struct : &#maybe_dyn #itf_ident = &**self_combox )
             } else {
-                quote!( let self_struct : &mut #itf_ident = &mut **self_combox )
+                quote!( let self_struct : &mut #maybe_dyn #itf_ident = &mut **self_combox )
             };
 
             output.push(quote!(
@@ -199,7 +205,10 @@ pub fn expand_com_impl(
             ));
 
             // Include the delegating method in the virtual table fields.
-            vtable_fields.push(quote!( #method_ident : #method_impl_ident, ));
+            vtable_fields.push(quote!(
+                #[allow(non_snake_case)]
+                #method_ident : #method_impl_ident,
+            ));
         }
 
         // Now that we've gathered all the virtual table fields, we can finally
@@ -211,8 +220,8 @@ pub fn expand_com_impl(
         ));
     }
 
-    output.push(quote!(
-        impl intercom::HasInterface< #itf_ident > for #struct_ident {}
+    output.push(quote_spanned!(imp.impl_span =>
+        impl intercom::HasInterface<#maybe_dyn #itf_ident> for #struct_ident {}
     ));
 
     Ok(tokens_to_tokenstream(item_tokens, output))

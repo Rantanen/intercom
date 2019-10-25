@@ -1,0 +1,19 @@
+error[E0038]: the trait `IFoo` cannot be made into an object
+  --> span-no-self-error.rs:9:7
+   |
+9  | trait IFoo {
+   |       ^^^^ the trait `IFoo` cannot be made into an object
+10 |     fn arg_type();
+   |        -------- associated function `arg_type` has no `self` parameter
+
+error[E0038]: the trait `IFoo` cannot be made into an object
+  --> span-no-self-error.rs:9:1
+   |
+9  | trait IFoo {
+   | ^^^^^^^^^^ the trait `IFoo` cannot be made into an object
+10 |     fn arg_type();
+   |        -------- associated function `arg_type` has no `self` parameter
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0038`.

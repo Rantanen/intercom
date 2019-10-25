@@ -8,7 +8,8 @@ use crate::methodinfo::ComMethodInfo;
 use crate::tyhandlers::ModelTypeSystem;
 use ::indexmap::IndexMap;
 use ::std::iter::FromIterator;
-use ::syn::{Ident, LitStr, Visibility};
+use ::syn::{spanned::Spanned, Ident, LitStr, Visibility};
+use proc_macro2::Span;
 
 intercom_attribute!(
     ComInterfaceAttr< ComInterfaceAttrParam, NoParams > {
@@ -29,7 +30,7 @@ impl ComInterfaceAttr
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct ComInterface
 {
     display_name: Ident,
@@ -37,6 +38,7 @@ pub struct ComInterface
     base_interface: Option<Ident>,
     variants: IndexMap<ModelTypeSystem, ComInterfaceVariant>,
     item_type: crate::utils::InterfaceType,
+    pub span: Span,
     is_unsafe: bool,
 }
 
@@ -53,28 +55,17 @@ pub struct ComInterfaceVariant
 
 impl ComInterface
 {
-    /// Parses a #[com_interface] attribute and the associated item.
-    pub fn parse(
-        crate_name: &str,
-        attr_params: TokenStream,
-        item: &str,
-    ) -> ParseResult<ComInterface>
-    {
-        // Parse the input code.
-        let item: ::syn::Item = ::syn::parse_str(item).map_err(|_| {
-            ParseError::ComInterface("<Unknown>".into(), "Item syntax error".into())
-        })?;
-
-        Self::from_ast(crate_name, attr_params, &item)
-    }
-
     /// Creates ComInterface from AST elements.
     pub fn from_ast(
         crate_name: &str,
         attr: TokenStream,
-        item: &::syn::Item,
+        item: TokenStream,
     ) -> ParseResult<ComInterface>
     {
+        let item: syn::Item = ::syn::parse2(item).map_err(|_| {
+            ParseError::ComInterface("<Unknown>".into(), "Item syntax error".into())
+        })?;
+
         let attr: ComInterfaceAttr = ::syn::parse2(attr).map_err(|_| {
             ParseError::ComInterface(
                 item.get_ident().unwrap().to_string(),
@@ -84,7 +75,7 @@ impl ComInterface
 
         // Get the interface details. As [com_interface] can be applied to both
         // impls and traits this handles both of those.
-        let (itf_ident, fns, itf_type, unsafety) = crate::utils::get_ident_and_fns(item)
+        let (itf_ident, fns, itf_type, unsafety) = crate::utils::get_ident_and_fns(&item)
             .ok_or_else(|| {
                 ParseError::ComInterface(
                     item.get_ident().unwrap().to_string(),
@@ -119,7 +110,7 @@ impl ComInterface
         //
         // Note this may conflict with visibility of the actual [com_class], but
         // nothing we can do for this really.
-        let visibility = if let ::syn::Item::Trait(ref t) = *item {
+        let visibility = if let ::syn::Item::Trait(ref t) = item {
             t.vis.clone()
         } else {
             parse_quote!(pub)
@@ -189,6 +180,7 @@ impl ComInterface
             base_interface: base,
             item_type: itf_type,
             is_unsafe: unsafety.is_some(),
+            span: item.span(),
             visibility,
             variants,
         })
@@ -281,13 +273,19 @@ mod test
     #[test]
     fn parse_com_interface()
     {
-        let itf = ComInterface::parse(
+        let itf = ComInterface::from_ast(
             "not used",
             quote!(
                 com_iid = "12345678-1234-1234-1234-567890ABCDEF",
                 raw_iid = "12345678-1234-1234-1234-567890FEDCBA",
             ),
-            "trait ITrait { fn foo( &self ); fn bar( &self ); }",
+            quote!(
+                trait ITrait
+                {
+                    fn foo(&self);
+                    fn bar(&self);
+                }
+            ),
         )
         .expect("com_interface attribute parsing failed");
 
@@ -317,10 +315,16 @@ mod test
     #[test]
     fn parse_com_interface_with_auto_guid()
     {
-        let itf = ComInterface::parse(
+        let itf = ComInterface::from_ast(
             "not used",
             quote!(),
-            "pub trait IAutoGuid { fn one( &self ); fn two( &self ); }",
+            quote!(
+                pub trait IAutoGuid
+                {
+                    fn one(&self);
+                    fn two(&self);
+                }
+            ),
         )
         .expect("com_interface attribute parsing failed");
 
@@ -352,10 +356,16 @@ mod test
     #[test]
     fn parse_com_interface_with_base_interface()
     {
-        let itf = ComInterface::parse(
+        let itf = ComInterface::from_ast(
             "not used",
             quote!(base = IBase),
-            "pub trait IAutoGuid { fn one( &self ); fn two( &self ); }",
+            quote!(
+                pub trait IAutoGuid
+                {
+                    fn one(&self);
+                    fn two(&self);
+                }
+            ),
         )
         .expect("com_interface attribute parsing failed");
 
@@ -391,10 +401,16 @@ mod test
     #[test]
     fn parse_com_interface_with_no_base_interface()
     {
-        let itf = ComInterface::parse(
+        let itf = ComInterface::from_ast(
             "not used",
             quote!(base = NO_BASE),
-            "pub trait IAutoGuid { fn one( &self ); fn two( &self ); }",
+            quote!(
+                pub trait IAutoGuid
+                {
+                    fn one(&self);
+                    fn two(&self);
+                }
+            ),
         )
         .expect("com_interface attribute parsing failed");
 

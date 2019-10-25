@@ -46,12 +46,11 @@ pub struct TypeLib
 }
 
 #[com_interface]
-#[allow(bare_trait_objects)]
 pub trait IIntercomTypeLib
 {
     fn get_info(&self) -> ComResult<(String, GUID, String)>;
     fn get_type_count(&self) -> ComResult<u32>;
-    fn get_type(&self, idx: u32) -> ComResult<ComRc<IIntercomTypeInfo>>;
+    fn get_type(&self, idx: u32) -> ComResult<ComRc<dyn IIntercomTypeInfo>>;
 }
 
 // TypeInfo
@@ -129,7 +128,6 @@ pub struct InterfaceVariant
 }
 
 #[com_interface]
-#[allow(bare_trait_objects)]
 pub trait IIntercomInterface
 {
     // FIXME: Support interface inheritance
@@ -137,17 +135,16 @@ pub trait IIntercomInterface
     fn get_options(&self) -> ComResult<InterfaceOptions>;
 
     fn get_variant_count(&self) -> ComResult<u32>;
-    fn get_variant(&self, idx: u32) -> ComResult<ComRc<IIntercomInterfaceVariant>>;
+    fn get_variant(&self, idx: u32) -> ComResult<ComRc<dyn IIntercomInterfaceVariant>>;
 }
 
 #[com_interface]
-#[allow(bare_trait_objects)]
 pub trait IIntercomInterfaceVariant
 {
     fn get_type_system(&self) -> ComResult<TypeSystemName>;
     fn get_iid(&self) -> ComResult<GUID>;
     fn get_method_count(&self) -> ComResult<u32>;
-    fn get_method(&self, idx: u32) -> ComResult<ComRc<IIntercomMethod>>;
+    fn get_method(&self, idx: u32) -> ComResult<ComRc<dyn IIntercomMethod>>;
 }
 
 // Method

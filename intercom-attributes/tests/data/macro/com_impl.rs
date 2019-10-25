@@ -5,6 +5,7 @@ use std::mem::MaybeUninit;
 // We need the IID and Vtbl to ensure this compiles.
 //
 // Normally these are provided by the [com_interface].
+#[allow(non_camel_case_types)]
 struct __Foo_AutomationVtbl;
 const IID_Foo_Automation: intercom::IID = intercom::GUID {
     data1: 0,
@@ -13,6 +14,7 @@ const IID_Foo_Automation: intercom::IID = intercom::GUID {
     data4: [0, 0, 0, 0, 0, 0, 0, 0],
 };
 
+#[allow(non_camel_case_types)]
 struct __Foo_RawVtbl;
 const IID_Foo_Raw: intercom::IID = intercom::GUID {
     data1: 0,

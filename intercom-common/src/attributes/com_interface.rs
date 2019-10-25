@@ -10,6 +10,8 @@ use crate::model;
 use crate::tyhandlers::{Direction, ModelTypeSystem};
 use crate::utils;
 
+use syn::spanned::Spanned;
+
 extern crate proc_macro;
 
 /// Interface level output.
@@ -58,8 +60,12 @@ pub fn expand_com_interface(
     // Parse the attribute.
     let mut output = vec![];
     let itf =
-        model::ComInterface::parse(&lib_name(), attr_tokens.into(), &item_tokens.to_string())?;
+        model::ComInterface::from_ast(&lib_name(), attr_tokens.into(), item_tokens.clone().into())?;
     let itf_ident = itf.name();
+    let maybe_dyn = match itf.item_type() {
+        utils::InterfaceType::Trait => quote_spanned!(itf.span => dyn),
+        utils::InterfaceType::Struct => quote!(),
+    };
 
     let mut itf_output = InterfaceOutput::default();
     for (&ts, itf_variant) in itf.variants() {
@@ -71,9 +77,9 @@ pub fn expand_com_interface(
         for (_, method) in itf_output.method_impls.iter() {
             let mut impl_branches = vec![];
             for (ts, method_ts_impl) in method.impls.iter() {
-                let ts_tokens = ts.as_typesystem_type();
-                impl_branches.push(quote!(
-                    if let Some( comptr ) = ComItf::maybe_ptr::< #ts_tokens >( self ) {
+                let ts_tokens = ts.as_typesystem_type(method.info.signature_span);
+                impl_branches.push(quote_spanned!(method.info.signature_span =>
+                    if let Some( comptr ) = intercom::ComItf::maybe_ptr::<#ts_tokens>( self ) {
                         #method_ts_impl
                     }
                 ));
@@ -83,11 +89,11 @@ pub fn expand_com_interface(
             let impl_args = method.info.args.iter().map(|ca| {
                 let name = &ca.name;
                 let ty = &ca.ty;
-                quote!( #name : #ty )
+                quote_spanned!(ca.span => #name : #ty )
             });
 
             let unsafety = if method.info.is_unsafe {
-                quote!(unsafe)
+                quote_spanned!(method.info.signature_span => unsafe)
             } else {
                 quote!()
             };
@@ -96,7 +102,7 @@ pub fn expand_com_interface(
             let return_ty = &method.info.rust_return_ty;
 
             // Rust to COM implementation.
-            impls.push(quote!(
+            impls.push(quote_spanned!(method.info.signature_span =>
                 #unsafety fn #method_rust_ident(
                     #self_arg, #( #impl_args ),*
                 ) -> #return_ty {
@@ -116,12 +122,13 @@ pub fn expand_com_interface(
         }
 
         let unsafety = if itf.is_unsafe() {
-            quote!(unsafe)
+            quote_spanned!(itf.span => unsafe)
         } else {
             quote!()
         };
-        output.push(quote!(
-            #unsafety impl #itf_ident for intercom::ComItf< #itf_ident > {
+        output.push(quote_spanned!(itf.span =>
+            #[allow(clippy::all)]
+            #unsafety impl #itf_ident for intercom::ComItf<dyn #itf_ident> {
                 #( #impls )*
             }
         ));
@@ -130,7 +137,10 @@ pub fn expand_com_interface(
     // Implement the ComInterface for the trait.
     let iid_arms = itf_output.iid_arms;
     let (deref_impl, deref_ret) = if itf.item_type() == utils::InterfaceType::Trait {
-        (quote!(com_itf), quote!( &( #itf_ident + 'static ) ))
+        (
+            quote_spanned!(itf.span => com_itf),
+            quote_spanned!(itf.span => &( dyn #itf_ident + 'static ) ),
+        )
     } else {
         // Note this is _extremely_ dangerous.
         //
@@ -142,8 +152,8 @@ pub fn expand_com_interface(
         // There's no real way to get this to work and we might want to just remove
         // the possibility to do 'implicit' interfaces by just impling the struct.
         (
-            quote!(
-                let some_iunk : &intercom::ComItf<intercom::IUnknown> = com_itf.as_ref();
+            quote_spanned!(itf.span =>
+                let some_iunk : &intercom::ComItf<dyn intercom::IUnknown> = com_itf.as_ref();
                 let iunknown_iid = intercom::IUnknown::iid(
                         intercom::type_system::TypeSystemName::Automation )
                             .expect( "IUnknown must have Automation IID" );
@@ -164,12 +174,12 @@ pub fn expand_com_interface(
                     (*combox).deref()
                 }
             ),
-            quote!( & #itf_ident ),
+            quote_spanned!(itf.span => & #itf_ident ),
         )
     };
 
-    output.push(quote!(
-        impl intercom::ComInterface for #itf_ident {
+    output.push(quote_spanned!(itf.span =>
+        impl intercom::ComInterface for #maybe_dyn #itf_ident {
 
             #[doc = "Returns the IID of the requested interface."]
             fn iid(
@@ -182,7 +192,7 @@ pub fn expand_com_interface(
             }
 
             fn deref(
-                com_itf : &intercom::ComItf< #itf_ident >
+                com_itf : &intercom::ComItf<#maybe_dyn #itf_ident>
             ) -> #deref_ret {
                 #deref_impl
             }
@@ -190,9 +200,9 @@ pub fn expand_com_interface(
     ));
 
     // Implement type info for the interface.
-    output.push(quote!(
+    output.push(quote_spanned!(itf.span =>
 
-        impl intercom::type_system::BidirectionalTypeInfo for #itf_ident {
+        impl intercom::type_system::BidirectionalTypeInfo for #maybe_dyn #itf_ident {
 
             /// The name of the type.
             fn type_name() -> &'static str { stringify!( #itf_ident )  }
@@ -228,60 +238,61 @@ fn process_itf_variant(
 {
     let itf_ident = itf.name();
     let visibility = itf.visibility();
-    let iid_ident = idents::iid(itf_variant.unique_name());
-    let vtable_ident = idents::vtable_struct(itf_variant.unique_name());
+    let iid_ident = idents::iid(itf_variant.unique_name(), itf.span);
+    let vtable_ident = idents::vtable_struct(itf_variant.unique_name(), itf.span);
 
     // IID_IInterface GUID.
-    let iid_tokens = utils::get_guid_tokens(itf_variant.iid());
+    let iid_tokens = utils::get_guid_tokens(itf_variant.iid(), itf.span);
     let iid_doc = format!("`{}` interface ID.", itf_ident);
-    output.push(quote!(
+    output.push(quote_spanned!(itf.span =>
         #[doc = #iid_doc]
         #[allow(non_upper_case_globals)]
         #visibility const #iid_ident : intercom::IID = #iid_tokens;
     ));
 
     // Construct the iid(ts) match arm for this type system.
-    let ts_match = ts.as_typesystem_tokens();
+    let ts_match = ts.as_typesystem_tokens(itf.span);
     itf_output
         .iid_arms
-        .push(quote!( #ts_match => Some( & #iid_ident ) ));
+        .push(quote_spanned!(itf.span => #ts_match => Some( & #iid_ident ) ));
 
     // Create a vector for the virtual table fields and insert the base
     // interface virtual table in it if required.
     let mut vtbl_fields = vec![];
     if let Some(ref base) = *itf.base_interface() {
         let vtbl = match base.to_string().as_ref() {
-            "IUnknown" => quote!(intercom::IUnknownVtbl),
+            "IUnknown" => quote_spanned!(itf.span =>intercom::IUnknownVtbl),
             _ => {
-                let vtbl = idents::vtable_struct(&base);
+                let vtbl = idents::vtable_struct(&base, itf.span);
                 quote!( #vtbl )
             }
         };
-        vtbl_fields.push(quote!( pub __base : #vtbl ));
+        vtbl_fields.push(quote_spanned!(itf.span => pub __base : #vtbl, ));
     }
 
     // Gather all the trait methods for the remaining vtable fields.
-    let calling_convention = get_calling_convetion();
     for method_info in itf_variant.methods() {
         let method_ident = &method_info.unique_name;
         let in_out_args = method_info.raw_com_args().into_iter().map(|com_arg| {
             let name = &com_arg.name;
-            let com_ty = &com_arg.handler.com_ty(com_arg.dir);
+            let com_ty = &com_arg.handler.com_ty(com_arg.span, com_arg.dir);
             let dir = match com_arg.dir {
                 Direction::In => quote!(),
-                Direction::Out | Direction::Retval => quote!( *mut ),
+                Direction::Out | Direction::Retval => quote_spanned!(com_arg.span => *mut ),
             };
-            quote!( #name : #dir #com_ty )
+            quote_spanned!(com_arg.span => #name : #dir #com_ty )
         });
-        let self_arg = quote!(self_vtable: intercom::RawComPtr);
+        let self_arg = quote_spanned!(method_info.rust_self_arg.span()=>
+            self_vtable: intercom::RawComPtr);
         let args = iter::once(self_arg).chain(in_out_args);
 
         // Create the vtable field and add it to the vector of fields.
         let ret_ty = method_info.returnhandler.com_ty();
-        vtbl_fields.push(quote!(
+        let tt = quote_spanned!(method_info.signature_span =>
             pub #method_ident :
-                unsafe extern #calling_convention fn( #( #args ),* ) -> #ret_ty
-        ));
+                unsafe extern "system" fn( #( #args ),* ) -> #ret_ty,
+        );
+        vtbl_fields.push(tt);
 
         let method_name = method_info.display_name.to_string();
         if !itf_output.method_impls.contains_key(&method_name) {
@@ -302,11 +313,13 @@ fn process_itf_variant(
 
     // Create the vtable. We've already gathered all the vtable method
     // pointer fields so defining the struct is simple enough.
-    output.push(quote!(
+    output.push(quote_spanned!(itf.span =>
         #[allow(non_camel_case_types)]
+        #[allow(non_snake_case)]
+        #[allow(clippy::all)]
         #[repr(C)]
         #[doc(hidden)]
-        #visibility struct #vtable_ident { #( #vtbl_fields, )* }
+        #visibility struct #vtable_ident { #( #vtbl_fields )* }
     ));
 }
 
@@ -333,9 +346,9 @@ fn rust_to_com_delegate(
         .iter()
         .map(|ca| {
             let ident = &ca.name;
-            let ty = &ca.handler.com_ty(Direction::Retval);
+            let ty = &ca.handler.com_ty(ca.span, Direction::Retval);
             let default = ca.handler.default_value();
-            quote!( let mut #ident : #ty = #default; )
+            quote_spanned!(ca.span => let mut #ident : #ty = #default; )
         })
         .collect::<Vec<_>>();
 
@@ -346,8 +359,10 @@ fn rust_to_com_delegate(
         .map(|com_arg| {
             let name = com_arg.name;
             match com_arg.dir {
-                Direction::In => com_arg.handler.rust_to_com(&name, Direction::In),
-                Direction::Out | Direction::Retval => quote!( &mut #name ),
+                Direction::In => com_arg
+                    .handler
+                    .rust_to_com(&name, com_arg.span, Direction::In),
+                Direction::Out | Direction::Retval => quote_spanned!(com_arg.span => &mut #name ),
             }
         })
         .collect();
@@ -355,7 +370,8 @@ fn rust_to_com_delegate(
     // Combine the parameters into the final parameter list.
     // This includes the 'this' pointer and both the IN and OUT
     // parameters.
-    let params = iter::once(quote!(comptr.ptr)).chain(params);
+    let params =
+        iter::once(quote_spanned!(method_info.rust_self_arg.span() => comptr.ptr)).chain(params);
 
     // Create the return statement.
     let return_ident = Ident::new("__result", Span::call_site());
@@ -364,10 +380,11 @@ fn rust_to_com_delegate(
     // Resolve some of the fields needed for quote.
     let method_ident = &method_info.unique_name;
     let return_ty = &method_info.rust_return_ty;
-    let iid_tokens = utils::get_guid_tokens(itf_variant.iid());
+    let iid_tokens = utils::get_guid_tokens(itf_variant.iid(), method_info.signature_span);
 
     // Construct the final method.
-    quote!(
+    quote_spanned!(method_info.signature_span =>
+        #[allow(unused_imports)]
         use intercom::type_system::{IntercomFrom, IntercomInto};
         let vtbl = comptr.ptr as *const *const #vtable_ident;
 
@@ -375,15 +392,15 @@ fn rust_to_com_delegate(
         // substitutions might end up using ?'s for error handling. The IIFE allows
         // us to handle the results here immediately.
         #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
-        let result : Result< #return_ty, intercom::ComError > = ( || unsafe {
+        let __intercom_result : Result< #return_ty, intercom::ComError > = ( || unsafe {
             #( #out_arg_declarations )*
             let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
 
-            let INTERCOM_iid = #iid_tokens;
+            let __intercom_iid = #iid_tokens;
             Ok( { #return_statement } )
         } )();
 
-        return match result {
+        return match __intercom_result {
             Ok( v ) => v,
             Err( err ) => < #return_ty as intercom::ErrorValue >::from_com_error( err ),
         };
@@ -394,7 +411,7 @@ fn create_get_typeinfo_function(itf: &model::ComInterface) -> Result<TokenStream
 {
     let fn_name = Ident::new(
         &format!("get_intercom_interface_info_for_{}", itf.name()),
-        Span::call_site(),
+        itf.span,
     );
     let itf_name = itf.name().to_string();
     let mut variant_tokens = vec![];
@@ -403,10 +420,12 @@ fn create_get_typeinfo_function(itf: &model::ComInterface) -> Result<TokenStream
     }
     let is_impl_interface = itf.item_type() == utils::InterfaceType::Struct;
 
-    Ok(quote!(
+    Ok(quote_spanned!(itf.span =>
+        #[allow(non_snake_case)]
+        #[allow(dead_code)]
         pub(crate) fn #fn_name() -> intercom::typelib::TypeInfo
         {
-            let mut variants = vec![ #( #variant_tokens ),* ];
+            let variants = vec![ #( #variant_tokens ),* ];
 
             intercom::typelib::TypeInfo::Interface(
                 intercom::ComStruct::new( intercom::typelib::Interface {
@@ -423,28 +442,29 @@ fn create_get_typeinfo_function(itf: &model::ComInterface) -> Result<TokenStream
 }
 
 fn create_typeinfo_for_variant(
-    _itf: &model::ComInterface,
+    itf: &model::ComInterface,
     ts: ModelTypeSystem,
     itf_variant: &model::ComInterfaceVariant,
 ) -> Result<TokenStream, String>
 {
-    let ts_tokens = ts.as_typesystem_tokens();
-    let ts_type = ts.as_typesystem_type();
-    let iid_tokens = utils::get_guid_tokens(itf_variant.iid());
+    let ts_tokens = ts.as_typesystem_tokens(itf.span);
+    let ts_type = ts.as_typesystem_type(itf.span);
+    let iid_tokens = utils::get_guid_tokens(itf_variant.iid(), itf.span);
     let methods = itf_variant.methods().iter().map( |m| {
         let method_name = m.display_name.to_string();
         let return_type = match &m.return_type {
-            Some(rt) => quote!( intercom::typelib::Arg {
-                name: "".into(),
-                ty: <
-                    <#rt as intercom::type_system::ExternType<#ts_type>>::ExternOutputType
-                    as intercom::type_system::OutputTypeInfo>::type_name().into(),
-                indirection_level: <
-                    <#rt as intercom::type_system::ExternType<#ts_type>>::ExternOutputType
-                    as intercom::type_system::OutputTypeInfo>::indirection_level(),
-                direction: intercom::typelib::Direction::Return,
-            }),
-            None => quote!( intercom::typelib::Arg {
+            Some(rt) => quote_spanned!(m.signature_span =>
+                intercom::typelib::Arg {
+                    name: "".into(),
+                    ty: <
+                        <#rt as intercom::type_system::ExternType<#ts_type>>::ExternOutputType
+                        as intercom::type_system::OutputTypeInfo>::type_name().into(),
+                    indirection_level: <
+                        <#rt as intercom::type_system::ExternType<#ts_type>>::ExternOutputType
+                        as intercom::type_system::OutputTypeInfo>::indirection_level(),
+                    direction: intercom::typelib::Direction::Return,
+                }),
+            None => quote_spanned!(m.signature_span => intercom::typelib::Arg {
                 name: "".into(),
                 ty: "void".into(),
                 indirection_level: 0,
@@ -453,20 +473,20 @@ fn create_typeinfo_for_variant(
         };
 
         let params = m.raw_com_args().into_iter().map(|arg| {
-            let com_ty = arg.handler.com_ty(arg.dir);
+            let com_ty = arg.handler.com_ty(arg.span, arg.dir);
             let arg_name = arg.name.to_string();
-            let dir_ident = Ident::new( match arg.dir {
+            let dir_ident = Ident::new(match arg.dir {
                 Direction::In => "In",
                 Direction::Out => "Out",
                 Direction::Retval => "Retval"
-            }, Span::call_site() );
+            }, arg.span);
 
-            let ty_info_trait = Ident::new( match arg.dir {
+            let ty_info_trait = Ident::new(match arg.dir {
                 Direction::Out | Direction::Retval => "OutputTypeInfo",
                 Direction::In => "InputTypeInfo",
-            }, Span::call_site() );
+            }, arg.span);
 
-            quote!( intercom::typelib::Arg {
+            quote_spanned!(arg.span => intercom::typelib::Arg {
                 name: #arg_name.into(),
                 ty: <#com_ty as intercom::type_system::#ty_info_trait>::type_name().into(),
                 indirection_level: <#com_ty as intercom::type_system::#ty_info_trait>::indirection_level(),
@@ -474,7 +494,7 @@ fn create_typeinfo_for_variant(
             })
         }).collect::<Vec<_>>();
 
-        quote!(
+        quote_spanned!(m.signature_span =>
             intercom::ComStruct::new(intercom::typelib::Method {
                 name: #method_name.into(),
                 return_type: #return_type,
@@ -483,7 +503,7 @@ fn create_typeinfo_for_variant(
         )
     }).collect::<Vec<_>>();
 
-    Ok(quote!(
+    Ok(quote_spanned!(itf.span =>
         intercom::ComStruct::new( intercom::typelib::InterfaceVariant {
             ts: #ts_tokens,
             iid: #iid_tokens,

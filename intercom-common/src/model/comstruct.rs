@@ -6,7 +6,7 @@ use crate::guid::GUID;
 use ::syn::{Ident, Visibility};
 
 intercom_attribute!(
-    ComStructAttr< ComStructAttrParam, Ident > {
+    ComStructAttr<ComStructAttrParam, Ident> {
         clsid : StrOption,
     }
 );
@@ -23,23 +23,17 @@ pub struct ComStruct
 
 impl ComStruct
 {
-    /// Parses a #[com_class] attribute and the associated struct.
-    pub fn parse(crate_name: &str, attr_params: TokenStream, item: &str) -> ParseResult<ComStruct>
-    {
-        // Parse the inputs.
-        let item: ::syn::ItemStruct = ::syn::parse_str(item)
-            .map_err(|_| ParseError::ComStruct("<Unknown>".into(), "Item syntax error".into()))?;
-
-        Self::from_ast(crate_name, attr_params, &item)
-    }
-
     /// Creates ComStruct from AST elements.
-    pub fn from_ast(
+    pub fn parse(
         crate_name: &str,
         attr_params: TokenStream,
-        item: &::syn::ItemStruct,
+        item: TokenStream,
     ) -> ParseResult<ComStruct>
     {
+        // Parse the inputs.
+        let item: ::syn::ItemStruct = ::syn::parse2(item)
+            .map_err(|_| ParseError::ComStruct("<Unknown>".into(), "Item syntax error".into()))?;
+
         let attr: ComStructAttr = ::syn::parse2(attr_params).map_err(|e| {
             ParseError::ComStruct(
                 item.ident.to_string(),
@@ -109,7 +103,9 @@ mod test
         let cls = ComStruct::parse(
             "not used",
             quote!(clsid = "12345678-1234-1234-1234-567890ABCDEF", Foo, Bar),
-            "struct S;",
+            quote!(
+                struct S;
+            ),
         )
         .expect("com_class attribute parsing failed");
 
@@ -134,7 +130,12 @@ mod test
         let cls = ComStruct::parse(
             "not used",
             quote!(MyStruct, IThings, IStuff),
-            "struct MyStruct { a: u32 }",
+            quote!(
+                struct MyStruct
+                {
+                    a: u32,
+                }
+            ),
         )
         .expect("com_class attribute parsing failed");
 
@@ -152,8 +153,14 @@ mod test
     #[test]
     fn parse_com_class_with_no_data()
     {
-        let cls = ComStruct::parse("not used", quote!(clsid = None), "struct EmptyType;")
-            .expect("com_class attribute parsing failed");
+        let cls = ComStruct::parse(
+            "not used",
+            quote!(clsid = None),
+            quote!(
+                struct EmptyType;
+            ),
+        )
+        .expect("com_class attribute parsing failed");
 
         assert_eq!(cls.name(), "EmptyType");
         assert_eq!(cls.clsid(), &None);
@@ -166,7 +173,9 @@ mod test
         let cls = ComStruct::parse(
             "not used",
             quote!(clsid = None, ITestInterface),
-            "struct EmptyType;",
+            quote!(
+                struct EmptyType;
+            ),
         )
         .expect("com_class attribute parsing failed");
 

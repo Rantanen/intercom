@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use proc_macro2::Span;
 use std::rc::Rc;
 use syn::*;
 
@@ -50,25 +51,28 @@ impl ModelTypeSystem
     }
 
     /// Converts the model type system into public type system tokens.
-    pub fn as_typesystem_tokens(self) -> TokenStream
+    pub fn as_typesystem_tokens(self, span: Span) -> TokenStream
     {
         match self {
             ModelTypeSystem::Automation => {
-                quote!(intercom::type_system::TypeSystemName::Automation)
+                quote_spanned!(span=> intercom::type_system::TypeSystemName::Automation)
             }
-            ModelTypeSystem::Raw => quote!(intercom::type_system::TypeSystemName::Raw),
+            ModelTypeSystem::Raw => {
+                quote_spanned!(span=> intercom::type_system::TypeSystemName::Raw)
+            }
         }
     }
 
     /// Returns the intercom type that represents the type system.
-    pub fn as_typesystem_type(self) -> Type
+    pub fn as_typesystem_type(self, span: Span) -> Type
     {
-        match self {
+        syn::parse2(match self {
             ModelTypeSystem::Automation => {
-                parse_quote!(intercom::type_system::AutomationTypeSystem)
+                quote_spanned!(span=> intercom::type_system::AutomationTypeSystem)
             }
-            ModelTypeSystem::Raw => parse_quote!(intercom::type_system::RawTypeSystem),
-        }
+            ModelTypeSystem::Raw => quote_spanned!(span=> intercom::type_system::RawTypeSystem),
+        })
+        .unwrap()
     }
 }
 
@@ -103,61 +107,65 @@ impl TypeHandler
     }
 
     /// The COM type.
-    pub fn com_ty(&self, dir: Direction) -> Type
+    pub fn com_ty(&self, span: Span, dir: Direction) -> Type
     {
         // Construct bits for the quote.
         let ty = &self.ty;
-        let ts = self.context.type_system.as_typesystem_type();
-        let ts_trait = quote!(
-            <#ty as intercom::type_system::ExternType< #ts > > );
+        let ts = self.context.type_system.as_typesystem_type(span);
+        let ts_trait = quote_spanned!(
+            span=> <#ty as intercom::type_system::ExternType< #ts > > );
 
         // Get the final type based on the parameter direction.
         match dir {
-            Direction::In => parse_quote!( #ts_trait::ExternInputType ),
-            Direction::Out | Direction::Retval => parse_quote!( #ts_trait::ExternOutputType ),
+            Direction::In => {
+                syn::parse2(quote_spanned!(span => #ts_trait::ExternInputType )).unwrap()
+            }
+            Direction::Out | Direction::Retval => {
+                syn::parse2(quote_spanned!(span => #ts_trait::ExternOutputType )).unwrap()
+            }
         }
     }
 
     /// Converts a COM parameter named by the ident into a Rust type.
-    pub fn com_to_rust(&self, ident: &Ident, dir: Direction) -> TokenStream
+    pub fn com_to_rust(&self, ident: &Ident, span: Span, dir: Direction) -> TokenStream
     {
         // Construct bits for the quote.
         let ty = &self.ty;
-        let ts = self.context.type_system.as_typesystem_type();
-        let ts_trait = quote!(
-            <#ty as intercom::type_system::ExternType< #ts > > );
+        let ts = self.context.type_system.as_typesystem_type(span);
+        let ts_trait = quote_spanned!(
+            span=> <#ty as intercom::type_system::ExternType< #ts > > );
 
         match dir {
             Direction::In => {
                 // Input arguments may use an intermediate type.
-                let intermediate = quote!(
-                    #ts_trait::OwnedNativeType::intercom_from( #ident )? );
-                quote!( ( & #intermediate ).intercom_into()? )
+                let intermediate = quote_spanned!(
+                    span=> #ts_trait::OwnedNativeType::intercom_from( #ident )? );
+                quote_spanned!(span=> ( & #intermediate ).intercom_into()? )
             }
             Direction::Out | Direction::Retval => {
                 // Output arguments must not use an intermediate type
                 // as these must outlive the current function.
-                quote!( #ident.intercom_into()? )
+                quote_spanned!(span=> #ident.intercom_into()? )
             }
         }
     }
 
     /// Converts a Rust parameter named by the ident into a COM type.
-    pub fn rust_to_com(&self, ident: &Ident, dir: Direction) -> TokenStream
+    pub fn rust_to_com(&self, ident: &Ident, span: Span, dir: Direction) -> TokenStream
     {
         // Construct bits for the quote.
         let ty = &self.ty;
-        let ts = self.context.type_system.as_typesystem_type();
-        let ts_trait = quote!(
-            <#ty as intercom::type_system::ExternType< #ts > > );
+        let ts = self.context.type_system.as_typesystem_type(span);
+        let ts_trait = quote_spanned!(
+            span=> <#ty as intercom::type_system::ExternType< #ts > > );
 
         match dir {
             Direction::In => {
-                let intermediate = quote!(
-                    #ts_trait::OwnedExternType::intercom_from( #ident )? );
-                quote!( ( & #intermediate ).intercom_into()? )
+                let intermediate = quote_spanned!(
+                    span=> #ts_trait::OwnedExternType::intercom_from( #ident )? );
+                quote_spanned!(span=> ( & #intermediate ).intercom_into()? )
             }
-            Direction::Out | Direction::Retval => quote!( #ident.intercom_into()? ),
+            Direction::Out | Direction::Retval => quote_spanned!(span=> #ident.intercom_into()? ),
         }
     }
 

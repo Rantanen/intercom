@@ -2,6 +2,7 @@ use crate::methodinfo::ComArg;
 use crate::prelude::*;
 use crate::tyhandlers::{self, Direction, ModelTypeSystem, TypeContext};
 use crate::utils;
+use proc_macro2::Span;
 use syn::Type;
 
 /// Defines return handler for handling various different return type schemes.
@@ -13,11 +14,14 @@ pub trait ReturnHandler: ::std::fmt::Debug
     /// The return type of the original Rust method.
     fn rust_ty(&self) -> Type;
 
+    /// The return type span.
+    fn return_type_span(&self) -> Span;
+
     /// The return type for COM implementation.
     fn com_ty(&self) -> Type
     {
         tyhandlers::get_ty_handler(&self.rust_ty(), TypeContext::new(self.type_system()))
-            .com_ty(Direction::Retval)
+            .com_ty(self.return_type_span(), Direction::Retval)
     }
 
     /// Gets the return statement for converting the COM result into Rust
@@ -43,12 +47,12 @@ pub trait ReturnHandler: ::std::fmt::Debug
 
 /// Void return type.
 #[derive(Debug)]
-struct VoidHandler;
+struct VoidHandler(Span);
 impl ReturnHandler for VoidHandler
 {
     fn rust_ty(&self) -> Type
     {
-        utils::unit_ty()
+        utils::unit_ty(self.0)
     }
 
     // Void types do not depend on the type system.
@@ -56,11 +60,17 @@ impl ReturnHandler for VoidHandler
     {
         ModelTypeSystem::Automation
     }
+
+    /// The return type span.
+    fn return_type_span(&self) -> Span
+    {
+        self.0
+    }
 }
 
 /// Simple return type with the return value as the immediate value.
 #[derive(Debug)]
-struct ReturnOnlyHandler(Type, ModelTypeSystem);
+struct ReturnOnlyHandler(Type, ModelTypeSystem, Span);
 impl ReturnHandler for ReturnOnlyHandler
 {
     fn type_system(&self) -> ModelTypeSystem
@@ -73,16 +83,27 @@ impl ReturnHandler for ReturnOnlyHandler
         self.0.clone()
     }
 
+    fn return_type_span(&self) -> Span
+    {
+        self.2
+    }
+
     fn com_to_rust_return(&self, result: &Ident) -> TokenStream
     {
-        tyhandlers::get_ty_handler(&self.rust_ty(), TypeContext::new(self.1))
-            .com_to_rust(result, Direction::Retval)
+        tyhandlers::get_ty_handler(&self.rust_ty(), TypeContext::new(self.1)).com_to_rust(
+            result,
+            self.2,
+            Direction::Retval,
+        )
     }
 
     fn rust_to_com_return(&self, result: &Ident) -> TokenStream
     {
-        tyhandlers::get_ty_handler(&self.rust_ty(), TypeContext::new(self.1))
-            .rust_to_com(result, Direction::Retval)
+        tyhandlers::get_ty_handler(&self.rust_ty(), TypeContext::new(self.1)).rust_to_com(
+            result,
+            self.2,
+            Direction::Retval,
+        )
     }
 
     fn com_out_args(&self) -> Vec<ComArg>
@@ -98,6 +119,7 @@ struct ErrorResultHandler
 {
     retval_ty: Type,
     return_ty: Type,
+    span: Span,
     type_system: ModelTypeSystem,
 }
 
@@ -111,13 +133,18 @@ impl ReturnHandler for ErrorResultHandler
     {
         self.return_ty.clone()
     }
+    fn return_type_span(&self) -> Span
+    {
+        self.span
+    }
     fn com_ty(&self) -> Type
     {
-        let ts = self.type_system.as_typesystem_type();
-        parse_quote!(
+        let ts = self.type_system.as_typesystem_type(self.span);
+        syn::parse2(quote_spanned!(self.span=>
             < intercom::raw::HRESULT as
                 intercom::type_system::ExternType< #ts >>
-                    ::ExternOutputType )
+                    ::ExternOutputType ))
+        .unwrap()
     }
 
     fn com_to_rust_return(&self, result: &Ident) -> TokenStream
@@ -141,7 +168,7 @@ impl ReturnHandler for ErrorResultHandler
             } else {
                 return Err( intercom::load_error(
                         self.as_ref(),
-                        &INTERCOM_iid,
+                        &__intercom_iid,
                         #result ) );
             }
         )
@@ -173,7 +200,7 @@ impl ReturnHandler for ErrorResultHandler
             }
         };
 
-        let (ok_writes, err_writes) = write_out_values(&ok_idents, self.com_out_args());
+        let (ok_writes, err_writes) = write_out_values(&ok_idents, self.com_out_args(), self.span);
         quote!(
             match #result {
                 Ok( #ok_pattern ) => { #( #ok_writes );*; intercom::raw::S_OK },
@@ -187,11 +214,15 @@ impl ReturnHandler for ErrorResultHandler
 
     fn com_out_args(&self) -> Vec<ComArg>
     {
-        get_out_args_for_result(&self.retval_ty, self.type_system)
+        get_out_args_for_result(&self.retval_ty, self.span, self.type_system)
     }
 }
 
-fn get_out_args_for_result(retval_ty: &Type, type_system: ModelTypeSystem) -> Vec<ComArg>
+fn get_out_args_for_result(
+    retval_ty: &Type,
+    span: Span,
+    type_system: ModelTypeSystem,
+) -> Vec<ComArg>
 {
     match *retval_ty {
         // Tuples map to multiple out args, no [retval].
@@ -201,30 +232,35 @@ fn get_out_args_for_result(retval_ty: &Type, type_system: ModelTypeSystem) -> Ve
             .enumerate()
             .map(|(idx, ty)| {
                 ComArg::new(
-                    Ident::new(&format!("__out{}", idx + 1), Span::call_site()),
+                    Ident::new(&format!("__out{}", idx + 1), span),
                     ty.clone(),
+                    span,
                     Direction::Out,
                     type_system,
                 )
             })
             .collect::<Vec<_>>(),
         _ => vec![ComArg::new(
-            Ident::new("__out", Span::call_site()),
+            Ident::new("__out", span),
             retval_ty.clone(),
+            span,
             Direction::Retval,
             type_system,
         )],
     }
 }
 
-fn write_out_values(idents: &[Ident], out_args: Vec<ComArg>)
-    -> (Vec<TokenStream>, Vec<TokenStream>)
+fn write_out_values(
+    idents: &[Ident],
+    out_args: Vec<ComArg>,
+    span: Span,
+) -> (Vec<TokenStream>, Vec<TokenStream>)
 {
     let mut ok_tokens = vec![];
     let mut err_tokens = vec![];
     for (ident, out_arg) in idents.iter().zip(out_args) {
         let arg_name = out_arg.name;
-        let ok_value = out_arg.handler.rust_to_com(ident, Direction::Out);
+        let ok_value = out_arg.handler.rust_to_com(ident, span, Direction::Out);
         let err_value = out_arg.handler.default_value();
 
         ok_tokens.push(quote!( *#arg_name = #ok_value ));
@@ -241,7 +277,7 @@ fn get_rust_ok_values(out_args: Vec<ComArg>) -> Vec<TokenStream>
     for out_arg in out_args {
         let value = out_arg
             .handler
-            .com_to_rust(&out_arg.name, Direction::Retval);
+            .com_to_rust(&out_arg.name, out_arg.span, Direction::Retval);
         tokens.push(value);
     }
     tokens
@@ -251,15 +287,17 @@ fn get_rust_ok_values(out_args: Vec<ComArg>) -> Vec<TokenStream>
 pub fn get_return_handler(
     retval_ty: &Option<Type>,
     return_ty: &Option<Type>,
+    span: Span,
     type_system: ModelTypeSystem,
 ) -> Result<Box<dyn ReturnHandler>, ()>
 {
     Ok(match (retval_ty, return_ty) {
-        (&None, &None) => Box::new(VoidHandler),
-        (&None, &Some(ref ty)) => Box::new(ReturnOnlyHandler(ty.clone(), type_system)),
+        (&None, &None) => Box::new(VoidHandler(span)),
+        (&None, &Some(ref ty)) => Box::new(ReturnOnlyHandler(ty.clone(), type_system, span)),
         (&Some(ref rv), &Some(ref rt)) => Box::new(ErrorResultHandler {
             retval_ty: rv.clone(),
             return_ty: rt.clone(),
+            span,
             type_system,
         }),
 

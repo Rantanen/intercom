@@ -1,6 +1,7 @@
 use crate::prelude::*;
+use proc_macro2::Span;
 use std::rc::Rc;
-use syn::{FnArg, PathArguments, Receiver, ReturnType, Signature, Type};
+use syn::{spanned::Spanned, FnArg, PathArguments, Receiver, ReturnType, Signature, Type};
 
 use crate::ast_converters::*;
 use crate::returnhandlers::{get_return_handler, ReturnHandler};
@@ -25,6 +26,9 @@ pub struct RustArg
     /// Rust type of the COM argument.
     pub ty: Type,
 
+    /// Rust type span.
+    pub span: Span,
+
     /// Type handler.
     pub handler: Rc<TypeHandler>,
 }
@@ -47,12 +51,13 @@ impl ::std::fmt::Debug for RustArg
 
 impl RustArg
 {
-    pub fn new(name: Ident, ty: Type, type_system: ModelTypeSystem) -> RustArg
+    pub fn new(name: Ident, ty: Type, span: Span, type_system: ModelTypeSystem) -> RustArg
     {
         let tyhandler = get_ty_handler(&ty, TypeContext::new(type_system));
         RustArg {
             name,
             ty,
+            span,
             handler: tyhandler,
         }
     }
@@ -69,19 +74,29 @@ pub struct ComArg
     /// Type handler.
     pub handler: Rc<TypeHandler>,
 
+    // Rust span that sources this COM argument.
+    pub span: Span,
+
     /// Argument direction. COM uses OUT params while Rust uses return values.
     pub dir: Direction,
 }
 
 impl ComArg
 {
-    pub fn new(name: Ident, ty: Type, dir: Direction, type_system: ModelTypeSystem) -> ComArg
+    pub fn new(
+        name: Ident,
+        ty: Type,
+        span: Span,
+        dir: Direction,
+        type_system: ModelTypeSystem,
+    ) -> ComArg
     {
         let tyhandler = get_ty_handler(&ty, TypeContext::new(type_system));
         ComArg {
             name,
             ty,
             dir,
+            span,
             handler: tyhandler,
         }
     }
@@ -93,6 +108,7 @@ impl ComArg
             name: rustarg.name,
             ty: rustarg.ty,
             dir,
+            span: rustarg.span,
             handler: tyhandler,
         }
     }
@@ -137,6 +153,9 @@ pub struct ComMethodInfo
 
     /// COM return type, such as the error value of Result<...>.
     pub return_type: Option<Type>,
+
+    /// Span for the method signature.
+    pub signature_span: Span,
 
     /// Return value handler.
     pub returnhandler: Rc<dyn ReturnHandler>,
@@ -200,31 +219,33 @@ impl ComMethodInfo
                     .get_ident()
                     .or_else(|_| Err(ComMethodInfoError::BadArg(Box::new(arg.clone()))))?;
 
-                Ok(RustArg::new(ident, ty, type_system))
+                Ok(RustArg::new(ident, ty, arg.span(), type_system))
             })
             .collect::<Result<_, _>>()?;
 
         // Get the output.
         let rust_return_ty = match decl.output {
-            ReturnType::Default => parse_quote!(()),
+            ReturnType::Default => syn::parse2(quote_spanned!(decl.span() => ())).unwrap(),
             ReturnType::Type(_, ref ty) => (**ty).clone(),
         };
 
         // Resolve the return type and retval type.
-        let (retval_type, return_type) = if utils::is_unit(&rust_return_ty) {
-            (None, None)
+        let (retval_type, return_type, retval_span) = if utils::is_unit(&rust_return_ty) {
+            (None, None, decl.span())
         } else if let Some((retval, ret)) = try_parse_result(&rust_return_ty) {
-            (Some(retval), Some(ret))
+            (Some(retval), Some(ret), decl.output.span())
         } else {
-            (None, Some(rust_return_ty.clone()))
+            (None, Some(rust_return_ty.clone()), decl.output.span())
         };
 
-        let returnhandler = get_return_handler(&retval_type, &return_type, type_system)
-            .or(Err(ComMethodInfoError::BadReturnType))?;
+        let returnhandler =
+            get_return_handler(&retval_type, &return_type, retval_span, type_system)
+                .or(Err(ComMethodInfoError::BadReturnType))?;
         Ok(ComMethodInfo {
-            unique_name: Ident::new(&format!("{}_{:?}", n, type_system), Span::call_site()),
+            unique_name: Ident::new(&format!("{}_{:?}", n, type_system), n.span()),
             display_name: n,
             returnhandler: returnhandler.into(),
+            signature_span: decl.span(),
             is_const,
             rust_self_arg,
             rust_return_ty,
@@ -267,7 +288,7 @@ fn try_parse_result(ty: &Type) -> Option<(Type, Type)>
     if let PathArguments::AngleBracketed(ref data) = last_segment.arguments {
         // The returned types depend on how many arguments the Result has.
         return Some(match data.args.len() {
-            1 => (data.args[0].get_ty().ok()?, hresult_ty()),
+            1 => (data.args[0].get_ty().ok()?, hresult_ty(ty.span())),
             2 => (data.args[0].get_ty().ok()?, data.args[1].get_ty().ok()?),
             _ => return None,
         });
@@ -277,9 +298,9 @@ fn try_parse_result(ty: &Type) -> Option<(Type, Type)>
     None
 }
 
-fn hresult_ty() -> Type
+fn hresult_ty(span: Span) -> Type
 {
-    parse_quote!(intercom::raw::HRESULT)
+    syn::parse2(quote_spanned!(span => intercom::raw::HRESULT)).unwrap()
 }
 
 #[cfg(test)]
