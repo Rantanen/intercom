@@ -335,9 +335,17 @@ fn test_path(config: &TestConfig, sub_path: &str, mode: TestMode) -> usize
             }
         }
 
-        // If these were equal, there's only one "Same" diff segment.
-        // If there is more than one, they differed.
-        let mut t = term::stdout().unwrap();
+        // Acquire a terminal.
+        //
+        // Especially in CI environments there is no real terminal but since we
+        // are still passing the TerminfoTerminal through the functions, we need
+        // one. We'll try ANSI terminal as a fallback.
+        let mut t = term::stdout().unwrap_or_else(|| {
+            Box::new(term::TerminfoTerminal::new_with_terminfo(
+                std::io::stdout(),
+                term::terminfo::TermInfo::from_name("ansi").expect("ansi terminal not supported"),
+            ))
+        });
         for r in results {
             if std::env::var("UPDATE_TARGETS").is_ok() && r.expected_path.is_some() {
                 // The user wants to update the targets.
@@ -473,6 +481,5 @@ fn assert_output_with(
 fn strip_path(path: &str, source: String) -> String
 {
     let root = Path::new(path).parent().unwrap().to_string_lossy() + "/";
-    eprintln!("{}", root);
     source.replace(root.as_ref(), "")
 }
