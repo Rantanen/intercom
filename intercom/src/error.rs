@@ -427,15 +427,14 @@ where
 
             // Construct the COM class used for IErrorInfo. The class contains the
             // description in memory.
-            let mut info = ComStruct::<ErrorInfo>::new(error_info.clone());
+            let info = ComBox::<ErrorInfo>::new(error_info.clone());
 
-            // Get the IErrorInfo interface and set it in thread memory.
-            let mut error_ptr: RawComPtr = std::ptr::null_mut();
+            // Turn the ComBox into a
+            let rc = ComRc::<dyn IErrorInfo>::from(info);
+            let ptr = ComItf::ptr(&rc);
+
             unsafe {
-                // We are intentionally ignoring the HRESULT codes here. We don't
-                // want to override the original error HRESULT with these codes.
-                ComBox::query_interface(info.as_mut(), &IID_IErrorInfo, &mut error_ptr);
-                error_store::SetErrorInfo(0, crate::raw::InterfacePtr::new(error_ptr));
+                error_store::SetErrorInfo(0, ptr);
             }
         }
         None => {
@@ -616,7 +615,7 @@ impl IErrorStore for ErrorStore
 
     fn set_error_message(&self, msg: &str) -> ComResult<()>
     {
-        let info = ComStruct::<ErrorInfo>::new(ErrorInfo::new(msg.to_string()));
+        let info = ComBox::<ErrorInfo>::new(ErrorInfo::new(msg.to_string()));
         let itf = ComRc::<dyn IErrorInfo>::from(&info);
         self.set_error_info(&*itf)
     }

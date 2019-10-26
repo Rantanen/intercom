@@ -1,8 +1,8 @@
 
 use intercom::*;
 use intercom::type_system::IntercomFrom;
-use std::convert::{TryFrom};
 use std::time::SystemTime;
+use std::convert::TryFrom;
 use chrono::prelude::*;
 
 #[com_class( VariantTests )]
@@ -176,9 +176,9 @@ impl VariantTests
             802 => Ok( Variant::from( String::from( "text" ) ) ),
             803 => Ok( Variant::from( CString::new( "text" ).unwrap() ) ),
             11 => Ok( Variant::from( true ) ),
-            1301 => Ok( Variant::from( ComStruct::new( VariantImpl ) ) ),
-            1302 => Ok( Variant::from( ComRc::<dyn IUnknown>::from( &ComStruct::new( VariantImpl ) ) ) ),
-            1303 => Ok( Variant::from( ComRc::<dyn IVariantInterface>::from( &ComStruct::new( VariantImpl ) ) ) ),
+            1301 => Ok( Variant::from( ComBox::new( VariantImpl ) ) ),
+            1302 => Ok( Variant::from( ComRc::<dyn IUnknown>::from( &ComBox::new( VariantImpl ) ) ) ),
+            1303 => Ok( Variant::from( ComRc::<dyn IVariantInterface>::from( &ComBox::new( VariantImpl ) ) ) ),
             16 => Ok( Variant::from( -1i8 ) ),
             17 => Ok( Variant::from( 129u8 ) ),
             18 => Ok( Variant::from( 12929u16 ) ),
@@ -194,7 +194,6 @@ impl VariantTests
         variant : Variant
     ) -> ComResult<Variant> {
 
-        use std::convert::TryFrom;
         match variant {
             Variant::IUnknown( iunk ) => {
                 match ComItf::query_interface::<dyn IVariantInterface>( &iunk ) {

@@ -72,18 +72,6 @@ impl<T: ComInterface + ?Sized> ComRc<T>
     {
         ComItf::maybe_wrap(ptr).map(|itf| ComRc::attach(itf))
     }
-
-    // ComRc is a smart pointer and shouldn't introduce methods on 'self'.
-    #[allow(clippy::wrong_self_convention)]
-    pub fn into_unknown(mut other: ComRc<T>) -> ComRc<dyn IUnknown>
-    {
-        // We'll steal the interface off the current ComRc. This prevents the
-        // current ComRc from releasing it so we are free to do attach here.
-        unsafe {
-            let itf = std::mem::replace(&mut other.itf, ComItf::null_itf());
-            ComRc::attach(ComItf::as_unknown(&itf))
-        }
-    }
 }
 
 #[cfg(windows)]
@@ -154,5 +142,13 @@ impl<T: ComInterface + ?Sized> AsRef<ComItf<T>> for ComRc<T>
     fn as_ref(&self) -> &ComItf<T>
     {
         &self.itf
+    }
+}
+
+impl<T: ComInterface + ?Sized> std::borrow::Borrow<ComItf<T>> for ComRc<T>
+{
+    fn borrow(&self) -> &ComItf<T>
+    {
+        self.as_ref()
     }
 }

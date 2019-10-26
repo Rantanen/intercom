@@ -160,14 +160,14 @@ pub fn expand_com_interface(
                 let primary_iunk = some_iunk.query_interface( iunknown_iid )
                         .expect( "All types must implement IUnknown" );
 
-                let combox : *mut intercom::ComBox< #itf_ident > =
-                        primary_iunk as *mut intercom::ComBox< #itf_ident >;
+                let combox : *mut intercom::ComBoxData< #itf_ident > =
+                        primary_iunk as *mut intercom::ComBoxData< #itf_ident >;
                 unsafe {
 
                     // We are already holding a reference to the 'self', which should
                     // keep this alive. We don't need to maintain a lifetime of the
                     // queried interface.
-                    intercom::ComBox::release( combox );
+                    intercom::ComBoxData::release( combox );
 
                     // Deref.
                     use std::ops::Deref;
@@ -428,7 +428,7 @@ fn create_get_typeinfo_function(itf: &model::ComInterface) -> Result<TokenStream
             let variants = vec![ #( #variant_tokens ),* ];
 
             intercom::typelib::TypeInfo::Interface(
-                intercom::ComStruct::new( intercom::typelib::Interface {
+                intercom::ComBox::new( intercom::typelib::Interface {
                     name: #itf_name.into(),
                     variants: variants,
                     options: intercom::typelib::InterfaceOptions {
@@ -495,7 +495,7 @@ fn create_typeinfo_for_variant(
         }).collect::<Vec<_>>();
 
         quote_spanned!(m.signature_span =>
-            intercom::ComStruct::new(intercom::typelib::Method {
+            intercom::ComBox::new(intercom::typelib::Method {
                 name: #method_name.into(),
                 return_type: #return_type,
                 parameters: vec![ #( #params ),* ],
@@ -504,7 +504,7 @@ fn create_typeinfo_for_variant(
     }).collect::<Vec<_>>();
 
     Ok(quote_spanned!(itf.span =>
-        intercom::ComStruct::new( intercom::typelib::InterfaceVariant {
+        intercom::ComBox::new( intercom::typelib::InterfaceVariant {
             ts: #ts_tokens,
             iid: #iid_tokens,
             methods: vec![ #( #methods ),* ],

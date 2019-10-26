@@ -11,11 +11,11 @@ impl TypeLib
             types.push(match ty.get_kind()? {
                 TypeInfoKind::CoClass => {
                     let cls = CoClass::from_comrc(&ComItf::query_interface(&ty)?)?;
-                    TypeInfo::Class(ComStruct::new(cls))
+                    TypeInfo::Class(ComBox::new(cls))
                 }
                 TypeInfoKind::Interface => {
                     let itf = Interface::from_comrc(&ComItf::query_interface(&ty)?)?;
-                    TypeInfo::Interface(ComStruct::new(itf))
+                    TypeInfo::Interface(ComBox::new(itf))
                 }
             });
         }
@@ -60,7 +60,7 @@ impl Interface
     {
         let mut variants = vec![];
         for v in 0..ti.get_variant_count()? {
-            variants.push(ComStruct::new(InterfaceVariant::from_comrc(
+            variants.push(ComBox::new(InterfaceVariant::from_comrc(
                 &ti.get_variant(v)?,
             )?));
         }
@@ -81,7 +81,7 @@ impl InterfaceVariant
     {
         let mut methods = vec![];
         for m in 0..ti.get_method_count()? {
-            methods.push(ComStruct::new(Method::from_comrc(&ti.get_method(m)?)?));
+            methods.push(ComBox::new(Method::from_comrc(&ti.get_method(m)?)?));
         }
 
         Ok(InterfaceVariant {

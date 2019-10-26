@@ -1,6 +1,6 @@
 use crate::{
-    com_class, com_impl, com_interface, type_system::TypeSystemName, ComError, ComItf, ComRc,
-    ComResult, ComStruct, GUID,
+    com_class, com_impl, com_interface, type_system::TypeSystemName, ComBox, ComError, ComItf,
+    ComRc, ComResult, GUID,
 };
 
 use std::borrow::Cow;
@@ -58,8 +58,8 @@ pub trait IIntercomTypeLib
 #[derive(Debug)]
 pub enum TypeInfo
 {
-    Class(ComStruct<CoClass>),
-    Interface(ComStruct<Interface>),
+    Class(ComBox<CoClass>),
+    Interface(ComBox<Interface>),
 }
 
 #[derive(intercom::ExternType, intercom::BidirectionalTypeInfo, Debug)]
@@ -106,7 +106,7 @@ pub trait IIntercomCoClass
 pub struct Interface
 {
     pub name: Cow<'static, str>,
-    pub variants: Vec<ComStruct<InterfaceVariant>>,
+    pub variants: Vec<ComBox<InterfaceVariant>>,
     pub options: InterfaceOptions,
 }
 
@@ -124,7 +124,7 @@ pub struct InterfaceVariant
 {
     pub ts: TypeSystemName,
     pub iid: GUID,
-    pub methods: Vec<ComStruct<Method>>,
+    pub methods: Vec<ComBox<Method>>,
 }
 
 #[com_interface]

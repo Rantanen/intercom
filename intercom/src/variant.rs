@@ -455,9 +455,9 @@ impl From<f32> for Variant
     }
 }
 
-impl<T: HasInterface<dyn IUnknown>> From<ComStruct<T>> for Variant
+impl<T: HasInterface<dyn IUnknown>> From<ComBox<T>> for Variant
 {
-    fn from(src: ComStruct<T>) -> Self
+    fn from(src: ComBox<T>) -> Self
     {
         Variant::IUnknown(ComRc::from(src))
     }
@@ -476,7 +476,12 @@ impl<T: ComInterface + ?Sized> From<ComRc<T>> for Variant
 {
     fn from(src: ComRc<T>) -> Self
     {
-        let iunkrc = ComRc::into_unknown(src);
+        // We need to go through query_interface so objects that implement
+        // multiple interfaces are handled properly (IUnknown pointers
+        // must be equal for the same object no matter which interface is
+        // used to acquire them).
+        let iunkrc = ComItf::query_interface::<dyn IUnknown>(&src)
+            .expect("All COM objects must implement IUnknown");
         Variant::IUnknown(iunkrc)
     }
 }

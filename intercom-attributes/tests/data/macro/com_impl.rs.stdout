@@ -37,23 +37,23 @@ pub struct Foo;
 #[inline(always)]
 #[allow(non_snake_case)]
 fn __Foo_Foo_AutomationVtbl_offset() -> usize {
-    unsafe { &intercom::ComBox::<Foo>::null_vtable().Foo_Automation as *const _ as usize }
+    unsafe { &intercom::ComBoxData::<Foo>::null_vtable().Foo_Automation as *const _ as usize }
 }
 #[inline(always)]
 #[allow(non_snake_case)]
 fn __Foo_Foo_RawVtbl_offset() -> usize {
-    unsafe { &intercom::ComBox::<Foo>::null_vtable().Foo_Raw as *const _ as usize }
+    unsafe { &intercom::ComBoxData::<Foo>::null_vtable().Foo_Raw as *const _ as usize }
 }
 #[allow(non_upper_case_globals)]
 const __Foo_ISupportErrorInfoVtbl_INSTANCE: intercom::ISupportErrorInfoVtbl =
     intercom::ISupportErrorInfoVtbl {
         __base: intercom::IUnknownVtbl {
-            query_interface_Automation: intercom::ComBox::<Foo>::query_interface_ptr,
-            add_ref_Automation: intercom::ComBox::<Foo>::add_ref_ptr,
-            release_Automation: intercom::ComBox::<Foo>::release_ptr,
+            query_interface_Automation: intercom::ComBoxData::<Foo>::query_interface_ptr,
+            add_ref_Automation: intercom::ComBoxData::<Foo>::add_ref_ptr,
+            release_Automation: intercom::ComBoxData::<Foo>::release_ptr,
         },
         interface_supports_error_info_Automation:
-            intercom::ComBox::<Foo>::interface_supports_error_info_ptr,
+            intercom::ComBoxData::<Foo>::interface_supports_error_info_ptr,
     };
 impl intercom::HasInterface<intercom::IUnknown> for Foo {}
 #[allow(non_snake_case)]
@@ -119,7 +119,7 @@ pub fn get_intercom_coclass_info_for_Foo() -> Vec<intercom::typelib::TypeInfo> {
     // Should be VARIANT_BOOL in Automation interface.
 
     <[_]>::into_vec(box [
-        intercom::typelib::TypeInfo::Class(intercom::ComStruct::new(
+        intercom::typelib::TypeInfo::Class(intercom::ComBox::new(
             intercom::typelib::CoClass::__new(
                 "Foo".into(),
                 intercom::GUID {
@@ -183,7 +183,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_query_interface(
 ) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
-    intercom::ComBox::<Foo>::query_interface(
+    intercom::ComBoxData::<Foo>::query_interface(
         &mut *((self_vtable as usize - __Foo_Foo_AutomationVtbl_offset()) as *mut _),
         riid,
         out,
@@ -197,7 +197,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_add_ref(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBox::<Foo>::add_ref(
+    intercom::ComBoxData::<Foo>::add_ref(
         &mut *((self_vtable as usize - __Foo_Foo_AutomationVtbl_offset()) as *mut _),
     )
 }
@@ -209,7 +209,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_release(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBox::<Foo>::release_ptr(
+    intercom::ComBoxData::<Foo>::release_ptr(
         (self_vtable as usize - __Foo_Foo_AutomationVtbl_offset()) as *mut _,
     )
 }
@@ -231,7 +231,7 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
                  let self_combox =
                      (self_vtable as usize -
                           __Foo_Foo_AutomationVtbl_offset()) as
-                         *mut intercom::ComBox<Foo>;
+                         *mut intercom::ComBoxData<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result = self_struct.simple_method();
                  Ok({ })
@@ -268,7 +268,7 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
                  let self_combox =
                      (self_vtable as usize -
                           __Foo_Foo_AutomationVtbl_offset()) as
-                         *mut intercom::ComBox<Foo>;
+                         *mut intercom::ComBoxData<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
                      self_struct.arg_method((&<u16 as
@@ -303,7 +303,7 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
                  let self_combox =
                      (self_vtable as usize -
                           __Foo_Foo_AutomationVtbl_offset()) as
-                         *mut intercom::ComBox<Foo>;
+                         *mut intercom::ComBoxData<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result = self_struct.simple_result_method();
                  Ok({ __result.intercom_into()? })
@@ -337,7 +337,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_com_result_method_Automation(
         intercom::ComError,
     > = (|| {
         let self_combox = (self_vtable as usize - __Foo_Foo_AutomationVtbl_offset())
-            as *mut intercom::ComBox<Foo>;
+            as *mut intercom::ComBoxData<Foo>;
         let self_struct: &Foo = &**self_combox;
         let __result = self_struct.com_result_method();
         Ok({
@@ -382,7 +382,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_rust_result_method_Automation(
         intercom::ComError,
     > = (|| {
         let self_combox = (self_vtable as usize - __Foo_Foo_AutomationVtbl_offset())
-            as *mut intercom::ComBox<Foo>;
+            as *mut intercom::ComBoxData<Foo>;
         let self_struct: &Foo = &**self_combox;
         let __result = self_struct.rust_result_method();
         Ok({
@@ -433,7 +433,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_tuple_result_method_Automation(
         intercom::ComError,
     > = (|| {
         let self_combox = (self_vtable as usize - __Foo_Foo_AutomationVtbl_offset())
-            as *mut intercom::ComBox<Foo>;
+            as *mut intercom::ComBoxData<Foo>;
         let self_struct: &Foo = &**self_combox;
         let __result = self_struct.tuple_result_method();
         Ok({
@@ -483,7 +483,7 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
         intercom::ComError,
     > = (|| {
         let self_combox = (self_vtable as usize - __Foo_Foo_AutomationVtbl_offset())
-            as *mut intercom::ComBox<Foo>;
+            as *mut intercom::ComBoxData<Foo>;
         let self_struct: &Foo = &**self_combox;
         let __result = self_struct.string_method(
             (&<String as intercom::type_system::ExternType<
@@ -525,7 +525,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_string_result_method_Automation(
         intercom::ComError,
     > = (|| {
         let self_combox = (self_vtable as usize - __Foo_Foo_AutomationVtbl_offset())
-            as *mut intercom::ComBox<Foo>;
+            as *mut intercom::ComBoxData<Foo>;
         let self_struct: &Foo = &**self_combox;
         let __result = self_struct.string_result_method(
             (&<String as intercom::type_system::ExternType<
@@ -583,7 +583,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_complete_method_Automation(
         intercom::ComError,
     > = (|| {
         let self_combox = (self_vtable as usize - __Foo_Foo_AutomationVtbl_offset())
-            as *mut intercom::ComBox<Foo>;
+            as *mut intercom::ComBoxData<Foo>;
         let self_struct: &mut Foo = &mut **self_combox;
         let __result = self_struct.complete_method(
             (&<u16 as intercom::type_system::ExternType<
@@ -640,7 +640,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_bool_method_Automation(
         intercom::ComError,
     > = (|| {
         let self_combox = (self_vtable as usize - __Foo_Foo_AutomationVtbl_offset())
-            as *mut intercom::ComBox<Foo>;
+            as *mut intercom::ComBoxData<Foo>;
         let self_struct: &Foo = &**self_combox;
         let __result = self_struct.bool_method(
             (&<bool as intercom::type_system::ExternType<
@@ -693,7 +693,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_variant_method_Automation(
         intercom::ComError,
     > = (|| {
         let self_combox = (self_vtable as usize - __Foo_Foo_AutomationVtbl_offset())
-            as *mut intercom::ComBox<Foo>;
+            as *mut intercom::ComBoxData<Foo>;
         let self_struct: &Foo = &**self_combox;
         let __result = self_struct.variant_method(
             (&<Variant as intercom::type_system::ExternType<
@@ -756,7 +756,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_query_interface(
 ) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
-    intercom::ComBox::<Foo>::query_interface(
+    intercom::ComBoxData::<Foo>::query_interface(
         &mut *((self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut _),
         riid,
         out,
@@ -770,7 +770,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_add_ref(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBox::<Foo>::add_ref(
+    intercom::ComBoxData::<Foo>::add_ref(
         &mut *((self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut _),
     )
 }
@@ -782,7 +782,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_release(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBox::<Foo>::release_ptr(
+    intercom::ComBoxData::<Foo>::release_ptr(
         (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut _,
     )
 }
@@ -803,7 +803,7 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
              {
                  let self_combox =
                      (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
-                         *mut intercom::ComBox<Foo>;
+                         *mut intercom::ComBoxData<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result = self_struct.simple_method();
                  Ok({ })
@@ -838,7 +838,7 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
              {
                  let self_combox =
                      (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
-                         *mut intercom::ComBox<Foo>;
+                         *mut intercom::ComBoxData<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
                      self_struct.arg_method((&<u16 as
@@ -872,7 +872,7 @@ intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::Extern
              {
                  let self_combox =
                      (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
-                         *mut intercom::ComBox<Foo>;
+                         *mut intercom::ComBoxData<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result = self_struct.simple_result_method();
                  Ok({ __result.intercom_into()? })
@@ -906,7 +906,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_com_result_method_Raw(
         intercom::ComError,
     > = (|| {
         let self_combox =
-            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBox<Foo>;
+            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBoxData<Foo>;
         let self_struct: &Foo = &**self_combox;
         let __result = self_struct.com_result_method();
         Ok({
@@ -952,7 +952,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_rust_result_method_Raw(
         intercom::ComError,
     > = (|| {
         let self_combox =
-            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBox<Foo>;
+            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBoxData<Foo>;
         let self_struct: &Foo = &**self_combox;
         let __result = self_struct.rust_result_method();
         Ok({
@@ -1006,7 +1006,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_tuple_result_method_Raw(
         intercom::ComError,
     > = (|| {
         let self_combox =
-            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBox<Foo>;
+            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBoxData<Foo>;
         let self_struct: &Foo = &**self_combox;
         let __result = self_struct.tuple_result_method();
         Ok({
@@ -1056,7 +1056,7 @@ intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>>::Extern
              {
                  let self_combox =
                      (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
-                         *mut intercom::ComBox<Foo>;
+                         *mut intercom::ComBoxData<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result =
                      self_struct.string_method((&<String as
@@ -1096,7 +1096,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_string_result_method_Raw(
         intercom::ComError,
     > = (|| {
         let self_combox =
-            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBox<Foo>;
+            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBoxData<Foo>;
         let self_struct: &Foo = &**self_combox;
         let __result = self_struct.string_result_method(
             (&<String as intercom::type_system::ExternType<
@@ -1152,7 +1152,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_complete_method_Raw(
         intercom::ComError,
     > = (|| {
         let self_combox =
-            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBox<Foo>;
+            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBoxData<Foo>;
         let self_struct: &mut Foo = &mut **self_combox;
         let __result =
             self_struct.complete_method(
@@ -1210,7 +1210,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_bool_method_Raw(
         intercom::ComError,
     > = (|| {
         let self_combox =
-            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBox<Foo>;
+            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBoxData<Foo>;
         let self_struct: &Foo = &**self_combox;
         let __result =
             self_struct.bool_method(
@@ -1264,7 +1264,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_variant_method_Raw(
         intercom::ComError,
     > = (|| {
         let self_combox =
-            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBox<Foo>;
+            (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut intercom::ComBoxData<Foo>;
         let self_struct: &Foo = &**self_combox;
         let __result = self_struct.variant_method(
             (&<Variant as intercom::type_system::ExternType<
