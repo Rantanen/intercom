@@ -6,9 +6,11 @@ strategy:
         Linux:
             imageName: "ubuntu-16.04"
             cmake_generator_opts:
+            memcheck: valgrind --error-exitcode=1 --leak-check=full
         Windows:
             imageName: "vs2017-win2016"
             cmake_generator_opts: -DCMAKE_GENERATOR_PLATFORM=x64
+            memcheck:
 
 pool:
   vmImage: $(imageName)
@@ -17,8 +19,13 @@ steps:
 - script: |
     curl -sSf -o rustup-init.exe https://win.rustup.rs
     rustup-init.exe --default-toolchain nightly -y
-  displayName: 'Update Rustup (Windows)'
+  displayName: 'Update environment (Windows)'
   condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
+
+- script: |
+    sudo apt-get install valgrind -y
+  displayName: 'Update environment (Linux)'
+  condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
 
 - script: |
     rustup -V
@@ -49,7 +56,7 @@ steps:
   displayName: "Build integration tests"
 
 - bash: |
-    build/bin/cpp-raw
-    build/bin/cpp-dl
-    build/bin/cpp-wrapper
+    $(memcheck) build/bin/cpp-raw
+    $(memcheck) build/bin/cpp-dl
+    $(memcheck) build/bin/cpp-wrapper
   displayName: "Run integration tests"

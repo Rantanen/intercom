@@ -54,6 +54,8 @@ TEST_CASE( "Manipulating BSTR succeeds" )
             REQUIRE( intercom::get_characters_in_bstr( converted ) == utf16_len );
 
             REQUIRE( memcmp( converted, utf16_text, utf16_len * 2 ) == 0 );
+
+            intercom::free_bstr( converted );
         }
 
         SECTION( std::string( "Converting BSTR to UTF-8 works: " ) + description )
@@ -74,6 +76,9 @@ TEST_CASE( "Manipulating BSTR succeeds" )
                 expected = "";
 
             REQUIRE( memcmp( converted, expected, utf8_len ) == 0 );
+
+            intercom::free_bstr( bstr );
+            intercom::free_string( converted );
         }
     }
 
