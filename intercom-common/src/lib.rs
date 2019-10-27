@@ -1,4 +1,3 @@
-#![feature(non_exhaustive)]
 #![recursion_limit = "128"]
 #![allow(clippy::match_bool)]
 
