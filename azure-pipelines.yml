@@ -19,8 +19,13 @@ steps:
 - script: |
     curl -sSf -o rustup-init.exe https://win.rustup.rs
     rustup-init.exe --default-toolchain nightly -y
-  displayName: 'Update Rustup (Windows)'
+  displayName: 'Update environment (Windows)'
   condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
+
+- script: |
+    sudo apt-get install valgrind -y
+  displayName: 'Update environment (Linux)'
+  condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
 
 - script: |
     rustup -V
