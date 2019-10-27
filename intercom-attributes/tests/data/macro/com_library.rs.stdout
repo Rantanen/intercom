@@ -55,10 +55,10 @@ pub unsafe extern "system" fn DllGetClassObject(
 }
 pub(crate) fn get_intercom_typelib() -> intercom::typelib::TypeLib {
     let types = <[_]>::into_vec(box [
-        intercom::alloc::get_intercom_coclass_info_for_Allocator(),
-        intercom::error::get_intercom_coclass_info_for_ErrorStore(),
-        some::path::get_intercom_coclass_info_for_Type(),
-        get_intercom_coclass_info_for_SimpleType(),
+        <intercom::alloc::Allocator as intercom::attributes::HasTypeInfo>::gather_type_info(),
+        <intercom::error::ErrorStore as intercom::attributes::HasTypeInfo>::gather_type_info(),
+        <some::path::Type as intercom::attributes::HasTypeInfo>::gather_type_info(),
+        <SimpleType as intercom::attributes::HasTypeInfo>::gather_type_info(),
     ])
     .into_iter()
     .flatten()

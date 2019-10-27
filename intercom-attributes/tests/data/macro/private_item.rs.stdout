@@ -10,49 +10,65 @@ use intercom::*;
 trait IFoo {
     fn trait_method(&self);
 }
-#[doc = "`IFoo` interface ID."]
-#[allow(non_upper_case_globals)]
-const IID_IFoo_Automation: intercom::IID = intercom::GUID {
-    data1: 0u32,
-    data2: 0u16,
-    data3: 0u16,
-    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
-};
 #[allow(non_camel_case_types)]
 #[allow(non_snake_case)]
 #[allow(clippy::all)]
 #[repr(C)]
 #[doc(hidden)]
-struct __IFoo_AutomationVtbl {
-    pub __base: intercom::IUnknownVtbl,
-    pub trait_method_Automation:
-        unsafe extern "system" fn(
-            self_vtable: intercom::RawComPtr,
-        ) -> <() as intercom::type_system::ExternType<
-            intercom::type_system::AutomationTypeSystem,
-        >>::ExternOutputType,
-}
-#[doc = "`IFoo` interface ID."]
-#[allow(non_upper_case_globals)]
-const IID_IFoo_Raw: intercom::IID = intercom::GUID {
-    data1: 0u32,
-    data2: 0u16,
-    data3: 0u16,
-    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
-};
-#[allow(non_camel_case_types)]
-#[allow(non_snake_case)]
-#[allow(clippy::all)]
-#[repr(C)]
-#[doc(hidden)]
-struct __IFoo_RawVtbl {
-    pub __base: intercom::IUnknownVtbl,
-    pub trait_method_Raw: unsafe extern "system" fn(
+struct __IntercomVtableForIFoo_Automation {
+    pub __base: <dyn intercom::IUnknown as intercom::attributes::ComInterface<
+        intercom::type_system::AutomationTypeSystem,
+    >>::VTable,
+    pub trait_method: unsafe extern "system" fn(
         self_vtable: intercom::RawComPtr,
-    )
-        -> <() as intercom::type_system::ExternType<
+    ) -> <() as intercom::type_system::ExternType<
         intercom::type_system::AutomationTypeSystem,
     >>::ExternOutputType,
+}
+#[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
+#[allow(clippy::all)]
+#[doc(hidden)]
+impl intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem> for dyn IFoo {
+    type VTable = __IntercomVtableForIFoo_Automation;
+    fn iid() -> &'static intercom::IID {
+        &intercom::GUID {
+            data1: 0u32,
+            data2: 0u16,
+            data3: 0u16,
+            data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
+        }
+    }
+}
+#[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
+#[allow(clippy::all)]
+#[repr(C)]
+#[doc(hidden)]
+struct __IntercomVtableForIFoo_Raw {
+    pub __base: <dyn intercom::IUnknown as intercom::attributes::ComInterface<
+        intercom::type_system::AutomationTypeSystem,
+    >>::VTable,
+    pub trait_method: unsafe extern "system" fn(
+        self_vtable: intercom::RawComPtr,
+    ) -> <() as intercom::type_system::ExternType<
+        intercom::type_system::AutomationTypeSystem,
+    >>::ExternOutputType,
+}
+#[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
+#[allow(clippy::all)]
+#[doc(hidden)]
+impl intercom::attributes::ComInterface<intercom::type_system::RawTypeSystem> for dyn IFoo {
+    type VTable = __IntercomVtableForIFoo_Raw;
+    fn iid() -> &'static intercom::IID {
+        &intercom::GUID {
+            data1: 0u32,
+            data2: 0u16,
+            data3: 0u16,
+            data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
+        }
+    }
 }
 #[allow(clippy::all)]
 impl IFoo for intercom::ComItf<dyn IFoo> {
@@ -64,10 +80,13 @@ impl IFoo for intercom::ComItf<dyn IFoo> {
         {
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
-            let vtbl = comptr.ptr as *const *const __IFoo_AutomationVtbl;
+            let vtbl = comptr.ptr
+                as *const *const <dyn IFoo as intercom::attributes::ComInterface<
+                    intercom::type_system::AutomationTypeSystem,
+                >>::VTable;
             #[allow(unused_unsafe)]
             let __intercom_result: Result<(), intercom::ComError> = (|| unsafe {
-                let __result = ((**vtbl).trait_method_Automation)(comptr.ptr);
+                let __result = ((**vtbl).trait_method)(comptr.ptr);
                 let __intercom_iid = intercom::GUID {
                     data1: 0u32,
                     data2: 0u16,
@@ -86,10 +105,13 @@ impl IFoo for intercom::ComItf<dyn IFoo> {
         {
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
-            let vtbl = comptr.ptr as *const *const __IFoo_RawVtbl;
+            let vtbl = comptr.ptr
+                as *const *const <dyn IFoo as intercom::attributes::ComInterface<
+                    intercom::type_system::RawTypeSystem,
+                >>::VTable;
             #[allow(unused_unsafe)]
             let __intercom_result: Result<(), intercom::ComError> = (|| unsafe {
-                let __result = ((**vtbl).trait_method_Raw)(comptr.ptr);
+                let __result = ((**vtbl).trait_method)(comptr.ptr);
                 let __intercom_iid = intercom::GUID {
                     data1: 0u32,
                     data2: 0u16,
@@ -108,10 +130,24 @@ impl IFoo for intercom::ComItf<dyn IFoo> {
 }
 impl intercom::ComInterface for dyn IFoo {
     #[doc = "Returns the IID of the requested interface."]
+    fn iid_ts<TS: intercom::type_system::TypeSystem>() -> &'static intercom::IID
+    where
+        Self: intercom::attributes::ComInterface<TS>,
+    {
+        <Self as intercom::attributes::ComInterface<TS>>::iid()
+    }
     fn iid(ts: intercom::type_system::TypeSystemName) -> Option<&'static intercom::IID> {
         match ts {
-            intercom::type_system::TypeSystemName::Automation => Some(&IID_IFoo_Automation),
-            intercom::type_system::TypeSystemName::Raw => Some(&IID_IFoo_Raw),
+            intercom::type_system::TypeSystemName::Automation => {
+                Some(<Self as intercom::attributes::ComInterface<
+                    intercom::type_system::AutomationTypeSystem,
+                >>::iid())
+            }
+            intercom::type_system::TypeSystemName::Raw => {
+                Some(<Self as intercom::attributes::ComInterface<
+                    intercom::type_system::RawTypeSystem,
+                >>::iid())
+            }
         }
     }
     fn deref(com_itf: &intercom::ComItf<dyn IFoo>) -> &(dyn IFoo + 'static) {
@@ -126,107 +162,165 @@ impl intercom::type_system::BidirectionalTypeInfo for dyn IFoo {
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
-pub(crate) fn get_intercom_interface_info_for_IFoo() -> intercom::typelib::TypeInfo {
-    let variants = <[_]>::into_vec(box [
-        intercom::ComBox::new(intercom::typelib::InterfaceVariant {
-            ts: intercom::type_system::TypeSystemName::Automation,
-            iid: intercom::GUID {
-                data1: 0u32,
-                data2: 0u16,
-                data3: 0u16,
-                data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
-            },
-            methods: <[_]>::into_vec(box [intercom::ComBox::new(intercom::typelib::Method {
-                name: "trait_method".into(),
-                return_type: intercom::typelib::Arg {
-                    name: "".into(),
-                    ty: "void".into(),
-                    indirection_level: 0,
-                    direction: intercom::typelib::Direction::Return,
+impl intercom::attributes::InterfaceHasTypeInfo for dyn IFoo {
+    fn gather_type_info() -> Vec<intercom::typelib::TypeInfo> {
+        let variants = <[_]>::into_vec(box [
+            intercom::ComBox::new(intercom::typelib::InterfaceVariant {
+                ts: intercom::type_system::TypeSystemName::Automation,
+                iid: intercom::GUID {
+                    data1: 0u32,
+                    data2: 0u16,
+                    data3: 0u16,
+                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 },
-                parameters: <[_]>::into_vec(box []),
-            })]),
-        }),
-        intercom::ComBox::new(intercom::typelib::InterfaceVariant {
-            ts: intercom::type_system::TypeSystemName::Raw,
-            iid: intercom::GUID {
-                data1: 0u32,
-                data2: 0u16,
-                data3: 0u16,
-                data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
-            },
-            methods: <[_]>::into_vec(box [intercom::ComBox::new(intercom::typelib::Method {
-                name: "trait_method".into(),
-                return_type: intercom::typelib::Arg {
-                    name: "".into(),
-                    ty: "void".into(),
-                    indirection_level: 0,
-                    direction: intercom::typelib::Direction::Return,
+                methods: <[_]>::into_vec(box [intercom::ComBox::new(intercom::typelib::Method {
+                    name: "trait_method".into(),
+                    return_type: intercom::typelib::Arg {
+                        name: "".into(),
+                        ty: "void".into(),
+                        indirection_level: 0,
+                        direction: intercom::typelib::Direction::Return,
+                    },
+                    parameters: <[_]>::into_vec(box []),
+                })]),
+            }),
+            intercom::ComBox::new(intercom::typelib::InterfaceVariant {
+                ts: intercom::type_system::TypeSystemName::Raw,
+                iid: intercom::GUID {
+                    data1: 0u32,
+                    data2: 0u16,
+                    data3: 0u16,
+                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 },
-                parameters: <[_]>::into_vec(box []),
-            })]),
-        }),
-    ]);
-    intercom::typelib::TypeInfo::Interface(intercom::ComBox::new(intercom::typelib::Interface {
-        name: "IFoo".into(),
-        variants: variants,
-        options: intercom::typelib::InterfaceOptions {
-            class_impl_interface: false,
-            ..Default::default()
-        },
-    }))
+                methods: <[_]>::into_vec(box [intercom::ComBox::new(intercom::typelib::Method {
+                    name: "trait_method".into(),
+                    return_type: intercom::typelib::Arg {
+                        name: "".into(),
+                        ty: "void".into(),
+                        indirection_level: 0,
+                        direction: intercom::typelib::Direction::Return,
+                    },
+                    parameters: <[_]>::into_vec(box []),
+                })]),
+            }),
+        ]);
+        <[_]>::into_vec(box [intercom::typelib::TypeInfo::Interface(
+            intercom::ComBox::new(intercom::typelib::Interface {
+                name: "IFoo".into(),
+                variants: variants,
+                options: intercom::typelib::InterfaceOptions {
+                    class_impl_interface: false,
+                    ..Default::default()
+                },
+            }),
+        )])
+    }
 }
 struct Foo;
-#[inline(always)]
 #[allow(non_snake_case)]
-fn __Foo_Foo_AutomationVtbl_offset() -> usize {
-    unsafe { &intercom::ComBoxData::<Foo>::null_vtable().Foo_Automation as *const _ as usize }
+impl intercom::attributes::ComClass<Foo, intercom::type_system::AutomationTypeSystem> for Foo {
+    #[inline(always)]
+    fn offset() -> usize {
+        unsafe { &intercom::ComBoxData::<Foo>::null_vtable().Foo_Automation as *const _ as usize }
+    }
 }
-#[inline(always)]
 #[allow(non_snake_case)]
-fn __Foo_Foo_RawVtbl_offset() -> usize {
-    unsafe { &intercom::ComBoxData::<Foo>::null_vtable().Foo_Raw as *const _ as usize }
+impl intercom::attributes::ComClass<Foo, intercom::type_system::RawTypeSystem> for Foo {
+    #[inline(always)]
+    fn offset() -> usize {
+        unsafe { &intercom::ComBoxData::<Foo>::null_vtable().Foo_Raw as *const _ as usize }
+    }
 }
-#[inline(always)]
 #[allow(non_snake_case)]
-fn __Foo_IFoo_AutomationVtbl_offset() -> usize {
-    unsafe { &intercom::ComBoxData::<Foo>::null_vtable().IFoo_Automation as *const _ as usize }
+impl intercom::attributes::ComClass<dyn IFoo, intercom::type_system::AutomationTypeSystem> for Foo {
+    #[inline(always)]
+    fn offset() -> usize {
+        unsafe { &intercom::ComBoxData::<Foo>::null_vtable().IFoo_Automation as *const _ as usize }
+    }
 }
-#[inline(always)]
 #[allow(non_snake_case)]
-fn __Foo_IFoo_RawVtbl_offset() -> usize {
-    unsafe { &intercom::ComBoxData::<Foo>::null_vtable().IFoo_Raw as *const _ as usize }
+impl intercom::attributes::ComClass<dyn IFoo, intercom::type_system::RawTypeSystem> for Foo {
+    #[inline(always)]
+    fn offset() -> usize {
+        unsafe { &intercom::ComBoxData::<Foo>::null_vtable().IFoo_Raw as *const _ as usize }
+    }
 }
 #[allow(non_upper_case_globals)]
-const __Foo_ISupportErrorInfoVtbl_INSTANCE: intercom::ISupportErrorInfoVtbl =
-    intercom::ISupportErrorInfoVtbl {
-        __base: intercom::IUnknownVtbl {
-            query_interface_Automation: intercom::ComBoxData::<Foo>::query_interface_ptr,
-            add_ref_Automation: intercom::ComBoxData::<Foo>::add_ref_ptr,
-            release_Automation: intercom::ComBoxData::<Foo>::release_ptr,
-        },
-        interface_supports_error_info_Automation:
-            intercom::ComBoxData::<Foo>::interface_supports_error_info_ptr,
-    };
+impl
+    intercom::attributes::ComImpl<
+        intercom::ISupportErrorInfo,
+        intercom::type_system::AutomationTypeSystem,
+    > for Foo
+{
+    fn vtable()
+     ->
+         &'static <dyn intercom::ISupportErrorInfo as
+intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable{
+        type T = <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<
+            intercom::type_system::AutomationTypeSystem,
+        >>::VTable;
+        &T {
+            __base: {
+                type Vtbl = <dyn intercom::IUnknown as intercom::attributes::ComInterface<
+                    intercom::type_system::AutomationTypeSystem,
+                >>::VTable;
+                Vtbl {
+                    query_interface: intercom::ComBoxData::<Foo>::query_interface_ptr,
+                    add_ref: intercom::ComBoxData::<Foo>::add_ref_ptr,
+                    release: intercom::ComBoxData::<Foo>::release_ptr,
+                }
+            },
+            interface_supports_error_info:
+                intercom::ComBoxData::<Foo>::interface_supports_error_info_ptr,
+        }
+    }
+}
 impl intercom::HasInterface<intercom::IUnknown> for Foo {}
 #[allow(non_snake_case)]
 #[doc(hidden)]
-struct __FooVtblList {
-    _ISupportErrorInfo: &'static intercom::ISupportErrorInfoVtbl,
-    Foo_Automation: &'static __Foo_AutomationVtbl,
-    Foo_Raw: &'static __Foo_RawVtbl,
-    IFoo_Automation: &'static __IFoo_AutomationVtbl,
-    IFoo_Raw: &'static __IFoo_RawVtbl,
+struct __intercom_vtable_for_Foo {
+    _ISupportErrorInfo:
+        &'static <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<
+            intercom::type_system::AutomationTypeSystem,
+        >>::VTable,
+    Foo_Automation: &'static <Foo as intercom::attributes::ComInterface<
+        intercom::type_system::AutomationTypeSystem,
+    >>::VTable,
+    Foo_Raw: &'static <Foo as intercom::attributes::ComInterface<
+        intercom::type_system::RawTypeSystem,
+    >>::VTable,
+    IFoo_Automation: &'static <dyn IFoo as intercom::attributes::ComInterface<
+        intercom::type_system::AutomationTypeSystem,
+    >>::VTable,
+    IFoo_Raw: &'static <dyn IFoo as intercom::attributes::ComInterface<
+        intercom::type_system::RawTypeSystem,
+    >>::VTable,
 }
+#[allow(clippy::all)]
 impl intercom::CoClass for Foo {
-    type VTableList = __FooVtblList;
+    type VTableList = __intercom_vtable_for_Foo;
     fn create_vtable_list() -> Self::VTableList {
-        __FooVtblList {
-            _ISupportErrorInfo: &__Foo_ISupportErrorInfoVtbl_INSTANCE,
-            Foo_Automation: &__Foo_Foo_AutomationVtbl_INSTANCE,
-            Foo_Raw: &__Foo_Foo_RawVtbl_INSTANCE,
-            IFoo_Automation: &__Foo_IFoo_AutomationVtbl_INSTANCE,
-            IFoo_Raw: &__Foo_IFoo_RawVtbl_INSTANCE,
+        __intercom_vtable_for_Foo {
+            _ISupportErrorInfo: <Foo as intercom::attributes::ComImpl<
+                dyn intercom::ISupportErrorInfo,
+                intercom::type_system::AutomationTypeSystem,
+            >>::vtable(),
+            Foo_Automation: <Foo as intercom::attributes::ComImpl<
+                Foo,
+                intercom::type_system::AutomationTypeSystem,
+            >>::vtable(),
+            Foo_Raw: <Foo as intercom::attributes::ComImpl<
+                Foo,
+                intercom::type_system::RawTypeSystem,
+            >>::vtable(),
+            IFoo_Automation: <Foo as intercom::attributes::ComImpl<
+                dyn IFoo,
+                intercom::type_system::AutomationTypeSystem,
+            >>::vtable(),
+            IFoo_Raw: <Foo as intercom::attributes::ComImpl<
+                dyn IFoo,
+                intercom::type_system::RawTypeSystem,
+            >>::vtable(),
         }
     }
     fn query_interface(
@@ -236,41 +330,120 @@ impl intercom::CoClass for Foo {
         if riid.is_null() {
             return Err(intercom::raw::E_NOINTERFACE);
         }
-        Ok(match *unsafe { &*riid } {
-            intercom::IID_IUnknown => {
-                (&vtables._ISupportErrorInfo) as *const &intercom::ISupportErrorInfoVtbl
-                    as *mut &intercom::ISupportErrorInfoVtbl as intercom::RawComPtr
-            }
-            intercom::IID_ISupportErrorInfo => {
-                (&vtables._ISupportErrorInfo) as *const &intercom::ISupportErrorInfoVtbl
-                    as *mut &intercom::ISupportErrorInfoVtbl as intercom::RawComPtr
-            }
-            self::IID_Foo_Automation => {
-                &vtables.Foo_Automation as *const &__Foo_AutomationVtbl
-                    as *mut &__Foo_AutomationVtbl as intercom::RawComPtr
-            }
-            self::IID_Foo_Raw => {
-                &vtables.Foo_Raw as *const &__Foo_RawVtbl as *mut &__Foo_RawVtbl
-                    as intercom::RawComPtr
-            }
-            self::IID_IFoo_Automation => {
-                &vtables.IFoo_Automation as *const &__IFoo_AutomationVtbl
-                    as *mut &__IFoo_AutomationVtbl as intercom::RawComPtr
-            }
-            self::IID_IFoo_Raw => {
-                &vtables.IFoo_Raw as *const &__IFoo_RawVtbl as *mut &__IFoo_RawVtbl
-                    as intercom::RawComPtr
-            }
-            _ => return Err(intercom::raw::E_NOINTERFACE),
-        })
+        unsafe {
+            let riid = &*riid;
+            Ok(
+                if riid
+                    == <dyn intercom::IUnknown as intercom::attributes::ComInterface<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::iid()
+                {
+                    (&vtables._ISupportErrorInfo) as
+                       *const &<dyn intercom::ISupportErrorInfo as
+                               intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
+                       as
+                       *mut &<dyn intercom::ISupportErrorInfo as
+                             intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
+                       as intercom::RawComPtr
+                } else if riid
+                    == <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::iid()
+                {
+                    (&vtables._ISupportErrorInfo) as
+                       *const &<dyn intercom::ISupportErrorInfo as
+                               intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
+                       as
+                       *mut &<dyn intercom::ISupportErrorInfo as
+                             intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
+                       as intercom::RawComPtr
+                } else if riid
+                    == <Foo as intercom::attributes::ComInterface<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::iid()
+                {
+                    &vtables.Foo_Automation
+                        as *const &<Foo as intercom::attributes::ComInterface<
+                            intercom::type_system::AutomationTypeSystem,
+                        >>::VTable
+                        as *mut &<Foo as intercom::attributes::ComInterface<
+                            intercom::type_system::AutomationTypeSystem,
+                        >>::VTable as intercom::RawComPtr
+                } else if riid
+                    == <Foo as intercom::attributes::ComInterface<
+                        intercom::type_system::RawTypeSystem,
+                    >>::iid()
+                {
+                    &vtables.Foo_Raw
+                        as *const &<Foo as intercom::attributes::ComInterface<
+                            intercom::type_system::RawTypeSystem,
+                        >>::VTable
+                        as *mut &<Foo as intercom::attributes::ComInterface<
+                            intercom::type_system::RawTypeSystem,
+                        >>::VTable as intercom::RawComPtr
+                } else if riid
+                    == <dyn IFoo as intercom::attributes::ComInterface<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::iid()
+                {
+                    &vtables.IFoo_Automation
+                        as *const &<dyn IFoo as intercom::attributes::ComInterface<
+                            intercom::type_system::AutomationTypeSystem,
+                        >>::VTable
+                        as *mut &<dyn IFoo as intercom::attributes::ComInterface<
+                            intercom::type_system::AutomationTypeSystem,
+                        >>::VTable as intercom::RawComPtr
+                } else if riid
+                    == <dyn IFoo as intercom::attributes::ComInterface<
+                        intercom::type_system::RawTypeSystem,
+                    >>::iid()
+                {
+                    &vtables.IFoo_Raw
+                        as *const &<dyn IFoo as intercom::attributes::ComInterface<
+                            intercom::type_system::RawTypeSystem,
+                        >>::VTable
+                        as *mut &<dyn IFoo as intercom::attributes::ComInterface<
+                            intercom::type_system::RawTypeSystem,
+                        >>::VTable as intercom::RawComPtr
+                } else {
+                    return Err(intercom::raw::E_NOINTERFACE);
+                },
+            )
+        }
     }
     fn interface_supports_error_info(riid: intercom::REFIID) -> bool {
-        match *unsafe { &*riid } {
-            self::IID_Foo_Automation => true,
-            self::IID_Foo_Raw => true,
-            self::IID_IFoo_Automation => true,
-            self::IID_IFoo_Raw => true,
-            _ => false,
+        if riid.is_null() {
+            return false;
+        }
+        unsafe {
+            let riid = &*riid;
+            if riid
+                == <Foo as intercom::attributes::ComInterface<
+                    intercom::type_system::AutomationTypeSystem,
+                >>::iid()
+            {
+                true
+            } else if riid
+                == <Foo as intercom::attributes::ComInterface<
+                    intercom::type_system::RawTypeSystem,
+                >>::iid()
+            {
+                true
+            } else if riid
+                == <dyn IFoo as intercom::attributes::ComInterface<
+                    intercom::type_system::AutomationTypeSystem,
+                >>::iid()
+            {
+                true
+            } else if riid
+                == <dyn IFoo as intercom::attributes::ComInterface<
+                    intercom::type_system::RawTypeSystem,
+                >>::iid()
+            {
+                true
+            } else {
+                false
+            }
         }
     }
 }
@@ -282,10 +455,10 @@ pub const CLSID_Foo: intercom::CLSID = intercom::GUID {
     data3: 0u16,
     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
 };
-pub fn get_intercom_coclass_info_for_Foo() -> Vec<intercom::typelib::TypeInfo> {
-    <[_]>::into_vec(box [
-        intercom::typelib::TypeInfo::Class(intercom::ComBox::new(
-            intercom::typelib::CoClass::__new(
+impl intercom::attributes::HasTypeInfo for Foo {
+    fn gather_type_info() -> Vec<intercom::typelib::TypeInfo> {
+        let mut r = <[_]>::into_vec(box [intercom::typelib::TypeInfo::Class(
+            intercom::ComBox::new(intercom::typelib::CoClass::__new(
                 "Foo".into(),
                 intercom::GUID {
                     data1: 0u32,
@@ -296,20 +469,33 @@ pub fn get_intercom_coclass_info_for_Foo() -> Vec<intercom::typelib::TypeInfo> {
                 <[_]>::into_vec(box [
                     intercom::typelib::InterfaceRef {
                         name: "Foo".into(),
-                        iid_automation: IID_Foo_Automation,
-                        iid_raw: IID_Foo_Raw,
+                        iid_automation: <Foo as intercom::attributes::ComInterface<
+                            intercom::type_system::AutomationTypeSystem,
+                        >>::iid()
+                        .clone(),
+                        iid_raw: <Foo as intercom::attributes::ComInterface<
+                            intercom::type_system::RawTypeSystem,
+                        >>::iid()
+                        .clone(),
                     },
                     intercom::typelib::InterfaceRef {
                         name: "IFoo".into(),
-                        iid_automation: IID_IFoo_Automation,
-                        iid_raw: IID_IFoo_Raw,
+                        iid_automation: <dyn IFoo as intercom::attributes::ComInterface<
+                            intercom::type_system::AutomationTypeSystem,
+                        >>::iid()
+                        .clone(),
+                        iid_raw: <dyn IFoo as intercom::attributes::ComInterface<
+                            intercom::type_system::RawTypeSystem,
+                        >>::iid()
+                        .clone(),
                     },
                 ]),
-            ),
-        )),
-        get_intercom_interface_info_for_Foo(),
-        get_intercom_interface_info_for_IFoo(),
-    ])
+            )),
+        )]);
+        r.extend(<Foo as intercom::attributes::InterfaceHasTypeInfo>::gather_type_info());
+        r.extend(<dyn IFoo as intercom::attributes::InterfaceHasTypeInfo>::gather_type_info());
+        r
+    }
 }
 impl Foo {
     pub fn struct_method(&self) {}
@@ -328,7 +514,11 @@ unsafe extern "system" fn __Foo_Foo_Automation_query_interface(
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
     intercom::ComBoxData::<Foo>::query_interface(
-        &mut *((self_vtable as usize - __Foo_Foo_AutomationVtbl_offset()) as *mut _),
+        &mut *((self_vtable as usize
+            - <Foo as intercom::attributes::ComClass<
+                Foo,
+                intercom::type_system::AutomationTypeSystem,
+            >>::offset()) as *mut _),
         riid,
         out,
     )
@@ -342,7 +532,11 @@ unsafe extern "system" fn __Foo_Foo_Automation_add_ref(self_vtable:
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
     intercom::ComBoxData::<Foo>::add_ref(
-        &mut *((self_vtable as usize - __Foo_Foo_AutomationVtbl_offset()) as *mut _),
+        &mut *((self_vtable as usize
+            - <Foo as intercom::attributes::ComClass<
+                Foo,
+                intercom::type_system::AutomationTypeSystem,
+            >>::offset()) as *mut _),
     )
 }
 #[allow(non_snake_case)]
@@ -354,7 +548,11 @@ unsafe extern "system" fn __Foo_Foo_Automation_release(self_vtable:
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
     intercom::ComBoxData::<Foo>::release_ptr(
-        (self_vtable as usize - __Foo_Foo_AutomationVtbl_offset()) as *mut _,
+        (self_vtable as usize
+            - <Foo as intercom::attributes::ComClass<
+                Foo,
+                intercom::type_system::AutomationTypeSystem,
+            >>::offset()) as *mut _,
     )
 }
 #[allow(non_snake_case)]
@@ -374,8 +572,10 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
              {
                  let self_combox =
                      (self_vtable as usize -
-                          __Foo_Foo_AutomationVtbl_offset()) as
-                         *mut intercom::ComBoxData<Foo>;
+                          <Foo as
+                              intercom::attributes::ComClass<Foo,
+                                                             intercom::type_system::AutomationTypeSystem>>::offset())
+                         as *mut intercom::ComBoxData<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result = self_struct.struct_method();
                  Ok({ })
@@ -391,14 +591,28 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
     }
 }
 #[allow(non_upper_case_globals)]
-const __Foo_Foo_AutomationVtbl_INSTANCE: __Foo_AutomationVtbl = __Foo_AutomationVtbl {
-    __base: intercom::IUnknownVtbl {
-        query_interface_Automation: __Foo_Foo_Automation_query_interface,
-        add_ref_Automation: __Foo_Foo_Automation_add_ref,
-        release_Automation: __Foo_Foo_Automation_release,
-    },
-    struct_method_Automation: __Foo_Foo_Automation_struct_method_Automation,
-};
+impl intercom::attributes::ComImpl<Foo, intercom::type_system::AutomationTypeSystem> for Foo {
+    fn vtable() -> &'static <Foo as intercom::attributes::ComInterface<
+        intercom::type_system::AutomationTypeSystem,
+    >>::VTable {
+        type T = <Foo as intercom::attributes::ComInterface<
+            intercom::type_system::AutomationTypeSystem,
+        >>::VTable;
+        &T {
+            __base: {
+                type TVtbl = <dyn intercom::IUnknown as intercom::attributes::ComInterface<
+                    intercom::type_system::AutomationTypeSystem,
+                >>::VTable;
+                TVtbl {
+                    query_interface: __Foo_Foo_Automation_query_interface,
+                    add_ref: __Foo_Foo_Automation_add_ref,
+                    release: __Foo_Foo_Automation_release,
+                }
+            },
+            struct_method: __Foo_Foo_Automation_struct_method_Automation,
+        }
+    }
+}
 #[allow(non_snake_case)]
 #[doc(hidden)]
 unsafe extern "system" fn __Foo_Foo_Raw_query_interface(
@@ -412,11 +626,13 @@ unsafe extern "system" fn __Foo_Foo_Raw_query_interface(
 ) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
-    intercom::ComBoxData::<Foo>::query_interface(
-        &mut *((self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut _),
-        riid,
-        out,
-    )
+    intercom::ComBoxData::<Foo>::query_interface(&mut *((self_vtable as usize
+                                                             -
+                                                             <Foo as
+                                                                 intercom::attributes::ComClass<Foo,
+                                                                                                intercom::type_system::RawTypeSystem>>::offset())
+                                                            as *mut _), riid,
+                                                 out)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -426,9 +642,11 @@ unsafe extern "system" fn __Foo_Foo_Raw_add_ref(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBoxData::<Foo>::add_ref(
-        &mut *((self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut _),
-    )
+    intercom::ComBoxData::<Foo>::add_ref(&mut *((self_vtable as usize -
+                                                     <Foo as
+                                                         intercom::attributes::ComClass<Foo,
+                                                                                        intercom::type_system::RawTypeSystem>>::offset())
+                                                    as *mut _))
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -438,9 +656,11 @@ unsafe extern "system" fn __Foo_Foo_Raw_release(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBoxData::<Foo>::release_ptr(
-        (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as *mut _,
-    )
+    intercom::ComBoxData::<Foo>::release_ptr((self_vtable as usize -
+                                                  <Foo as
+                                                      intercom::attributes::ComClass<Foo,
+                                                                                     intercom::type_system::RawTypeSystem>>::offset())
+                                                 as *mut _)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -458,8 +678,11 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
         (||
              {
                  let self_combox =
-                     (self_vtable as usize - __Foo_Foo_RawVtbl_offset()) as
-                         *mut intercom::ComBoxData<Foo>;
+                     (self_vtable as usize -
+                          <Foo as
+                              intercom::attributes::ComClass<Foo,
+                                                             intercom::type_system::RawTypeSystem>>::offset())
+                         as *mut intercom::ComBoxData<Foo>;
                  let self_struct: &Foo = &**self_combox;
                  let __result = self_struct.struct_method();
                  Ok({ })
@@ -475,65 +698,110 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
     }
 }
 #[allow(non_upper_case_globals)]
-const __Foo_Foo_RawVtbl_INSTANCE: __Foo_RawVtbl = __Foo_RawVtbl {
-    __base: intercom::IUnknownVtbl {
-        query_interface_Automation: __Foo_Foo_Raw_query_interface,
-        add_ref_Automation: __Foo_Foo_Raw_add_ref,
-        release_Automation: __Foo_Foo_Raw_release,
-    },
-    struct_method_Raw: __Foo_Foo_Raw_struct_method_Raw,
-};
-impl intercom::HasInterface<Foo> for Foo {}
-#[doc = "`Foo` interface ID."]
-#[allow(non_upper_case_globals)]
-pub const IID_Foo_Automation: intercom::IID = intercom::GUID {
-    data1: 0u32,
-    data2: 0u16,
-    data3: 0u16,
-    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8],
-};
-#[allow(non_camel_case_types)]
-#[allow(non_snake_case)]
-#[allow(clippy::all)]
-#[repr(C)]
-#[doc(hidden)]
-pub struct __Foo_AutomationVtbl {
-    pub __base: intercom::IUnknownVtbl,
-    pub struct_method_Automation:
-        unsafe extern "system" fn(
-            self_vtable: intercom::RawComPtr,
-        ) -> <() as intercom::type_system::ExternType<
-            intercom::type_system::AutomationTypeSystem,
-        >>::ExternOutputType,
+impl intercom::attributes::ComImpl<Foo, intercom::type_system::RawTypeSystem> for Foo {
+    fn vtable()
+     ->
+         &'static <Foo as
+intercom::attributes::ComInterface<intercom::type_system::RawTypeSystem>>::VTable{
+        type T = <Foo as intercom::attributes::ComInterface<
+            intercom::type_system::RawTypeSystem,
+        >>::VTable;
+        &T {
+            __base: {
+                type TVtbl = <dyn intercom::IUnknown as intercom::attributes::ComInterface<
+                    intercom::type_system::AutomationTypeSystem,
+                >>::VTable;
+                TVtbl {
+                    query_interface: __Foo_Foo_Raw_query_interface,
+                    add_ref: __Foo_Foo_Raw_add_ref,
+                    release: __Foo_Foo_Raw_release,
+                }
+            },
+            struct_method: __Foo_Foo_Raw_struct_method_Raw,
+        }
+    }
 }
-#[doc = "`Foo` interface ID."]
-#[allow(non_upper_case_globals)]
-pub const IID_Foo_Raw: intercom::IID = intercom::GUID {
-    data1: 0u32,
-    data2: 0u16,
-    data3: 0u16,
-    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8],
-};
+impl intercom::HasInterface<Foo> for Foo {}
 #[allow(non_camel_case_types)]
 #[allow(non_snake_case)]
 #[allow(clippy::all)]
 #[repr(C)]
 #[doc(hidden)]
-pub struct __Foo_RawVtbl {
-    pub __base: intercom::IUnknownVtbl,
-    pub struct_method_Raw: unsafe extern "system" fn(
+pub struct __IntercomVtableForFoo_Automation {
+    pub __base: <dyn intercom::IUnknown as intercom::attributes::ComInterface<
+        intercom::type_system::AutomationTypeSystem,
+    >>::VTable,
+    pub struct_method: unsafe extern "system" fn(
         self_vtable: intercom::RawComPtr,
-    )
-        -> <() as intercom::type_system::ExternType<
+    ) -> <() as intercom::type_system::ExternType<
         intercom::type_system::AutomationTypeSystem,
     >>::ExternOutputType,
 }
+#[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
+#[allow(clippy::all)]
+#[doc(hidden)]
+impl intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem> for Foo {
+    type VTable = __IntercomVtableForFoo_Automation;
+    fn iid() -> &'static intercom::IID {
+        &intercom::GUID {
+            data1: 0u32,
+            data2: 0u16,
+            data3: 0u16,
+            data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8],
+        }
+    }
+}
+#[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
+#[allow(clippy::all)]
+#[repr(C)]
+#[doc(hidden)]
+pub struct __IntercomVtableForFoo_Raw {
+    pub __base: <dyn intercom::IUnknown as intercom::attributes::ComInterface<
+        intercom::type_system::AutomationTypeSystem,
+    >>::VTable,
+    pub struct_method: unsafe extern "system" fn(
+        self_vtable: intercom::RawComPtr,
+    ) -> <() as intercom::type_system::ExternType<
+        intercom::type_system::AutomationTypeSystem,
+    >>::ExternOutputType,
+}
+#[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
+#[allow(clippy::all)]
+#[doc(hidden)]
+impl intercom::attributes::ComInterface<intercom::type_system::RawTypeSystem> for Foo {
+    type VTable = __IntercomVtableForFoo_Raw;
+    fn iid() -> &'static intercom::IID {
+        &intercom::GUID {
+            data1: 0u32,
+            data2: 0u16,
+            data3: 0u16,
+            data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8],
+        }
+    }
+}
 impl intercom::ComInterface for Foo {
     #[doc = "Returns the IID of the requested interface."]
+    fn iid_ts<TS: intercom::type_system::TypeSystem>() -> &'static intercom::IID
+    where
+        Self: intercom::attributes::ComInterface<TS>,
+    {
+        <Self as intercom::attributes::ComInterface<TS>>::iid()
+    }
     fn iid(ts: intercom::type_system::TypeSystemName) -> Option<&'static intercom::IID> {
         match ts {
-            intercom::type_system::TypeSystemName::Automation => Some(&IID_Foo_Automation),
-            intercom::type_system::TypeSystemName::Raw => Some(&IID_Foo_Raw),
+            intercom::type_system::TypeSystemName::Automation => {
+                Some(<Self as intercom::attributes::ComInterface<
+                    intercom::type_system::AutomationTypeSystem,
+                >>::iid())
+            }
+            intercom::type_system::TypeSystemName::Raw => {
+                Some(<Self as intercom::attributes::ComInterface<
+                    intercom::type_system::RawTypeSystem,
+                >>::iid())
+            }
         }
     }
     fn deref(com_itf: &intercom::ComItf<Foo>) -> &Foo {
@@ -560,55 +828,59 @@ impl intercom::type_system::BidirectionalTypeInfo for Foo {
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
-pub(crate) fn get_intercom_interface_info_for_Foo() -> intercom::typelib::TypeInfo {
-    let variants = <[_]>::into_vec(box [
-        intercom::ComBox::new(intercom::typelib::InterfaceVariant {
-            ts: intercom::type_system::TypeSystemName::Automation,
-            iid: intercom::GUID {
-                data1: 0u32,
-                data2: 0u16,
-                data3: 0u16,
-                data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8],
-            },
-            methods: <[_]>::into_vec(box [intercom::ComBox::new(intercom::typelib::Method {
-                name: "struct_method".into(),
-                return_type: intercom::typelib::Arg {
-                    name: "".into(),
-                    ty: "void".into(),
-                    indirection_level: 0,
-                    direction: intercom::typelib::Direction::Return,
+impl intercom::attributes::InterfaceHasTypeInfo for Foo {
+    fn gather_type_info() -> Vec<intercom::typelib::TypeInfo> {
+        let variants = <[_]>::into_vec(box [
+            intercom::ComBox::new(intercom::typelib::InterfaceVariant {
+                ts: intercom::type_system::TypeSystemName::Automation,
+                iid: intercom::GUID {
+                    data1: 0u32,
+                    data2: 0u16,
+                    data3: 0u16,
+                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8],
                 },
-                parameters: <[_]>::into_vec(box []),
-            })]),
-        }),
-        intercom::ComBox::new(intercom::typelib::InterfaceVariant {
-            ts: intercom::type_system::TypeSystemName::Raw,
-            iid: intercom::GUID {
-                data1: 0u32,
-                data2: 0u16,
-                data3: 0u16,
-                data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8],
-            },
-            methods: <[_]>::into_vec(box [intercom::ComBox::new(intercom::typelib::Method {
-                name: "struct_method".into(),
-                return_type: intercom::typelib::Arg {
-                    name: "".into(),
-                    ty: "void".into(),
-                    indirection_level: 0,
-                    direction: intercom::typelib::Direction::Return,
+                methods: <[_]>::into_vec(box [intercom::ComBox::new(intercom::typelib::Method {
+                    name: "struct_method".into(),
+                    return_type: intercom::typelib::Arg {
+                        name: "".into(),
+                        ty: "void".into(),
+                        indirection_level: 0,
+                        direction: intercom::typelib::Direction::Return,
+                    },
+                    parameters: <[_]>::into_vec(box []),
+                })]),
+            }),
+            intercom::ComBox::new(intercom::typelib::InterfaceVariant {
+                ts: intercom::type_system::TypeSystemName::Raw,
+                iid: intercom::GUID {
+                    data1: 0u32,
+                    data2: 0u16,
+                    data3: 0u16,
+                    data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8],
                 },
-                parameters: <[_]>::into_vec(box []),
-            })]),
-        }),
-    ]);
-    intercom::typelib::TypeInfo::Interface(intercom::ComBox::new(intercom::typelib::Interface {
-        name: "Foo".into(),
-        variants: variants,
-        options: intercom::typelib::InterfaceOptions {
-            class_impl_interface: true,
-            ..Default::default()
-        },
-    }))
+                methods: <[_]>::into_vec(box [intercom::ComBox::new(intercom::typelib::Method {
+                    name: "struct_method".into(),
+                    return_type: intercom::typelib::Arg {
+                        name: "".into(),
+                        ty: "void".into(),
+                        indirection_level: 0,
+                        direction: intercom::typelib::Direction::Return,
+                    },
+                    parameters: <[_]>::into_vec(box []),
+                })]),
+            }),
+        ]);
+        <[_]>::into_vec(box [intercom::typelib::TypeInfo::Interface(
+            intercom::ComBox::new(intercom::typelib::Interface {
+                name: "Foo".into(),
+                variants: variants,
+                options: intercom::typelib::InterfaceOptions {
+                    class_impl_interface: true,
+                    ..Default::default()
+                },
+            }),
+        )])
+    }
 }
 impl IFoo for Foo {
     fn trait_method(&self) {}
@@ -627,7 +899,11 @@ unsafe extern "system" fn __Foo_IFoo_Automation_query_interface(
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
     intercom::ComBoxData::<Foo>::query_interface(
-        &mut *((self_vtable as usize - __Foo_IFoo_AutomationVtbl_offset()) as *mut _),
+        &mut *((self_vtable as usize
+            - <Foo as intercom::attributes::ComClass<
+                dyn IFoo,
+                intercom::type_system::AutomationTypeSystem,
+            >>::offset()) as *mut _),
         riid,
         out,
     )
@@ -641,7 +917,11 @@ unsafe extern "system" fn __Foo_IFoo_Automation_add_ref(self_vtable:
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
     intercom::ComBoxData::<Foo>::add_ref(
-        &mut *((self_vtable as usize - __Foo_IFoo_AutomationVtbl_offset()) as *mut _),
+        &mut *((self_vtable as usize
+            - <Foo as intercom::attributes::ComClass<
+                dyn IFoo,
+                intercom::type_system::AutomationTypeSystem,
+            >>::offset()) as *mut _),
     )
 }
 #[allow(non_snake_case)]
@@ -653,7 +933,11 @@ unsafe extern "system" fn __Foo_IFoo_Automation_release(self_vtable:
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
     intercom::ComBoxData::<Foo>::release_ptr(
-        (self_vtable as usize - __Foo_IFoo_AutomationVtbl_offset()) as *mut _,
+        (self_vtable as usize
+            - <Foo as intercom::attributes::ComClass<
+                dyn IFoo,
+                intercom::type_system::AutomationTypeSystem,
+            >>::offset()) as *mut _,
     )
 }
 #[allow(non_snake_case)]
@@ -673,8 +957,10 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
              {
                  let self_combox =
                      (self_vtable as usize -
-                          __Foo_IFoo_AutomationVtbl_offset()) as
-                         *mut intercom::ComBoxData<Foo>;
+                          <Foo as
+                              intercom::attributes::ComClass<dyn IFoo,
+                                                             intercom::type_system::AutomationTypeSystem>>::offset())
+                         as *mut intercom::ComBoxData<Foo>;
                  let self_struct: &dyn IFoo = &**self_combox;
                  let __result = self_struct.trait_method();
                  Ok({ })
@@ -690,14 +976,28 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
     }
 }
 #[allow(non_upper_case_globals)]
-const __Foo_IFoo_AutomationVtbl_INSTANCE: __IFoo_AutomationVtbl = __IFoo_AutomationVtbl {
-    __base: intercom::IUnknownVtbl {
-        query_interface_Automation: __Foo_IFoo_Automation_query_interface,
-        add_ref_Automation: __Foo_IFoo_Automation_add_ref,
-        release_Automation: __Foo_IFoo_Automation_release,
-    },
-    trait_method_Automation: __Foo_IFoo_Automation_trait_method_Automation,
-};
+impl intercom::attributes::ComImpl<dyn IFoo, intercom::type_system::AutomationTypeSystem> for Foo {
+    fn vtable() -> &'static <dyn IFoo as intercom::attributes::ComInterface<
+        intercom::type_system::AutomationTypeSystem,
+    >>::VTable {
+        type T = <dyn IFoo as intercom::attributes::ComInterface<
+            intercom::type_system::AutomationTypeSystem,
+        >>::VTable;
+        &T {
+            __base: {
+                type TVtbl = <dyn intercom::IUnknown as intercom::attributes::ComInterface<
+                    intercom::type_system::AutomationTypeSystem,
+                >>::VTable;
+                TVtbl {
+                    query_interface: __Foo_IFoo_Automation_query_interface,
+                    add_ref: __Foo_IFoo_Automation_add_ref,
+                    release: __Foo_IFoo_Automation_release,
+                }
+            },
+            trait_method: __Foo_IFoo_Automation_trait_method_Automation,
+        }
+    }
+}
 #[allow(non_snake_case)]
 #[doc(hidden)]
 unsafe extern "system" fn __Foo_IFoo_Raw_query_interface(
@@ -712,7 +1012,11 @@ unsafe extern "system" fn __Foo_IFoo_Raw_query_interface(
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
     intercom::ComBoxData::<Foo>::query_interface(
-        &mut *((self_vtable as usize - __Foo_IFoo_RawVtbl_offset()) as *mut _),
+        &mut *((self_vtable as usize
+            - <Foo as intercom::attributes::ComClass<
+                dyn IFoo,
+                intercom::type_system::RawTypeSystem,
+            >>::offset()) as *mut _),
         riid,
         out,
     )
@@ -726,7 +1030,11 @@ unsafe extern "system" fn __Foo_IFoo_Raw_add_ref(self_vtable:
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
     intercom::ComBoxData::<Foo>::add_ref(
-        &mut *((self_vtable as usize - __Foo_IFoo_RawVtbl_offset()) as *mut _),
+        &mut *((self_vtable as usize
+            - <Foo as intercom::attributes::ComClass<
+                dyn IFoo,
+                intercom::type_system::RawTypeSystem,
+            >>::offset()) as *mut _),
     )
 }
 #[allow(non_snake_case)]
@@ -738,7 +1046,11 @@ unsafe extern "system" fn __Foo_IFoo_Raw_release(self_vtable:
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
     intercom::ComBoxData::<Foo>::release_ptr(
-        (self_vtable as usize - __Foo_IFoo_RawVtbl_offset()) as *mut _,
+        (self_vtable as usize
+            - <Foo as intercom::attributes::ComClass<
+                dyn IFoo,
+                intercom::type_system::RawTypeSystem,
+            >>::offset()) as *mut _,
     )
 }
 #[allow(non_snake_case)]
@@ -757,8 +1069,11 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
         (||
              {
                  let self_combox =
-                     (self_vtable as usize - __Foo_IFoo_RawVtbl_offset()) as
-                         *mut intercom::ComBoxData<Foo>;
+                     (self_vtable as usize -
+                          <Foo as
+                              intercom::attributes::ComClass<dyn IFoo,
+                                                             intercom::type_system::RawTypeSystem>>::offset())
+                         as *mut intercom::ComBoxData<Foo>;
                  let self_struct: &dyn IFoo = &**self_combox;
                  let __result = self_struct.trait_method();
                  Ok({ })
@@ -774,12 +1089,26 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
     }
 }
 #[allow(non_upper_case_globals)]
-const __Foo_IFoo_RawVtbl_INSTANCE: __IFoo_RawVtbl = __IFoo_RawVtbl {
-    __base: intercom::IUnknownVtbl {
-        query_interface_Automation: __Foo_IFoo_Raw_query_interface,
-        add_ref_Automation: __Foo_IFoo_Raw_add_ref,
-        release_Automation: __Foo_IFoo_Raw_release,
-    },
-    trait_method_Raw: __Foo_IFoo_Raw_trait_method_Raw,
-};
+impl intercom::attributes::ComImpl<dyn IFoo, intercom::type_system::RawTypeSystem> for Foo {
+    fn vtable() -> &'static <dyn IFoo as intercom::attributes::ComInterface<
+        intercom::type_system::RawTypeSystem,
+    >>::VTable {
+        type T = <dyn IFoo as intercom::attributes::ComInterface<
+            intercom::type_system::RawTypeSystem,
+        >>::VTable;
+        &T {
+            __base: {
+                type TVtbl = <dyn intercom::IUnknown as intercom::attributes::ComInterface<
+                    intercom::type_system::AutomationTypeSystem,
+                >>::VTable;
+                TVtbl {
+                    query_interface: __Foo_IFoo_Raw_query_interface,
+                    add_ref: __Foo_IFoo_Raw_add_ref,
+                    release: __Foo_IFoo_Raw_release,
+                }
+            },
+            trait_method: __Foo_IFoo_Raw_trait_method_Raw,
+        }
+    }
+}
 impl intercom::HasInterface<dyn IFoo> for Foo {}
