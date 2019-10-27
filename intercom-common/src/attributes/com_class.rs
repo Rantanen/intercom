@@ -204,6 +204,7 @@ pub fn expand_com_class(
 
     // The actual CoClass implementation.
     output.push(quote!(
+        #[allow(clippy::all)]
         impl intercom::CoClass for #struct_ident {
             type VTableList = #vtable_list_ident;
             fn create_vtable_list() -> Self::VTableList {
