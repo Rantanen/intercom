@@ -9,7 +9,6 @@ where
 
 pub trait ComClass<TInterface: ?Sized, TS: TypeSystem>
 {
-    #[inline(always)]
     fn offset() -> usize;
 }
 
