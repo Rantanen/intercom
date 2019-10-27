@@ -296,6 +296,7 @@ struct __intercom_vtable_for_Foo {
         intercom::type_system::RawTypeSystem,
     >>::VTable,
 }
+#[allow(clippy::all)]
 impl intercom::CoClass for Foo {
     type VTableList = __intercom_vtable_for_Foo;
     fn create_vtable_list() -> Self::VTableList {
