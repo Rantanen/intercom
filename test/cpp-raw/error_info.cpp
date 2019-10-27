@@ -36,6 +36,8 @@ namespace
             if( hr2 != intercom::SC_OK )
                 return hr2;
 
+            pErrorStore->Release();
+
             // Return the hresult.
             return hr;
 		}
@@ -59,6 +61,8 @@ namespace
             if( hr2 != intercom::SC_OK )
                 return hr2;
 
+            pErrorStore->Release();
+
             // Return the hresult.
             return hr;
 		}
@@ -81,6 +85,8 @@ namespace
             hr2 = pErrorStore->SetErrorMessage( bstr );
             if( hr2 != intercom::SC_OK )
                 return hr2;
+
+            pErrorStore->Release();
 
             // Return the hresult.
             return hr;
@@ -220,6 +226,9 @@ namespace
                 REQUIRE( text[ i ] == right[ i ] );  // This failed above.
             }
         }
+
+        pAllocator->Release();
+        pConverter->Release();
     }
 }
 
@@ -310,6 +319,7 @@ TEST_CASE( "Interfaces support error info" )
             check_equal( u"Error message", bstrOut );
             pAllocator->FreeBstr( bstrOut );
             pAllocator->FreeBstr( bstrError );
+            pErrorInfo->Release();
         }
 
         SECTION( "Returning custom error" )
@@ -328,6 +338,7 @@ TEST_CASE( "Interfaces support error info" )
             check_equal( u"Error message", bstrOut );
             pAllocator->FreeBstr( bstrOut );
             pAllocator->FreeBstr( bstrError );
+            pErrorInfo->Release();
         }
 
         SECTION( "Returning std::io::Error" )
@@ -344,6 +355,7 @@ TEST_CASE( "Interfaces support error info" )
             hr = pErrorInfo->GetDescription( &bstrOut );
             check_equal( u"permission denied", bstrOut );
             pAllocator->FreeBstr( bstrOut );
+            pErrorInfo->Release();
         }
 
         SECTION( "Returning ComError from COM callback" )

@@ -121,6 +121,22 @@ namespace intercom
     }
 
     /**
+     * @brief Allocates memory for a string.
+     *
+     * @return intercom::OLECHAR Returns an uninitialized string with null-terminator.
+     */
+    template< typename TCharType >
+    inline void free_string(
+            TCharType* string
+    )
+    {
+        // Allocate enough memory to hold the string and null terminator.
+        if( string == nullptr )
+            return;
+        std::free( string );
+    }
+
+    /**
      * @brief Reallocates a strng.
      *
      * @param string
