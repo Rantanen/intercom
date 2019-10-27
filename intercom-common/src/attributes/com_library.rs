@@ -1,5 +1,4 @@
 use super::common::*;
-use crate::ast_converters::ReplaceIdent;
 use crate::prelude::*;
 
 use crate::idents;
@@ -147,19 +146,18 @@ fn create_get_typelib_function(lib: &model::ComLibrary) -> Result<TokenStream, S
 {
     let lib_name = lib_name();
     let libid = utils::get_guid_tokens(&lib.libid, Span::call_site());
-    let create_class_typeinfo = lib
-        .coclasses
-        .iter()
-        .map(|p| p.map_ident(|i| format!("get_intercom_coclass_info_for_{}", i)))
-        .collect::<Result<Vec<_>, _>>()?;
-    let calling_convention = get_calling_convetion();
+    let create_class_typeinfo = lib.coclasses.iter().map(|path| {
+        quote!(
+            <#path as intercom::attributes::HasTypeInfo>::gather_type_info()
+        )
+    });
     Ok(quote!(
         pub(crate) fn get_intercom_typelib() -> intercom::typelib::TypeLib
         {
             let types = vec![
-                intercom::alloc::get_intercom_coclass_info_for_Allocator(),
-                intercom::error::get_intercom_coclass_info_for_ErrorStore(),
-                #( #create_class_typeinfo() ),*
+                <intercom::alloc::Allocator as intercom::attributes::HasTypeInfo>::gather_type_info(),
+                <intercom::error::ErrorStore as intercom::attributes::HasTypeInfo>::gather_type_info(),
+                #( #create_class_typeinfo ),*
             ].into_iter().flatten().collect::<Vec<_>>();
             intercom::typelib::TypeLib::__new(
                 #lib_name.into(),
@@ -170,7 +168,7 @@ fn create_get_typelib_function(lib: &model::ComLibrary) -> Result<TokenStream, S
         }
 
         #[no_mangle]
-        pub unsafe extern #calling_convention fn IntercomTypeLib(
+        pub unsafe extern "system" fn IntercomTypeLib(
             type_system: intercom::type_system::TypeSystemName,
             out: *mut intercom::RawComPtr,
         ) -> intercom::raw::HRESULT

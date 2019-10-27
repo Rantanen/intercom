@@ -2,9 +2,9 @@
 extern crate intercom;
 use intercom::*;
 
+#[com_interface]
 trait NotComInterface {}
 
-#[com_class(NotComInterface)]
 struct S;
 
 #[com_impl]

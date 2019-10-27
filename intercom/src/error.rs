@@ -2,6 +2,7 @@ use std::convert::TryFrom;
 use std::error::Error;
 
 use super::*;
+use crate::attributes;
 use crate::type_system::{AutomationTypeSystem, ExternType, IntercomFrom, TypeSystem};
 
 /// Error structure containing the available information on a COM error.
@@ -453,10 +454,8 @@ pub fn load_error(iunk: &ComItf<dyn IUnknown>, iid: &GUID, err: raw::HRESULT) ->
 {
     // Do not try to load error if this is IUnknown or ISupportErrorInfo.
     // Both of these are used during error handling and may fail.
-    if *iid == IID_IUnknown
-        || *iid == intercom::interfaces::IID_IUnknown_Raw
-        || *iid == IID_ISupportErrorInfo
-        || *iid == intercom::interfaces::IID_ISupportErrorInfo_Raw
+    if iid == <dyn IUnknown as attributes::ComInterface<AutomationTypeSystem>>::iid()
+        || iid == <dyn ISupportErrorInfo as attributes::ComInterface<AutomationTypeSystem>>::iid()
     {
         return ComError {
             hresult: err,

@@ -103,6 +103,7 @@ pub use crate::variant::{Variant, VariantError};
 pub mod type_system;
 pub mod typelib;
 pub use type_system::{BidirectionalTypeInfo, InputTypeInfo, OutputTypeInfo};
+pub mod attributes;
 
 /// The `ComInterface` trait defines the COM interface details for a COM
 /// interface trait.
@@ -110,6 +111,10 @@ pub trait ComInterface
 {
     /// IID of the COM interface.
     fn iid(ts: type_system::TypeSystemName) -> Option<&'static IID>;
+
+    fn iid_ts<TS: intercom::type_system::TypeSystem>() -> &'static intercom::IID
+    where
+        Self: intercom::attributes::ComInterface<TS>;
 
     /// Dereferences a `ComItf<T>` into a `&T`.
     ///
@@ -233,13 +238,11 @@ pub const IID_IErrorInfo: GUID = GUID {
     data4: [0x8E, 0x65, 0x08, 0x00, 0x2B, 0x2B, 0xD1, 0x19],
 };
 
-pub use crate::interfaces::IID_IUnknown_Automation as IID_IUnknown;
 pub use crate::interfaces::IUnknown;
-pub use crate::interfaces::__IUnknown_AutomationVtbl as IUnknownVtbl;
+// pub use crate::interfaces::__IUnknown_AutomationVtbl as IUnknownVtbl;
 
-pub use crate::interfaces::IID_ISupportErrorInfo_Automation as IID_ISupportErrorInfo;
 pub use crate::interfaces::ISupportErrorInfo;
-pub use crate::interfaces::__ISupportErrorInfo_AutomationVtbl as ISupportErrorInfoVtbl;
+// pub use crate::interfaces::__ISupportErrorInfo_AutomationVtbl as ISupportErrorInfoVtbl;
 
 // Do we need this? Would rather not export this through an extern crate
 // for another dll.

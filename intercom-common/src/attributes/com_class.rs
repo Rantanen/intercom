@@ -27,20 +27,27 @@ pub fn expand_com_class(
     // IUnknown vtable match. As the primary query_interface is implemented
     // on the root IUnknown interface, the self_vtable here should already be
     // the IUnknown we need.
+    let support_error_info_vtbl = quote!(
+        <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<
+            intercom::type_system::AutomationTypeSystem,
+        >>::VTable
+    );
     let mut query_interface_match_arms = vec![
         quote!(
-            intercom::IID_IUnknown =>
+            if riid == <dyn intercom::IUnknown as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::iid() {
                 ( &vtables._ISupportErrorInfo )
-                    as *const &intercom::ISupportErrorInfoVtbl
-                    as *mut &intercom::ISupportErrorInfoVtbl
+                    as *const &#support_error_info_vtbl
+                    as *mut &#support_error_info_vtbl
                     as intercom::RawComPtr
+            } else
         ),
         quote!(
-            intercom::IID_ISupportErrorInfo =>
+            if riid == <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::iid() {
                 ( &vtables._ISupportErrorInfo )
-                    as *const &intercom::ISupportErrorInfoVtbl
-                    as *mut &intercom::ISupportErrorInfoVtbl
+                    as *const &#support_error_info_vtbl
+                    as *mut &#support_error_info_vtbl
                     as intercom::RawComPtr
+            } else
         ),
     ];
     let mut support_error_info_match_arms = vec![];
@@ -54,14 +61,15 @@ pub fn expand_com_class(
     // This is done to ensure the IUnknown pointer matches the ComBoxData pointer.
     // We ensure this by defining the primary IUnknown methods on the
     // ISupportErrorInfo virtual table and having that at the beginning.
-    let isupporterrorinfo_ident = Ident::new("ISupportErrorInfo", Span::call_site());
-    let isupporterrorinfo_vtable_instance_ident =
-        idents::vtable_instance(struct_ident, &isupporterrorinfo_ident, Span::call_site());
     let mut vtable_list_field_decls = vec![quote!(
-        _ISupportErrorInfo: &'static intercom::ISupportErrorInfoVtbl
+        _ISupportErrorInfo:
+            &'static <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<
+                intercom::type_system::AutomationTypeSystem,
+            >>::VTable
     )];
-    let mut vtable_list_field_values =
-        vec![quote!( _ISupportErrorInfo : &#isupporterrorinfo_vtable_instance_ident )];
+    let mut vtable_list_field_values = vec![quote!( _ISupportErrorInfo :
+                <#struct_ident as intercom::attributes::ComImpl<
+                    dyn intercom::ISupportErrorInfo, intercom::type_system::AutomationTypeSystem>>::vtable() )];
 
     // Create the vtable data for the additional interfaces.
     // The data should include the match-arms for the primary query_interface
@@ -70,11 +78,11 @@ pub fn expand_com_class(
         for &ts in &[ModelTypeSystem::Automation, ModelTypeSystem::Raw] {
             // Various idents.
             let itf_variant = Ident::new(&format!("{}_{:?}", itf, ts), itf.span());
-            let offset_ident = idents::vtable_offset(struct_ident, &itf_variant, itf.span());
-            let iid_ident = idents::iid(&itf_variant, itf.span());
-            let vtable_struct_ident = idents::vtable_struct(&itf_variant, itf.span());
-            let vtable_instance_ident =
-                idents::vtable_instance(struct_ident, &itf_variant, itf.span());
+            let ts_type = ts.as_typesystem_type(itf.span());
+            let maybe_dyn = match itf == struct_ident {
+                true => quote!(),
+                false => quote_spanned!(itf.span() => dyn),
+            };
 
             // Store the field offset globally. We need this offset when implementing
             // the delegating query_interface methods. The only place where we know
@@ -85,33 +93,46 @@ pub fn expand_com_class(
             // use an inline fn instead. LLVM should be able to reduce this into a
             // constant expression during compilation.
             output.push(quote!(
+                #[allow(non_snake_case)]
+                impl intercom::attributes::ComClass<
+                    #maybe_dyn #itf, #ts_type> for #struct_ident {
+
                     #[inline(always)]
-                    #[allow(non_snake_case)]
-                    fn #offset_ident() -> usize {
+                    fn offset() -> usize {
                         unsafe {
                             &intercom::ComBoxData::< #struct_ident >::null_vtable().#itf_variant
                                     as *const _ as usize
                         }
                     }
+                }
             ));
 
+            let itf_attrib_data = quote!(
+                <#maybe_dyn #itf as intercom::attributes::ComInterface<#ts_type>>);
+            let impl_attrib_data = quote!(
+                <#struct_ident as intercom::attributes::ComImpl<#maybe_dyn #itf, #ts_type>>);
+
             // Add the interface in the vtable list.
-            vtable_list_field_decls.push(quote!( #itf_variant : &'static #vtable_struct_ident ));
-            vtable_list_field_values.push(quote!( #itf_variant : &#vtable_instance_ident ));
+            vtable_list_field_decls.push(quote!( #itf_variant : &'static #itf_attrib_data::VTable));
+            vtable_list_field_values.push(quote!( #itf_variant : #impl_attrib_data::vtable()));
 
             // Define the query_interface match arm for the current interface.
             // This just gets the correct interface vtable reference from the list
             // of vtables.
             query_interface_match_arms.push(quote!(
-                self::#iid_ident => &vtables.#itf_variant
-                        as *const &#vtable_struct_ident
-                        as *mut &#vtable_struct_ident
+                if riid == #itf_attrib_data::iid() {
+                    &vtables.#itf_variant
+                        as *const &#itf_attrib_data::VTable
+                        as *mut &#itf_attrib_data::VTable
                         as intercom::RawComPtr
+                } else
             ));
 
             // Define the support error info match arms.
             support_error_info_match_arms.push(quote!(
-                self::#iid_ident => true
+                if riid == <#maybe_dyn #itf as intercom::attributes::ComInterface<#ts_type>>::iid() {
+                    true
+                } else
             ));
         }
     }
@@ -120,26 +141,41 @@ pub fn expand_com_class(
     // ISupportErrorInfo virtual table instance.
     //
     // The primary IUnknown virtual table is embedded in this one.
+    let iunknown_vtbl = quote!(
+        <dyn intercom::IUnknown as intercom::attributes::ComInterface<
+            intercom::type_system::AutomationTypeSystem,
+        >>::VTable
+    );
     output.push(quote!(
         #[allow(non_upper_case_globals)]
-        const #isupporterrorinfo_vtable_instance_ident
-                : intercom::ISupportErrorInfoVtbl
-                = intercom::ISupportErrorInfoVtbl {
-                    __base : intercom::IUnknownVtbl {
-                        query_interface_Automation
-                            : intercom::ComBoxData::< #struct_ident >
-                                ::query_interface_ptr,
-                        add_ref_Automation
-                            : intercom::ComBoxData::< #struct_ident >
-                                ::add_ref_ptr,
-                        release_Automation
-                            : intercom::ComBoxData::< #struct_ident >
-                                ::release_ptr,
+        impl intercom::attributes::ComImpl<
+            intercom::ISupportErrorInfo, intercom::type_system::AutomationTypeSystem>
+            for #struct_ident {
+
+            fn vtable() -> &'static <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
+            {
+                type T = <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable;
+                & T {
+                    __base : {
+                        type Vtbl = #iunknown_vtbl;
+                        Vtbl {
+                            query_interface
+                                : intercom::ComBoxData::< #struct_ident >
+                                    ::query_interface_ptr,
+                            add_ref
+                                : intercom::ComBoxData::< #struct_ident >
+                                    ::add_ref_ptr,
+                            release
+                                : intercom::ComBoxData::< #struct_ident >
+                                    ::release_ptr,
+                        }
                     },
-                    interface_supports_error_info_Automation
+                    interface_supports_error_info
                         : intercom::ComBoxData::< #struct_ident >
                             ::interface_supports_error_info_ptr,
-                };
+                }
+            }
+        }
     ));
 
     // Mark the struct as having IUnknown.
@@ -153,7 +189,10 @@ pub fn expand_com_class(
     // interfaces that the coclass implements.
 
     // VTableList struct definition.
-    let vtable_list_ident = idents::vtable_list(struct_ident);
+    let vtable_list_ident = Ident::new(
+        &format!("__intercom_vtable_for_{}", struct_ident),
+        Span::call_site(),
+    );
     let visibility = &cls.visibility;
     output.push(quote!(
         #[allow(non_snake_case)]
@@ -176,20 +215,25 @@ pub fn expand_com_class(
                 vtables : &Self::VTableList,
                 riid : intercom::REFIID,
             ) -> intercom::RawComResult< intercom::RawComPtr > {
-                if riid.is_null() { return Err( intercom::raw::E_NOINTERFACE ) }
-                Ok( match *unsafe { &*riid } {
-                    #( #query_interface_match_arms ),*,
-                    _ => return Err( intercom::raw::E_NOINTERFACE )
-                } )
+                if riid.is_null() { return Err( intercom::raw::E_NOINTERFACE ); }
+                unsafe {
+                    let riid = &*riid;
+                    Ok(
+                        #( #query_interface_match_arms )*
+                        { return Err( intercom::raw::E_NOINTERFACE ) }
+                    )
+                }
             }
 
             fn interface_supports_error_info(
                 riid : intercom::REFIID
             ) -> bool
             {
-                match *unsafe { &*riid } {
-                    #( #support_error_info_match_arms ),*,
-                    _ => false
+                if riid.is_null() { return false; }
+                unsafe {
+                    let riid = &*riid;
+                    #( #support_error_info_match_arms )*
+                    { false }
                 }
             }
         }
@@ -222,6 +266,7 @@ fn create_get_typeinfo_function(cls: &model::ComStruct) -> Result<TokenStream, S
         &format!("get_intercom_coclass_info_for_{}", cls.name),
         Span::call_site(),
     );
+    let cls_ident = &cls.name;
     let cls_name = cls.name.to_string();
     let clsid = match &cls.clsid {
         Some(guid) => guid,
@@ -238,41 +283,37 @@ fn create_get_typeinfo_function(cls: &model::ComStruct) -> Result<TokenStream, S
         .iter()
         .map(|itf_ident| {
             let itf_name = itf_ident.to_string();
-            let itf_automation_iid = idents::iid(
-                &Ident::new(&format!("{}_Automation", itf_name), Span::call_site()),
-                itf_ident.span(),
-            );
-            let itf_raw_iid = idents::iid(
-                &Ident::new(&format!("{}_Raw", itf_name), Span::call_site()),
-                itf_ident.span(),
-            );
-            let itf_fn = Ident::new(
-                &format!("get_intercom_interface_info_for_{}", itf_name),
-                itf_ident.span(),
-            );
+            let maybe_dyn = match itf_ident == &cls.name {
+                true => quote!(),
+                false => quote_spanned!(itf_ident.span() => dyn),
+            };
             (
                 quote!( intercom::typelib::InterfaceRef {
                     name: #itf_name.into(),
-                    iid_automation: #itf_automation_iid,
-                    iid_raw: #itf_raw_iid,
+                    iid_automation: <#maybe_dyn #itf_ident as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::iid().clone(),
+                    iid_raw: <#maybe_dyn #itf_ident as intercom::attributes::ComInterface<intercom::type_system::RawTypeSystem>>::iid().clone(),
                 } ),
-                quote!( #itf_fn() ),
+                quote!(
+                    r.extend(<#maybe_dyn #itf_ident as intercom::attributes::InterfaceHasTypeInfo>::gather_type_info());
+                ),
             )
         })
         .unzip();
     Ok(quote!(
-        pub fn #fn_name() -> Vec<intercom::typelib::TypeInfo>
+        impl intercom::attributes::HasTypeInfo for #cls_ident
         {
-            vec![ intercom::typelib::TypeInfo::Class(
-                intercom::ComBox::new( intercom::typelib::CoClass::__new(
-                    #cls_name.into(),
-                    #clsid_tokens,
-                    vec![
-                        #( #interfaces ),*
-                    ]
-                ) ) ),
-                #( #interface_info ),*
-            ]
+            fn gather_type_info() -> Vec<intercom::typelib::TypeInfo>
+            {
+                let mut r = vec![ intercom::typelib::TypeInfo::Class(
+                    intercom::ComBox::new( intercom::typelib::CoClass::__new(
+                        #cls_name.into(),
+                        #clsid_tokens,
+                        vec![ #( #interfaces ),* ]
+                    ) ) )
+                ];
+                #( #interface_info )*
+                r
+            }
         }
     ))
 }

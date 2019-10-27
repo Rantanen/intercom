@@ -6,6 +6,12 @@
 //! user specifies the `#[com_library(..)]` -attribute.
 
 use super::*;
+use crate::attributes;
+use crate::type_system::AutomationTypeSystem;
+
+type IUnknownVtbl = <dyn crate::IUnknown as attributes::ComInterface<
+    intercom::type_system::AutomationTypeSystem,
+>>::VTable;
 
 #[allow(non_camel_case_types)]
 #[doc(hidden)]
@@ -31,17 +37,18 @@ impl<T: Fn(REFCLSID) -> RawComResult<RawComPtr>> CoClass for ClassFactory<T>
     {
         ClassFactory::<T>::create_vtable()
     }
+
     fn query_interface(vtables: &Self::VTableList, riid: REFIID) -> RawComResult<RawComPtr>
     {
         if riid.is_null() {
             return Err(raw::E_NOINTERFACE);
         }
         unsafe {
-            match *riid {
-                super::IID_IUnknown | super::IID_IClassFactory => {
-                    Ok(vtables as *const _ as RawComPtr)
-                }
-                _ => Err(raw::E_NOINTERFACE),
+            let riid = &*riid;
+            if riid == IUnknown::iid_ts::<AutomationTypeSystem>() || *riid == IID_IClassFactory {
+                Ok(vtables as *const _ as RawComPtr)
+            } else {
+                Err(raw::E_NOINTERFACE)
             }
         }
     }
@@ -92,8 +99,7 @@ impl<T: Fn(REFCLSID) -> RawComResult<RawComPtr>> ClassFactory<T>
             Err(hr) => return hr,
         } as *const *const IUnknownVtbl;
 
-        let query_result =
-            ((**iunk_ptr).query_interface_Automation)(iunk_ptr as RawComPtr, riid, out);
+        let query_result = ((**iunk_ptr).query_interface)(iunk_ptr as RawComPtr, riid, out);
 
         // Avoid leaking memory in case query_interface fails.
         if query_result != raw::S_OK {
@@ -119,9 +125,9 @@ impl<T: Fn(REFCLSID) -> RawComResult<RawComPtr>> ClassFactory<T>
     {
         &ClassFactoryVtbl {
             __base: IUnknownVtbl {
-                query_interface_Automation: ComBoxData::<Self>::query_interface_ptr,
-                add_ref_Automation: ComBoxData::<Self>::add_ref_ptr,
-                release_Automation: ComBoxData::<Self>::release_ptr,
+                query_interface: ComBoxData::<Self>::query_interface_ptr,
+                add_ref: ComBoxData::<Self>::add_ref_ptr,
+                release: ComBoxData::<Self>::release_ptr,
             },
             create_instance: Self::create_instance,
             lock_server: Self::lock_server,

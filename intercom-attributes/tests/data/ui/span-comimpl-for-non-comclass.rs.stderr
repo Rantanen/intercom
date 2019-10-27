@@ -1,0 +1,9 @@
+error[E0277]: the trait bound `S: intercom::CoClass` is not satisfied
+  --> span-comimpl-for-non-comclass.rs:11:1
+   |
+11 | impl NotComInterface for S {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::CoClass` is not implemented for `S`
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0277`.

@@ -34,11 +34,12 @@ pub fn expand_com_impl(
 
     for (_, impl_variant) in imp.variants {
         let itf_unique_ident = impl_variant.interface_unique_name;
-        let vtable_struct_ident = idents::vtable_struct(&itf_unique_ident, itf_ident.span());
-        let vtable_instance_ident =
-            idents::vtable_instance(&struct_ident, &itf_unique_ident, itf_ident.span());
-        let vtable_offset =
-            idents::vtable_offset(&struct_ident, &itf_unique_ident, itf_ident.span());
+        let ts_tokens = impl_variant
+            .type_system
+            .as_typesystem_type(struct_ident.span());
+        let vtable_offset = quote!(
+            <#struct_ident as intercom::attributes::ComClass<#maybe_dyn #itf_ident, #ts_tokens>>::offset()
+        );
 
         /////////////////////
         // #itf::QueryInterface, AddRef & Release
@@ -52,13 +53,12 @@ pub fn expand_com_impl(
         // by the known vtable offset.
 
         // QueryInterface
-        let calling_convetion = get_calling_convetion();
         let query_interface_ident =
             idents::method_impl(&struct_ident, &itf_unique_ident, "query_interface");
         output.push(quote_spanned!(struct_ident.span() =>
             #[allow(non_snake_case)]
             #[doc(hidden)]
-            unsafe extern #calling_convetion fn #query_interface_ident(
+            unsafe extern "system" fn #query_interface_ident(
                 self_vtable : intercom::RawComPtr,
                 riid : <intercom::REFIID as intercom::type_system::ExternType<
                         intercom::type_system::AutomationTypeSystem>>
@@ -74,7 +74,7 @@ pub fn expand_com_impl(
                 // self_vtable with the vtable offset. Once we have the primary
                 // pointer we can delegate the call to the primary implementation.
                 intercom::ComBoxData::< #struct_ident >::query_interface(
-                        &mut *(( self_vtable as usize - #vtable_offset() ) as *mut _ ),
+                        &mut *(( self_vtable as usize - #vtable_offset ) as *mut _ ),
                         riid,
                         out )
             }
@@ -86,14 +86,14 @@ pub fn expand_com_impl(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
             #[doc(hidden)]
-            unsafe extern #calling_convetion fn #add_ref_ident(
+            unsafe extern "system" fn #add_ref_ident(
                 self_vtable : intercom::RawComPtr
             ) -> <u32 as intercom::type_system::ExternType<
                     intercom::type_system::AutomationTypeSystem>>
                         ::ExternOutputType
             {
                 intercom::ComBoxData::< #struct_ident >::add_ref(
-                        &mut *(( self_vtable as usize - #vtable_offset() ) as *mut _ ) )
+                        &mut *(( self_vtable as usize - #vtable_offset ) as *mut _ ) )
             }
         ));
 
@@ -103,25 +103,30 @@ pub fn expand_com_impl(
             #[allow(non_snake_case)]
             #[allow(dead_code)]
             #[doc(hidden)]
-            unsafe extern #calling_convetion fn #release_ident(
+            unsafe extern "system" fn #release_ident(
                 self_vtable : intercom::RawComPtr
             ) -> <u32 as intercom::type_system::ExternType<
                     intercom::type_system::AutomationTypeSystem>>
                         ::ExternOutputType
             {
                 intercom::ComBoxData::< #struct_ident >::release_ptr(
-                        ( self_vtable as usize - #vtable_offset() ) as *mut _ )
+                        ( self_vtable as usize - #vtable_offset ) as *mut _ )
             }
         ));
 
         // Start the definition fo the vtable fields. The base interface is always
         // IUnknown at this point. We might support IDispatch later, but for now
         // we only support IUnknown.
+        let iunk_vtbl_type = quote_spanned!(itf_ident.span() =>
+            <dyn intercom::IUnknown as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable);
         let mut vtable_fields = vec![quote_spanned!(struct_ident.span() =>
-            __base : intercom::IUnknownVtbl {
-                query_interface_Automation : #query_interface_ident,
-                add_ref_Automation : #add_ref_ident,
-                release_Automation : #release_ident,
+            __base : {
+                type TVtbl = #iunk_vtbl_type;
+                TVtbl {
+                    query_interface : #query_interface_ident,
+                    add_ref : #add_ref_ident,
+                    release : #release_ident,
+                }
             },
         )];
 
@@ -135,10 +140,13 @@ pub fn expand_com_impl(
         // silently. This is done by breaking out of the 'catch' before adding the
         // method to the vtable fields.
         for method_info in impl_variant.methods {
-            let method_ident = &method_info.unique_name;
+            let method_ident = &method_info.display_name;
             let method_rust_ident = &method_info.display_name;
-            let method_impl_ident =
-                idents::method_impl(&struct_ident, &itf_unique_ident, &method_ident.to_string());
+            let method_impl_ident = idents::method_impl(
+                &struct_ident,
+                &itf_unique_ident,
+                &method_info.unique_name.to_string(),
+            );
 
             let in_out_args = method_info.raw_com_args().into_iter().map(|com_arg| {
                 let name = &com_arg.name;
@@ -179,14 +187,14 @@ pub fn expand_com_impl(
                 #[allow(non_snake_case)]
                 #[allow(dead_code)]
                 #[doc(hidden)]
-                unsafe extern #calling_convetion fn #method_impl_ident(
+                unsafe extern "system" fn #method_impl_ident(
                     #( #args ),*
                 ) -> #ret_ty {
                     use intercom::type_system::{IntercomFrom, IntercomInto};
                     let result : Result< #ret_ty, intercom::ComError > = ( || {
                         // Acquire the reference to the ComBoxData. For this we need
                         // to offset the current 'self_vtable' vtable pointer.
-                        let self_combox = ( self_vtable as usize - #vtable_offset() )
+                        let self_combox = ( self_vtable as usize - #vtable_offset )
                                 as *mut intercom::ComBoxData< #struct_ident >;
 
                         #self_struct_stmt;
@@ -213,10 +221,19 @@ pub fn expand_com_impl(
 
         // Now that we've gathered all the virtual table fields, we can finally
         // emit the virtual table instance.
-        output.push(quote!(
+        let attrib_data = quote_spanned!(itf_ident.span() =>
+            <#maybe_dyn #itf_ident as intercom::attributes::ComInterface<#ts_tokens>>);
+        output.push(quote_spanned!(itf_ident.span() =>
             #[allow(non_upper_case_globals)]
-            const #vtable_instance_ident : #vtable_struct_ident
-                    = #vtable_struct_ident { #( #vtable_fields )* };
+            impl intercom::attributes::ComImpl<
+                #maybe_dyn #itf_ident, #ts_tokens>
+                for #struct_ident
+            {
+                fn vtable() -> &'static #attrib_data::VTable {
+                    type T = #attrib_data::VTable;
+                    & T { #( #vtable_fields )* }
+                }
+            }
         ));
     }
 
