@@ -17,11 +17,14 @@ name = "intercom"
 
 [dependencies]
 intercom-attributes = { version = "0.3", path = "../intercom-attributes" }
-
 failure = "0.1"
 serde = { version = "1.0", optional = true }
 serde_derive = { version = "1.0", optional = true }
 handlebars = { version = "2.0", optional = true }
+log = { version = "0.4", optional = true }
+
+[dev-dependencies]
+simple_logger = { version = "1.0", default-features = false }
 
 [target.'cfg(not(windows))'.dependencies]
 libc = "0.2"
