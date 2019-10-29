@@ -23,6 +23,7 @@ pub fn expand_com_class(
     let mut output = vec![];
     let cls = model::ComStruct::parse(&lib_name(), attr_tokens.into(), item_tokens.clone().into())?;
     let struct_ident = &cls.name;
+    let struct_name = struct_ident.to_string();
 
     // IUnknown vtable match. As the primary query_interface is implemented
     // on the root IUnknown interface, the self_vtable here should already be
@@ -35,6 +36,10 @@ pub fn expand_com_class(
     let mut query_interface_match_arms = vec![
         quote!(
             if riid == <dyn intercom::IUnknown as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::iid() {
+                intercom::logging::trace(format_args!(
+                    "[{:p}] {}::query_interface({:-X}) -> IUnknown", vtables, #struct_name, riid));
+                intercom::logging::trace(format_args!(
+                    "-> IUnknown"));
                 ( &vtables._ISupportErrorInfo )
                     as *const &#support_error_info_vtbl
                     as *mut &#support_error_info_vtbl
@@ -43,6 +48,8 @@ pub fn expand_com_class(
         ),
         quote!(
             if riid == <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::iid() {
+                intercom::logging::trace(format_args!(
+                    "[{:p}] {}::query_interface({:-X}) -> ISupportErrorInfo", vtables, #struct_name, riid));
                 ( &vtables._ISupportErrorInfo )
                     as *const &#support_error_info_vtbl
                     as *mut &#support_error_info_vtbl
@@ -119,8 +126,12 @@ pub fn expand_com_class(
             // Define the query_interface match arm for the current interface.
             // This just gets the correct interface vtable reference from the list
             // of vtables.
+            let itf_name = itf.to_string();
+            let ts_name = format!("{:?}", ts);
             query_interface_match_arms.push(quote!(
                 if riid == #itf_attrib_data::iid() {
+                    intercom::logging::trace(format_args!(
+                        "[{:p}] {}::query_interface({:-X}) -> {} ({})", vtables, #struct_name, riid, #itf_name, #ts_name));
                     &vtables.#itf_variant
                         as *const &#itf_attrib_data::VTable
                         as *mut &#itf_attrib_data::VTable
@@ -216,12 +227,22 @@ pub fn expand_com_class(
                 vtables : &Self::VTableList,
                 riid : intercom::REFIID,
             ) -> intercom::RawComResult< intercom::RawComPtr > {
-                if riid.is_null() { return Err( intercom::raw::E_NOINTERFACE ); }
+                if riid.is_null() {
+                    intercom::logging::error(format_args!(
+                        "[{:p}] {}::query_interface(NULL)", vtables, #struct_name));
+                    return Err( intercom::raw::E_NOINTERFACE );
+                }
                 unsafe {
                     let riid = &*riid;
+                    intercom::logging::trace(format_args!(
+                        "[{:p}] {}::query_interface({:-X})", vtables, #struct_name, riid));
                     Ok(
                         #( #query_interface_match_arms )*
-                        { return Err( intercom::raw::E_NOINTERFACE ) }
+                        {
+                            intercom::logging::trace(format_args!(
+                                "[{:p}] {}::query_interface({:-X}) -> E_NOINTERFACe", vtables, #struct_name, riid));
+                            return Err( intercom::raw::E_NOINTERFACE )
+                        }
                     )
                 }
             }
