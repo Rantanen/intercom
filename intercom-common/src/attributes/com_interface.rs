@@ -83,9 +83,9 @@ pub fn expand_com_interface(
                 let ts_name = format!("{:?}", ts);
                 impl_branches.push(quote_spanned!(method.info.signature_span =>
                     if let Some( comptr ) = intercom::ComItf::maybe_ptr::<#ts_tokens>( self ) {
-                        intercom::logging::trace(format_args!(
+                        intercom::logging::trace(|l| l(module_path!(), format_args!(
                             "[{:p}, with {:p}] Calling {}::{}, type system: {}",
-                            self, comptr.ptr, #itf_name, #method_name, #ts_name));
+                            self, comptr.ptr, #itf_name, #method_name, #ts_name)));
 
                         #method_ts_impl
                     }
@@ -113,8 +113,8 @@ pub fn expand_com_interface(
                     #self_arg, #( #impl_args ),*
                 ) -> #return_ty {
 
-                    intercom::logging::trace(format_args!(
-                        "[{:p}] Calling {}::{}", self, #itf_name, #method_name));
+                    intercom::logging::trace(|l| l(module_path!(), format_args!(
+                        "[{:p}] Calling {}::{}", self, #itf_name, #method_name)));
 
                     #[allow(unused_imports)]
                     use intercom::ErrorValue;

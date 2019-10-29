@@ -36,24 +36,26 @@ pub fn expand_com_class(
     let mut query_interface_match_arms = vec![
         quote!(
             if riid == <dyn intercom::IUnknown as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::iid() {
-                intercom::logging::trace(format_args!(
-                    "[{:p}] {}::query_interface({:-X}) -> IUnknown", vtables, #struct_name, riid));
-                intercom::logging::trace(format_args!(
-                    "-> IUnknown"));
-                ( &vtables._ISupportErrorInfo )
+                let ptr = ( &vtables._ISupportErrorInfo )
                     as *const &#support_error_info_vtbl
                     as *mut &#support_error_info_vtbl
-                    as intercom::RawComPtr
+                    as intercom::RawComPtr;
+                intercom::logging::trace(|l| l(module_path!(), format_args!(
+                    "[{:p}] {}::query_interface({:-X}) -> IUnknown [{:p}]",
+                    vtables, #struct_name, riid, ptr)));
+                ptr
             } else
         ),
         quote!(
             if riid == <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::iid() {
-                intercom::logging::trace(format_args!(
-                    "[{:p}] {}::query_interface({:-X}) -> ISupportErrorInfo", vtables, #struct_name, riid));
-                ( &vtables._ISupportErrorInfo )
+                let ptr = ( &vtables._ISupportErrorInfo )
                     as *const &#support_error_info_vtbl
                     as *mut &#support_error_info_vtbl
-                    as intercom::RawComPtr
+                    as intercom::RawComPtr;
+                intercom::logging::trace(|l| l(module_path!(), format_args!(
+                    "[{:p}] {}::query_interface({:-X}) -> ISupportErrorInfo [{:p}]",
+                    vtables, #struct_name, riid, ptr)));
+                ptr
             } else
         ),
     ];
@@ -130,12 +132,14 @@ pub fn expand_com_class(
             let ts_name = format!("{:?}", ts);
             query_interface_match_arms.push(quote!(
                 if riid == #itf_attrib_data::iid() {
-                    intercom::logging::trace(format_args!(
-                        "[{:p}] {}::query_interface({:-X}) -> {} ({})", vtables, #struct_name, riid, #itf_name, #ts_name));
-                    &vtables.#itf_variant
+                    let ptr = &vtables.#itf_variant
                         as *const &#itf_attrib_data::VTable
                         as *mut &#itf_attrib_data::VTable
-                        as intercom::RawComPtr
+                        as intercom::RawComPtr;
+                    intercom::logging::trace(|l| l(module_path!(), format_args!(
+                        "[{:p}] {}::query_interface({:-X}) -> {} ({}) [{:p}]",
+                        vtables, #struct_name, riid, #itf_name, #ts_name, ptr)));
+                    ptr
                 } else
             ));
 
@@ -228,19 +232,19 @@ pub fn expand_com_class(
                 riid : intercom::REFIID,
             ) -> intercom::RawComResult< intercom::RawComPtr > {
                 if riid.is_null() {
-                    intercom::logging::error(format_args!(
-                        "[{:p}] {}::query_interface(NULL)", vtables, #struct_name));
+                    intercom::logging::error(|l| l(module_path!(), format_args!(
+                        "[{:p}] {}::query_interface(NULL)", vtables, #struct_name)));
                     return Err( intercom::raw::E_NOINTERFACE );
                 }
                 unsafe {
                     let riid = &*riid;
-                    intercom::logging::trace(format_args!(
-                        "[{:p}] {}::query_interface({:-X})", vtables, #struct_name, riid));
+                    intercom::logging::trace(|l| l(module_path!(), format_args!(
+                        "[{:p}] {}::query_interface({:-X})", vtables, #struct_name, riid)));
                     Ok(
                         #( #query_interface_match_arms )*
                         {
-                            intercom::logging::trace(format_args!(
-                                "[{:p}] {}::query_interface({:-X}) -> E_NOINTERFACe", vtables, #struct_name, riid));
+                            intercom::logging::trace(|l| l(module_path!(), format_args!(
+                                "[{:p}] {}::query_interface({:-X}) -> E_NOINTERFACE", vtables, #struct_name, riid)));
                             return Err( intercom::raw::E_NOINTERFACE )
                         }
                     )

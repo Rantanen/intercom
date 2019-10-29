@@ -10,7 +10,7 @@ struct S;
 #[intercom::com_interface]
 trait IInterface
 {
-    fn call(&self);
+    fn call(&self) -> intercom::ComResult<String>;
 }
 
 #[intercom::com_interface]
@@ -21,9 +21,9 @@ trait IAnotherInterface
 #[intercom::com_impl]
 impl IInterface for S
 {
-    fn call(&self)
+    fn call(&self) -> intercom::ComResult<String>
     {
-        println!("Call");
+        Ok("result".to_string())
     }
 }
 
@@ -31,12 +31,13 @@ impl IInterface for S
 fn run_with_logging(bencher: &mut test::Bencher)
 {
     simple_logger::init().unwrap();
+    log::set_max_level(log::LevelFilter::Trace);
 
     bencher.iter(|| {
         let combox = test::black_box(intercom::ComBox::new(S));
         let rc: intercom::ComRc<dyn IInterface> = intercom::ComRc::from(combox);
 
-        test::black_box(&rc).call();
+        assert_eq!(&test::black_box(&rc).call().unwrap(), "result");
 
         let rc: intercom::ComResult<intercom::ComRc<dyn IAnotherInterface>> =
             intercom::ComItf::query_interface(&rc);
@@ -48,11 +49,13 @@ fn run_with_logging(bencher: &mut test::Bencher)
 #[bench]
 fn run_without_logging(bencher: &mut test::Bencher)
 {
+    log::set_max_level(log::LevelFilter::Off);
+
     bencher.iter(|| {
         let combox = test::black_box(intercom::ComBox::new(S));
         let rc: intercom::ComRc<dyn IInterface> = intercom::ComRc::from(combox);
 
-        test::black_box(&rc).call();
+        assert_eq!(&test::black_box(&rc).call().unwrap(), "result");
 
         let rc: intercom::ComResult<intercom::ComRc<dyn IAnotherInterface>> =
             intercom::ComItf::query_interface(&rc);

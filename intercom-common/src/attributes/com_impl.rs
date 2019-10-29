@@ -75,9 +75,9 @@ pub fn expand_com_impl(
                 // self_vtable with the vtable offset. Once we have the primary
                 // pointer we can delegate the call to the primary implementation.
                 let self_ptr = ( self_vtable as usize - #vtable_offset ) as *mut _;
-                intercom::logging::trace(format_args!(
+                intercom::logging::trace(|l| l(module_path!(), format_args!(
                     "[{:p}, through {:p}] Serving {}::query_interface",
-                    self_ptr, self_vtable, #struct_name));
+                    self_ptr, self_vtable, #struct_name)));
                 intercom::ComBoxData::< #struct_ident >::query_interface(
                         &mut *self_ptr,
                         riid,
@@ -98,9 +98,9 @@ pub fn expand_com_impl(
                         ::ExternOutputType
             {
                 let self_ptr = ( self_vtable as usize - #vtable_offset ) as *mut _;
-                intercom::logging::trace(format_args!(
+                intercom::logging::trace(|l| l(module_path!(), format_args!(
                     "[{:p}, through {:p}] Serving {}::add_ref",
-                    self_ptr, self_vtable, #struct_name));
+                    self_ptr, self_vtable, #struct_name)));
                 intercom::ComBoxData::< #struct_ident >::add_ref_ptr(self_ptr)
             }
         ));
@@ -118,9 +118,9 @@ pub fn expand_com_impl(
                         ::ExternOutputType
             {
                 let self_ptr = ( self_vtable as usize - #vtable_offset ) as *mut _;
-                intercom::logging::trace(format_args!(
+                intercom::logging::trace(|l| l(module_path!(), format_args!(
                     "[{:p}, through {:p}] Serving {}::release_ptr",
-                    self_ptr, self_vtable, #struct_name));
+                    self_ptr, self_vtable, #struct_name)));
                 intercom::ComBoxData::< #struct_ident >::release_ptr(self_ptr)
             }
         ));
@@ -209,9 +209,9 @@ pub fn expand_com_impl(
 
                     use intercom::type_system::{IntercomFrom, IntercomInto};
                     let result : Result< #ret_ty, intercom::ComError > = ( || {
-                        intercom::logging::trace(format_args!(
+                        intercom::logging::trace(|l| l(module_path!(), format_args!(
                             "[{:p}, through {:p}] Serving {}::{}",
-                            self_combox, self_vtable, #struct_name, #method_name));
+                            self_combox, self_vtable, #struct_name, #method_name)));
 
                         #self_struct_stmt;
                         let #return_ident = self_struct.#method_rust_ident( #( #in_params ),* );
@@ -222,15 +222,15 @@ pub fn expand_com_impl(
                     use intercom::ErrorValue;
                     match result {
                         Ok( v ) => {
-                            intercom::logging::trace(format_args!(
+                            intercom::logging::trace(|l| l(module_path!(), format_args!(
                                 "[{:p}, through {:p}] Serving {}::{}, OK",
-                                self_combox, self_vtable, #struct_name, #method_name));
+                                self_combox, self_vtable, #struct_name, #method_name)));
                             v
                         },
                         Err( err ) => {
-                            intercom::logging::trace(format_args!(
+                            intercom::logging::trace(|l| l(module_path!(), format_args!(
                                 "[{:p}, through {:p}] Serving {}::{}, ERROR",
-                                self_combox, self_vtable, #struct_name, #method_name));
+                                self_combox, self_vtable, #struct_name, #method_name)));
                             <#ret_ty as ErrorValue>::from_error(
                                 intercom::store_error(err))
                         },
