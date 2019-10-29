@@ -20,5 +20,7 @@ quote = { version = "1.0" }
 difference = "2"
 term = "0.5"
 intercom-fmt = { version = "0.3.0", path = "../intercom-fmt" }
-intercom = { version = "0.3", path = "../intercom" }
+intercom = { version = "0.3", path = "../intercom", features = [ "log" ] }
 regex = "0.2"
+log = "0.4"
+simple_logger = { version = "1.0", default-features = false }

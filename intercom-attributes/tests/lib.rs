@@ -2,6 +2,10 @@ extern crate difference;
 extern crate regex;
 extern crate term;
 
+// Compile the loggers so they are available for the tests.
+extern crate log;
+extern crate simple_logger;
+
 use difference::{Changeset, Difference};
 
 use std::fs;
@@ -39,8 +43,9 @@ fn check_expansions()
     build_crate("intercom");
     build_crate("intercom-fmt");
 
-    let failed =
-        test_path(&config, "macro", TestMode::Macro) + test_path(&config, "ui", TestMode::UI);
+    let failed = test_path(&config, "macro", TestMode::Macro)
+        + test_path(&config, "ui", TestMode::UI)
+        + test_path(&config, "run", TestMode::Run);
 
     // Ensure there were no failures.
     //
@@ -147,23 +152,23 @@ fn build(cwd: &str, path: &str, mode: TestMode) -> (bool, String, String)
     #[cfg(not(debug_assertions))]
     let conf = "release";
 
+    let crate_type = match mode {
+        TestMode::Run => "bin",
+        _ => "lib",
+    };
+
     // Launch rustc.
-    #[rustfmt::skip]
     let mut cmd = std::process::Command::new("rustc");
+    #[rustfmt::skip]
     cmd.current_dir(cwd)
         .env("CARGO_PKG_NAME", "TestLib")
         .args(&[
-            "--crate-name",
-            "source",
-            "--crate-type",
-            "lib",
+            "--crate-name", "testcrate",
+            "--crate-type", crate_type,
+            "--out-dir", "tests/out",
+            "-L", &format!("all=../target/{}/deps", conf),
+            "--extern", &format!("intercom=../target/{}/libintercom.rlib", conf),
             path,
-            "--out-dir",
-            "tests/out",
-            "-L",
-            &format!("dependency=../target/{}/deps", conf),
-            "--extern",
-            &format!("intercom=../target/{}/libintercom.rlib", conf),
         ]);
 
     // In expansion mode add the 'pretty=expanded' option.
@@ -286,11 +291,12 @@ fn has_intercom_fmt(dir: &PathBuf) -> Option<PathBuf>
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 enum TestMode
 {
     Macro,
     UI,
+    Run,
 }
 
 fn test_path(config: &TestConfig, sub_path: &str, mode: TestMode) -> usize
@@ -305,19 +311,48 @@ fn test_path(config: &TestConfig, sub_path: &str, mode: TestMode) -> usize
         .filter(|p| p.ends_with(".rs"));
     let mut failed = 0;
 
+    let timestamp_re = regex::RegexBuilder::new(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}")
+        .multi_line(true)
+        .build()
+        .unwrap();
+    let bracket_re = regex::Regex::new(r"\[0x.*?\]").unwrap();
     for source_path in source_paths {
         println!("Testing {}", source_path);
 
         // Get the source and target code.
 
         // The source is compiled using rustc
-        let (_, result_code, result_stderr) =
+        let (success, mut result_stdout, mut result_stderr) =
             build(config.crate_path.to_str().unwrap(), &source_path, mode);
+
+        // If this is a run-test, run the resulting binary.
+        if success && mode == TestMode::Run {
+            let mut cmd = std::process::Command::new("tests/out/testcrate");
+            let output = cmd.output().expect("Failed to execute");
+            assert!(output.status.success());
+
+            // stdout/err is utf8 byte stream. Parse it into a string.
+            result_stdout = String::from_utf8(output.stdout).expect("Bad output");
+            result_stderr = String::from_utf8(output.stderr).expect("Bad stderr");
+
+            // Remove values that are likely to change between runs.
+
+            // Log Timestamps
+            let result_stdout_clean = timestamp_re.replace_all(&result_stdout, "<TIMESTAMP>");
+            let result_stderr_clean = timestamp_re.replace_all(&result_stderr, "<TIMESTAMP>");
+
+            // Pointer values.
+            let result_stdout_clean = bracket_re.replace_all(&result_stdout_clean, "[xxxxxxxx]");
+            let result_stderr_clean = bracket_re.replace_all(&result_stderr_clean, "[xxxxxxxx]");
+
+            result_stdout = result_stdout_clean.to_string();
+            result_stderr = result_stderr_clean.to_string();
+        }
 
         // Generate diffs for both sources
         // Ensure the linebreaks are the same for both. This seems to be
         // somewhat of an issue on AppVeyor.
-        let result_code = result_code.replace("\r", "");
+        let result_stdout = result_stdout.replace("\r", "");
         let result_stderr = result_stderr.replace("\r", "");
 
         let mut results = vec![];
@@ -327,12 +362,18 @@ fn test_path(config: &TestConfig, sub_path: &str, mode: TestMode) -> usize
         // compiler pretty print format in the reference target files - which,
         // despite its name, isn't very pretty.
         match mode {
-            TestMode::Macro => {
-                results.extend(assert_macro(result_code, result_stderr, &source_path))
-            }
-            TestMode::UI => {
-                results.extend(assert_compile(result_code, result_stderr, &source_path))
-            }
+            TestMode::Macro => results.extend(assert_test_output(
+                result_stdout,
+                result_stderr,
+                &source_path,
+                |s| format(s.trim()),
+            )),
+            TestMode::Run | TestMode::UI => results.extend(assert_test_output(
+                result_stdout,
+                result_stderr,
+                &source_path,
+                |s| s,
+            )),
         }
 
         // Acquire a terminal.
@@ -387,8 +428,12 @@ fn test_path(config: &TestConfig, sub_path: &str, mode: TestMode) -> usize
     failed
 }
 
-fn assert_macro(result_code: String, result_stderr: String, source_path: &str)
-    -> Vec<OutputResult>
+fn assert_test_output(
+    result_stdout: String,
+    result_stderr: String,
+    source_path: &str,
+    sanitize: impl Fn(String) -> String,
+) -> Vec<OutputResult>
 {
     // Construct the target file path by replacing the ".source.rs" with a
     // ".target.rs". There's a small discrepancy here as the .source.rs had
@@ -398,7 +443,7 @@ fn assert_macro(result_code: String, result_stderr: String, source_path: &str)
     // This shouldn't matter in practice as these are test files and we can
     // decide on their naming as we write them.
     vec![
-        assert_output_with(result_code, source_path, "stdout", |s| format(s.trim())),
+        assert_output_with(result_stdout, source_path, "stdout", sanitize),
         assert_output_with(result_stderr, source_path, "stderr", |s| {
             strip_path(source_path, s)
         }),
@@ -406,28 +451,6 @@ fn assert_macro(result_code: String, result_stderr: String, source_path: &str)
     .into_iter()
     .flat_map(|v| v)
     .collect()
-}
-
-fn assert_compile(
-    result_code: String,
-    result_stderr: String,
-    source_path: &str,
-) -> Vec<OutputResult>
-{
-    vec![
-        assert_output(result_code, source_path, "stdout"),
-        assert_output_with(result_stderr, source_path, "stderr", |s| {
-            strip_path(source_path, s)
-        }),
-    ]
-    .into_iter()
-    .flat_map(|v| v)
-    .collect()
-}
-
-fn assert_output(actual: String, actual_path: &str, output_kind: &str) -> Option<OutputResult>
-{
-    assert_output_with(actual, actual_path, output_kind, |input| input)
 }
 
 fn assert_output_with(
