@@ -15,7 +15,7 @@ pub enum ParseError
     ComLibrary(String),
 
     #[fail(display = "Parsing [com_class] item {} failed: {}", _0, _1)]
-    ComStruct(String, String),
+    ComClass(String, String),
 
     #[fail(display = "Parsing [com_interface] item {} failed: {}", _0, _1)]
     ComInterface(String, String),
@@ -37,8 +37,8 @@ mod macros;
 
 mod comlibrary;
 pub use self::comlibrary::*;
-mod comstruct;
-pub use self::comstruct::*;
+mod comclass;
+pub use self::comclass::*;
 mod cominterface;
 pub use self::cominterface::*;
 mod comimpl;

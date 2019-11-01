@@ -21,7 +21,7 @@ pub fn expand_com_class(
 {
     // Parse the attribute.
     let mut output = vec![];
-    let cls = model::ComStruct::parse(&lib_name(), attr_tokens.into(), item_tokens.clone().into())?;
+    let cls = model::ComClass::parse(&lib_name(), attr_tokens.into(), item_tokens.clone().into())?;
     let struct_ident = &cls.name;
 
     // IUnknown vtable match. As the primary query_interface is implemented
@@ -255,13 +255,13 @@ pub fn expand_com_class(
 
     output.push(
         create_get_typeinfo_function(&cls)
-            .map_err(|e| model::ParseError::ComStruct(cls.name.to_string(), e))?,
+            .map_err(|e| model::ParseError::ComClass(cls.name.to_string(), e))?,
     );
 
     Ok(tokens_to_tokenstream(item_tokens, output))
 }
 
-fn create_get_typeinfo_function(cls: &model::ComStruct) -> Result<TokenStream, String>
+fn create_get_typeinfo_function(cls: &model::ComClass) -> Result<TokenStream, String>
 {
     let fn_name = Ident::new(
         &format!("get_intercom_coclass_info_for_{}", cls.name),

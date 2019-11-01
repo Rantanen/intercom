@@ -6,14 +6,14 @@ use crate::guid::GUID;
 use ::syn::{Ident, Visibility};
 
 intercom_attribute!(
-    ComStructAttr<ComStructAttrParam, Ident> {
+    ComClassAttr<ComClassAttrParam, Ident> {
         clsid : StrOption,
     }
 );
 
 /// Details of a struct marked with `#[com_class]` attribute.
 #[derive(Debug, PartialEq)]
-pub struct ComStruct
+pub struct ComClass
 {
     pub name: Ident,
     pub clsid: Option<GUID>,
@@ -21,21 +21,21 @@ pub struct ComStruct
     pub interfaces: Vec<Ident>,
 }
 
-impl ComStruct
+impl ComClass
 {
-    /// Creates ComStruct from AST elements.
+    /// Creates ComClass from AST elements.
     pub fn parse(
         crate_name: &str,
         attr_params: TokenStream,
         item: TokenStream,
-    ) -> ParseResult<ComStruct>
+    ) -> ParseResult<ComClass>
     {
         // Parse the inputs.
         let item: ::syn::ItemStruct = ::syn::parse2(item)
-            .map_err(|_| ParseError::ComStruct("<Unknown>".into(), "Item syntax error".into()))?;
+            .map_err(|_| ParseError::ComClass("<Unknown>".into(), "Item syntax error".into()))?;
 
-        let attr: ComStructAttr = ::syn::parse2(attr_params).map_err(|e| {
-            ParseError::ComStruct(
+        let attr: ComClassAttr = ::syn::parse2(attr_params).map_err(|e| {
+            ParseError::ComClass(
                 item.ident.to_string(),
                 format!("Attribute syntax error: {}", e),
             )
@@ -44,14 +44,14 @@ impl ComStruct
         // First attribute parameter is the CLSID. Parse it.
         let clsid_attr = attr
             .clsid()
-            .map_err(|msg| ParseError::ComStruct(item.ident.to_string(), msg))?;
+            .map_err(|msg| ParseError::ComClass(item.ident.to_string(), msg))?;
         let clsid = match clsid_attr {
             None => Some(crate::utils::generate_clsid(
                 crate_name,
                 &item.ident.to_string(),
             )),
             Some(StrOption::Str(clsid)) => Some(GUID::parse(&clsid.value()).map_err(|_| {
-                ParseError::ComStruct(item.ident.to_string(), "Bad CLSID format".into())
+                ParseError::ComClass(item.ident.to_string(), "Bad CLSID format".into())
             })?),
             Some(StrOption::None) => None,
         };
@@ -59,7 +59,7 @@ impl ComStruct
         // Remaining parameters are coclasses.
         let interfaces = attr.args().into_iter().cloned().collect();
 
-        Ok(ComStruct {
+        Ok(ComClass {
             name: item.ident.clone(),
             visibility: item.vis.clone(),
             clsid,
@@ -76,7 +76,7 @@ mod test
     #[test]
     fn parse_com_class()
     {
-        let cls = ComStruct::parse(
+        let cls = ComClass::parse(
             "not used",
             quote!(clsid = "12345678-1234-1234-1234-567890ABCDEF", Foo, Bar),
             quote!(
@@ -103,7 +103,7 @@ mod test
         // What the final GUID is isn't important, what _is_ important however
         // is that the final GUID will not change ever as long as the library
         // name stays the same.
-        let cls = ComStruct::parse(
+        let cls = ComClass::parse(
             "not used",
             quote!(MyStruct, IThings, IStuff),
             quote!(
@@ -129,7 +129,7 @@ mod test
     #[test]
     fn parse_com_class_with_no_data()
     {
-        let cls = ComStruct::parse(
+        let cls = ComClass::parse(
             "not used",
             quote!(clsid = None),
             quote!(
@@ -146,7 +146,7 @@ mod test
     #[test]
     fn parse_com_class_with_no_guid_with_interface()
     {
-        let cls = ComStruct::parse(
+        let cls = ComClass::parse(
             "not used",
             quote!(clsid = None, ITestInterface),
             quote!(
