@@ -22,3 +22,5 @@ term = "0.5"
 intercom-fmt = { version = "0.3.0", path = "../intercom-fmt" }
 intercom = { version = "0.3", path = "../intercom" }
 regex = "0.2"
+log = "0.4"
+simple_logger = { version = "1.0", default-features = false }

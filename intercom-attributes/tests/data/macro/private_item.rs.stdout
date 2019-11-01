@@ -73,11 +73,43 @@ impl intercom::attributes::ComInterface<intercom::type_system::RawTypeSystem> fo
 #[allow(clippy::all)]
 impl IFoo for intercom::ComItf<dyn IFoo> {
     fn trait_method(&self) -> () {
+        intercom::logging::trace(|l| {
+            l(
+                "testcrate",
+                ::core::fmt::Arguments::new_v1(
+                    &["[", "] Calling ", "::"],
+                    &match (&self, &"IFoo", &"trait_method") {
+                        (arg0, arg1, arg2) => [
+                            ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                            ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                            ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ],
+                    },
+                ),
+            )
+        });
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"IFoo", &"trait_method", &"Automation") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -103,6 +135,23 @@ impl IFoo for intercom::ComItf<dyn IFoo> {
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"IFoo", &"trait_method", &"Raw") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -328,84 +377,747 @@ impl intercom::CoClass for Foo {
         riid: intercom::REFIID,
     ) -> intercom::RawComResult<intercom::RawComPtr> {
         if riid.is_null() {
+            intercom::logging::error(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", "] ", "::query_interface(NULL)"],
+                        &match (&vtables, &"Foo") {
+                            (arg0, arg1) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             return Err(intercom::raw::E_NOINTERFACE);
         }
         unsafe {
             let riid = &*riid;
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1_formatted(
+                        &["[", "] ", "::query_interface(", ")"],
+                        &match (&vtables, &"Foo", &riid) {
+                            (arg0, arg1, arg2) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::UpperHex::fmt),
+                            ],
+                        },
+                        &[
+                            ::core::fmt::rt::v1::Argument {
+                                position: ::core::fmt::rt::v1::Position::At(0usize),
+                                format: ::core::fmt::rt::v1::FormatSpec {
+                                    fill: ' ',
+                                    align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                    flags: 0u32,
+                                    precision: ::core::fmt::rt::v1::Count::Implied,
+                                    width: ::core::fmt::rt::v1::Count::Implied,
+                                },
+                            },
+                            ::core::fmt::rt::v1::Argument {
+                                position: ::core::fmt::rt::v1::Position::At(1usize),
+                                format: ::core::fmt::rt::v1::FormatSpec {
+                                    fill: ' ',
+                                    align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                    flags: 0u32,
+                                    precision: ::core::fmt::rt::v1::Count::Implied,
+                                    width: ::core::fmt::rt::v1::Count::Implied,
+                                },
+                            },
+                            ::core::fmt::rt::v1::Argument {
+                                position: ::core::fmt::rt::v1::Position::At(2usize),
+                                format: ::core::fmt::rt::v1::FormatSpec {
+                                    fill: ' ',
+                                    align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                    flags: 2u32,
+                                    precision: ::core::fmt::rt::v1::Count::Implied,
+                                    width: ::core::fmt::rt::v1::Count::Implied,
+                                },
+                            },
+                        ],
+                    ),
+                )
+            });
             Ok(
                 if riid
                     == <dyn intercom::IUnknown as intercom::attributes::ComInterface<
                         intercom::type_system::AutomationTypeSystem,
                     >>::iid()
                 {
-                    (&vtables._ISupportErrorInfo) as
-                       *const &<dyn intercom::ISupportErrorInfo as
-                               intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
-                       as
-                       *mut &<dyn intercom::ISupportErrorInfo as
-                             intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
-                       as intercom::RawComPtr
+                    let ptr =
+                       (&vtables._ISupportErrorInfo) as
+                           *const &<dyn intercom::ISupportErrorInfo as
+                                   intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
+                           as
+                           *mut &<dyn intercom::ISupportErrorInfo as
+                                 intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
+                           as intercom::RawComPtr;
+                    intercom::logging::trace(|l| {
+                        l(
+                            "testcrate",
+                            ::core::fmt::Arguments::new_v1_formatted(
+                                &["[", "] ", "::query_interface(", ") -> IUnknown [", "]"],
+                                &match (&vtables, &"Foo", &riid, &ptr) {
+                                    (arg0, arg1, arg2, arg3) => [
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg0,
+                                            ::core::fmt::Pointer::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg1,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg2,
+                                            ::core::fmt::UpperHex::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg3,
+                                            ::core::fmt::Pointer::fmt,
+                                        ),
+                                    ],
+                                },
+                                &[
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(0usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(1usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(2usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 2u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(3usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                ],
+                            ),
+                        )
+                    });
+                    ptr
                 } else if riid
                     == <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<
                         intercom::type_system::AutomationTypeSystem,
                     >>::iid()
                 {
-                    (&vtables._ISupportErrorInfo) as
-                       *const &<dyn intercom::ISupportErrorInfo as
-                               intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
-                       as
-                       *mut &<dyn intercom::ISupportErrorInfo as
-                             intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
-                       as intercom::RawComPtr
+                    let ptr =
+                       (&vtables._ISupportErrorInfo) as
+                           *const &<dyn intercom::ISupportErrorInfo as
+                                   intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
+                           as
+                           *mut &<dyn intercom::ISupportErrorInfo as
+                                 intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
+                           as intercom::RawComPtr;
+                    intercom::logging::trace(|l| {
+                        l(
+                            "testcrate",
+                            ::core::fmt::Arguments::new_v1_formatted(
+                                &[
+                                    "[",
+                                    "] ",
+                                    "::query_interface(",
+                                    ") -> ISupportErrorInfo [",
+                                    "]",
+                                ],
+                                &match (&vtables, &"Foo", &riid, &ptr) {
+                                    (arg0, arg1, arg2, arg3) => [
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg0,
+                                            ::core::fmt::Pointer::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg1,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg2,
+                                            ::core::fmt::UpperHex::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg3,
+                                            ::core::fmt::Pointer::fmt,
+                                        ),
+                                    ],
+                                },
+                                &[
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(0usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(1usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(2usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 2u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(3usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                ],
+                            ),
+                        )
+                    });
+                    ptr
                 } else if riid
                     == <Foo as intercom::attributes::ComInterface<
                         intercom::type_system::AutomationTypeSystem,
                     >>::iid()
                 {
-                    &vtables.Foo_Automation
+                    let ptr = &vtables.Foo_Automation
                         as *const &<Foo as intercom::attributes::ComInterface<
                             intercom::type_system::AutomationTypeSystem,
                         >>::VTable
                         as *mut &<Foo as intercom::attributes::ComInterface<
                             intercom::type_system::AutomationTypeSystem,
-                        >>::VTable as intercom::RawComPtr
+                        >>::VTable as intercom::RawComPtr;
+                    intercom::logging::trace(|l| {
+                        l(
+                            "testcrate",
+                            ::core::fmt::Arguments::new_v1_formatted(
+                                &["[", "] ", "::query_interface(", ") -> ", " (", ") [", "]"],
+                                &match (&vtables, &"Foo", &riid, &"Foo", &"Automation", &ptr) {
+                                    (arg0, arg1, arg2, arg3, arg4, arg5) => [
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg0,
+                                            ::core::fmt::Pointer::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg1,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg2,
+                                            ::core::fmt::UpperHex::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg3,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg4,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg5,
+                                            ::core::fmt::Pointer::fmt,
+                                        ),
+                                    ],
+                                },
+                                &[
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(0usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(1usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(2usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 2u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(3usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(4usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(5usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                ],
+                            ),
+                        )
+                    });
+                    ptr
                 } else if riid
                     == <Foo as intercom::attributes::ComInterface<
                         intercom::type_system::RawTypeSystem,
                     >>::iid()
                 {
-                    &vtables.Foo_Raw
+                    let ptr = &vtables.Foo_Raw
                         as *const &<Foo as intercom::attributes::ComInterface<
                             intercom::type_system::RawTypeSystem,
                         >>::VTable
                         as *mut &<Foo as intercom::attributes::ComInterface<
                             intercom::type_system::RawTypeSystem,
-                        >>::VTable as intercom::RawComPtr
+                        >>::VTable as intercom::RawComPtr;
+                    intercom::logging::trace(|l| {
+                        l(
+                            "testcrate",
+                            ::core::fmt::Arguments::new_v1_formatted(
+                                &["[", "] ", "::query_interface(", ") -> ", " (", ") [", "]"],
+                                &match (&vtables, &"Foo", &riid, &"Foo", &"Raw", &ptr) {
+                                    (arg0, arg1, arg2, arg3, arg4, arg5) => [
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg0,
+                                            ::core::fmt::Pointer::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg1,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg2,
+                                            ::core::fmt::UpperHex::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg3,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg4,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg5,
+                                            ::core::fmt::Pointer::fmt,
+                                        ),
+                                    ],
+                                },
+                                &[
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(0usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(1usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(2usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 2u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(3usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(4usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(5usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                ],
+                            ),
+                        )
+                    });
+                    ptr
                 } else if riid
                     == <dyn IFoo as intercom::attributes::ComInterface<
                         intercom::type_system::AutomationTypeSystem,
                     >>::iid()
                 {
-                    &vtables.IFoo_Automation
+                    let ptr = &vtables.IFoo_Automation
                         as *const &<dyn IFoo as intercom::attributes::ComInterface<
                             intercom::type_system::AutomationTypeSystem,
                         >>::VTable
                         as *mut &<dyn IFoo as intercom::attributes::ComInterface<
                             intercom::type_system::AutomationTypeSystem,
-                        >>::VTable as intercom::RawComPtr
+                        >>::VTable as intercom::RawComPtr;
+                    intercom::logging::trace(|l| {
+                        l(
+                            "testcrate",
+                            ::core::fmt::Arguments::new_v1_formatted(
+                                &["[", "] ", "::query_interface(", ") -> ", " (", ") [", "]"],
+                                &match (&vtables, &"Foo", &riid, &"IFoo", &"Automation", &ptr) {
+                                    (arg0, arg1, arg2, arg3, arg4, arg5) => [
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg0,
+                                            ::core::fmt::Pointer::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg1,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg2,
+                                            ::core::fmt::UpperHex::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg3,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg4,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg5,
+                                            ::core::fmt::Pointer::fmt,
+                                        ),
+                                    ],
+                                },
+                                &[
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(0usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(1usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(2usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 2u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(3usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(4usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(5usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                ],
+                            ),
+                        )
+                    });
+                    ptr
                 } else if riid
                     == <dyn IFoo as intercom::attributes::ComInterface<
                         intercom::type_system::RawTypeSystem,
                     >>::iid()
                 {
-                    &vtables.IFoo_Raw
+                    let ptr = &vtables.IFoo_Raw
                         as *const &<dyn IFoo as intercom::attributes::ComInterface<
                             intercom::type_system::RawTypeSystem,
                         >>::VTable
                         as *mut &<dyn IFoo as intercom::attributes::ComInterface<
                             intercom::type_system::RawTypeSystem,
-                        >>::VTable as intercom::RawComPtr
+                        >>::VTable as intercom::RawComPtr;
+                    intercom::logging::trace(|l| {
+                        l(
+                            "testcrate",
+                            ::core::fmt::Arguments::new_v1_formatted(
+                                &["[", "] ", "::query_interface(", ") -> ", " (", ") [", "]"],
+                                &match (&vtables, &"Foo", &riid, &"IFoo", &"Raw", &ptr) {
+                                    (arg0, arg1, arg2, arg3, arg4, arg5) => [
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg0,
+                                            ::core::fmt::Pointer::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg1,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg2,
+                                            ::core::fmt::UpperHex::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg3,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg4,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg5,
+                                            ::core::fmt::Pointer::fmt,
+                                        ),
+                                    ],
+                                },
+                                &[
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(0usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(1usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(2usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 2u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(3usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(4usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(5usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                ],
+                            ),
+                        )
+                    });
+                    ptr
                 } else {
+                    intercom::logging::trace(|l| {
+                        l(
+                            "testcrate",
+                            ::core::fmt::Arguments::new_v1_formatted(
+                                &["[", "] ", "::query_interface(", ") -> E_NOINTERFACE"],
+                                &match (&vtables, &"Foo", &riid) {
+                                    (arg0, arg1, arg2) => [
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg0,
+                                            ::core::fmt::Pointer::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg1,
+                                            ::core::fmt::Display::fmt,
+                                        ),
+                                        ::core::fmt::ArgumentV1::new(
+                                            arg2,
+                                            ::core::fmt::UpperHex::fmt,
+                                        ),
+                                    ],
+                                },
+                                &[
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(0usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(1usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 0u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                    ::core::fmt::rt::v1::Argument {
+                                        position: ::core::fmt::rt::v1::Position::At(2usize),
+                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                            fill: ' ',
+                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                            flags: 2u32,
+                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                        },
+                                    },
+                                ],
+                            ),
+                        )
+                    });
                     return Err(intercom::raw::E_NOINTERFACE);
                 },
             )
@@ -513,15 +1225,27 @@ unsafe extern "system" fn __Foo_Foo_Automation_query_interface(
 ) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
-    intercom::ComBoxData::<Foo>::query_interface(
-        &mut *((self_vtable as usize
-            - <Foo as intercom::attributes::ComClass<
-                Foo,
-                intercom::type_system::AutomationTypeSystem,
-            >>::offset()) as *mut _),
-        riid,
-        out,
-    )
+    let self_ptr = (self_vtable as usize
+        - <Foo as intercom::attributes::ComClass<
+            Foo,
+            intercom::type_system::AutomationTypeSystem,
+        >>::offset()) as *mut _;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::query_interface"],
+                &match (&self_ptr, &self_vtable, &"Foo") {
+                    (arg0, arg1, arg2) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    intercom::ComBoxData::<Foo>::query_interface(&mut *self_ptr, riid, out)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -531,13 +1255,27 @@ unsafe extern "system" fn __Foo_Foo_Automation_add_ref(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBoxData::<Foo>::add_ref(
-        &mut *((self_vtable as usize
-            - <Foo as intercom::attributes::ComClass<
-                Foo,
-                intercom::type_system::AutomationTypeSystem,
-            >>::offset()) as *mut _),
-    )
+    let self_ptr = (self_vtable as usize
+        - <Foo as intercom::attributes::ComClass<
+            Foo,
+            intercom::type_system::AutomationTypeSystem,
+        >>::offset()) as *mut _;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::add_ref"],
+                &match (&self_ptr, &self_vtable, &"Foo") {
+                    (arg0, arg1, arg2) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    intercom::ComBoxData::<Foo>::add_ref_ptr(self_ptr)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -547,13 +1285,27 @@ unsafe extern "system" fn __Foo_Foo_Automation_release(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBoxData::<Foo>::release_ptr(
-        (self_vtable as usize
-            - <Foo as intercom::attributes::ComClass<
-                Foo,
-                intercom::type_system::AutomationTypeSystem,
-            >>::offset()) as *mut _,
-    )
+    let self_ptr = (self_vtable as usize
+        - <Foo as intercom::attributes::ComClass<
+            Foo,
+            intercom::type_system::AutomationTypeSystem,
+        >>::offset()) as *mut _;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::release_ptr"],
+                &match (&self_ptr, &self_vtable, &"Foo") {
+                    (arg0, arg1, arg2) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    intercom::ComBoxData::<Foo>::release_ptr(self_ptr)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -563,6 +1315,11 @@ unsafe extern "system" fn __Foo_Foo_Automation_struct_method_Automation(self_vta
  ->
      <() as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+    let self_combox = (self_vtable as usize
+        - <Foo as intercom::attributes::ComClass<
+            Foo,
+            intercom::type_system::AutomationTypeSystem,
+        >>::offset()) as *mut intercom::ComBoxData<Foo>;
     use intercom::type_system::{IntercomFrom, IntercomInto};
     let result:
             Result<<() as
@@ -570,24 +1327,77 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
                    intercom::ComError> =
         (||
              {
-                 let self_combox =
-                     (self_vtable as usize -
-                          <Foo as
-                              intercom::attributes::ComClass<Foo,
-                                                             intercom::type_system::AutomationTypeSystem>>::offset())
-                         as *mut intercom::ComBoxData<Foo>;
+                 intercom::logging::trace(|l|
+                                              l("testcrate",
+                                                ::core::fmt::Arguments::new_v1(&["[",
+                                                                                 ", through ",
+                                                                                 "] Serving ",
+                                                                                 "::"],
+                                                                               &match (&self_combox,
+                                                                                       &self_vtable,
+                                                                                       &"Foo",
+                                                                                       &"struct_method")
+                                                                                    {
+                                                                                    (arg0,
+                                                                                     arg1,
+                                                                                     arg2,
+                                                                                     arg3)
+                                                                                    =>
+                                                                                    [::core::fmt::ArgumentV1::new(arg0,
+                                                                                                                  ::core::fmt::Pointer::fmt),
+                                                                                     ::core::fmt::ArgumentV1::new(arg1,
+                                                                                                                  ::core::fmt::Pointer::fmt),
+                                                                                     ::core::fmt::ArgumentV1::new(arg2,
+                                                                                                                  ::core::fmt::Display::fmt),
+                                                                                     ::core::fmt::ArgumentV1::new(arg3,
+                                                                                                                  ::core::fmt::Display::fmt)],
+                                                                                })));
                  let self_struct: &Foo = &**self_combox;
                  let __result = self_struct.struct_method();
                  Ok({ })
              })();
     use intercom::ErrorValue;
     match result {
-        Ok(v) => v,
-        Err(err) => <<() as intercom::type_system::ExternType<
-            intercom::type_system::AutomationTypeSystem,
-        >>::ExternOutputType as ErrorValue>::from_error(intercom::store_error(
-            err,
-        )),
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (&self_combox, &self_vtable, &"Foo", &"struct_method") {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (&self_combox, &self_vtable, &"Foo", &"struct_method") {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<() as
+             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                as ErrorValue>::from_error(intercom::store_error(err))
+        }
     }
 }
 #[allow(non_upper_case_globals)]
@@ -626,13 +1436,28 @@ unsafe extern "system" fn __Foo_Foo_Raw_query_interface(
 ) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
-    intercom::ComBoxData::<Foo>::query_interface(&mut *((self_vtable as usize
-                                                             -
-                                                             <Foo as
-                                                                 intercom::attributes::ComClass<Foo,
-                                                                                                intercom::type_system::RawTypeSystem>>::offset())
-                                                            as *mut _), riid,
-                                                 out)
+    let self_ptr =
+        (self_vtable as usize -
+             <Foo as
+                 intercom::attributes::ComClass<Foo,
+                                                intercom::type_system::RawTypeSystem>>::offset())
+            as *mut _;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::query_interface"],
+                &match (&self_ptr, &self_vtable, &"Foo") {
+                    (arg0, arg1, arg2) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    intercom::ComBoxData::<Foo>::query_interface(&mut *self_ptr, riid, out)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -642,11 +1467,28 @@ unsafe extern "system" fn __Foo_Foo_Raw_add_ref(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBoxData::<Foo>::add_ref(&mut *((self_vtable as usize -
-                                                     <Foo as
-                                                         intercom::attributes::ComClass<Foo,
-                                                                                        intercom::type_system::RawTypeSystem>>::offset())
-                                                    as *mut _))
+    let self_ptr =
+        (self_vtable as usize -
+             <Foo as
+                 intercom::attributes::ComClass<Foo,
+                                                intercom::type_system::RawTypeSystem>>::offset())
+            as *mut _;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::add_ref"],
+                &match (&self_ptr, &self_vtable, &"Foo") {
+                    (arg0, arg1, arg2) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    intercom::ComBoxData::<Foo>::add_ref_ptr(self_ptr)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -656,11 +1498,28 @@ unsafe extern "system" fn __Foo_Foo_Raw_release(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBoxData::<Foo>::release_ptr((self_vtable as usize -
-                                                  <Foo as
-                                                      intercom::attributes::ComClass<Foo,
-                                                                                     intercom::type_system::RawTypeSystem>>::offset())
-                                                 as *mut _)
+    let self_ptr =
+        (self_vtable as usize -
+             <Foo as
+                 intercom::attributes::ComClass<Foo,
+                                                intercom::type_system::RawTypeSystem>>::offset())
+            as *mut _;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::release_ptr"],
+                &match (&self_ptr, &self_vtable, &"Foo") {
+                    (arg0, arg1, arg2) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    intercom::ComBoxData::<Foo>::release_ptr(self_ptr)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -670,6 +1529,12 @@ unsafe extern "system" fn __Foo_Foo_Raw_struct_method_Raw(self_vtable:
  ->
      <() as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+    let self_combox =
+        (self_vtable as usize -
+             <Foo as
+                 intercom::attributes::ComClass<Foo,
+                                                intercom::type_system::RawTypeSystem>>::offset())
+            as *mut intercom::ComBoxData<Foo>;
     use intercom::type_system::{IntercomFrom, IntercomInto};
     let result:
             Result<<() as
@@ -677,24 +1542,77 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
                    intercom::ComError> =
         (||
              {
-                 let self_combox =
-                     (self_vtable as usize -
-                          <Foo as
-                              intercom::attributes::ComClass<Foo,
-                                                             intercom::type_system::RawTypeSystem>>::offset())
-                         as *mut intercom::ComBoxData<Foo>;
+                 intercom::logging::trace(|l|
+                                              l("testcrate",
+                                                ::core::fmt::Arguments::new_v1(&["[",
+                                                                                 ", through ",
+                                                                                 "] Serving ",
+                                                                                 "::"],
+                                                                               &match (&self_combox,
+                                                                                       &self_vtable,
+                                                                                       &"Foo",
+                                                                                       &"struct_method")
+                                                                                    {
+                                                                                    (arg0,
+                                                                                     arg1,
+                                                                                     arg2,
+                                                                                     arg3)
+                                                                                    =>
+                                                                                    [::core::fmt::ArgumentV1::new(arg0,
+                                                                                                                  ::core::fmt::Pointer::fmt),
+                                                                                     ::core::fmt::ArgumentV1::new(arg1,
+                                                                                                                  ::core::fmt::Pointer::fmt),
+                                                                                     ::core::fmt::ArgumentV1::new(arg2,
+                                                                                                                  ::core::fmt::Display::fmt),
+                                                                                     ::core::fmt::ArgumentV1::new(arg3,
+                                                                                                                  ::core::fmt::Display::fmt)],
+                                                                                })));
                  let self_struct: &Foo = &**self_combox;
                  let __result = self_struct.struct_method();
                  Ok({ })
              })();
     use intercom::ErrorValue;
     match result {
-        Ok(v) => v,
-        Err(err) => <<() as intercom::type_system::ExternType<
-            intercom::type_system::AutomationTypeSystem,
-        >>::ExternOutputType as ErrorValue>::from_error(intercom::store_error(
-            err,
-        )),
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (&self_combox, &self_vtable, &"Foo", &"struct_method") {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (&self_combox, &self_vtable, &"Foo", &"struct_method") {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<() as
+             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                as ErrorValue>::from_error(intercom::store_error(err))
+        }
     }
 }
 #[allow(non_upper_case_globals)]
@@ -898,15 +1816,27 @@ unsafe extern "system" fn __Foo_IFoo_Automation_query_interface(
 ) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
-    intercom::ComBoxData::<Foo>::query_interface(
-        &mut *((self_vtable as usize
-            - <Foo as intercom::attributes::ComClass<
-                dyn IFoo,
-                intercom::type_system::AutomationTypeSystem,
-            >>::offset()) as *mut _),
-        riid,
-        out,
-    )
+    let self_ptr = (self_vtable as usize
+        - <Foo as intercom::attributes::ComClass<
+            dyn IFoo,
+            intercom::type_system::AutomationTypeSystem,
+        >>::offset()) as *mut _;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::query_interface"],
+                &match (&self_ptr, &self_vtable, &"Foo") {
+                    (arg0, arg1, arg2) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    intercom::ComBoxData::<Foo>::query_interface(&mut *self_ptr, riid, out)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -916,13 +1846,27 @@ unsafe extern "system" fn __Foo_IFoo_Automation_add_ref(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBoxData::<Foo>::add_ref(
-        &mut *((self_vtable as usize
-            - <Foo as intercom::attributes::ComClass<
-                dyn IFoo,
-                intercom::type_system::AutomationTypeSystem,
-            >>::offset()) as *mut _),
-    )
+    let self_ptr = (self_vtable as usize
+        - <Foo as intercom::attributes::ComClass<
+            dyn IFoo,
+            intercom::type_system::AutomationTypeSystem,
+        >>::offset()) as *mut _;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::add_ref"],
+                &match (&self_ptr, &self_vtable, &"Foo") {
+                    (arg0, arg1, arg2) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    intercom::ComBoxData::<Foo>::add_ref_ptr(self_ptr)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -932,13 +1876,27 @@ unsafe extern "system" fn __Foo_IFoo_Automation_release(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBoxData::<Foo>::release_ptr(
-        (self_vtable as usize
-            - <Foo as intercom::attributes::ComClass<
-                dyn IFoo,
-                intercom::type_system::AutomationTypeSystem,
-            >>::offset()) as *mut _,
-    )
+    let self_ptr = (self_vtable as usize
+        - <Foo as intercom::attributes::ComClass<
+            dyn IFoo,
+            intercom::type_system::AutomationTypeSystem,
+        >>::offset()) as *mut _;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::release_ptr"],
+                &match (&self_ptr, &self_vtable, &"Foo") {
+                    (arg0, arg1, arg2) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    intercom::ComBoxData::<Foo>::release_ptr(self_ptr)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -948,6 +1906,11 @@ unsafe extern "system" fn __Foo_IFoo_Automation_trait_method_Automation(self_vta
  ->
      <() as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+    let self_combox = (self_vtable as usize
+        - <Foo as intercom::attributes::ComClass<
+            dyn IFoo,
+            intercom::type_system::AutomationTypeSystem,
+        >>::offset()) as *mut intercom::ComBoxData<Foo>;
     use intercom::type_system::{IntercomFrom, IntercomInto};
     let result:
             Result<<() as
@@ -955,24 +1918,77 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
                    intercom::ComError> =
         (||
              {
-                 let self_combox =
-                     (self_vtable as usize -
-                          <Foo as
-                              intercom::attributes::ComClass<dyn IFoo,
-                                                             intercom::type_system::AutomationTypeSystem>>::offset())
-                         as *mut intercom::ComBoxData<Foo>;
+                 intercom::logging::trace(|l|
+                                              l("testcrate",
+                                                ::core::fmt::Arguments::new_v1(&["[",
+                                                                                 ", through ",
+                                                                                 "] Serving ",
+                                                                                 "::"],
+                                                                               &match (&self_combox,
+                                                                                       &self_vtable,
+                                                                                       &"Foo",
+                                                                                       &"trait_method")
+                                                                                    {
+                                                                                    (arg0,
+                                                                                     arg1,
+                                                                                     arg2,
+                                                                                     arg3)
+                                                                                    =>
+                                                                                    [::core::fmt::ArgumentV1::new(arg0,
+                                                                                                                  ::core::fmt::Pointer::fmt),
+                                                                                     ::core::fmt::ArgumentV1::new(arg1,
+                                                                                                                  ::core::fmt::Pointer::fmt),
+                                                                                     ::core::fmt::ArgumentV1::new(arg2,
+                                                                                                                  ::core::fmt::Display::fmt),
+                                                                                     ::core::fmt::ArgumentV1::new(arg3,
+                                                                                                                  ::core::fmt::Display::fmt)],
+                                                                                })));
                  let self_struct: &dyn IFoo = &**self_combox;
                  let __result = self_struct.trait_method();
                  Ok({ })
              })();
     use intercom::ErrorValue;
     match result {
-        Ok(v) => v,
-        Err(err) => <<() as intercom::type_system::ExternType<
-            intercom::type_system::AutomationTypeSystem,
-        >>::ExternOutputType as ErrorValue>::from_error(intercom::store_error(
-            err,
-        )),
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (&self_combox, &self_vtable, &"Foo", &"trait_method") {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (&self_combox, &self_vtable, &"Foo", &"trait_method") {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<() as
+             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                as ErrorValue>::from_error(intercom::store_error(err))
+        }
     }
 }
 #[allow(non_upper_case_globals)]
@@ -1011,15 +2027,28 @@ unsafe extern "system" fn __Foo_IFoo_Raw_query_interface(
 ) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
     intercom::type_system::AutomationTypeSystem,
 >>::ExternOutputType {
-    intercom::ComBoxData::<Foo>::query_interface(
-        &mut *((self_vtable as usize
+    let self_ptr =
+        (self_vtable as usize
             - <Foo as intercom::attributes::ComClass<
                 dyn IFoo,
                 intercom::type_system::RawTypeSystem,
-            >>::offset()) as *mut _),
-        riid,
-        out,
-    )
+            >>::offset()) as *mut _;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::query_interface"],
+                &match (&self_ptr, &self_vtable, &"Foo") {
+                    (arg0, arg1, arg2) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    intercom::ComBoxData::<Foo>::query_interface(&mut *self_ptr, riid, out)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -1029,13 +2058,28 @@ unsafe extern "system" fn __Foo_IFoo_Raw_add_ref(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBoxData::<Foo>::add_ref(
-        &mut *((self_vtable as usize
+    let self_ptr =
+        (self_vtable as usize
             - <Foo as intercom::attributes::ComClass<
                 dyn IFoo,
                 intercom::type_system::RawTypeSystem,
-            >>::offset()) as *mut _),
-    )
+            >>::offset()) as *mut _;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::add_ref"],
+                &match (&self_ptr, &self_vtable, &"Foo") {
+                    (arg0, arg1, arg2) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    intercom::ComBoxData::<Foo>::add_ref_ptr(self_ptr)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -1045,13 +2089,28 @@ unsafe extern "system" fn __Foo_IFoo_Raw_release(self_vtable:
  ->
      <u32 as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
-    intercom::ComBoxData::<Foo>::release_ptr(
+    let self_ptr =
         (self_vtable as usize
             - <Foo as intercom::attributes::ComClass<
                 dyn IFoo,
                 intercom::type_system::RawTypeSystem,
-            >>::offset()) as *mut _,
-    )
+            >>::offset()) as *mut _;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::release_ptr"],
+                &match (&self_ptr, &self_vtable, &"Foo") {
+                    (arg0, arg1, arg2) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    intercom::ComBoxData::<Foo>::release_ptr(self_ptr)
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -1061,6 +2120,12 @@ unsafe extern "system" fn __Foo_IFoo_Raw_trait_method_Raw(self_vtable:
  ->
      <() as
 intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+    let self_combox =
+        (self_vtable as usize
+            - <Foo as intercom::attributes::ComClass<
+                dyn IFoo,
+                intercom::type_system::RawTypeSystem,
+            >>::offset()) as *mut intercom::ComBoxData<Foo>;
     use intercom::type_system::{IntercomFrom, IntercomInto};
     let result:
             Result<<() as
@@ -1068,24 +2133,77 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
                    intercom::ComError> =
         (||
              {
-                 let self_combox =
-                     (self_vtable as usize -
-                          <Foo as
-                              intercom::attributes::ComClass<dyn IFoo,
-                                                             intercom::type_system::RawTypeSystem>>::offset())
-                         as *mut intercom::ComBoxData<Foo>;
+                 intercom::logging::trace(|l|
+                                              l("testcrate",
+                                                ::core::fmt::Arguments::new_v1(&["[",
+                                                                                 ", through ",
+                                                                                 "] Serving ",
+                                                                                 "::"],
+                                                                               &match (&self_combox,
+                                                                                       &self_vtable,
+                                                                                       &"Foo",
+                                                                                       &"trait_method")
+                                                                                    {
+                                                                                    (arg0,
+                                                                                     arg1,
+                                                                                     arg2,
+                                                                                     arg3)
+                                                                                    =>
+                                                                                    [::core::fmt::ArgumentV1::new(arg0,
+                                                                                                                  ::core::fmt::Pointer::fmt),
+                                                                                     ::core::fmt::ArgumentV1::new(arg1,
+                                                                                                                  ::core::fmt::Pointer::fmt),
+                                                                                     ::core::fmt::ArgumentV1::new(arg2,
+                                                                                                                  ::core::fmt::Display::fmt),
+                                                                                     ::core::fmt::ArgumentV1::new(arg3,
+                                                                                                                  ::core::fmt::Display::fmt)],
+                                                                                })));
                  let self_struct: &dyn IFoo = &**self_combox;
                  let __result = self_struct.trait_method();
                  Ok({ })
              })();
     use intercom::ErrorValue;
     match result {
-        Ok(v) => v,
-        Err(err) => <<() as intercom::type_system::ExternType<
-            intercom::type_system::AutomationTypeSystem,
-        >>::ExternOutputType as ErrorValue>::from_error(intercom::store_error(
-            err,
-        )),
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (&self_combox, &self_vtable, &"Foo", &"trait_method") {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (&self_combox, &self_vtable, &"Foo", &"trait_method") {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<() as
+             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
+                as ErrorValue>::from_error(intercom::store_error(err))
+        }
     }
 }
 #[allow(non_upper_case_globals)]

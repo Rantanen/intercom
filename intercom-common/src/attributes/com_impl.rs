@@ -55,6 +55,7 @@ pub fn expand_com_impl(
         // QueryInterface
         let query_interface_ident =
             idents::method_impl(&struct_ident, &itf_unique_ident, "query_interface");
+        let struct_name = struct_ident.to_string();
         output.push(quote_spanned!(struct_ident.span() =>
             #[allow(non_snake_case)]
             #[doc(hidden)]
@@ -73,8 +74,12 @@ pub fn expand_com_impl(
                 // Get the primary iunk interface by offsetting the current
                 // self_vtable with the vtable offset. Once we have the primary
                 // pointer we can delegate the call to the primary implementation.
+                let self_ptr = ( self_vtable as usize - #vtable_offset ) as *mut _;
+                intercom::logging::trace(|l| l(module_path!(), format_args!(
+                    "[{:p}, through {:p}] Serving {}::query_interface",
+                    self_ptr, self_vtable, #struct_name)));
                 intercom::ComBoxData::< #struct_ident >::query_interface(
-                        &mut *(( self_vtable as usize - #vtable_offset ) as *mut _ ),
+                        &mut *self_ptr,
                         riid,
                         out )
             }
@@ -92,8 +97,11 @@ pub fn expand_com_impl(
                     intercom::type_system::AutomationTypeSystem>>
                         ::ExternOutputType
             {
-                intercom::ComBoxData::< #struct_ident >::add_ref(
-                        &mut *(( self_vtable as usize - #vtable_offset ) as *mut _ ) )
+                let self_ptr = ( self_vtable as usize - #vtable_offset ) as *mut _;
+                intercom::logging::trace(|l| l(module_path!(), format_args!(
+                    "[{:p}, through {:p}] Serving {}::add_ref",
+                    self_ptr, self_vtable, #struct_name)));
+                intercom::ComBoxData::< #struct_ident >::add_ref_ptr(self_ptr)
             }
         ));
 
@@ -109,8 +117,11 @@ pub fn expand_com_impl(
                     intercom::type_system::AutomationTypeSystem>>
                         ::ExternOutputType
             {
-                intercom::ComBoxData::< #struct_ident >::release_ptr(
-                        ( self_vtable as usize - #vtable_offset ) as *mut _ )
+                let self_ptr = ( self_vtable as usize - #vtable_offset ) as *mut _;
+                intercom::logging::trace(|l| l(module_path!(), format_args!(
+                    "[{:p}, through {:p}] Serving {}::release_ptr",
+                    self_ptr, self_vtable, #struct_name)));
+                intercom::ComBoxData::< #struct_ident >::release_ptr(self_ptr)
             }
         ));
 
@@ -183,6 +194,7 @@ pub fn expand_com_impl(
                 quote!( let self_struct : &mut #maybe_dyn #itf_ident = &mut **self_combox )
             };
 
+            let method_name = method_ident.to_string();
             output.push(quote!(
                 #[allow(non_snake_case)]
                 #[allow(dead_code)]
@@ -190,12 +202,16 @@ pub fn expand_com_impl(
                 unsafe extern "system" fn #method_impl_ident(
                     #( #args ),*
                 ) -> #ret_ty {
+                    // Acquire the reference to the ComBoxData. For this we need
+                    // to offset the current 'self_vtable' vtable pointer.
+                    let self_combox = ( self_vtable as usize - #vtable_offset )
+                            as *mut intercom::ComBoxData< #struct_ident >;
+
                     use intercom::type_system::{IntercomFrom, IntercomInto};
                     let result : Result< #ret_ty, intercom::ComError > = ( || {
-                        // Acquire the reference to the ComBoxData. For this we need
-                        // to offset the current 'self_vtable' vtable pointer.
-                        let self_combox = ( self_vtable as usize - #vtable_offset )
-                                as *mut intercom::ComBoxData< #struct_ident >;
+                        intercom::logging::trace(|l| l(module_path!(), format_args!(
+                            "[{:p}, through {:p}] Serving {}::{}",
+                            self_combox, self_vtable, #struct_name, #method_name)));
 
                         #self_struct_stmt;
                         let #return_ident = self_struct.#method_rust_ident( #( #in_params ),* );
@@ -205,9 +221,19 @@ pub fn expand_com_impl(
 
                     use intercom::ErrorValue;
                     match result {
-                        Ok( v ) => v,
-                        Err( err ) => < #ret_ty as ErrorValue >::from_error(
-                                intercom::store_error( err ) ),
+                        Ok( v ) => {
+                            intercom::logging::trace(|l| l(module_path!(), format_args!(
+                                "[{:p}, through {:p}] Serving {}::{}, OK",
+                                self_combox, self_vtable, #struct_name, #method_name)));
+                            v
+                        },
+                        Err( err ) => {
+                            intercom::logging::trace(|l| l(module_path!(), format_args!(
+                                "[{:p}, through {:p}] Serving {}::{}, ERROR",
+                                self_combox, self_vtable, #struct_name, #method_name)));
+                            <#ret_ty as ErrorValue>::from_error(
+                                intercom::store_error(err))
+                        },
                     }
                 }
             ));

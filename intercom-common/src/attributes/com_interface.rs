@@ -61,6 +61,7 @@ pub fn expand_com_interface(
     let itf =
         model::ComInterface::from_ast(&lib_name(), attr_tokens.into(), item_tokens.clone().into())?;
     let itf_ident = &itf.display_name;
+    let itf_name = itf.display_name.to_string();
     let maybe_dyn = match itf.item_type {
         utils::InterfaceType::Trait => quote_spanned!(itf.span => dyn),
         utils::InterfaceType::Struct => quote!(),
@@ -74,11 +75,18 @@ pub fn expand_com_interface(
     if itf.item_type == utils::InterfaceType::Trait {
         let mut impls = vec![];
         for (_, method) in itf_output.method_impls.iter() {
+            let method_rust_ident = &method.info.display_name;
+            let method_name = method_rust_ident.to_string();
             let mut impl_branches = vec![];
             for (ts, method_ts_impl) in method.impls.iter() {
                 let ts_tokens = ts.as_typesystem_type(method.info.signature_span);
+                let ts_name = format!("{:?}", ts);
                 impl_branches.push(quote_spanned!(method.info.signature_span =>
                     if let Some( comptr ) = intercom::ComItf::maybe_ptr::<#ts_tokens>( self ) {
+                        intercom::logging::trace(|l| l(module_path!(), format_args!(
+                            "[{:p}, with {:p}] Calling {}::{}, type system: {}",
+                            self, comptr.ptr, #itf_name, #method_name, #ts_name)));
+
                         #method_ts_impl
                     }
                 ));
@@ -97,7 +105,6 @@ pub fn expand_com_interface(
                 quote!()
             };
             let self_arg = &method.info.rust_self_arg;
-            let method_rust_ident = &method.info.display_name;
             let return_ty = &method.info.rust_return_ty;
 
             // Rust to COM implementation.
@@ -105,6 +112,9 @@ pub fn expand_com_interface(
                 #unsafety fn #method_rust_ident(
                     #self_arg, #( #impl_args ),*
                 ) -> #return_ty {
+
+                    intercom::logging::trace(|l| l(module_path!(), format_args!(
+                        "[{:p}] Calling {}::{}", self, #itf_name, #method_name)));
 
                     #[allow(unused_imports)]
                     use intercom::ErrorValue;

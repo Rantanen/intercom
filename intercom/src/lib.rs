@@ -74,6 +74,9 @@ pub use intercom_attributes::*;
 #[macro_use]
 extern crate failure;
 
+#[cfg(feature = "log")]
+extern crate log;
+
 pub mod prelude;
 
 mod classfactory;
@@ -99,6 +102,7 @@ pub mod type_system;
 pub mod typelib;
 pub use type_system::{BidirectionalTypeInfo, InputTypeInfo, OutputTypeInfo};
 pub mod attributes;
+pub mod logging;
 
 /// The `ComInterface` trait defines the COM interface details for a COM
 /// interface trait.

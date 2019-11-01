@@ -259,11 +259,43 @@ impl intercom::attributes::ComInterface<intercom::type_system::RawTypeSystem> fo
 #[allow(clippy::all)]
 impl Foo for intercom::ComItf<dyn Foo> {
     fn arg_method(&self, a: u16) -> () {
+        intercom::logging::trace(|l| {
+            l(
+                "testcrate",
+                ::core::fmt::Arguments::new_v1(
+                    &["[", "] Calling ", "::"],
+                    &match (&self, &"Foo", &"arg_method") {
+                        (arg0, arg1, arg2) => [
+                            ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                            ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                            ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ],
+                    },
+                ),
+            )
+        });
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"arg_method", &"Automation") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -295,6 +327,23 @@ impl Foo for intercom::ComItf<dyn Foo> {
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"arg_method", &"Raw") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -326,11 +375,43 @@ impl Foo for intercom::ComItf<dyn Foo> {
         <() as intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn bool_method(&self, input: bool) -> ComResult<bool> {
+        intercom::logging::trace(|l| {
+            l(
+                "testcrate",
+                ::core::fmt::Arguments::new_v1(
+                    &["[", "] Calling ", "::"],
+                    &match (&self, &"Foo", &"bool_method") {
+                        (arg0, arg1, arg2) => [
+                            ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                            ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                            ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ],
+                    },
+                ),
+            )
+        });
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"bool_method", &"Automation") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -376,6 +457,23 @@ impl Foo for intercom::ComItf<dyn Foo> {
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"bool_method", &"Raw") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -423,11 +521,49 @@ impl Foo for intercom::ComItf<dyn Foo> {
         )
     }
     fn com_result_method(&self) -> ComResult<u16> {
+        intercom::logging::trace(|l| {
+            l(
+                "testcrate",
+                ::core::fmt::Arguments::new_v1(
+                    &["[", "] Calling ", "::"],
+                    &match (&self, &"Foo", &"com_result_method") {
+                        (arg0, arg1, arg2) => [
+                            ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                            ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                            ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ],
+                    },
+                ),
+            )
+        });
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (
+                            &self,
+                            &comptr.ptr,
+                            &"Foo",
+                            &"com_result_method",
+                            &"Automation",
+                        ) {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -466,6 +602,23 @@ impl Foo for intercom::ComItf<dyn Foo> {
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"com_result_method", &"Raw") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -506,11 +659,43 @@ impl Foo for intercom::ComItf<dyn Foo> {
         )
     }
     fn comitf_method(&self, itf: ComItf<dyn Foo>) -> ComResult<ComItf<dyn IUnknown>> {
+        intercom::logging::trace(|l| {
+            l(
+                "testcrate",
+                ::core::fmt::Arguments::new_v1(
+                    &["[", "] Calling ", "::"],
+                    &match (&self, &"Foo", &"comitf_method") {
+                        (arg0, arg1, arg2) => [
+                            ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                            ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                            ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ],
+                    },
+                ),
+            )
+        });
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"comitf_method", &"Automation") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -561,6 +746,23 @@ impl Foo for intercom::ComItf<dyn Foo> {
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"comitf_method", &"Raw") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -613,11 +815,49 @@ impl Foo for intercom::ComItf<dyn Foo> {
         )
     }
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
+        intercom::logging::trace(|l| {
+            l(
+                "testcrate",
+                ::core::fmt::Arguments::new_v1(
+                    &["[", "] Calling ", "::"],
+                    &match (&self, &"Foo", &"complete_method") {
+                        (arg0, arg1, arg2) => [
+                            ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                            ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                            ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ],
+                    },
+                ),
+            )
+        });
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (
+                            &self,
+                            &comptr.ptr,
+                            &"Foo",
+                            &"complete_method",
+                            &"Automation",
+                        ) {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -667,6 +907,23 @@ impl Foo for intercom::ComItf<dyn Foo> {
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"complete_method", &"Raw") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -718,11 +975,49 @@ impl Foo for intercom::ComItf<dyn Foo> {
         )
     }
     fn rust_result_method(&self) -> Result<u16, i32> {
+        intercom::logging::trace(|l| {
+            l(
+                "testcrate",
+                ::core::fmt::Arguments::new_v1(
+                    &["[", "] Calling ", "::"],
+                    &match (&self, &"Foo", &"rust_result_method") {
+                        (arg0, arg1, arg2) => [
+                            ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                            ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                            ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ],
+                    },
+                ),
+            )
+        });
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (
+                            &self,
+                            &comptr.ptr,
+                            &"Foo",
+                            &"rust_result_method",
+                            &"Automation",
+                        ) {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -761,6 +1056,23 @@ impl Foo for intercom::ComItf<dyn Foo> {
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"rust_result_method", &"Raw") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -801,11 +1113,43 @@ impl Foo for intercom::ComItf<dyn Foo> {
         )
     }
     fn simple_method(&self) -> () {
+        intercom::logging::trace(|l| {
+            l(
+                "testcrate",
+                ::core::fmt::Arguments::new_v1(
+                    &["[", "] Calling ", "::"],
+                    &match (&self, &"Foo", &"simple_method") {
+                        (arg0, arg1, arg2) => [
+                            ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                            ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                            ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ],
+                    },
+                ),
+            )
+        });
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"simple_method", &"Automation") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -831,6 +1175,23 @@ impl Foo for intercom::ComItf<dyn Foo> {
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"simple_method", &"Raw") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -856,11 +1217,49 @@ impl Foo for intercom::ComItf<dyn Foo> {
         <() as intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn simple_result_method(&self) -> u16 {
+        intercom::logging::trace(|l| {
+            l(
+                "testcrate",
+                ::core::fmt::Arguments::new_v1(
+                    &["[", "] Calling ", "::"],
+                    &match (&self, &"Foo", &"simple_result_method") {
+                        (arg0, arg1, arg2) => [
+                            ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                            ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                            ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ],
+                    },
+                ),
+            )
+        });
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (
+                            &self,
+                            &comptr.ptr,
+                            &"Foo",
+                            &"simple_result_method",
+                            &"Automation",
+                        ) {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -886,6 +1285,23 @@ impl Foo for intercom::ComItf<dyn Foo> {
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"simple_result_method", &"Raw") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -911,11 +1327,43 @@ impl Foo for intercom::ComItf<dyn Foo> {
         <u16 as intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn string_method(&self, msg: String) -> String {
+        intercom::logging::trace(|l| {
+            l(
+                "testcrate",
+                ::core::fmt::Arguments::new_v1(
+                    &["[", "] Calling ", "::"],
+                    &match (&self, &"Foo", &"string_method") {
+                        (arg0, arg1, arg2) => [
+                            ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                            ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                            ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ],
+                    },
+                ),
+            )
+        });
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"string_method", &"Automation") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -947,6 +1395,23 @@ impl Foo for intercom::ComItf<dyn Foo> {
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"string_method", &"Raw") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -978,11 +1443,43 @@ impl Foo for intercom::ComItf<dyn Foo> {
         <String as intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
     }
     fn variant_method(&self, input: Variant) -> ComResult<Variant> {
+        intercom::logging::trace(|l| {
+            l(
+                "testcrate",
+                ::core::fmt::Arguments::new_v1(
+                    &["[", "] Calling ", "::"],
+                    &match (&self, &"Foo", &"variant_method") {
+                        (arg0, arg1, arg2) => [
+                            ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                            ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                            ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ],
+                    },
+                ),
+            )
+        });
         #[allow(unused_imports)]
         use intercom::ErrorValue;
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::AutomationTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"variant_method", &"Automation") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
@@ -1029,6 +1526,23 @@ impl Foo for intercom::ComItf<dyn Foo> {
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
         {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", with ", "] Calling ", "::", ", type system: "],
+                        &match (&self, &comptr.ptr, &"Foo", &"variant_method", &"Raw") {
+                            (arg0, arg1, arg2, arg3, arg4) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg4, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
             #[allow(unused_imports)]
             use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
