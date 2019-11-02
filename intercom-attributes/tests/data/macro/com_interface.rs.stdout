@@ -306,10 +306,10 @@ impl Foo for intercom::ComItf<dyn Foo> {
             let __intercom_result: Result<(), intercom::ComError> = (|| unsafe {
                 let __result = ((**vtbl).arg_method)(
                     comptr.ptr,
-                    (&<u16 as intercom::type_system::ExternType<
+                    (<u16 as intercom::type_system::ExternType<
                         intercom::type_system::AutomationTypeSystem,
                     >>::intercom_from(a)?)
-                        .intercom_into()?,
+                    .intercom_into()?,
                 );
                 let __intercom_iid = intercom::GUID {
                     data1: 0u32,
@@ -354,10 +354,10 @@ impl Foo for intercom::ComItf<dyn Foo> {
             let __intercom_result: Result<(), intercom::ComError> = (|| unsafe {
                 let __result = ((**vtbl).arg_method)(
                     comptr.ptr,
-                    (&<u16 as intercom::type_system::ExternType<
+                    (<u16 as intercom::type_system::ExternType<
                         intercom::type_system::RawTypeSystem,
                     >>::intercom_from(a)?)
-                        .intercom_into()?,
+                    .intercom_into()?,
                 );
                 let __intercom_iid = intercom::GUID {
                     data1: 0u32,
@@ -425,10 +425,10 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 >>::ExternOutputType = intercom::type_system::ExternDefault::extern_default();
                 let __result = ((**vtbl).bool_method)(
                     comptr.ptr,
-                    (&<bool as intercom::type_system::ExternType<
+                    (<bool as intercom::type_system::ExternType<
                         intercom::type_system::AutomationTypeSystem,
                     >>::intercom_from(input)?)
-                        .intercom_into()?,
+                    .intercom_into()?,
                     &mut __out,
                 );
                 let __intercom_iid = intercom::GUID {
@@ -487,10 +487,10 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 >>::ExternOutputType = intercom::type_system::ExternDefault::extern_default();
                 let __result = ((**vtbl).bool_method)(
                     comptr.ptr,
-                    (&<bool as intercom::type_system::ExternType<
+                    (<bool as intercom::type_system::ExternType<
                         intercom::type_system::RawTypeSystem,
                     >>::intercom_from(input)?)
-                        .intercom_into()?,
+                    .intercom_into()?,
                     &mut __out,
                 );
                 let __intercom_iid = intercom::GUID {
@@ -712,10 +712,10 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 >>::ExternOutputType = intercom::type_system::ExternDefault::extern_default();
                 let __result = ((**vtbl).comitf_method)(
                     comptr.ptr,
-                    (&<ComItf<dyn Foo> as intercom::type_system::ExternType<
+                    (<ComItf<dyn Foo> as intercom::type_system::ExternType<
                         intercom::type_system::AutomationTypeSystem,
                     >>::intercom_from(itf)?)
-                        .intercom_into()?,
+                    .intercom_into()?,
                     &mut __out,
                 );
                 let __intercom_iid = intercom::GUID {
@@ -779,10 +779,10 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 >>::ExternOutputType = intercom::type_system::ExternDefault::extern_default();
                 let __result = ((**vtbl).comitf_method)(
                     comptr.ptr,
-                    (&<ComItf<dyn Foo> as intercom::type_system::ExternType<
+                    (<ComItf<dyn Foo> as intercom::type_system::ExternType<
                         intercom::type_system::RawTypeSystem,
                     >>::intercom_from(itf)?)
-                        .intercom_into()?,
+                    .intercom_into()?,
                     &mut __out,
                 );
                 let __intercom_iid = intercom::GUID {
@@ -871,14 +871,14 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 >>::ExternOutputType = intercom::type_system::ExternDefault::extern_default();
                 let __result = ((**vtbl).complete_method)(
                     comptr.ptr,
-                    (&<u16 as intercom::type_system::ExternType<
+                    (<u16 as intercom::type_system::ExternType<
                         intercom::type_system::AutomationTypeSystem,
                     >>::intercom_from(a)?)
-                        .intercom_into()?,
-                    (&<i16 as intercom::type_system::ExternType<
+                    .intercom_into()?,
+                    (<i16 as intercom::type_system::ExternType<
                         intercom::type_system::AutomationTypeSystem,
                     >>::intercom_from(b)?)
-                        .intercom_into()?,
+                    .intercom_into()?,
                     &mut __out,
                 );
                 let __intercom_iid = intercom::GUID {
@@ -937,14 +937,14 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 >>::ExternOutputType = intercom::type_system::ExternDefault::extern_default();
                 let __result = ((**vtbl).complete_method)(
                     comptr.ptr,
-                    (&<u16 as intercom::type_system::ExternType<
+                    (<u16 as intercom::type_system::ExternType<
                         intercom::type_system::RawTypeSystem,
                     >>::intercom_from(a)?)
-                        .intercom_into()?,
-                    (&<i16 as intercom::type_system::ExternType<
+                    .intercom_into()?,
+                    (<i16 as intercom::type_system::ExternType<
                         intercom::type_system::RawTypeSystem,
                     >>::intercom_from(b)?)
-                        .intercom_into()?,
+                    .intercom_into()?,
                     &mut __out,
                 );
                 let __intercom_iid = intercom::GUID {
@@ -1374,10 +1374,10 @@ impl Foo for intercom::ComItf<dyn Foo> {
             let __intercom_result: Result<String, intercom::ComError> = (|| unsafe {
                 let __result = ((**vtbl).string_method)(
                     comptr.ptr,
-                    (&<String as intercom::type_system::ExternType<
+                    (<String as intercom::type_system::ExternType<
                         intercom::type_system::AutomationTypeSystem,
                     >>::intercom_from(msg)?)
-                        .intercom_into()?,
+                    .intercom_into()?,
                 );
                 let __intercom_iid = intercom::GUID {
                     data1: 0u32,
@@ -1422,10 +1422,10 @@ impl Foo for intercom::ComItf<dyn Foo> {
             let __intercom_result: Result<String, intercom::ComError> = (|| unsafe {
                 let __result = ((**vtbl).string_method)(
                     comptr.ptr,
-                    (&<String as intercom::type_system::ExternType<
+                    (<String as intercom::type_system::ExternType<
                         intercom::type_system::RawTypeSystem,
                     >>::intercom_from(msg)?)
-                        .intercom_into()?,
+                    .intercom_into()?,
                 );
                 let __intercom_iid = intercom::GUID {
                     data1: 0u32,
@@ -1493,10 +1493,10 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 >>::ExternOutputType = intercom::type_system::ExternDefault::extern_default();
                 let __result = ((**vtbl).variant_method)(
                     comptr.ptr,
-                    (&<Variant as intercom::type_system::ExternType<
+                    (<Variant as intercom::type_system::ExternType<
                         intercom::type_system::AutomationTypeSystem,
                     >>::intercom_from(input)?)
-                        .intercom_into()?,
+                    .intercom_into()?,
                     &mut __out,
                 );
                 let __intercom_iid = intercom::GUID {
@@ -1556,10 +1556,10 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 >>::ExternOutputType = intercom::type_system::ExternDefault::extern_default();
                 let __result = ((**vtbl).variant_method)(
                     comptr.ptr,
-                    (&<Variant as intercom::type_system::ExternType<
+                    (<Variant as intercom::type_system::ExternType<
                         intercom::type_system::RawTypeSystem,
                     >>::intercom_from(input)?)
-                        .intercom_into()?,
+                    .intercom_into()?,
                     &mut __out,
                 );
                 let __intercom_iid = intercom::GUID {

@@ -13,7 +13,7 @@
 //! use intercom::{com_library, com_class, com_interface, com_impl, ComResult};
 //!
 //! // Define COM classes to expose from this library.
-//! com_library!(Calculator);
+//! com_library!(class Calculator);
 //!
 //! // Define the COM class and the interfaces it implements.
 //! #[com_class(Calculator)]
