@@ -71,6 +71,7 @@ fn generate_extern_struct(s: &ComStruct, ts: ModelTypeSystem) -> Vec<TokenStream
     vec![
         quote!(
         #[allow(non_camel_case_types)]
+        #[repr(C)]
         #vis struct #extern_ident #extern_fields
         ),
         quote!(impl intercom::type_system::IntercomFrom<#extern_ident> for
