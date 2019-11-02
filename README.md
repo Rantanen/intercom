@@ -20,7 +20,7 @@ Rust COM server:
 ```rust
 pub use intercom::*;
 
-#[com_library(Calculator)]
+#[com_library(class Calculator)]
 
 #[com_class(Calculator)]
 struct Calculator {
