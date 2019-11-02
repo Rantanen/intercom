@@ -85,6 +85,11 @@ public:
         m_handle = dlopen( m_file.c_str(), ( int ) m_flags );
         if( m_handle == nullptr )
             throw_if_failed();
+
+        // Invoke DllMain if one exists.
+        bool ( *dllMainFunc )( void*, uint32_t, void* );
+        if( try_load_function("DllMain", &dllMainFunc) )
+            (*dllMainFunc)(m_handle, 0, nullptr);
     }
 
     //! Decrements the reference count of the dynamic shared object.

@@ -354,6 +354,7 @@ impl IntercomFrom<BString> for String
 {
     unsafe fn intercom_from(source: BString) -> Result<Self, ComError>
     {
+        log::trace!("String::intercom_from(BString)");
         source.to_string().map_err(|_| ComError::E_INVALIDARG)
     }
 }
@@ -362,6 +363,7 @@ impl IntercomFrom<CString> for String
 {
     unsafe fn intercom_from(source: CString) -> Result<Self, ComError>
     {
+        log::trace!("String::intercom_from(CString)");
         source.into_string().map_err(|_| ComError::E_INVALIDARG)
     }
 }
@@ -463,6 +465,7 @@ impl From<BString> for IntercomString
 {
     fn from(source: BString) -> Self
     {
+        log::trace!("");
         IntercomString::BString(source)
     }
 }
@@ -487,6 +490,7 @@ impl IntercomFrom<IntercomString> for BString
 {
     unsafe fn intercom_from(source: IntercomString) -> Result<Self, ComError>
     {
+        log::trace!("BString::intercom_from(IntercomString)");
         match source {
             IntercomString::BString(bstring) => bstring.intercom_into(),
             IntercomString::CString(cstring) => cstring.intercom_into(),
@@ -499,6 +503,7 @@ impl IntercomFrom<IntercomString> for CString
 {
     unsafe fn intercom_from(source: IntercomString) -> Result<Self, ComError>
     {
+        log::trace!("CString::intercom_from(IntercomString)");
         match source {
             IntercomString::BString(bstring) => bstring.intercom_into(),
             IntercomString::CString(cstring) => cstring.intercom_into(),
@@ -511,6 +516,7 @@ impl IntercomFrom<IntercomString> for String
 {
     unsafe fn intercom_from(source: IntercomString) -> Result<Self, ComError>
     {
+        log::trace!("String::intercom_from(IntercomString)");
         match source {
             IntercomString::BString(bstring) => bstring.intercom_into(),
             IntercomString::CString(cstring) => cstring.intercom_into(),
@@ -625,6 +631,7 @@ impl IntercomFrom<crate::raw::InBSTR> for String
 {
     unsafe fn intercom_from(source: crate::raw::InBSTR) -> ComResult<Self>
     {
+        log::trace!("String::intercom_from(InBSTR)");
         Ok(BStr::from_ptr(source.0)
             .to_string()
             .map_err(|_| ComError::E_INVALIDARG)?)
@@ -635,6 +642,7 @@ impl IntercomFrom<crate::raw::InBSTR> for BString
 {
     unsafe fn intercom_from(source: crate::raw::InBSTR) -> ComResult<Self>
     {
+        log::trace!("BString::intercom_from(InBSTR)");
         Ok(BStr::from_ptr(source.0).to_owned())
     }
 }
@@ -643,6 +651,7 @@ impl<'a> IntercomFrom<&'a crate::raw::InBSTR> for &'a BStr
 {
     unsafe fn intercom_from(source: &'a crate::raw::InBSTR) -> ComResult<Self>
     {
+        log::trace!("&BStr::intercom_from(&InBSTR)");
         Ok(BStr::from_ptr(source.0))
     }
 }
@@ -651,6 +660,7 @@ impl<'a> IntercomFrom<crate::raw::InBSTR> for &'a BStr
 {
     unsafe fn intercom_from(source: crate::raw::InBSTR) -> ComResult<Self>
     {
+        log::trace!("&BStr::intercom_from(InBSTR)");
         Ok(BStr::from_ptr(source.0))
     }
 }
@@ -659,6 +669,7 @@ impl IntercomFrom<crate::raw::InBSTR> for CString
 {
     unsafe fn intercom_from(source: crate::raw::InBSTR) -> ComResult<Self>
     {
+        log::trace!("CString::intercom_from(InBSTR)");
         CString::new(
             BStr::from_ptr(source.0)
                 .to_string()
@@ -674,6 +685,7 @@ where
 {
     default unsafe fn intercom_from(source: *mut TPtr) -> ComResult<Self>
     {
+        log::trace!("TTarget::intercom_from(*mut TPtr)");
         let bstring: ComResult<TTarget> = (source as *const TPtr).intercom_into();
 
         bstring
@@ -687,6 +699,7 @@ impl IntercomFrom<intercom::raw::OutBSTR> for BString
 {
     unsafe fn intercom_from(source: intercom::raw::OutBSTR) -> ComResult<Self>
     {
+        log::trace!("BString::intercom_from(OutBSTR)");
         Ok(BString::from_ptr(source.0))
     }
 }
@@ -695,9 +708,10 @@ impl IntercomFrom<intercom::raw::OutBSTR> for String
 {
     unsafe fn intercom_from(source: intercom::raw::OutBSTR) -> ComResult<Self>
     {
-        BString::from_ptr(source.0)
+        log::trace!("String::intercom_from(OutBSTR)");
+        BStr::from_ptr(source.0)
             .to_string()
-            .map_err(|_| ComError::E_INVALIDARG)
+            .map_err(|e| { log::error!("{:?}", e); ComError::E_INVALIDARG })
     }
 }
 
@@ -705,6 +719,7 @@ impl IntercomFrom<intercom::raw::OutBSTR> for CString
 {
     unsafe fn intercom_from(source: intercom::raw::OutBSTR) -> ComResult<Self>
     {
+        log::trace!("CString::intercom_from(OutBSTR)");
         CString::new(String::intercom_from(source)?).map_err(|_| ComError::E_INVALIDARG)
     }
 }
@@ -715,6 +730,7 @@ impl IntercomFrom<*const c_char> for String
 {
     unsafe fn intercom_from(source: *const c_char) -> ComResult<Self>
     {
+        log::trace!("String::intercom_from(*const char)");
         Ok(CStr::from_ptr(source)
             .to_str()
             .map_err(|_| ComError::E_INVALIDARG)?
@@ -749,6 +765,7 @@ impl IntercomFrom<*const c_char> for BString
 {
     unsafe fn intercom_from(source: *const c_char) -> ComResult<Self>
     {
+        log::trace!("BString::intercom_from(*const char)");
         Ok(BString::from(
             CStr::from_ptr(source)
                 .to_str()
@@ -777,6 +794,7 @@ impl<'a> IntercomFrom<*const c_char> for CString
 {
     unsafe fn intercom_from(source: *const c_char) -> ComResult<Self>
     {
+        log::trace!("CString::intercom_from(*const char)");
         Ok(CStr::from_ptr(source).into())
     }
 }
@@ -789,6 +807,7 @@ impl IntercomFrom<*mut c_char> for CString
 {
     unsafe fn intercom_from(source: *mut c_char) -> ComResult<CString>
     {
+        log::trace!("CString::intercom_from(*mut char)");
         Ok(CString::from_raw(source))
     }
 }
@@ -797,6 +816,7 @@ impl<'a> IntercomFrom<*const c_char> for &'a CStr
 {
     unsafe fn intercom_from(source: *const c_char) -> ComResult<Self>
     {
+        log::trace!("&CStr::intercom_from(*const char)");
         Ok(CStr::from_ptr(source))
     }
 }
@@ -805,6 +825,7 @@ impl<'a> IntercomFrom<&*const c_char> for &'a CStr
 {
     unsafe fn intercom_from(source: &*const c_char) -> ComResult<Self>
     {
+        log::trace!("&CStr::intercom_from(&*const char)");
         Ok(CStr::from_ptr(*source))
     }
 }
@@ -815,6 +836,7 @@ impl IntercomFrom<&BStr> for crate::raw::InBSTR
 {
     unsafe fn intercom_from(source: &BStr) -> ComResult<Self>
     {
+        log::trace!("InBSTR::intercom_from(&BStr)");
         Ok(crate::raw::InBSTR(source.as_ptr()))
     }
 }
@@ -823,6 +845,7 @@ impl IntercomFrom<&BString> for crate::raw::InBSTR
 {
     unsafe fn intercom_from(source: &BString) -> ComResult<Self>
     {
+        log::trace!("InBSTR::intercom_from(&BString)");
         Ok(crate::raw::InBSTR(source.as_ptr()))
     }
 }
@@ -831,6 +854,7 @@ impl IntercomFrom<BString> for crate::raw::OutBSTR
 {
     unsafe fn intercom_from(source: BString) -> ComResult<Self>
     {
+        log::trace!("OutBSTR::intercom_from(BString)");
         Ok(crate::raw::OutBSTR(source.into_ptr()))
     }
 }
@@ -839,6 +863,7 @@ impl IntercomFrom<BString> for crate::raw::InBSTR
 {
     unsafe fn intercom_from(source: BString) -> ComResult<Self>
     {
+        log::trace!("InBSTR::intercom_from(BString)");
         Ok(crate::raw::InBSTR(source.into_ptr()))
     }
 }
@@ -847,6 +872,7 @@ impl IntercomFrom<CString> for crate::raw::OutBSTR
 {
     unsafe fn intercom_from(source: CString) -> ComResult<Self>
     {
+        log::trace!("OutBSTR::intercom_from(CString)");
         let bstr: BString = source.intercom_into()?;
         Ok(crate::raw::OutBSTR(bstr.into_ptr()))
     }
@@ -858,6 +884,7 @@ impl IntercomFrom<&CStr> for *const c_char
 {
     unsafe fn intercom_from(source: &CStr) -> ComResult<Self>
     {
+        log::trace!("*const char::intercom_from(&CStr)");
         Ok(source.as_ptr())
     }
 }
@@ -866,6 +893,7 @@ impl IntercomFrom<&CString> for *const c_char
 {
     unsafe fn intercom_from(source: &CString) -> ComResult<Self>
     {
+        log::trace!("*const char::intercom_from(&CString)");
         Ok(source.as_ptr())
     }
 }
@@ -875,6 +903,7 @@ impl IntercomFrom<CString> for *const c_char
     unsafe fn intercom_from(source: CString) -> ComResult<Self>
     {
         // FIXME: These should be allocated with the intercom allocator.
+        log::trace!("*const char::intercom_from(CString)");
         let ptr = source.as_ptr();
         std::mem::forget(source);
         Ok(ptr as _)
@@ -886,6 +915,7 @@ impl IntercomFrom<CString> for *mut c_char
     unsafe fn intercom_from(source: CString) -> ComResult<Self>
     {
         // FIXME: These should be allocated with the intercom allocator.
+        log::trace!("*mut char::intercom_from(CString)");
         let ptr = source.as_ptr();
         std::mem::forget(source);
         Ok(ptr as _)
@@ -896,6 +926,7 @@ impl IntercomFrom<BString> for *mut c_char
 {
     unsafe fn intercom_from(source: BString) -> ComResult<Self>
     {
+        log::trace!("*mut char::intercom_from(BString)");
         let cstring: CString = source.intercom_into()?;
         cstring.intercom_into()
     }
@@ -907,6 +938,7 @@ impl IntercomFrom<String> for CString
 {
     unsafe fn intercom_from(source: String) -> ComResult<Self>
     {
+        log::trace!("CString::intercom_from(String)");
         CString::new(source).map_err(|_| ComError::E_INVALIDARG)
     }
 }
@@ -915,6 +947,7 @@ impl IntercomFrom<&str> for CString
 {
     unsafe fn intercom_from(source: &str) -> ComResult<Self>
     {
+        log::trace!("CString::intercom_from(&str)");
         CString::new(source).map_err(|_| ComError::E_INVALIDARG)
     }
 }
@@ -923,6 +956,7 @@ impl IntercomFrom<String> for BString
 {
     unsafe fn intercom_from(source: String) -> ComResult<Self>
     {
+        log::trace!("BString::intercom_from(String)");
         Ok(BString::from(source.as_ref()))
     }
 }
@@ -931,6 +965,7 @@ impl<'a> IntercomFrom<&'a str> for BString
 {
     unsafe fn intercom_from(source: &str) -> ComResult<Self>
     {
+        log::trace!("BString::intercom_from(&str)");
         Ok(BString::from(source))
     }
 }
@@ -941,6 +976,7 @@ impl IntercomFrom<CString> for BString
 {
     unsafe fn intercom_from(source: CString) -> ComResult<Self>
     {
+        log::trace!("BString::intercom_from(CString)");
         Ok(BString::from(
             source
                 .to_str()
@@ -954,6 +990,7 @@ impl<'a> IntercomFrom<&'a CString> for &'a CStr
 {
     unsafe fn intercom_from(source: &'a CString) -> ComResult<Self>
     {
+        log::trace!("&CStr::intercom_from(&CString)");
         Ok(source.as_ref())
     }
 }
@@ -964,6 +1001,7 @@ impl IntercomFrom<BString> for CString
 {
     unsafe fn intercom_from(source: BString) -> ComResult<Self>
     {
+        log::trace!("CString::intercom_from(BString)");
         CString::new(source.to_string().map_err(|_| ComError::E_INVALIDARG)?)
             .map_err(|_| ComError::E_INVALIDARG)
     }
@@ -973,6 +1011,7 @@ impl<'a> IntercomFrom<&'a BString> for &'a BStr
 {
     unsafe fn intercom_from(source: &'a BString) -> ComResult<Self>
     {
+        log::trace!("&BStr::intercom_from(BString)");
         Ok(source.as_ref())
     }
 }
@@ -981,6 +1020,7 @@ impl IntercomFrom<&BStr> for CString
 {
     unsafe fn intercom_from(source: &BStr) -> ComResult<Self>
     {
+        log::trace!("CString::intercom_from(&BStr)");
         CString::new(source.to_string().map_err(|_| ComError::E_INVALIDARG)?)
             .map_err(|_| ComError::E_INVALIDARG)
     }
@@ -990,6 +1030,7 @@ impl IntercomFrom<&CStr> for BString
 {
     unsafe fn intercom_from(source: &CStr) -> ComResult<Self>
     {
+        log::trace!("BString::intercom_from(&CStr)");
         Ok(BString::from(
             source
                 .to_str()
@@ -1003,6 +1044,7 @@ impl<'a> IntercomFrom<&'a String> for &'a str
 {
     unsafe fn intercom_from(source: &'a String) -> ComResult<Self>
     {
+        log::trace!("&str::intercom_from(&String)");
         Ok(source.as_ref())
     }
 }
@@ -1011,6 +1053,7 @@ impl IntercomFrom<String> for *mut c_char
 {
     unsafe fn intercom_from(source: String) -> ComResult<Self>
     {
+        log::trace!("*mut char::intercom_from(String)");
         let bytes = source.as_bytes();
 
         // We just allocated the memory. This is safe.
@@ -1026,6 +1069,7 @@ impl IntercomFrom<String> for intercom::raw::OutBSTR
 {
     unsafe fn intercom_from(source: String) -> ComResult<Self>
     {
+        log::trace!("OutBSTR::intercom_from(String)");
         Ok(intercom::raw::OutBSTR(BString::from(source).into_ptr()))
     }
 }

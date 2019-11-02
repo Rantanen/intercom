@@ -21,6 +21,8 @@ pub mod variant;
 
 // Declare available COM classes.
 com_library!(
+    on_load = on_load,
+
     class primitive::PrimitiveOperations,
     class return_interfaces::RefCountOperations,
     class return_interfaces::ClassCreator,
@@ -42,3 +44,14 @@ com_library!(
     user_type struct_parameters::Rectangle,
     user_type struct_parameters::Point,
 );
+
+fn on_load() {
+    env_logger::builder()
+        .format(|buf, record| {
+            let file = record.file().unwrap_or("<unknown>");
+            let line = record.line().unwrap_or(0);
+            use std::io::Write;
+            writeln!(buf, "{} - {}:{}: {}", record.level(), file, line, record.args())
+        })
+        .init();
+}

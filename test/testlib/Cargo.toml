@@ -10,3 +10,4 @@ crate-type = [ "cdylib" ]
 intercom = { path = "../../intercom" }
 winapi = "0.2.8"
 chrono = "0.4"
+env_logger = "0.7"

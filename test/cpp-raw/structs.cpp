@@ -91,8 +91,8 @@ TEST_CASE( "Struct" ) {
             REQUIRE( hr == intercom::SC_OK );
 
             StringStruct_Automation ssa;
-            BSTR a = AllocBstr(pAllocator, u"foo");
-            BSTR b = AllocBstr(pAllocator, u"bar");
+            intercom::BSTR a = AllocBstr(pAllocator, u"foo");
+            intercom::BSTR b = AllocBstr(pAllocator, u"bar");
 
             REQUIRE( pTests->GetStringStruct(a, b, &ssa ) == intercom::SC_OK );
 
@@ -120,13 +120,18 @@ TEST_CASE( "Struct" ) {
             REQUIRE(pTests->QueryInterface(IID_IStructParameterTests_Raw, reinterpret_cast<void**>( &pTests_raw ) ) == intercom::SC_OK);
 
             StringStruct_Raw ssa;
-            REQUIRE( pTests_raw->GetStringStruct("foo", "bar", &ssa ) == intercom::SC_OK );
+            REQUIRE( pTests_raw->GetStringStruct(
+                    const_cast<char*>("foo"),
+                    const_cast<char*>("bar"),
+                    &ssa ) == intercom::SC_OK );
 
             REQUIRE( strcmp( ssa.a, "foo" ) == 0 );
             REQUIRE( strcmp( ssa.b, "bar" ) == 0 );
 
             pAllocator->Free( ssa.a );
             pAllocator->Free( ssa.b );
+            pAllocator->Release();
+            pTests_raw->Release();
         }
 
         SECTION( "Complex struct" )
@@ -163,8 +168,8 @@ TEST_CASE( "Struct" ) {
                 &pAllocator );
             REQUIRE( hr == intercom::SC_OK );
 
-            BSTR a = AllocBstr(pAllocator, u"foo");
-            BSTR b = AllocBstr(pAllocator, u"bar");
+            intercom::BSTR a = AllocBstr(pAllocator, u"foo");
+            intercom::BSTR b = AllocBstr(pAllocator, u"bar");
 
             StringStruct_Automation ssa;
             ssa.a = a;
@@ -191,10 +196,16 @@ TEST_CASE( "Struct" ) {
             REQUIRE(pTests->QueryInterface(IID_IStructParameterTests_Raw, reinterpret_cast<void**>( &pTests_raw ) ) == intercom::SC_OK);
 
             StringStruct_Raw ssa;
-            ssa.a = "foo";
-            ssa.b = "bar";
+            ssa.a = const_cast<char*>("foo");
+            ssa.b = const_cast<char*>("bar");
 
-            REQUIRE( pTests_raw->VerifyStringStruct(ssa, "foo", "bar") == intercom::SC_OK );
+            REQUIRE( pTests_raw->VerifyStringStruct(ssa,
+                        const_cast<char*>("foo"),
+                        const_cast<char*>("bar"))
+                    == intercom::SC_OK );
+
+            pAllocator->Release();
+            pTests_raw->Release();
         }
 
         SECTION( "Complex struct" )
@@ -208,4 +219,6 @@ TEST_CASE( "Struct" ) {
             REQUIRE( pTests->VerifyComplexStruct(rect, 1.0, 100.0, 123.456, 789.123) == intercom::SC_OK );
         }
     }
+
+    pTests->Release();
 }

@@ -32,6 +32,7 @@ impl syn::parse::Parse for LibraryType
 intercom_attribute!(
     ComLibraryAttr<ComLibraryAttrParam, LibraryType> {
         libid : LitStr,
+        on_load: Path,
     }
 );
 
@@ -43,6 +44,7 @@ pub struct ComLibrary
 {
     pub name: String,
     pub libid: GUID,
+    pub on_load: Option<Path>,
     pub coclasses: Vec<Path>,
     pub interfaces: Vec<Path>,
     pub structs: Vec<Path>,
@@ -75,6 +77,7 @@ impl ComLibrary
 
         Ok(ComLibrary {
             name: crate_name.to_owned(),
+            on_load: attr.on_load().map_err(ParseError::ComLibrary)?.cloned(),
             coclasses,
             interfaces,
             structs,

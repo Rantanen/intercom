@@ -85,6 +85,9 @@ namespace raw
     static constexpr intercom::IID IID_{{name}} = {{iid_struct}};
     using {{name}} = {{../lib_name}}::raw::{{name}};
 {{~/each}}
+{{~#each structs}}
+    using {{name}} = {{../lib_name}}::raw::{{name}};
+{{~/each}}
 {{~#each coclasses}}
     static constexpr intercom::CLSID CLSID_{{name}} = {{clsid_struct}};
 {{~/each}}

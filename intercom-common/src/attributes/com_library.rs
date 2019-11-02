@@ -91,6 +91,30 @@ pub fn expand_com_library(
     let dll_get_class_object = get_dll_get_class_object_function(&match_arms);
     output.push(dll_get_class_object);
 
+    // Instantiate the dll main, which invokes the lib init function if one is
+    // specified
+    let on_load = match &lib.on_load {
+        Some(path) => quote!(
+            static ON_LOAD: std::sync::Once = std::sync::Once::new();
+            ON_LOAD.call_once(|| #path());
+        ),
+        None => quote!(),
+    };
+    output.push(quote!(
+        #[no_mangle]
+        #[allow(non_camel_case_types)]
+        #[doc(hidden)]
+        pub extern "system" fn DllMain(
+            _dll_instance: *mut std::os::raw::c_void,
+            _reason: u32,
+            _reserved: *mut std::os::raw::c_void,
+        ) -> bool
+        {
+            #on_load
+            true
+        }
+    ));
+
     // Implement get_intercom_typelib()
     let get_typelib_fn =
         create_get_typelib_function(&lib).map_err(model::ParseError::ComLibrary)?;
