@@ -13,7 +13,7 @@ pub fn expand_com_struct(
     let model = ComStruct::parse(&lib_name(), attr_tokens.into(), item_tokens.clone().into())?;
 
     let mut output = vec![];
-    for ts in [ModelTypeSystem::Automation, ModelTypeSystem::Raw].into_iter() {
+    for ts in [ModelTypeSystem::Automation, ModelTypeSystem::Raw].iter() {
         output.extend(generate_extern_struct(&model, *ts));
 
         let struct_ident = &model.name;
@@ -104,7 +104,7 @@ fn generate_extern_struct(s: &ComStruct, ts: ModelTypeSystem) -> Vec<TokenStream
 
 fn change_types(fields: &mut Punctuated<Field, Comma>, ts: ModelTypeSystem)
 {
-    for ref mut field in fields {
+    for field in fields.iter_mut() {
         let ty = &field.ty;
         let ts_type = ts.as_typesystem_type(ty.span());
         field.ty = syn::parse2(
@@ -117,7 +117,7 @@ fn create_get_typeinfo_function(model: &model::ComStruct) -> Result<TokenStream,
 {
     let struct_name = model.name.to_string();
     let mut variant_tokens = vec![];
-    for ts in [ModelTypeSystem::Automation, ModelTypeSystem::Raw].into_iter() {
+    for ts in [ModelTypeSystem::Automation, ModelTypeSystem::Raw].iter() {
         variant_tokens.push(create_typeinfo_for_variant(model, *ts)?);
     }
 
