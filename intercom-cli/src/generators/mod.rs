@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 
 use intercom::type_system::TypeSystemName;
-use intercom::typelib::{Interface, TypeInfo, TypeLib};
+use intercom::typelib::{Interface, Struct, TypeInfo, TypeLib};
 
 /// A common error type for all the generators.
 #[derive(Fail, Debug)]
@@ -48,6 +48,7 @@ pub struct LibraryContext<'a>
 {
     pub itfs_by_ref: HashMap<String, &'a Interface>,
     pub itfs_by_name: HashMap<String, &'a Interface>,
+    pub structs_by_name: HashMap<String, &'a Struct>,
 }
 
 impl<'a> LibraryContext<'a>
@@ -78,9 +79,19 @@ impl<'a> LibraryContext<'a>
                 )
             })
             .collect();
+        let structs_by_name: HashMap<String, &Struct> = lib
+            .types
+            .iter()
+            .filter_map(|t| match t {
+                TypeInfo::Struct(stru) => Some(stru),
+                _ => None,
+            })
+            .map(|stru| (stru.name.to_string(), &**stru.as_ref()))
+            .collect();
         Ok(LibraryContext {
             itfs_by_name,
             itfs_by_ref,
+            structs_by_name,
         })
     }
 }

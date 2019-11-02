@@ -27,3 +27,8 @@ pub trait InterfaceHasTypeInfo
 {
     fn gather_type_info() -> Vec<crate::typelib::TypeInfo>;
 }
+
+pub trait StructHasTypeInfo
+{
+    fn gather_type_info() -> Vec<crate::typelib::TypeInfo>;
+}

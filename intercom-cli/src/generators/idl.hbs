@@ -25,6 +25,15 @@ library {{lib_name}}
     interface {{name}};
 {{/each}}
 
+{{#each structs}}
+    struct {{name}}
+    {
+    {{#each fields}}
+        {{arg_type}} {{name}};
+    {{/each}}
+    };
+{{/each}}
+
 {{#each interfaces}}
     [
         object,

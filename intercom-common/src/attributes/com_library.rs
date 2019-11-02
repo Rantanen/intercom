@@ -151,13 +151,19 @@ fn create_get_typelib_function(lib: &model::ComLibrary) -> Result<TokenStream, S
             <#path as intercom::attributes::HasTypeInfo>::gather_type_info()
         )
     });
+    let create_struct_typeinfo = lib.structs.iter().map(|path| {
+        quote!(
+            <#path as intercom::attributes::StructHasTypeInfo>::gather_type_info()
+        )
+    });
     Ok(quote!(
         pub(crate) fn get_intercom_typelib() -> intercom::typelib::TypeLib
         {
             let types = vec![
                 <intercom::alloc::Allocator as intercom::attributes::HasTypeInfo>::gather_type_info(),
                 <intercom::error::ErrorStore as intercom::attributes::HasTypeInfo>::gather_type_info(),
-                #( #create_class_typeinfo ),*
+                #( #create_class_typeinfo, )*
+                #( #create_struct_typeinfo, )*
             ].into_iter().flatten().collect::<Vec<_>>();
             intercom::typelib::TypeLib::__new(
                 #lib_name.into(),

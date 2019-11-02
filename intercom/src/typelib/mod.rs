@@ -60,6 +60,7 @@ pub enum TypeInfo
 {
     Class(ComBox<CoClass>),
     Interface(ComBox<Interface>),
+    Struct(ComBox<Struct>),
 }
 
 #[derive(intercom::ExternType, intercom::BidirectionalTypeInfo, Debug)]
@@ -68,6 +69,7 @@ pub enum TypeInfoKind
 {
     CoClass,
     Interface,
+    Struct,
 }
 
 #[com_interface]
@@ -188,6 +190,38 @@ pub trait IIntercomMethod
     fn get_parameter(&self, idx: u32) -> ComResult<(String, String, u32, Direction)>;
 }
 
+#[com_class(IIntercomTypeInfo, IIntercomStruct)]
+#[derive(Debug)]
+pub struct Struct
+{
+    pub name: Cow<'static, str>,
+    pub variants: Vec<ComBox<StructVariant>>,
+}
+
+#[com_class(IIntercomStructVariant)]
+#[derive(Debug)]
+pub struct StructVariant
+{
+    pub ts: TypeSystemName,
+    pub fields: Vec<Arg>,
+}
+
+#[com_interface]
+pub trait IIntercomStruct
+{
+    fn get_name(&self) -> ComResult<String>;
+    fn get_variant_count(&self) -> ComResult<u32>;
+    fn get_variant(&self, idx: u32) -> ComResult<ComRc<dyn IIntercomStructVariant>>;
+}
+
+#[com_interface]
+pub trait IIntercomStructVariant
+{
+    fn get_type_system(&self) -> ComResult<TypeSystemName>;
+    fn get_field_count(&self) -> ComResult<u32>;
+    fn get_field(&self, idx: u32) -> ComResult<(String, String, u32, Direction)>;
+}
+
 // Impls
 
 #[com_impl]
@@ -212,6 +246,7 @@ impl IIntercomTypeLib for TypeLib
         Ok(match &self.types[idx as usize] {
             TypeInfo::Class(cls) => ComRc::from(cls),
             TypeInfo::Interface(itf) => ComRc::from(itf),
+            TypeInfo::Struct(stru) => ComRc::from(stru),
         })
     }
 }
@@ -354,6 +389,62 @@ impl IIntercomMethod for Method
     }
 }
 
+#[com_impl]
+impl IIntercomTypeInfo for Struct
+{
+    fn get_name(&self) -> ComResult<String>
+    {
+        Ok(self.name.to_string())
+    }
+
+    fn get_kind(&self) -> ComResult<TypeInfoKind>
+    {
+        Ok(TypeInfoKind::Struct)
+    }
+}
+
+#[com_impl]
+impl IIntercomStruct for Struct
+{
+    fn get_name(&self) -> ComResult<String>
+    {
+        Ok(self.name.to_string())
+    }
+    fn get_variant_count(&self) -> ComResult<u32>
+    {
+        Ok(self.variants.len() as u32)
+    }
+    fn get_variant(&self, idx: u32) -> ComResult<ComRc<dyn IIntercomStructVariant>>
+    {
+        Ok(ComRc::from(&self.variants[idx as usize]))
+    }
+}
+
+#[com_impl]
+impl IIntercomStructVariant for StructVariant
+{
+    fn get_type_system(&self) -> ComResult<TypeSystemName>
+    {
+        Ok(self.ts)
+    }
+
+    fn get_field_count(&self) -> ComResult<u32>
+    {
+        Ok(self.fields.len() as u32)
+    }
+
+    fn get_field(&self, idx: u32) -> ComResult<(String, String, u32, Direction)>
+    {
+        let arg = &self.fields[idx as usize];
+        Ok((
+            arg.name.to_string(),
+            arg.ty.to_string(),
+            arg.indirection_level,
+            arg.direction,
+        ))
+    }
+}
+
 impl CoClass
 {
     pub fn __new(name: Cow<'static, str>, clsid: GUID, interfaces: Vec<InterfaceRef>) -> Self
@@ -378,10 +469,12 @@ impl TypeLib
         types.sort_by_key(|item| match item {
             TypeInfo::Class(cls) => ("class", cls.as_ref().name.to_string()),
             TypeInfo::Interface(itf) => ("itf", itf.as_ref().name.to_string()),
+            TypeInfo::Struct(stru) => ("struct", stru.as_ref().name.to_string()),
         });
         types.dedup_by_key(|item| match item {
             TypeInfo::Class(cls) => ("class", cls.as_ref().name.to_string()),
             TypeInfo::Interface(itf) => ("itf", itf.as_ref().name.to_string()),
+            TypeInfo::Struct(stru) => ("stru", stru.as_ref().name.to_string()),
         });
         TypeLib {
             name,

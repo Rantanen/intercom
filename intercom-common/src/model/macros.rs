@@ -120,7 +120,7 @@ macro_rules! intercom_attribute {
 
                 // Match the ident to the name and parse the correct enum alternative from the
                 // value.
-                Ok( match ident.to_string().as_ref() {
+                Ok( match ident.to_string().as_str() {
                     $(
                         stringify!( $name ) => $attr_param::$name( input.parse()? ),
                     )*

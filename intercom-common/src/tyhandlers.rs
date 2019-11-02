@@ -134,13 +134,17 @@ impl TypeHandler
         let ts = self.context.type_system.as_typesystem_type(span);
         let ts_trait = quote_spanned!(
             span=> <#ty as intercom::type_system::ExternType< #ts > > );
+        let maybe_ref = match ty {
+            syn::Type::Reference(..) => quote!(&),
+            _ => quote!(),
+        };
 
         match dir {
             Direction::In => {
                 // Input arguments may use an intermediate type.
                 let intermediate = quote_spanned!(
                     span=> #ts_trait::OwnedNativeType::intercom_from( #ident )? );
-                quote_spanned!(span=> ( & #intermediate ).intercom_into()? )
+                quote_spanned!(span=> ( #maybe_ref #intermediate ).intercom_into()? )
             }
             Direction::Out | Direction::Retval => {
                 // Output arguments must not use an intermediate type
@@ -158,12 +162,16 @@ impl TypeHandler
         let ts = self.context.type_system.as_typesystem_type(span);
         let ts_trait = quote_spanned!(
             span=> <#ty as intercom::type_system::ExternType< #ts > > );
+        let maybe_ref = match ty {
+            syn::Type::Reference(..) => quote!(&),
+            _ => quote!(),
+        };
 
         match dir {
             Direction::In => {
                 let intermediate = quote_spanned!(
                     span=> #ts_trait::OwnedExternType::intercom_from( #ident )? );
-                quote_spanned!(span=> ( & #intermediate ).intercom_into()? )
+                quote_spanned!(span=> ( #maybe_ref #intermediate ).intercom_into()? )
             }
             Direction::Out | Direction::Retval => quote_spanned!(span=> #ident.intercom_into()? ),
         }

@@ -2,10 +2,35 @@ use super::*;
 use crate::prelude::*;
 
 use crate::guid::GUID;
-use ::syn::{LitStr, Path};
+use syn::{LitStr, Path};
+
+#[derive(Debug, Clone)]
+pub enum LibraryType
+{
+    Class(Path),
+    Interface(Path),
+    Struct(Path),
+}
+
+impl syn::parse::Parse for LibraryType
+{
+    fn parse(input: syn::parse::ParseStream) -> syn::parse::Result<Self>
+    {
+        let ident: syn::Ident = input.parse()?;
+        match ident.to_string().as_str() {
+            "class" => Ok(LibraryType::Class(input.parse()?)),
+            "interface" => Ok(LibraryType::Interface(input.parse()?)),
+            "user_type" => Ok(LibraryType::Struct(input.parse()?)),
+            _ => Err(input.error(&format!(
+                "Expected 'class', 'interface' or 'user_type', found {}",
+                ident
+            ))),
+        }
+    }
+}
 
 intercom_attribute!(
-    ComLibraryAttr< ComLibraryAttrParam, Path > {
+    ComLibraryAttr<ComLibraryAttrParam, LibraryType> {
         libid : LitStr,
     }
 );
@@ -19,6 +44,8 @@ pub struct ComLibrary
     pub name: String,
     pub libid: GUID,
     pub coclasses: Vec<Path>,
+    pub interfaces: Vec<Path>,
+    pub structs: Vec<Path>,
 }
 
 impl ComLibrary
@@ -27,7 +54,7 @@ impl ComLibrary
     pub fn parse(crate_name: &str, attr_params: TokenStream) -> ParseResult<ComLibrary>
     {
         let attr: ComLibraryAttr = ::syn::parse2(attr_params)
-            .map_err(|_| ParseError::ComLibrary("Attribute syntax error".into()))?;
+            .map_err(|e| ParseError::ComLibrary(format!("Attribute syntax error: {}", e)))?;
 
         // The first parameter is the LIBID of the library.
         let libid = match attr.libid().map_err(ParseError::ComLibrary)? {
@@ -35,9 +62,22 @@ impl ComLibrary
             None => crate::utils::generate_libid(crate_name),
         };
 
+        let mut coclasses = vec![];
+        let mut interfaces = vec![];
+        let mut structs = vec![];
+        for arg in attr.args().into_iter().cloned() {
+            match arg {
+                LibraryType::Class(cls) => coclasses.push(cls),
+                LibraryType::Interface(cls) => interfaces.push(cls),
+                LibraryType::Struct(cls) => structs.push(cls),
+            }
+        }
+
         Ok(ComLibrary {
             name: crate_name.to_owned(),
-            coclasses: attr.args().into_iter().cloned().collect(),
+            coclasses,
+            interfaces,
+            structs,
             libid,
         })
     }

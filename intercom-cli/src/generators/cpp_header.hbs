@@ -35,6 +35,15 @@ namespace {{lib_name}}
 
 namespace raw
 {
+{{~#each structs}}
+    struct {{name}}
+    {
+    {{#each fields}}
+        {{arg_type}} {{name}};
+    {{/each}}
+    };
+{{~/each}}
+
 {{~#each interfaces}}
     struct {{name}};
 {{~/each}}

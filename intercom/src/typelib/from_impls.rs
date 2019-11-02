@@ -17,6 +17,10 @@ impl TypeLib
                     let itf = Interface::from_comrc(&ComItf::query_interface(&ty)?)?;
                     TypeInfo::Interface(ComBox::new(itf))
                 }
+                TypeInfoKind::Struct => {
+                    let stru = Struct::from_comrc(&ComItf::query_interface(&ty)?)?;
+                    TypeInfo::Struct(ComBox::new(stru))
+                }
             });
         }
 
@@ -117,6 +121,42 @@ impl Method
                 direction: Direction::Return,
             },
             parameters,
+        })
+    }
+}
+
+impl Struct
+{
+    pub fn from_comrc(ti: &ComRc<dyn IIntercomStruct>) -> Result<Self, TypeLibError>
+    {
+        let mut variants = vec![];
+        for v in 0..ti.get_variant_count()? {
+            variants.push(ComBox::new(StructVariant::from_comrc(&ti.get_variant(v)?)?));
+        }
+        Ok(Struct {
+            name: ti.get_name()?.into(),
+            variants,
+        })
+    }
+}
+
+impl StructVariant
+{
+    pub fn from_comrc(ti: &ComRc<dyn IIntercomStructVariant>) -> Result<Self, TypeLibError>
+    {
+        let mut fields = vec![];
+        for f in 0..ti.get_field_count()? {
+            let (name, ty, indirection_level, direction) = ti.get_field(f)?;
+            fields.push(Arg {
+                name: name.into(),
+                ty: ty.into(),
+                indirection_level,
+                direction,
+            });
+        }
+        Ok(StructVariant {
+            ts: ti.get_type_system()?,
+            fields,
         })
     }
 }

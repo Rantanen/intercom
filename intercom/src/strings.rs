@@ -676,9 +676,6 @@ where
     {
         let bstring: ComResult<TTarget> = (source as *const TPtr).intercom_into();
 
-        // Free the buffer.
-        crate::alloc::free(source as *mut _);
-
         bstring
     }
 }
@@ -838,6 +835,14 @@ impl IntercomFrom<BString> for crate::raw::OutBSTR
     }
 }
 
+impl IntercomFrom<BString> for crate::raw::InBSTR
+{
+    unsafe fn intercom_from(source: BString) -> ComResult<Self>
+    {
+        Ok(crate::raw::InBSTR(source.into_ptr()))
+    }
+}
+
 impl IntercomFrom<CString> for crate::raw::OutBSTR
 {
     unsafe fn intercom_from(source: CString) -> ComResult<Self>
@@ -865,29 +870,25 @@ impl IntercomFrom<&CString> for *const c_char
     }
 }
 
+impl IntercomFrom<CString> for *const c_char
+{
+    unsafe fn intercom_from(source: CString) -> ComResult<Self>
+    {
+        // FIXME: These should be allocated with the intercom allocator.
+        let ptr = source.as_ptr();
+        std::mem::forget(source);
+        Ok(ptr as _)
+    }
+}
+
 impl IntercomFrom<CString> for *mut c_char
 {
     unsafe fn intercom_from(source: CString) -> ComResult<Self>
     {
+        // FIXME: These should be allocated with the intercom allocator.
         let ptr = source.as_ptr();
         std::mem::forget(source);
         Ok(ptr as _)
-
-        /* We really should do the following I believe:
-        let bytes = source.as_bytes();
-
-        // We just allocated the memory. This is safe.
-        unsafe {
-            let buffer = crate::alloc::allocate( bytes.len() + 1 ) as *mut u8;
-            std::ptr::copy_nonoverlapping(
-                bytes.as_ptr(),
-                buffer,
-                bytes.len() );
-            *buffer.offset( ( bytes.len() + 1 ) as isize ) = 0;
-
-            Ok( buffer as *mut c_char )
-        }
-        */
     }
 }
 

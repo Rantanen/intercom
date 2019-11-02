@@ -10,7 +10,8 @@ use handlebars::Handlebars;
 use serde_derive::Serialize;
 
 use intercom::typelib::{
-    Arg, CoClass, Direction, Interface, InterfaceVariant, Method, TypeInfo, TypeLib,
+    Arg, CoClass, Direction, Interface, InterfaceVariant, Method, Struct, StructVariant, TypeInfo,
+    TypeLib,
 };
 
 #[derive(Debug, Serialize)]
@@ -20,6 +21,7 @@ struct IdlLibrary
     pub lib_id: String,
     pub interfaces: Vec<IdlInterface>,
     pub coclasses: Vec<IdlClass>,
+    pub structs: Vec<IdlStruct>,
 }
 
 #[derive(Debug, Serialize)]
@@ -56,6 +58,13 @@ struct IdlClass
     pub interfaces: Vec<String>,
 }
 
+#[derive(Debug, Serialize)]
+struct IdlStruct
+{
+    pub name: String,
+    pub fields: Vec<IdlArg>,
+}
+
 impl IdlLibrary
 {
     fn try_from(lib: TypeLib, opts: &ModelOptions) -> Result<Self, GeneratorError>
@@ -64,26 +73,27 @@ impl IdlLibrary
 
         let mut interfaces = vec![];
         let mut coclasses = vec![];
+        let mut structs = vec![];
         for t in &lib.types {
             match t {
                 TypeInfo::Class(cls) => {
                     coclasses.push(IdlClass::try_from(cls.as_ref(), opts, &ctx)?)
                 }
                 TypeInfo::Interface(itf) => {
-                    interfaces.push(IdlInterface::gather(itf.as_ref(), opts, &ctx)?)
+                    interfaces.extend(IdlInterface::gather(itf.as_ref(), opts, &ctx)?)
+                }
+                TypeInfo::Struct(stru) => {
+                    structs.extend(IdlStruct::gather(stru.as_ref(), opts, &ctx)?)
                 }
             }
         }
-        let interfaces = interfaces
-            .into_iter()
-            .flatten()
-            .collect::<Vec<IdlInterface>>();
 
         Ok(Self {
             lib_name: pascal_case(lib.name),
             lib_id: format!("{:-X}", lib.libid),
             interfaces,
             coclasses,
+            structs,
         })
     }
 }
@@ -198,11 +208,15 @@ impl IdlArg
 
     fn idl_type(arg: &Arg, opts: &TypeSystemOptions, ctx: &LibraryContext) -> String
     {
-        let base_name = ctx
-            .itfs_by_name
-            .get(arg.ty.as_ref())
-            .map(|itf| IdlInterface::final_name(itf, opts))
-            .unwrap_or_else(|| arg.ty.to_string());
+        let mut base_name = arg.ty.to_string();
+
+        if let Some(itf) = ctx.itfs_by_name.get(arg.ty.as_ref()) {
+            base_name = IdlInterface::final_name(itf, opts);
+        }
+        if let Some(stru) = ctx.structs_by_name.get(arg.ty.as_ref()) {
+            base_name = IdlStruct::final_name(stru, opts);
+        }
+
         let indirection = match arg.direction {
             Direction::In | Direction::Return => arg.indirection_level,
             Direction::Out | Direction::Retval => arg.indirection_level + 1,
@@ -213,7 +227,17 @@ impl IdlArg
             other => other.to_string(),
         };
 
-        format!("{}{}", base_name, "*".repeat(indirection as usize))
+        let maybe_struct = match ctx.structs_by_name.contains_key(arg.ty.as_ref()) {
+            true => "struct ",
+            false => "",
+        };
+
+        format!(
+            "{}{}{}",
+            maybe_struct,
+            base_name,
+            "*".repeat(indirection as usize)
+        )
     }
 }
 
@@ -243,6 +267,53 @@ impl IdlClass
             clsid: format!("{:-X}", cls.clsid),
             interfaces,
         })
+    }
+}
+
+impl IdlStruct
+{
+    fn gather(
+        stru: &Struct,
+        opts: &ModelOptions,
+        ctx: &LibraryContext,
+    ) -> Result<Vec<Self>, GeneratorError>
+    {
+        Ok(opts
+            .type_systems
+            .iter()
+            .map(
+                |ts_opts| match stru.variants.iter().find(|v| v.as_ref().ts == ts_opts.ts) {
+                    Some(v) => Some(IdlStruct::try_from(&stru, v.as_ref(), ts_opts, ctx)),
+                    None => None,
+                },
+            )
+            .filter_map(|i| i)
+            .collect::<Result<Vec<_>, _>>()?)
+    }
+
+    fn try_from(
+        stru: &Struct,
+        struct_variant: &StructVariant,
+        ts_opts: &TypeSystemOptions,
+        ctx: &LibraryContext,
+    ) -> Result<Self, GeneratorError>
+    {
+        Ok(Self {
+            name: Self::final_name(&stru, ts_opts),
+            fields: struct_variant
+                .fields
+                .iter()
+                .map(|f| IdlArg::try_from(f, ts_opts, ctx))
+                .collect::<Result<Vec<_>, _>>()?,
+        })
+    }
+
+    pub fn final_name(itf: &Struct, opts: &TypeSystemOptions) -> String
+    {
+        match opts.use_full_name {
+            true => format!("{}_{:?}", itf.name, opts.ts),
+            false => itf.name.to_string(),
+        }
     }
 }
 

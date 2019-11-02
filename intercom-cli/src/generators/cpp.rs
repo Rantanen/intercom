@@ -10,23 +10,25 @@ use super::GeneratorError;
 use super::{pascal_case, LibraryContext, ModelOptions, TypeSystemOptions};
 
 use intercom::typelib::{
-    Arg, CoClass, Direction, Interface, InterfaceVariant, Method, TypeInfo, TypeLib,
+    Arg, CoClass, Direction, Interface, InterfaceVariant, Method, Struct, StructVariant, TypeInfo,
+    TypeLib,
 };
 
 use handlebars::Handlebars;
 use serde_derive::Serialize;
 
 #[derive(PartialEq, Serialize, Debug)]
-pub struct CppLibrary
+struct CppLibrary
 {
     pub lib_name: String,
     pub interfaces: Vec<CppInterface>,
     pub coclass_count: usize,
     pub coclasses: Vec<CppClass>,
+    pub structs: Vec<CppStruct>,
 }
 
 #[derive(PartialEq, Serialize, Debug)]
-pub struct CppInterface
+struct CppInterface
 {
     pub name: String,
     pub iid_struct: String,
@@ -35,7 +37,7 @@ pub struct CppInterface
 }
 
 #[derive(PartialEq, Serialize, Debug)]
-pub struct CppMethod
+struct CppMethod
 {
     pub name: String,
     pub ret_type: String,
@@ -43,19 +45,26 @@ pub struct CppMethod
 }
 
 #[derive(PartialEq, Serialize, Debug)]
-pub struct CppArg
+struct CppArg
 {
     pub name: String,
     pub arg_type: String,
 }
 
 #[derive(PartialEq, Serialize, Debug)]
-pub struct CppClass
+struct CppClass
 {
     pub name: String,
     pub clsid_struct: String,
     pub interface_count: usize,
     pub interfaces: Vec<String>,
+}
+
+#[derive(PartialEq, Serialize, Debug)]
+struct CppStruct
+{
+    pub name: String,
+    pub fields: Vec<CppArg>,
 }
 
 impl CppLibrary
@@ -66,26 +75,27 @@ impl CppLibrary
 
         let mut interfaces = vec![];
         let mut coclasses = vec![];
+        let mut structs = vec![];
         for t in &lib.types {
             match t {
                 TypeInfo::Class(cls) => {
                     coclasses.push(CppClass::try_from(cls.as_ref(), opts, &ctx)?)
                 }
                 TypeInfo::Interface(itf) => {
-                    interfaces.push(CppInterface::gather(itf.as_ref(), opts, &ctx)?)
+                    interfaces.extend(CppInterface::gather(itf.as_ref(), opts, &ctx)?)
+                }
+                TypeInfo::Struct(stru) => {
+                    structs.extend(CppStruct::gather(stru.as_ref(), opts, &ctx)?)
                 }
             }
         }
-        let interfaces = interfaces
-            .into_iter()
-            .flatten()
-            .collect::<Vec<CppInterface>>();
 
         Ok(Self {
             lib_name: lib.name.to_string(),
             interfaces,
             coclass_count: coclasses.len(),
             coclasses,
+            structs,
         })
     }
 }
@@ -196,11 +206,15 @@ impl CppArg
 
     fn cpp_type(arg: &Arg, opts: &TypeSystemOptions, ctx: &LibraryContext) -> String
     {
-        let base_name = ctx
-            .itfs_by_name
-            .get(arg.ty.as_ref())
-            .map(|itf| CppInterface::final_name(itf, opts))
-            .unwrap_or_else(|| arg.ty.to_string());
+        let mut base_name = arg.ty.to_string();
+
+        if let Some(itf) = ctx.itfs_by_name.get(arg.ty.as_ref()) {
+            base_name = CppInterface::final_name(itf, opts);
+        }
+        if let Some(stru) = ctx.structs_by_name.get(arg.ty.as_ref()) {
+            base_name = CppStruct::final_name(stru, opts);
+        }
+
         let indirection = match arg.direction {
             Direction::In | Direction::Return => arg.indirection_level,
             Direction::Out | Direction::Retval => arg.indirection_level + 1,
@@ -243,6 +257,53 @@ impl CppClass
             interface_count: interfaces.len(),
             interfaces,
         })
+    }
+}
+
+impl CppStruct
+{
+    fn gather(
+        stru: &Struct,
+        opts: &ModelOptions,
+        ctx: &LibraryContext,
+    ) -> Result<Vec<Self>, GeneratorError>
+    {
+        Ok(opts
+            .type_systems
+            .iter()
+            .map(
+                |ts_opts| match stru.variants.iter().find(|v| v.as_ref().ts == ts_opts.ts) {
+                    Some(v) => Some(CppStruct::try_from(&stru, v.as_ref(), ts_opts, ctx)),
+                    None => None,
+                },
+            )
+            .filter_map(|i| i)
+            .collect::<Result<Vec<_>, _>>()?)
+    }
+
+    fn try_from(
+        stru: &Struct,
+        struct_variant: &StructVariant,
+        ts_opts: &TypeSystemOptions,
+        ctx: &LibraryContext,
+    ) -> Result<Self, GeneratorError>
+    {
+        Ok(Self {
+            name: Self::final_name(&stru, ts_opts),
+            fields: struct_variant
+                .fields
+                .iter()
+                .map(|f| CppArg::try_from(f, ts_opts, ctx))
+                .collect::<Result<Vec<_>, _>>()?,
+        })
+    }
+
+    pub fn final_name(itf: &Struct, opts: &TypeSystemOptions) -> String
+    {
+        match opts.use_full_name {
+            true => format!("{}_{:?}", itf.name, opts.ts),
+            false => itf.name.to_string(),
+        }
     }
 }
 

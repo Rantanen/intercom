@@ -11,8 +11,6 @@ use crate::utils;
 
 use syn::spanned::Spanned;
 
-extern crate proc_macro;
-
 /// Interface level output.
 #[derive(Default)]
 struct InterfaceOutput
