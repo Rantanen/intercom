@@ -167,9 +167,7 @@ pub struct Arg
     pub direction: Direction,
 }
 
-#[derive(
-    Debug, Clone, Copy, intercom::ExternOutput, intercom::ForeignType, PartialEq, Eq,
-)]
+#[derive(Debug, Clone, Copy, intercom::ExternOutput, intercom::ForeignType, PartialEq, Eq)]
 #[repr(C)]
 pub enum Direction
 {

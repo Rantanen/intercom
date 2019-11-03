@@ -142,9 +142,7 @@ pub type REFCLSID = *const IID;
 pub mod raw
 {
 
-    #[derive(
-        Clone, Copy, intercom_attributes::ExternInput, intercom_attributes::ForeignType,
-    )]
+    #[derive(Clone, Copy, intercom_attributes::ExternInput, intercom_attributes::ForeignType)]
     #[repr(transparent)]
     pub struct InBSTR(pub *const u16);
 
