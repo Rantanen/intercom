@@ -61,7 +61,7 @@ pub fn expand_com_impl(
             #[doc(hidden)]
             unsafe extern "system" fn #query_interface_ident(
                 self_vtable : intercom::RawComPtr,
-                riid : <intercom::REFIID as intercom::type_system::ExternParameter<
+                riid : <intercom::REFIID as intercom::type_system::ExternInput<
                         intercom::type_system::AutomationTypeSystem>>
                             ::ForeignType,
                 out : *mut <intercom::RawComPtr as intercom::type_system::ExternOutput<

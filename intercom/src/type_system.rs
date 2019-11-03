@@ -51,15 +51,15 @@ pub trait BidirectionalTypeInfo
 }
 
 /// Defines a type that is compatible with Intercom interfaces.
-pub trait ExternParameter<TS: TypeSystem>: Sized
+pub trait ExternInput<TS: TypeSystem>: Sized
 {
     type ForeignType: BidirectionalTypeInfo;
 
-    type IntoTemporary;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>;
+    type Lease;
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>;
 
-    type OwnedParameter;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>;
+    type Owned;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>;
 }
 
 pub trait ExternOutput<TS: TypeSystem>: Sized
@@ -71,7 +71,7 @@ pub trait ExternOutput<TS: TypeSystem>: Sized
     unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>;
 }
 
-/// A quick macro for implementing ExternParameter/etc. for various basic types
+/// A quick macro for implementing ExternInput/etc. for various basic types
 /// that should represent themselves.
 macro_rules! self_extern {
     ( $t:ty ) => {
@@ -84,19 +84,17 @@ macro_rules! self_extern {
             }
         }
 
-        impl<TS: TypeSystem> ExternParameter<TS> for $t
+        impl<TS: TypeSystem> ExternInput<TS> for $t
         {
             type ForeignType = $t;
-            type IntoTemporary = ();
+            type Lease = ();
             fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
             {
                 Ok((self, ()))
             }
 
-            type OwnedParameter = Self;
-            unsafe fn from_foreign_parameter(
-                source: Self::ForeignType,
-            ) -> ComResult<Self::OwnedParameter>
+            type Owned = Self;
+            unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
             {
                 Ok(source)
             }
@@ -178,33 +176,33 @@ impl<TS: TypeSystem, TPtr: BidirectionalTypeInfo + ?Sized> ExternOutput<TS> for 
     }
 }
 
-impl<TS: TypeSystem, TPtr: BidirectionalTypeInfo + ?Sized> ExternParameter<TS> for *mut TPtr
+impl<TS: TypeSystem, TPtr: BidirectionalTypeInfo + ?Sized> ExternInput<TS> for *mut TPtr
 {
     type ForeignType = Self;
-    type IntoTemporary = ();
+    type Lease = ();
     fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
     {
         Ok((self, ()))
     }
 
-    type OwnedParameter = Self;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         Ok(source)
     }
 }
 
-impl<TS: TypeSystem, TPtr: BidirectionalTypeInfo + ?Sized> ExternParameter<TS> for *const TPtr
+impl<TS: TypeSystem, TPtr: BidirectionalTypeInfo + ?Sized> ExternInput<TS> for *const TPtr
 {
     type ForeignType = Self;
-    type IntoTemporary = ();
+    type Lease = ();
     fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
     {
         Ok((self, ()))
     }
 
-    type OwnedParameter = Self;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         Ok(source)
     }

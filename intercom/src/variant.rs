@@ -1,4 +1,4 @@
-use crate::type_system::{ExternOutput, ExternParameter, TypeSystem};
+use crate::type_system::{ExternInput, ExternOutput, TypeSystem};
 use crate::*;
 use intercom_attributes::BidirectionalTypeInfo;
 use std::convert::TryFrom;
@@ -116,18 +116,18 @@ impl Default for Variant
     }
 }
 
-impl<TS: TypeSystem> ExternParameter<TS> for Variant
+impl<TS: TypeSystem> ExternInput<TS> for Variant
 {
     type ForeignType = raw::Variant<TS>;
 
-    type IntoTemporary = ();
+    type Lease = ();
     fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
     {
         Self::ForeignType::try_from(self).map(|variant| (variant, ()))
     }
 
-    type OwnedParameter = Self;
-    unsafe fn from_foreign_parameter(src: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(src: Self::ForeignType) -> ComResult<Self::Owned>
     {
         Self::from_raw(src)
     }

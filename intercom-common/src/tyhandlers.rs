@@ -115,7 +115,7 @@ impl TypeHandler
 
         // Get the final type based on the parameter direction.
         let tr = match dir {
-            Direction::In => quote_spanned!(span => intercom::type_system::ExternParameter),
+            Direction::In => quote_spanned!(span => intercom::type_system::ExternInput),
             Direction::Out | Direction::Retval => {
                 quote_spanned!(span => intercom::type_system::ExternOutput)
             }
@@ -136,7 +136,7 @@ impl TypeHandler
         };
         match dir {
             Direction::In => quote_spanned!(span=>
-                    #maybe_ref <#ty as intercom::type_system::ExternParameter<#ts>>
+                    #maybe_ref <#ty as intercom::type_system::ExternInput<#ts>>
                         ::from_foreign_parameter(#ident)?),
             Direction::Out | Direction::Retval => quote_spanned!(span=>
                     <#ty as intercom::type_system::ExternOutput<#ts>>
@@ -152,7 +152,7 @@ impl TypeHandler
         let ts = self.context.type_system.as_typesystem_type(span);
         match dir {
             Direction::In => quote_spanned!(span=>
-                    <#ty as intercom::type_system::ExternParameter<#ts>>
+                    <#ty as intercom::type_system::ExternInput<#ts>>
                         ::into_foreign_parameter(#ident)?.0),
             Direction::Out | Direction::Retval => quote_spanned!(span=>
                     <#ty as intercom::type_system::ExternOutput<#ts>>

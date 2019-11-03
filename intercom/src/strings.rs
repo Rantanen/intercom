@@ -14,7 +14,7 @@ use std::{
 
 use crate::intercom::{ComError, ComResult};
 use crate::raw::OutBSTR;
-use crate::type_system::{AutomationTypeSystem, ExternOutput, ExternParameter, RawTypeSystem};
+use crate::type_system::{AutomationTypeSystem, ExternInput, ExternOutput, RawTypeSystem};
 
 #[derive(Debug)]
 pub struct FormatError;
@@ -523,20 +523,20 @@ impl TryFrom<IntercomString> for String
 }
 
 // String
-impl ExternParameter<AutomationTypeSystem> for String
+impl ExternInput<AutomationTypeSystem> for String
 {
     type ForeignType = OutBSTR;
 
-    type IntoTemporary = BString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = BString;
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("String::into_foreign_parameter<Automation>");
         let bstring = BString::from_str(&self).expect("Error type is never type");
         Ok((OutBSTR(bstring.as_ptr() as *mut _), bstring))
     }
 
-    type OwnedParameter = Self;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         log::trace!("String::from_foreign_parameter<Automation>");
         let bstring = BStr::from_ptr(source.0);
@@ -544,20 +544,20 @@ impl ExternParameter<AutomationTypeSystem> for String
     }
 }
 
-impl ExternParameter<RawTypeSystem> for String
+impl ExternInput<RawTypeSystem> for String
 {
     type ForeignType = *mut c_char;
 
-    type IntoTemporary = CString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = CString;
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("String::into_foreign_parameter<Raw>");
         let cstring = CString::new(self).map_err(|_| ComError::E_INVALIDARG)?;
         Ok((cstring.as_ptr() as *mut _, cstring))
     }
 
-    type OwnedParameter = Self;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         log::trace!("String::from_foreign_parameter<Raw>");
         let cstring = CStr::from_ptr(source);
@@ -607,20 +607,20 @@ impl ExternOutput<RawTypeSystem> for String
 }
 
 // &str
-impl<'a> ExternParameter<AutomationTypeSystem> for &'a str
+impl<'a> ExternInput<AutomationTypeSystem> for &'a str
 {
     type ForeignType = OutBSTR;
 
-    type IntoTemporary = BString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = BString;
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("&str::into_foreign_parameter<Automation>");
         let bstring = BString::from_str(self).expect("Error type is never type");
         Ok((OutBSTR(bstring.as_ptr() as *mut _), bstring))
     }
 
-    type OwnedParameter = String;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = String;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         log::trace!("&str::from_foreign_parameter<Automation>");
         let bstr = BStr::from_ptr(source.0);
@@ -628,20 +628,20 @@ impl<'a> ExternParameter<AutomationTypeSystem> for &'a str
     }
 }
 
-impl<'a> ExternParameter<RawTypeSystem> for &'a str
+impl<'a> ExternInput<RawTypeSystem> for &'a str
 {
     type ForeignType = *const c_char;
 
-    type IntoTemporary = CString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = CString;
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("&str::into_foreign_parameter<Raw>");
         let cstring = CString::new(self).map_err(|_| ComError::E_INVALIDARG)?;
         Ok((cstring.as_ptr(), cstring))
     }
 
-    type OwnedParameter = Self;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         log::trace!("&str::from_foreign_parameter<Raw>");
         let cstr = CStr::from_ptr(source);
@@ -650,31 +650,31 @@ impl<'a> ExternParameter<RawTypeSystem> for &'a str
 }
 
 // BString
-impl ExternParameter<AutomationTypeSystem> for BString
+impl ExternInput<AutomationTypeSystem> for BString
 {
     type ForeignType = OutBSTR;
 
-    type IntoTemporary = BString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = BString;
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("BString::into_foreign_parameter<Automation>");
         Ok((OutBSTR(self.as_ptr() as *mut _), self))
     }
 
-    type OwnedParameter = Self;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         log::trace!("BString::from_foreign_parameter<Automation>");
         Ok(BStr::from_ptr(source.0).to_owned())
     }
 }
 
-impl ExternParameter<RawTypeSystem> for BString
+impl ExternInput<RawTypeSystem> for BString
 {
     type ForeignType = *mut c_char;
 
-    type IntoTemporary = CString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = CString;
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("BString::into_foreign_parameter<Raw>");
         self.to_string()
@@ -683,8 +683,8 @@ impl ExternParameter<RawTypeSystem> for BString
             .map(|cstring| (cstring.as_ptr() as *mut _, cstring))
     }
 
-    type OwnedParameter = Self;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         log::trace!("BString::from_foreign_parameter<Raw>");
         CStr::from_ptr(source)
@@ -735,12 +735,12 @@ impl ExternOutput<RawTypeSystem> for BString
 }
 
 // CString
-impl ExternParameter<AutomationTypeSystem> for CString
+impl ExternInput<AutomationTypeSystem> for CString
 {
     type ForeignType = OutBSTR;
 
-    type IntoTemporary = BString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = BString;
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("CString::into_foreign_parameter<Automation>");
         let cstring = self.into_string().map_err(|_| ComError::E_INVALIDARG)?;
@@ -748,8 +748,8 @@ impl ExternParameter<AutomationTypeSystem> for CString
         Ok((OutBSTR(bstring.as_ptr() as *mut _), bstring))
     }
 
-    type OwnedParameter = Self;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         log::trace!("CString::from_foreign_parameter<Automation>");
         CString::new(
@@ -761,19 +761,19 @@ impl ExternParameter<AutomationTypeSystem> for CString
     }
 }
 
-impl ExternParameter<RawTypeSystem> for CString
+impl ExternInput<RawTypeSystem> for CString
 {
     type ForeignType = *mut c_char;
 
-    type IntoTemporary = CString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = CString;
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("CString::into_foreign_parameter<Raw>");
         Ok((self.as_ptr() as *mut _, self))
     }
 
-    type OwnedParameter = Self;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         log::trace!("CString::from_foreign_parameter<Raw>");
         Ok(CStr::from_ptr(source).to_owned())
@@ -821,12 +821,12 @@ impl ExternOutput<RawTypeSystem> for CString
 }
 
 // &CStr
-impl<'a> ExternParameter<AutomationTypeSystem> for &'a CStr
+impl<'a> ExternInput<AutomationTypeSystem> for &'a CStr
 {
     type ForeignType = OutBSTR;
 
-    type IntoTemporary = BString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = BString;
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("&CStr::into_foreign_parameter<Automation>");
         let string = self.to_str().map_err(|_| ComError::E_INVALIDARG)?;
@@ -834,8 +834,8 @@ impl<'a> ExternParameter<AutomationTypeSystem> for &'a CStr
         Ok((OutBSTR(bstring.as_ptr() as *mut _), bstring))
     }
 
-    type OwnedParameter = CString;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = CString;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         log::trace!("&CStr::from_foreign_parameter<Automation>");
         let string = BStr::from_ptr(source.0)
@@ -845,19 +845,19 @@ impl<'a> ExternParameter<AutomationTypeSystem> for &'a CStr
     }
 }
 
-impl<'a> ExternParameter<RawTypeSystem> for &'a CStr
+impl<'a> ExternInput<RawTypeSystem> for &'a CStr
 {
     type ForeignType = *mut c_char;
 
-    type IntoTemporary = ();
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = ();
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("&CStr::into_foreign_parameter<Raw>");
         Ok((self.as_ptr() as *mut _, ()))
     }
 
-    type OwnedParameter = Self;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         log::trace!("&CStr::from_foreign_parameter<Raw>");
         Ok(CStr::from_ptr(source))
@@ -865,31 +865,31 @@ impl<'a> ExternParameter<RawTypeSystem> for &'a CStr
 }
 
 // &BStr
-impl<'a> ExternParameter<AutomationTypeSystem> for &'a BStr
+impl<'a> ExternInput<AutomationTypeSystem> for &'a BStr
 {
     type ForeignType = OutBSTR;
 
-    type IntoTemporary = ();
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = ();
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("&BStr::into_foreign_parameter<Automation>");
         Ok((OutBSTR(self.as_ptr() as *mut _), ()))
     }
 
-    type OwnedParameter = Self;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         log::trace!("&BStr::from_foreign_parameter<Automation>");
         Ok(BStr::from_ptr(source.0))
     }
 }
 
-impl<'a> ExternParameter<RawTypeSystem> for &'a BStr
+impl<'a> ExternInput<RawTypeSystem> for &'a BStr
 {
     type ForeignType = *mut c_char;
 
-    type IntoTemporary = CString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = CString;
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("&BStr::into_foreign_parameter<Raw>");
         let string = self.to_string().map_err(|_| ComError::E_INVALIDARG)?;
@@ -897,8 +897,8 @@ impl<'a> ExternParameter<RawTypeSystem> for &'a BStr
         Ok((cstring.as_ptr() as *mut c_char, cstring))
     }
 
-    type OwnedParameter = BString;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = BString;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         log::trace!("&BStr::from_foreign_parameter<Raw>");
         let string = CStr::from_ptr(source)

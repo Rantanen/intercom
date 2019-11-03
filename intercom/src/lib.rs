@@ -143,10 +143,7 @@ pub mod raw
 {
 
     #[derive(
-        Clone,
-        Copy,
-        intercom_attributes::ExternParameter,
-        intercom_attributes::BidirectionalTypeInfo,
+        Clone, Copy, intercom_attributes::ExternInput, intercom_attributes::BidirectionalTypeInfo,
     )]
     #[repr(transparent)]
     pub struct InBSTR(pub *const u16);
@@ -154,7 +151,7 @@ pub mod raw
     #[derive(
         Clone,
         Copy,
-        intercom_attributes::ExternParameter,
+        intercom_attributes::ExternInput,
         intercom_attributes::ExternOutput,
         intercom_attributes::BidirectionalTypeInfo,
     )]

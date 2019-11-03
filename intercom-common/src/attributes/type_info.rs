@@ -24,11 +24,11 @@ pub fn expand_bidirectional_type_info(
     Ok(result.into())
 }
 
-/// Expands the `ExternParameter` derive attribute.
+/// Expands the `ExternInput` derive attribute.
 ///
 /// The attribute expansion results in the following items:
 ///
-/// - Implementation of the ExternParameter trait.
+/// - Implementation of the ExternInput trait.
 pub fn expand_derive_extern_parameter(
     item_tokens: TokenStreamNightly,
 ) -> Result<TokenStreamNightly, syn::Error>
@@ -39,20 +39,20 @@ pub fn expand_derive_extern_parameter(
 
     // Immpl requires the the generics in particular way.
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
-    let result = quote! { impl<TS: intercom::type_system::TypeSystem> #impl_generics intercom::type_system::ExternParameter<TS> for #name #ty_generics #where_clause {
+    let result = quote! { impl<TS: intercom::type_system::TypeSystem> #impl_generics intercom::type_system::ExternInput<TS> for #name #ty_generics #where_clause {
 
         type ForeignType = #name;
-        type IntoTemporary = ();
+        type Lease = ();
 
         #[inline(always)]
-        fn into_foreign_parameter(self) -> intercom::ComResult<(Self::ForeignType, Self::IntoTemporary)> {
+        fn into_foreign_parameter(self) -> intercom::ComResult<(Self::ForeignType, Self::Lease)> {
             Ok((self, ()))
         }
 
-        type OwnedParameter = #name;
+        type Owned = #name;
 
         #[inline(always)]
-        unsafe fn from_foreign_parameter(source: Self::ForeignType) -> intercom::ComResult<Self::OwnedParameter> {
+        unsafe fn from_foreign_parameter(source: Self::ForeignType) -> intercom::ComResult<Self::Owned> {
             Ok(source)
         }
     } };

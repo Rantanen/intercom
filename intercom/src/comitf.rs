@@ -1,5 +1,5 @@
 use super::*;
-use crate::type_system::{AutomationTypeSystem, ExternParameter, RawTypeSystem, TypeSystem};
+use crate::type_system::{AutomationTypeSystem, ExternInput, RawTypeSystem, TypeSystem};
 use std::marker::PhantomData;
 
 /// An incoming COM interface pointer.
@@ -288,21 +288,20 @@ impl<T: ComInterface + ?Sized> std::ops::Deref for ComItf<T>
     }
 }
 
-impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternParameter<TS>
-    for &'a crate::ComItf<I>
+impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS> for &'a crate::ComItf<I>
 where
     I: BidirectionalTypeInfo,
 {
     type ForeignType = crate::raw::InterfacePtr<TS, I>;
 
-    type IntoTemporary = ();
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = ();
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         Ok((ComItf::ptr(self), ()))
     }
 
-    type OwnedParameter = ComItf<I>;
-    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::OwnedParameter>
+    type Owned = ComItf<I>;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
         crate::ComItf::maybe_wrap(source).ok_or_else(|| crate::ComError::E_INVALIDARG)
     }

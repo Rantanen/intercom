@@ -1,5 +1,5 @@
 use super::*;
-use crate::type_system::{ExternOutput, ExternParameter, TypeSystem};
+use crate::type_system::{ExternInput, ExternOutput, TypeSystem};
 
 /// Reference counted handle to the `ComBox` data.
 ///
@@ -153,19 +153,19 @@ impl<T: ComInterface + ?Sized> std::borrow::Borrow<ComItf<T>> for ComRc<T>
     }
 }
 
-impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternParameter<TS> for crate::ComRc<I>
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS> for crate::ComRc<I>
 where
     I: BidirectionalTypeInfo,
 {
     type ForeignType = crate::raw::InterfacePtr<TS, I>;
 
-    type IntoTemporary = Self;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    type Lease = Self;
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         Ok((ComItf::ptr(&self), self))
     }
 
-    type OwnedParameter = Self;
+    type Owned = Self;
     unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self>
     {
         ComRc::wrap(source).ok_or(ComError::E_POINTER)
