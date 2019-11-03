@@ -10,11 +10,6 @@ pub struct TypeSystemCaller;
 impl TypeSystemCaller
 {
     pub fn new() -> Self {
-        static init : std::sync::Once = std::sync::Once::new();
-        init.call_once(|| {
-            env_logger::init()
-        });
-
         TypeSystemCaller
     }
 
