@@ -1,10 +1,10 @@
 use crate::prelude::*;
 
-/// Expands the `BidirectionalTypeInfo` derive attribute.
+/// Expands the `ForeignType` derive attribute.
 ///
 /// The attribute expansion results in the following items:
 ///
-/// - Implementation of the BidirectionalTypeInfo trait.
+/// - Implementation of the ForeignType trait.
 pub fn expand_bidirectional_type_info(
     item_tokens: TokenStreamNightly,
 ) -> Result<TokenStreamNightly, syn::Error>
@@ -15,7 +15,7 @@ pub fn expand_bidirectional_type_info(
 
     // Immpl requires the the generics in particular way.
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
-    let result = quote! { impl #impl_generics intercom::type_system::BidirectionalTypeInfo for #name #ty_generics #where_clause {
+    let result = quote! { impl #impl_generics intercom::type_system::ForeignType for #name #ty_generics #where_clause {
 
         /// The default name is the name of the type.
         fn type_name() -> &'static str { stringify!( #name ) }

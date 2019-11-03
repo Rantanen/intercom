@@ -40,7 +40,7 @@ impl TypeSystem for RawTypeSystem
 }
 
 /// Defines a type that has identical representation for both input and output directions.
-pub trait BidirectionalTypeInfo
+pub trait ForeignType
 {
     /// The name of the type.
     fn type_name() -> &'static str;
@@ -53,7 +53,7 @@ pub trait BidirectionalTypeInfo
 /// Defines a type that is compatible with Intercom interfaces.
 pub trait ExternInput<TS: TypeSystem>: Sized
 {
-    type ForeignType: BidirectionalTypeInfo;
+    type ForeignType: ForeignType;
 
     type Lease;
     fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>;
@@ -64,7 +64,7 @@ pub trait ExternInput<TS: TypeSystem>: Sized
 
 pub trait ExternOutput<TS: TypeSystem>: Sized
 {
-    type ForeignType: BidirectionalTypeInfo;
+    type ForeignType: ForeignType;
 
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>;
 
@@ -75,7 +75,7 @@ pub trait ExternOutput<TS: TypeSystem>: Sized
 /// that should represent themselves.
 macro_rules! self_extern {
     ( $t:ty ) => {
-        impl BidirectionalTypeInfo for $t
+        impl ForeignType for $t
         {
             /// The default name is the name of the type.
             fn type_name() -> &'static str
@@ -140,7 +140,7 @@ self_extern!(GUID);
 
 self_extern!(TypeSystemName);
 
-impl BidirectionalTypeInfo for libc::c_void
+impl ForeignType for libc::c_void
 {
     fn type_name() -> &'static str
     {
@@ -148,7 +148,7 @@ impl BidirectionalTypeInfo for libc::c_void
     }
 }
 
-impl<TS: TypeSystem, TPtr: BidirectionalTypeInfo + ?Sized> ExternOutput<TS> for *mut TPtr
+impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternOutput<TS> for *mut TPtr
 {
     type ForeignType = Self;
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>
@@ -162,7 +162,7 @@ impl<TS: TypeSystem, TPtr: BidirectionalTypeInfo + ?Sized> ExternOutput<TS> for 
     }
 }
 
-impl<TS: TypeSystem, TPtr: BidirectionalTypeInfo + ?Sized> ExternOutput<TS> for *const TPtr
+impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternOutput<TS> for *const TPtr
 {
     type ForeignType = Self;
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>
@@ -176,7 +176,7 @@ impl<TS: TypeSystem, TPtr: BidirectionalTypeInfo + ?Sized> ExternOutput<TS> for 
     }
 }
 
-impl<TS: TypeSystem, TPtr: BidirectionalTypeInfo + ?Sized> ExternInput<TS> for *mut TPtr
+impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternInput<TS> for *mut TPtr
 {
     type ForeignType = Self;
     type Lease = ();
@@ -192,7 +192,7 @@ impl<TS: TypeSystem, TPtr: BidirectionalTypeInfo + ?Sized> ExternInput<TS> for *
     }
 }
 
-impl<TS: TypeSystem, TPtr: BidirectionalTypeInfo + ?Sized> ExternInput<TS> for *const TPtr
+impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternInput<TS> for *const TPtr
 {
     type ForeignType = Self;
     type Lease = ();
@@ -208,45 +208,45 @@ impl<TS: TypeSystem, TPtr: BidirectionalTypeInfo + ?Sized> ExternInput<TS> for *
     }
 }
 
-impl<TPtr: BidirectionalTypeInfo + ?Sized> BidirectionalTypeInfo for *mut TPtr
+impl<TPtr: ForeignType + ?Sized> ForeignType for *mut TPtr
 {
     fn type_name() -> &'static str
     {
-        <TPtr as BidirectionalTypeInfo>::type_name()
+        <TPtr as ForeignType>::type_name()
     }
 
     fn indirection_level() -> u32
     {
-        <TPtr as BidirectionalTypeInfo>::indirection_level() + 1
+        <TPtr as ForeignType>::indirection_level() + 1
     }
 }
 
-impl<TPtr: BidirectionalTypeInfo + ?Sized> BidirectionalTypeInfo for *const TPtr
+impl<TPtr: ForeignType + ?Sized> ForeignType for *const TPtr
 {
     fn type_name() -> &'static str
     {
-        <TPtr as BidirectionalTypeInfo>::type_name()
+        <TPtr as ForeignType>::type_name()
     }
 
     fn indirection_level() -> u32
     {
-        <TPtr as BidirectionalTypeInfo>::indirection_level() + 1
+        <TPtr as ForeignType>::indirection_level() + 1
     }
 }
 
-impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> BidirectionalTypeInfo
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ForeignType
     for crate::raw::InterfacePtr<TS, I>
 where
-    I: BidirectionalTypeInfo,
+    I: ForeignType,
 {
     /// The name of the type.
     fn type_name() -> &'static str
     {
-        <I as BidirectionalTypeInfo>::type_name()
+        <I as ForeignType>::type_name()
     }
     fn indirection_level() -> u32
     {
-        <I as BidirectionalTypeInfo>::indirection_level() + 1
+        <I as ForeignType>::indirection_level() + 1
     }
 }
 

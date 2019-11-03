@@ -155,7 +155,7 @@ impl<T: ComInterface + ?Sized> std::borrow::Borrow<ComItf<T>> for ComRc<T>
 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS> for crate::ComRc<I>
 where
-    I: BidirectionalTypeInfo,
+    I: ForeignType,
 {
     type ForeignType = crate::raw::InterfacePtr<TS, I>;
 
@@ -174,7 +174,7 @@ where
 
 impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternOutput<TS> for crate::ComRc<I>
 where
-    I: BidirectionalTypeInfo,
+    I: ForeignType,
 {
     type ForeignType = crate::raw::InterfacePtr<TS, I>;
 

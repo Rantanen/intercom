@@ -217,7 +217,7 @@ pub fn expand_com_interface(
     // Implement type info for the interface.
     output.push(quote_spanned!(itf.span =>
 
-        impl intercom::type_system::BidirectionalTypeInfo for #maybe_dyn #itf_ident {
+        impl intercom::type_system::ForeignType for #maybe_dyn #itf_ident {
 
             /// The name of the type.
             fn type_name() -> &'static str { stringify!( #itf_ident )  }
@@ -499,10 +499,10 @@ fn create_typeinfo_for_variant(
                     name: "".into(),
                     ty: <
                         <#rt as intercom::type_system::ExternOutput<#ts_type>>::ForeignType
-                        as intercom::type_system::BidirectionalTypeInfo>::type_name().into(),
+                        as intercom::type_system::ForeignType>::type_name().into(),
                     indirection_level: <
                         <#rt as intercom::type_system::ExternOutput<#ts_type>>::ForeignType
-                        as intercom::type_system::BidirectionalTypeInfo>::indirection_level(),
+                        as intercom::type_system::ForeignType>::indirection_level(),
                     direction: intercom::typelib::Direction::Return,
                 }),
             None => quote_spanned!(m.signature_span => intercom::typelib::Arg {
@@ -523,8 +523,8 @@ fn create_typeinfo_for_variant(
             }, arg.span);
 
             let ty_info_trait = Ident::new(match arg.dir {
-                Direction::Out | Direction::Retval => "BidirectionalTypeInfo",
-                Direction::In => "BidirectionalTypeInfo",
+                Direction::Out | Direction::Retval => "ForeignType",
+                Direction::In => "ForeignType",
             }, arg.span);
 
             quote_spanned!(arg.span => intercom::typelib::Arg {

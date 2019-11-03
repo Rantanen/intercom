@@ -129,8 +129,8 @@ pub fn com_library(args: TokenStream) -> TokenStream
     }
 }
 
-/// Derives the implementation of the trait BidirectionalTypeInfo for a type.
-#[proc_macro_derive(BidirectionalTypeInfo)]
+/// Derives the implementation of the trait ForeignType for a type.
+#[proc_macro_derive(ForeignType)]
 pub fn named_type_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 {
     match expand_bidirectional_type_info(input) {

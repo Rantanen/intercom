@@ -1,13 +1,13 @@
 use crate::type_system::{ExternInput, ExternOutput, TypeSystem};
 use crate::*;
-use intercom_attributes::BidirectionalTypeInfo;
+use intercom_attributes::ForeignType;
 use std::convert::TryFrom;
 use std::time::SystemTime;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Currency(i64);
 
-#[derive(Debug, Clone, BidirectionalTypeInfo)]
+#[derive(Debug, Clone, ForeignType)]
 pub enum Variant
 {
     None,
@@ -622,7 +622,7 @@ impl<T: Into<IntercomString>> From<T> for Variant
 pub mod raw
 {
 
-    use super::intercom_attributes::BidirectionalTypeInfo;
+    use super::intercom_attributes::ForeignType;
     use crate::type_system::TypeSystem;
     use std;
     use std::time::{Duration, SystemTime};
@@ -794,7 +794,7 @@ pub mod raw
     }
 
     #[repr(C)]
-    #[derive(Copy, Clone, BidirectionalTypeInfo)]
+    #[derive(Copy, Clone, ForeignType)]
     pub struct Variant<TS: TypeSystem>
     {
         pub vt: VariantType,

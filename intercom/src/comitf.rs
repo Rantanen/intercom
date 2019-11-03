@@ -290,7 +290,7 @@ impl<T: ComInterface + ?Sized> std::ops::Deref for ComItf<T>
 
 impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS> for &'a crate::ComItf<I>
 where
-    I: BidirectionalTypeInfo,
+    I: ForeignType,
 {
     type ForeignType = crate::raw::InterfacePtr<TS, I>;
 
