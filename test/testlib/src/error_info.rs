@@ -146,15 +146,14 @@ impl IErrorSource for ErrorTests
 pub struct TestError( raw::HRESULT, String );
 
 impl<TS: intercom::type_system::TypeSystem>
-        intercom::type_system::ExternType<TS> for TestError {
-    type ExternInputType = raw::HRESULT;
-    type ExternOutputType = raw::HRESULT;
-    type OwnedNativeType = TestError;
-    type OwnedExternType = TestError;
-}
+        intercom::type_system::ExternOutput<TS> for TestError {
+    type ForeignType = raw::HRESULT;
 
-impl intercom::type_system::IntercomFrom<error::raw::HRESULT> for TestError {
-    default unsafe fn intercom_from( source: error::raw::HRESULT ) -> ComResult<TestError> {
+    fn into_foreign_output(self) -> ComResult<Self::ForeignType> {
+        Ok(self.0)
+    }
+
+    unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self> {
         Ok(TestError(source, "".to_string()))
     }
 }

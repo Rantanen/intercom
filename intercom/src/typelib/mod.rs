@@ -62,7 +62,7 @@ pub enum TypeInfo
     Interface(ComBox<Interface>),
 }
 
-#[derive(intercom::ExternType, intercom::BidirectionalTypeInfo, Debug)]
+#[derive(intercom::ExternOutput, intercom::BidirectionalTypeInfo, Debug)]
 #[repr(C)]
 pub enum TypeInfoKind
 {
@@ -110,7 +110,7 @@ pub struct Interface
     pub options: InterfaceOptions,
 }
 
-#[derive(Debug, Clone, Default, intercom::ExternType, intercom::BidirectionalTypeInfo)]
+#[derive(Debug, Clone, Default, intercom::ExternOutput, intercom::BidirectionalTypeInfo)]
 #[repr(C)]
 pub struct InterfaceOptions
 {
@@ -168,7 +168,7 @@ pub struct Arg
 }
 
 #[derive(
-    Debug, Clone, Copy, intercom::ExternType, intercom::BidirectionalTypeInfo, PartialEq, Eq,
+    Debug, Clone, Copy, intercom::ExternOutput, intercom::BidirectionalTypeInfo, PartialEq, Eq,
 )]
 #[repr(C)]
 pub enum Direction

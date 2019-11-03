@@ -1,5 +1,5 @@
 use super::*;
-use crate::type_system::TypeSystem;
+use crate::type_system::{ExternOutput, ExternParameter, TypeSystem};
 
 /// Reference counted handle to the `ComBox` data.
 ///
@@ -150,5 +150,43 @@ impl<T: ComInterface + ?Sized> std::borrow::Borrow<ComItf<T>> for ComRc<T>
     fn borrow(&self) -> &ComItf<T>
     {
         self.as_ref()
+    }
+}
+
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternParameter<TS> for crate::ComRc<I>
+where
+    I: BidirectionalTypeInfo,
+{
+    type ForeignType = crate::raw::InterfacePtr<TS, I>;
+
+    type IntoTemporary = Self;
+    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::IntoTemporary)>
+    {
+        Ok((ComItf::ptr(&self), self))
+    }
+
+    type OwnedParameter = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self>
+    {
+        ComRc::wrap(source).ok_or(ComError::E_POINTER)
+    }
+}
+
+impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternOutput<TS> for crate::ComRc<I>
+where
+    I: BidirectionalTypeInfo,
+{
+    type ForeignType = crate::raw::InterfacePtr<TS, I>;
+
+    fn into_foreign_output(self) -> ComResult<Self::ForeignType>
+    {
+        Ok(ComItf::ptr(&ComRc::detach(self)))
+    }
+
+    unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>
+    {
+        Ok(ComRc::attach(
+            ComItf::maybe_wrap(source).ok_or(ComError::E_POINTER)?,
+        ))
     }
 }

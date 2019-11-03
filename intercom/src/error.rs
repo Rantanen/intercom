@@ -3,9 +3,7 @@ use std::error::Error;
 
 use super::*;
 use crate::attributes;
-use crate::type_system::{
-    AutomationTypeSystem, ExternType, IntercomFrom, RawTypeSystem, TypeSystem,
-};
+use crate::type_system::{AutomationTypeSystem, ExternOutput, RawTypeSystem, TypeSystem};
 
 /// Error structure containing the available information on a COM error.
 #[derive(Debug)]
@@ -42,25 +40,16 @@ impl std::fmt::Display for ComError
     }
 }
 
-impl<TS: TypeSystem> ExternType<TS> for ComError
+impl<TS: TypeSystem> ExternOutput<TS> for ComError
 {
-    type ExternInputType = raw::HRESULT;
-    type ExternOutputType = raw::HRESULT;
-    type OwnedNativeType = ComError;
-    type OwnedExternType = ComError;
-}
+    type ForeignType = raw::HRESULT;
 
-impl<TS: TypeSystem> ExternType<TS> for std::io::Error
-{
-    type ExternInputType = raw::HRESULT;
-    type ExternOutputType = raw::HRESULT;
-    type OwnedNativeType = std::io::Error;
-    type OwnedExternType = std::io::Error;
-}
+    fn into_foreign_output(self) -> ComResult<Self::ForeignType>
+    {
+        Ok(self.hresult)
+    }
 
-impl IntercomFrom<error::raw::HRESULT> for ComError
-{
-    unsafe fn intercom_from(source: error::raw::HRESULT) -> ComResult<ComError>
+    unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>
     {
         Ok(ComError {
             hresult: source,
@@ -69,11 +58,20 @@ impl IntercomFrom<error::raw::HRESULT> for ComError
     }
 }
 
-impl IntercomFrom<error::raw::HRESULT> for std::io::Error
+impl<TS: TypeSystem> ExternOutput<TS> for std::io::Error
 {
-    unsafe fn intercom_from(source: error::raw::HRESULT) -> ComResult<std::io::Error>
+    type ForeignType = raw::HRESULT;
+
+    fn into_foreign_output(self) -> ComResult<Self::ForeignType>
     {
-        Ok(ComError::intercom_from(source)?.into())
+        let com_error: ComError = ComError::from(self);
+        <ComError as ExternOutput<TS>>::into_foreign_output(com_error)
+    }
+
+    unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>
+    {
+        let com_error: ComError = <ComError as ExternOutput<TS>>::from_foreign_output(source)?;
+        Ok(Self::from(com_error))
     }
 }
 

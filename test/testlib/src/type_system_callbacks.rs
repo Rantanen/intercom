@@ -9,7 +9,14 @@ pub struct TypeSystemCaller;
 #[com_impl]
 impl TypeSystemCaller
 {
-    pub fn new() -> Self { TypeSystemCaller }
+    pub fn new() -> Self {
+        static init : std::sync::Once = std::sync::Once::new();
+        init.call_once(|| {
+            env_logger::init()
+        });
+
+        TypeSystemCaller
+    }
 
     pub fn call_string( &self, i: u32, callback : &ComItf<dyn IStringTests> ) -> ComResult<()> {
 
