@@ -61,15 +61,15 @@ pub fn expand_com_impl(
             #[doc(hidden)]
             unsafe extern "system" fn #query_interface_ident(
                 self_vtable : intercom::RawComPtr,
-                riid : <intercom::REFIID as intercom::type_system::ExternType<
+                riid : <intercom::REFIID as intercom::type_system::ExternInput<
                         intercom::type_system::AutomationTypeSystem>>
-                            ::ExternInputType,
-                out : *mut <intercom::RawComPtr as intercom::type_system::ExternType<
+                            ::ForeignType,
+                out : *mut <intercom::RawComPtr as intercom::type_system::ExternOutput<
                         intercom::type_system::AutomationTypeSystem>>
-                            ::ExternOutputType,
-            ) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
+                            ::ForeignType,
+            ) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
                     intercom::type_system::AutomationTypeSystem>>
-                        ::ExternOutputType
+                        ::ForeignType
             {
                 // Get the primary iunk interface by offsetting the current
                 // self_vtable with the vtable offset. Once we have the primary
@@ -93,9 +93,9 @@ pub fn expand_com_impl(
             #[doc(hidden)]
             unsafe extern "system" fn #add_ref_ident(
                 self_vtable : intercom::RawComPtr
-            ) -> <u32 as intercom::type_system::ExternType<
+            ) -> <u32 as intercom::type_system::ExternOutput<
                     intercom::type_system::AutomationTypeSystem>>
-                        ::ExternOutputType
+                        ::ForeignType
             {
                 let self_ptr = ( self_vtable as usize - #vtable_offset ) as *mut _;
                 intercom::logging::trace(|l| l(module_path!(), format_args!(
@@ -113,9 +113,9 @@ pub fn expand_com_impl(
             #[doc(hidden)]
             unsafe extern "system" fn #release_ident(
                 self_vtable : intercom::RawComPtr
-            ) -> <u32 as intercom::type_system::ExternType<
+            ) -> <u32 as intercom::type_system::ExternOutput<
                     intercom::type_system::AutomationTypeSystem>>
-                        ::ExternOutputType
+                        ::ForeignType
             {
                 let self_ptr = ( self_vtable as usize - #vtable_offset ) as *mut _;
                 intercom::logging::trace(|l| l(module_path!(), format_args!(
@@ -207,7 +207,6 @@ pub fn expand_com_impl(
                     let self_combox = ( self_vtable as usize - #vtable_offset )
                             as *mut intercom::ComBoxData< #struct_ident >;
 
-                    use intercom::type_system::{IntercomFrom, IntercomInto};
                     let result : Result< #ret_ty, intercom::ComError > = ( || {
                         intercom::logging::trace(|l| l(module_path!(), format_args!(
                             "[{:p}, through {:p}] Serving {}::{}",

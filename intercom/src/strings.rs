@@ -5,6 +5,7 @@
 use std::{
     self,
     borrow::Borrow,
+    convert::TryFrom,
     ffi,
     ops::Deref,
     os::raw::c_char,
@@ -12,9 +13,8 @@ use std::{
 };
 
 use crate::intercom::{ComError, ComResult};
-use crate::type_system::{
-    AutomationTypeSystem, ExternType, IntercomFrom, IntercomInto, RawTypeSystem,
-};
+use crate::raw::OutBSTR;
+use crate::type_system::{AutomationTypeSystem, ExternInput, ExternOutput, RawTypeSystem};
 
 #[derive(Debug)]
 pub struct FormatError;
@@ -350,21 +350,6 @@ impl Drop for BString
     }
 }
 
-impl IntercomFrom<BString> for String
-{
-    unsafe fn intercom_from(source: BString) -> Result<Self, ComError>
-    {
-        source.to_string().map_err(|_| ComError::E_INVALIDARG)
-    }
-}
-
-impl IntercomFrom<CString> for String
-{
-    unsafe fn intercom_from(source: CString) -> Result<Self, ComError>
-    {
-        source.into_string().map_err(|_| ComError::E_INVALIDARG)
-    }
-}
 pub type CStr = std::ffi::CStr;
 pub type CString = std::ffi::CString;
 
@@ -374,11 +359,12 @@ pub type CString = std::ffi::CString;
 #[cfg(windows)]
 mod os
 {
+    use crate::raw::OutBSTR;
 
     #[link(name = "oleaut32")]
     extern "system" {
         #[doc(hidden)]
-        pub fn SysAllocStringLen(psz: *const u16, len: u32) -> crate::raw::OutBSTR;
+        pub fn SysAllocStringLen(psz: *const u16, len: u32) -> OutBSTR;
 
         #[doc(hidden)]
         pub fn SysFreeString(bstr: *mut u16);
@@ -392,15 +378,16 @@ mod os
 #[allow(non_snake_case)]
 mod os
 {
+    use crate::raw::OutBSTR;
     use libc;
 
     #[doc(hidden)]
-    pub unsafe fn SysAllocStringLen(psz: *const u16, len: u32) -> crate::raw::OutBSTR
+    pub unsafe fn SysAllocStringLen(psz: *const u16, len: u32) -> OutBSTR
     {
         // Match the SysAllocStringLen implementation on Windows when
         // psz is null.
         if psz.is_null() {
-            return crate::raw::OutBSTR(std::ptr::null_mut());
+            return OutBSTR(std::ptr::null_mut());
         }
 
         // Length prefix + data length + null-terminator.
@@ -409,7 +396,7 @@ mod os
         let buffer_length: usize = 4 + data_length + 2;
         let buffer = libc::malloc(buffer_length);
         if buffer.is_null() {
-            return crate::raw::OutBSTR(std::ptr::null_mut());
+            return OutBSTR(std::ptr::null_mut());
         }
 
         // Set the length prefix.
@@ -426,7 +413,7 @@ mod os
         libc::memcpy(buffer.offset(4 + data_length as isize), null_terminator, 2);
 
         let buffer = buffer.offset(4) as *mut u16;
-        crate::raw::OutBSTR(buffer)
+        OutBSTR(buffer)
     }
 
     #[doc(hidden)]
@@ -483,182 +470,289 @@ impl From<CString> for IntercomString
     }
 }
 
-impl IntercomFrom<IntercomString> for BString
+impl TryFrom<IntercomString> for BString
 {
-    unsafe fn intercom_from(source: IntercomString) -> Result<Self, ComError>
+    type Error = ComError;
+    fn try_from(source: IntercomString) -> Result<BString, ComError>
     {
         match source {
-            IntercomString::BString(bstring) => bstring.intercom_into(),
-            IntercomString::CString(cstring) => cstring.intercom_into(),
-            IntercomString::String(string) => string.intercom_into(),
+            IntercomString::BString(bstring) => Ok(bstring),
+            IntercomString::CString(cstring) => {
+                BString::from_str(&cstring.into_string().map_err(|_| ComError::E_INVALIDARG)?)
+                    .map_err(|_| ComError::E_INVALIDARG)
+            }
+            IntercomString::String(string) => {
+                BString::from_str(&string).map_err(|_| ComError::E_INVALIDARG)
+            }
         }
     }
 }
 
-impl IntercomFrom<IntercomString> for CString
+impl TryFrom<IntercomString> for CString
 {
-    unsafe fn intercom_from(source: IntercomString) -> Result<Self, ComError>
+    type Error = ComError;
+    fn try_from(source: IntercomString) -> Result<CString, ComError>
     {
         match source {
-            IntercomString::BString(bstring) => bstring.intercom_into(),
-            IntercomString::CString(cstring) => cstring.intercom_into(),
-            IntercomString::String(string) => string.intercom_into(),
+            IntercomString::BString(bstring) => bstring
+                .to_string()
+                .map_err(|_| ComError::E_INVALIDARG)
+                .and_then(|string| CString::new(string).map_err(|_| ComError::E_INVALIDARG)),
+            IntercomString::CString(cstring) => Ok(cstring),
+            IntercomString::String(string) => {
+                CString::new(string).map_err(|_| ComError::E_INVALIDARG)
+            }
         }
     }
 }
 
-impl IntercomFrom<IntercomString> for String
+impl TryFrom<IntercomString> for String
 {
-    unsafe fn intercom_from(source: IntercomString) -> Result<Self, ComError>
+    type Error = ComError;
+    fn try_from(source: IntercomString) -> Result<String, ComError>
     {
         match source {
-            IntercomString::BString(bstring) => bstring.intercom_into(),
-            IntercomString::CString(cstring) => cstring.intercom_into(),
-            IntercomString::String(string) => string.intercom_into(),
+            IntercomString::BString(bstring) => {
+                bstring.to_string().map_err(|_| ComError::E_INVALIDARG)
+            }
+            IntercomString::CString(cstring) => {
+                cstring.into_string().map_err(|_| ComError::E_INVALIDARG)
+            }
+            IntercomString::String(string) => Ok(string),
         }
     }
 }
 
-// Automation type system.
-
-impl ExternType<AutomationTypeSystem> for &str
+// String
+unsafe impl ExternInput<AutomationTypeSystem> for String
 {
-    type ExternInputType = crate::raw::InBSTR;
-    type ExternOutputType = crate::raw::OutBSTR;
-    type OwnedExternType = BString;
-    type OwnedNativeType = String;
-}
+    type ForeignType = OutBSTR;
 
-impl ExternType<AutomationTypeSystem> for String
-{
-    type ExternInputType = crate::raw::InBSTR;
-    type ExternOutputType = crate::raw::OutBSTR;
-    type OwnedExternType = BString;
-    type OwnedNativeType = String;
-}
-
-impl ExternType<AutomationTypeSystem> for &BStr
-{
-    type ExternInputType = crate::raw::InBSTR;
-    type ExternOutputType = crate::raw::OutBSTR;
-    type OwnedExternType = crate::raw::InBSTR;
-    type OwnedNativeType = crate::raw::InBSTR;
-}
-
-impl ExternType<AutomationTypeSystem> for BString
-{
-    type ExternInputType = crate::raw::InBSTR;
-    type ExternOutputType = crate::raw::OutBSTR;
-    type OwnedExternType = BString;
-    type OwnedNativeType = BString;
-}
-
-impl ExternType<AutomationTypeSystem> for &CStr
-{
-    type ExternInputType = crate::raw::InBSTR;
-    type ExternOutputType = crate::raw::OutBSTR;
-    type OwnedExternType = BString;
-    type OwnedNativeType = CString;
-}
-
-impl ExternType<AutomationTypeSystem> for CString
-{
-    type ExternInputType = crate::raw::InBSTR;
-    type ExternOutputType = crate::raw::OutBSTR;
-    type OwnedExternType = BString;
-    type OwnedNativeType = CString;
-}
-
-// Raw type system.
-
-impl ExternType<RawTypeSystem> for &str
-{
-    type ExternInputType = *const c_char;
-    type ExternOutputType = *mut c_char;
-    type OwnedExternType = CString;
-    type OwnedNativeType = String;
-}
-
-impl ExternType<RawTypeSystem> for String
-{
-    type ExternInputType = *const c_char;
-    type ExternOutputType = *mut c_char;
-    type OwnedExternType = CString;
-    type OwnedNativeType = String;
-}
-
-impl ExternType<RawTypeSystem> for &BStr
-{
-    type ExternInputType = *const c_char;
-    type ExternOutputType = *mut c_char;
-    type OwnedExternType = CString;
-    type OwnedNativeType = BString;
-}
-
-impl ExternType<RawTypeSystem> for BString
-{
-    type ExternInputType = *const c_char;
-    type ExternOutputType = *mut c_char;
-    type OwnedExternType = CString;
-    type OwnedNativeType = BString;
-}
-
-impl ExternType<RawTypeSystem> for &CStr
-{
-    type ExternInputType = *const c_char;
-    type ExternOutputType = *mut c_char;
-    type OwnedExternType = *const c_char;
-    type OwnedNativeType = *const c_char;
-}
-
-impl ExternType<RawTypeSystem> for CString
-{
-    type ExternInputType = *const c_char;
-    type ExternOutputType = *mut c_char;
-    type OwnedExternType = CString;
-    type OwnedNativeType = CString;
-}
-
-// InBSTR -> X
-
-impl IntercomFrom<crate::raw::InBSTR> for String
-{
-    unsafe fn intercom_from(source: crate::raw::InBSTR) -> ComResult<Self>
+    type Lease = BString;
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
-        Ok(BStr::from_ptr(source.0)
-            .to_string()
-            .map_err(|_| ComError::E_INVALIDARG)?)
+        log::trace!("String::into_foreign_parameter<Automation>");
+        let bstring = BString::from_str(&self).expect("Error type is never type");
+        Ok((OutBSTR(bstring.as_ptr() as *mut _), bstring))
+    }
+
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
+    {
+        log::trace!("String::from_foreign_parameter<Automation>");
+        let bstring = BStr::from_ptr(source.0);
+        bstring.to_string().map_err(|_| ComError::E_INVALIDARG)
     }
 }
 
-impl IntercomFrom<crate::raw::InBSTR> for BString
+unsafe impl ExternInput<RawTypeSystem> for String
 {
-    unsafe fn intercom_from(source: crate::raw::InBSTR) -> ComResult<Self>
+    type ForeignType = *mut c_char;
+
+    type Lease = CString;
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
+        log::trace!("String::into_foreign_parameter<Raw>");
+        let cstring = CString::new(self).map_err(|_| ComError::E_INVALIDARG)?;
+        Ok((cstring.as_ptr() as *mut _, cstring))
+    }
+
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
+    {
+        log::trace!("String::from_foreign_parameter<Raw>");
+        let cstring = CStr::from_ptr(source);
+        cstring
+            .to_str()
+            .map_err(|_| ComError::E_INVALIDARG)
+            .map(|s| s.to_string())
+    }
+}
+
+unsafe impl ExternOutput<AutomationTypeSystem> for String
+{
+    type ForeignType = OutBSTR;
+
+    fn into_foreign_output(self) -> ComResult<Self::ForeignType>
+    {
+        log::trace!("String::from_foreign_output<Automation>");
+        let bstring = BString::from_str(&self).expect("Error type is never type");
+        Ok(OutBSTR(bstring.into_ptr()))
+    }
+
+    unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>
+    {
+        log::trace!("String::from_foreign_output<Automation>");
+        let bstring = BString::from_ptr(source.0);
+        bstring.to_string().map_err(|_| ComError::E_INVALIDARG)
+    }
+}
+
+unsafe impl ExternOutput<RawTypeSystem> for String
+{
+    type ForeignType = *mut c_char;
+
+    fn into_foreign_output(self) -> ComResult<Self::ForeignType>
+    {
+        log::trace!("String::into_foreign_output<Raw>");
+        let cstring = CString::new(self).map_err(|_| ComError::E_INVALIDARG)?;
+        Ok(cstring.into_raw())
+    }
+
+    unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>
+    {
+        log::trace!("String::from_foreign_output<Raw>");
+        let cstring = CString::from_raw(source);
+        cstring.into_string().map_err(|_| ComError::E_INVALIDARG)
+    }
+}
+
+// &str
+unsafe impl<'a> ExternInput<AutomationTypeSystem> for &'a str
+{
+    type ForeignType = OutBSTR;
+
+    type Lease = BString;
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    {
+        log::trace!("&str::into_foreign_parameter<Automation>");
+        let bstring = BString::from_str(self).expect("Error type is never type");
+        Ok((OutBSTR(bstring.as_ptr() as *mut _), bstring))
+    }
+
+    type Owned = String;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
+    {
+        log::trace!("&str::from_foreign_parameter<Automation>");
+        let bstr = BStr::from_ptr(source.0);
+        bstr.to_string().map_err(|_| ComError::E_INVALIDARG)
+    }
+}
+
+unsafe impl<'a> ExternInput<RawTypeSystem> for &'a str
+{
+    type ForeignType = *const c_char;
+
+    type Lease = CString;
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    {
+        log::trace!("&str::into_foreign_parameter<Raw>");
+        let cstring = CString::new(self).map_err(|_| ComError::E_INVALIDARG)?;
+        Ok((cstring.as_ptr(), cstring))
+    }
+
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
+    {
+        log::trace!("&str::from_foreign_parameter<Raw>");
+        let cstr = CStr::from_ptr(source);
+        cstr.to_str().map_err(|_| ComError::E_INVALIDARG)
+    }
+}
+
+// BString
+unsafe impl ExternInput<AutomationTypeSystem> for BString
+{
+    type ForeignType = OutBSTR;
+
+    type Lease = BString;
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    {
+        log::trace!("BString::into_foreign_parameter<Automation>");
+        Ok((OutBSTR(self.as_ptr() as *mut _), self))
+    }
+
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
+    {
+        log::trace!("BString::from_foreign_parameter<Automation>");
         Ok(BStr::from_ptr(source.0).to_owned())
     }
 }
 
-impl<'a> IntercomFrom<&'a crate::raw::InBSTR> for &'a BStr
+unsafe impl ExternInput<RawTypeSystem> for BString
 {
-    unsafe fn intercom_from(source: &'a crate::raw::InBSTR) -> ComResult<Self>
+    type ForeignType = *mut c_char;
+
+    type Lease = CString;
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
-        Ok(BStr::from_ptr(source.0))
+        log::trace!("BString::into_foreign_parameter<Raw>");
+        self.to_string()
+            .map_err(|_| ComError::E_INVALIDARG)
+            .and_then(|string| CString::new(string).map_err(|_| ComError::E_INVALIDARG))
+            .map(|cstring| (cstring.as_ptr() as *mut _, cstring))
+    }
+
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
+    {
+        log::trace!("BString::from_foreign_parameter<Raw>");
+        CStr::from_ptr(source)
+            .to_str()
+            .map(BString::from)
+            .map_err(|_| ComError::E_INVALIDARG)
     }
 }
 
-impl<'a> IntercomFrom<crate::raw::InBSTR> for &'a BStr
+unsafe impl ExternOutput<AutomationTypeSystem> for BString
 {
-    unsafe fn intercom_from(source: crate::raw::InBSTR) -> ComResult<Self>
+    type ForeignType = OutBSTR;
+
+    fn into_foreign_output(self) -> ComResult<Self::ForeignType>
     {
-        Ok(BStr::from_ptr(source.0))
+        log::trace!("BString::into_foreign_output<Automation>");
+        Ok(OutBSTR(self.into_ptr() as *mut _))
+    }
+
+    unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>
+    {
+        log::trace!("BString::from_foreign_output<Automation>");
+        Ok(BString::from_ptr(source.0))
     }
 }
 
-impl IntercomFrom<crate::raw::InBSTR> for CString
+unsafe impl ExternOutput<RawTypeSystem> for BString
 {
-    unsafe fn intercom_from(source: crate::raw::InBSTR) -> ComResult<Self>
+    type ForeignType = *mut c_char;
+
+    fn into_foreign_output(self) -> ComResult<Self::ForeignType>
     {
+        log::trace!("BString::into_foreign_output<Raw>");
+        self.to_string()
+            .map_err(|_| ComError::E_INVALIDARG)
+            .and_then(|string| CString::new(string).map_err(|_| ComError::E_INVALIDARG))
+            .map(|cstring| cstring.into_raw())
+    }
+
+    unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>
+    {
+        log::trace!("BString::from_foreign_output<Raw>");
+        CString::from_raw(source)
+            .into_string()
+            .map(BString::from)
+            .map_err(|_| ComError::E_INVALIDARG)
+    }
+}
+
+// CString
+unsafe impl ExternInput<AutomationTypeSystem> for CString
+{
+    type ForeignType = OutBSTR;
+
+    type Lease = BString;
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    {
+        log::trace!("CString::into_foreign_parameter<Automation>");
+        let cstring = self.into_string().map_err(|_| ComError::E_INVALIDARG)?;
+        let bstring = BString::from(cstring);
+        Ok((OutBSTR(bstring.as_ptr() as *mut _), bstring))
+    }
+
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
+    {
+        log::trace!("CString::from_foreign_parameter<Automation>");
         CString::new(
             BStr::from_ptr(source.0)
                 .to_string()
@@ -668,364 +762,150 @@ impl IntercomFrom<crate::raw::InBSTR> for CString
     }
 }
 
-impl<TPtr, TTarget> IntercomFrom<*mut TPtr> for TTarget
-where
-    TTarget: IntercomFrom<*const TPtr>,
+unsafe impl ExternInput<RawTypeSystem> for CString
 {
-    default unsafe fn intercom_from(source: *mut TPtr) -> ComResult<Self>
+    type ForeignType = *mut c_char;
+
+    type Lease = CString;
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
-        let bstring: ComResult<TTarget> = (source as *const TPtr).intercom_into();
+        log::trace!("CString::into_foreign_parameter<Raw>");
+        Ok((self.as_ptr() as *mut _, self))
+    }
 
-        // Free the buffer.
-        crate::alloc::free(source as *mut _);
-
-        bstring
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
+    {
+        log::trace!("CString::from_foreign_parameter<Raw>");
+        Ok(CStr::from_ptr(source).to_owned())
     }
 }
 
-// The *mut u16 strings should be BSTRs and must not be freed using the
-// normal `alloc::free`.
-
-impl IntercomFrom<intercom::raw::OutBSTR> for BString
+unsafe impl ExternOutput<AutomationTypeSystem> for CString
 {
-    unsafe fn intercom_from(source: intercom::raw::OutBSTR) -> ComResult<Self>
+    type ForeignType = OutBSTR;
+
+    fn into_foreign_output(self) -> ComResult<Self::ForeignType>
     {
-        Ok(BString::from_ptr(source.0))
+        log::trace!("CString::into_foreign_output<Automation>");
+        let cstring = self.into_string().map_err(|_| ComError::E_INVALIDARG)?;
+        Ok(OutBSTR(BString::from(cstring).into_ptr()))
     }
-}
 
-impl IntercomFrom<intercom::raw::OutBSTR> for String
-{
-    unsafe fn intercom_from(source: intercom::raw::OutBSTR) -> ComResult<Self>
+    unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>
     {
-        BString::from_ptr(source.0)
-            .to_string()
-            .map_err(|_| ComError::E_INVALIDARG)
-    }
-}
-
-impl IntercomFrom<intercom::raw::OutBSTR> for CString
-{
-    unsafe fn intercom_from(source: intercom::raw::OutBSTR) -> ComResult<Self>
-    {
-        CString::new(String::intercom_from(source)?).map_err(|_| ComError::E_INVALIDARG)
-    }
-}
-
-// *c_char -> X
-
-impl IntercomFrom<*const c_char> for String
-{
-    unsafe fn intercom_from(source: *const c_char) -> ComResult<Self>
-    {
-        Ok(CStr::from_ptr(source)
-            .to_str()
-            .map_err(|_| ComError::E_INVALIDARG)?
-            .to_string())
-    }
-}
-
-/*
-impl IntercomFrom<*mut c_char> for String {
-    unsafe fn intercom_from( source: *mut c_char ) -> ComResult<String> {
-
-        // TODO:
-        // We really shouldn't blanket unsafe here.
-        // The intercom_from should turn into an unsafe function instead.
-        unsafe {
-
-            // Convert the string. Maintain the result for now.
-            let result = CStr::from_ptr( source )
-                .to_str().map( |s| s.to_string() )
-                .map_err( |_| ComError::E_INVALIDARG );
-
-            // Free the buffer.
-            ::alloc::free( source as *mut _ );
-
-            result
-        }
-    }
-}
-*/
-
-impl IntercomFrom<*const c_char> for BString
-{
-    unsafe fn intercom_from(source: *const c_char) -> ComResult<Self>
-    {
-        Ok(BString::from(
-            CStr::from_ptr(source)
-                .to_str()
+        log::trace!("CString::from_foreign_output<Automation>");
+        CString::new(
+            BString::from_ptr(source.0)
+                .to_string()
                 .map_err(|_| ComError::E_INVALIDARG)?,
-        ))
+        )
+        .map_err(|_| ComError::E_INVALIDARG)
     }
 }
 
-/*
-impl IntercomFrom<*mut c_char> for BString {
-    unsafe fn intercom_from( source: *mut c_char ) -> ComResult<Self> {
-        unsafe {
-            let bstring : ComResult<BString> =
-                    ( source as *const c_char ).intercom_into();
-
-            // Free the buffer.
-            ::alloc::free( source as *mut _ );
-
-            bstring
-        }
-    }
-}
-*/
-
-impl<'a> IntercomFrom<*const c_char> for CString
+unsafe impl ExternOutput<RawTypeSystem> for CString
 {
-    unsafe fn intercom_from(source: *const c_char) -> ComResult<Self>
-    {
-        Ok(CStr::from_ptr(source).into())
-    }
-}
+    type ForeignType = *mut c_char;
 
-/* We don't know where the *mut c_char is coming from so we shouldn't really
- * give it to CString given CString assumes it has reserved the memory on
- * its own.
- * */
-impl IntercomFrom<*mut c_char> for CString
-{
-    unsafe fn intercom_from(source: *mut c_char) -> ComResult<CString>
+    fn into_foreign_output(self) -> ComResult<Self::ForeignType>
     {
+        log::trace!("CString::into_foreign_output<Raw>");
+        Ok(self.into_raw())
+    }
+
+    unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>
+    {
+        log::trace!("CString::from_foreign_output<Raw>");
         Ok(CString::from_raw(source))
     }
 }
 
-impl<'a> IntercomFrom<*const c_char> for &'a CStr
+// &CStr
+unsafe impl<'a> ExternInput<AutomationTypeSystem> for &'a CStr
 {
-    unsafe fn intercom_from(source: *const c_char) -> ComResult<Self>
+    type ForeignType = OutBSTR;
+
+    type Lease = BString;
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
+        log::trace!("&CStr::into_foreign_parameter<Automation>");
+        let string = self.to_str().map_err(|_| ComError::E_INVALIDARG)?;
+        let bstring = BString::from(string);
+        Ok((OutBSTR(bstring.as_ptr() as *mut _), bstring))
+    }
+
+    type Owned = CString;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
+    {
+        log::trace!("&CStr::from_foreign_parameter<Automation>");
+        let string = BStr::from_ptr(source.0)
+            .to_string()
+            .map_err(|_| ComError::E_INVALIDARG)?;
+        CString::new(string).map_err(|_| ComError::E_INVALIDARG)
+    }
+}
+
+unsafe impl<'a> ExternInput<RawTypeSystem> for &'a CStr
+{
+    type ForeignType = *mut c_char;
+
+    type Lease = ();
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    {
+        log::trace!("&CStr::into_foreign_parameter<Raw>");
+        Ok((self.as_ptr() as *mut _, ()))
+    }
+
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
+    {
+        log::trace!("&CStr::from_foreign_parameter<Raw>");
         Ok(CStr::from_ptr(source))
     }
 }
 
-impl<'a> IntercomFrom<&*const c_char> for &'a CStr
+// &BStr
+unsafe impl<'a> ExternInput<AutomationTypeSystem> for &'a BStr
 {
-    unsafe fn intercom_from(source: &*const c_char) -> ComResult<Self>
+    type ForeignType = OutBSTR;
+
+    type Lease = ();
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
-        Ok(CStr::from_ptr(*source))
+        log::trace!("&BStr::into_foreign_parameter<Automation>");
+        Ok((OutBSTR(self.as_ptr() as *mut _), ()))
+    }
+
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
+    {
+        log::trace!("&BStr::from_foreign_parameter<Automation>");
+        Ok(BStr::from_ptr(source.0))
     }
 }
 
-// X -> BSTR
-
-impl IntercomFrom<&BStr> for crate::raw::InBSTR
+unsafe impl<'a> ExternInput<RawTypeSystem> for &'a BStr
 {
-    unsafe fn intercom_from(source: &BStr) -> ComResult<Self>
+    type ForeignType = *mut c_char;
+
+    type Lease = CString;
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
-        Ok(crate::raw::InBSTR(source.as_ptr()))
+        log::trace!("&BStr::into_foreign_parameter<Raw>");
+        let string = self.to_string().map_err(|_| ComError::E_INVALIDARG)?;
+        let cstring = CString::new(string).map_err(|_| ComError::E_INVALIDARG)?;
+        Ok((cstring.as_ptr() as *mut c_char, cstring))
     }
-}
 
-impl IntercomFrom<&BString> for crate::raw::InBSTR
-{
-    unsafe fn intercom_from(source: &BString) -> ComResult<Self>
+    type Owned = BString;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
-        Ok(crate::raw::InBSTR(source.as_ptr()))
-    }
-}
-
-impl IntercomFrom<BString> for crate::raw::OutBSTR
-{
-    unsafe fn intercom_from(source: BString) -> ComResult<Self>
-    {
-        Ok(crate::raw::OutBSTR(source.into_ptr()))
-    }
-}
-
-impl IntercomFrom<CString> for crate::raw::OutBSTR
-{
-    unsafe fn intercom_from(source: CString) -> ComResult<Self>
-    {
-        let bstr: BString = source.intercom_into()?;
-        Ok(crate::raw::OutBSTR(bstr.into_ptr()))
-    }
-}
-
-// X -> *c_char
-
-impl IntercomFrom<&CStr> for *const c_char
-{
-    unsafe fn intercom_from(source: &CStr) -> ComResult<Self>
-    {
-        Ok(source.as_ptr())
-    }
-}
-
-impl IntercomFrom<&CString> for *const c_char
-{
-    unsafe fn intercom_from(source: &CString) -> ComResult<Self>
-    {
-        Ok(source.as_ptr())
-    }
-}
-
-impl IntercomFrom<CString> for *mut c_char
-{
-    unsafe fn intercom_from(source: CString) -> ComResult<Self>
-    {
-        let ptr = source.as_ptr();
-        std::mem::forget(source);
-        Ok(ptr as _)
-
-        /* We really should do the following I believe:
-        let bytes = source.as_bytes();
-
-        // We just allocated the memory. This is safe.
-        unsafe {
-            let buffer = crate::alloc::allocate( bytes.len() + 1 ) as *mut u8;
-            std::ptr::copy_nonoverlapping(
-                bytes.as_ptr(),
-                buffer,
-                bytes.len() );
-            *buffer.offset( ( bytes.len() + 1 ) as isize ) = 0;
-
-            Ok( buffer as *mut c_char )
-        }
-        */
-    }
-}
-
-impl IntercomFrom<BString> for *mut c_char
-{
-    unsafe fn intercom_from(source: BString) -> ComResult<Self>
-    {
-        let cstring: CString = source.intercom_into()?;
-        cstring.intercom_into()
-    }
-}
-
-// String -> X
-
-impl IntercomFrom<String> for CString
-{
-    unsafe fn intercom_from(source: String) -> ComResult<Self>
-    {
-        CString::new(source).map_err(|_| ComError::E_INVALIDARG)
-    }
-}
-
-impl IntercomFrom<&str> for CString
-{
-    unsafe fn intercom_from(source: &str) -> ComResult<Self>
-    {
-        CString::new(source).map_err(|_| ComError::E_INVALIDARG)
-    }
-}
-
-impl IntercomFrom<String> for BString
-{
-    unsafe fn intercom_from(source: String) -> ComResult<Self>
-    {
-        Ok(BString::from(source.as_ref()))
-    }
-}
-
-impl<'a> IntercomFrom<&'a str> for BString
-{
-    unsafe fn intercom_from(source: &str) -> ComResult<Self>
-    {
-        Ok(BString::from(source))
-    }
-}
-
-// CString -> X
-
-impl IntercomFrom<CString> for BString
-{
-    unsafe fn intercom_from(source: CString) -> ComResult<Self>
-    {
-        Ok(BString::from(
-            source
-                .to_str()
-                .map_err(|_| ComError::E_INVALIDARG)?
-                .to_string(),
-        ))
-    }
-}
-
-impl<'a> IntercomFrom<&'a CString> for &'a CStr
-{
-    unsafe fn intercom_from(source: &'a CString) -> ComResult<Self>
-    {
-        Ok(source.as_ref())
-    }
-}
-
-// BString -> X
-
-impl IntercomFrom<BString> for CString
-{
-    unsafe fn intercom_from(source: BString) -> ComResult<Self>
-    {
-        CString::new(source.to_string().map_err(|_| ComError::E_INVALIDARG)?)
-            .map_err(|_| ComError::E_INVALIDARG)
-    }
-}
-
-impl<'a> IntercomFrom<&'a BString> for &'a BStr
-{
-    unsafe fn intercom_from(source: &'a BString) -> ComResult<Self>
-    {
-        Ok(source.as_ref())
-    }
-}
-
-impl IntercomFrom<&BStr> for CString
-{
-    unsafe fn intercom_from(source: &BStr) -> ComResult<Self>
-    {
-        CString::new(source.to_string().map_err(|_| ComError::E_INVALIDARG)?)
-            .map_err(|_| ComError::E_INVALIDARG)
-    }
-}
-
-impl IntercomFrom<&CStr> for BString
-{
-    unsafe fn intercom_from(source: &CStr) -> ComResult<Self>
-    {
-        Ok(BString::from(
-            source
-                .to_str()
-                .map_err(|_| ComError::E_INVALIDARG)?
-                .to_string(),
-        ))
-    }
-}
-
-impl<'a> IntercomFrom<&'a String> for &'a str
-{
-    unsafe fn intercom_from(source: &'a String) -> ComResult<Self>
-    {
-        Ok(source.as_ref())
-    }
-}
-
-impl IntercomFrom<String> for *mut c_char
-{
-    unsafe fn intercom_from(source: String) -> ComResult<Self>
-    {
-        let bytes = source.as_bytes();
-
-        // We just allocated the memory. This is safe.
-        let buffer = crate::alloc::allocate(bytes.len() + 1) as *mut u8;
-        std::ptr::copy_nonoverlapping(bytes.as_ptr(), buffer, bytes.len());
-        *buffer.add(bytes.len()) = 0;
-
-        Ok(buffer as *mut c_char)
-    }
-}
-
-impl IntercomFrom<String> for intercom::raw::OutBSTR
-{
-    unsafe fn intercom_from(source: String) -> ComResult<Self>
-    {
-        Ok(intercom::raw::OutBSTR(BString::from(source).into_ptr()))
+        log::trace!("&BStr::from_foreign_parameter<Raw>");
+        let string = CStr::from_ptr(source)
+            .to_str()
+            .map_err(|_| ComError::E_INVALIDARG)?;
+        Ok(BString::from(string))
     }
 }
 

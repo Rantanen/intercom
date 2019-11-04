@@ -129,8 +129,8 @@ pub fn com_library(args: TokenStream) -> TokenStream
     }
 }
 
-/// Derives the implementation of the trait BidirectionalTypeInfo for a type.
-#[proc_macro_derive(BidirectionalTypeInfo)]
+/// Derives the implementation of the trait ForeignType for a type.
+#[proc_macro_derive(ForeignType)]
 pub fn named_type_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 {
     match expand_bidirectional_type_info(input) {
@@ -139,11 +139,21 @@ pub fn named_type_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStr
     }
 }
 
-/// Derives the implementation of the trait ExternType for a type.
-#[proc_macro_derive(ExternType)]
-pub fn derive_extern_type(input: proc_macro::TokenStream) -> proc_macro::TokenStream
+/// Derives the implementation of the trait ExternInput for a type.
+#[proc_macro_derive(ExternInput)]
+pub fn derive_extern_parameter(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 {
-    match expand_derive_extern_type(input) {
+    match expand_derive_extern_parameter(input) {
+        Ok(t) => t,
+        Err(e) => panic!("{}", e),
+    }
+}
+
+/// Derives the implementation of the trait ExternOutput for a type.
+#[proc_macro_derive(ExternOutput)]
+pub fn derive_extern_output(input: proc_macro::TokenStream) -> proc_macro::TokenStream
+{
+    match expand_derive_extern_output(input) {
         Ok(t) => t,
         Err(e) => panic!("{}", e),
     }

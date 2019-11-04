@@ -1,13 +1,13 @@
-use crate::type_system::{ExternType, IntercomFrom, TypeSystem};
+use crate::type_system::{ExternInput, ExternOutput, TypeSystem};
 use crate::*;
-use intercom_attributes::BidirectionalTypeInfo;
+use intercom_attributes::ForeignType;
 use std::convert::TryFrom;
 use std::time::SystemTime;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Currency(i64);
 
-#[derive(Debug, Clone, BidirectionalTypeInfo)]
+#[derive(Debug, Clone, ForeignType)]
 pub enum Variant
 {
     None,
@@ -51,27 +51,11 @@ impl Variant
             Variant::IUnknown(..) => raw::var_type::UNKNOWN,
         }
     }
-}
 
-impl<TS: TypeSystem> ExternType<TS> for Variant
-{
-    type ExternInputType = crate::raw::Variant<TS>;
-    type ExternOutputType = crate::raw::Variant<TS>;
-    type OwnedExternType = Variant;
-    type OwnedNativeType = Variant;
-}
-
-impl Default for Variant
-{
-    fn default() -> Self
-    {
-        Variant::None
-    }
-}
-
-impl<TS: TypeSystem> IntercomFrom<raw::Variant<TS>> for Variant
-{
-    unsafe fn intercom_from(src: raw::Variant<TS>) -> Result<Variant, ComError>
+    /// # Safety
+    ///
+    /// The source variant must be a valid variant.
+    pub unsafe fn from_raw<TS: TypeSystem>(src: raw::Variant<TS>) -> ComResult<Self>
     {
         Ok(if src.vt.0 & raw::var_type::BYREF == 0 {
             match src.vt.0 & raw::var_type::TYPEMASK {
@@ -127,9 +111,50 @@ impl<TS: TypeSystem> IntercomFrom<raw::Variant<TS>> for Variant
     }
 }
 
-impl<TS: TypeSystem> IntercomFrom<Variant> for raw::Variant<TS>
+impl Default for Variant
 {
-    unsafe fn intercom_from(src: Variant) -> ComResult<Self>
+    fn default() -> Self
+    {
+        Variant::None
+    }
+}
+
+unsafe impl<TS: TypeSystem> ExternInput<TS> for Variant
+{
+    type ForeignType = raw::Variant<TS>;
+
+    type Lease = ();
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
+    {
+        Self::ForeignType::try_from(self).map(|variant| (variant, ()))
+    }
+
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(src: Self::ForeignType) -> ComResult<Self::Owned>
+    {
+        Self::from_raw(src)
+    }
+}
+
+unsafe impl<TS: TypeSystem> ExternOutput<TS> for Variant
+{
+    type ForeignType = raw::Variant<TS>;
+
+    fn into_foreign_output(self) -> ComResult<Self::ForeignType>
+    {
+        Self::ForeignType::try_from(self)
+    }
+
+    unsafe fn from_foreign_output(src: Self::ForeignType) -> ComResult<Self>
+    {
+        Self::from_raw(src)
+    }
+}
+
+impl<TS: TypeSystem> TryFrom<Variant> for raw::Variant<TS>
+{
+    type Error = ComError;
+    fn try_from(src: Variant) -> ComResult<Self>
     {
         Ok(match src {
             Variant::None => raw::Variant::new(
@@ -189,7 +214,7 @@ impl<TS: TypeSystem> IntercomFrom<Variant> for raw::Variant<TS>
             Variant::String(data) => raw::Variant::new(
                 raw::VariantType::new(raw::var_type::BSTR),
                 raw::VariantData {
-                    bstrVal: crate::BString::intercom_from(data)?.into_ptr(),
+                    bstrVal: crate::BString::try_from(data)?.into_ptr(),
                 },
             ),
             Variant::SystemTime(data) => raw::Variant::new(
@@ -559,10 +584,7 @@ impl TryFrom<Variant> for String
     fn try_from(src: Variant) -> Result<String, Self::Error>
     {
         match src {
-            Variant::String(data) => unsafe {
-                // Variant should hold a valid string, making this safe.
-                String::intercom_from(data).map_err(|_| VariantError)
-            },
+            Variant::String(data) => String::try_from(data).map_err(|_| VariantError),
             _ => Err(VariantError::from(&src)),
         }
     }
@@ -574,10 +596,7 @@ impl TryFrom<Variant> for BString
     fn try_from(src: Variant) -> Result<BString, Self::Error>
     {
         match src {
-            Variant::String(data) => unsafe {
-                // Variant should hold a valid string, making this safe.
-                BString::intercom_from(data).map_err(|_| VariantError)
-            },
+            Variant::String(data) => BString::try_from(data).map_err(|_| VariantError),
             _ => Err(VariantError::from(&src)),
         }
     }
@@ -589,10 +608,7 @@ impl TryFrom<Variant> for CString
     fn try_from(src: Variant) -> Result<CString, Self::Error>
     {
         match src {
-            Variant::String(data) => unsafe {
-                // Variant should hold a valid string, making this safe.
-                CString::intercom_from(data).map_err(|_| VariantError)
-            },
+            Variant::String(data) => CString::try_from(data).map_err(|_| VariantError),
             _ => Err(VariantError::from(&src)),
         }
     }
@@ -609,7 +625,7 @@ impl<T: Into<IntercomString>> From<T> for Variant
 pub mod raw
 {
 
-    use super::intercom_attributes::BidirectionalTypeInfo;
+    use super::intercom_attributes::ForeignType;
     use crate::type_system::TypeSystem;
     use std;
     use std::time::{Duration, SystemTime};
@@ -781,7 +797,7 @@ pub mod raw
     }
 
     #[repr(C)]
-    #[derive(Copy, Clone, BidirectionalTypeInfo)]
+    #[derive(Copy, Clone, ForeignType)]
     pub struct Variant<TS: TypeSystem>
     {
         pub vt: VariantType,

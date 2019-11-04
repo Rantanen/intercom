@@ -112,18 +112,16 @@ impl TypeHandler
         // Construct bits for the quote.
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type(span);
-        let ts_trait = quote_spanned!(
-            span=> <#ty as intercom::type_system::ExternType< #ts > > );
 
         // Get the final type based on the parameter direction.
-        match dir {
-            Direction::In => {
-                syn::parse2(quote_spanned!(span => #ts_trait::ExternInputType )).unwrap()
-            }
+        let tr = match dir {
+            Direction::In => quote_spanned!(span => intercom::type_system::ExternInput),
             Direction::Out | Direction::Retval => {
-                syn::parse2(quote_spanned!(span => #ts_trait::ExternOutputType )).unwrap()
+                quote_spanned!(span => intercom::type_system::ExternOutput)
             }
-        }
+        };
+
+        syn::parse2(quote_spanned!(span => <#ty as #tr<#ts>>::ForeignType)).unwrap()
     }
 
     /// Converts a COM parameter named by the ident into a Rust type.
@@ -132,21 +130,17 @@ impl TypeHandler
         // Construct bits for the quote.
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type(span);
-        let ts_trait = quote_spanned!(
-            span=> <#ty as intercom::type_system::ExternType< #ts > > );
-
+        let maybe_ref = match ty {
+            syn::Type::Reference(..) => quote!(&),
+            _ => quote!(),
+        };
         match dir {
-            Direction::In => {
-                // Input arguments may use an intermediate type.
-                let intermediate = quote_spanned!(
-                    span=> #ts_trait::OwnedNativeType::intercom_from( #ident )? );
-                quote_spanned!(span=> ( & #intermediate ).intercom_into()? )
-            }
-            Direction::Out | Direction::Retval => {
-                // Output arguments must not use an intermediate type
-                // as these must outlive the current function.
-                quote_spanned!(span=> #ident.intercom_into()? )
-            }
+            Direction::In => quote_spanned!(span=>
+                    #maybe_ref <#ty as intercom::type_system::ExternInput<#ts>>
+                        ::from_foreign_parameter(#ident)?),
+            Direction::Out | Direction::Retval => quote_spanned!(span=>
+                    <#ty as intercom::type_system::ExternOutput<#ts>>
+                        ::from_foreign_output(#ident)?),
         }
     }
 
@@ -156,16 +150,13 @@ impl TypeHandler
         // Construct bits for the quote.
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type(span);
-        let ts_trait = quote_spanned!(
-            span=> <#ty as intercom::type_system::ExternType< #ts > > );
-
         match dir {
-            Direction::In => {
-                let intermediate = quote_spanned!(
-                    span=> #ts_trait::OwnedExternType::intercom_from( #ident )? );
-                quote_spanned!(span=> ( & #intermediate ).intercom_into()? )
-            }
-            Direction::Out | Direction::Retval => quote_spanned!(span=> #ident.intercom_into()? ),
+            Direction::In => quote_spanned!(span=>
+                    <#ty as intercom::type_system::ExternInput<#ts>>
+                        ::into_foreign_parameter(#ident)?.0),
+            Direction::Out | Direction::Retval => quote_spanned!(span=>
+                    <#ty as intercom::type_system::ExternOutput<#ts>>
+                        ::into_foreign_output(#ident)?),
         }
     }
 

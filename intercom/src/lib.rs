@@ -100,7 +100,7 @@ mod variant;
 pub use crate::variant::{Variant, VariantError};
 pub mod type_system;
 pub mod typelib;
-pub use type_system::{BidirectionalTypeInfo, InputTypeInfo, OutputTypeInfo};
+pub use type_system::ForeignType;
 pub mod attributes;
 pub mod logging;
 
@@ -142,14 +142,16 @@ pub type REFCLSID = *const IID;
 pub mod raw
 {
 
-    #[derive(
-        Clone, Copy, intercom_attributes::ExternType, intercom_attributes::BidirectionalTypeInfo,
-    )]
+    #[derive(Clone, Copy, intercom_attributes::ExternInput, intercom_attributes::ForeignType)]
     #[repr(transparent)]
     pub struct InBSTR(pub *const u16);
 
     #[derive(
-        Clone, Copy, intercom_attributes::ExternType, intercom_attributes::BidirectionalTypeInfo,
+        Clone,
+        Copy,
+        intercom_attributes::ExternInput,
+        intercom_attributes::ExternOutput,
+        intercom_attributes::ForeignType,
     )]
     #[repr(transparent)]
     pub struct OutBSTR(pub *mut u16);

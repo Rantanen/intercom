@@ -217,7 +217,7 @@ pub fn expand_com_interface(
     // Implement type info for the interface.
     output.push(quote_spanned!(itf.span =>
 
-        impl intercom::type_system::BidirectionalTypeInfo for #maybe_dyn #itf_ident {
+        impl intercom::type_system::ForeignType for #maybe_dyn #itf_ident {
 
             /// The name of the type.
             fn type_name() -> &'static str { stringify!( #itf_ident )  }
@@ -422,7 +422,6 @@ fn rust_to_com_delegate(
     // Construct the final method.
     quote_spanned!(method_info.signature_span =>
         #[allow(unused_imports)]
-        use intercom::type_system::{IntercomFrom, IntercomInto};
         let vtbl = comptr.ptr as *const *const <#maybe_dyn #itf_name as
             intercom::attributes::ComInterface<#ts_type>>::VTable;
 
@@ -499,11 +498,11 @@ fn create_typeinfo_for_variant(
                 intercom::typelib::Arg {
                     name: "".into(),
                     ty: <
-                        <#rt as intercom::type_system::ExternType<#ts_type>>::ExternOutputType
-                        as intercom::type_system::OutputTypeInfo>::type_name().into(),
+                        <#rt as intercom::type_system::ExternOutput<#ts_type>>::ForeignType
+                        as intercom::type_system::ForeignType>::type_name().into(),
                     indirection_level: <
-                        <#rt as intercom::type_system::ExternType<#ts_type>>::ExternOutputType
-                        as intercom::type_system::OutputTypeInfo>::indirection_level(),
+                        <#rt as intercom::type_system::ExternOutput<#ts_type>>::ForeignType
+                        as intercom::type_system::ForeignType>::indirection_level(),
                     direction: intercom::typelib::Direction::Return,
                 }),
             None => quote_spanned!(m.signature_span => intercom::typelib::Arg {
@@ -524,8 +523,8 @@ fn create_typeinfo_for_variant(
             }, arg.span);
 
             let ty_info_trait = Ident::new(match arg.dir {
-                Direction::Out | Direction::Retval => "OutputTypeInfo",
-                Direction::In => "InputTypeInfo",
+                Direction::Out | Direction::Retval => "ForeignType",
+                Direction::In => "ForeignType",
             }, arg.span);
 
             quote_spanned!(arg.span => intercom::typelib::Arg {

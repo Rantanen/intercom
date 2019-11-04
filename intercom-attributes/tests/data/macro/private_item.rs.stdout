@@ -21,9 +21,9 @@ struct __IntercomVtableForIFoo_Automation {
     >>::VTable,
     pub trait_method: unsafe extern "system" fn(
         self_vtable: intercom::RawComPtr,
-    ) -> <() as intercom::type_system::ExternType<
+    ) -> <() as intercom::type_system::ExternOutput<
         intercom::type_system::AutomationTypeSystem,
-    >>::ExternOutputType,
+    >>::ForeignType,
 }
 #[allow(non_camel_case_types)]
 #[allow(non_snake_case)]
@@ -51,9 +51,9 @@ struct __IntercomVtableForIFoo_Raw {
     >>::VTable,
     pub trait_method: unsafe extern "system" fn(
         self_vtable: intercom::RawComPtr,
-    ) -> <() as intercom::type_system::ExternType<
+    ) -> <() as intercom::type_system::ExternOutput<
         intercom::type_system::AutomationTypeSystem,
-    >>::ExternOutputType,
+    >>::ForeignType,
 }
 #[allow(non_camel_case_types)]
 #[allow(non_snake_case)]
@@ -111,7 +111,6 @@ impl IFoo for intercom::ComItf<dyn IFoo> {
                 )
             });
             #[allow(unused_imports)]
-            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
                 as *const *const <dyn IFoo as intercom::attributes::ComInterface<
                     intercom::type_system::AutomationTypeSystem,
@@ -153,7 +152,6 @@ impl IFoo for intercom::ComItf<dyn IFoo> {
                 )
             });
             #[allow(unused_imports)]
-            use intercom::type_system::{IntercomFrom, IntercomInto};
             let vtbl = comptr.ptr
                 as *const *const <dyn IFoo as intercom::attributes::ComInterface<
                     intercom::type_system::RawTypeSystem,
@@ -203,7 +201,7 @@ impl intercom::ComInterface for dyn IFoo {
         com_itf
     }
 }
-impl intercom::type_system::BidirectionalTypeInfo for dyn IFoo {
+impl intercom::type_system::ForeignType for dyn IFoo {
     #[doc = r" The name of the type."]
     fn type_name() -> &'static str {
         "IFoo"
@@ -1216,15 +1214,15 @@ impl Foo {
 #[doc(hidden)]
 unsafe extern "system" fn __Foo_Foo_Automation_query_interface(
     self_vtable: intercom::RawComPtr,
-    riid: <intercom::REFIID as intercom::type_system::ExternType<
+    riid: <intercom::REFIID as intercom::type_system::ExternInput<
         intercom::type_system::AutomationTypeSystem,
-    >>::ExternInputType,
-    out: *mut <intercom::RawComPtr as intercom::type_system::ExternType<
+    >>::ForeignType,
+    out: *mut <intercom::RawComPtr as intercom::type_system::ExternOutput<
         intercom::type_system::AutomationTypeSystem,
-    >>::ExternOutputType,
-) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
     intercom::type_system::AutomationTypeSystem,
->>::ExternOutputType {
+>>::ForeignType {
     let self_ptr = (self_vtable as usize
         - <Foo as intercom::attributes::ComClass<
             Foo,
@@ -1254,7 +1252,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_add_ref(self_vtable:
                                                            intercom::RawComPtr)
  ->
      <u32 as
-intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
     let self_ptr = (self_vtable as usize
         - <Foo as intercom::attributes::ComClass<
             Foo,
@@ -1284,7 +1282,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_release(self_vtable:
                                                            intercom::RawComPtr)
  ->
      <u32 as
-intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
     let self_ptr = (self_vtable as usize
         - <Foo as intercom::attributes::ComClass<
             Foo,
@@ -1314,16 +1312,15 @@ unsafe extern "system" fn __Foo_Foo_Automation_struct_method_Automation(self_vta
                                                                             intercom::RawComPtr)
  ->
      <() as
-intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
     let self_combox = (self_vtable as usize
         - <Foo as intercom::attributes::ComClass<
             Foo,
             intercom::type_system::AutomationTypeSystem,
         >>::offset()) as *mut intercom::ComBoxData<Foo>;
-    use intercom::type_system::{IntercomFrom, IntercomInto};
     let result:
             Result<<() as
-                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
                    intercom::ComError> =
         (||
              {
@@ -1394,9 +1391,9 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
                     ),
                 )
             });
-            <<() as
-             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
-                as ErrorValue>::from_error(intercom::store_error(err))
+            <<() as intercom::type_system::ExternOutput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::ForeignType as ErrorValue>::from_error(intercom::store_error(err))
         }
     }
 }
@@ -1427,15 +1424,15 @@ impl intercom::attributes::ComImpl<Foo, intercom::type_system::AutomationTypeSys
 #[doc(hidden)]
 unsafe extern "system" fn __Foo_Foo_Raw_query_interface(
     self_vtable: intercom::RawComPtr,
-    riid: <intercom::REFIID as intercom::type_system::ExternType<
+    riid: <intercom::REFIID as intercom::type_system::ExternInput<
         intercom::type_system::AutomationTypeSystem,
-    >>::ExternInputType,
-    out: *mut <intercom::RawComPtr as intercom::type_system::ExternType<
+    >>::ForeignType,
+    out: *mut <intercom::RawComPtr as intercom::type_system::ExternOutput<
         intercom::type_system::AutomationTypeSystem,
-    >>::ExternOutputType,
-) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
     intercom::type_system::AutomationTypeSystem,
->>::ExternOutputType {
+>>::ForeignType {
     let self_ptr =
         (self_vtable as usize -
              <Foo as
@@ -1466,7 +1463,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_add_ref(self_vtable:
                                                     intercom::RawComPtr)
  ->
      <u32 as
-intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
     let self_ptr =
         (self_vtable as usize -
              <Foo as
@@ -1497,7 +1494,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_release(self_vtable:
                                                     intercom::RawComPtr)
  ->
      <u32 as
-intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
     let self_ptr =
         (self_vtable as usize -
              <Foo as
@@ -1528,17 +1525,16 @@ unsafe extern "system" fn __Foo_Foo_Raw_struct_method_Raw(self_vtable:
                                                               intercom::RawComPtr)
  ->
      <() as
-intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
     let self_combox =
         (self_vtable as usize -
              <Foo as
                  intercom::attributes::ComClass<Foo,
                                                 intercom::type_system::RawTypeSystem>>::offset())
             as *mut intercom::ComBoxData<Foo>;
-    use intercom::type_system::{IntercomFrom, IntercomInto};
     let result:
             Result<<() as
-                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
                    intercom::ComError> =
         (||
              {
@@ -1609,9 +1605,9 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
                     ),
                 )
             });
-            <<() as
-             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
-                as ErrorValue>::from_error(intercom::store_error(err))
+            <<() as intercom::type_system::ExternOutput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::ForeignType as ErrorValue>::from_error(intercom::store_error(err))
         }
     }
 }
@@ -1651,9 +1647,10 @@ pub struct __IntercomVtableForFoo_Automation {
     >>::VTable,
     pub struct_method: unsafe extern "system" fn(
         self_vtable: intercom::RawComPtr,
-    ) -> <() as intercom::type_system::ExternType<
+    )
+        -> <() as intercom::type_system::ExternOutput<
         intercom::type_system::AutomationTypeSystem,
-    >>::ExternOutputType,
+    >>::ForeignType,
 }
 #[allow(non_camel_case_types)]
 #[allow(non_snake_case)]
@@ -1681,9 +1678,10 @@ pub struct __IntercomVtableForFoo_Raw {
     >>::VTable,
     pub struct_method: unsafe extern "system" fn(
         self_vtable: intercom::RawComPtr,
-    ) -> <() as intercom::type_system::ExternType<
+    )
+        -> <() as intercom::type_system::ExternOutput<
         intercom::type_system::AutomationTypeSystem,
-    >>::ExternOutputType,
+    >>::ForeignType,
 }
 #[allow(non_camel_case_types)]
 #[allow(non_snake_case)]
@@ -1738,7 +1736,7 @@ impl intercom::ComInterface for Foo {
         }
     }
 }
-impl intercom::type_system::BidirectionalTypeInfo for Foo {
+impl intercom::type_system::ForeignType for Foo {
     #[doc = r" The name of the type."]
     fn type_name() -> &'static str {
         "Foo"
@@ -1807,15 +1805,15 @@ impl IFoo for Foo {
 #[doc(hidden)]
 unsafe extern "system" fn __Foo_IFoo_Automation_query_interface(
     self_vtable: intercom::RawComPtr,
-    riid: <intercom::REFIID as intercom::type_system::ExternType<
+    riid: <intercom::REFIID as intercom::type_system::ExternInput<
         intercom::type_system::AutomationTypeSystem,
-    >>::ExternInputType,
-    out: *mut <intercom::RawComPtr as intercom::type_system::ExternType<
+    >>::ForeignType,
+    out: *mut <intercom::RawComPtr as intercom::type_system::ExternOutput<
         intercom::type_system::AutomationTypeSystem,
-    >>::ExternOutputType,
-) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
     intercom::type_system::AutomationTypeSystem,
->>::ExternOutputType {
+>>::ForeignType {
     let self_ptr = (self_vtable as usize
         - <Foo as intercom::attributes::ComClass<
             dyn IFoo,
@@ -1845,7 +1843,7 @@ unsafe extern "system" fn __Foo_IFoo_Automation_add_ref(self_vtable:
                                                             intercom::RawComPtr)
  ->
      <u32 as
-intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
     let self_ptr = (self_vtable as usize
         - <Foo as intercom::attributes::ComClass<
             dyn IFoo,
@@ -1875,7 +1873,7 @@ unsafe extern "system" fn __Foo_IFoo_Automation_release(self_vtable:
                                                             intercom::RawComPtr)
  ->
      <u32 as
-intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
     let self_ptr = (self_vtable as usize
         - <Foo as intercom::attributes::ComClass<
             dyn IFoo,
@@ -1905,16 +1903,15 @@ unsafe extern "system" fn __Foo_IFoo_Automation_trait_method_Automation(self_vta
                                                                             intercom::RawComPtr)
  ->
      <() as
-intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
     let self_combox = (self_vtable as usize
         - <Foo as intercom::attributes::ComClass<
             dyn IFoo,
             intercom::type_system::AutomationTypeSystem,
         >>::offset()) as *mut intercom::ComBoxData<Foo>;
-    use intercom::type_system::{IntercomFrom, IntercomInto};
     let result:
             Result<<() as
-                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
                    intercom::ComError> =
         (||
              {
@@ -1985,9 +1982,9 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
                     ),
                 )
             });
-            <<() as
-             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
-                as ErrorValue>::from_error(intercom::store_error(err))
+            <<() as intercom::type_system::ExternOutput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::ForeignType as ErrorValue>::from_error(intercom::store_error(err))
         }
     }
 }
@@ -2018,15 +2015,15 @@ impl intercom::attributes::ComImpl<dyn IFoo, intercom::type_system::AutomationTy
 #[doc(hidden)]
 unsafe extern "system" fn __Foo_IFoo_Raw_query_interface(
     self_vtable: intercom::RawComPtr,
-    riid: <intercom::REFIID as intercom::type_system::ExternType<
+    riid: <intercom::REFIID as intercom::type_system::ExternInput<
         intercom::type_system::AutomationTypeSystem,
-    >>::ExternInputType,
-    out: *mut <intercom::RawComPtr as intercom::type_system::ExternType<
+    >>::ForeignType,
+    out: *mut <intercom::RawComPtr as intercom::type_system::ExternOutput<
         intercom::type_system::AutomationTypeSystem,
-    >>::ExternOutputType,
-) -> <intercom::raw::HRESULT as intercom::type_system::ExternType<
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
     intercom::type_system::AutomationTypeSystem,
->>::ExternOutputType {
+>>::ForeignType {
     let self_ptr =
         (self_vtable as usize
             - <Foo as intercom::attributes::ComClass<
@@ -2057,7 +2054,7 @@ unsafe extern "system" fn __Foo_IFoo_Raw_add_ref(self_vtable:
                                                      intercom::RawComPtr)
  ->
      <u32 as
-intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
     let self_ptr =
         (self_vtable as usize
             - <Foo as intercom::attributes::ComClass<
@@ -2088,7 +2085,7 @@ unsafe extern "system" fn __Foo_IFoo_Raw_release(self_vtable:
                                                      intercom::RawComPtr)
  ->
      <u32 as
-intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
     let self_ptr =
         (self_vtable as usize
             - <Foo as intercom::attributes::ComClass<
@@ -2119,17 +2116,16 @@ unsafe extern "system" fn __Foo_IFoo_Raw_trait_method_Raw(self_vtable:
                                                               intercom::RawComPtr)
  ->
      <() as
-intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType{
+intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
     let self_combox =
         (self_vtable as usize
             - <Foo as intercom::attributes::ComClass<
                 dyn IFoo,
                 intercom::type_system::RawTypeSystem,
             >>::offset()) as *mut intercom::ComBoxData<Foo>;
-    use intercom::type_system::{IntercomFrom, IntercomInto};
     let result:
             Result<<() as
-                   intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType,
+                   intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
                    intercom::ComError> =
         (||
              {
@@ -2200,9 +2196,9 @@ intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>:
                     ),
                 )
             });
-            <<() as
-             intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>>::ExternOutputType
-                as ErrorValue>::from_error(intercom::store_error(err))
+            <<() as intercom::type_system::ExternOutput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::ForeignType as ErrorValue>::from_error(intercom::store_error(err))
         }
     }
 }

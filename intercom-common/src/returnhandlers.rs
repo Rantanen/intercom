@@ -142,8 +142,8 @@ impl ReturnHandler for ErrorResultHandler
         let ts = self.type_system.as_typesystem_type(self.span);
         syn::parse2(quote_spanned!(self.span=>
             < intercom::raw::HRESULT as
-                intercom::type_system::ExternType< #ts >>
-                    ::ExternOutputType ))
+                intercom::type_system::ExternOutput< #ts >>
+                    ::ForeignType ))
         .unwrap()
     }
 
