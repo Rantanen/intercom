@@ -359,6 +359,7 @@ pub type CString = std::ffi::CString;
 #[cfg(windows)]
 mod os
 {
+    use crate::raw::OutBSTR;
 
     #[link(name = "oleaut32")]
     extern "system" {
