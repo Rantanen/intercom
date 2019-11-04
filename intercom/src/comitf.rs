@@ -288,14 +288,15 @@ impl<T: ComInterface + ?Sized> std::ops::Deref for ComItf<T>
     }
 }
 
-impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS> for &'a crate::ComItf<I>
+unsafe impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS>
+    for &'a crate::ComItf<I>
 where
     I: ForeignType,
 {
     type ForeignType = crate::raw::InterfacePtr<TS, I>;
 
     type Lease = ();
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         Ok((ComItf::ptr(self), ()))
     }

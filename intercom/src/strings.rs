@@ -523,12 +523,12 @@ impl TryFrom<IntercomString> for String
 }
 
 // String
-impl ExternInput<AutomationTypeSystem> for String
+unsafe impl ExternInput<AutomationTypeSystem> for String
 {
     type ForeignType = OutBSTR;
 
     type Lease = BString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("String::into_foreign_parameter<Automation>");
         let bstring = BString::from_str(&self).expect("Error type is never type");
@@ -544,12 +544,12 @@ impl ExternInput<AutomationTypeSystem> for String
     }
 }
 
-impl ExternInput<RawTypeSystem> for String
+unsafe impl ExternInput<RawTypeSystem> for String
 {
     type ForeignType = *mut c_char;
 
     type Lease = CString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("String::into_foreign_parameter<Raw>");
         let cstring = CString::new(self).map_err(|_| ComError::E_INVALIDARG)?;
@@ -568,7 +568,7 @@ impl ExternInput<RawTypeSystem> for String
     }
 }
 
-impl ExternOutput<AutomationTypeSystem> for String
+unsafe impl ExternOutput<AutomationTypeSystem> for String
 {
     type ForeignType = OutBSTR;
 
@@ -587,7 +587,7 @@ impl ExternOutput<AutomationTypeSystem> for String
     }
 }
 
-impl ExternOutput<RawTypeSystem> for String
+unsafe impl ExternOutput<RawTypeSystem> for String
 {
     type ForeignType = *mut c_char;
 
@@ -607,12 +607,12 @@ impl ExternOutput<RawTypeSystem> for String
 }
 
 // &str
-impl<'a> ExternInput<AutomationTypeSystem> for &'a str
+unsafe impl<'a> ExternInput<AutomationTypeSystem> for &'a str
 {
     type ForeignType = OutBSTR;
 
     type Lease = BString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("&str::into_foreign_parameter<Automation>");
         let bstring = BString::from_str(self).expect("Error type is never type");
@@ -628,12 +628,12 @@ impl<'a> ExternInput<AutomationTypeSystem> for &'a str
     }
 }
 
-impl<'a> ExternInput<RawTypeSystem> for &'a str
+unsafe impl<'a> ExternInput<RawTypeSystem> for &'a str
 {
     type ForeignType = *const c_char;
 
     type Lease = CString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("&str::into_foreign_parameter<Raw>");
         let cstring = CString::new(self).map_err(|_| ComError::E_INVALIDARG)?;
@@ -650,12 +650,12 @@ impl<'a> ExternInput<RawTypeSystem> for &'a str
 }
 
 // BString
-impl ExternInput<AutomationTypeSystem> for BString
+unsafe impl ExternInput<AutomationTypeSystem> for BString
 {
     type ForeignType = OutBSTR;
 
     type Lease = BString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("BString::into_foreign_parameter<Automation>");
         Ok((OutBSTR(self.as_ptr() as *mut _), self))
@@ -669,12 +669,12 @@ impl ExternInput<AutomationTypeSystem> for BString
     }
 }
 
-impl ExternInput<RawTypeSystem> for BString
+unsafe impl ExternInput<RawTypeSystem> for BString
 {
     type ForeignType = *mut c_char;
 
     type Lease = CString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("BString::into_foreign_parameter<Raw>");
         self.to_string()
@@ -689,12 +689,12 @@ impl ExternInput<RawTypeSystem> for BString
         log::trace!("BString::from_foreign_parameter<Raw>");
         CStr::from_ptr(source)
             .to_str()
-            .map(|string| BString::from(string))
+            .map(BString::from)
             .map_err(|_| ComError::E_INVALIDARG)
     }
 }
 
-impl ExternOutput<AutomationTypeSystem> for BString
+unsafe impl ExternOutput<AutomationTypeSystem> for BString
 {
     type ForeignType = OutBSTR;
 
@@ -711,7 +711,7 @@ impl ExternOutput<AutomationTypeSystem> for BString
     }
 }
 
-impl ExternOutput<RawTypeSystem> for BString
+unsafe impl ExternOutput<RawTypeSystem> for BString
 {
     type ForeignType = *mut c_char;
 
@@ -729,18 +729,18 @@ impl ExternOutput<RawTypeSystem> for BString
         log::trace!("BString::from_foreign_output<Raw>");
         CString::from_raw(source)
             .into_string()
-            .map(|string| BString::from(string))
+            .map(BString::from)
             .map_err(|_| ComError::E_INVALIDARG)
     }
 }
 
 // CString
-impl ExternInput<AutomationTypeSystem> for CString
+unsafe impl ExternInput<AutomationTypeSystem> for CString
 {
     type ForeignType = OutBSTR;
 
     type Lease = BString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("CString::into_foreign_parameter<Automation>");
         let cstring = self.into_string().map_err(|_| ComError::E_INVALIDARG)?;
@@ -761,12 +761,12 @@ impl ExternInput<AutomationTypeSystem> for CString
     }
 }
 
-impl ExternInput<RawTypeSystem> for CString
+unsafe impl ExternInput<RawTypeSystem> for CString
 {
     type ForeignType = *mut c_char;
 
     type Lease = CString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("CString::into_foreign_parameter<Raw>");
         Ok((self.as_ptr() as *mut _, self))
@@ -780,7 +780,7 @@ impl ExternInput<RawTypeSystem> for CString
     }
 }
 
-impl ExternOutput<AutomationTypeSystem> for CString
+unsafe impl ExternOutput<AutomationTypeSystem> for CString
 {
     type ForeignType = OutBSTR;
 
@@ -803,7 +803,7 @@ impl ExternOutput<AutomationTypeSystem> for CString
     }
 }
 
-impl ExternOutput<RawTypeSystem> for CString
+unsafe impl ExternOutput<RawTypeSystem> for CString
 {
     type ForeignType = *mut c_char;
 
@@ -821,12 +821,12 @@ impl ExternOutput<RawTypeSystem> for CString
 }
 
 // &CStr
-impl<'a> ExternInput<AutomationTypeSystem> for &'a CStr
+unsafe impl<'a> ExternInput<AutomationTypeSystem> for &'a CStr
 {
     type ForeignType = OutBSTR;
 
     type Lease = BString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("&CStr::into_foreign_parameter<Automation>");
         let string = self.to_str().map_err(|_| ComError::E_INVALIDARG)?;
@@ -845,12 +845,12 @@ impl<'a> ExternInput<AutomationTypeSystem> for &'a CStr
     }
 }
 
-impl<'a> ExternInput<RawTypeSystem> for &'a CStr
+unsafe impl<'a> ExternInput<RawTypeSystem> for &'a CStr
 {
     type ForeignType = *mut c_char;
 
     type Lease = ();
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("&CStr::into_foreign_parameter<Raw>");
         Ok((self.as_ptr() as *mut _, ()))
@@ -865,12 +865,12 @@ impl<'a> ExternInput<RawTypeSystem> for &'a CStr
 }
 
 // &BStr
-impl<'a> ExternInput<AutomationTypeSystem> for &'a BStr
+unsafe impl<'a> ExternInput<AutomationTypeSystem> for &'a BStr
 {
     type ForeignType = OutBSTR;
 
     type Lease = ();
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("&BStr::into_foreign_parameter<Automation>");
         Ok((OutBSTR(self.as_ptr() as *mut _), ()))
@@ -884,12 +884,12 @@ impl<'a> ExternInput<AutomationTypeSystem> for &'a BStr
     }
 }
 
-impl<'a> ExternInput<RawTypeSystem> for &'a BStr
+unsafe impl<'a> ExternInput<RawTypeSystem> for &'a BStr
 {
     type ForeignType = *mut c_char;
 
     type Lease = CString;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
         log::trace!("&BStr::into_foreign_parameter<Raw>");
         let string = self.to_string().map_err(|_| ComError::E_INVALIDARG)?;

@@ -52,6 +52,9 @@ impl Variant
         }
     }
 
+    /// # Safety
+    ///
+    /// The source variant must be a valid variant.
     pub unsafe fn from_raw<TS: TypeSystem>(src: raw::Variant<TS>) -> ComResult<Self>
     {
         Ok(if src.vt.0 & raw::var_type::BYREF == 0 {
@@ -116,12 +119,12 @@ impl Default for Variant
     }
 }
 
-impl<TS: TypeSystem> ExternInput<TS> for Variant
+unsafe impl<TS: TypeSystem> ExternInput<TS> for Variant
 {
     type ForeignType = raw::Variant<TS>;
 
     type Lease = ();
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
     {
         Self::ForeignType::try_from(self).map(|variant| (variant, ()))
     }
@@ -133,7 +136,7 @@ impl<TS: TypeSystem> ExternInput<TS> for Variant
     }
 }
 
-impl<TS: TypeSystem> ExternOutput<TS> for Variant
+unsafe impl<TS: TypeSystem> ExternOutput<TS> for Variant
 {
     type ForeignType = raw::Variant<TS>;
 

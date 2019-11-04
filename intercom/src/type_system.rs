@@ -50,24 +50,56 @@ pub trait ForeignType
     }
 }
 
-/// Defines a type that is compatible with Intercom interfaces.
-pub trait ExternInput<TS: TypeSystem>: Sized
+/// Defines a type that may be used as a parameter type in Intercom interfaces.
+///
+/// # Safety
+///
+/// Implementing this trait allows Intercom to use the type as an input type.
+/// This trait will be used within the code generated in the procedural macros.
+/// It is important to ensure this trait is implemented in such a way that its
+/// use in the macros is sound.
+pub unsafe trait ExternInput<TS: TypeSystem>: Sized
 {
     type ForeignType: ForeignType;
 
     type Lease;
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>;
+
+    /// # Safety
+    ///
+    /// The returned `ForeignType` value is valid only as long as the `Lease`
+    /// is held.
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>;
 
     type Owned;
+
+    /// # Safety
+    ///
+    /// The validity of the returned `Owned` value depends on the source type.
+    /// In general it shouldn't be used past the lifetime of the `source`
+    /// reference.
     unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>;
 }
 
-pub trait ExternOutput<TS: TypeSystem>: Sized
+/// Defines a type that may be used as an output type in Intercom interfaces.
+///
+/// # Safety
+///
+/// Implementing this trait allows Intercom to use the type as an output type.
+/// This trait will be used within the code generated in the procedural macros.
+/// It is important to ensure this trait is implemented in such a way that its
+/// use in the macros is sound.
+pub unsafe trait ExternOutput<TS: TypeSystem>: Sized
 {
     type ForeignType: ForeignType;
 
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>;
 
+    /// # Safety
+    ///
+    /// The source ownership is transferred to the function invoker. In case of
+    /// pointers, the function (or the `Self` type) is given the ownership of
+    /// the memory. The caller must ensure that it owns the source parameter
+    /// and is allowed to pass the ownership in this way.
     unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>;
 }
 
@@ -84,11 +116,11 @@ macro_rules! self_extern {
             }
         }
 
-        impl<TS: TypeSystem> ExternInput<TS> for $t
+        unsafe impl<TS: TypeSystem> ExternInput<TS> for $t
         {
             type ForeignType = $t;
             type Lease = ();
-            fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
+            unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
             {
                 Ok((self, ()))
             }
@@ -100,7 +132,7 @@ macro_rules! self_extern {
             }
         }
 
-        impl<TS: TypeSystem> ExternOutput<TS> for $t
+        unsafe impl<TS: TypeSystem> ExternOutput<TS> for $t
         {
             type ForeignType = $t;
             fn into_foreign_output(self) -> ComResult<Self::ForeignType>
@@ -148,7 +180,7 @@ impl ForeignType for libc::c_void
     }
 }
 
-impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternOutput<TS> for *mut TPtr
+unsafe impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternOutput<TS> for *mut TPtr
 {
     type ForeignType = Self;
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>
@@ -162,7 +194,7 @@ impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternOutput<TS> for *mut TPtr
     }
 }
 
-impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternOutput<TS> for *const TPtr
+unsafe impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternOutput<TS> for *const TPtr
 {
     type ForeignType = Self;
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>
@@ -176,11 +208,11 @@ impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternOutput<TS> for *const TPt
     }
 }
 
-impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternInput<TS> for *mut TPtr
+unsafe impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternInput<TS> for *mut TPtr
 {
     type ForeignType = Self;
     type Lease = ();
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
     {
         Ok((self, ()))
     }
@@ -192,11 +224,11 @@ impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternInput<TS> for *mut TPtr
     }
 }
 
-impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternInput<TS> for *const TPtr
+unsafe impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternInput<TS> for *const TPtr
 {
     type ForeignType = Self;
     type Lease = ();
-    fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
     {
         Ok((self, ()))
     }

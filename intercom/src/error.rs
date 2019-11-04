@@ -40,7 +40,7 @@ impl std::fmt::Display for ComError
     }
 }
 
-impl<TS: TypeSystem> ExternOutput<TS> for ComError
+unsafe impl<TS: TypeSystem> ExternOutput<TS> for ComError
 {
     type ForeignType = raw::HRESULT;
 
@@ -58,7 +58,7 @@ impl<TS: TypeSystem> ExternOutput<TS> for ComError
     }
 }
 
-impl<TS: TypeSystem> ExternOutput<TS> for std::io::Error
+unsafe impl<TS: TypeSystem> ExternOutput<TS> for std::io::Error
 {
     type ForeignType = raw::HRESULT;
 

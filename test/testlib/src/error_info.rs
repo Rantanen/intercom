@@ -118,7 +118,8 @@ impl IErrorSource for ErrorTests
 #[derive(Debug)]
 pub struct TestError(raw::HRESULT, String);
 
-impl<TS: intercom::type_system::TypeSystem> intercom::type_system::ExternOutput<TS> for TestError
+unsafe impl<TS: intercom::type_system::TypeSystem> intercom::type_system::ExternOutput<TS>
+    for TestError
 {
     type ForeignType = raw::HRESULT;
 

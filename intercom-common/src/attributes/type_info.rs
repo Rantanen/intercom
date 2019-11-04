@@ -39,13 +39,13 @@ pub fn expand_derive_extern_parameter(
 
     // Immpl requires the the generics in particular way.
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
-    let result = quote! { impl<TS: intercom::type_system::TypeSystem> #impl_generics intercom::type_system::ExternInput<TS> for #name #ty_generics #where_clause {
+    let result = quote! { unsafe impl<TS: intercom::type_system::TypeSystem> #impl_generics intercom::type_system::ExternInput<TS> for #name #ty_generics #where_clause {
 
         type ForeignType = #name;
         type Lease = ();
 
         #[inline(always)]
-        fn into_foreign_parameter(self) -> intercom::ComResult<(Self::ForeignType, Self::Lease)> {
+        unsafe fn into_foreign_parameter(self) -> intercom::ComResult<(Self::ForeignType, Self::Lease)> {
             Ok((self, ()))
         }
 
@@ -73,9 +73,9 @@ pub fn expand_derive_extern_output(
     let input: syn::DeriveInput = syn::parse(item_tokens)?;
     let name = &input.ident;
 
-    // Immpl requires the the generics in particular way.
+    // Impl requires the the generics in particular way.
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
-    let result = quote! { impl<TS: intercom::type_system::TypeSystem> #impl_generics intercom::type_system::ExternOutput<TS> for #name #ty_generics #where_clause {
+    let result = quote! { unsafe impl<TS: intercom::type_system::TypeSystem> #impl_generics intercom::type_system::ExternOutput<TS> for #name #ty_generics #where_clause {
 
         type ForeignType = #name;
 
