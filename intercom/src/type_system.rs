@@ -172,13 +172,7 @@ self_extern!(GUID);
 
 self_extern!(TypeSystemName);
 
-impl ForeignType for libc::c_void
-{
-    fn type_name() -> &'static str
-    {
-        "void"
-    }
-}
+self_extern!(std::ffi::c_void);
 
 unsafe impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternOutput<TS> for *mut TPtr
 {
