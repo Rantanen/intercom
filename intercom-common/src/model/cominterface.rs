@@ -220,8 +220,8 @@ mod test
             GUID::parse("12345678-1234-1234-1234-567890ABCDEF").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
-        assert_eq!(variant.methods[0].display_name, "foo");
-        assert_eq!(variant.methods[1].display_name, "bar");
+        assert_eq!(variant.methods[0].name, "foo");
+        assert_eq!(variant.methods[1].name, "bar");
 
         let variant = &itf.variants[&Raw];
         assert_eq!(
@@ -229,8 +229,8 @@ mod test
             GUID::parse("12345678-1234-1234-1234-567890FEDCBA").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
-        assert_eq!(variant.methods[0].display_name, "foo");
-        assert_eq!(variant.methods[1].display_name, "bar");
+        assert_eq!(variant.methods[0].name, "foo");
+        assert_eq!(variant.methods[1].name, "bar");
     }
 
     #[test]
@@ -261,8 +261,8 @@ mod test
             GUID::parse("82B905D9-D292-3531-452F-E04722F567DD").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
-        assert_eq!(variant.methods[0].display_name, "one");
-        assert_eq!(variant.methods[1].display_name, "two");
+        assert_eq!(variant.methods[0].name, "one");
+        assert_eq!(variant.methods[1].name, "two");
 
         let variant = &itf.variants[&Raw];
         assert_eq!(
@@ -270,8 +270,8 @@ mod test
             GUID::parse("E16EEA74-C0E0-34DE-6F51-1D949883DE06").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
-        assert_eq!(variant.methods[0].display_name, "one");
-        assert_eq!(variant.methods[1].display_name, "two");
+        assert_eq!(variant.methods[0].name, "one");
+        assert_eq!(variant.methods[1].name, "two");
     }
 
     #[test]
@@ -302,10 +302,8 @@ mod test
             GUID::parse("82B905D9-D292-3531-452F-E04722F567DD").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
-        assert_eq!(variant.methods[0].display_name, "one");
-        assert_eq!(variant.methods[0].unique_name, "one_Automation");
-        assert_eq!(variant.methods[1].display_name, "two");
-        assert_eq!(variant.methods[1].unique_name, "two_Automation");
+        assert_eq!(variant.methods[0].name, "one");
+        assert_eq!(variant.methods[1].name, "two");
 
         let variant = &itf.variants[&ModelTypeSystem::Raw];
         assert_eq!(
@@ -313,10 +311,8 @@ mod test
             GUID::parse("E16EEA74-C0E0-34DE-6F51-1D949883DE06").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
-        assert_eq!(variant.methods[0].display_name, "one");
-        assert_eq!(variant.methods[0].unique_name, "one_Raw");
-        assert_eq!(variant.methods[1].display_name, "two");
-        assert_eq!(variant.methods[1].unique_name, "two_Raw");
+        assert_eq!(variant.methods[0].name, "one");
+        assert_eq!(variant.methods[1].name, "two");
     }
 
     #[test]
@@ -347,8 +343,8 @@ mod test
             GUID::parse("82B905D9-D292-3531-452F-E04722F567DD").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
-        assert_eq!(variant.methods[0].unique_name, "one_Automation");
-        assert_eq!(variant.methods[1].unique_name, "two_Automation");
+        assert_eq!(variant.methods[0].name, "one");
+        assert_eq!(variant.methods[1].name, "two");
 
         let variant = &itf.variants[&Raw];
         assert_eq!(
@@ -356,7 +352,7 @@ mod test
             GUID::parse("E16EEA74-C0E0-34DE-6F51-1D949883DE06").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
-        assert_eq!(variant.methods[0].unique_name, "one_Raw");
-        assert_eq!(variant.methods[1].unique_name, "two_Raw");
+        assert_eq!(variant.methods[0].name, "one");
+        assert_eq!(variant.methods[1].name, "two");
     }
 }

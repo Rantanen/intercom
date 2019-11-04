@@ -114,21 +114,11 @@ mod test
         assert_eq!(itf.interface_path, parse_quote!(Foo));
         assert_eq!(itf.is_trait_impl, false);
         assert_eq!(itf.variants[&Automation].methods.len(), 2);
-        assert_eq!(itf.variants[&Automation].methods[0].display_name, "foo");
-        assert_eq!(
-            itf.variants[&Automation].methods[0].unique_name,
-            "foo_Automation"
-        );
-        assert_eq!(itf.variants[&Automation].methods[1].display_name, "bar");
-        assert_eq!(
-            itf.variants[&Automation].methods[1].unique_name,
-            "bar_Automation"
-        );
+        assert_eq!(itf.variants[&Automation].methods[0].name, "foo");
+        assert_eq!(itf.variants[&Automation].methods[1].name, "bar");
         assert_eq!(itf.variants[&Raw].methods.len(), 2);
-        assert_eq!(itf.variants[&Raw].methods[0].display_name, "foo");
-        assert_eq!(itf.variants[&Raw].methods[0].unique_name, "foo_Raw");
-        assert_eq!(itf.variants[&Raw].methods[1].display_name, "bar");
-        assert_eq!(itf.variants[&Raw].methods[1].unique_name, "bar_Raw");
+        assert_eq!(itf.variants[&Raw].methods[0].name, "foo");
+        assert_eq!(itf.variants[&Raw].methods[1].name, "bar");
     }
 
     #[test]
@@ -142,20 +132,10 @@ mod test
         assert_eq!(itf.interface_path, parse_quote!(IFoo));
         assert_eq!(itf.is_trait_impl, true);
         assert_eq!(itf.variants[&Automation].methods.len(), 2);
-        assert_eq!(itf.variants[&Automation].methods[0].display_name, "one");
-        assert_eq!(
-            itf.variants[&Automation].methods[0].unique_name,
-            "one_Automation"
-        );
-        assert_eq!(itf.variants[&Automation].methods[1].display_name, "two");
-        assert_eq!(
-            itf.variants[&Automation].methods[1].unique_name,
-            "two_Automation"
-        );
+        assert_eq!(itf.variants[&Automation].methods[0].name, "one");
+        assert_eq!(itf.variants[&Automation].methods[1].name, "two");
         assert_eq!(itf.variants[&Raw].methods.len(), 2);
-        assert_eq!(itf.variants[&Raw].methods[0].display_name, "one");
-        assert_eq!(itf.variants[&Raw].methods[0].unique_name, "one_Raw");
-        assert_eq!(itf.variants[&Raw].methods[1].display_name, "two");
-        assert_eq!(itf.variants[&Raw].methods[1].unique_name, "two_Raw");
+        assert_eq!(itf.variants[&Raw].methods[0].name, "one");
+        assert_eq!(itf.variants[&Raw].methods[1].name, "two");
     }
 }
