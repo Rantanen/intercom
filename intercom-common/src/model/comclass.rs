@@ -3,10 +3,10 @@ use super::*;
 use crate::prelude::*;
 
 use crate::guid::GUID;
-use ::syn::{Ident, Visibility};
+use ::syn::{Path, Visibility};
 
 intercom_attribute!(
-    ComClassAttr<ComClassAttrParam, Ident> {
+    ComClassAttr<ComClassAttrParam, Path> {
         clsid : StrOption,
     }
 );
@@ -18,7 +18,7 @@ pub struct ComClass
     pub name: Ident,
     pub clsid: Option<GUID>,
     pub visibility: Visibility,
-    pub interfaces: Vec<Ident>,
+    pub interfaces: Vec<Path>,
 }
 
 impl ComClass
@@ -57,14 +57,39 @@ impl ComClass
         };
 
         // Remaining parameters are coclasses.
-        let interfaces = attr.args().into_iter().cloned().collect();
+        let name = item.ident.clone();
+        let interfaces = attr
+            .args()
+            .into_iter()
+            .map(|itf| match itf.get_ident() {
+                Some(ident) if ident == "Self" => parse_quote!(#name),
+                _ => itf.clone(),
+            })
+            .collect();
 
         Ok(ComClass {
-            name: item.ident.clone(),
             visibility: item.vis.clone(),
+            name,
             clsid,
             interfaces,
         })
+    }
+
+    /// Figure out whether the path refers to the current struct.
+    pub fn is_self_path(&self, path: &Path) -> bool
+    {
+        // The self type must be specified as ident. We can't resolve
+        // the current path of the com_class so we can't figure out whether
+        // `foo::bar::ThisStruct` _really_ is `ThisStruct`.
+        if let Some(ident) = path.get_ident() {
+            // The self type can be specified either with the type name or
+            // by using 'Self' as type name.
+            if ident == &self.name || ident == "Self" {
+                return true;
+            }
+        }
+
+        false
     }
 }
 
@@ -91,8 +116,8 @@ mod test
             Some(GUID::parse("12345678-1234-1234-1234-567890ABCDEF").unwrap())
         );
         assert_eq!(cls.interfaces.len(), 2);
-        assert_eq!(cls.interfaces[0], "Foo");
-        assert_eq!(cls.interfaces[1], "Bar");
+        assert_eq!(cls.interfaces[0], parse_quote!(Foo));
+        assert_eq!(cls.interfaces[1], parse_quote!(Bar));
     }
 
     #[test]
@@ -121,9 +146,9 @@ mod test
             Some(GUID::parse("28F57CBA-6AF4-3D3F-7C55-1CF1394D5C7A").unwrap())
         );
         assert_eq!(cls.interfaces.len(), 3);
-        assert_eq!(cls.interfaces[0], "MyStruct");
-        assert_eq!(cls.interfaces[1], "IThings");
-        assert_eq!(cls.interfaces[2], "IStuff");
+        assert_eq!(cls.interfaces[0], parse_quote!(MyStruct));
+        assert_eq!(cls.interfaces[1], parse_quote!(IThings));
+        assert_eq!(cls.interfaces[2], parse_quote!(IStuff));
     }
 
     #[test]

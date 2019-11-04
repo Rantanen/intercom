@@ -7,14 +7,18 @@ use crate::tyhandlers::ModelTypeSystem;
 use ::indexmap::IndexMap;
 use ::std::iter::FromIterator;
 
+use crate::idents::SomeIdent;
 use proc_macro2::Span;
 use syn::spanned::Spanned;
+use syn::Path;
 
 #[derive(Debug)]
 pub struct ComImpl
 {
-    pub struct_name: Ident,
-    pub interface_name: Ident,
+    pub struct_path: Path,
+    pub struct_ident: Ident,
+    pub interface_path: Path,
+    pub interface_ident: Ident,
     pub is_trait_impl: bool,
     pub variants: IndexMap<ModelTypeSystem, ComImplVariant>,
     pub impl_span: Span,
@@ -24,7 +28,6 @@ pub struct ComImpl
 pub struct ComImplVariant
 {
     pub type_system: ModelTypeSystem,
-    pub interface_unique_name: Ident,
     pub methods: Vec<ComMethodInfo>,
 }
 
@@ -43,26 +46,21 @@ impl ComImpl
         })?;
 
         // Resolve the idents and functions.
-        let (itf_ident_opt, struct_ident, fns) =
+        let (itf_path_opt, struct_path, fns) =
             crate::utils::get_impl_data(&item).ok_or_else(|| {
                 ParseError::ComImpl(
-                    item.get_ident().unwrap().to_string(),
+                    item.get_ident().expect("Item had no ident").to_string(),
                     "<Unknown>".into(),
                     "Unsupported associated item".into(),
                 )
             })?;
-        let is_trait_impl = itf_ident_opt.is_some();
-        let itf_ident = itf_ident_opt.unwrap_or_else(|| struct_ident.clone());
+        let is_trait_impl = itf_path_opt.is_some();
+        let interface_path = itf_path_opt.unwrap_or_else(|| struct_path.clone());
 
         let variants = IndexMap::from_iter(
             [ModelTypeSystem::Automation, ModelTypeSystem::Raw]
                 .iter()
                 .map(|&ts| {
-                    let itf_unique_ident = Ident::new(
-                        &format!("{}_{:?}", itf_ident.to_string(), ts),
-                        Span::call_site(),
-                    );
-
                     // Turn the impl methods into MethodInfo.
                     //
                     // TODO: Currently we ignore invalid methods. We should probably do
@@ -77,7 +75,6 @@ impl ComImpl
                         ts,
                         ComImplVariant {
                             type_system: ts,
-                            interface_unique_name: itf_unique_ident,
                             methods,
                         },
                     )
@@ -90,8 +87,10 @@ impl ComImpl
         }
         .unwrap_or_else(Span::call_site);
         Ok(ComImpl {
-            struct_name: struct_ident,
-            interface_name: itf_ident,
+            struct_ident: struct_path.get_some_ident().expect("Type had no name"),
+            interface_ident: interface_path.get_some_ident().expect("Trait had no name"),
+            struct_path,
+            interface_path,
             impl_span,
             variants,
             is_trait_impl,
@@ -111,8 +110,8 @@ mod test
         let itf = ComImpl::parse(quote!(impl Foo { fn foo( &self ) {} fn bar( &self ) {} }))
             .expect("com_impl attribute parsing failed");
 
-        assert_eq!(itf.struct_name, "Foo");
-        assert_eq!(itf.interface_name, "Foo");
+        assert_eq!(itf.struct_path, parse_quote!(Foo));
+        assert_eq!(itf.interface_path, parse_quote!(Foo));
         assert_eq!(itf.is_trait_impl, false);
         assert_eq!(itf.variants[&Automation].methods.len(), 2);
         assert_eq!(itf.variants[&Automation].methods[0].display_name, "foo");
@@ -139,8 +138,8 @@ mod test
             ComImpl::parse(quote!(impl IFoo for Bar { fn one( &self ) {} fn two( &self ) {} }))
                 .expect("com_impl attribute parsing failed");
 
-        assert_eq!(itf.struct_name, "Bar");
-        assert_eq!(itf.interface_name, "IFoo");
+        assert_eq!(itf.struct_path, parse_quote!(Bar));
+        assert_eq!(itf.interface_path, parse_quote!(IFoo));
         assert_eq!(itf.is_trait_impl, true);
         assert_eq!(itf.variants[&Automation].methods.len(), 2);
         assert_eq!(itf.variants[&Automation].methods[0].display_name, "one");

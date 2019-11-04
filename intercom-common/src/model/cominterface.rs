@@ -4,11 +4,13 @@ use crate::prelude::*;
 
 use crate::ast_converters::*;
 use crate::guid::GUID;
+use crate::idents::SomeIdent;
 use crate::methodinfo::ComMethodInfo;
+use crate::quote::ToTokens;
 use crate::tyhandlers::ModelTypeSystem;
 use ::indexmap::IndexMap;
 use ::std::iter::FromIterator;
-use ::syn::{spanned::Spanned, Ident, LitStr, Visibility};
+use ::syn::{spanned::Spanned, Ident, LitStr, Path, Visibility};
 use proc_macro2::Span;
 
 intercom_attribute!(
@@ -33,7 +35,8 @@ impl ComInterfaceAttr
 #[derive(Debug)]
 pub struct ComInterface
 {
-    pub display_name: Ident,
+    pub path: Path,
+    pub ident: Ident,
     pub visibility: Visibility,
     pub base_interface: Option<Ident>,
     pub variants: IndexMap<ModelTypeSystem, ComInterfaceVariant>,
@@ -45,8 +48,6 @@ pub struct ComInterface
 #[derive(Debug, PartialEq)]
 pub struct ComInterfaceVariant
 {
-    pub display_name: Ident,
-    pub unique_name: Ident,
     pub unique_base_interface: Option<Ident>,
     pub type_system: ModelTypeSystem,
     pub iid: GUID,
@@ -75,13 +76,20 @@ impl ComInterface
 
         // Get the interface details. As [com_interface] can be applied to both
         // impls and traits this handles both of those.
-        let (itf_ident, fns, itf_type, unsafety) = crate::utils::get_ident_and_fns(&item)
-            .ok_or_else(|| {
+        let (path, fns, itf_type, unsafety) =
+            crate::utils::get_ident_and_fns(&item).ok_or_else(|| {
                 ParseError::ComInterface(
                     item.get_ident().unwrap().to_string(),
                     "Unsupported associated item".into(),
                 )
             })?;
+
+        let ident = path.get_some_ident().ok_or_else(|| {
+            ParseError::ComInterface(
+                path.to_token_stream().to_string(),
+                "Could not resolve ident for".to_string(),
+            )
+        })?;
 
         // The second argument is the optional base class. If there's no base
         // class defined, use IUnknown as the default. The value of NO_BASE will
@@ -120,11 +128,6 @@ impl ComInterface
             [ModelTypeSystem::Automation, ModelTypeSystem::Raw]
                 .iter()
                 .map(|&ts| {
-                    let itf_unique_ident = Ident::new(
-                        &format!("{}_{:?}", itf_ident.to_string(), ts),
-                        Span::call_site(),
-                    );
-
                     // IUnknown interfaces do not have type system variants.
                     let unique_base = match base {
                         Some(ref iunk) if iunk == "IUnknown" => base.clone(),
@@ -143,11 +146,7 @@ impl ComInterface
                                 "Bad IID format".into(),
                             )
                         })?,
-                        None => crate::utils::generate_iid(
-                            crate_name,
-                            &itf_unique_ident.to_string(),
-                            ts,
-                        ),
+                        None => crate::utils::generate_iid(crate_name, &ident.to_string(), ts),
                     };
 
                     // Read the method details.
@@ -163,8 +162,6 @@ impl ComInterface
                     Ok((
                         ts,
                         ComInterfaceVariant {
-                            display_name: itf_ident.clone(),
-                            unique_name: itf_unique_ident,
                             unique_base_interface: unique_base,
                             type_system: ts,
                             iid,
@@ -176,11 +173,12 @@ impl ComInterface
         );
 
         Ok(ComInterface {
-            display_name: itf_ident,
             base_interface: base,
             item_type: itf_type,
             is_unsafe: unsafety.is_some(),
             span: item.span(),
+            path,
+            ident,
             visibility,
             variants,
         })
@@ -212,7 +210,7 @@ mod test
         )
         .expect("com_interface attribute parsing failed");
 
-        assert_eq!(itf.display_name, "ITrait");
+        assert_eq!(itf.path, parse_quote!(ITrait));
         assert_eq!(itf.visibility, Visibility::Inherited);
         assert_eq!(itf.base_interface.as_ref().unwrap(), "IUnknown");
 
@@ -251,7 +249,7 @@ mod test
         )
         .expect("com_interface attribute parsing failed");
 
-        assert_eq!(itf.display_name, "IAutoGuid");
+        assert_eq!(itf.path, parse_quote!(IAutoGuid));
 
         let pub_visibility: Visibility = parse_quote!(pub);
         assert_eq!(itf.visibility, pub_visibility);
@@ -260,7 +258,7 @@ mod test
         let variant = &itf.variants[&Automation];
         assert_eq!(
             variant.iid,
-            GUID::parse("3DC87B73-0998-30B6-75EA-D4F564454D4B").unwrap()
+            GUID::parse("82B905D9-D292-3531-452F-E04722F567DD").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].display_name, "one");
@@ -269,7 +267,7 @@ mod test
         let variant = &itf.variants[&Raw];
         assert_eq!(
             variant.iid,
-            GUID::parse("D552E455-9FB2-34A2-61C0-34BDE0A9095D").unwrap()
+            GUID::parse("E16EEA74-C0E0-34DE-6F51-1D949883DE06").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].display_name, "one");
@@ -292,7 +290,7 @@ mod test
         )
         .expect("com_interface attribute parsing failed");
 
-        assert_eq!(itf.display_name, "IAutoGuid");
+        assert_eq!(itf.path, parse_quote!(IAutoGuid));
 
         let pub_visibility: Visibility = parse_quote!(pub);
         assert_eq!(itf.visibility, pub_visibility);
@@ -301,7 +299,7 @@ mod test
         let variant = &itf.variants[&ModelTypeSystem::Automation];
         assert_eq!(
             variant.iid,
-            GUID::parse("3DC87B73-0998-30B6-75EA-D4F564454D4B").unwrap()
+            GUID::parse("82B905D9-D292-3531-452F-E04722F567DD").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].display_name, "one");
@@ -312,7 +310,7 @@ mod test
         let variant = &itf.variants[&ModelTypeSystem::Raw];
         assert_eq!(
             variant.iid,
-            GUID::parse("D552E455-9FB2-34A2-61C0-34BDE0A9095D").unwrap()
+            GUID::parse("E16EEA74-C0E0-34DE-6F51-1D949883DE06").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].display_name, "one");
@@ -337,7 +335,7 @@ mod test
         )
         .expect("com_interface attribute parsing failed");
 
-        assert_eq!(itf.display_name, "IAutoGuid");
+        assert_eq!(itf.path, parse_quote!(IAutoGuid));
 
         let pub_visibility: Visibility = parse_quote!(pub);
         assert_eq!(itf.visibility, pub_visibility);
@@ -346,7 +344,7 @@ mod test
         let variant = &itf.variants[&Automation];
         assert_eq!(
             variant.iid,
-            GUID::parse("3DC87B73-0998-30B6-75EA-D4F564454D4B").unwrap()
+            GUID::parse("82B905D9-D292-3531-452F-E04722F567DD").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].unique_name, "one_Automation");
@@ -355,7 +353,7 @@ mod test
         let variant = &itf.variants[&Raw];
         assert_eq!(
             variant.iid,
-            GUID::parse("D552E455-9FB2-34A2-61C0-34BDE0A9095D").unwrap()
+            GUID::parse("E16EEA74-C0E0-34DE-6F51-1D949883DE06").unwrap()
         );
         assert_eq!(variant.methods.len(), 2);
         assert_eq!(variant.methods[0].unique_name, "one_Raw");

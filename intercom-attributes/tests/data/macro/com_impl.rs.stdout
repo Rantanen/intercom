@@ -748,7 +748,7 @@ impl Foo {
 }
 #[allow(non_snake_case)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_query_interface(
+unsafe extern "system" fn __Foo_Foo_query_interface_Automation(
     self_vtable: intercom::RawComPtr,
     riid: <intercom::REFIID as intercom::type_system::ExternInput<
         intercom::type_system::AutomationTypeSystem,
@@ -784,7 +784,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_query_interface(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_add_ref(self_vtable:
+unsafe extern "system" fn __Foo_Foo_add_ref_Automation(self_vtable:
                                                            intercom::RawComPtr)
  ->
      <u32 as
@@ -814,7 +814,7 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_release(self_vtable:
+unsafe extern "system" fn __Foo_Foo_release_Automation(self_vtable:
                                                            intercom::RawComPtr)
  ->
      <u32 as
@@ -844,8 +844,8 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_simple_method_Automation(self_vtable:
-                                                                            intercom::RawComPtr)
+unsafe extern "system" fn __Foo_Foo_simple_method_Automation(self_vtable:
+                                                                 intercom::RawComPtr)
  ->
      <() as
 intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
@@ -936,12 +936,11 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_arg_method_Automation(self_vtable:
-                                                                         intercom::RawComPtr,
-                                                                     a:
-                                                                         <u16
-                                                                         as
-                                                                         intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
+unsafe extern "system" fn __Foo_Foo_arg_method_Automation(self_vtable:
+                                                              intercom::RawComPtr,
+                                                          a:
+                                                              <u16 as
+                                                              intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
  ->
      <() as
 intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
@@ -1034,8 +1033,8 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_simple_result_method_Automation(self_vtable:
-                                                                                   intercom::RawComPtr)
+unsafe extern "system" fn __Foo_Foo_simple_result_method_Automation(self_vtable:
+                                                                        intercom::RawComPtr)
  ->
      <u16 as
 intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
@@ -1129,7 +1128,7 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_com_result_method_Automation(
+unsafe extern "system" fn __Foo_Foo_com_result_method_Automation(
     self_vtable: intercom::RawComPtr,
     __out: *mut <u16 as intercom::type_system::ExternOutput<
         intercom::type_system::AutomationTypeSystem,
@@ -1228,7 +1227,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_com_result_method_Automation(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_rust_result_method_Automation(
+unsafe extern "system" fn __Foo_Foo_rust_result_method_Automation(
     self_vtable: intercom::RawComPtr,
     __out: *mut <u16 as intercom::type_system::ExternOutput<
         intercom::type_system::AutomationTypeSystem,
@@ -1327,7 +1326,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_rust_result_method_Automation(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_tuple_result_method_Automation(
+unsafe extern "system" fn __Foo_Foo_tuple_result_method_Automation(
     self_vtable: intercom::RawComPtr,
     __out1: *mut <u8 as intercom::type_system::ExternOutput<
         intercom::type_system::AutomationTypeSystem,
@@ -1440,12 +1439,11 @@ unsafe extern "system" fn __Foo_Foo_Automation_tuple_result_method_Automation(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_string_method_Automation(self_vtable:
-                                                                            intercom::RawComPtr,
-                                                                        input:
-                                                                            <String
-                                                                            as
-                                                                            intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
+unsafe extern "system" fn __Foo_Foo_string_method_Automation(self_vtable:
+                                                                 intercom::RawComPtr,
+                                                             input:
+                                                                 <String as
+                                                                 intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
  ->
      <String as
 intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
@@ -1533,7 +1531,7 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_string_result_method_Automation(
+unsafe extern "system" fn __Foo_Foo_string_result_method_Automation(
     self_vtable: intercom::RawComPtr,
     input: <String as intercom::type_system::ExternInput<
         intercom::type_system::AutomationTypeSystem,
@@ -1638,16 +1636,14 @@ unsafe extern "system" fn __Foo_Foo_Automation_string_result_method_Automation(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_complete_method_Automation(
+unsafe extern "system" fn __Foo_Foo_complete_method_Automation(
     self_vtable: intercom::RawComPtr,
     a:
-                                                                              <u16
-                                                                              as
-                                                                              intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+                                                                   <u16 as
+                                                                   intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
     b:
-                                                                              <i16
-                                                                              as
-                                                                              intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+                                                                   <i16 as
+                                                                   intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
     __out: *mut <bool as intercom::type_system::ExternOutput<
         intercom::type_system::AutomationTypeSystem,
     >>::ForeignType,
@@ -1752,7 +1748,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_complete_method_Automation(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_bool_method_Automation(
+unsafe extern "system" fn __Foo_Foo_bool_method_Automation(
     self_vtable: intercom::RawComPtr,
     input: <bool as intercom::type_system::ExternInput<
         intercom::type_system::AutomationTypeSystem,
@@ -1856,7 +1852,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_bool_method_Automation(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_variant_method_Automation(
+unsafe extern "system" fn __Foo_Foo_variant_method_Automation(
     self_vtable: intercom::RawComPtr,
     input: <Variant as intercom::type_system::ExternInput<
         intercom::type_system::AutomationTypeSystem,
@@ -1972,28 +1968,28 @@ impl intercom::attributes::ComImpl<Foo, intercom::type_system::AutomationTypeSys
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
                 TVtbl {
-                    query_interface: __Foo_Foo_Automation_query_interface,
-                    add_ref: __Foo_Foo_Automation_add_ref,
-                    release: __Foo_Foo_Automation_release,
+                    query_interface: __Foo_Foo_query_interface_Automation,
+                    add_ref: __Foo_Foo_add_ref_Automation,
+                    release: __Foo_Foo_release_Automation,
                 }
             },
-            simple_method: __Foo_Foo_Automation_simple_method_Automation,
-            arg_method: __Foo_Foo_Automation_arg_method_Automation,
-            simple_result_method: __Foo_Foo_Automation_simple_result_method_Automation,
-            com_result_method: __Foo_Foo_Automation_com_result_method_Automation,
-            rust_result_method: __Foo_Foo_Automation_rust_result_method_Automation,
-            tuple_result_method: __Foo_Foo_Automation_tuple_result_method_Automation,
-            string_method: __Foo_Foo_Automation_string_method_Automation,
-            string_result_method: __Foo_Foo_Automation_string_result_method_Automation,
-            complete_method: __Foo_Foo_Automation_complete_method_Automation,
-            bool_method: __Foo_Foo_Automation_bool_method_Automation,
-            variant_method: __Foo_Foo_Automation_variant_method_Automation,
+            simple_method: __Foo_Foo_simple_method_Automation,
+            arg_method: __Foo_Foo_arg_method_Automation,
+            simple_result_method: __Foo_Foo_simple_result_method_Automation,
+            com_result_method: __Foo_Foo_com_result_method_Automation,
+            rust_result_method: __Foo_Foo_rust_result_method_Automation,
+            tuple_result_method: __Foo_Foo_tuple_result_method_Automation,
+            string_method: __Foo_Foo_string_method_Automation,
+            string_result_method: __Foo_Foo_string_result_method_Automation,
+            complete_method: __Foo_Foo_complete_method_Automation,
+            bool_method: __Foo_Foo_bool_method_Automation,
+            variant_method: __Foo_Foo_variant_method_Automation,
         }
     }
 }
 #[allow(non_snake_case)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_query_interface(
+unsafe extern "system" fn __Foo_Foo_query_interface_Raw(
     self_vtable: intercom::RawComPtr,
     riid: <intercom::REFIID as intercom::type_system::ExternInput<
         intercom::type_system::AutomationTypeSystem,
@@ -2030,7 +2026,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_query_interface(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_add_ref(self_vtable:
+unsafe extern "system" fn __Foo_Foo_add_ref_Raw(self_vtable:
                                                     intercom::RawComPtr)
  ->
      <u32 as
@@ -2061,7 +2057,7 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_release(self_vtable:
+unsafe extern "system" fn __Foo_Foo_release_Raw(self_vtable:
                                                     intercom::RawComPtr)
  ->
      <u32 as
@@ -2092,8 +2088,8 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_simple_method_Raw(self_vtable:
-                                                              intercom::RawComPtr)
+unsafe extern "system" fn __Foo_Foo_simple_method_Raw(self_vtable:
+                                                          intercom::RawComPtr)
  ->
      <() as
 intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
@@ -2185,11 +2181,11 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_arg_method_Raw(self_vtable:
-                                                           intercom::RawComPtr,
-                                                       a:
-                                                           <u16 as
-                                                           intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType)
+unsafe extern "system" fn __Foo_Foo_arg_method_Raw(self_vtable:
+                                                       intercom::RawComPtr,
+                                                   a:
+                                                       <u16 as
+                                                       intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType)
  ->
      <() as
 intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
@@ -2283,7 +2279,7 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_simple_result_method_Raw(
+unsafe extern "system" fn __Foo_Foo_simple_result_method_Raw(
     self_vtable: intercom::RawComPtr,
 ) -> <u16 as intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType
 {
@@ -2378,7 +2374,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_simple_result_method_Raw(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_com_result_method_Raw(
+unsafe extern "system" fn __Foo_Foo_com_result_method_Raw(
     self_vtable: intercom::RawComPtr,
     __out: *mut <u16 as intercom::type_system::ExternOutput<
         intercom::type_system::RawTypeSystem,
@@ -2478,7 +2474,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_com_result_method_Raw(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_rust_result_method_Raw(
+unsafe extern "system" fn __Foo_Foo_rust_result_method_Raw(
     self_vtable: intercom::RawComPtr,
     __out: *mut <u16 as intercom::type_system::ExternOutput<
         intercom::type_system::RawTypeSystem,
@@ -2578,7 +2574,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_rust_result_method_Raw(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_tuple_result_method_Raw(
+unsafe extern "system" fn __Foo_Foo_tuple_result_method_Raw(
     self_vtable: intercom::RawComPtr,
     __out1: *mut <u8 as intercom::type_system::ExternOutput<
         intercom::type_system::RawTypeSystem,
@@ -2692,11 +2688,11 @@ unsafe extern "system" fn __Foo_Foo_Raw_tuple_result_method_Raw(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_string_method_Raw(self_vtable:
-                                                              intercom::RawComPtr,
-                                                          input:
-                                                              <String as
-                                                              intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType)
+unsafe extern "system" fn __Foo_Foo_string_method_Raw(self_vtable:
+                                                          intercom::RawComPtr,
+                                                      input:
+                                                          <String as
+                                                          intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType)
  ->
      <String as
 intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType{
@@ -2793,12 +2789,11 @@ intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::Fore
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_string_result_method_Raw(
+unsafe extern "system" fn __Foo_Foo_string_result_method_Raw(
     self_vtable: intercom::RawComPtr,
     input:
-                                                                     <String
-                                                                     as
-                                                                     intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+                                                                 <String as
+                                                                 intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
     __out: *mut <String as intercom::type_system::ExternOutput<
         intercom::type_system::RawTypeSystem,
     >>::ForeignType,
@@ -2900,14 +2895,14 @@ unsafe extern "system" fn __Foo_Foo_Raw_string_result_method_Raw(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_complete_method_Raw(
+unsafe extern "system" fn __Foo_Foo_complete_method_Raw(
     self_vtable: intercom::RawComPtr,
     a:
-                                                                <u16 as
-                                                                intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+                                                            <u16 as
+                                                            intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
     b:
-                                                                <i16 as
-                                                                intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+                                                            <i16 as
+                                                            intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
     __out: *mut <bool as intercom::type_system::ExternOutput<
         intercom::type_system::RawTypeSystem,
     >>::ForeignType,
@@ -3014,11 +3009,11 @@ unsafe extern "system" fn __Foo_Foo_Raw_complete_method_Raw(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_bool_method_Raw(
+unsafe extern "system" fn __Foo_Foo_bool_method_Raw(
     self_vtable: intercom::RawComPtr,
     input:
-                                                            <bool as
-                                                            intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+                                                        <bool as
+                                                        intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
     __out: *mut <bool as intercom::type_system::ExternOutput<
         intercom::type_system::RawTypeSystem,
     >>::ForeignType,
@@ -3119,11 +3114,11 @@ unsafe extern "system" fn __Foo_Foo_Raw_bool_method_Raw(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_variant_method_Raw(
+unsafe extern "system" fn __Foo_Foo_variant_method_Raw(
     self_vtable: intercom::RawComPtr,
     input:
-                                                               <Variant as
-                                                               intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+                                                           <Variant as
+                                                           intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
     __out: *mut <Variant as intercom::type_system::ExternOutput<
         intercom::type_system::RawTypeSystem,
     >>::ForeignType,
@@ -3237,22 +3232,22 @@ intercom::attributes::ComInterface<intercom::type_system::RawTypeSystem>>::VTabl
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
                 TVtbl {
-                    query_interface: __Foo_Foo_Raw_query_interface,
-                    add_ref: __Foo_Foo_Raw_add_ref,
-                    release: __Foo_Foo_Raw_release,
+                    query_interface: __Foo_Foo_query_interface_Raw,
+                    add_ref: __Foo_Foo_add_ref_Raw,
+                    release: __Foo_Foo_release_Raw,
                 }
             },
-            simple_method: __Foo_Foo_Raw_simple_method_Raw,
-            arg_method: __Foo_Foo_Raw_arg_method_Raw,
-            simple_result_method: __Foo_Foo_Raw_simple_result_method_Raw,
-            com_result_method: __Foo_Foo_Raw_com_result_method_Raw,
-            rust_result_method: __Foo_Foo_Raw_rust_result_method_Raw,
-            tuple_result_method: __Foo_Foo_Raw_tuple_result_method_Raw,
-            string_method: __Foo_Foo_Raw_string_method_Raw,
-            string_result_method: __Foo_Foo_Raw_string_result_method_Raw,
-            complete_method: __Foo_Foo_Raw_complete_method_Raw,
-            bool_method: __Foo_Foo_Raw_bool_method_Raw,
-            variant_method: __Foo_Foo_Raw_variant_method_Raw,
+            simple_method: __Foo_Foo_simple_method_Raw,
+            arg_method: __Foo_Foo_arg_method_Raw,
+            simple_result_method: __Foo_Foo_simple_result_method_Raw,
+            com_result_method: __Foo_Foo_com_result_method_Raw,
+            rust_result_method: __Foo_Foo_rust_result_method_Raw,
+            tuple_result_method: __Foo_Foo_tuple_result_method_Raw,
+            string_method: __Foo_Foo_string_method_Raw,
+            string_result_method: __Foo_Foo_string_result_method_Raw,
+            complete_method: __Foo_Foo_complete_method_Raw,
+            bool_method: __Foo_Foo_bool_method_Raw,
+            variant_method: __Foo_Foo_variant_method_Raw,
         }
     }
 }

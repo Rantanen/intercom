@@ -1212,7 +1212,7 @@ impl Foo {
 }
 #[allow(non_snake_case)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_query_interface(
+unsafe extern "system" fn __Foo_Foo_query_interface_Automation(
     self_vtable: intercom::RawComPtr,
     riid: <intercom::REFIID as intercom::type_system::ExternInput<
         intercom::type_system::AutomationTypeSystem,
@@ -1248,7 +1248,7 @@ unsafe extern "system" fn __Foo_Foo_Automation_query_interface(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_add_ref(self_vtable:
+unsafe extern "system" fn __Foo_Foo_add_ref_Automation(self_vtable:
                                                            intercom::RawComPtr)
  ->
      <u32 as
@@ -1278,7 +1278,7 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_release(self_vtable:
+unsafe extern "system" fn __Foo_Foo_release_Automation(self_vtable:
                                                            intercom::RawComPtr)
  ->
      <u32 as
@@ -1308,8 +1308,8 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Automation_struct_method_Automation(self_vtable:
-                                                                            intercom::RawComPtr)
+unsafe extern "system" fn __Foo_Foo_struct_method_Automation(self_vtable:
+                                                                 intercom::RawComPtr)
  ->
      <() as
 intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
@@ -1411,18 +1411,18 @@ impl intercom::attributes::ComImpl<Foo, intercom::type_system::AutomationTypeSys
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
                 TVtbl {
-                    query_interface: __Foo_Foo_Automation_query_interface,
-                    add_ref: __Foo_Foo_Automation_add_ref,
-                    release: __Foo_Foo_Automation_release,
+                    query_interface: __Foo_Foo_query_interface_Automation,
+                    add_ref: __Foo_Foo_add_ref_Automation,
+                    release: __Foo_Foo_release_Automation,
                 }
             },
-            struct_method: __Foo_Foo_Automation_struct_method_Automation,
+            struct_method: __Foo_Foo_struct_method_Automation,
         }
     }
 }
 #[allow(non_snake_case)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_query_interface(
+unsafe extern "system" fn __Foo_Foo_query_interface_Raw(
     self_vtable: intercom::RawComPtr,
     riid: <intercom::REFIID as intercom::type_system::ExternInput<
         intercom::type_system::AutomationTypeSystem,
@@ -1459,7 +1459,7 @@ unsafe extern "system" fn __Foo_Foo_Raw_query_interface(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_add_ref(self_vtable:
+unsafe extern "system" fn __Foo_Foo_add_ref_Raw(self_vtable:
                                                     intercom::RawComPtr)
  ->
      <u32 as
@@ -1490,7 +1490,7 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_release(self_vtable:
+unsafe extern "system" fn __Foo_Foo_release_Raw(self_vtable:
                                                     intercom::RawComPtr)
  ->
      <u32 as
@@ -1521,8 +1521,8 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_Foo_Raw_struct_method_Raw(self_vtable:
-                                                              intercom::RawComPtr)
+unsafe extern "system" fn __Foo_Foo_struct_method_Raw(self_vtable:
+                                                          intercom::RawComPtr)
  ->
      <() as
 intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
@@ -1626,12 +1626,12 @@ intercom::attributes::ComInterface<intercom::type_system::RawTypeSystem>>::VTabl
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
                 TVtbl {
-                    query_interface: __Foo_Foo_Raw_query_interface,
-                    add_ref: __Foo_Foo_Raw_add_ref,
-                    release: __Foo_Foo_Raw_release,
+                    query_interface: __Foo_Foo_query_interface_Raw,
+                    add_ref: __Foo_Foo_add_ref_Raw,
+                    release: __Foo_Foo_release_Raw,
                 }
             },
-            struct_method: __Foo_Foo_Raw_struct_method_Raw,
+            struct_method: __Foo_Foo_struct_method_Raw,
         }
     }
 }
@@ -1803,7 +1803,7 @@ impl IFoo for Foo {
 }
 #[allow(non_snake_case)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_IFoo_Automation_query_interface(
+unsafe extern "system" fn __Foo_IFoo_query_interface_Automation(
     self_vtable: intercom::RawComPtr,
     riid: <intercom::REFIID as intercom::type_system::ExternInput<
         intercom::type_system::AutomationTypeSystem,
@@ -1839,7 +1839,7 @@ unsafe extern "system" fn __Foo_IFoo_Automation_query_interface(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_IFoo_Automation_add_ref(self_vtable:
+unsafe extern "system" fn __Foo_IFoo_add_ref_Automation(self_vtable:
                                                             intercom::RawComPtr)
  ->
      <u32 as
@@ -1869,7 +1869,7 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_IFoo_Automation_release(self_vtable:
+unsafe extern "system" fn __Foo_IFoo_release_Automation(self_vtable:
                                                             intercom::RawComPtr)
  ->
      <u32 as
@@ -1899,8 +1899,8 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_IFoo_Automation_trait_method_Automation(self_vtable:
-                                                                            intercom::RawComPtr)
+unsafe extern "system" fn __Foo_IFoo_trait_method_Automation(self_vtable:
+                                                                 intercom::RawComPtr)
  ->
      <() as
 intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
@@ -2002,18 +2002,18 @@ impl intercom::attributes::ComImpl<dyn IFoo, intercom::type_system::AutomationTy
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
                 TVtbl {
-                    query_interface: __Foo_IFoo_Automation_query_interface,
-                    add_ref: __Foo_IFoo_Automation_add_ref,
-                    release: __Foo_IFoo_Automation_release,
+                    query_interface: __Foo_IFoo_query_interface_Automation,
+                    add_ref: __Foo_IFoo_add_ref_Automation,
+                    release: __Foo_IFoo_release_Automation,
                 }
             },
-            trait_method: __Foo_IFoo_Automation_trait_method_Automation,
+            trait_method: __Foo_IFoo_trait_method_Automation,
         }
     }
 }
 #[allow(non_snake_case)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_IFoo_Raw_query_interface(
+unsafe extern "system" fn __Foo_IFoo_query_interface_Raw(
     self_vtable: intercom::RawComPtr,
     riid: <intercom::REFIID as intercom::type_system::ExternInput<
         intercom::type_system::AutomationTypeSystem,
@@ -2050,7 +2050,7 @@ unsafe extern "system" fn __Foo_IFoo_Raw_query_interface(
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_IFoo_Raw_add_ref(self_vtable:
+unsafe extern "system" fn __Foo_IFoo_add_ref_Raw(self_vtable:
                                                      intercom::RawComPtr)
  ->
      <u32 as
@@ -2081,7 +2081,7 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_IFoo_Raw_release(self_vtable:
+unsafe extern "system" fn __Foo_IFoo_release_Raw(self_vtable:
                                                      intercom::RawComPtr)
  ->
      <u32 as
@@ -2112,8 +2112,8 @@ intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 #[doc(hidden)]
-unsafe extern "system" fn __Foo_IFoo_Raw_trait_method_Raw(self_vtable:
-                                                              intercom::RawComPtr)
+unsafe extern "system" fn __Foo_IFoo_trait_method_Raw(self_vtable:
+                                                          intercom::RawComPtr)
  ->
      <() as
 intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType{
@@ -2216,12 +2216,12 @@ impl intercom::attributes::ComImpl<dyn IFoo, intercom::type_system::RawTypeSyste
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
                 TVtbl {
-                    query_interface: __Foo_IFoo_Raw_query_interface,
-                    add_ref: __Foo_IFoo_Raw_add_ref,
-                    release: __Foo_IFoo_Raw_release,
+                    query_interface: __Foo_IFoo_query_interface_Raw,
+                    add_ref: __Foo_IFoo_add_ref_Raw,
+                    release: __Foo_IFoo_release_Raw,
                 }
             },
-            trait_method: __Foo_IFoo_Raw_trait_method_Raw,
+            trait_method: __Foo_IFoo_trait_method_Raw,
         }
     }
 }

@@ -4,6 +4,7 @@ use crate::prelude::*;
 use std::collections::BTreeMap;
 use std::iter;
 
+use crate::idents::SomeIdent;
 use crate::methodinfo::ComMethodInfo;
 use crate::model;
 use crate::tyhandlers::{Direction, ModelTypeSystem};
@@ -60,8 +61,8 @@ pub fn expand_com_interface(
     let mut output = vec![];
     let itf =
         model::ComInterface::from_ast(&lib_name(), attr_tokens.into(), item_tokens.clone().into())?;
-    let itf_ident = &itf.display_name;
-    let itf_name = itf.display_name.to_string();
+    let itf_path = &itf.path;
+    let itf_name = itf.ident.to_string();
     let maybe_dyn = match itf.item_type {
         utils::InterfaceType::Trait => quote_spanned!(itf.span => dyn),
         utils::InterfaceType::Struct => quote!(),
@@ -137,7 +138,7 @@ pub fn expand_com_interface(
         };
         output.push(quote_spanned!(itf.span =>
             #[allow(clippy::all)]
-            #unsafety impl #itf_ident for intercom::ComItf<dyn #itf_ident> {
+            #unsafety impl #itf_path for intercom::ComItf<dyn #itf_path> {
                 #( #impls )*
             }
         ));
@@ -148,14 +149,14 @@ pub fn expand_com_interface(
     let (deref_impl, deref_ret) = if itf.item_type == utils::InterfaceType::Trait {
         (
             quote_spanned!(itf.span => com_itf),
-            quote_spanned!(itf.span => &( dyn #itf_ident + 'static ) ),
+            quote_spanned!(itf.span => &( dyn #itf_path + 'static ) ),
         )
     } else {
         // Note this is _extremely_ dangerous.
         //
-        // Essentially we are assuming here that every #itf_ident pointer represents
+        // Essentially we are assuming here that every #itf_path pointer represents
         // a ComBox structure that we have created. This will fail the moment
-        // the user code implements #itf_ident interface on their own and passes
+        // the user code implements #itf_path interface on their own and passes
         // that back to us.
         //
         // There's no real way to get this to work and we might want to just remove
@@ -169,8 +170,8 @@ pub fn expand_com_interface(
                 let primary_iunk = some_iunk.query_interface( iunknown_iid )
                         .expect( "All types must implement IUnknown" );
 
-                let combox : *mut intercom::ComBoxData< #itf_ident > =
-                        primary_iunk as *mut intercom::ComBoxData< #itf_ident >;
+                let combox : *mut intercom::ComBoxData< #itf_path > =
+                        primary_iunk as *mut intercom::ComBoxData< #itf_path >;
                 unsafe {
 
                     // We are already holding a reference to the 'self', which should
@@ -183,12 +184,12 @@ pub fn expand_com_interface(
                     (*combox).deref()
                 }
             ),
-            quote_spanned!(itf.span => & #itf_ident ),
+            quote_spanned!(itf.span => & #itf_path ),
         )
     };
 
     output.push(quote_spanned!(itf.span =>
-        impl intercom::ComInterface for #maybe_dyn #itf_ident {
+        impl intercom::ComInterface for #maybe_dyn #itf_path {
 
             #[doc = "Returns the IID of the requested interface."]
             fn iid_ts<TS: intercom::type_system::TypeSystem>() -> &'static intercom::IID
@@ -207,7 +208,7 @@ pub fn expand_com_interface(
             }
 
             fn deref(
-                com_itf : &intercom::ComItf<#maybe_dyn #itf_ident>
+                com_itf : &intercom::ComItf<#maybe_dyn #itf_path>
             ) -> #deref_ret {
                 #deref_impl
             }
@@ -217,19 +218,18 @@ pub fn expand_com_interface(
     // Implement type info for the interface.
     output.push(quote_spanned!(itf.span =>
 
-        impl intercom::type_system::ForeignType for #maybe_dyn #itf_ident {
+        impl intercom::type_system::ForeignType for #maybe_dyn #itf_path {
 
             /// The name of the type.
-            fn type_name() -> &'static str { stringify!( #itf_ident )  }
+            fn type_name() -> &'static str { stringify!( #itf_path )  }
         }
 
     ));
 
     // Create runtime type info.
-    output.push(
-        create_get_typeinfo_function(&itf)
-            .map_err(|e| model::ParseError::ComInterface(itf_ident.to_string(), e))?,
-    );
+    output.push(create_get_typeinfo_function(&itf).map_err(|e| {
+        model::ParseError::ComInterface(itf_path.get_some_ident().unwrap().to_string(), e)
+    })?);
 
     Ok(tokens_to_tokenstream(item_tokens, output))
 }
@@ -251,10 +251,11 @@ fn process_itf_variant(
     itf_output: &mut InterfaceOutput,
 )
 {
-    let itf_ident = &itf.display_name;
+    let itf_path = &itf.path;
+    let itf_ident = &itf.ident;
     let visibility = &itf.visibility;
     let vtable_ident = Ident::new(
-        &format!("__IntercomVtableFor{}", itf_variant.unique_name),
+        &format!("__IntercomVtableFor{}_{:?}", itf_ident, ts),
         itf.span,
     );
     let ts_value_tokens = ts.as_typesystem_tokens(itf.span);
@@ -278,7 +279,7 @@ fn process_itf_variant(
                 quote_spanned!(itf.span => <dyn intercom::IUnknown as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable)
             }
             _ => quote!(
-                    <#maybe_dyn #itf_ident as intercom::attributes::ComInterface<#ts_type_tokens>>::VTable),
+                    <#maybe_dyn #itf_path as intercom::attributes::ComInterface<#ts_type_tokens>>::VTable),
         };
         vtbl_fields.push(quote_spanned!(itf.span => pub __base : #vtbl, ));
     }
@@ -340,12 +341,12 @@ fn process_itf_variant(
         utils::InterfaceType::Struct => quote!(),
     };
     let iid_tokens = utils::get_guid_tokens(&itf_variant.iid, itf.span);
-    output.push(quote_spanned!(itf_ident.span() =>
+    output.push(quote_spanned!(itf_path.span() =>
         #[allow(non_camel_case_types)]
         #[allow(non_snake_case)]
         #[allow(clippy::all)]
         #[doc(hidden)]
-        impl intercom::attributes::ComInterface<#ts_type_tokens> for #maybe_dyn #itf_ident {
+        impl intercom::attributes::ComInterface<#ts_type_tokens> for #maybe_dyn #itf_path {
             type VTable = #vtable_ident;
             fn iid() -> &'static intercom::IID {
                 & #iid_tokens
@@ -412,7 +413,7 @@ fn rust_to_com_delegate(
     let method_ident = &method_info.display_name;
     let return_ty = &method_info.rust_return_ty;
     let iid_tokens = utils::get_guid_tokens(&itf_variant.iid, method_info.signature_span);
-    let itf_name = &itf.display_name;
+    let itf_path = &itf.path;
     let ts_type = itf_variant.type_system.as_typesystem_type(itf.span);
     let maybe_dyn = match itf.item_type {
         utils::InterfaceType::Trait => quote_spanned!(itf.span => dyn),
@@ -422,7 +423,7 @@ fn rust_to_com_delegate(
     // Construct the final method.
     quote_spanned!(method_info.signature_span =>
         #[allow(unused_imports)]
-        let vtbl = comptr.ptr as *const *const <#maybe_dyn #itf_name as
+        let vtbl = comptr.ptr as *const *const <#maybe_dyn #itf_path as
             intercom::attributes::ComInterface<#ts_type>>::VTable;
 
         // Use an IIFE to act as a try/catch block. The various template
@@ -446,14 +447,14 @@ fn rust_to_com_delegate(
 
 fn create_get_typeinfo_function(itf: &model::ComInterface) -> Result<TokenStream, String>
 {
-    let itf_name = itf.display_name.to_string();
+    let itf_name = itf.ident.to_string();
     let mut variant_tokens = vec![];
     for (ts, variant) in &itf.variants {
         variant_tokens.push(create_typeinfo_for_variant(itf, *ts, &variant)?);
     }
     let is_impl_interface = itf.item_type == utils::InterfaceType::Struct;
 
-    let itf_ident = &itf.display_name;
+    let itf_path = &itf.path;
     let maybe_dyn = match itf.item_type {
         utils::InterfaceType::Trait => quote_spanned!(itf.span => dyn),
         utils::InterfaceType::Struct => quote!(),
@@ -461,7 +462,7 @@ fn create_get_typeinfo_function(itf: &model::ComInterface) -> Result<TokenStream
     Ok(quote_spanned!(itf.span =>
         #[allow(non_snake_case)]
         #[allow(dead_code)]
-        impl intercom::attributes::InterfaceHasTypeInfo for #maybe_dyn #itf_ident
+        impl intercom::attributes::InterfaceHasTypeInfo for #maybe_dyn #itf_path
         {
             fn gather_type_info() -> Vec<intercom::typelib::TypeInfo>
             {
