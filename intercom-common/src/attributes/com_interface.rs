@@ -76,7 +76,7 @@ pub fn expand_com_interface(
     if itf.item_type == utils::InterfaceType::Trait {
         let mut impls = vec![];
         for (_, method) in itf_output.method_impls.iter() {
-            let method_rust_ident = &method.info.display_name;
+            let method_rust_ident = &method.info.name;
             let method_name = method_rust_ident.to_string();
             let mut impl_branches = vec![];
             for (ts, method_ts_impl) in method.impls.iter() {
@@ -286,7 +286,7 @@ fn process_itf_variant(
 
     // Gather all the trait methods for the remaining vtable fields.
     for method_info in &itf_variant.methods {
-        let method_ident = &method_info.display_name;
+        let method_ident = &method_info.name;
         let in_out_args = method_info.raw_com_args().into_iter().map(|com_arg| {
             let name = &com_arg.name;
             let com_ty = &com_arg.handler.com_ty(com_arg.span, com_arg.dir);
@@ -308,7 +308,7 @@ fn process_itf_variant(
         );
         vtbl_fields.push(tt);
 
-        let method_name = method_info.display_name.to_string();
+        let method_name = method_info.name.to_string();
         if !itf_output.method_impls.contains_key(&method_name) {
             itf_output
                 .method_impls
@@ -410,7 +410,7 @@ fn rust_to_com_delegate(
     let return_statement = method_info.returnhandler.com_to_rust_return(&return_ident);
 
     // Resolve some of the fields needed for quote.
-    let method_ident = &method_info.display_name;
+    let method_ident = &method_info.name;
     let return_ty = &method_info.rust_return_ty;
     let iid_tokens = utils::get_guid_tokens(&itf_variant.iid, method_info.signature_span);
     let itf_path = &itf.path;
@@ -493,7 +493,7 @@ fn create_typeinfo_for_variant(
     let ts_type = ts.as_typesystem_type(itf.span);
     let iid_tokens = utils::get_guid_tokens(&itf_variant.iid, itf.span);
     let methods = itf_variant.methods.iter().map( |m| {
-        let method_name = m.display_name.to_string();
+        let method_name = m.name.to_string();
         let return_type = match &m.return_type {
             Some(rt) => quote_spanned!(m.signature_span =>
                 intercom::typelib::Arg {

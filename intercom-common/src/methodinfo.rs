@@ -134,10 +134,7 @@ impl ::std::fmt::Debug for ComArg
 pub struct ComMethodInfo
 {
     /// The display name used in public places that do not require an unique name.
-    pub display_name: Ident,
-
-    /// Unique name that differentiates between different type systems.
-    pub unique_name: Ident,
+    pub name: Ident,
 
     /// True if the self parameter is not mutable.
     pub is_const: bool,
@@ -174,8 +171,7 @@ impl PartialEq for ComMethodInfo
 {
     fn eq(&self, other: &ComMethodInfo) -> bool
     {
-        self.display_name == other.display_name
-            && self.unique_name == other.unique_name
+        self.name == other.name
             && self.is_const == other.is_const
             && self.rust_self_arg == other.rust_self_arg
             && self.rust_return_ty == other.rust_return_ty
@@ -242,8 +238,7 @@ impl ComMethodInfo
             get_return_handler(&retval_type, &return_type, retval_span, type_system)
                 .or(Err(ComMethodInfoError::BadReturnType))?;
         Ok(ComMethodInfo {
-            unique_name: Ident::new(&format!("{}_{:?}", n, type_system), n.span()),
-            display_name: n,
+            name: n,
             returnhandler: returnhandler.into(),
             signature_span: decl.span(),
             is_const,
@@ -318,8 +313,7 @@ mod tests
         let info = test_info("fn foo( &self ) {}", Automation);
 
         assert_eq!(info.is_const, true);
-        assert_eq!(info.display_name, "foo");
-        assert_eq!(info.unique_name, "foo_Automation");
+        assert_eq!(info.name, "foo");
         assert_eq!(info.args.len(), 0);
         assert_eq!(info.retval_type.is_none(), true);
         assert_eq!(info.return_type.is_none(), true);
@@ -331,8 +325,7 @@ mod tests
         let info = test_info("fn foo( &self ) -> bool {}", Raw);
 
         assert_eq!(info.is_const, true);
-        assert_eq!(info.display_name, "foo");
-        assert_eq!(info.unique_name, "foo_Raw");
+        assert_eq!(info.name, "foo");
         assert_eq!(info.args.len(), 0);
         assert_eq!(info.retval_type.is_none(), true);
         assert_eq!(info.return_type, Some(parse_quote!(bool)));
@@ -344,8 +337,7 @@ mod tests
         let info = test_info("fn foo( &self ) -> Result<String, f32> {}", Automation);
 
         assert_eq!(info.is_const, true);
-        assert_eq!(info.display_name, "foo");
-        assert_eq!(info.unique_name, "foo_Automation");
+        assert_eq!(info.name, "foo");
         assert_eq!(info.args.len(), 0);
         assert_eq!(info.retval_type, Some(parse_quote!(String)));
         assert_eq!(info.return_type, Some(parse_quote!(f32)));
@@ -357,8 +349,7 @@ mod tests
         let info = test_info("fn foo( &self ) -> ComResult<String> {}", Automation);
 
         assert_eq!(info.is_const, true);
-        assert_eq!(info.display_name, "foo");
-        assert_eq!(info.unique_name, "foo_Automation");
+        assert_eq!(info.name, "foo");
         assert_eq!(info.args.len(), 0);
         assert_eq!(info.retval_type, Some(parse_quote!(String)));
         assert_eq!(info.return_type, Some(parse_quote!(intercom::raw::HRESULT)));
@@ -370,8 +361,7 @@ mod tests
         let info = test_info("fn foo( &self, a : u32, b : f32 ) {}", Raw);
 
         assert_eq!(info.is_const, true);
-        assert_eq!(info.display_name, "foo");
-        assert_eq!(info.unique_name, "foo_Raw");
+        assert_eq!(info.name, "foo");
         assert_eq!(info.retval_type.is_none(), true);
         assert_eq!(info.return_type.is_none(), true);
 
