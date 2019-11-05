@@ -9,6 +9,7 @@ use crate::tyhandlers::Direction;
 
 extern crate proc_macro;
 use self::proc_macro::TokenStream;
+use syn::spanned::Spanned;
 
 /// Expands the `com_impl` attribute.
 ///
@@ -25,20 +26,22 @@ pub fn expand_com_impl(
     // Parse the attribute.
     let mut output = vec![];
     let imp = model::ComImpl::parse(item_tokens.clone().into())?;
-    let struct_ident = imp.struct_name;
-    let itf_ident = imp.interface_name;
+    let struct_path = imp.struct_path;
+    let struct_ident = imp.struct_ident;
+    let itf_path = imp.interface_path;
+    let itf_ident = imp.interface_ident;
     let maybe_dyn = match imp.is_trait_impl {
-        true => quote_spanned!(itf_ident.span() => dyn),
+        true => quote_spanned!(itf_path.span() => dyn),
         false => quote!(),
     };
 
     for (_, impl_variant) in imp.variants {
-        let itf_unique_ident = impl_variant.interface_unique_name;
+        let ts = impl_variant.type_system;
         let ts_tokens = impl_variant
             .type_system
-            .as_typesystem_type(struct_ident.span());
+            .as_typesystem_type(struct_path.span());
         let vtable_offset = quote!(
-            <#struct_ident as intercom::attributes::ComClass<#maybe_dyn #itf_ident, #ts_tokens>>::offset()
+            <#struct_path as intercom::attributes::ComClass<#maybe_dyn #itf_path, #ts_tokens>>::offset()
         );
 
         /////////////////////
@@ -54,9 +57,9 @@ pub fn expand_com_impl(
 
         // QueryInterface
         let query_interface_ident =
-            idents::method_impl(&struct_ident, &itf_unique_ident, "query_interface");
+            idents::method_impl(&struct_ident, &itf_ident, "query_interface", ts);
         let struct_name = struct_ident.to_string();
-        output.push(quote_spanned!(struct_ident.span() =>
+        output.push(quote_spanned!(struct_path.span() =>
             #[allow(non_snake_case)]
             #[doc(hidden)]
             unsafe extern "system" fn #query_interface_ident(
@@ -78,7 +81,7 @@ pub fn expand_com_impl(
                 intercom::logging::trace(|l| l(module_path!(), format_args!(
                     "[{:p}, through {:p}] Serving {}::query_interface",
                     self_ptr, self_vtable, #struct_name)));
-                intercom::ComBoxData::< #struct_ident >::query_interface(
+                intercom::ComBoxData::< #struct_path >::query_interface(
                         &mut *self_ptr,
                         riid,
                         out )
@@ -86,8 +89,8 @@ pub fn expand_com_impl(
         ));
 
         // AddRef
-        let add_ref_ident = idents::method_impl(&struct_ident, &itf_unique_ident, "add_ref");
-        output.push(quote_spanned!(struct_ident.span() =>
+        let add_ref_ident = idents::method_impl(&struct_ident, &itf_ident, "add_ref", ts);
+        output.push(quote_spanned!(struct_path.span() =>
             #[allow(non_snake_case)]
             #[allow(dead_code)]
             #[doc(hidden)]
@@ -101,13 +104,13 @@ pub fn expand_com_impl(
                 intercom::logging::trace(|l| l(module_path!(), format_args!(
                     "[{:p}, through {:p}] Serving {}::add_ref",
                     self_ptr, self_vtable, #struct_name)));
-                intercom::ComBoxData::< #struct_ident >::add_ref_ptr(self_ptr)
+                intercom::ComBoxData::< #struct_path >::add_ref_ptr(self_ptr)
             }
         ));
 
         // Release
-        let release_ident = idents::method_impl(&struct_ident, &itf_unique_ident, "release");
-        output.push(quote_spanned!(struct_ident.span() =>
+        let release_ident = idents::method_impl(&struct_ident, &itf_ident, "release", ts);
+        output.push(quote_spanned!(struct_path.span() =>
             #[allow(non_snake_case)]
             #[allow(dead_code)]
             #[doc(hidden)]
@@ -121,16 +124,16 @@ pub fn expand_com_impl(
                 intercom::logging::trace(|l| l(module_path!(), format_args!(
                     "[{:p}, through {:p}] Serving {}::release_ptr",
                     self_ptr, self_vtable, #struct_name)));
-                intercom::ComBoxData::< #struct_ident >::release_ptr(self_ptr)
+                intercom::ComBoxData::< #struct_path >::release_ptr(self_ptr)
             }
         ));
 
         // Start the definition fo the vtable fields. The base interface is always
         // IUnknown at this point. We might support IDispatch later, but for now
         // we only support IUnknown.
-        let iunk_vtbl_type = quote_spanned!(itf_ident.span() =>
+        let iunk_vtbl_type = quote_spanned!(itf_path.span() =>
             <dyn intercom::IUnknown as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable);
-        let mut vtable_fields = vec![quote_spanned!(struct_ident.span() =>
+        let mut vtable_fields = vec![quote_spanned!(struct_path.span() =>
             __base : {
                 type TVtbl = #iunk_vtbl_type;
                 TVtbl {
@@ -151,13 +154,10 @@ pub fn expand_com_impl(
         // silently. This is done by breaking out of the 'catch' before adding the
         // method to the vtable fields.
         for method_info in impl_variant.methods {
-            let method_ident = &method_info.display_name;
-            let method_rust_ident = &method_info.display_name;
-            let method_impl_ident = idents::method_impl(
-                &struct_ident,
-                &itf_unique_ident,
-                &method_info.unique_name.to_string(),
-            );
+            let method_ident = &method_info.name;
+            let method_rust_ident = &method_info.name;
+            let method_impl_ident =
+                idents::method_impl(&struct_ident, &itf_ident, &method_ident, ts);
 
             let in_out_args = method_info.raw_com_args().into_iter().map(|com_arg| {
                 let name = &com_arg.name;
@@ -189,9 +189,9 @@ pub fn expand_com_impl(
             // with the vtable offset.
             let ret_ty = method_info.returnhandler.com_ty();
             let self_struct_stmt = if method_info.is_const {
-                quote!( let self_struct : &#maybe_dyn #itf_ident = &**self_combox )
+                quote!( let self_struct : &#maybe_dyn #itf_path = &**self_combox )
             } else {
-                quote!( let self_struct : &mut #maybe_dyn #itf_ident = &mut **self_combox )
+                quote!( let self_struct : &mut #maybe_dyn #itf_path = &mut **self_combox )
             };
 
             let method_name = method_ident.to_string();
@@ -205,7 +205,7 @@ pub fn expand_com_impl(
                     // Acquire the reference to the ComBoxData. For this we need
                     // to offset the current 'self_vtable' vtable pointer.
                     let self_combox = ( self_vtable as usize - #vtable_offset )
-                            as *mut intercom::ComBoxData< #struct_ident >;
+                            as *mut intercom::ComBoxData< #struct_path >;
 
                     let result : Result< #ret_ty, intercom::ComError > = ( || {
                         intercom::logging::trace(|l| l(module_path!(), format_args!(
@@ -246,13 +246,13 @@ pub fn expand_com_impl(
 
         // Now that we've gathered all the virtual table fields, we can finally
         // emit the virtual table instance.
-        let attrib_data = quote_spanned!(itf_ident.span() =>
-            <#maybe_dyn #itf_ident as intercom::attributes::ComInterface<#ts_tokens>>);
-        output.push(quote_spanned!(itf_ident.span() =>
+        let attrib_data = quote_spanned!(itf_path.span() =>
+            <#maybe_dyn #itf_path as intercom::attributes::ComInterface<#ts_tokens>>);
+        output.push(quote_spanned!(itf_path.span() =>
             #[allow(non_upper_case_globals)]
             impl intercom::attributes::ComImpl<
-                #maybe_dyn #itf_ident, #ts_tokens>
-                for #struct_ident
+                #maybe_dyn #itf_path, #ts_tokens>
+                for #struct_path
             {
                 fn vtable() -> &'static #attrib_data::VTable {
                     type T = #attrib_data::VTable;
@@ -263,7 +263,7 @@ pub fn expand_com_impl(
     }
 
     output.push(quote_spanned!(imp.impl_span =>
-        impl intercom::HasInterface<#maybe_dyn #itf_ident> for #struct_ident {}
+        impl intercom::HasInterface<#maybe_dyn #itf_path> for #struct_path {}
     ));
 
     Ok(tokens_to_tokenstream(item_tokens, output))

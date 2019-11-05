@@ -2,10 +2,13 @@ use super::common::*;
 use crate::prelude::*;
 
 use crate::idents;
+use crate::idents::SomeIdent;
 use crate::model;
 use crate::utils;
 
 use crate::tyhandlers::ModelTypeSystem;
+
+use syn::spanned::Spanned;
 
 /// Expands the `com_class` attribute.
 ///
@@ -86,9 +89,10 @@ pub fn expand_com_class(
     for itf in &cls.interfaces {
         for &ts in &[ModelTypeSystem::Automation, ModelTypeSystem::Raw] {
             // Various idents.
-            let itf_variant = Ident::new(&format!("{}_{:?}", itf, ts), itf.span());
+            let itf_ident = itf.get_some_ident().expect("#[com_interface] had no ident");
+            let itf_variant = Ident::new(&format!("{}_{:?}", itf_ident, ts), itf.span());
             let ts_type = ts.as_typesystem_type(itf.span());
-            let maybe_dyn = match itf == struct_ident {
+            let maybe_dyn = match cls.is_self_path(itf) {
                 true => quote!(),
                 false => quote_spanned!(itf.span() => dyn),
             };
@@ -128,7 +132,7 @@ pub fn expand_com_class(
             // Define the query_interface match arm for the current interface.
             // This just gets the correct interface vtable reference from the list
             // of vtables.
-            let itf_name = itf.to_string();
+            let itf_name = itf_ident.to_string();
             let ts_name = format!("{:?}", ts);
             query_interface_match_arms.push(quote!(
                 if riid == #itf_attrib_data::iid() {
@@ -307,20 +311,20 @@ fn create_get_typeinfo_function(cls: &model::ComClass) -> Result<TokenStream, St
     let (interfaces, interface_info): (Vec<_>, Vec<_>) = cls
         .interfaces
         .iter()
-        .map(|itf_ident| {
-            let itf_name = itf_ident.to_string();
-            let maybe_dyn = match itf_ident == &cls.name {
+        .map(|itf_path| {
+            let itf_name = itf_path.get_some_ident().expect("#[com_interface] had no ident").to_string();
+            let maybe_dyn = match cls.is_self_path(itf_path) {
                 true => quote!(),
-                false => quote_spanned!(itf_ident.span() => dyn),
+                false => quote_spanned!(itf_path.span() => dyn),
             };
             (
                 quote!( intercom::typelib::InterfaceRef {
                     name: #itf_name.into(),
-                    iid_automation: <#maybe_dyn #itf_ident as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::iid().clone(),
-                    iid_raw: <#maybe_dyn #itf_ident as intercom::attributes::ComInterface<intercom::type_system::RawTypeSystem>>::iid().clone(),
+                    iid_automation: <#maybe_dyn #itf_path as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::iid().clone(),
+                    iid_raw: <#maybe_dyn #itf_path as intercom::attributes::ComInterface<intercom::type_system::RawTypeSystem>>::iid().clone(),
                 } ),
                 quote!(
-                    r.extend(<#maybe_dyn #itf_ident as intercom::attributes::InterfaceHasTypeInfo>::gather_type_info());
+                    r.extend(<#maybe_dyn #itf_path as intercom::attributes::InterfaceHasTypeInfo>::gather_type_info());
                 ),
             )
         })

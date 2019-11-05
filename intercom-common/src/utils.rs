@@ -5,8 +5,6 @@ use syn::*;
 use super::*;
 use proc_macro2::Span;
 
-use crate::ast_converters::*;
-
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum InterfaceType
 {
@@ -15,7 +13,7 @@ pub enum InterfaceType
 }
 
 pub type InterfaceData<'a> = (
-    Ident,
+    Path,
     Vec<&'a Signature>,
     InterfaceType,
     Option<Token!(unsafe)>,
@@ -42,9 +40,10 @@ pub fn get_ident_and_fns(item: &Item) -> Option<InterfaceData>
         }) => {
             let methods: Option<Vec<&Signature>> =
                 items.iter().map(|i| get_trait_method(i)).collect();
+            let path = syn::Path::from(ident.clone());
 
             match methods {
-                Some(m) => Some((ident.clone(), m, InterfaceType::Trait, unsafety)),
+                Some(m) => Some((path, m, InterfaceType::Trait, unsafety)),
                 None => None,
             }
         }
@@ -52,7 +51,7 @@ pub fn get_ident_and_fns(item: &Item) -> Option<InterfaceData>
     }
 }
 
-pub type ImplData<'a> = (Option<Ident>, Ident, Vec<&'a Signature>);
+pub type ImplData<'a> = (Option<Path>, Path, Vec<&'a Signature>);
 
 pub fn get_impl_data(item: &Item) -> Option<ImplData>
 {
@@ -74,16 +73,22 @@ fn get_impl_data_raw<'a>(
     items: &'a [ImplItem],
 ) -> ImplData<'a>
 {
-    let struct_ident = struct_ty.get_ident().unwrap();
-    let trait_ident = match *trait_ref {
-        Some((_, ref path, _)) => path.get_ident().cloned(),
-        None => None,
+    let struct_path = match struct_ty {
+        syn::Type::Path(typepath) => {
+            if typepath.qself.is_some() {
+                panic!("#[com_impl] cannot use associated types");
+            }
+            typepath.path.clone()
+        }
+        _ => panic!("#[com_impl] must be defined for Path"),
     };
+
+    let trait_path = trait_ref.as_ref().map(|(_, path, _)| path.clone());
 
     let methods_opt: Option<Vec<&Signature>> = items.iter().map(|i| get_impl_method(i)).collect();
     let methods = methods_opt.unwrap_or_else(|| vec![]);
 
-    (trait_ident, struct_ident, methods)
+    (trait_path, struct_path, methods)
 }
 
 pub fn get_impl_method(i: &ImplItem) -> Option<&Signature>
