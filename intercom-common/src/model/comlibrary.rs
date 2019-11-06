@@ -44,7 +44,7 @@ pub struct ComLibrary
     pub libid: GUID,
     pub coclasses: Vec<Path>,
     pub interfaces: Vec<Path>,
-    pub sub_modules: Vec<Path>,
+    pub submodules: Vec<Path>,
 }
 
 impl ComLibrary
@@ -63,12 +63,12 @@ impl ComLibrary
 
         let mut coclasses = vec![];
         let mut interfaces = vec![];
-        let mut sub_modules = vec![];
+        let mut submodules = vec![];
         for arg in attr.args().into_iter().cloned() {
             match arg {
                 LibraryItemType::Class(cls) => coclasses.push(cls),
                 LibraryItemType::Interface(cls) => interfaces.push(cls),
-                LibraryItemType::Module(cls) => sub_modules.push(cls),
+                LibraryItemType::Module(cls) => submodules.push(cls),
             }
         }
 
@@ -76,7 +76,7 @@ impl ComLibrary
             name: crate_name.to_owned(),
             coclasses,
             interfaces,
-            sub_modules,
+            submodules,
             libid,
         })
     }
