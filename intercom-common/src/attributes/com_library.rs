@@ -29,7 +29,7 @@ pub fn expand_com_module(
         let clsid_path = idents::clsid_path(struct_path);
         match_arms.push(quote_spanned!(struct_path.span() =>
             #clsid_path =>
-                return Some(intercom::ClassFactory::<#struct_path>::new(riid, pout))
+                return Some(intercom::ClassFactory::<#struct_path>::create(riid, pout))
         ));
     }
 

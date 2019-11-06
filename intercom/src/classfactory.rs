@@ -68,7 +68,10 @@ impl AsRef<IUnknownVtbl> for ClassFactoryVtbl
 
 impl<T: Default + CoClass> ClassFactory<T>
 {
-    pub unsafe fn new(
+    /// # Safety
+    ///
+    /// The `out` pointer must be valid for receiving the requested interface.
+    pub unsafe fn create(
         riid: intercom::REFIID,
         out: *mut intercom::RawComPtr,
     ) -> crate::error::raw::HRESULT
@@ -91,8 +94,7 @@ impl<T: Default + CoClass> ClassFactory<T>
     ) -> raw::HRESULT
     {
         let mut combox = ComBox::new(T::default());
-        let query_result = ComBoxData::query_interface(combox.as_mut(), riid, out);
-        query_result
+        ComBoxData::query_interface(combox.as_mut(), riid, out)
     }
 
     /// # Safety
