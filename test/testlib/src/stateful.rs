@@ -6,8 +6,10 @@ pub struct StatefulOperations
     state: i32,
 }
 
-impl Default for StatefulOperations {
-    fn default() -> Self {
+impl Default for StatefulOperations
+{
+    fn default() -> Self
+    {
         StatefulOperations { state: 0xABBACD }
     }
 }
