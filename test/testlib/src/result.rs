@@ -2,17 +2,13 @@ use intercom::*;
 use std::convert::TryFrom;
 
 #[com_class(ResultOperations)]
+#[derive(Default)]
 pub struct ResultOperations {}
 
 #[com_interface]
 #[com_impl]
 impl ResultOperations
 {
-    pub fn new() -> ResultOperations
-    {
-        ResultOperations {}
-    }
-
     pub fn s_ok(&mut self) -> raw::HRESULT
     {
         raw::S_OK

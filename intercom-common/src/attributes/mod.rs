@@ -10,7 +10,7 @@ mod com_impl;
 pub use self::com_impl::expand_com_impl;
 
 mod com_library;
-pub use self::com_library::expand_com_library;
+pub use self::com_library::expand_com_module;
 
 mod type_info;
 pub use self::type_info::expand_bidirectional_type_info;

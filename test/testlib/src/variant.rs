@@ -4,6 +4,7 @@ use std::convert::TryFrom;
 use std::time::SystemTime;
 
 #[com_class(VariantTests)]
+#[derive(Default)]
 pub struct VariantTests;
 
 #[com_interface]
@@ -13,6 +14,7 @@ pub trait IVariantInterface
 }
 
 #[com_class(IVariantInterface)]
+#[derive(Default)]
 pub struct VariantImpl;
 impl VariantImpl
 {
@@ -35,11 +37,6 @@ impl IVariantInterface for VariantImpl
 #[com_impl]
 impl VariantTests
 {
-    pub fn new() -> VariantTests
-    {
-        VariantTests
-    }
-
     pub fn variant_parameter(&self, vt: u16, variant: Variant) -> Result<(), ComError>
     {
         let vt_type = if vt > 100 { vt / 100 } else { vt };

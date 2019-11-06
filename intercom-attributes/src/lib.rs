@@ -123,7 +123,7 @@ pub fn com_class(attr: TokenStream, tokens: TokenStream) -> TokenStream
 #[proc_macro]
 pub fn com_library(args: TokenStream) -> TokenStream
 {
-    match expand_com_library(args) {
+    match expand_com_module(args, true) {
         Ok(t) => t,
         Err(e) => panic!("{}", e),
     }

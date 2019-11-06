@@ -15,6 +15,7 @@ trait IHelloWorld
 }
 
 #[com_class(clsid = "{25ccb3f6-b782-4b2d-933e-54ab447da0aa}", IHelloWorld)]
+#[derive(Default)]
 pub struct HelloWorld {}
 
 impl HelloWorld

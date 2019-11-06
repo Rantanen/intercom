@@ -11,17 +11,13 @@ pub trait IErrorSource
 }
 
 #[com_class(ErrorTests, IErrorSource)]
+#[derive(Default)]
 pub struct ErrorTests;
 
 #[com_interface]
 #[com_impl]
 impl ErrorTests
 {
-    pub fn new() -> ErrorTests
-    {
-        ErrorTests
-    }
-
     pub fn test_comerror(&self, source: &ComItf<dyn IErrorSource>) -> ComResult<()>
     {
         let err = source.return_comerror(raw::HRESULT::new(123), "Error message");

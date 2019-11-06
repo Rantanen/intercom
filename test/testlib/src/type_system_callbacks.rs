@@ -2,6 +2,7 @@ use intercom::*;
 use strings::{IStringTests, STRING_DATA};
 
 #[com_class(TypeSystemCaller)]
+#[derive(Default)]
 pub struct TypeSystemCaller;
 
 #[com_interface]

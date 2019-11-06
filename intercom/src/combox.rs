@@ -206,9 +206,7 @@ impl<T: CoClass> ComBoxData<T>
     ///
     /// # Safety
     ///
-    /// The method isn't technically unsafe in regard to Rust unsafety, but
-    /// it's marked as unsafe to discourage it's use due to high risks of
-    /// memory leaks.
+    /// The `out` pointer must be valid for writing the interface pointer to.
     pub unsafe fn query_interface(
         this: &mut Self,
         riid: REFIID,
@@ -486,5 +484,11 @@ where
     fn deref_mut(&mut self) -> &mut T
     {
         unsafe { &mut (*self.data).value }
+    }
+}
+
+impl<T: Default + CoClass> Default for ComBox<T> {
+    fn default() -> Self {
+        ComBox::new(T::default())
     }
 }
