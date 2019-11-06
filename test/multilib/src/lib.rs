@@ -6,7 +6,7 @@ use intercom::*;
 extern crate winapi;
 
 // Declare available COM classes.
-com_library!(HelloWorld);
+com_library!(class HelloWorld);
 
 #[com_interface]
 trait IHelloWorld
