@@ -487,8 +487,10 @@ where
     }
 }
 
-impl<T: Default + CoClass> Default for ComBox<T> {
-    fn default() -> Self {
+impl<T: Default + CoClass> Default for ComBox<T>
+{
+    fn default() -> Self
+    {
         ComBox::new(T::default())
     }
 }

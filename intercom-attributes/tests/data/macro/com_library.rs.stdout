@@ -25,6 +25,22 @@ pub(crate) fn get_intercom_coclass_info_for_SimpleType() -> intercom::typelib::T
     unsafe { MaybeUninit::uninit().assume_init() }
 }
 
+#[allow(dead_code)]
+#[doc(hidden)]
+pub unsafe fn __get_module_class_factory(
+    rclsid: intercom::REFCLSID,
+    riid: intercom::REFIID,
+    pout: *mut intercom::RawComPtr,
+) -> Option<intercom::raw::HRESULT> {
+    match *rclsid {
+        some::path::CLSID_Type => {
+            return Some(intercom::ClassFactory::<some::path::Type>::new(riid, pout))
+        }
+        CLSID_SimpleType => return Some(intercom::ClassFactory::<SimpleType>::new(riid, pout)),
+        _ => {}
+    };
+    None
+}
 #[no_mangle]
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -34,36 +50,29 @@ pub unsafe extern "system" fn DllGetClassObject(
     riid: intercom::REFIID,
     pout: *mut intercom::RawComPtr,
 ) -> intercom::raw::HRESULT {
-    let mut com_struct =
-        intercom::ComBox::new(intercom::ClassFactory::new(rclsid, |clsid| match *clsid {
-            self::some::path::CLSID_Type => {
-                Ok(intercom::ComBoxData::new(some::path::Type::new()) as intercom::RawComPtr)
-            }
-            self::CLSID_SimpleType => {
-                Ok(intercom::ComBoxData::new(SimpleType::new()) as intercom::RawComPtr)
-            }
-            intercom::alloc::CLSID_Allocator => Ok(intercom::ComBoxData::new(
-                intercom::alloc::Allocator::default(),
-            ) as intercom::RawComPtr),
-            intercom::error::CLSID_ErrorStore => Ok(intercom::ComBoxData::new(
-                intercom::error::ErrorStore::default(),
-            ) as intercom::RawComPtr),
-            _ => Err(intercom::raw::E_NOINTERFACE),
-        }));
-    intercom::ComBoxData::query_interface(com_struct.as_mut(), riid, pout);
-    intercom::raw::S_OK
+    if let Some(hr) = __get_module_class_factory(rclsid, riid, pout) {
+        return hr;
+    }
+    if let Some(hr) = intercom::__get_module_class_factory(rclsid, riid, pout) {
+        return hr;
+    }
+    intercom::raw::E_CLASSNOTAVAILABLE
 }
-pub(crate) fn get_intercom_typelib() -> intercom::typelib::TypeLib {
-    let types = <[_]>::into_vec(box [
-        <intercom::alloc::Allocator as intercom::attributes::HasTypeInfo>::gather_type_info(),
-        <intercom::error::ErrorStore as intercom::attributes::HasTypeInfo>::gather_type_info(),
+pub fn __gather_module_types() -> Vec<intercom::typelib::TypeInfo> {
+    <[_]>::into_vec(box [
         <some::path::Type as intercom::attributes::HasTypeInfo>::gather_type_info(),
         <SimpleType as intercom::attributes::HasTypeInfo>::gather_type_info(),
     ])
     .into_iter()
     .flatten()
-    .collect::<Vec<_>>();
-    intercom::typelib::TypeLib::__new(
+    .collect()
+}
+#[no_mangle]
+pub unsafe extern "system" fn IntercomTypeLib(
+    type_system: intercom::type_system::TypeSystemName,
+    out: *mut intercom::RawComPtr,
+) -> intercom::raw::HRESULT {
+    let mut tlib = intercom::ComBox::new(intercom::typelib::TypeLib::__new(
         "TestLib".into(),
         intercom::GUID {
             data1: 0u32,
@@ -71,16 +80,12 @@ pub(crate) fn get_intercom_typelib() -> intercom::typelib::TypeLib {
             data3: 0u16,
             data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
         },
-        "1.0".into(),
-        types,
-    )
-}
-#[no_mangle]
-pub unsafe extern "system" fn IntercomTypeLib(
-    type_system: intercom::type_system::TypeSystemName,
-    out: *mut intercom::RawComPtr,
-) -> intercom::raw::HRESULT {
-    let mut tlib = intercom::ComBox::new(get_intercom_typelib());
+        "0.1".into(),
+        intercom::__gather_module_types()
+            .into_iter()
+            .chain(__gather_module_types())
+            .collect(),
+    ));
     let rc = intercom::ComRc::<intercom::typelib::IIntercomTypeLib>::from(&tlib);
     let itf = intercom::ComRc::detach(rc);
     *out = match type_system {
@@ -107,13 +112,24 @@ pub unsafe extern "system" fn IntercomListClassObjects(
     if pclsids.is_null() {
         return intercom::raw::E_POINTER;
     }
-    static AVAILABLE_CLASSES: [::intercom::CLSID; 4usize] = [
-        some::path::CLSID_Type,
-        CLSID_SimpleType,
-        intercom::alloc::CLSID_Allocator,
-        intercom::error::CLSID_ErrorStore,
-    ];
-    *pcount = 4usize;
-    *pclsids = AVAILABLE_CLASSES.as_ptr();
+    static mut AVAILABLE_CLASSES: Option<Vec<intercom::CLSID>> = None;
+    static INIT_AVAILABLE_CLASSES: std::sync::Once = std::sync::Once::new();
+    INIT_AVAILABLE_CLASSES.call_once(|| unsafe {
+        AVAILABLE_CLASSES = Some(
+            __gather_module_types()
+                .into_iter()
+                .chain(intercom::__gather_module_types())
+                .filter_map(|ty| match ty {
+                    intercom::typelib::TypeInfo::Class(cls) => Some(cls.clsid.clone()),
+                    _ => None,
+                })
+                .collect(),
+        );
+    });
+    let available_classes = AVAILABLE_CLASSES
+        .as_ref()
+        .expect("AVAILABLE_CLASSES was not initialized");
+    *pcount = available_classes.len();
+    *pclsids = available_classes.as_ptr();
     intercom::raw::S_OK
 }

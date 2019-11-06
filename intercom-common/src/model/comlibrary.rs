@@ -22,7 +22,8 @@ impl syn::parse::Parse for LibraryItemType
             "class" => Ok(LibraryItemType::Class(input.parse()?)),
             "interface" => Ok(LibraryItemType::Interface(input.parse()?)),
             _ => Err(input.error(&format!(
-                    "Expected 'class', 'interface' or 'module', found {}", ident
+                "Expected 'class', 'interface' or 'module', found {}",
+                ident
             ))),
         }
     }
@@ -104,7 +105,10 @@ mod test
     {
         let lib = ComLibrary::parse(
             "library_name".into(),
-            quote!(libid = "12345678-1234-1234-1234-567890ABCDEF", Foo, Bar),
+            quote!(
+                libid = "12345678-1234-1234-1234-567890ABCDEF",
+                class Foo,
+                class Bar),
         )
         .expect("com_library attribute parsing failed");
 
@@ -131,7 +135,7 @@ mod test
         // What the final GUID is isn't important, what _is_ important however
         // is that the final GUID will not change ever as long as the library
         // name stays the same.
-        let lib = ComLibrary::parse("another_library".into(), quote!(One, Two))
+        let lib = ComLibrary::parse("another_library".into(), quote!(class One, class Two))
             .expect("com_library attribute parsing failed");
 
         assert_eq!(lib.name, "another_library");

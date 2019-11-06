@@ -22,5 +22,5 @@ pub(crate) fn get_intercom_coclass_info_for_SimpleType() -> intercom::typelib::T
 
 com_library!(
         libid = "00000000-0000-0000-0000-000000000000",
-        some::path::Type,
-        SimpleType );
+        class some::path::Type,
+        class SimpleType );

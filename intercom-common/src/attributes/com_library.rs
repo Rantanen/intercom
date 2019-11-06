@@ -24,19 +24,22 @@ pub fn expand_com_module(
 
     // Create the match-statmeent patterns for each supposedly visible COM class.
     let mut match_arms = vec![];
-    let mut creatable_classes = vec![];
     for struct_path in &lib.coclasses {
         // Construct the match pattern.
         let clsid_path = idents::clsid_path(struct_path);
         match_arms.push(quote_spanned!(struct_path.span() =>
             #clsid_path =>
-                intercom::ClassFactory::<#struct_path>::new(riid, pout)
+                return Some(intercom::ClassFactory::<#struct_path>::new(riid, pout))
         ));
-
-        // Collect class identifies of classes that have a guid and
-        // which others outside the library can create.
-        creatable_classes.push(quote!( #clsid_path ));
     }
+
+    let try_submodule_class_factory = lib.submodules.iter().map(|submod| {
+        quote!(
+            if let Some(hr) = #submod::__get_module_class_factory(rclsid, riid, pout) {
+                return Some(hr);
+            }
+        )
+    });
 
     // Implement the __get_module_class_factory function.
     output.push(quote!(
@@ -46,15 +49,20 @@ pub fn expand_com_module(
             rclsid : intercom::REFCLSID,
             riid : intercom::REFIID,
             pout : *mut intercom::RawComPtr
-        ) -> Option<raw::HRESULT>
+        ) -> Option<intercom::raw::HRESULT>
         {
             // Create new class factory.
             // Specify a create function that is able to create all the
             // contained coclasses.
-            Some(match *rclsid {
+            match *rclsid {
                 #( #match_arms, )*
-                _ => return None,
-            })
+                _ => {},
+            };
+
+            // Try each sub-module
+            #( #try_submodule_class_factory )*
+
+            None
         }
     ));
 
@@ -64,18 +72,23 @@ pub fn expand_com_module(
     // infrastructure uses. The COM client uses this method to acquire
     // the IClassFactory interfaces that are then used to construct the
     // actual coclasses.
-    let dll_get_class_object = get_dll_get_class_object_function();
-    output.push(dll_get_class_object);
+    if com_library {
+        let dll_get_class_object = get_dll_get_class_object_function();
+        output.push(dll_get_class_object);
+    }
 
     // Implement get_intercom_typelib()
-    let get_typelib_fn =
-        create_get_typelib_function(&lib).map_err(model::ParseError::ComLibrary)?;
-    output.push(get_typelib_fn);
+    output.push(create_gather_module_types(&lib).map_err(model::ParseError::ComLibrary)?);
+    if com_library {
+        output.push(create_get_typelib_function(&lib).map_err(model::ParseError::ComLibrary)?);
+    }
 
     // Implement DllListClassObjects
     // DllListClassObjects returns all CLSIDs implemented in the crate.
-    let list_class_objects = get_intercom_list_class_objects_function(&creatable_classes);
-    output.push(list_class_objects);
+    if com_library {
+        let list_class_objects = get_intercom_list_class_objects_function();
+        output.push(list_class_objects);
+    }
 
     Ok(TokenStream::from_iter(output.into_iter()).into())
 }
@@ -88,13 +101,18 @@ fn get_dll_get_class_object_function() -> TokenStream
         #[allow(dead_code)]
         #[doc(hidden)]
         pub unsafe extern "system" fn DllGetClassObject(
-            rclsid : intercom::REFCLSID,
-            riid : intercom::REFIID,
-            pout : *mut intercom::RawComPtr
+            rclsid: intercom::REFCLSID,
+            riid: intercom::REFIID,
+            pout: *mut intercom::RawComPtr,
         ) -> intercom::raw::HRESULT
         {
             // Delegate to the module implementation.
             if let Some(hr) = __get_module_class_factory(rclsid, riid, pout) {
+                return hr;
+            }
+
+            // Try intercom built in types.
+            if let Some(hr) = intercom::__get_module_class_factory(rclsid, riid, pout) {
                 return hr;
             }
 
@@ -103,38 +121,50 @@ fn get_dll_get_class_object_function() -> TokenStream
     )
 }
 
-fn create_get_typelib_function(lib: &model::ComLibrary) -> Result<TokenStream, String>
+fn create_gather_module_types(lib: &model::ComLibrary) -> Result<TokenStream, String>
 {
-    let lib_name = lib_name();
-    let libid = utils::get_guid_tokens(&lib.libid, Span::call_site());
     let create_class_typeinfo = lib.coclasses.iter().map(|path| {
         quote!(
             <#path as intercom::attributes::HasTypeInfo>::gather_type_info()
         )
     });
+    let gather_submodule_types = lib
+        .submodules
+        .iter()
+        .map(|path| quote!( #path::__gather_module_types()));
     Ok(quote!(
-        pub(crate) fn __get_library_typelib() -> intercom::typelib::TypeLib
+        pub fn __gather_module_types() -> Vec<intercom::typelib::TypeInfo>
         {
-            let types = vec![
-                <intercom::alloc::Allocator as intercom::attributes::HasTypeInfo>::gather_type_info(),
-                <intercom::error::ErrorStore as intercom::attributes::HasTypeInfo>::gather_type_info(),
-                #( #create_class_typeinfo ),*
-            ].into_iter().flatten().collect::<Vec<_>>();
-            intercom::typelib::TypeLib::__new(
-                #lib_name.into(),
-                #libid,
-                "1.0".into(),
-                types
-            )
+            vec![
+                #( #create_class_typeinfo, )*
+                #( #gather_submodule_types, )*
+            ]
+            .into_iter()
+            .flatten()
+            .collect()
         }
+    ))
+}
 
+fn create_get_typelib_function(lib: &model::ComLibrary) -> Result<TokenStream, String>
+{
+    let lib_name = lib_name();
+    let libid = utils::get_guid_tokens(&lib.libid, Span::call_site());
+    Ok(quote!(
         #[no_mangle]
         pub unsafe extern "system" fn IntercomTypeLib(
             type_system: intercom::type_system::TypeSystemName,
             out: *mut intercom::RawComPtr,
         ) -> intercom::raw::HRESULT
         {
-            let mut tlib = intercom::ComBox::new( __get_library_typelib() );
+            let mut tlib = intercom::ComBox::new(intercom::typelib::TypeLib::__new(
+                    #lib_name.into(),
+                    #libid,
+                    "0.1".into(),
+                    intercom::__gather_module_types()
+                        .into_iter().chain(__gather_module_types())
+                        .collect()
+            ));
             let rc = intercom::ComRc::<intercom::typelib::IIntercomTypeLib>::from( &tlib );
             let itf = intercom::ComRc::detach(rc);
             *out = match type_system {
@@ -149,35 +179,51 @@ fn create_get_typelib_function(lib: &model::ComLibrary) -> Result<TokenStream, S
     ))
 }
 
-fn get_intercom_list_class_objects_function(clsid_tokens: &[TokenStream]) -> TokenStream
+fn get_intercom_list_class_objects_function() -> TokenStream
 {
-    let calling_convetion = get_calling_convetion();
-    let token_count = clsid_tokens.len();
     quote!(
         #[no_mangle]
         #[allow(non_snake_case)]
         #[allow(dead_code)]
         #[doc(hidden)]
-        pub unsafe extern #calling_convetion fn IntercomListClassObjects(
+        pub unsafe extern "system" fn IntercomListClassObjects(
             pcount: *mut usize,
             pclsids: *mut *const intercom::CLSID,
         ) -> intercom::raw::HRESULT
         {
             // Do not crash due to invalid parameters.
-            if pcount.is_null() { return intercom::raw::E_POINTER; }
-            if pclsids.is_null() { return intercom::raw::E_POINTER; }
+            if pcount.is_null() {
+                return intercom::raw::E_POINTER;
+            }
+            if pclsids.is_null() {
+                return intercom::raw::E_POINTER;
+            }
 
             // Store the available CLSID in a static variable so that we can
             // pass them as-is to the caller.
-            static AVAILABLE_CLASSES: [::intercom::CLSID; #token_count ] = [
-                #( #clsid_tokens, )*
-            ];
+            static mut AVAILABLE_CLASSES: Option<Vec<intercom::CLSID>> = None;
+            static INIT_AVAILABLE_CLASSES: std::sync::Once = std::sync::Once::new();
+            INIT_AVAILABLE_CLASSES.call_once(|| unsafe {
+                AVAILABLE_CLASSES = Some(
+                    __gather_module_types()
+                        .into_iter()
+                        .chain(intercom::__gather_module_types())
+                        .filter_map(|ty| match ty {
+                            intercom::typelib::TypeInfo::Class(cls) => Some(cls.clsid.clone()),
+                            _ => None,
+                        })
+                        .collect(),
+                );
+            });
 
             // com_struct will drop here and decrement the referenc ecount.
             // This is okay, as the query_interface incremented it, leaving
             // it at two at this point.
-            *pcount = #token_count;
-            *pclsids = AVAILABLE_CLASSES.as_ptr();
+            let available_classes = AVAILABLE_CLASSES
+                .as_ref()
+                .expect("AVAILABLE_CLASSES was not initialized");
+            *pcount = available_classes.len();
+            *pclsids = available_classes.as_ptr();
 
             intercom::raw::S_OK
         }

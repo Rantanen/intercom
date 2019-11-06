@@ -70,15 +70,14 @@ impl<T: Default + CoClass> ClassFactory<T>
 {
     pub unsafe fn new(
         riid: intercom::REFIID,
-        out: *mut intercom::RawComPtr
+        out: *mut intercom::RawComPtr,
     ) -> crate::error::raw::HRESULT
     {
-        let factory = Self { phantom: std::marker::PhantomData };
+        let factory = Self {
+            phantom: std::marker::PhantomData,
+        };
 
-        intercom::ComBoxData::query_interface(
-            intercom::ComBox::new(factory).as_mut(),
-            riid,
-            out)
+        intercom::ComBoxData::query_interface(intercom::ComBox::new(factory).as_mut(), riid, out)
     }
 
     /// # Safety

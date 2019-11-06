@@ -1,5 +1,11 @@
 use intercom::*;
 
+com_module!(
+    class RefCountOperations,
+    class ClassCreator,
+    class CreatedClass,
+);
+
 #[com_interface]
 trait IRefCount
 {

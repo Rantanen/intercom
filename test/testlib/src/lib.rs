@@ -20,10 +20,9 @@ pub mod variant;
 
 // Declare available COM classes.
 com_library!(
+    module return_interfaces,
+
     class primitive::PrimitiveOperations,
-    class return_interfaces::RefCountOperations,
-    class return_interfaces::ClassCreator,
-    class return_interfaces::CreatedClass,
     class stateful::StatefulOperations,
     class result::ResultOperations,
     class interface_params::SharedImplementation,
