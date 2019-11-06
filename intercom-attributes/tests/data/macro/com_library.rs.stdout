@@ -34,9 +34,11 @@ pub unsafe fn __get_module_class_factory(
 ) -> Option<intercom::raw::HRESULT> {
     match *rclsid {
         some::path::CLSID_Type => {
-            return Some(intercom::ClassFactory::<some::path::Type>::new(riid, pout))
+            return Some(intercom::ClassFactory::<some::path::Type>::create(
+                riid, pout,
+            ))
         }
-        CLSID_SimpleType => return Some(intercom::ClassFactory::<SimpleType>::new(riid, pout)),
+        CLSID_SimpleType => return Some(intercom::ClassFactory::<SimpleType>::create(riid, pout)),
         _ => {}
     };
     None
