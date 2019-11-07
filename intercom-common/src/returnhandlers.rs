@@ -17,11 +17,17 @@ pub trait ReturnHandler: ::std::fmt::Debug
     /// The return type span.
     fn return_type_span(&self) -> Span;
 
+    /// Infallible status.
+    fn is_infallible(&self) -> bool;
+
     /// The return type for COM implementation.
     fn com_ty(&self) -> Type
     {
-        tyhandlers::get_ty_handler(&self.rust_ty(), TypeContext::new(self.type_system()))
-            .com_ty(self.return_type_span(), Direction::Retval)
+        tyhandlers::get_ty_handler(&self.rust_ty(), TypeContext::new(self.type_system())).com_ty(
+            self.return_type_span(),
+            Direction::Retval,
+            self.is_infallible(),
+        )
     }
 
     /// Gets the return statement for converting the COM result into Rust
@@ -71,6 +77,11 @@ impl ReturnHandler for VoidHandler
     {
         self.0
     }
+
+    fn is_infallible(&self) -> bool
+    {
+        true
+    }
 }
 
 /// Simple return type with the return value as the immediate value.
@@ -99,6 +110,7 @@ impl ReturnHandler for ReturnOnlyHandler
             result,
             self.2,
             Direction::Retval,
+            true,
         )
     }
 
@@ -108,12 +120,18 @@ impl ReturnHandler for ReturnOnlyHandler
             result,
             self.2,
             Direction::Retval,
+            true,
         )
     }
 
     fn com_out_args(&self) -> Vec<ComArg>
     {
         vec![]
+    }
+
+    fn is_infallible(&self) -> bool
+    {
+        true
     }
 }
 
@@ -157,7 +175,7 @@ impl ReturnHandler for ErrorResultHandler
         // Format the final Ok value.
         // If there is only one, it should be a raw value;
         // If there are multiple value turn them into a tuple.
-        let ok_values = get_rust_ok_values(self.com_out_args());
+        let ok_values = get_rust_ok_values(self.com_out_args(), self.is_infallible());
         let ok_tokens = if ok_values.len() != 1 {
             quote!( ( #( #ok_values ),* ) )
         } else {
@@ -205,7 +223,12 @@ impl ReturnHandler for ErrorResultHandler
             }
         };
 
-        let (ok_writes, err_writes) = write_out_values(&ok_idents, self.com_out_args(), self.span);
+        let (ok_writes, err_writes) = write_out_values(
+            &ok_idents,
+            self.com_out_args(),
+            self.is_infallible(),
+            self.span,
+        );
         quote!(
             match #result {
                 Ok( #ok_pattern ) => { #( #ok_writes );*; intercom::raw::S_OK },
@@ -220,6 +243,11 @@ impl ReturnHandler for ErrorResultHandler
     fn com_out_args(&self) -> Vec<ComArg>
     {
         get_out_args_for_result(&self.retval_ty, self.span, self.type_system)
+    }
+
+    fn is_infallible(&self) -> bool
+    {
+        false
     }
 }
 
@@ -258,6 +286,7 @@ fn get_out_args_for_result(
 fn write_out_values(
     idents: &[Ident],
     out_args: Vec<ComArg>,
+    infallible: bool,
     span: Span,
 ) -> (Vec<TokenStream>, Vec<TokenStream>)
 {
@@ -265,7 +294,9 @@ fn write_out_values(
     let mut err_tokens = vec![];
     for (ident, out_arg) in idents.iter().zip(out_args) {
         let arg_name = out_arg.name;
-        let ok_value = out_arg.handler.rust_to_com(ident, span, Direction::Out);
+        let ok_value = out_arg
+            .handler
+            .rust_to_com(ident, span, Direction::Out, infallible);
         let err_value = out_arg.handler.default_value();
 
         ok_tokens.push(quote!( *#arg_name = #ok_value ));
@@ -276,13 +307,14 @@ fn write_out_values(
 }
 
 /// Gets the result as Rust types for a success return value.
-fn get_rust_ok_values(out_args: Vec<ComArg>) -> Vec<TokenStream>
+fn get_rust_ok_values(out_args: Vec<ComArg>, infallible: bool) -> Vec<TokenStream>
 {
     let mut tokens = vec![];
     for out_arg in out_args {
-        let value = out_arg
-            .handler
-            .com_to_rust(&out_arg.name, out_arg.span, Direction::Retval);
+        let value =
+            out_arg
+                .handler
+                .com_to_rust(&out_arg.name, out_arg.span, Direction::Retval, infallible);
         tokens.push(value);
     }
     tokens

@@ -158,10 +158,13 @@ pub fn expand_com_impl(
             let method_rust_ident = &method_info.name;
             let method_impl_ident =
                 idents::method_impl(&struct_ident, &itf_ident, &method_ident, ts);
+            let infallible = method_info.returnhandler.is_infallible();
 
             let in_out_args = method_info.raw_com_args().into_iter().map(|com_arg| {
                 let name = &com_arg.name;
-                let com_ty = &com_arg.handler.com_ty(com_arg.span, com_arg.dir);
+                let com_ty = &com_arg
+                    .handler
+                    .com_ty(com_arg.span, com_arg.dir, infallible);
                 let dir = match com_arg.dir {
                     Direction::In => quote!(),
                     Direction::Out | Direction::Retval => quote!( *mut ),
@@ -175,7 +178,10 @@ pub fn expand_com_impl(
             let in_params: Vec<_> = method_info
                 .args
                 .iter()
-                .map(|ca| ca.handler.com_to_rust(&ca.name, ca.span, Direction::In))
+                .map(|ca| {
+                    ca.handler
+                        .com_to_rust(&ca.name, ca.span, Direction::In, infallible)
+                })
                 .collect();
 
             let return_ident = Ident::new("__result", Span::call_site());
@@ -195,19 +201,19 @@ pub fn expand_com_impl(
             };
 
             let method_name = method_ident.to_string();
-            output.push(quote!(
-                #[allow(non_snake_case)]
-                #[allow(dead_code)]
-                #[doc(hidden)]
-                unsafe extern "system" fn #method_impl_ident(
-                    #( #args ),*
-                ) -> #ret_ty {
-                    // Acquire the reference to the ComBoxData. For this we need
-                    // to offset the current 'self_vtable' vtable pointer.
-                    let self_combox = ( self_vtable as usize - #vtable_offset )
-                            as *mut intercom::ComBoxData< #struct_path >;
+            if infallible {
+                output.push(quote!(
+                    #[allow(non_snake_case)]
+                    #[allow(dead_code)]
+                    #[doc(hidden)]
+                    unsafe extern "system" fn #method_impl_ident(
+                        #( #args ),*
+                    ) -> #ret_ty {
+                        // Acquire the reference to the ComBoxData. For this we need
+                        // to offset the current 'self_vtable' vtable pointer.
+                        let self_combox = ( self_vtable as usize - #vtable_offset )
+                                as *mut intercom::ComBoxData< #struct_path >;
 
-                    let result : Result< #ret_ty, intercom::ComError > = ( || {
                         intercom::logging::trace(|l| l(module_path!(), format_args!(
                             "[{:p}, through {:p}] Serving {}::{}",
                             self_combox, self_vtable, #struct_name, #method_name)));
@@ -215,27 +221,56 @@ pub fn expand_com_impl(
                         #self_struct_stmt;
                         let #return_ident = self_struct.#method_rust_ident( #( #in_params ),* );
 
-                        Ok( { #return_statement } )
-                    } )();
+                        intercom::logging::trace(|l| l(module_path!(), format_args!(
+                            "[{:p}, through {:p}] Serving {}::{}, OK",
+                            self_combox, self_vtable, #struct_name, #method_name)));
 
-                    use intercom::ErrorValue;
-                    match result {
-                        Ok( v ) => {
-                            intercom::logging::trace(|l| l(module_path!(), format_args!(
-                                "[{:p}, through {:p}] Serving {}::{}, OK",
-                                self_combox, self_vtable, #struct_name, #method_name)));
-                            v
-                        },
-                        Err( err ) => {
-                            intercom::logging::trace(|l| l(module_path!(), format_args!(
-                                "[{:p}, through {:p}] Serving {}::{}, ERROR",
-                                self_combox, self_vtable, #struct_name, #method_name)));
-                            <#ret_ty as ErrorValue>::from_error(
-                                intercom::store_error(err))
-                        },
+                        #return_statement
                     }
-                }
-            ));
+                ));
+            } else {
+                output.push(quote!(
+                    #[allow(non_snake_case)]
+                    #[allow(dead_code)]
+                    #[doc(hidden)]
+                    unsafe extern "system" fn #method_impl_ident(
+                        #( #args ),*
+                    ) -> #ret_ty {
+                        // Acquire the reference to the ComBoxData. For this we need
+                        // to offset the current 'self_vtable' vtable pointer.
+                        let self_combox = ( self_vtable as usize - #vtable_offset )
+                                as *mut intercom::ComBoxData< #struct_path >;
+
+                        let result : Result< #ret_ty, intercom::ComError > = ( || {
+                            intercom::logging::trace(|l| l(module_path!(), format_args!(
+                                "[{:p}, through {:p}] Serving {}::{}",
+                                self_combox, self_vtable, #struct_name, #method_name)));
+
+                            #self_struct_stmt;
+                            let #return_ident = self_struct.#method_rust_ident( #( #in_params ),* );
+
+                            Ok( { #return_statement } )
+                        } )();
+
+                        use intercom::ErrorValue;
+                        match result {
+                            Ok( v ) => {
+                                intercom::logging::trace(|l| l(module_path!(), format_args!(
+                                    "[{:p}, through {:p}] Serving {}::{}, OK",
+                                    self_combox, self_vtable, #struct_name, #method_name)));
+                                v
+                            },
+                            Err( err ) => {
+                                intercom::logging::trace(|l| l(module_path!(), format_args!(
+                                    "[{:p}, through {:p}] Serving {}::{}, ERROR",
+                                    self_combox, self_vtable, #struct_name, #method_name)));
+                                <#ret_ty as ErrorValue>::from_error(
+                                    intercom::store_error(err))
+                            },
+                        }
+                    }
+                ));
+            }
 
             // Include the delegating method in the virtual table fields.
             vtable_fields.push(quote!(

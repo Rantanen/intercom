@@ -165,6 +165,9 @@ pub struct ComMethodInfo
 
     /// Type system.
     pub type_system: ModelTypeSystem,
+
+    /// Is the method infallible.
+    pub infallible: bool,
 }
 
 impl PartialEq for ComMethodInfo
@@ -239,6 +242,7 @@ impl ComMethodInfo
                 .or(Err(ComMethodInfoError::BadReturnType))?;
         Ok(ComMethodInfo {
             name: n,
+            infallible: returnhandler.is_infallible(),
             returnhandler: returnhandler.into(),
             signature_span: decl.span(),
             is_const,
