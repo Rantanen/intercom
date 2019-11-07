@@ -43,13 +43,13 @@ pub struct __IntercomVtableForFoo_Automation {
                                                   intercom::RawComPtr,
                                               a:
                                                   <u16 as
-                                                  intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
+                                                  intercom::type_system::InfallibleExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
                         -> (),
     pub simple_result_method: unsafe extern "system" fn(self_vtable:
                                                             intercom::RawComPtr)
                                   ->
                                       <u16 as
-                                      intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+                                      intercom::type_system::InfallibleExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
     pub com_result_method: unsafe extern "system" fn(self_vtable:
                                                          intercom::RawComPtr,
                                                      __out:
@@ -84,10 +84,10 @@ pub struct __IntercomVtableForFoo_Automation {
                                                      intercom::RawComPtr,
                                                  msg:
                                                      <String as
-                                                     intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
+                                                     intercom::type_system::InfallibleExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
                            ->
                                <String as
-                               intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+                               intercom::type_system::InfallibleExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
     pub comitf_method: unsafe extern "system" fn(self_vtable:
                                                      intercom::RawComPtr,
                                                  itf:
@@ -153,13 +153,13 @@ pub struct __IntercomVtableForFoo_Raw {
                                                   intercom::RawComPtr,
                                               a:
                                                   <u16 as
-                                                  intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType)
+                                                  intercom::type_system::InfallibleExternInput<intercom::type_system::RawTypeSystem>>::ForeignType)
                         -> (),
     pub simple_result_method: unsafe extern "system" fn(self_vtable:
                                                             intercom::RawComPtr)
                                   ->
                                       <u16 as
-                                      intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType,
+                                      intercom::type_system::InfallibleExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType,
     pub com_result_method: unsafe extern "system" fn(self_vtable:
                                                          intercom::RawComPtr,
                                                      __out:
@@ -194,10 +194,10 @@ pub struct __IntercomVtableForFoo_Raw {
                                                      intercom::RawComPtr,
                                                  msg:
                                                      <String as
-                                                     intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType)
+                                                     intercom::type_system::InfallibleExternInput<intercom::type_system::RawTypeSystem>>::ForeignType)
                            ->
                                <String as
-                               intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType,
+                               intercom::type_system::InfallibleExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType,
     pub comitf_method: unsafe extern "system" fn(self_vtable:
                                                      intercom::RawComPtr,
                                                  itf:
@@ -293,13 +293,14 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 as *const *const <dyn Foo as intercom::attributes::ComInterface<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
+
             #[allow(unused_unsafe)]
-            let __intercom_result: Result<(), intercom::ComError> = (|| unsafe {
+            unsafe {
                 let __result = ((**vtbl).arg_method)(
                     comptr.ptr,
-                    <u16 as intercom::type_system::ExternInput<
+                    <u16 as intercom::type_system::InfallibleExternInput<
                         intercom::type_system::AutomationTypeSystem,
-                    >>::into_foreign_parameter(a)?
+                    >>::into_foreign_parameter(a)
                     .0,
                 );
                 let __intercom_iid = intercom::GUID {
@@ -308,12 +309,8 @@ impl Foo for intercom::ComItf<dyn Foo> {
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
-                Ok({})
-            })();
-            return match __intercom_result {
-                Ok(v) => v,
-                Err(err) => <() as intercom::ErrorValue>::from_com_error(err),
-            };
+                return {};
+            }
         }
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
@@ -340,13 +337,14 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 as *const *const <dyn Foo as intercom::attributes::ComInterface<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
+
             #[allow(unused_unsafe)]
-            let __intercom_result: Result<(), intercom::ComError> = (|| unsafe {
+            unsafe {
                 let __result = ((**vtbl).arg_method)(
                     comptr.ptr,
-                    <u16 as intercom::type_system::ExternInput<
+                    <u16 as intercom::type_system::InfallibleExternInput<
                         intercom::type_system::RawTypeSystem,
-                    >>::into_foreign_parameter(a)?
+                    >>::into_foreign_parameter(a)
                     .0,
                 );
                 let __intercom_iid = intercom::GUID {
@@ -355,14 +353,16 @@ impl Foo for intercom::ComItf<dyn Foo> {
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
-                Ok({})
-            })();
-            return match __intercom_result {
-                Ok(v) => v,
-                Err(err) => <() as intercom::ErrorValue>::from_com_error(err),
-            };
+                return {};
+            }
         }
-        <() as intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
+        {
+            {
+                ::std::rt::begin_panic("internal error: entered unreachable code",
+                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                         12u32, 5u32))
+            }
+        };
     }
     fn bool_method(&self, input: bool) -> ComResult<bool> {
         intercom::logging::trace(|l| {
@@ -508,9 +508,13 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 Err(err) => <ComResult<bool> as intercom::ErrorValue>::from_com_error(err),
             };
         }
-        <ComResult<bool> as intercom::ErrorValue>::from_com_error(
-            intercom::ComError::E_POINTER.into(),
-        )
+        {
+            {
+                ::std::rt::begin_panic("internal error: entered unreachable code",
+                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                         24u32, 5u32))
+            }
+        };
     }
     fn com_result_method(&self) -> ComResult<u16> {
         intercom::logging::trace(|l| {
@@ -648,9 +652,13 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 Err(err) => <ComResult<u16> as intercom::ErrorValue>::from_com_error(err),
             };
         }
-        <ComResult<u16> as intercom::ErrorValue>::from_com_error(
-            intercom::ComError::E_POINTER.into(),
-        )
+        {
+            {
+                ::std::rt::begin_panic("internal error: entered unreachable code",
+                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                         15u32, 5u32))
+            }
+        };
     }
     fn comitf_method(&self, itf: ComItf<dyn Foo>) -> ComResult<ComItf<dyn IUnknown>> {
         intercom::logging::trace(|l| {
@@ -810,9 +818,13 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 }
             };
         }
-        <ComResult<ComItf<dyn IUnknown>> as intercom::ErrorValue>::from_com_error(
-            intercom::ComError::E_POINTER.into(),
-        )
+        {
+            {
+                ::std::rt::begin_panic("internal error: entered unreachable code",
+                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                         21u32, 5u32))
+            }
+        };
     }
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
         intercom::logging::trace(|l| {
@@ -972,9 +984,13 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 Err(err) => <ComResult<bool> as intercom::ErrorValue>::from_com_error(err),
             };
         }
-        <ComResult<bool> as intercom::ErrorValue>::from_com_error(
-            intercom::ComError::E_POINTER.into(),
-        )
+        {
+            {
+                ::std::rt::begin_panic("internal error: entered unreachable code",
+                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                         18u32, 5u32))
+            }
+        };
     }
     fn rust_result_method(&self) -> Result<u16, i32> {
         intercom::logging::trace(|l| {
@@ -1112,9 +1128,13 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 Err(err) => <Result<u16, i32> as intercom::ErrorValue>::from_com_error(err),
             };
         }
-        <Result<u16, i32> as intercom::ErrorValue>::from_com_error(
-            intercom::ComError::E_POINTER.into(),
-        )
+        {
+            {
+                ::std::rt::begin_panic("internal error: entered unreachable code",
+                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                         16u32, 5u32))
+            }
+        };
     }
     fn simple_method(&self) -> () {
         intercom::logging::trace(|l| {
@@ -1159,8 +1179,9 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 as *const *const <dyn Foo as intercom::attributes::ComInterface<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
+
             #[allow(unused_unsafe)]
-            let __intercom_result: Result<(), intercom::ComError> = (|| unsafe {
+            unsafe {
                 let __result = ((**vtbl).simple_method)(comptr.ptr);
                 let __intercom_iid = intercom::GUID {
                     data1: 0u32,
@@ -1168,12 +1189,8 @@ impl Foo for intercom::ComItf<dyn Foo> {
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
-                Ok({})
-            })();
-            return match __intercom_result {
-                Ok(v) => v,
-                Err(err) => <() as intercom::ErrorValue>::from_com_error(err),
-            };
+                return {};
+            }
         }
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
@@ -1200,8 +1217,9 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 as *const *const <dyn Foo as intercom::attributes::ComInterface<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
+
             #[allow(unused_unsafe)]
-            let __intercom_result: Result<(), intercom::ComError> = (|| unsafe {
+            unsafe {
                 let __result = ((**vtbl).simple_method)(comptr.ptr);
                 let __intercom_iid = intercom::GUID {
                     data1: 0u32,
@@ -1209,14 +1227,16 @@ impl Foo for intercom::ComItf<dyn Foo> {
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
-                Ok({})
-            })();
-            return match __intercom_result {
-                Ok(v) => v,
-                Err(err) => <() as intercom::ErrorValue>::from_com_error(err),
-            };
+                return {};
+            }
         }
-        <() as intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
+        {
+            {
+                ::std::rt::begin_panic("internal error: entered unreachable code",
+                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                         10u32, 5u32))
+            }
+        };
     }
     fn simple_result_method(&self) -> u16 {
         intercom::logging::trace(|l| {
@@ -1267,8 +1287,9 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 as *const *const <dyn Foo as intercom::attributes::ComInterface<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
+
             #[allow(unused_unsafe)]
-            let __intercom_result: Result<u16, intercom::ComError> = (|| unsafe {
+            unsafe {
                 let __result = ((**vtbl).simple_result_method)(comptr.ptr);
                 let __intercom_iid = intercom::GUID {
                     data1: 0u32,
@@ -1276,16 +1297,12 @@ impl Foo for intercom::ComItf<dyn Foo> {
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
-                Ok({
-                    <u16 as intercom::type_system::ExternOutput<
+                return {
+                    <u16 as intercom::type_system::InfallibleExternOutput<
                         intercom::type_system::AutomationTypeSystem,
-                    >>::from_foreign_output(__result)?
-                })
-            })();
-            return match __intercom_result {
-                Ok(v) => v,
-                Err(err) => <u16 as intercom::ErrorValue>::from_com_error(err),
-            };
+                    >>::from_foreign_output(__result)
+                };
+            }
         }
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
@@ -1312,8 +1329,9 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 as *const *const <dyn Foo as intercom::attributes::ComInterface<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
+
             #[allow(unused_unsafe)]
-            let __intercom_result: Result<u16, intercom::ComError> = (|| unsafe {
+            unsafe {
                 let __result = ((**vtbl).simple_result_method)(comptr.ptr);
                 let __intercom_iid = intercom::GUID {
                     data1: 0u32,
@@ -1321,18 +1339,20 @@ impl Foo for intercom::ComItf<dyn Foo> {
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
-                Ok({
-                    <u16 as intercom::type_system::ExternOutput<
+                return {
+                    <u16 as intercom::type_system::InfallibleExternOutput<
                         intercom::type_system::RawTypeSystem,
-                    >>::from_foreign_output(__result)?
-                })
-            })();
-            return match __intercom_result {
-                Ok(v) => v,
-                Err(err) => <u16 as intercom::ErrorValue>::from_com_error(err),
-            };
+                    >>::from_foreign_output(__result)
+                };
+            }
         }
-        <u16 as intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
+        {
+            {
+                ::std::rt::begin_panic("internal error: entered unreachable code",
+                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                         14u32, 5u32))
+            }
+        };
     }
     fn string_method(&self, msg: String) -> String {
         intercom::logging::trace(|l| {
@@ -1377,13 +1397,14 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 as *const *const <dyn Foo as intercom::attributes::ComInterface<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
+
             #[allow(unused_unsafe)]
-            let __intercom_result: Result<String, intercom::ComError> = (|| unsafe {
+            unsafe {
                 let __result = ((**vtbl).string_method)(
                     comptr.ptr,
-                    <String as intercom::type_system::ExternInput<
+                    <String as intercom::type_system::InfallibleExternInput<
                         intercom::type_system::AutomationTypeSystem,
-                    >>::into_foreign_parameter(msg)?
+                    >>::into_foreign_parameter(msg)
                     .0,
                 );
                 let __intercom_iid = intercom::GUID {
@@ -1392,16 +1413,12 @@ impl Foo for intercom::ComItf<dyn Foo> {
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
-                Ok({
-                    <String as intercom::type_system::ExternOutput<
+                return {
+                    <String as intercom::type_system::InfallibleExternOutput<
                         intercom::type_system::AutomationTypeSystem,
-                    >>::from_foreign_output(__result)?
-                })
-            })();
-            return match __intercom_result {
-                Ok(v) => v,
-                Err(err) => <String as intercom::ErrorValue>::from_com_error(err),
-            };
+                    >>::from_foreign_output(__result)
+                };
+            }
         }
         if let Some(comptr) =
             intercom::ComItf::maybe_ptr::<intercom::type_system::RawTypeSystem>(self)
@@ -1428,13 +1445,14 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 as *const *const <dyn Foo as intercom::attributes::ComInterface<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
+
             #[allow(unused_unsafe)]
-            let __intercom_result: Result<String, intercom::ComError> = (|| unsafe {
+            unsafe {
                 let __result = ((**vtbl).string_method)(
                     comptr.ptr,
-                    <String as intercom::type_system::ExternInput<
+                    <String as intercom::type_system::InfallibleExternInput<
                         intercom::type_system::RawTypeSystem,
-                    >>::into_foreign_parameter(msg)?
+                    >>::into_foreign_parameter(msg)
                     .0,
                 );
                 let __intercom_iid = intercom::GUID {
@@ -1443,18 +1461,20 @@ impl Foo for intercom::ComItf<dyn Foo> {
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
-                Ok({
-                    <String as intercom::type_system::ExternOutput<
+                return {
+                    <String as intercom::type_system::InfallibleExternOutput<
                         intercom::type_system::RawTypeSystem,
-                    >>::from_foreign_output(__result)?
-                })
-            })();
-            return match __intercom_result {
-                Ok(v) => v,
-                Err(err) => <String as intercom::ErrorValue>::from_com_error(err),
-            };
+                    >>::from_foreign_output(__result)
+                };
+            }
         }
-        <String as intercom::ErrorValue>::from_com_error(intercom::ComError::E_POINTER.into())
+        {
+            {
+                ::std::rt::begin_panic("internal error: entered unreachable code",
+                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                         20u32, 5u32))
+            }
+        };
     }
     fn variant_method(&self, input: Variant) -> ComResult<Variant> {
         intercom::logging::trace(|l| {
@@ -1602,9 +1622,13 @@ impl Foo for intercom::ComItf<dyn Foo> {
                 Err(err) => <ComResult<Variant> as intercom::ErrorValue>::from_com_error(err),
             };
         }
-        <ComResult<Variant> as intercom::ErrorValue>::from_com_error(
-            intercom::ComError::E_POINTER.into(),
-        )
+        {
+            {
+                ::std::rt::begin_panic("internal error: entered unreachable code",
+                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                         26u32, 5u32))
+            }
+        };
     }
 }
 impl intercom::ComInterface for dyn Foo {
@@ -1697,13 +1721,13 @@ impl intercom::attributes::InterfaceHasTypeInfo for dyn Foo {
                                                                                                                                                                                                                     ty:
                                                                                                                                                                                                                         <<u16
                                                                                                                                                                                                                          as
-                                                                                                                                                                                                                         intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType
+                                                                                                                                                                                                                         intercom::type_system::InfallibleExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType
                                                                                                                                                                                                                             as
                                                                                                                                                                                                                             intercom::type_system::ForeignType>::type_name().into(),
                                                                                                                                                                                                                     indirection_level:
                                                                                                                                                                                                                         <<u16
                                                                                                                                                                                                                          as
-                                                                                                                                                                                                                         intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType
+                                                                                                                                                                                                                         intercom::type_system::InfallibleExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType
                                                                                                                                                                                                                             as
                                                                                                                                                                                                                             intercom::type_system::ForeignType>::indirection_level(),
                                                                                                                                                                                                                     direction:
@@ -1899,13 +1923,13 @@ impl intercom::attributes::InterfaceHasTypeInfo for dyn Foo {
                                                                                                                                                                                                                     ty:
                                                                                                                                                                                                                         <<String
                                                                                                                                                                                                                          as
-                                                                                                                                                                                                                         intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType
+                                                                                                                                                                                                                         intercom::type_system::InfallibleExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType
                                                                                                                                                                                                                             as
                                                                                                                                                                                                                             intercom::type_system::ForeignType>::type_name().into(),
                                                                                                                                                                                                                     indirection_level:
                                                                                                                                                                                                                         <<String
                                                                                                                                                                                                                          as
-                                                                                                                                                                                                                         intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType
+                                                                                                                                                                                                                         intercom::type_system::InfallibleExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType
                                                                                                                                                                                                                             as
                                                                                                                                                                                                                             intercom::type_system::ForeignType>::indirection_level(),
                                                                                                                                                                                                                     direction:
@@ -2121,13 +2145,13 @@ impl intercom::attributes::InterfaceHasTypeInfo for dyn Foo {
                                                                                                                                                                                                                     ty:
                                                                                                                                                                                                                         <<u16
                                                                                                                                                                                                                          as
-                                                                                                                                                                                                                         intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType
+                                                                                                                                                                                                                         intercom::type_system::InfallibleExternInput<intercom::type_system::RawTypeSystem>>::ForeignType
                                                                                                                                                                                                                             as
                                                                                                                                                                                                                             intercom::type_system::ForeignType>::type_name().into(),
                                                                                                                                                                                                                     indirection_level:
                                                                                                                                                                                                                         <<u16
                                                                                                                                                                                                                          as
-                                                                                                                                                                                                                         intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType
+                                                                                                                                                                                                                         intercom::type_system::InfallibleExternInput<intercom::type_system::RawTypeSystem>>::ForeignType
                                                                                                                                                                                                                             as
                                                                                                                                                                                                                             intercom::type_system::ForeignType>::indirection_level(),
                                                                                                                                                                                                                     direction:
@@ -2323,13 +2347,13 @@ impl intercom::attributes::InterfaceHasTypeInfo for dyn Foo {
                                                                                                                                                                                                                     ty:
                                                                                                                                                                                                                         <<String
                                                                                                                                                                                                                          as
-                                                                                                                                                                                                                         intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType
+                                                                                                                                                                                                                         intercom::type_system::InfallibleExternInput<intercom::type_system::RawTypeSystem>>::ForeignType
                                                                                                                                                                                                                             as
                                                                                                                                                                                                                             intercom::type_system::ForeignType>::type_name().into(),
                                                                                                                                                                                                                     indirection_level:
                                                                                                                                                                                                                         <<String
                                                                                                                                                                                                                          as
-                                                                                                                                                                                                                         intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType
+                                                                                                                                                                                                                         intercom::type_system::InfallibleExternInput<intercom::type_system::RawTypeSystem>>::ForeignType
                                                                                                                                                                                                                             as
                                                                                                                                                                                                                             intercom::type_system::ForeignType>::indirection_level(),
                                                                                                                                                                                                                     direction:
