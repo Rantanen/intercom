@@ -1,6 +1,7 @@
 use intercom::*;
 
 #[com_class(AllocTests)]
+#[derive(Default)]
 pub struct AllocTests;
 
 #[com_interface]

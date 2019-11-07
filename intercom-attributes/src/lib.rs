@@ -106,16 +106,35 @@ pub fn com_class(attr: TokenStream, tokens: TokenStream) -> TokenStream
     }
 }
 
+/// Defines a COM library sub-module.
+///
+/// ```rust,ignore
+/// com_module!(items...)]
+/// ```
+///
+/// - `items` - List of items contained in this module.
+///
+/// The macro results in the implementation of the object creation
+/// infrastructure that allows external clients to load the library and
+/// instantiate the specified types.
+#[proc_macro]
+pub fn com_module(args: TokenStream) -> TokenStream
+{
+    match expand_com_module(args, false) {
+        Ok(t) => t,
+        Err(e) => panic!("{}", e),
+    }
+}
+
 /// Defines the COM library.
 ///
 /// ```rust,ignore
-/// com_library!( libid = "...", classes...)]
+/// com_library!( libid = "...", items...)]
 /// ```
 ///
 /// - `libid` - A unique ID that specifies the current intercom library.
 ///             Optional, the libid is generated randomly if omitted.
-/// - `classes` - List of intercom classes that can be constructed by the
-///               clients.
+/// - `items` - List of items contained in this library.
 ///
 /// The macro results in the implementation of the object creation
 /// infrastructure that allows external clients to load the library and
@@ -123,7 +142,7 @@ pub fn com_class(attr: TokenStream, tokens: TokenStream) -> TokenStream
 #[proc_macro]
 pub fn com_library(args: TokenStream) -> TokenStream
 {
-    match expand_com_library(args) {
+    match expand_com_module(args, true) {
         Ok(t) => t,
         Err(e) => panic!("{}", e),
     }

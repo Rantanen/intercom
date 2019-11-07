@@ -9,17 +9,10 @@ pub trait ISharedInterface
 }
 
 #[com_class(ISharedInterface)]
+#[derive(Default)]
 pub struct SharedImplementation
 {
     value: u32,
-}
-
-impl SharedImplementation
-{
-    pub fn new() -> SharedImplementation
-    {
-        SharedImplementation { value: 0 }
-    }
 }
 
 #[com_impl]

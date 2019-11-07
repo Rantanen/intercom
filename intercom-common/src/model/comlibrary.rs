@@ -2,10 +2,35 @@ use super::*;
 use crate::prelude::*;
 
 use crate::guid::GUID;
-use ::syn::{LitStr, Path};
+use syn::{LitStr, Path};
+
+#[derive(Debug, Clone)]
+pub enum LibraryItemType
+{
+    Module(Path),
+    Class(Path),
+    Interface(Path),
+}
+
+impl syn::parse::Parse for LibraryItemType
+{
+    fn parse(input: syn::parse::ParseStream) -> syn::parse::Result<Self>
+    {
+        let ident: syn::Ident = input.parse()?;
+        match ident.to_string().as_str() {
+            "module" => Ok(LibraryItemType::Module(input.parse()?)),
+            "class" => Ok(LibraryItemType::Class(input.parse()?)),
+            "interface" => Ok(LibraryItemType::Interface(input.parse()?)),
+            _ => Err(input.error(&format!(
+                "Expected 'class', 'interface' or 'module', found {}",
+                ident
+            ))),
+        }
+    }
+}
 
 intercom_attribute!(
-    ComLibraryAttr< ComLibraryAttrParam, Path > {
+    ComLibraryAttr< ComLibraryAttrParam, LibraryItemType > {
         libid : LitStr,
     }
 );
@@ -19,6 +44,8 @@ pub struct ComLibrary
     pub name: String,
     pub libid: GUID,
     pub coclasses: Vec<Path>,
+    pub interfaces: Vec<Path>,
+    pub submodules: Vec<Path>,
 }
 
 impl ComLibrary
@@ -35,9 +62,22 @@ impl ComLibrary
             None => crate::utils::generate_libid(crate_name),
         };
 
+        let mut coclasses = vec![];
+        let mut interfaces = vec![];
+        let mut submodules = vec![];
+        for arg in attr.args().into_iter().cloned() {
+            match arg {
+                LibraryItemType::Class(cls) => coclasses.push(cls),
+                LibraryItemType::Interface(cls) => interfaces.push(cls),
+                LibraryItemType::Module(cls) => submodules.push(cls),
+            }
+        }
+
         Ok(ComLibrary {
             name: crate_name.to_owned(),
-            coclasses: attr.args().into_iter().cloned().collect(),
+            coclasses,
+            interfaces,
+            submodules,
             libid,
         })
     }
@@ -65,7 +105,10 @@ mod test
     {
         let lib = ComLibrary::parse(
             "library_name".into(),
-            quote!(libid = "12345678-1234-1234-1234-567890ABCDEF", Foo, Bar),
+            quote!(
+                libid = "12345678-1234-1234-1234-567890ABCDEF",
+                class Foo,
+                class Bar),
         )
         .expect("com_library attribute parsing failed");
 
@@ -92,7 +135,7 @@ mod test
         // What the final GUID is isn't important, what _is_ important however
         // is that the final GUID will not change ever as long as the library
         // name stays the same.
-        let lib = ComLibrary::parse("another_library".into(), quote!(One, Two))
+        let lib = ComLibrary::parse("another_library".into(), quote!(class One, class Two))
             .expect("com_library attribute parsing failed");
 
         assert_eq!(lib.name, "another_library");

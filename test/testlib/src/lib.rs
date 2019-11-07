@@ -20,18 +20,17 @@ pub mod variant;
 
 // Declare available COM classes.
 com_library!(
-    primitive::PrimitiveOperations,
-    return_interfaces::RefCountOperations,
-    return_interfaces::ClassCreator,
-    return_interfaces::CreatedClass,
-    stateful::StatefulOperations,
-    result::ResultOperations,
-    interface_params::SharedImplementation,
-    error_info::ErrorTests,
-    alloc::AllocTests,
-    strings::StringTests,
-    type_system_callbacks::TypeSystemCaller,
-    variant::VariantTests,
-    variant::VariantImpl,
-    unicode::UnicodeConversion,
+    module return_interfaces,
+
+    class primitive::PrimitiveOperations,
+    class stateful::StatefulOperations,
+    class result::ResultOperations,
+    class interface_params::SharedImplementation,
+    class error_info::ErrorTests,
+    class alloc::AllocTests,
+    class strings::StringTests,
+    class type_system_callbacks::TypeSystemCaller,
+    class variant::VariantTests,
+    class variant::VariantImpl,
+    class unicode::UnicodeConversion,
 );

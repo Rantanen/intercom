@@ -1,5 +1,11 @@
 use intercom::*;
 
+com_module!(
+    class RefCountOperations,
+    class ClassCreator,
+    class CreatedClass,
+);
+
 #[com_interface]
 trait IRefCount
 {
@@ -7,17 +13,13 @@ trait IRefCount
 }
 
 #[com_class(ClassCreator)]
+#[derive(Default)]
 pub struct ClassCreator {}
 
 #[com_interface]
 #[com_impl]
 impl ClassCreator
 {
-    pub fn new() -> ClassCreator
-    {
-        ClassCreator {}
-    }
-
     pub fn create_root(&self, id: i32) -> ComResult<ComRc<CreatedClass>>
     {
         Ok(ComRc::from(&ComBox::new(CreatedClass::new_with_id(id))))
@@ -37,6 +39,7 @@ impl ClassCreator
 }
 
 #[com_class(CreatedClass, IParent, IRefCount)]
+#[derive(Default)]
 pub struct CreatedClass
 {
     id: i32,
@@ -47,10 +50,6 @@ pub struct CreatedClass
 #[com_impl]
 impl CreatedClass
 {
-    pub fn new() -> CreatedClass
-    {
-        unreachable!()
-    }
     pub fn new_with_id(id: i32) -> CreatedClass
     {
         CreatedClass { id, parent: 0 }
@@ -96,20 +95,16 @@ impl IParent for CreatedClass
 }
 
 #[com_class(RefCountOperations)]
+#[derive(Default)]
 pub struct RefCountOperations {}
 
 #[com_interface]
 #[com_impl]
 impl RefCountOperations
 {
-    pub fn new() -> RefCountOperations
-    {
-        RefCountOperations {}
-    }
-
     pub fn get_new(&self) -> ComResult<ComRc<RefCountOperations>>
     {
-        Ok(ComRc::from(&ComBox::new(RefCountOperations::new())))
+        Ok(ComRc::from(&ComBox::<RefCountOperations>::default()))
     }
 
     pub fn get_ref_count(&self) -> u32

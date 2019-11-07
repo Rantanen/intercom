@@ -13,10 +13,11 @@
 //! use intercom::{com_library, com_class, com_interface, com_impl, ComResult};
 //!
 //! // Define COM classes to expose from this library.
-//! com_library!(Calculator);
+//! com_library!(class Calculator);
 //!
 //! // Define the COM class and the interfaces it implements.
 //! #[com_class(Calculator)]
+//! #[derive(Default)]
 //! struct Calculator;
 //!
 //! // Define the implementation for the class. The COM interface is defined
@@ -24,11 +25,6 @@
 //! #[com_interface]
 //! #[com_impl]
 //! impl Calculator {
-//!
-//!     // Intercom requires a `new` method with no parameters for all classes.
-//! #   // TODO: This should be replaced with Default::default implementation.
-//!     fn new() -> Calculator { Calculator }
-//!
 //!     fn add(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a + b) }
 //!     fn sub(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a - b) }
 //! }
@@ -103,6 +99,11 @@ pub mod typelib;
 pub use type_system::ForeignType;
 pub mod attributes;
 pub mod logging;
+
+com_module!(
+    class intercom::alloc::Allocator,
+    class intercom::error::ErrorStore,
+);
 
 /// The `ComInterface` trait defines the COM interface details for a COM
 /// interface trait.

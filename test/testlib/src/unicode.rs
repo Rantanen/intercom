@@ -2,17 +2,13 @@ use intercom::*;
 use std::os::raw::c_char;
 
 #[com_class(UnicodeConversion)]
+#[derive(Default)]
 pub struct UnicodeConversion;
 
 #[com_interface]
 #[com_impl]
 impl UnicodeConversion
 {
-    pub fn new() -> UnicodeConversion
-    {
-        UnicodeConversion
-    }
-
     fn utf8_to_utf16(&self, input: *const c_char) -> ComResult<*mut u16>
     {
         if input.is_null() {

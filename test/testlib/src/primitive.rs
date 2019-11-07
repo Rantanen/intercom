@@ -1,6 +1,7 @@
 use intercom::*;
 
 #[com_class(clsid = "{12341234-1234-1234-1234-123412340001}", PrimitiveOperations)]
+#[derive(Default)]
 pub struct PrimitiveOperations {}
 
 #[com_interface(
@@ -10,11 +11,6 @@ pub struct PrimitiveOperations {}
 #[com_impl]
 impl PrimitiveOperations
 {
-    pub fn new() -> PrimitiveOperations
-    {
-        PrimitiveOperations {}
-    }
-
     pub fn i8(&self, v: i8) -> i8
     {
         !(v.wrapping_add(1))

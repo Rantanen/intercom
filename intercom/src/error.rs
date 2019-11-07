@@ -720,6 +720,11 @@ pub mod raw
         E_INVALIDARG = 0x8007_0057
     );
 
+    make_hr!(
+        /// `HRESULT` for unavailable CLSID.
+        E_CLASSNOTAVAILABLE = 0x8004_0111
+    );
+
     // These might be deprecated. They are a bit too specific for cross-platform
     // support. We'll just need to ensure the winapi HRESULTs are compatible.
     make_hr!(E_ACCESSDENIED = 0x8007_0005);

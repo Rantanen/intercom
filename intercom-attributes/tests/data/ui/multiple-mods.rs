@@ -10,6 +10,7 @@ mod interface {
 
 mod class {
     #[intercom::com_class(MyStruct, crate::interface::MyInterface)]
+    #[derive(Default)]
     pub struct MyStruct;
 }
 
@@ -24,12 +25,25 @@ mod class_impl {
     #[intercom::com_impl]
     #[intercom::com_interface]
     impl crate::class::MyStruct {
-        pub fn new() -> Self { Self }
-
         fn struct_method(&self) -> u32 { 0 }
     }
 }
 
+mod submodule {
+    intercom::com_module!(
+        class SubmoduleClass
+    );
+
+    #[intercom::com_class(Self)]
+    #[derive(Default)]
+    pub struct SubmoduleClass;
+
+    #[intercom::com_interface]
+    #[intercom::com_impl]
+    impl SubmoduleClass {}
+}
+
 intercom::com_library!(
-    class::MyStruct
+    class class::MyStruct,
+    module submodule,
 );

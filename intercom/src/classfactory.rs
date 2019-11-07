@@ -24,13 +24,12 @@ pub struct ClassFactoryVtbl
 }
 
 #[doc(hidden)]
-pub struct ClassFactory<T>
+pub struct ClassFactory<T: Default + CoClass>
 {
-    pub clsid: REFCLSID,
-    pub create_instance: T,
+    phantom: std::marker::PhantomData<T>,
 }
 
-impl<T: Fn(REFCLSID) -> RawComResult<RawComPtr>> CoClass for ClassFactory<T>
+impl<T: Default + CoClass> CoClass for ClassFactory<T>
 {
     type VTableList = &'static ClassFactoryVtbl;
     fn create_vtable_list() -> Self::VTableList
@@ -67,45 +66,35 @@ impl AsRef<IUnknownVtbl> for ClassFactoryVtbl
     }
 }
 
-impl<T: Fn(REFCLSID) -> RawComResult<RawComPtr>> ClassFactory<T>
+impl<T: Default + CoClass> ClassFactory<T>
 {
-    pub fn new(clsid: REFCLSID, create_instance: T) -> Self
+    /// # Safety
+    ///
+    /// The `out` pointer must be valid for receiving the requested interface.
+    pub unsafe fn create(
+        riid: intercom::REFIID,
+        out: *mut intercom::RawComPtr,
+    ) -> crate::error::raw::HRESULT
     {
-        Self {
-            clsid,
-            create_instance,
-        }
+        let factory = Self {
+            phantom: std::marker::PhantomData,
+        };
+
+        intercom::ComBoxData::query_interface(intercom::ComBox::new(factory).as_mut(), riid, out)
     }
 
     /// # Safety
     ///
     /// The pointers _must_ be valid.
     pub unsafe extern "system" fn create_instance(
-        self_vtbl: RawComPtr,
+        _self_vtbl: RawComPtr,
         _outer: RawComPtr,
         riid: REFIID,
         out: *mut RawComPtr,
     ) -> raw::HRESULT
     {
-        if out.is_null() {
-            return raw::E_POINTER;
-        }
-        *out = std::ptr::null_mut();
-
-        let cb = ComBoxData::<Self>::from_ptr(self_vtbl);
-
-        let iunk_ptr = match (cb.create_instance)(cb.clsid) {
-            Ok(m) => m,
-            Err(hr) => return hr,
-        } as *const *const IUnknownVtbl;
-
-        let query_result = ((**iunk_ptr).query_interface)(iunk_ptr as RawComPtr, riid, out);
-
-        // Avoid leaking memory in case query_interface fails.
-        if query_result != raw::S_OK {
-            drop(Box::from_raw(iunk_ptr as RawComPtr));
-        }
-        query_result
+        let mut combox = ComBox::new(T::default());
+        ComBoxData::query_interface(combox.as_mut(), riid, out)
     }
 
     /// # Safety

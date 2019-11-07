@@ -25,6 +25,7 @@ pub trait IStringTests
 }
 
 #[com_class(IStringTests)]
+#[derive(Default)]
 pub struct StringTests;
 
 impl StringTests
