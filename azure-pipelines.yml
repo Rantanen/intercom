@@ -57,9 +57,11 @@ steps:
 
 - script: cargo clippy
   displayName: 'Run build'
+  condition: and(succeeded(), eq( variables['rustVersion'], 'nightly' ))
 
 - script: cargo test
   displayName: 'Run unit tests'
+  condition: and(succeeded(), eq( variables['rustVersion'], 'nightly' ))
 
 - script: |
     mkdir build
