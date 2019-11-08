@@ -359,7 +359,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
         {
             {
                 ::std::rt::begin_panic("internal error: entered unreachable code",
-                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                       &("com_interface.rs",
                                          12u32, 5u32))
             }
         };
@@ -511,7 +511,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
         {
             {
                 ::std::rt::begin_panic("internal error: entered unreachable code",
-                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                       &("com_interface.rs",
                                          24u32, 5u32))
             }
         };
@@ -655,7 +655,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
         {
             {
                 ::std::rt::begin_panic("internal error: entered unreachable code",
-                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                       &("com_interface.rs",
                                          15u32, 5u32))
             }
         };
@@ -821,7 +821,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
         {
             {
                 ::std::rt::begin_panic("internal error: entered unreachable code",
-                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                       &("com_interface.rs",
                                          21u32, 5u32))
             }
         };
@@ -987,7 +987,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
         {
             {
                 ::std::rt::begin_panic("internal error: entered unreachable code",
-                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                       &("com_interface.rs",
                                          18u32, 5u32))
             }
         };
@@ -1131,7 +1131,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
         {
             {
                 ::std::rt::begin_panic("internal error: entered unreachable code",
-                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                       &("com_interface.rs",
                                          16u32, 5u32))
             }
         };
@@ -1233,7 +1233,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
         {
             {
                 ::std::rt::begin_panic("internal error: entered unreachable code",
-                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                       &("com_interface.rs",
                                          10u32, 5u32))
             }
         };
@@ -1349,7 +1349,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
         {
             {
                 ::std::rt::begin_panic("internal error: entered unreachable code",
-                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                       &("com_interface.rs",
                                          14u32, 5u32))
             }
         };
@@ -1471,7 +1471,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
         {
             {
                 ::std::rt::begin_panic("internal error: entered unreachable code",
-                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                       &("com_interface.rs",
                                          20u32, 5u32))
             }
         };
@@ -1625,7 +1625,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
         {
             {
                 ::std::rt::begin_panic("internal error: entered unreachable code",
-                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/com_interface.rs",
+                                       &("com_interface.rs",
                                          26u32, 5u32))
             }
         };

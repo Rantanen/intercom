@@ -162,7 +162,7 @@ impl IFoo for intercom::ComItf<dyn IFoo> {
         {
             {
                 ::std::rt::begin_panic("internal error: entered unreachable code",
-                                       &("C:/Dev/Projects/rust-com/intercom-attributes/tests/data/macro/private_item.rs",
+                                       &("private_item.rs",
                                          8u32, 5u32))
             }
         };
