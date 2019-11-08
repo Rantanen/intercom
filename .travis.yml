@@ -25,7 +25,7 @@ env:
     - CC=gcc-5 CXX=g++-5 RUSTFLAGS='-C link-dead-code'
 
 script:
-    - rustup component add clippy rustfmt
+    - rustup component add clippy rustfmt || true
     - if( ! cargo clippy -V || ! cargo fmt --version ); then rustup uninstall nightly && rustup toolchain install nightly -c clippy -c rustfmt; fi
     - cargo clippy --all -- -D warnings
     - cargo test
