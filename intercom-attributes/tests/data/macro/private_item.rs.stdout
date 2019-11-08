@@ -161,9 +161,10 @@ impl IFoo for intercom::ComItf<dyn IFoo> {
 
         {
             {
-                ::std::rt::begin_panic("internal error: entered unreachable code",
-                                       &("private_item.rs",
-                                         8u32, 5u32))
+                ::std::rt::begin_panic(
+                    "internal error: entered unreachable code",
+                    &("private_item.rs", 8u32, 5u32),
+                )
             }
         };
     }
