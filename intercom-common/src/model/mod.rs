@@ -8,7 +8,6 @@
 //!
 
 #[derive(Fail, Debug)]
-#[non_exhaustive]
 pub enum ParseError
 {
     #[fail(display = "Parsing [com_library] failed: {}", _0)]
@@ -28,6 +27,10 @@ pub enum ParseError
 
     #[fail(display = "Reading TOML failed: {}", _0)]
     CargoToml(String),
+
+    #[doc(hidden)]
+    #[fail(display = "<Internal>")]
+    __NonExhaustive,
 }
 
 pub type ParseResult<T> = Result<T, ParseError>;
