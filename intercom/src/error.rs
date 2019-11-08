@@ -519,22 +519,6 @@ pub trait ErrorValue
 {
     /// Attempts to convert a COM error into a custom status code. Must not panic.
     fn from_error(_: ComError) -> Self;
-
-    /// Attempts to convert a COM error into a custom status code. May panic.
-    fn from_com_error(_: ComError) -> Self;
-}
-
-impl<T> ErrorValue for T
-{
-    default fn from_error(_: ComError) -> Self
-    {
-        panic!("Function does not support error values")
-    }
-
-    default fn from_com_error(_: ComError) -> Self
-    {
-        panic!("Function does not support error values")
-    }
 }
 
 impl<S, E: ErrorValue> ErrorValue for Result<S, E>
@@ -543,46 +527,13 @@ impl<S, E: ErrorValue> ErrorValue for Result<S, E>
     {
         Err(E::from_error(e))
     }
-
-    fn from_com_error(e: ComError) -> Self
-    {
-        Err(E::from_error(e))
-    }
-}
-
-impl ErrorValue for ComError
-{
-    fn from_error(err: ComError) -> Self
-    {
-        err
-    }
-    fn from_com_error(err: ComError) -> Self
-    {
-        err
-    }
 }
 
 impl<T: From<ComError>> ErrorValue for T
 {
-    default fn from_error(err: ComError) -> Self
-    {
-        err.into()
-    }
-    default fn from_com_error(err: ComError) -> Self
-    {
-        err.into()
-    }
-}
-
-impl ErrorValue for raw::HRESULT
-{
     fn from_error(err: ComError) -> Self
     {
-        err.hresult
-    }
-    fn from_com_error(err: ComError) -> Self
-    {
-        err.hresult
+        err.into()
     }
 }
 
