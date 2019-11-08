@@ -443,7 +443,9 @@ fn assert_test_output(
     // This shouldn't matter in practice as these are test files and we can
     // decide on their naming as we write them.
     vec![
-        assert_output_with(result_stdout, source_path, "stdout", sanitize),
+        assert_output_with(result_stdout, source_path, "stdout", |s| {
+            sanitize(strip_path(source_path, s))
+        }),
         assert_output_with(result_stderr, source_path, "stderr", |s| {
             strip_path(source_path, s)
         }),

@@ -123,10 +123,12 @@ pub fn expand_com_interface(
                     // Try the available type systems.
                     #( #impl_branches )*
 
-                    // None of the type system pointers were available,
-                    // which means this is a null reference.
-                    < #return_ty as intercom::ErrorValue >::from_com_error(
-                            intercom::ComError::E_POINTER.into() )
+                    // The ComItf invariant states it has at least one pointer
+                    // available so we should never get here.
+                    //
+                    // Also since this is Rust-to-COM call we are allowed to
+                    // panic here.
+                    unreachable!();
                 }
             ));
         }
@@ -287,9 +289,12 @@ fn process_itf_variant(
     // Gather all the trait methods for the remaining vtable fields.
     for method_info in &itf_variant.methods {
         let method_ident = &method_info.name;
+        let infallible = method_info.returnhandler.is_infallible();
         let in_out_args = method_info.raw_com_args().into_iter().map(|com_arg| {
             let name = &com_arg.name;
-            let com_ty = &com_arg.handler.com_ty(com_arg.span, com_arg.dir);
+            let com_ty = &com_arg
+                .handler
+                .com_ty(com_arg.span, com_arg.dir, infallible);
             let dir = match com_arg.dir {
                 Direction::In => quote!(),
                 Direction::Out | Direction::Retval => quote_spanned!(com_arg.span => *mut ),
@@ -372,13 +377,14 @@ fn rust_to_com_delegate(
     // The COM out-arguments that mirror the Rust return value will
     // require temporary variables during the COM call. Format their
     // declarations.
+    let infallible = method_info.returnhandler.is_infallible();
     let out_arg_declarations = method_info
         .returnhandler
         .com_out_args()
         .iter()
         .map(|ca| {
             let ident = &ca.name;
-            let ty = &ca.handler.com_ty(ca.span, Direction::Retval);
+            let ty = &ca.handler.com_ty(ca.span, Direction::Retval, infallible);
             let default = ca.handler.default_value();
             quote_spanned!(ca.span => let mut #ident : #ty = #default; )
         })
@@ -391,9 +397,11 @@ fn rust_to_com_delegate(
         .map(|com_arg| {
             let name = com_arg.name;
             match com_arg.dir {
-                Direction::In => com_arg
-                    .handler
-                    .rust_to_com(&name, com_arg.span, Direction::In),
+                Direction::In => {
+                    com_arg
+                        .handler
+                        .rust_to_com(&name, com_arg.span, Direction::In, infallible)
+                }
                 Direction::Out | Direction::Retval => quote_spanned!(com_arg.span => &mut #name ),
             }
         })
@@ -421,28 +429,45 @@ fn rust_to_com_delegate(
     };
 
     // Construct the final method.
-    quote_spanned!(method_info.signature_span =>
-        #[allow(unused_imports)]
-        let vtbl = comptr.ptr as *const *const <#maybe_dyn #itf_path as
-            intercom::attributes::ComInterface<#ts_type>>::VTable;
+    if infallible {
+        quote_spanned!(method_info.signature_span =>
+            #[allow(unused_imports)]
+            let vtbl = comptr.ptr as *const *const <#maybe_dyn #itf_path as
+                intercom::attributes::ComInterface<#ts_type>>::VTable;
 
-        // Use an IIFE to act as a try/catch block. The various template
-        // substitutions might end up using ?'s for error handling. The IIFE allows
-        // us to handle the results here immediately.
-        #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
-        let __intercom_result : Result< #return_ty, intercom::ComError > = ( || unsafe {
-            #( #out_arg_declarations )*
-            let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
+            #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
+            unsafe {
+                #( #out_arg_declarations )*
+                let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
 
-            let __intercom_iid = #iid_tokens;
-            Ok( { #return_statement } )
-        } )();
+                let __intercom_iid = #iid_tokens;
+                return { #return_statement };
+            }
+        )
+    } else {
+        quote_spanned!(method_info.signature_span =>
+            #[allow(unused_imports)]
+            let vtbl = comptr.ptr as *const *const <#maybe_dyn #itf_path as
+                intercom::attributes::ComInterface<#ts_type>>::VTable;
 
-        return match __intercom_result {
-            Ok( v ) => v,
-            Err( err ) => < #return_ty as intercom::ErrorValue >::from_com_error( err ),
-        };
-    )
+            // Use an IIFE to act as a try/catch block. The various template
+            // substitutions might end up using ?'s for error handling. The IIFE allows
+            // us to handle the results here immediately.
+            #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
+            let __intercom_result : Result< #return_ty, intercom::ComError > = ( || unsafe {
+                #( #out_arg_declarations )*
+                let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
+
+                let __intercom_iid = #iid_tokens;
+                Ok( { #return_statement } )
+            } )();
+
+            return match __intercom_result {
+                Ok( v ) => v,
+                Err( err ) => < #return_ty as intercom::ErrorValue >::from_com_error( err ),
+            };
+        )
+    }
 }
 
 fn create_get_typeinfo_function(itf: &model::ComInterface) -> Result<TokenStream, String>
@@ -493,6 +518,7 @@ fn create_typeinfo_for_variant(
     let ts_type = ts.as_typesystem_type(itf.span);
     let iid_tokens = utils::get_guid_tokens(&itf_variant.iid, itf.span);
     let methods = itf_variant.methods.iter().map( |m| {
+        let infallible = m.returnhandler.is_infallible();
         let method_name = m.name.to_string();
         let return_type = match &m.return_type {
             Some(rt) => quote_spanned!(m.signature_span =>
@@ -515,7 +541,7 @@ fn create_typeinfo_for_variant(
         };
 
         let params = m.raw_com_args().into_iter().map(|arg| {
-            let com_ty = arg.handler.com_ty(arg.span, arg.dir);
+            let com_ty = arg.handler.com_ty(arg.span, arg.dir, infallible);
             let arg_name = arg.name.to_string();
             let dir_ident = Ident::new(match arg.dir {
                 Direction::In => "In",

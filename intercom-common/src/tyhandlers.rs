@@ -107,56 +107,61 @@ impl TypeHandler
     }
 
     /// The COM type.
-    pub fn com_ty(&self, span: Span, dir: Direction) -> Type
+    pub fn com_ty(&self, span: Span, dir: Direction, infallible: bool) -> Type
     {
         // Construct bits for the quote.
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type(span);
-
-        // Get the final type based on the parameter direction.
-        let tr = match dir {
-            Direction::In => quote_spanned!(span => intercom::type_system::ExternInput),
-            Direction::Out | Direction::Retval => {
-                quote_spanned!(span => intercom::type_system::ExternOutput)
-            }
-        };
-
+        let (tr, _unwrap) = resolve_type_handling(dir, infallible, span);
         syn::parse2(quote_spanned!(span => <#ty as #tr<#ts>>::ForeignType)).unwrap()
     }
 
     /// Converts a COM parameter named by the ident into a Rust type.
-    pub fn com_to_rust(&self, ident: &Ident, span: Span, dir: Direction) -> TokenStream
+    pub fn com_to_rust(
+        &self,
+        ident: &Ident,
+        span: Span,
+        dir: Direction,
+        infallible: bool,
+    ) -> TokenStream
     {
         // Construct bits for the quote.
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type(span);
+        let (tr, unwrap) = resolve_type_handling(dir, infallible, span);
         let maybe_ref = match ty {
             syn::Type::Reference(..) => quote!(&),
             _ => quote!(),
         };
         match dir {
             Direction::In => quote_spanned!(span=>
-                    #maybe_ref <#ty as intercom::type_system::ExternInput<#ts>>
-                        ::from_foreign_parameter(#ident)?),
+                    #maybe_ref <#ty as #tr<#ts>>
+                        ::from_foreign_parameter(#ident)#unwrap),
             Direction::Out | Direction::Retval => quote_spanned!(span=>
-                    <#ty as intercom::type_system::ExternOutput<#ts>>
-                        ::from_foreign_output(#ident)?),
+                    <#ty as #tr<#ts>>::from_foreign_output(#ident)#unwrap),
         }
     }
 
     /// Converts a Rust parameter named by the ident into a COM type.
-    pub fn rust_to_com(&self, ident: &Ident, span: Span, dir: Direction) -> TokenStream
+    pub fn rust_to_com(
+        &self,
+        ident: &Ident,
+        span: Span,
+        dir: Direction,
+        infallible: bool,
+    ) -> TokenStream
     {
         // Construct bits for the quote.
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type(span);
+        let (tr, unwrap) = resolve_type_handling(dir, infallible, span);
         match dir {
             Direction::In => quote_spanned!(span=>
-                    <#ty as intercom::type_system::ExternInput<#ts>>
-                        ::into_foreign_parameter(#ident)?.0),
+                    <#ty as #tr<#ts>>
+                        ::into_foreign_parameter(#ident)#unwrap.0),
             Direction::Out | Direction::Retval => quote_spanned!(span=>
-                    <#ty as intercom::type_system::ExternOutput<#ts>>
-                        ::into_foreign_output(#ident)?),
+                    <#ty as #tr<#ts>>
+                        ::into_foreign_output(#ident)#unwrap),
         }
     }
 
@@ -165,6 +170,25 @@ impl TypeHandler
     {
         quote!(intercom::type_system::ExternDefault::extern_default())
     }
+}
+
+fn resolve_type_handling(dir: Direction, infallible: bool, span: Span)
+    -> (TokenStream, TokenStream)
+{
+    let dir_part = match dir {
+        Direction::In => "Input",
+        Direction::Out | Direction::Retval => "Output",
+    };
+    let (fallibility, unwrap) = match infallible {
+        true => ("Infallible", quote!()),
+        false => ("", quote!(?)),
+    };
+
+    let ident = Ident::new(&format!("{}Extern{}", fallibility, dir_part), span);
+    (
+        quote_spanned!(span => intercom::type_system::#ident),
+        unwrap,
+    )
 }
 
 /// Resolves the `TypeHandler` to use.

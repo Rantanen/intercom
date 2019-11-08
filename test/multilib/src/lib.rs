@@ -11,7 +11,7 @@ com_library!(class HelloWorld);
 #[com_interface]
 trait IHelloWorld
 {
-    fn get_hello(&self) -> String;
+    fn get_hello(&self) -> ComResult<String>;
 }
 
 #[com_class(clsid = "{25ccb3f6-b782-4b2d-933e-54ab447da0aa}", IHelloWorld)]
@@ -29,9 +29,9 @@ impl HelloWorld
 #[com_impl]
 impl IHelloWorld for HelloWorld
 {
-    fn get_hello(&self) -> String
+    fn get_hello(&self) -> ComResult<String>
     {
-        "Hello World!".to_string()
+        Ok("Hello World!".to_string())
     }
 }
 
@@ -39,5 +39,5 @@ impl IHelloWorld for HelloWorld
 fn hello_world_returns_hello_world()
 {
     let hello = HelloWorld::new();
-    assert_eq!(hello.get_hello(), "Hello World!");
+    assert_eq!(hello.get_hello().unwrap(), "Hello World!");
 }
