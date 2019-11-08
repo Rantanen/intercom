@@ -38,17 +38,13 @@ pub struct __IntercomVtableForFoo_Automation {
                 intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable,
     pub simple_method: unsafe extern "system" fn(self_vtable:
                                                      intercom::RawComPtr)
-                           ->
-                               <() as
-                               intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+                           -> (),
     pub arg_method: unsafe extern "system" fn(self_vtable:
                                                   intercom::RawComPtr,
                                               a:
                                                   <u16 as
                                                   intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
-                        ->
-                            <() as
-                            intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+                        -> (),
     pub simple_result_method: unsafe extern "system" fn(self_vtable:
                                                             intercom::RawComPtr)
                                   ->
@@ -152,17 +148,13 @@ pub struct __IntercomVtableForFoo_Raw {
                 intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable,
     pub simple_method: unsafe extern "system" fn(self_vtable:
                                                      intercom::RawComPtr)
-                           ->
-                               <() as
-                               intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+                           -> (),
     pub arg_method: unsafe extern "system" fn(self_vtable:
                                                   intercom::RawComPtr,
                                               a:
                                                   <u16 as
                                                   intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType)
-                        ->
-                            <() as
-                            intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+                        -> (),
     pub simple_result_method: unsafe extern "system" fn(self_vtable:
                                                             intercom::RawComPtr)
                                   ->

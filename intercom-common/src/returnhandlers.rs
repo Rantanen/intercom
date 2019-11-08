@@ -55,6 +55,11 @@ impl ReturnHandler for VoidHandler
         utils::unit_ty(self.0)
     }
 
+    fn com_ty(&self) -> Type
+    {
+        syn::parse2(quote_spanned!(self.0 => ())).unwrap()
+    }
+
     // Void types do not depend on the type system.
     fn type_system(&self) -> ModelTypeSystem
     {
