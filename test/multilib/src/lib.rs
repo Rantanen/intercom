@@ -1,5 +1,4 @@
 #![crate_type = "dylib"]
-#![feature(type_ascription)]
 
 extern crate intercom;
 use intercom::*;
