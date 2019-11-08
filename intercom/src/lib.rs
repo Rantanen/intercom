@@ -54,7 +54,6 @@
 //! ```
 
 #![crate_type = "dylib"]
-#![feature(specialization, integer_atomics, associated_type_defaults)]
 #![allow(clippy::match_bool)]
 
 extern crate self as intercom;

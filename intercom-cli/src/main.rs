@@ -1,4 +1,3 @@
-#![feature(inner_deref)]
 #![allow(clippy::match_bool)]
 
 use std::fs::File;
