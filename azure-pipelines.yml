@@ -75,3 +75,28 @@ steps:
     $(memcheck) build/bin/cpp-dl
     $(memcheck) build/bin/cpp-wrapper
   displayName: "Run integration tests"
+
+- script: |
+    "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.6.1 Tools/tlbimp" test/target/debug/test_lib.dll /MACHINE:X64 /out:test/cs/TestLib.Interop.dll
+  displayName: "Generate C# type library"
+  condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
+
+- task: NuGetCommand@2
+  inputs:
+      restoreSolution: test/cs/cs.sln
+  displayName: 'Restore NuGet packages'
+  condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
+
+- task: MSBuild@1
+  inputs:
+      solution: test/cs/cs.sln
+      platform: x64
+  displayName: 'Build C# tests'
+  condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
+
+- task: VSTest@2
+  inputs:
+      testAssemblyVer2: test/cs/bin/x64/debug/cs.dll
+  displayName: 'Run C# tests'
+  condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
+
