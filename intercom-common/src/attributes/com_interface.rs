@@ -464,7 +464,7 @@ fn rust_to_com_delegate(
 
             return match __intercom_result {
                 Ok( v ) => v,
-                Err( err ) => < #return_ty as intercom::ErrorValue >::from_com_error( err ),
+                Err( err ) => < #return_ty as intercom::ErrorValue >::from_error( err ),
             };
         )
     }

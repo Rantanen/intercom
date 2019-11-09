@@ -89,28 +89,6 @@ and deallocated using [`IIntercomAllocator`]
 
 [`IIntercomAllocator`]: https://github.com/Rantanen/intercom/issues/27
 
-## Nightly requirement
-
-Intercom requires nightly Rust version for few unstable features. By far the
-most important of these is the procedural macro attributes. Unfortunately these
-are not properly feature gated.
-
-The features with feature gates and tracking issues that Intercom depends on are
-listed below:
-
-- `specialization` - needed for handling `ComItf`, which may refer to an
-  interface that might or might not be a concrete struct interface.
-  Tracking issue: [#31844](https://github.com/rust-lang/rust/issues/31844)
-- `non_exhaustive` - There are some types that we may want to add items to.
-  Tracking issue: [#44109](https://github.com/rust-lang/rust/issues/44109)
-
-The following features are currently in use, but more for 'nice to have'
-reasons and could be worked around if we needed to get to stable quickly:
-
-- `try_from`, tracking issue: [#33417](https://github.com/rust-lang/rust/issues/33417)
-- `try_trait`, tracking issue: [#42327](https://github.com/rust-lang/rust/issues/42327)
-- `integer_atomics`, tracking issue: [#32976](https://github.com/rust-lang/rust/issues/32976)
-
 ## Technical details
 
 ### Background
@@ -135,7 +113,7 @@ and `"stdcall"` in Rust).
 The Intercom libraries are built over Rust [proc macro attributes]. Currently
 there are four attributes available:
 
-- `[com_library(LIBID, Classes...)]` - A required attribute that implements the
+- `com_library!(LIBID, Classes...)` - A required attribute that implements the
   exported `DllGetClassObject` entry point as well as the `CoClass` for the
   `ClassFactory`.
 - `[com_interface(IID)]` - An attribute that specifies a `trait` or an `impl`

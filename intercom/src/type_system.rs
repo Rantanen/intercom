@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::ComItf;
 
 #[derive(Debug, Clone, Copy, Hash, PartialOrd, PartialEq)]
 #[repr(C)]
@@ -15,6 +16,12 @@ pub trait TypeSystem: Clone + Copy
     const RAW: TypeSystemName = TypeSystemName::Raw;
 
     fn key() -> TypeSystemName;
+
+    /// Gets the type system pointer from a ComItf.
+    fn get_ptr<I: ?Sized>(itf: &ComItf<I>) -> crate::raw::InterfacePtr<Self, I>;
+
+    /// Constructs a ComItf from a pointer.
+    fn wrap_ptr<I: ?Sized>(ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>;
 }
 
 /// Automation type system.
@@ -26,6 +33,22 @@ impl TypeSystem for AutomationTypeSystem
     {
         TypeSystemName::Automation
     }
+
+    /// Gets the type system pointer from a ComItf.
+    fn get_ptr<I: ?Sized>(itf: &ComItf<I>) -> crate::raw::InterfacePtr<Self, I>
+    {
+        itf.automation_ptr
+    }
+
+    /// Constructs a ComItf from a pointer.
+    fn wrap_ptr<I: ?Sized>(ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>
+    {
+        ComItf {
+            automation_ptr: ptr,
+            raw_ptr: crate::raw::InterfacePtr::null(),
+            phantom: std::marker::PhantomData,
+        }
+    }
 }
 
 /// Raw type system.
@@ -36,6 +59,22 @@ impl TypeSystem for RawTypeSystem
     fn key() -> TypeSystemName
     {
         TypeSystemName::Raw
+    }
+
+    /// Gets the type system pointer from a ComItf.
+    fn get_ptr<I: ?Sized>(itf: &ComItf<I>) -> crate::raw::InterfacePtr<Self, I>
+    {
+        itf.raw_ptr
+    }
+
+    /// Constructs a ComItf from a pointer.
+    fn wrap_ptr<I: ?Sized>(ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>
+    {
+        ComItf {
+            automation_ptr: crate::raw::InterfacePtr::null(),
+            raw_ptr: ptr,
+            phantom: std::marker::PhantomData,
+        }
     }
 }
 
@@ -366,16 +405,8 @@ pub trait ExternDefault
 
 impl<T> ExternDefault for T
 {
-    default unsafe fn extern_default() -> Self
+    unsafe fn extern_default() -> Self
     {
         std::mem::zeroed()
-    }
-}
-
-impl<TPtr> ExternDefault for *const TPtr
-{
-    default unsafe fn extern_default() -> Self
-    {
-        std::ptr::null()
     }
 }

@@ -443,7 +443,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             })();
             return match __intercom_result {
                 Ok(v) => v,
-                Err(err) => <ComResult<bool> as intercom::ErrorValue>::from_com_error(err),
+                Err(err) => <ComResult<bool> as intercom::ErrorValue>::from_error(err),
             };
         }
         if let Some(comptr) =
@@ -506,7 +506,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             })();
             return match __intercom_result {
                 Ok(v) => v,
-                Err(err) => <ComResult<bool> as intercom::ErrorValue>::from_com_error(err),
+                Err(err) => <ComResult<bool> as intercom::ErrorValue>::from_error(err),
             };
         }
         {
@@ -595,7 +595,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             })();
             return match __intercom_result {
                 Ok(v) => v,
-                Err(err) => <ComResult<u16> as intercom::ErrorValue>::from_com_error(err),
+                Err(err) => <ComResult<u16> as intercom::ErrorValue>::from_error(err),
             };
         }
         if let Some(comptr) =
@@ -651,7 +651,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             })();
             return match __intercom_result {
                 Ok(v) => v,
-                Err(err) => <ComResult<u16> as intercom::ErrorValue>::from_com_error(err),
+                Err(err) => <ComResult<u16> as intercom::ErrorValue>::from_error(err),
             };
         }
         {
@@ -747,7 +747,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             return match __intercom_result {
                 Ok(v) => v,
                 Err(err) => {
-                    <ComResult<ComItf<dyn IUnknown>> as intercom::ErrorValue>::from_com_error(err)
+                    <ComResult<ComItf<dyn IUnknown>> as intercom::ErrorValue>::from_error(err)
                 }
             };
         }
@@ -817,7 +817,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             return match __intercom_result {
                 Ok(v) => v,
                 Err(err) => {
-                    <ComResult<ComItf<dyn IUnknown>> as intercom::ErrorValue>::from_com_error(err)
+                    <ComResult<ComItf<dyn IUnknown>> as intercom::ErrorValue>::from_error(err)
                 }
             };
         }
@@ -918,7 +918,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             })();
             return match __intercom_result {
                 Ok(v) => v,
-                Err(err) => <ComResult<bool> as intercom::ErrorValue>::from_com_error(err),
+                Err(err) => <ComResult<bool> as intercom::ErrorValue>::from_error(err),
             };
         }
         if let Some(comptr) =
@@ -985,7 +985,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             })();
             return match __intercom_result {
                 Ok(v) => v,
-                Err(err) => <ComResult<bool> as intercom::ErrorValue>::from_com_error(err),
+                Err(err) => <ComResult<bool> as intercom::ErrorValue>::from_error(err),
             };
         }
         {
@@ -1074,7 +1074,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             })();
             return match __intercom_result {
                 Ok(v) => v,
-                Err(err) => <Result<u16, i32> as intercom::ErrorValue>::from_com_error(err),
+                Err(err) => <Result<u16, i32> as intercom::ErrorValue>::from_error(err),
             };
         }
         if let Some(comptr) =
@@ -1130,7 +1130,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             })();
             return match __intercom_result {
                 Ok(v) => v,
-                Err(err) => <Result<u16, i32> as intercom::ErrorValue>::from_com_error(err),
+                Err(err) => <Result<u16, i32> as intercom::ErrorValue>::from_error(err),
             };
         }
         {
@@ -1564,7 +1564,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             );
             return match __intercom_result {
                 Ok(v) => v,
-                Err(err) => <ComResult<Variant> as intercom::ErrorValue>::from_com_error(err),
+                Err(err) => <ComResult<Variant> as intercom::ErrorValue>::from_error(err),
             };
         }
         if let Some(comptr) =
@@ -1628,7 +1628,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             );
             return match __intercom_result {
                 Ok(v) => v,
-                Err(err) => <ComResult<Variant> as intercom::ErrorValue>::from_com_error(err),
+                Err(err) => <ComResult<Variant> as intercom::ErrorValue>::from_error(err),
             };
         }
         {

@@ -3,12 +3,24 @@ trigger:
 
 strategy:
     matrix:
-        Linux:
+        Linux_nightly:
             imageName: "ubuntu-16.04"
+            rustVersion: nightly
             cmake_generator_opts:
             memcheck: valgrind --error-exitcode=1 --leak-check=full
-        Windows:
+        Windows_nightly:
             imageName: "vs2017-win2016"
+            rustVersion: nightly
+            cmake_generator_opts: -DCMAKE_GENERATOR_PLATFORM=x64
+            memcheck:
+        Linux_stable:
+            imageName: "ubuntu-16.04"
+            rustVersion: stable
+            cmake_generator_opts:
+            memcheck: valgrind --error-exitcode=1 --leak-check=full
+        Windows_stable:
+            imageName: "vs2017-win2016"
+            rustVersion: stable
             cmake_generator_opts: -DCMAKE_GENERATOR_PLATFORM=x64
             memcheck:
 
@@ -18,7 +30,7 @@ pool:
 steps:
 - script: |
     curl -sSf -o rustup-init.exe https://win.rustup.rs
-    rustup-init.exe --default-toolchain nightly -y
+    rustup-init.exe --default-toolchain $(rustVersion) -y
   displayName: 'Update environment (Windows)'
   condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
 
@@ -31,8 +43,8 @@ steps:
     rustup -V
     rustup self update
     rustup set profile minimal
-    rustup toolchain install nightly -c rustfmt -c clippy
-    rustup default nightly
+    rustup toolchain install $(rustVersion) -c rustfmt -c clippy
+    rustup default $(rustVersion)
     cargo -V
     rustc -V
     cargo clippy -V
@@ -41,12 +53,15 @@ steps:
 
 - script: cargo fmt -- --check
   displayName: 'Check style'
+  condition: and(succeeded(), eq( variables['rustVersion'], 'nightly' ))
 
 - script: cargo clippy
   displayName: 'Run build'
+  condition: and(succeeded(), eq( variables['rustVersion'], 'nightly' ))
 
 - script: cargo test
   displayName: 'Run unit tests'
+  condition: and(succeeded(), eq( variables['rustVersion'], 'nightly' ))
 
 - script: |
     mkdir build

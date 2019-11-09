@@ -14,9 +14,9 @@ pub struct ComItf<T>
 where
     T: ?Sized,
 {
-    raw_ptr: raw::InterfacePtr<RawTypeSystem, T>,
-    automation_ptr: raw::InterfacePtr<AutomationTypeSystem, T>,
-    phantom: PhantomData<T>,
+    pub(crate) raw_ptr: raw::InterfacePtr<RawTypeSystem, T>,
+    pub(crate) automation_ptr: raw::InterfacePtr<AutomationTypeSystem, T>,
+    pub(crate) phantom: PhantomData<T>,
 }
 
 impl<T: ?Sized> std::fmt::Debug for ComItf<T>
@@ -143,81 +143,6 @@ impl ComItf<dyn IUnknown>
             }
             Err(e) => Err(e.into()),
         }
-    }
-}
-
-/// Trait that allows constructing strong pointer types from raw
-/// pointers in a type system specific way.
-trait PointerOperations: TypeSystem + Sized
-{
-    /// Wraps a raw interface pointer into a ComItf.
-    ///
-    /// # Safety
-    ///
-    /// The returned `ComItf` must not outlast the reference held by the pointer.
-    unsafe fn wrap_ptr<I: ?Sized>(ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>;
-
-    /// Gets a raw interface pointer from a ComItf.
-    fn get_ptr<I: ?Sized>(itf: &ComItf<I>) -> crate::raw::InterfacePtr<Self, I>;
-}
-
-/// A generic implementation that ensures _every_ type system has some
-/// implementation for this.
-///
-/// Note that this is required to tell Rust compiler that calls to wrap_ptr
-/// are okay in any case. The actual implementation here will throw a runtime
-/// panic.
-///
-/// This trait really needs to be specialized for each type system for it to
-/// work correctly.
-impl<TS: TypeSystem> PointerOperations for TS
-{
-    default unsafe fn wrap_ptr<I: ?Sized>(_ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>
-    {
-        panic!("Not implemented");
-    }
-
-    default fn get_ptr<I: ?Sized>(_itf: &ComItf<I>) -> crate::raw::InterfacePtr<Self, I>
-    {
-        panic!("Not implemented");
-    }
-}
-
-impl PointerOperations for AutomationTypeSystem
-{
-    unsafe fn wrap_ptr<I: ?Sized>(ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>
-    {
-        // Construct a ComItf from a automation pointer.
-        ComItf {
-            raw_ptr: raw::InterfacePtr::null(),
-            automation_ptr: ptr,
-            phantom: PhantomData,
-        }
-    }
-
-    fn get_ptr<I: ?Sized>(itf: &ComItf<I>) -> raw::InterfacePtr<Self, I>
-    {
-        // Get an automation pointer from the ComItf.
-        itf.automation_ptr
-    }
-}
-
-impl PointerOperations for RawTypeSystem
-{
-    unsafe fn wrap_ptr<I: ?Sized>(ptr: raw::InterfacePtr<Self, I>) -> ComItf<I>
-    {
-        // Construct a ComItf from a raw pointer.
-        ComItf {
-            raw_ptr: ptr,
-            automation_ptr: raw::InterfacePtr::null(),
-            phantom: PhantomData,
-        }
-    }
-
-    fn get_ptr<I: ?Sized>(itf: &ComItf<I>) -> crate::raw::InterfacePtr<Self, I>
-    {
-        // Get an automation pointer form the ComItf.
-        itf.raw_ptr
     }
 }
 
