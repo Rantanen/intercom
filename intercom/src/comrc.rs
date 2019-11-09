@@ -38,9 +38,7 @@ impl<TS: TypeSystem, T: ComInterface + ?Sized> From<crate::raw::InterfacePtr<TS,
     fn from(source: crate::raw::InterfacePtr<TS, T>) -> Self
     {
         // Lone ComItf doesn't outlast the pointer.
-        unsafe {
-            ComItf::as_rc(&ComItf::wrap(source))
-        }
+        unsafe { ComItf::as_rc(&ComItf::wrap(source)) }
     }
 }
 
@@ -182,7 +180,7 @@ where
     unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self>
     {
         match source {
-            Some(ptr) => Ok(ComItf::as_rc(&ComItf::wrap(ptr))),
+            Some(ptr) => Ok(ComRc::from(ptr)),
             None => Err(ComError::E_POINTER),
         }
     }
@@ -231,7 +229,7 @@ where
     unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self>
     {
         Ok(match source {
-            Some(ptr) => Some(ComItf::as_rc(&ComItf::wrap(ptr))),
+            Some(ptr) => Some(ComRc::from(ptr)),
             None => None,
         })
     }
