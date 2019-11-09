@@ -22,41 +22,42 @@ set(TESTLIB_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${TESTLIB_BINARY_BUILD_N
 set(TESTLIB_IMPORT_LOCATION "${TESTLIB_LOCATION}.lib" )
 
 # Build instructions for the library.
-file(GLOB testlib_sources ${CMAKE_CURRENT_SOURCE_DIR}/src)
+file(GLOB TESTLIB_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_custom_command(
         OUTPUT ${TESTLIB_BINARY_BUILD_PATH}
-        COMMAND "cargo" ARGS "build" ${TESTLIB_BUILD_ARGUMENT_RELEASE}
-        WORKING_DIRECTORY ${TESTLIB_WORKSPACE_DIR}
-        DEPENDS ${testlib_sources})
+        COMMAND cargo build ${TESTLIB_BUILD_ARGUMENT_RELEASE}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DEPENDS ${TESTLIB_SOURCES})
 
 # On Windows the DLLs are linked with the help of an import library.
 # Carge sets the name of the import library to "<library>.dll.lib".
 if( WIN32 )
 
-    # Import library is required.
-    add_custom_target( testlib DEPENDS ${TESTLIB_BINARY_BUILD_PATH} ${TESTLIB_IMPORT_BUILD_PATH} )
+    # Import library is required on Windows.
+    add_custom_target( testlib_dll DEPENDS ${TESTLIB_BINARY_BUILD_PATH} ${TESTLIB_IMPORT_BUILD_PATH} )
 
+    # Also embed the typelib into the dll.
     add_custom_command(
-            TARGET testlib POST_BUILD
+        TARGET testlib_dll POST_BUILD
             COMMAND cargo run embed-typelib ${TESTLIB_BINARY_BUILD_PATH}
             WORKING_DIRECTORY ${TESTLIB_WORKSPACE_DIR}/../intercom-cli
     )
 
+    # Import library is required on Windows.
+    add_custom_target( testlib DEPENDS testlib_dll )
+
 else()
 
-    # No need to depend on the import library.
+    # No import library is required.
     add_custom_target( testlib DEPENDS ${TESTLIB_BINARY_BUILD_PATH} )
 
 endif()
 
 add_custom_command(
         TARGET testlib POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-                ${TESTLIB_BINARY_BUILD_PATH}
-                ${TESTLIB_LOCATION}
+        COMMAND ${CMAKE_COMMAND} -E copy ${TESTLIB_BINARY_BUILD_PATH} ${TESTLIB_LOCATION}
         DEPENDS ${TESTLIB_BINARY_BUILD_PATH} )
 
-message( "${TESTLIB_IMPORT_LOCATION}" )
 # Publish as a library.
 add_library(test_lib SHARED IMPORTED GLOBAL)
 add_dependencies(test_lib testlib)
