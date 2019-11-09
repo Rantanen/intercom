@@ -34,14 +34,17 @@ add_custom_command(
 if( WIN32 )
 
     # Import library is required on Windows.
-    add_custom_target( testlib DEPENDS ${TESTLIB_BINARY_BUILD_PATH} ${TESTLIB_IMPORT_BUILD_PATH} )
+    add_custom_target( testlib_dll DEPENDS ${TESTLIB_BINARY_BUILD_PATH} ${TESTLIB_IMPORT_BUILD_PATH} )
 
     # Also embed the typelib into the dll.
     add_custom_command(
-        TARGET ${TESTLIB_BINARY_BUILD_PATH} POST_BUILD
+        TARGET testlib_dll POST_BUILD
             COMMAND cargo run embed-typelib ${TESTLIB_BINARY_BUILD_PATH}
             WORKING_DIRECTORY ${TESTLIB_WORKSPACE_DIR}/../intercom-cli
     )
+
+    # Import library is required on Windows.
+    add_custom_target( testlib DEPENDS testlib_dll )
 
 else()
 
