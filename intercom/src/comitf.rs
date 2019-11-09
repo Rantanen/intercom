@@ -1,5 +1,7 @@
 use super::*;
-use crate::type_system::{AutomationTypeSystem, ExternInput, RawTypeSystem, TypeSystem};
+use crate::type_system::{
+    AutomationTypeSystem, ExternInput, InfallibleExternInput, RawTypeSystem, TypeSystem,
+};
 use std::marker::PhantomData;
 
 /// An incoming COM interface pointer.
@@ -14,8 +16,8 @@ pub struct ComItf<T>
 where
     T: ?Sized,
 {
-    pub(crate) raw_ptr: raw::InterfacePtr<RawTypeSystem, T>,
-    pub(crate) automation_ptr: raw::InterfacePtr<AutomationTypeSystem, T>,
+    pub(crate) raw_ptr: Option<raw::InterfacePtr<RawTypeSystem, T>>,
+    pub(crate) automation_ptr: Option<raw::InterfacePtr<AutomationTypeSystem, T>>,
     pub(crate) phantom: PhantomData<T>,
 }
 
@@ -34,81 +36,50 @@ impl<T: ?Sized> std::fmt::Debug for ComItf<T>
 impl<T: ?Sized> ComItf<T>
 {
     /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
-    ///
-    /// # Safety
-    ///
-    /// The `ptr` __must__ be a valid COM interface pointer for an interface
-    /// of type `T`.
-    pub unsafe fn new(
+    pub fn new(
         automation: raw::InterfacePtr<AutomationTypeSystem, T>,
         raw: raw::InterfacePtr<RawTypeSystem, T>,
     ) -> ComItf<T>
     {
         ComItf {
+            raw_ptr: Some(raw),
+            automation_ptr: Some(automation),
+            phantom: PhantomData,
+        }
+    }
+
+    /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
+    pub unsafe fn maybe_new(
+        automation: Option<raw::InterfacePtr<AutomationTypeSystem, T>>,
+        raw: Option<raw::InterfacePtr<RawTypeSystem, T>>,
+    ) -> Option<ComItf<T>>
+    {
+        // ComItf must have at least one valid interface pointer.
+        if automation.is_none() && raw.is_none() {
+            return None;
+        }
+
+        Some(ComItf {
             raw_ptr: raw,
             automation_ptr: automation,
             phantom: PhantomData,
-        }
+        })
     }
 
     /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
     ///
     /// # Safety
     ///
-    /// The `ptr` __must__ be a valid COM interface pointer for an interface
-    /// of type `T`. The `ComItf` must not outlast the reference owned by the
-    /// provided pointer.
-    pub unsafe fn maybe_wrap<TS: TypeSystem>(ptr: raw::InterfacePtr<TS, T>) -> Option<ComItf<T>>
+    /// The `ComItf` must not outlast the reference owned by the provided pointer.
+    pub unsafe fn wrap<TS: TypeSystem>(ptr: raw::InterfacePtr<TS, T>) -> ComItf<T>
     {
-        if ptr.is_null() {
-            None
-        } else {
-            Some(TS::wrap_ptr(ptr))
-        }
+        TS::wrap_ptr(ptr)
     }
 
     /// Gets the raw COM pointer from the `ComItf<T>`.
-    pub fn ptr<TS: TypeSystem>(this: &Self) -> raw::InterfacePtr<TS, T>
+    pub fn ptr<TS: TypeSystem>(this: &Self) -> Option<raw::InterfacePtr<TS, T>>
     {
         TS::get_ptr(this)
-    }
-
-    pub fn maybe_ptr<TS: TypeSystem>(this: &Self) -> Option<raw::InterfacePtr<TS, T>>
-    {
-        // Acquire the pointer.
-        let ptr = Self::ptr(this);
-
-        // Check for null.
-        if ptr.is_null() {
-            None
-        } else {
-            Some(ptr)
-        }
-    }
-
-    /// Returns a `ComItf<T>` value that references a null pointer.
-    ///
-    /// # Safety
-    ///
-    /// The `ComItf<T>` returned by the function will be invalid for any
-    /// method calls. Its purpose is to act as a return value from COM
-    /// methods in the case of an error result.
-    pub unsafe fn null_itf() -> ComItf<T>
-    {
-        ComItf {
-            raw_ptr: raw::InterfacePtr::null(),
-            automation_ptr: raw::InterfacePtr::null(),
-            phantom: PhantomData,
-        }
-    }
-
-    /// Checks whether the interface represents a null pointer.
-    ///
-    /// This should not be a case normally but may occur after certain unsafe
-    /// operations.
-    pub fn is_null(itf: &Self) -> bool
-    {
-        itf.raw_ptr.is_null() && itf.automation_ptr.is_null()
     }
 }
 
@@ -137,8 +108,10 @@ impl ComItf<dyn IUnknown>
                 // so it's safe to attach it here.
                 unsafe {
                     let target_itf = raw::InterfacePtr::<TS, TTarget>::new(ptr);
-                    let itf = ComItf::maybe_wrap(target_itf).ok_or_else(|| ComError::E_POINTER)?;
-                    Ok(ComRc::attach(itf))
+                    match target_itf {
+                        Some(itf) => Ok(ComRc::attach(ComItf::wrap(itf))),
+                        None => Err(ComError::E_POINTER),
+                    }
                 }
             }
             Err(e) => Err(e.into()),
@@ -218,7 +191,7 @@ unsafe impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS>
 where
     I: ForeignType,
 {
-    type ForeignType = crate::raw::InterfacePtr<TS, I>;
+    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
 
     type Lease = ();
     unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
@@ -229,7 +202,62 @@ where
     type Owned = ComItf<I>;
     unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
     {
-        crate::ComItf::maybe_wrap(source).ok_or_else(|| crate::ComError::E_INVALIDARG)
+        match source {
+            Some(ptr) => Ok(ComItf::wrap(ptr)),
+            None => Err(crate::ComError::E_POINTER),
+        }
+    }
+}
+
+unsafe impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS>
+    for Option<&'a crate::ComItf<I>>
+where
+    I: ForeignType,
+{
+    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
+
+    type Lease = ();
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    {
+        Ok((
+            match self {
+                None => None,
+                Some(comitf) => ComItf::ptr(comitf),
+            },
+            (),
+        ))
+    }
+
+    type Owned = Option<ComItf<I>>;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self::Owned>
+    {
+        Ok(source.map(|ptr| ComItf::wrap(ptr)))
+    }
+}
+
+unsafe impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> InfallibleExternInput<TS>
+    for Option<&'a crate::ComItf<I>>
+where
+    I: ForeignType,
+{
+    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
+
+    type Lease = ();
+    unsafe fn into_foreign_parameter(self) -> (Self::ForeignType, Self::Lease)
+    {
+        (
+            match self {
+                None => None,
+                Some(comitf) => ComItf::ptr(comitf),
+            },
+            (),
+        )
+    }
+
+    type Owned = Option<ComItf<I>>;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> Self::Owned
+    {
+        source.map(|ptr| ComItf::wrap(ptr))
     }
 }
 
@@ -240,10 +268,10 @@ extern "system" {
     #[doc(hidden)]
     pub fn CoCreateInstance(
         clsid: crate::guid::GUID,
-        outer: RawComPtr,
+        outer: raw::RawComPtr,
         cls_context: u32,
         riid: crate::REFIID,
-        out: &mut RawComPtr,
+        out: &mut raw::RawComPtr,
     ) -> crate::raw::HRESULT;
 }
 

@@ -63,11 +63,11 @@ pub fn expand_com_impl(
             #[allow(non_snake_case)]
             #[doc(hidden)]
             unsafe extern "system" fn #query_interface_ident(
-                self_vtable : intercom::RawComPtr,
+                self_vtable : intercom::raw::RawComPtr,
                 riid : <intercom::REFIID as intercom::type_system::ExternInput<
                         intercom::type_system::AutomationTypeSystem>>
                             ::ForeignType,
-                out : *mut <intercom::RawComPtr as intercom::type_system::ExternOutput<
+                out : *mut <intercom::raw::RawComPtr as intercom::type_system::ExternOutput<
                         intercom::type_system::AutomationTypeSystem>>
                             ::ForeignType,
             ) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
@@ -95,7 +95,7 @@ pub fn expand_com_impl(
             #[allow(dead_code)]
             #[doc(hidden)]
             unsafe extern "system" fn #add_ref_ident(
-                self_vtable : intercom::RawComPtr
+                self_vtable : intercom::raw::RawComPtr
             ) -> <u32 as intercom::type_system::ExternOutput<
                     intercom::type_system::AutomationTypeSystem>>
                         ::ForeignType
@@ -115,7 +115,7 @@ pub fn expand_com_impl(
             #[allow(dead_code)]
             #[doc(hidden)]
             unsafe extern "system" fn #release_ident(
-                self_vtable : intercom::RawComPtr
+                self_vtable : intercom::raw::RawComPtr
             ) -> <u32 as intercom::type_system::ExternOutput<
                     intercom::type_system::AutomationTypeSystem>>
                         ::ForeignType
@@ -171,7 +171,7 @@ pub fn expand_com_impl(
                 };
                 quote!( #name : #dir #com_ty )
             });
-            let self_arg = quote!(self_vtable: intercom::RawComPtr);
+            let self_arg = quote!(self_vtable: intercom::raw::RawComPtr);
             let args = iter::once(self_arg).chain(in_out_args);
 
             // Format the in and out parameters for the Rust call.

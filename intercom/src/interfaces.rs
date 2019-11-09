@@ -20,7 +20,7 @@ pub trait IUnknown
     ///
     /// Returns `Ok( interface_ptr )` if the object supports the specified
     /// interface or `Err( E_NOINTERFACE )` if it doesn't.
-    fn query_interface(&self, riid: crate::REFIID) -> crate::RawComResult<crate::RawComPtr>;
+    fn query_interface(&self, riid: crate::REFIID) -> crate::RawComResult<crate::raw::RawComPtr>;
 
     /// Increments the reference count of the object.
     ///

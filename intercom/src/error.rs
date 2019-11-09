@@ -252,13 +252,13 @@ mod error_store
     extern "system" {
         pub(super) fn SetErrorInfo(
             dw_reserved: u32,
-            errorinfo: crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
+            errorinfo: Option<crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>>,
         ) -> raw::HRESULT;
 
         #[allow(private_in_public)]
         pub(super) fn GetErrorInfo(
             dw_reserved: u32,
-            errorinfo: *mut crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
+            errorinfo: *mut Option<crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>>,
         ) -> raw::HRESULT;
     }
 }
@@ -289,7 +289,7 @@ mod error_store
 
     pub(super) unsafe fn SetErrorInfo(
         _dw_reserved: u32,
-        errorinfo: crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
+        errorinfo: Option<crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>>,
     ) -> raw::HRESULT
     {
         reset_error_store(ComItf::maybe_wrap(errorinfo).map(|i| ComRc::from(&i)));
@@ -298,7 +298,7 @@ mod error_store
 
     pub(super) unsafe fn GetErrorInfo(
         _dw_reserved: u32,
-        errorinfo: *mut crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>,
+        errorinfo: *mut Option<crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>>,
     ) -> raw::HRESULT
     {
         match take_error() {
@@ -430,18 +430,17 @@ where
             // description in memory.
             let info = ComBox::<ErrorInfo>::new(error_info.clone());
 
-            // Turn the ComBox into a
+            // Store the IErrorInfo pointer in the SetErrorInfo.
             let rc = ComRc::<dyn IErrorInfo>::from(info);
-            let ptr = ComItf::ptr(&rc);
-
+            let ptr = ComItf::ptr(&rc).expect("Intercom did not implement correct type system");
             unsafe {
-                error_store::SetErrorInfo(0, ptr);
+                error_store::SetErrorInfo(0, Some(ptr));
             }
         }
         None => {
             // No error info in the ComError.
             unsafe {
-                error_store::SetErrorInfo(0, crate::raw::InterfacePtr::null());
+                error_store::SetErrorInfo(0, None);
             }
         }
     }
@@ -486,25 +485,14 @@ pub fn load_error(iunk: &ComItf<dyn IUnknown>, iid: &GUID, err: raw::HRESULT) ->
 /// Gets the last COM error that occurred on the current thread.
 pub fn get_last_error() -> Option<ErrorInfo>
 {
-    // Get the last error COM interface.
-    let mut error_ptr: crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo> =
-        crate::raw::InterfacePtr::null();
-    match unsafe { error_store::GetErrorInfo(0, &mut error_ptr) } {
-        raw::S_OK => {
-            // GetErrorInfo returns an automation interface pointer.
-            // Passing that to wrap with TypeSystem::Automation is safe.
-            let ierrorinfo = unsafe { ComRc::<dyn IErrorInfo>::wrap(error_ptr) };
+    let ierrorinfo = match get_error_info() {
+        Some(ierror) => ierror,
+        None => return None,
+    };
 
-            match ierrorinfo {
-                Some(ierr) => ErrorInfo::try_from(&**ierr).ok(),
-                _ => None,
-            }
-        }
-
-        // GetErrorInfo didn't return proper error. Don't provide one
-        // in the ComError.
-        _ => None,
-    }
+    // FIXME ComRc Deref
+    let ierr: &dyn IErrorInfo = &*ierrorinfo;
+    ErrorInfo::try_from(ierr).ok()
 }
 
 /// Defines a way to handle errors based on the method return value type.
@@ -557,7 +545,7 @@ impl IErrorStore for ErrorStore
 {
     fn get_error_info(&self) -> ComResult<ComRc<dyn IErrorInfo>>
     {
-        get_error_info()
+        Ok(get_error_info().unwrap()) // FIXME Option
     }
 
     fn set_error_info(&self, info: &ComItf<dyn IErrorInfo>) -> ComResult<()>
@@ -573,25 +561,23 @@ impl IErrorStore for ErrorStore
     }
 }
 
-fn get_error_info() -> ComResult<ComRc<dyn IErrorInfo>>
+fn get_error_info() -> Option<ComRc<dyn IErrorInfo>>
 {
-    // Get the last error COM interface.
-    let mut error_ptr: crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo> =
-        crate::raw::InterfacePtr::null();
-    match unsafe { error_store::GetErrorInfo(0, &mut error_ptr) } {
-        raw::S_OK => {
-            // GetErrorInfo returns an automation interface pointer.
-            // Passing that to wrap with TypeSystem::Automation is safe.
-            match unsafe { ComRc::<dyn IErrorInfo>::wrap(error_ptr) } {
-                Some(rc) => Ok(rc),
-
-                // TODO: This should really return Option<ComRc>.
-                None => Ok(unsafe { ComRc::attach(ComItf::null_itf()) }),
-            }
+    // We're unsafe due to pointer lifetimes.
+    //
+    // The GetErrorInfo gives us a raw pointer which we own so we'll need to
+    // wrap that in a `ComRc` to manage its memory.
+    unsafe {
+        // Get the error info and wrap it in an RC.
+        let mut error_ptr = None;
+        match error_store::GetErrorInfo(0, &mut error_ptr) {
+            raw::S_OK => {}
+            _ => return None,
         }
-
-        // TODO: This should really return Option<ComRc>.
-        _ => Ok(unsafe { ComRc::attach(ComItf::null_itf()) }),
+        match error_ptr {
+            Some(ptr) => Some(ComRc::wrap(ptr)),
+            None => None,
+        }
     }
 }
 

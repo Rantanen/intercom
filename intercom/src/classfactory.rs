@@ -7,6 +7,7 @@
 
 use super::*;
 use crate::attributes;
+use crate::raw::RawComPtr;
 use crate::type_system::AutomationTypeSystem;
 
 type IUnknownVtbl = <dyn crate::IUnknown as attributes::ComInterface<
@@ -71,10 +72,8 @@ impl<T: Default + CoClass> ClassFactory<T>
     /// # Safety
     ///
     /// The `out` pointer must be valid for receiving the requested interface.
-    pub unsafe fn create(
-        riid: intercom::REFIID,
-        out: *mut intercom::RawComPtr,
-    ) -> crate::error::raw::HRESULT
+    pub unsafe fn create(riid: intercom::REFIID, out: *mut RawComPtr)
+        -> crate::error::raw::HRESULT
     {
         let factory = Self {
             phantom: std::marker::PhantomData,

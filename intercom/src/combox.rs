@@ -1,4 +1,5 @@
 use super::*;
+use crate::raw::RawComPtr;
 use crate::type_system::TypeSystemName;
 use std::sync::atomic::{AtomicU32, Ordering};
 
@@ -82,10 +83,11 @@ impl<T: CoClass> ComBox<T>
             (automation_ptr, raw_ptr)
         };
 
-        ComItf::new(
+        ComItf::maybe_new(
             raw::InterfacePtr::new(automation_ptr),
             raw::InterfacePtr::new(raw_ptr),
         )
+        .expect("Intercom failed to create interface pointers")
     }
 }
 

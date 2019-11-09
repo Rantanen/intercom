@@ -18,19 +18,17 @@ pub fn read_typelib(path: &Path) -> Result<intercom::typelib::TypeLib, failure::
         let fn_get_type_lib: libloading::Symbol<
             unsafe extern "C" fn(
                 TypeSystemName,
-                *mut intercom::RawComPtr,
+                *mut intercom::raw::RawComPtr,
             ) -> intercom::raw::HRESULT,
         > = lib.get(b"IntercomTypeLib")?;
 
-        let mut ptr: intercom::RawComPtr = std::ptr::null_mut();
+        let mut ptr: intercom::raw::RawComPtr = std::ptr::null_mut();
         fn_get_type_lib(TypeSystemName::Automation, &mut ptr as *mut _);
 
         let comptr =
-            intercom::raw::InterfacePtr::<AutomationTypeSystem, dyn IIntercomTypeLib>::new(ptr);
-        let comitf = intercom::ComItf::maybe_wrap(comptr)
-            .ok_or_else(|| TypeLibError::AcquiringTypeLib("Null ptr".to_owned()))?;
-
-        intercom::ComRc::attach(comitf)
+            intercom::raw::InterfacePtr::<AutomationTypeSystem, dyn IIntercomTypeLib>::new(ptr)
+                .ok_or_else(|| TypeLibError::AcquiringTypeLib("Null ptr".to_owned()))?;
+        intercom::ComRc::wrap(comptr)
     };
 
     Ok(intercom::typelib::TypeLib::from_comrc(&typelib)?)

@@ -30,7 +30,7 @@ pub(crate) fn get_intercom_coclass_info_for_SimpleType() -> intercom::typelib::T
 pub unsafe fn __get_module_class_factory(
     rclsid: intercom::REFCLSID,
     riid: intercom::REFIID,
-    pout: *mut intercom::RawComPtr,
+    pout: *mut intercom::raw::RawComPtr,
 ) -> Option<intercom::raw::HRESULT> {
     match *rclsid {
         some::path::CLSID_Type => {
@@ -50,7 +50,7 @@ pub unsafe fn __get_module_class_factory(
 pub unsafe extern "system" fn DllGetClassObject(
     rclsid: intercom::REFCLSID,
     riid: intercom::REFIID,
-    pout: *mut intercom::RawComPtr,
+    pout: *mut intercom::raw::RawComPtr,
 ) -> intercom::raw::HRESULT {
     if let Some(hr) = __get_module_class_factory(rclsid, riid, pout) {
         return hr;
@@ -72,7 +72,7 @@ pub fn __gather_module_types() -> Vec<intercom::typelib::TypeInfo> {
 #[no_mangle]
 pub unsafe extern "system" fn IntercomTypeLib(
     type_system: intercom::type_system::TypeSystemName,
-    out: *mut intercom::RawComPtr,
+    out: *mut intercom::raw::RawComPtr,
 ) -> intercom::raw::HRESULT {
     let mut tlib = intercom::ComBox::new(intercom::typelib::TypeLib::__new(
         "TestLib".into(),
@@ -90,14 +90,7 @@ pub unsafe extern "system" fn IntercomTypeLib(
     ));
     let rc = intercom::ComRc::<intercom::typelib::IIntercomTypeLib>::from(&tlib);
     let itf = intercom::ComRc::detach(rc);
-    *out = match type_system {
-        intercom::type_system::TypeSystemName::Automation => {
-            intercom::ComItf::ptr::<intercom::type_system::AutomationTypeSystem>(&itf).ptr
-        }
-        intercom::type_system::TypeSystemName::Raw => {
-            intercom::ComItf::ptr::<intercom::type_system::RawTypeSystem>(&itf).ptr
-        }
-    };
+    *out = type_system.get_ptr(&itf);
     intercom::raw::S_OK
 }
 #[no_mangle]

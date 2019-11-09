@@ -8,6 +8,7 @@ extern crate winapi;
 pub mod alloc;
 pub mod error_info;
 pub mod interface_params;
+pub mod nullable_parameters;
 pub mod primitive;
 pub mod result;
 pub mod return_interfaces;
@@ -18,8 +19,9 @@ pub mod unicode;
 pub mod variant;
 
 // Declare available COM classes.
-com_library!(
+com_library! {
     module return_interfaces,
+    module nullable_parameters,
 
     class primitive::PrimitiveOperations,
     class stateful::StatefulOperations,
@@ -32,4 +34,4 @@ com_library!(
     class variant::VariantTests,
     class variant::VariantImpl,
     class unicode::UnicodeConversion,
-);
+}

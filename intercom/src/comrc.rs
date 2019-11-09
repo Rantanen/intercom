@@ -55,9 +55,11 @@ impl<T: ComInterface + ?Sized> ComRc<T>
     /// reference counting.
     ///
     /// Does not increment the reference count.
-    pub fn detach(mut rc: ComRc<T>) -> ComItf<T>
+    pub fn detach(rc: ComRc<T>) -> ComItf<T>
     {
-        unsafe { std::mem::replace(&mut rc.itf, ComItf::null_itf()) }
+        let itf = ComItf { ..rc.itf };
+        std::mem::forget(rc);
+        itf
     }
 
     /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
@@ -66,11 +68,10 @@ impl<T: ComInterface + ?Sized> ComRc<T>
     ///
     /// # Safety
     ///
-    /// The `ptr` __must__ be a valid COM interface pointer for an interface
-    /// of type `T`.
-    pub unsafe fn wrap<TS: TypeSystem>(ptr: raw::InterfacePtr<TS, T>) -> Option<ComRc<T>>
+    /// The `ptr` must be owned by us. `wrap` will not call `add_ref` on the `ptr`.
+    pub unsafe fn wrap<TS: TypeSystem>(ptr: raw::InterfacePtr<TS, T>) -> ComRc<T>
     {
-        ComItf::maybe_wrap(ptr).map(|itf| ComRc::attach(itf))
+        ComRc::attach(ComItf::wrap(ptr))
     }
 }
 
@@ -105,12 +106,9 @@ impl<T: ComInterface + ?Sized> ComRc<T>
                 // On success construct the ComRc. We are using Automation type
                 // system as that's the IID we used earlier.
                 crate::raw::S_OK => {
-                    // Wrap the pointer into ComItf. This takes care of null checks.
-                    let itf =
-                        ComItf::maybe_wrap::<AutomationTypeSystem>(raw::InterfacePtr::new(out))
-                            .ok_or_else(|| ComError::E_POINTER)?;
-
-                    Ok(ComRc::attach(itf))
+                    let ptr = raw::InterfacePtr::new(out).ok_or_else(|| ComError::E_POINTER)?;
+                    let comitf = ComItf::wrap::<AutomationTypeSystem>(ptr);
+                    Ok(ComRc::attach(comitf))
                 }
                 e => Err(e.into()),
             }
@@ -131,9 +129,7 @@ impl<T: ComInterface + ?Sized> Drop for ComRc<T>
 {
     fn drop(&mut self)
     {
-        if !ComItf::is_null(&self.itf) {
-            self.itf.as_ref().release();
-        }
+        self.itf.as_ref().release();
     }
 }
 
@@ -157,18 +153,27 @@ unsafe impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS> for
 where
     I: ForeignType,
 {
-    type ForeignType = crate::raw::InterfacePtr<TS, I>;
+    // `ComRc` as extern input should be non-nullable, but `NonNull` is not safe
+    // to pass in from C as there are no guarantees the external code would not
+    // pass in a null pointer.
+    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
 
     type Lease = Self;
     unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
-        Ok((ComItf::ptr(&self), self))
+        match ComItf::ptr::<TS>(&self) {
+            Some(ptr) => Ok((Some(ptr), self)),
+            None => Err(ComError::E_POINTER),
+        }
     }
 
     type Owned = Self;
     unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self>
     {
-        ComRc::wrap(source).ok_or(ComError::E_POINTER)
+        match source {
+            Some(ptr) => Ok(ComItf::as_rc(&ComItf::wrap(ptr))),
+            None => Err(ComError::E_POINTER),
+        }
     }
 }
 
@@ -176,7 +181,7 @@ unsafe impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternOutput<TS> fo
 where
     I: ForeignType,
 {
-    type ForeignType = crate::raw::InterfacePtr<TS, I>;
+    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
 
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>
     {
@@ -185,8 +190,65 @@ where
 
     unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>
     {
-        Ok(ComRc::attach(
-            ComItf::maybe_wrap(source).ok_or(ComError::E_POINTER)?,
-        ))
+        match source {
+            Some(ptr) => Ok(ComRc::wrap(ptr)),
+            None => Err(ComError::E_POINTER),
+        }
+    }
+}
+
+unsafe impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS>
+    for Option<crate::ComRc<I>>
+where
+    I: ForeignType,
+{
+    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
+
+    type Lease = Self;
+    unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
+    {
+        match &self {
+            None => Ok((None, self)),
+            Some(rc) => match ComItf::ptr::<TS>(rc) {
+                None => Err(ComError::E_POINTER),
+                Some(ptr) => Ok((Some(ptr), self)),
+            },
+        }
+    }
+
+    type Owned = Self;
+    unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self>
+    {
+        Ok(match source {
+            Some(ptr) => Some(ComItf::as_rc(&ComItf::wrap(ptr))),
+            None => None,
+        })
+    }
+}
+
+unsafe impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternOutput<TS>
+    for Option<crate::ComRc<I>>
+where
+    I: ForeignType,
+{
+    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
+
+    fn into_foreign_output(self) -> ComResult<Self::ForeignType>
+    {
+        match self {
+            None => Ok(None),
+            Some(rc) => match ComItf::ptr::<TS>(&ComRc::detach(rc)) {
+                None => Err(ComError::E_POINTER),
+                Some(ptr) => Ok(Some(ptr)),
+            },
+        }
+    }
+
+    unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>
+    {
+        Ok(match source {
+            Some(ptr) => Some(ComRc::wrap(ptr)),
+            None => None,
+        })
     }
 }
