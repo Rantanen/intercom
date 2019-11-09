@@ -48,7 +48,7 @@ pub fn expand_com_module(
         pub unsafe fn __get_module_class_factory(
             rclsid : intercom::REFCLSID,
             riid : intercom::REFIID,
-            pout : *mut intercom::RawComPtr
+            pout : *mut intercom::raw::RawComPtr
         ) -> Option<intercom::raw::HRESULT>
         {
             // Create new class factory.
@@ -103,7 +103,7 @@ fn get_dll_get_class_object_function() -> TokenStream
         pub unsafe extern "system" fn DllGetClassObject(
             rclsid: intercom::REFCLSID,
             riid: intercom::REFIID,
-            pout: *mut intercom::RawComPtr,
+            pout: *mut intercom::raw::RawComPtr,
         ) -> intercom::raw::HRESULT
         {
             // Delegate to the module implementation.
@@ -154,7 +154,7 @@ fn create_get_typelib_function(lib: &model::ComLibrary) -> Result<TokenStream, S
         #[no_mangle]
         pub unsafe extern "system" fn IntercomTypeLib(
             type_system: intercom::type_system::TypeSystemName,
-            out: *mut intercom::RawComPtr,
+            out: *mut intercom::raw::RawComPtr,
         ) -> intercom::raw::HRESULT
         {
             let mut tlib = intercom::ComBox::new(intercom::typelib::TypeLib::__new(
@@ -167,12 +167,7 @@ fn create_get_typelib_function(lib: &model::ComLibrary) -> Result<TokenStream, S
             ));
             let rc = intercom::ComRc::<intercom::typelib::IIntercomTypeLib>::from( &tlib );
             let itf = intercom::ComRc::detach(rc);
-            *out = match type_system {
-                intercom::type_system::TypeSystemName::Automation =>
-                    intercom::ComItf::ptr::<intercom::type_system::AutomationTypeSystem>(&itf).ptr,
-                intercom::type_system::TypeSystemName::Raw =>
-                    intercom::ComItf::ptr::<intercom::type_system::RawTypeSystem>(&itf).ptr,
-            };
+            *out = type_system.get_ptr(&itf);
 
             intercom::raw::S_OK
         }

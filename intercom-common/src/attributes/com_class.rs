@@ -42,7 +42,7 @@ pub fn expand_com_class(
                 let ptr = ( &vtables._ISupportErrorInfo )
                     as *const &#support_error_info_vtbl
                     as *mut &#support_error_info_vtbl
-                    as intercom::RawComPtr;
+                    as intercom::raw::RawComPtr;
                 intercom::logging::trace(|l| l(module_path!(), format_args!(
                     "[{:p}] {}::query_interface({:-X}) -> IUnknown [{:p}]",
                     vtables, #struct_name, riid, ptr)));
@@ -54,7 +54,7 @@ pub fn expand_com_class(
                 let ptr = ( &vtables._ISupportErrorInfo )
                     as *const &#support_error_info_vtbl
                     as *mut &#support_error_info_vtbl
-                    as intercom::RawComPtr;
+                    as intercom::raw::RawComPtr;
                 intercom::logging::trace(|l| l(module_path!(), format_args!(
                     "[{:p}] {}::query_interface({:-X}) -> ISupportErrorInfo [{:p}]",
                     vtables, #struct_name, riid, ptr)));
@@ -139,7 +139,7 @@ pub fn expand_com_class(
                     let ptr = &vtables.#itf_variant
                         as *const &#itf_attrib_data::VTable
                         as *mut &#itf_attrib_data::VTable
-                        as intercom::RawComPtr;
+                        as intercom::raw::RawComPtr;
                     intercom::logging::trace(|l| l(module_path!(), format_args!(
                         "[{:p}] {}::query_interface({:-X}) -> {} ({}) [{:p}]",
                         vtables, #struct_name, riid, #itf_name, #ts_name, ptr)));
@@ -234,7 +234,7 @@ pub fn expand_com_class(
             fn query_interface(
                 vtables : &Self::VTableList,
                 riid : intercom::REFIID,
-            ) -> intercom::RawComResult< intercom::RawComPtr > {
+            ) -> intercom::RawComResult< intercom::raw::RawComPtr > {
                 if riid.is_null() {
                     intercom::logging::error(|l| l(module_path!(), format_args!(
                         "[{:p}] {}::query_interface(NULL)", vtables, #struct_name)));

@@ -24,7 +24,7 @@ if ( Test-Path env:APPVEYOR_JOB_ID ) {
 
 popd
 
-pushd test\cs\bin\x64\Release
+pushd test\cs\bin\x64\Debug
 
 if ( Test-Path env:APPVEYOR_JOB_ID ) {
     vstest.console /logger:Appveyor /platform:x64 cs.dll

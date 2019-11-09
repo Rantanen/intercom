@@ -129,14 +129,11 @@ impl TypeHandler
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type(span);
         let (tr, unwrap) = resolve_type_handling(dir, infallible, span);
-        let maybe_ref = match ty {
-            syn::Type::Reference(..) => quote!(&),
-            _ => quote!(),
-        };
+        let (maybe_ref, maybe_as_ref) = resolve_ref(ty);
         match dir {
             Direction::In => quote_spanned!(span=>
                     #maybe_ref <#ty as #tr<#ts>>
-                        ::from_foreign_parameter(#ident)#unwrap),
+                        ::from_foreign_parameter(#ident)#unwrap#maybe_as_ref),
             Direction::Out | Direction::Retval => quote_spanned!(span=>
                     <#ty as #tr<#ts>>::from_foreign_output(#ident)#unwrap),
         }
@@ -169,6 +166,39 @@ impl TypeHandler
     pub fn default_value(&self) -> TokenStream
     {
         quote!(intercom::type_system::ExternDefault::extern_default())
+    }
+}
+
+fn resolve_ref(ty: &Type) -> (TokenStream, TokenStream)
+{
+    if let syn::Type::Reference(..) = ty {
+        return (quote!(&), quote!());
+    }
+
+    if has_ref(ty) {
+        (quote!(), quote!(.as_ref()))
+    } else {
+        (quote!(), quote!())
+    }
+}
+
+fn has_ref(ty: &Type) -> bool
+{
+    match ty {
+        syn::Type::Reference(..) => true,
+        syn::Type::Path(p) => {
+            let last_segment = p.path.segments.last().expect("Path was empth");
+            match &last_segment.arguments {
+                syn::PathArguments::None | syn::PathArguments::Parenthesized(..) => false,
+                syn::PathArguments::AngleBracketed(generics) => {
+                    generics.args.iter().any(|g| match g {
+                        syn::GenericArgument::Type(t) => has_ref(t),
+                        _ => false,
+                    })
+                }
+            }
+        }
+        _ => false,
     }
 }
 

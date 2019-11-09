@@ -125,8 +125,6 @@ pub trait ComInterface
 }
 
 /// Raw COM pointer type.
-pub type RawComPtr = *mut std::os::raw::c_void;
-
 /// Interface ID GUID.
 pub type IID = GUID;
 
@@ -141,6 +139,15 @@ pub type REFCLSID = *const IID;
 
 pub mod raw
 {
+    use std::marker::PhantomData;
+    use std::os::raw::c_void;
+    use std::ptr::NonNull;
+
+    pub use crate::error::raw::*;
+    pub use crate::type_system::{ForeignType, TypeSystem};
+    pub use crate::variant::raw::*;
+
+    pub type RawComPtr = *mut c_void;
 
     #[derive(Clone, Copy, intercom_attributes::ExternInput, intercom_attributes::ForeignType)]
     #[repr(transparent)]
@@ -156,27 +163,27 @@ pub mod raw
     #[repr(transparent)]
     pub struct OutBSTR(pub *mut u16);
 
-    pub type InCStr = *const ::std::os::raw::c_char;
-    pub type OutCStr = *mut ::std::os::raw::c_char;
+    pub type InCStr = *const std::os::raw::c_char;
+    pub type OutCStr = *mut std::os::raw::c_char;
 
-    pub use crate::error::raw::*;
-    pub use crate::type_system::TypeSystem;
-    pub use crate::variant::raw::*;
-
-    #[repr(C)]
+    #[repr(transparent)]
     #[derive(PartialEq, Eq)]
     pub struct InterfacePtr<TS: TypeSystem, I: ?Sized>
     {
-        pub ptr: super::RawComPtr,
-        phantom_itf: ::std::marker::PhantomData<I>,
-        phantom_ts: ::std::marker::PhantomData<TS>,
+        pub ptr: NonNull<c_void>,
+        phantom_itf: PhantomData<I>,
+        phantom_ts: PhantomData<TS>,
     }
 
     impl<TS: TypeSystem, I: ?Sized> Clone for InterfacePtr<TS, I>
     {
         fn clone(&self) -> Self
         {
-            InterfacePtr::new(self.ptr)
+            InterfacePtr {
+                ptr: self.ptr,
+                phantom_itf: PhantomData,
+                phantom_ts: PhantomData,
+            }
         }
     }
 
@@ -192,23 +199,17 @@ pub mod raw
 
     impl<TS: TypeSystem, I: ?Sized> InterfacePtr<TS, I>
     {
-        pub fn new(ptr: super::RawComPtr) -> InterfacePtr<TS, I>
+        /// # Safety
+        ///
+        /// The raw `ptr` must represent the correct type system and interface.
+        pub unsafe fn new(ptr: RawComPtr) -> Option<InterfacePtr<TS, I>>
         {
-            InterfacePtr {
+            let ptr = NonNull::new(ptr);
+            ptr.map(|ptr| InterfacePtr {
                 ptr,
-                phantom_itf: ::std::marker::PhantomData,
-                phantom_ts: ::std::marker::PhantomData,
-            }
-        }
-
-        pub fn null() -> Self
-        {
-            Self::new(std::ptr::null_mut())
-        }
-
-        pub fn is_null(self) -> bool
-        {
-            self.ptr.is_null()
+                phantom_itf: PhantomData,
+                phantom_ts: PhantomData,
+            })
         }
     }
 
@@ -216,7 +217,26 @@ pub mod raw
     {
         pub fn as_unknown(self) -> InterfacePtr<TS, dyn crate::IUnknown>
         {
-            InterfacePtr::new(self.ptr)
+            InterfacePtr {
+                ptr: self.ptr,
+                phantom_itf: PhantomData,
+                phantom_ts: PhantomData,
+            }
+        }
+    }
+
+    impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ForeignType for Option<InterfacePtr<TS, I>>
+    where
+        I: ForeignType,
+    {
+        /// The name of the type.
+        fn type_name() -> &'static str
+        {
+            <I as ForeignType>::type_name()
+        }
+        fn indirection_level() -> u32
+        {
+            <I as ForeignType>::indirection_level() + 1
         }
     }
 }

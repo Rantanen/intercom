@@ -83,7 +83,7 @@ pub fn expand_com_interface(
                 let ts_tokens = ts.as_typesystem_type(method.info.signature_span);
                 let ts_name = format!("{:?}", ts);
                 impl_branches.push(quote_spanned!(method.info.signature_span =>
-                    if let Some( comptr ) = intercom::ComItf::maybe_ptr::<#ts_tokens>( self ) {
+                    if let Some( comptr ) = intercom::ComItf::ptr::<#ts_tokens>( self ) {
                         intercom::logging::trace(|l| l(module_path!(), format_args!(
                             "[{:p}, with {:p}] Calling {}::{}, type system: {}",
                             self, comptr.ptr, #itf_name, #method_name, #ts_name)));
@@ -302,7 +302,7 @@ fn process_itf_variant(
             quote_spanned!(com_arg.span => #name : #dir #com_ty )
         });
         let self_arg = quote_spanned!(method_info.rust_self_arg.span()=>
-            self_vtable: intercom::RawComPtr);
+            self_vtable: intercom::raw::RawComPtr);
         let args = iter::once(self_arg).chain(in_out_args);
 
         // Create the vtable field and add it to the vector of fields.
@@ -411,7 +411,8 @@ fn rust_to_com_delegate(
     // This includes the 'this' pointer and both the IN and OUT
     // parameters.
     let params =
-        iter::once(quote_spanned!(method_info.rust_self_arg.span() => comptr.ptr)).chain(params);
+        iter::once(quote_spanned!(method_info.rust_self_arg.span() => comptr.ptr.as_ptr()))
+            .chain(params);
 
     // Create the return statement.
     let return_ident = Ident::new("__result", Span::call_site());
@@ -432,7 +433,7 @@ fn rust_to_com_delegate(
     if infallible {
         quote_spanned!(method_info.signature_span =>
             #[allow(unused_imports)]
-            let vtbl = comptr.ptr as *const *const <#maybe_dyn #itf_path as
+            let vtbl = comptr.ptr.as_ptr() as *const *const <#maybe_dyn #itf_path as
                 intercom::attributes::ComInterface<#ts_type>>::VTable;
 
             #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
@@ -447,7 +448,7 @@ fn rust_to_com_delegate(
     } else {
         quote_spanned!(method_info.signature_span =>
             #[allow(unused_imports)]
-            let vtbl = comptr.ptr as *const *const <#maybe_dyn #itf_path as
+            let vtbl = comptr.ptr.as_ptr() as *const *const <#maybe_dyn #itf_path as
                 intercom::attributes::ComInterface<#ts_type>>::VTable;
 
             // Use an IIFE to act as a try/catch block. The various template

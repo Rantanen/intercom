@@ -76,8 +76,8 @@ impl Variant
                 )),
                 raw::var_type::CY => Variant::Currency(Currency(src.data.cyVal)),
                 raw::var_type::DATE => Variant::SystemTime(src.data.date.into()),
-                raw::var_type::UNKNOWN => match ComRc::wrap(src.data.punkVal) {
-                    Some(rc) => Variant::IUnknown(rc),
+                raw::var_type::UNKNOWN => match src.data.punkVal {
+                    Some(ptr) => Variant::IUnknown(ComRc::wrap(ptr)),
                     None => Variant::None,
                 },
                 _ => return Err(ComError::E_NOTIMPL),
@@ -101,8 +101,8 @@ impl Variant
                 )),
                 raw::var_type::DATE => Variant::SystemTime((*src.data.pdate).into()),
                 raw::var_type::CY => Variant::Currency(Currency(*src.data.pcyVal)),
-                raw::var_type::UNKNOWN => match ComRc::wrap(*src.data.ppunkVal) {
-                    Some(rc) => Variant::IUnknown(rc),
+                raw::var_type::UNKNOWN => match *src.data.ppunkVal {
+                    Some(ptr) => Variant::IUnknown(ComRc::wrap(ptr)),
                     None => Variant::None,
                 },
                 _ => return Err(ComError::E_NOTIMPL),
@@ -742,7 +742,7 @@ pub mod raw
     pub struct UserDefinedTypeValue
     {
         pub pvRecord: *mut std::ffi::c_void,
-        pub pRecInfo: crate::RawComPtr,
+        pub pRecInfo: crate::raw::RawComPtr,
     }
 
     #[repr(C)]
@@ -761,7 +761,7 @@ pub mod raw
         pub cyVal: i64,
         pub date: VariantDate,
         pub bstrVal: *mut u16,
-        pub punkVal: crate::raw::InterfacePtr<TS, dyn crate::IUnknown>,
+        pub punkVal: Option<crate::raw::InterfacePtr<TS, dyn crate::IUnknown>>,
         //*pdispVal : ComItf<IDispatch>,
         //parray : SafeArray,
         pub pbVal: *mut i8,
@@ -775,7 +775,7 @@ pub mod raw
         pub pcyVal: *mut i64,
         pub pdate: *mut VariantDate,
         pub pbstrVal: *mut *mut u16,
-        pub ppunkVal: *mut crate::raw::InterfacePtr<TS, dyn crate::IUnknown>,
+        pub ppunkVal: *mut Option<crate::raw::InterfacePtr<TS, dyn crate::IUnknown>>,
         //ppdispVal : *mut ComItf<IDispatch>,
         //pparray : *mut SafeArray,
         pub pvarVal: *mut Variant<TS>,

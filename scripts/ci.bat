@@ -11,10 +11,10 @@ mkdir build
 pushd build
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-cmake ".." -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=Release
+cmake ".." -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=Debug
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-cmake --build . --config Release
+cmake --build . --config Debug
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 popd
@@ -22,10 +22,10 @@ popd
 REM REM Build C# test suite
 pushd test\cs
 
-tlbimp ..\target\release\test_lib.dll /MACHINE:X64 /out:TestLib.Interop.dll
+tlbimp ..\target\debug\test_lib.dll /MACHINE:X64 /out:TestLib.Interop.dll
 
 nuget restore
-msbuild /p:Platform=x64 /p:Configuration=Release
+msbuild /p:Platform=x64 /p:Configuration=Debug
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 popd

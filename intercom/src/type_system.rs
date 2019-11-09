@@ -9,6 +9,22 @@ pub enum TypeSystemName
     Raw = 1,
 }
 
+impl TypeSystemName
+{
+    pub fn get_ptr<I: ?Sized>(self, itf: &ComItf<I>) -> crate::raw::RawComPtr
+    {
+        let opt = match self {
+            TypeSystemName::Automation => AutomationTypeSystem::get_ptr(itf).map(|p| p.ptr),
+            TypeSystemName::Raw => RawTypeSystem::get_ptr(itf).map(|p| p.ptr),
+        };
+
+        match opt {
+            Some(ptr) => ptr.as_ptr(),
+            None => std::ptr::null_mut(),
+        }
+    }
+}
+
 /// Common trait for type systems.
 pub trait TypeSystem: Clone + Copy
 {
@@ -18,7 +34,7 @@ pub trait TypeSystem: Clone + Copy
     fn key() -> TypeSystemName;
 
     /// Gets the type system pointer from a ComItf.
-    fn get_ptr<I: ?Sized>(itf: &ComItf<I>) -> crate::raw::InterfacePtr<Self, I>;
+    fn get_ptr<I: ?Sized>(itf: &ComItf<I>) -> Option<crate::raw::InterfacePtr<Self, I>>;
 
     /// Constructs a ComItf from a pointer.
     fn wrap_ptr<I: ?Sized>(ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>;
@@ -35,7 +51,7 @@ impl TypeSystem for AutomationTypeSystem
     }
 
     /// Gets the type system pointer from a ComItf.
-    fn get_ptr<I: ?Sized>(itf: &ComItf<I>) -> crate::raw::InterfacePtr<Self, I>
+    fn get_ptr<I: ?Sized>(itf: &ComItf<I>) -> Option<crate::raw::InterfacePtr<Self, I>>
     {
         itf.automation_ptr
     }
@@ -44,8 +60,8 @@ impl TypeSystem for AutomationTypeSystem
     fn wrap_ptr<I: ?Sized>(ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>
     {
         ComItf {
-            automation_ptr: ptr,
-            raw_ptr: crate::raw::InterfacePtr::null(),
+            automation_ptr: Some(ptr),
+            raw_ptr: None,
             phantom: std::marker::PhantomData,
         }
     }
@@ -62,7 +78,7 @@ impl TypeSystem for RawTypeSystem
     }
 
     /// Gets the type system pointer from a ComItf.
-    fn get_ptr<I: ?Sized>(itf: &ComItf<I>) -> crate::raw::InterfacePtr<Self, I>
+    fn get_ptr<I: ?Sized>(itf: &ComItf<I>) -> Option<crate::raw::InterfacePtr<Self, I>>
     {
         itf.raw_ptr
     }
@@ -71,8 +87,8 @@ impl TypeSystem for RawTypeSystem
     fn wrap_ptr<I: ?Sized>(ptr: crate::raw::InterfacePtr<Self, I>) -> ComItf<I>
     {
         ComItf {
-            automation_ptr: crate::raw::InterfacePtr::null(),
-            raw_ptr: ptr,
+            automation_ptr: None,
+            raw_ptr: Some(ptr),
             phantom: std::marker::PhantomData,
         }
     }
@@ -375,22 +391,6 @@ macro_rules! extern_ptr {
 
 extern_ptr!(mut);
 extern_ptr!(const);
-
-impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ForeignType
-    for crate::raw::InterfacePtr<TS, I>
-where
-    I: ForeignType,
-{
-    /// The name of the type.
-    fn type_name() -> &'static str
-    {
-        <I as ForeignType>::type_name()
-    }
-    fn indirection_level() -> u32
-    {
-        <I as ForeignType>::indirection_level() + 1
-    }
-}
 
 /// Defines the uninitialized values for out parameters when calling into
 /// Intercom interfaces.
