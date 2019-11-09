@@ -292,7 +292,7 @@ mod error_store
         errorinfo: Option<crate::raw::InterfacePtr<AutomationTypeSystem, dyn IErrorInfo>>,
     ) -> raw::HRESULT
     {
-        reset_error_store(errorinfo.map(|ptr| ComRc::from(ptr)));
+        reset_error_store(errorinfo.map(ComRc::from));
         raw::S_OK
     }
 

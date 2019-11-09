@@ -49,7 +49,7 @@ impl<T: ?Sized> ComItf<T>
     }
 
     /// Creates a `ComItf<T>` from a raw type system COM interface pointer..
-    pub unsafe fn maybe_new(
+    pub fn maybe_new(
         automation: Option<raw::InterfacePtr<AutomationTypeSystem, T>>,
         raw: Option<raw::InterfacePtr<RawTypeSystem, T>>,
     ) -> Option<ComItf<T>>

@@ -11,7 +11,7 @@ pub enum TypeSystemName
 
 impl TypeSystemName
 {
-    pub fn get_ptr<I: ?Sized>(&self, itf: &ComItf<I>) -> crate::raw::RawComPtr
+    pub fn get_ptr<I: ?Sized>(self, itf: &ComItf<I>) -> crate::raw::RawComPtr
     {
         let opt = match self {
             TypeSystemName::Automation => AutomationTypeSystem::get_ptr(itf).map(|p| p.ptr),
