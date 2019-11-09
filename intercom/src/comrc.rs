@@ -33,6 +33,17 @@ impl<T: ComInterface + ?Sized> From<&ComItf<T>> for ComRc<T>
     }
 }
 
+impl<TS: TypeSystem, T: ComInterface + ?Sized> From<crate::raw::InterfacePtr<TS, T>> for ComRc<T>
+{
+    fn from(source: crate::raw::InterfacePtr<TS, T>) -> Self
+    {
+        // Lone ComItf doesn't outlast the pointer.
+        unsafe {
+            ComItf::as_rc(&ComItf::wrap(source))
+        }
+    }
+}
+
 impl<T: ComInterface + ?Sized> ComRc<T>
 {
     /// Attaches a floating ComItf reference and brings it under managed
