@@ -5,23 +5,6 @@ use super::*;
 use crate::attributes;
 use crate::type_system::{AutomationTypeSystem, ExternOutput, RawTypeSystem, TypeSystem};
 
-pub mod interface_implementation
-{
-    use crate::{combox::ComBoxData, raw, REFIID};
-
-    /// Checks whether the given interface identified by the IID supports error
-    /// info through IErrorInfo.
-    pub fn interface_supports_error_info<S>(_this: &ComBoxData<S>, riid: REFIID) -> raw::HRESULT
-    where
-        S: intercom::combox::CoClass,
-    {
-        match S::interface_supports_error_info(riid) {
-            true => raw::S_OK,
-            false => raw::S_FALSE,
-        }
-    }
-}
-
 /// Error structure containing the available information on a COM error.
 #[derive(Debug)]
 pub struct ComError

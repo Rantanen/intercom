@@ -84,11 +84,7 @@ where
     S: intercom::attributes::ComClass<I, TS> + intercom::CoClass,
     TS: crate::type_system::TypeSystem,
 {
-    intercom::ComBoxData::<S>::query_interface(
-        <S as intercom::attributes::ComClass<I, TS>>::get_box(self_vtable),
-        riid,
-        out,
-    )
+    intercom::ComBoxData::<S>::query_interface(S::get_box(self_vtable), riid, out)
 }
 
 pub unsafe extern "system" fn add_ref<I, S, TS>(self_vtable: crate::raw::RawComPtr) -> u32
@@ -97,9 +93,7 @@ where
     S: intercom::attributes::ComClass<I, TS> + intercom::CoClass,
     TS: crate::type_system::TypeSystem,
 {
-    intercom::ComBoxData::<S>::add_ref(<S as intercom::attributes::ComClass<I, TS>>::get_box(
-        self_vtable,
-    ))
+    intercom::ComBoxData::<S>::add_ref(S::get_box(self_vtable))
 }
 
 pub unsafe extern "system" fn release<I, S, TS>(self_vtable: crate::raw::RawComPtr) -> u32
@@ -108,9 +102,7 @@ where
     S: intercom::attributes::ComClass<I, TS> + intercom::CoClass,
     TS: crate::type_system::TypeSystem,
 {
-    intercom::ComBoxData::<S>::release(<S as intercom::attributes::ComClass<I, TS>>::get_box(
-        self_vtable,
-    ))
+    intercom::ComBoxData::<S>::release(S::get_box(self_vtable))
 }
 
 /// The `ISupportErrorInfo` COM interface.
@@ -134,7 +126,8 @@ where
 /// Other methods will set a null `IErrorInfo` value.
 #[com_interface(
     com_iid = "DF0B3D60-548F-101B-8E65-08002B2BD119",
-    implemented_by = intercom::error::interface_implementation,
+    raw_iid = "4C667A45-1C4F-4761-8EBF-34E7699BD06E",
+    implemented_by = isupporterrorinfo
 )]
 pub trait ISupportErrorInfo: IUnknown
 {
@@ -159,4 +152,21 @@ pub trait ISupportErrorInfo: IUnknown
     /// `S_OK` from this method.
     ///
     fn interface_supports_error_info(&self, riid: crate::REFIID) -> crate::raw::HRESULT;
+}
+
+pub mod isupporterrorinfo
+{
+    use crate::{combox::ComBoxData, raw, REFIID};
+
+    /// Checks whether the given interface identified by the IID supports error
+    /// info through IErrorInfo.
+    pub fn interface_supports_error_info<S>(_this: &ComBoxData<S>, riid: REFIID) -> raw::HRESULT
+    where
+        S: intercom::combox::CoClass,
+    {
+        match S::interface_supports_error_info(riid) {
+            true => raw::S_OK,
+            false => raw::S_FALSE,
+        }
+    }
 }
