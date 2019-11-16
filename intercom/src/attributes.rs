@@ -2,13 +2,6 @@ use crate::combox::{CoClass, ComBoxData};
 use crate::raw::RawComPtr;
 use crate::{type_system::TypeSystem, IID};
 
-pub trait ComImpl<TInterface: ?Sized, TS: TypeSystem>
-where
-    TInterface: ComInterface<TS>,
-{
-    fn vtable() -> &'static TInterface::VTable;
-}
-
 pub trait ComClass<TInterface: ?Sized, TS: TypeSystem>: CoClass + Sized
 {
     fn offset() -> usize;
