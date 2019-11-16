@@ -265,24 +265,6 @@ pub use crate::interfaces::IUnknown;
 pub use crate::interfaces::ISupportErrorInfo;
 // pub use crate::interfaces::__ISupportErrorInfo_AutomationVtbl as ISupportErrorInfoVtbl;
 
-// Do we need this? Would rather not export this through an extern crate
-// for another dll.
-//
-// com_library should have dllmain!() macro or similar that implements this
-// together with the COM registration.
-#[no_mangle]
-#[allow(non_camel_case_types)]
-#[deprecated]
-#[doc(hidden)]
-pub extern "stdcall" fn DllMain(
-    _dll_instance: *mut std::os::raw::c_void,
-    _reason: u32,
-    _reserved: *mut std::os::raw::c_void,
-) -> bool
-{
-    true
-}
-
 /// Basic COM result type.
 ///
 /// The `ComResult` maps the Rust concept of `Ok` and `Err` values to COM

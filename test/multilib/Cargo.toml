@@ -9,3 +9,4 @@ crate-type = [ "cdylib" ]
 [dependencies]
 intercom = { path = "../../intercom" }
 winapi = "0.2.8"
+env_logger = "0.7"

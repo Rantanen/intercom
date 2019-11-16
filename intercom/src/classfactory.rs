@@ -10,7 +10,10 @@ use crate::attributes;
 use crate::raw::RawComPtr;
 use crate::type_system::AutomationTypeSystem;
 
-#[com_interface]
+#[com_interface(
+    com_iid = "00000001-0000-0000-C000-000000000046",
+    raw_iid = "11111112-0000-0000-C000-000000000046"
+)]
 pub trait IClassFactory
 {
     fn create_instance(&self, outer: RawComPtr, riid: REFIID) -> ComResult<RawComPtr>;
@@ -30,8 +33,9 @@ impl<T: Default + CoClass> IClassFactory for ClassFactory<T>
     fn create_instance(&self, outer: RawComPtr, riid: REFIID) -> ComResult<RawComPtr>
     {
         unsafe {
+            let instance = ComBox::new(T::default());
             let mut out = std::ptr::null_mut();
-            let hr = ComBoxData::query_interface(ComBoxData::of(self), riid, &mut out);
+            let hr = ComBoxData::query_interface(instance.as_ref(), riid, &mut out);
             if hr == raw::S_OK {
                 Ok(out)
             } else {

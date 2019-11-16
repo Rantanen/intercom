@@ -66,7 +66,7 @@ pub fn expand_com_module(
         }
     ));
 
-    // Implement DllGetClassObject.
+    // Implement DllGetClassObject and DllMain.
     //
     // This is more or less the only symbolic entry point that the COM
     // infrastructure uses. The COM client uses this method to acquire
@@ -75,6 +75,28 @@ pub fn expand_com_module(
     if com_library {
         let dll_get_class_object = get_dll_get_class_object_function();
         output.push(dll_get_class_object);
+        output.push(quote!(
+            // Do we need this? Would rather not export this through an extern crate
+            // for another dll.
+            //
+            // com_library should have dllmain!() macro or similar that implements this
+            // together with the COM registration.
+            #[no_mangle]
+            #[allow(non_camel_case_types)]
+            #[deprecated]
+            #[doc(hidden)]
+            pub extern "stdcall" fn DllMain(
+                _dll_instance: *mut std::os::raw::c_void,
+                reason: u32,
+                _reserved: *mut std::os::raw::c_void,
+            ) -> bool
+            {
+                if reason == 1 {
+                    env_logger::init();
+                }
+                true
+            }
+        ));
     }
 
     // Implement get_intercom_typelib()
