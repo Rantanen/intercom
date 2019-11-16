@@ -97,15 +97,19 @@ pub fn expand_com_class(
     // The data should include the match-arms for the primary query_interface
     // and the vtable offsets used for the delegating query_interface impls.
     for itf in &cls.interfaces {
+        let maybe_dyn = match cls.is_self_path(itf) {
+            true => quote!(),
+            false => quote_spanned!(itf.span() => dyn),
+        };
+        output.push(quote_spanned!(itf.span() =>
+            impl intercom::HasInterface<#maybe_dyn #itf> for #struct_ident {}
+        ));
+
         for &ts in &[ModelTypeSystem::Automation, ModelTypeSystem::Raw] {
             // Various idents.
             let itf_ident = itf.get_some_ident().expect("#[com_interface] had no ident");
             let itf_variant = Ident::new(&format!("{}_{:?}", itf_ident, ts), itf.span());
             let ts_type = ts.as_typesystem_type(itf.span());
-            let maybe_dyn = match cls.is_self_path(itf) {
-                true => quote!(),
-                false => quote_spanned!(itf.span() => dyn),
-            };
 
             // Store the field offset globally. We need this offset when implementing
             // the delegating query_interface methods. The only place where we know

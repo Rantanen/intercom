@@ -297,9 +297,5 @@ pub fn expand_com_impl(
         ));
     }
 
-    output.push(quote_spanned!(imp.impl_span =>
-        impl intercom::HasInterface<#maybe_dyn #itf_path> for #struct_path {}
-    ));
-
     Ok(tokens_to_tokenstream(item_tokens, output))
 }

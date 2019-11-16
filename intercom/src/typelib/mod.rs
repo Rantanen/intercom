@@ -1,6 +1,6 @@
 use crate::{
-    com_class, com_impl, com_interface, type_system::TypeSystemName, ComBox, ComError, ComItf,
-    ComRc, ComResult, GUID,
+    com_class, com_interface, type_system::TypeSystemName, ComBox, ComError, ComItf, ComRc,
+    ComResult, GUID,
 };
 
 use std::borrow::Cow;
@@ -188,7 +188,6 @@ pub trait IIntercomMethod: crate::IUnknown
 
 // Impls
 
-#[com_impl]
 impl IIntercomTypeLib for TypeLib
 {
     fn get_info(&self) -> ComResult<(String, GUID, String)>
@@ -214,7 +213,6 @@ impl IIntercomTypeLib for TypeLib
     }
 }
 
-#[com_impl]
 impl IIntercomTypeInfo for CoClass
 {
     fn get_name(&self) -> ComResult<String>
@@ -228,7 +226,6 @@ impl IIntercomTypeInfo for CoClass
     }
 }
 
-#[com_impl]
 impl IIntercomCoClass for CoClass
 {
     fn get_name(&self) -> ComResult<String>
@@ -258,7 +255,6 @@ impl IIntercomCoClass for CoClass
     }
 }
 
-#[com_impl]
 impl IIntercomTypeInfo for Interface
 {
     fn get_name(&self) -> ComResult<String>
@@ -272,7 +268,6 @@ impl IIntercomTypeInfo for Interface
     }
 }
 
-#[com_impl]
 impl IIntercomInterface for Interface
 {
     fn get_name(&self) -> ComResult<String>
@@ -296,7 +291,6 @@ impl IIntercomInterface for Interface
     }
 }
 
-#[com_impl]
 impl IIntercomInterfaceVariant for InterfaceVariant
 {
     fn get_type_system(&self) -> ComResult<TypeSystemName>
@@ -320,7 +314,6 @@ impl IIntercomInterfaceVariant for InterfaceVariant
     }
 }
 
-#[com_impl]
 impl IIntercomMethod for Method
 {
     fn get_name(&self) -> ComResult<String>
