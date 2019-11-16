@@ -134,8 +134,6 @@ pub fn expand_com_class(
                 <#maybe_dyn #itf as intercom::attributes::ComInterface<#ts_type>>);
             let itf_vtable_for = quote!(
                 <#maybe_dyn #itf as intercom::attributes::VTableFor<#maybe_dyn #itf, #struct_ident, #ts_type>>);
-            let impl_attrib_data = quote!(
-                <#struct_ident as intercom::attributes::ComImpl<#maybe_dyn #itf, #ts_type>>);
 
             // Add the interface in the vtable list.
             vtable_list_field_defs.push(quote!( #itf_variant : #itf_attrib_data::VTable));
@@ -252,6 +250,7 @@ pub fn expand_com_class(
         vtable_list_ident.span(),
     );
     output.push(quote!(
+        #[allow(non_snake_case)]
         #visibility struct #vtable_static_ident {
             #( #vtable_list_field_defs ),*
         }

@@ -1,8 +1,6 @@
 use super::*;
 use crate::raw::{RawComPtr, HRESULT};
 use crate::type_system::{AutomationTypeSystem, RawTypeSystem};
-use std::cell::Cell;
-use std::sync::Once;
 
 /// The `IUnknown` COM interface.
 ///
@@ -52,6 +50,7 @@ pub trait RawIUnknown
     fn release(&self) -> u32;
 }
 
+#[allow(non_camel_case_types)]
 pub struct __IntercomVtableForIUnknown_Automation
 {
     pub query_interface: unsafe extern "system" fn(
@@ -62,64 +61,11 @@ pub struct __IntercomVtableForIUnknown_Automation
     pub add_ref: unsafe extern "system" fn(this: RawComPtr) -> u32,
     pub release: unsafe extern "system" fn(this: RawComPtr) -> u32,
 }
+
+#[allow(non_camel_case_types)]
 type __IntercomVtableForIUnknown_Raw = __IntercomVtableForIUnknown_Automation;
-pub struct IUnknownRawVTableFactory;
-impl IUnknownRawVTableFactory
-{
-    pub fn vtable_ptr<I, S>() -> &'static __IntercomVtableForIUnknown_Automation
-    where
-        I: ?Sized,
-        S: intercom::attributes::ComClass<I, RawTypeSystem> + intercom::CoClass,
-    {
-        unsafe {
-            static mut PTR: Option<__IntercomVtableForIUnknown_Automation> = None;
-            static ONCE: Once = Once::new();
-            ONCE.call_once(|| PTR = Some(Self::vtable::<I, S>()));
-            PTR.as_ref().unwrap()
-        }
-    }
 
-    pub fn vtable<I, S>() -> __IntercomVtableForIUnknown_Raw
-    where
-        I: ?Sized,
-        S: intercom::attributes::ComClass<I, RawTypeSystem> + intercom::CoClass,
-    {
-        __IntercomVtableForIUnknown_Raw {
-            query_interface: query_interface::<I, S, RawTypeSystem>,
-            add_ref: add_ref::<I, S, RawTypeSystem>,
-            release: release::<I, S, RawTypeSystem>,
-        }
-    }
-}
-pub struct IUnknownAutomationVTableFactory;
-impl IUnknownAutomationVTableFactory
-{
-    pub fn vtable_ptr<I, S>() -> &'static __IntercomVtableForIUnknown_Automation
-    where
-        I: ?Sized,
-        S: intercom::attributes::ComClass<I, AutomationTypeSystem> + intercom::CoClass,
-    {
-        unsafe {
-            static mut PTR: Option<__IntercomVtableForIUnknown_Automation> = None;
-            static ONCE: Once = Once::new();
-            ONCE.call_once(|| PTR = Some(Self::vtable::<I, S>()));
-            PTR.as_ref().unwrap()
-        }
-    }
-
-    pub fn vtable<I, S>() -> __IntercomVtableForIUnknown_Automation
-    where
-        I: ?Sized,
-        S: intercom::attributes::ComClass<I, AutomationTypeSystem> + intercom::CoClass,
-    {
-        __IntercomVtableForIUnknown_Automation {
-            query_interface: query_interface::<I, S, AutomationTypeSystem>,
-            add_ref: add_ref::<I, S, AutomationTypeSystem>,
-            release: release::<I, S, AutomationTypeSystem>,
-        }
-    }
-}
-impl<I, S> crate::attributes::VTableFor<I, S, RawTypeSystem> for IUnknown
+impl<I, S> crate::attributes::VTableFor<I, S, RawTypeSystem> for dyn IUnknown
 where
     I: ?Sized,
     S: intercom::attributes::ComClass<I, RawTypeSystem> + intercom::CoClass,
@@ -130,7 +76,7 @@ where
         release: release::<I, S, RawTypeSystem>,
     };
 }
-impl<I, S> crate::attributes::VTableFor<I, S, AutomationTypeSystem> for IUnknown
+impl<I, S> crate::attributes::VTableFor<I, S, AutomationTypeSystem> for dyn IUnknown
 where
     I: ?Sized,
     S: intercom::attributes::ComClass<I, AutomationTypeSystem> + intercom::CoClass,
