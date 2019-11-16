@@ -209,11 +209,7 @@ impl<T: CoClass> ComBoxData<T>
     /// # Safety
     ///
     /// The `out` pointer must be valid for writing the interface pointer to.
-    pub unsafe fn query_interface(
-        this: &mut Self,
-        riid: REFIID,
-        out: *mut RawComPtr,
-    ) -> raw::HRESULT
+    pub unsafe fn query_interface(this: &Self, riid: REFIID, out: *mut RawComPtr) -> raw::HRESULT
     {
         match T::query_interface(&this.vtable_list, riid) {
             Ok(ptr) => {
@@ -237,7 +233,7 @@ impl<T: CoClass> ComBoxData<T>
     /// The method isn't technically unsafe in regard to Rust unsafety, but
     /// it's marked as unsafe to discourage it's use due to high risks of
     /// memory leaks.
-    pub unsafe fn add_ref(this: &mut Self) -> u32
+    pub unsafe fn add_ref(this: &Self) -> u32
     {
         let previous_value = this.ref_count.fetch_add(1, Ordering::Relaxed);
         (previous_value + 1)
