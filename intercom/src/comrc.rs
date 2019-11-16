@@ -138,7 +138,7 @@ impl<T: ComInterface + ?Sized> Drop for ComRc<T>
 {
     fn drop(&mut self)
     {
-        self.itf.as_ref().release();
+        self.itf.as_raw_iunknown().release();
     }
 }
 

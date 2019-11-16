@@ -140,7 +140,7 @@ pub fn expand_com_interface(
         };
         output.push(quote_spanned!(itf.span =>
             #[allow(clippy::all)]
-            #unsafety impl #itf_path for intercom::ComItf<dyn #itf_path> {
+            #unsafety impl<I: intercom::ComInterface + #itf_path + ?Sized> #itf_path for intercom::ComItf<I> {
                 #( #impls )*
             }
         ));
@@ -165,7 +165,7 @@ pub fn expand_com_interface(
         // the possibility to do 'implicit' interfaces by just impling the struct.
         (
             quote_spanned!(itf.span =>
-                let some_iunk : &intercom::ComItf<dyn intercom::IUnknown> = com_itf.as_ref();
+                let some_iunk : &intercom::ComItf<dyn intercom::interfaces::RawIUnknown> = com_itf.as_raw_iunknown();
                 let iunknown_iid = intercom::IUnknown::iid(
                         intercom::type_system::TypeSystemName::Automation )
                             .expect( "IUnknown must have Automation IID" );
@@ -262,9 +262,11 @@ fn process_itf_variant(
     );
     let ts_value_tokens = ts.as_typesystem_tokens(itf.span);
     let ts_type_tokens = ts.as_typesystem_type(itf.span);
-    let maybe_dyn = match itf.item_type {
-        utils::InterfaceType::Trait => quote_spanned!(itf.span => dyn),
+    let vtable_factory = Ident::new(&format!("{}{:?}VTableFactory", itf.ident, ts), itf.span);
+    let itf_ref = &itf.itf_ref;
+    let generics = match itf.item_type {
         utils::InterfaceType::Struct => quote!(),
+        utils::InterfaceType::Trait => quote!(::<I, S>),
     };
 
     // Construct the iid(ts) match arm for this type system.
@@ -275,20 +277,21 @@ fn process_itf_variant(
     // Create a vector for the virtual table fields and insert the base
     // interface virtual table in it if required.
     let mut vtbl_fields = vec![];
+    let mut vtbl_values = vec![];
     if let Some(ref base) = itf.base_interface {
-        let vtbl = match base.to_string().as_ref() {
-            "IUnknown" => {
-                quote_spanned!(itf.span => <dyn intercom::IUnknown as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable)
-            }
-            _ => quote!(
-                    <#maybe_dyn #itf_path as intercom::attributes::ComInterface<#ts_type_tokens>>::VTable),
-        };
-        vtbl_fields.push(quote_spanned!(itf.span => pub __base : #vtbl, ));
+        let vtbl = quote_spanned!(itf.span => <dyn #base as intercom::attributes::ComInterface<#ts_type_tokens>>);
+        vtbl_fields.push(quote_spanned!(itf.span => pub __base : #vtbl::VTable, ));
+        vtbl_values
+            .push(quote_spanned!(itf.span => __base : #vtbl::VTableFactory::vtable::<I, S>() ));
     }
 
     // Gather all the trait methods for the remaining vtable fields.
     for method_info in &itf_variant.methods {
         let method_ident = &method_info.name;
+        let method_impl_ident = Ident::new(
+            &format!("__{}_{}_{:?}", itf_ident, method_ident, ts),
+            method_info.signature_span,
+        );
         let infallible = method_info.returnhandler.is_infallible();
         let in_out_args = method_info.raw_com_args().into_iter().map(|com_arg| {
             let name = &com_arg.name;
@@ -312,6 +315,8 @@ fn process_itf_variant(
                 unsafe extern "system" fn( #( #args ),* ) -> #ret_ty,
         );
         vtbl_fields.push(tt);
+        vtbl_values.push(quote_spanned!(method_info.signature_span =>
+                #method_ident: #method_impl_ident #generics));
 
         let method_name = method_info.name.to_string();
         if !itf_output.method_impls.contains_key(&method_name) {
@@ -328,31 +333,56 @@ fn process_itf_variant(
             itf_variant.type_system,
             rust_to_com_delegate(itf, itf_variant, &method_info),
         );
+
+        output.push(create_virtual_method(
+            &method_impl_ident,
+            itf,
+            ts,
+            method_info,
+        ));
     }
 
     // Create the vtable. We've already gathered all the vtable method
     // pointer fields so defining the struct is simple enough.
-    output.push(quote_spanned!(itf.span =>
-        #[allow(non_camel_case_types)]
-        #[allow(non_snake_case)]
-        #[allow(clippy::all)]
-        #[repr(C)]
-        #[doc(hidden)]
-        #visibility struct #vtable_ident { #( #vtbl_fields )* }
-    ));
-
-    let maybe_dyn = match itf.item_type {
-        utils::InterfaceType::Trait => quote_spanned!(itf.span => dyn),
+    let itf_bound = match itf.item_type {
         utils::InterfaceType::Struct => quote!(),
+        utils::InterfaceType::Trait => quote!(+ #itf_ident),
     };
+    if !itf.custom_vtable {
+        output.push(quote_spanned!(itf.span =>
+            #[allow(non_camel_case_types)]
+            #[allow(non_snake_case)]
+            #[allow(clippy::all)]
+            #[repr(C)]
+            #[doc(hidden)]
+            #visibility struct #vtable_ident { #( #vtbl_fields )* }
+
+            #[allow(unused)]
+            #visibility struct #vtable_factory;
+
+            #[allow(unused)]
+            impl #vtable_factory {
+                pub fn vtable<I, S>() -> #vtable_ident
+                where I: ?Sized,
+                      S: intercom::attributes::ComClass<I, #ts_type_tokens> + intercom::CoClass #itf_bound,
+                {
+                    #vtable_ident {
+                        #( #vtbl_values, )*
+                    }
+                }
+            }
+        ));
+    }
+
     let iid_tokens = utils::get_guid_tokens(&itf_variant.iid, itf.span);
     output.push(quote_spanned!(itf_path.span() =>
         #[allow(non_camel_case_types)]
         #[allow(non_snake_case)]
         #[allow(clippy::all)]
         #[doc(hidden)]
-        impl intercom::attributes::ComInterface<#ts_type_tokens> for #maybe_dyn #itf_path {
+        impl intercom::attributes::ComInterface<#ts_type_tokens> for #itf_ref {
             type VTable = #vtable_ident;
+            type VTableFactory = #vtable_factory;
             fn iid() -> &'static intercom::IID {
                 & #iid_tokens
             }
@@ -467,6 +497,153 @@ fn rust_to_com_delegate(
                 Ok( v ) => v,
                 Err( err ) => < #return_ty as intercom::ErrorValue >::from_error( err ),
             };
+        )
+    }
+}
+
+fn create_virtual_method(
+    method_impl_ident: &Ident,
+    itf: &model::ComInterface,
+    ts: ModelTypeSystem,
+    method_info: &ComMethodInfo,
+) -> TokenStream
+{
+    let method_ident = &method_info.name;
+    let method_rust_ident = &method_info.name;
+    let infallible = method_info.returnhandler.is_infallible();
+    let itf_ident = &itf.ident;
+    let itf_ref = &itf.itf_ref;
+    let ts_type_tokens = ts.as_typesystem_type(itf.span);
+
+    let in_out_args = method_info.raw_com_args().into_iter().map(|com_arg| {
+        let name = &com_arg.name;
+        let com_ty = &com_arg
+            .handler
+            .com_ty(com_arg.span, com_arg.dir, infallible);
+        let dir = match com_arg.dir {
+            Direction::In => quote!(),
+            Direction::Out | Direction::Retval => quote!( *mut ),
+        };
+        quote!( #name : #dir #com_ty )
+    });
+    let self_arg = quote!(self_vtable: intercom::raw::RawComPtr);
+    let args = iter::once(self_arg).chain(in_out_args);
+
+    // Format the in and out parameters for the Rust call.
+    let in_params: Vec<_> = method_info
+        .args
+        .iter()
+        .map(|ca| {
+            ca.handler
+                .com_to_rust(&ca.name, ca.span, Direction::In, infallible)
+        })
+        .collect();
+
+    let return_ident = Ident::new("__result", Span::call_site());
+    let return_statement = method_info.returnhandler.rust_to_com_return(&return_ident);
+
+    // Define the delegating method implementation.
+    //
+    // Note the self_vtable here will be a pointer to the start of the
+    // vtable for the current interface. To get the coclass and thus
+    // the actual 'data' struct, we'll need to offset the self_vtable
+    // with the vtable offset.
+    let ret_ty = method_info.returnhandler.com_ty();
+    let self_struct_stmt = if method_info.is_const {
+        quote!( let self_struct : &#itf_ref = &**self_combox )
+    } else {
+        quote!( let self_struct : &mut #itf_ref = &mut **self_combox )
+    };
+    let (generics, bounds, s_ref, i_ref) = match itf.item_type {
+        utils::InterfaceType::Struct => {
+            (quote!(), quote!(), quote!(#itf_ident), quote!(#itf_ident))
+        }
+        utils::InterfaceType::Trait => (
+            quote!(<I, S>),
+            quote!(
+                where I: ?Sized,
+                      S: intercom::attributes::ComClass<I, #ts_type_tokens> + intercom::CoClass + #itf_ident
+            ),
+            quote!(S),
+            quote!(I),
+        ),
+    };
+
+    let method_name = method_ident.to_string();
+    if infallible {
+        quote!(
+            #[allow(non_snake_case)]
+            #[allow(dead_code)]
+            #[doc(hidden)]
+            unsafe extern "system" fn #method_impl_ident #generics(
+                #( #args ),*
+            ) -> #ret_ty
+            #bounds
+            {
+                // Acquire the reference to the ComBoxData. For this we need
+                // to offset the current 'self_vtable' vtable pointer.
+                let offset = <#s_ref as intercom::attributes::ComClass<#i_ref, #ts_type_tokens>>::offset();
+                let self_combox = ( self_vtable as usize - offset )
+                        as *mut intercom::ComBoxData<#s_ref>;
+
+                intercom::logging::trace(|l| l(module_path!(), format_args!(
+                    "[{:p}, through {:p}] Serving {}::{}",
+                    self_combox, self_vtable, std::any::type_name::<#s_ref>(), #method_name)));
+
+                #self_struct_stmt;
+                let #return_ident = self_struct.#method_rust_ident( #( #in_params ),* );
+
+                intercom::logging::trace(|l| l(module_path!(), format_args!(
+                    "[{:p}, through {:p}] Serving {}::{}, OK",
+                    self_combox, self_vtable, std::any::type_name::<#s_ref>(), #method_name)));
+
+                #return_statement
+            }
+        )
+    } else {
+        quote!(
+            #[allow(non_snake_case)]
+            #[allow(dead_code)]
+            #[doc(hidden)]
+            unsafe extern "system" fn #method_impl_ident #generics(
+                #( #args ),*
+            ) -> #ret_ty
+            #bounds
+            {
+                // Acquire the reference to the ComBoxData. For this we need
+                // to offset the current 'self_vtable' vtable pointer.
+                let offset = <#s_ref as intercom::attributes::ComClass<#i_ref, #ts_type_tokens>>::offset();
+                let self_combox = ( self_vtable as usize - offset )
+                        as *mut intercom::ComBoxData<#s_ref>;
+
+                let result : Result< #ret_ty, intercom::ComError > = ( || {
+                    intercom::logging::trace(|l| l(module_path!(), format_args!(
+                        "[{:p}, through {:p}] Serving {}::{}",
+                        self_combox, self_vtable, std::any::type_name::<#s_ref>(), #method_name)));
+
+                    #self_struct_stmt;
+                    let #return_ident = self_struct.#method_rust_ident( #( #in_params ),* );
+
+                    Ok( { #return_statement } )
+                } )();
+
+                use intercom::ErrorValue;
+                match result {
+                    Ok( v ) => {
+                        intercom::logging::trace(|l| l(module_path!(), format_args!(
+                            "[{:p}, through {:p}] Serving {}::{}, OK",
+                            self_combox, self_vtable, std::any::type_name::<#s_ref>(), #method_name)));
+                        v
+                    },
+                    Err( err ) => {
+                        intercom::logging::trace(|l| l(module_path!(), format_args!(
+                            "[{:p}, through {:p}] Serving {}::{}, ERROR",
+                            self_combox, self_vtable, std::any::type_name::<#s_ref>(), #method_name)));
+                        <#ret_ty as ErrorValue>::from_error(
+                            intercom::store_error(err))
+                    },
+                }
+            }
         )
     }
 }

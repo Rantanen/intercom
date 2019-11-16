@@ -15,6 +15,7 @@ pub trait ComClass<TInterface: ?Sized, TS: TypeSystem>
 pub trait ComInterface<TS: TypeSystem>
 {
     type VTable;
+    type VTableFactory;
     fn iid() -> &'static IID;
 }
 

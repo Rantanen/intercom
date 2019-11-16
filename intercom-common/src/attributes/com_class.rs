@@ -64,6 +64,10 @@ pub fn expand_com_class(
     ];
     let mut support_error_info_match_arms = vec![];
 
+    output.push(quote!(
+        impl intercom::IUnknown for #struct_ident {}
+    ));
+
     // Gather the virtual table list struct field definitions and their values.
     // The definitions are needed when we define the virtual table list struct,
     // which is different for each com_class. The values are needed when we
@@ -73,15 +77,19 @@ pub fn expand_com_class(
     // This is done to ensure the IUnknown pointer matches the ComBoxData pointer.
     // We ensure this by defining the primary IUnknown methods on the
     // ISupportErrorInfo virtual table and having that at the beginning.
+    let mut vtable_list_field_defs = vec![];
     let mut vtable_list_field_decls = vec![quote!(
         _ISupportErrorInfo:
             &'static <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<
                 intercom::type_system::AutomationTypeSystem,
             >>::VTable
     )];
-    let mut vtable_list_field_values = vec![quote!( _ISupportErrorInfo :
+    let mut vtable_list_field_values = vec![];
+    let mut vtable_list_field_ptrs = vec![quote!(
+                 _ISupportErrorInfo :
                 <#struct_ident as intercom::attributes::ComImpl<
-                    dyn intercom::ISupportErrorInfo, intercom::type_system::AutomationTypeSystem>>::vtable() )];
+                    dyn intercom::ISupportErrorInfo, intercom::type_system::AutomationTypeSystem>>::vtable()
+    )];
 
     // Create the vtable data for the additional interfaces.
     // The data should include the match-arms for the primary query_interface
@@ -126,8 +134,12 @@ pub fn expand_com_class(
                 <#struct_ident as intercom::attributes::ComImpl<#maybe_dyn #itf, #ts_type>>);
 
             // Add the interface in the vtable list.
+            vtable_list_field_defs.push(quote!( #itf_variant : #itf_attrib_data::VTable));
             vtable_list_field_decls.push(quote!( #itf_variant : &'static #itf_attrib_data::VTable));
-            vtable_list_field_values.push(quote!( #itf_variant : #impl_attrib_data::vtable()));
+            vtable_list_field_values
+                .push(quote!( #itf_variant : #itf_attrib_data::VTableFactory::vtable::<#maybe_dyn #itf, #struct_ident>()));
+            vtable_list_field_ptrs
+                .push(quote!( #itf_variant : &VTABLE.as_ref().unwrap().#itf_variant ));
 
             // Define the query_interface match arm for the current interface.
             // This just gets the correct interface vtable reference from the list
@@ -222,13 +234,30 @@ pub fn expand_com_class(
     ));
 
     // The actual CoClass implementation.
+    let vtable_static_ident = Ident::new(
+        &format!("Static{}", vtable_list_ident),
+        vtable_list_ident.span(),
+    );
     output.push(quote!(
+        #visibility struct #vtable_static_ident {
+            #( #vtable_list_field_defs ),*
+        }
+
         #[allow(clippy::all)]
         impl intercom::CoClass for #struct_ident {
             type VTableList = #vtable_list_ident;
             fn create_vtable_list() -> Self::VTableList {
-                #vtable_list_ident {
-                    #( #vtable_list_field_values ),*
+                static mut VTABLE: Option<#vtable_static_ident> = None;
+                static ONCE: std::sync::Once = std::sync::Once::new();
+                unsafe {
+                    ONCE.call_once(|| {
+                        VTABLE = Some(#vtable_static_ident {
+                            #( #vtable_list_field_values ),*
+                        });
+                    });
+                    #vtable_list_ident {
+                        #( #vtable_list_field_ptrs ),*
+                    }
                 }
             }
             fn query_interface(

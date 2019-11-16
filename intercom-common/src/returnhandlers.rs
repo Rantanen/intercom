@@ -190,7 +190,7 @@ impl ReturnHandler for ErrorResultHandler
                 Ok( #ok_tokens )
             } else {
                 return Err( intercom::load_error(
-                        self.as_ref(),
+                        self,
                         &__intercom_iid,
                         #result ) );
             }

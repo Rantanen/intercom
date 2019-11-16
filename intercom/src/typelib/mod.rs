@@ -46,7 +46,7 @@ pub struct TypeLib
 }
 
 #[com_interface]
-pub trait IIntercomTypeLib
+pub trait IIntercomTypeLib: crate::IUnknown
 {
     fn get_info(&self) -> ComResult<(String, GUID, String)>;
     fn get_type_count(&self) -> ComResult<u32>;
@@ -71,7 +71,7 @@ pub enum TypeInfoKind
 }
 
 #[com_interface]
-pub trait IIntercomTypeInfo
+pub trait IIntercomTypeInfo: crate::IUnknown
 {
     fn get_name(&self) -> ComResult<String>;
     fn get_kind(&self) -> ComResult<TypeInfoKind>;
@@ -89,7 +89,7 @@ pub struct CoClass
 }
 
 #[com_interface]
-pub trait IIntercomCoClass
+pub trait IIntercomCoClass: crate::IUnknown
 {
     // FIXME: Support interface inheritance
     fn get_name(&self) -> ComResult<String>;
@@ -128,7 +128,7 @@ pub struct InterfaceVariant
 }
 
 #[com_interface]
-pub trait IIntercomInterface
+pub trait IIntercomInterface: crate::IUnknown
 {
     // FIXME: Support interface inheritance
     fn get_name(&self) -> ComResult<String>;
@@ -139,7 +139,7 @@ pub trait IIntercomInterface
 }
 
 #[com_interface]
-pub trait IIntercomInterfaceVariant
+pub trait IIntercomInterfaceVariant: crate::IUnknown
 {
     fn get_type_system(&self) -> ComResult<TypeSystemName>;
     fn get_iid(&self) -> ComResult<GUID>;
@@ -178,7 +178,7 @@ pub enum Direction
 }
 
 #[com_interface]
-pub trait IIntercomMethod
+pub trait IIntercomMethod: crate::IUnknown
 {
     fn get_name(&self) -> ComResult<String>;
     fn get_return_type(&self) -> ComResult<(String, u32)>;

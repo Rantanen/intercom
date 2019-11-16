@@ -378,7 +378,7 @@ impl<'a> TryFrom<&'a dyn IErrorInfo> for ErrorInfo
 }
 
 #[com_interface(com_iid = "1CF2B120-547D-101B-8E65-08002B2BD119")]
-pub trait IErrorInfo
+pub trait IErrorInfo: crate::IUnknown
 {
     fn get_guid(&self) -> ComResult<GUID>;
     fn get_source(&self) -> ComResult<String>;
@@ -449,7 +449,11 @@ where
     com_error
 }
 
-pub fn load_error(iunk: &ComItf<dyn IUnknown>, iid: &GUID, err: raw::HRESULT) -> ComError
+pub fn load_error<I: crate::ComInterface + ?Sized>(
+    iunk: &ComItf<I>,
+    iid: &GUID,
+    err: raw::HRESULT,
+) -> ComError
 {
     // Do not try to load error if this is IUnknown or ISupportErrorInfo.
     // Both of these are used during error handling and may fail.
@@ -533,7 +537,7 @@ pub struct ErrorStore;
     com_iid = "d7f996c5-0b51-4053-82f8-19a7261793a9",
     raw_iid = "7586c49a-abbd-4a06-b588-e3d02b431f01"
 )]
-pub trait IErrorStore
+pub trait IErrorStore: crate::IUnknown
 {
     fn get_error_info(&self) -> ComResult<ComRc<dyn IErrorInfo>>;
     fn set_error_info(&self, info: &ComItf<dyn IErrorInfo>) -> ComResult<()>;

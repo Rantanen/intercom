@@ -12,7 +12,7 @@ pub struct Allocator;
     com_iid = "18EE22B3-B0C6-44A5-A94A-7A417676FB66",
     raw_iid = "7A6F6564-04B5-4455-A223-EA0512B8CC63"
 )]
-pub trait IAllocator
+pub trait IAllocator: crate::IUnknown
 {
     /// Allocates a new BSTR based on an existing string value.
     ///

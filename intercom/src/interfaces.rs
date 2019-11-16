@@ -1,4 +1,8 @@
 use super::*;
+use crate::raw::{RawComPtr, HRESULT};
+use crate::type_system::{AutomationTypeSystem, RawTypeSystem};
+use std::cell::Cell;
+use std::sync::Once;
 
 /// The `IUnknown` COM interface.
 ///
@@ -7,8 +11,19 @@ use super::*;
 /// and interface discovery.
 ///
 /// For Rust code, Intercom implements the interface automatically.
-#[com_interface( com_iid = "00000000-0000-0000-C000-000000000046", base = NO_BASE )]
+#[com_interface(
+    com_iid = "00000000-0000-0000-C000-000000000046",
+    raw_iid = "11111111-0000-0000-C000-000000000046",
+    base = NO_BASE, custom_vtable = true )]
 pub trait IUnknown
+{
+}
+
+#[com_interface(
+    com_iid = "00000000-0000-0000-C000-000000000046",
+    raw_iid = "11111111-0000-0000-C000-000000000046",
+    base = NO_BASE )]
+pub trait RawIUnknown
 {
     /// Tries to get a different COM interface for the current object.
     ///
@@ -37,6 +52,111 @@ pub trait IUnknown
     fn release(&self) -> u32;
 }
 
+pub struct __IntercomVtableForIUnknown_Automation
+{
+    pub query_interface: unsafe extern "system" fn(
+        this: RawComPtr,
+        riid: crate::REFIID,
+        result: *mut crate::raw::RawComPtr,
+    ) -> HRESULT,
+    pub add_ref: unsafe extern "system" fn(this: RawComPtr) -> u32,
+    pub release: unsafe extern "system" fn(this: RawComPtr) -> u32,
+}
+type __IntercomVtableForIUnknown_Raw = __IntercomVtableForIUnknown_Automation;
+pub struct IUnknownRawVTableFactory;
+impl IUnknownRawVTableFactory
+{
+    pub fn vtable_ptr<I, S>() -> &'static __IntercomVtableForIUnknown_Automation
+    where
+        I: ?Sized,
+        S: intercom::attributes::ComClass<I, RawTypeSystem> + intercom::CoClass,
+    {
+        unsafe {
+            static mut PTR: Option<__IntercomVtableForIUnknown_Automation> = None;
+            static ONCE: Once = Once::new();
+            ONCE.call_once(|| PTR = Some(Self::vtable::<I, S>()));
+            PTR.as_ref().unwrap()
+        }
+    }
+
+    pub fn vtable<I, S>() -> __IntercomVtableForIUnknown_Raw
+    where
+        I: ?Sized,
+        S: intercom::attributes::ComClass<I, RawTypeSystem> + intercom::CoClass,
+    {
+        __IntercomVtableForIUnknown_Raw {
+            query_interface: query_interface::<I, S, RawTypeSystem>,
+            add_ref: add_ref::<I, S, RawTypeSystem>,
+            release: release::<I, S, RawTypeSystem>,
+        }
+    }
+}
+pub struct IUnknownAutomationVTableFactory;
+impl IUnknownAutomationVTableFactory
+{
+    pub fn vtable_ptr<I, S>() -> &'static __IntercomVtableForIUnknown_Automation
+    where
+        I: ?Sized,
+        S: intercom::attributes::ComClass<I, AutomationTypeSystem> + intercom::CoClass,
+    {
+        unsafe {
+            static mut PTR: Option<__IntercomVtableForIUnknown_Automation> = None;
+            static ONCE: Once = Once::new();
+            ONCE.call_once(|| PTR = Some(Self::vtable::<I, S>()));
+            PTR.as_ref().unwrap()
+        }
+    }
+
+    pub fn vtable<I, S>() -> __IntercomVtableForIUnknown_Automation
+    where
+        I: ?Sized,
+        S: intercom::attributes::ComClass<I, AutomationTypeSystem> + intercom::CoClass,
+    {
+        __IntercomVtableForIUnknown_Automation {
+            query_interface: query_interface::<I, S, AutomationTypeSystem>,
+            add_ref: add_ref::<I, S, AutomationTypeSystem>,
+            release: release::<I, S, AutomationTypeSystem>,
+        }
+    }
+}
+
+pub unsafe extern "system" fn query_interface<I, S, TS>(
+    self_vtable: crate::raw::RawComPtr,
+    riid: *const crate::GUID,
+    out: *mut *mut std::ffi::c_void,
+) -> HRESULT
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClass<I, TS> + intercom::CoClass,
+    TS: crate::type_system::TypeSystem,
+{
+    let offset = <S as intercom::attributes::ComClass<I, TS>>::offset();
+    let self_ptr = (self_vtable as usize - offset) as *mut _;
+    intercom::ComBoxData::<S>::query_interface(&mut *self_ptr, riid, out)
+}
+
+pub unsafe extern "system" fn add_ref<I, S, TS>(self_vtable: crate::raw::RawComPtr) -> u32
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClass<I, TS> + intercom::CoClass,
+    TS: crate::type_system::TypeSystem,
+{
+    let offset = <S as intercom::attributes::ComClass<I, TS>>::offset();
+    let self_ptr = (self_vtable as usize - offset) as *mut _;
+    intercom::ComBoxData::<S>::add_ref_ptr(self_ptr)
+}
+
+pub unsafe extern "system" fn release<I, S, TS>(self_vtable: crate::raw::RawComPtr) -> u32
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClass<I, TS> + intercom::CoClass,
+    TS: crate::type_system::TypeSystem,
+{
+    let offset = <S as intercom::attributes::ComClass<I, TS>>::offset();
+    let self_ptr = (self_vtable as usize - offset) as *mut _;
+    intercom::ComBoxData::<S>::release_ptr(self_ptr)
+}
+
 /// The `ISupportErrorInfo` COM interface.
 ///
 /// The `ISupportErrorInfo` is part of COM error handling concept. As the
@@ -57,7 +177,7 @@ pub trait IUnknown
 /// two-parameter `Result<S,E>` value will store the detailed `IErrorInfo`.
 /// Other methods will set a null `IErrorInfo` value.
 #[com_interface(com_iid = "DF0B3D60-548F-101B-8E65-08002B2BD119")]
-pub trait ISupportErrorInfo
+pub trait ISupportErrorInfo: IUnknown
 {
     /// Informs the current COM class supports `IErrorInfo` for a specific
     /// interface.

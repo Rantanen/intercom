@@ -8,16 +8,17 @@ use crate::idents::SomeIdent;
 use crate::methodinfo::ComMethodInfo;
 use crate::quote::ToTokens;
 use crate::tyhandlers::ModelTypeSystem;
-use ::indexmap::IndexMap;
-use ::std::iter::FromIterator;
-use ::syn::{spanned::Spanned, Ident, LitStr, Path, Visibility};
+use indexmap::IndexMap;
 use proc_macro2::Span;
+use std::iter::FromIterator;
+use syn::{spanned::Spanned, Ident, LitBool, LitStr, Path, Visibility};
 
 intercom_attribute!(
     ComInterfaceAttr< ComInterfaceAttrParam, NoParams > {
         com_iid : LitStr,
         raw_iid : LitStr,
-        base : Ident,
+        base : Path,
+        custom_vtable : LitBool,
     }
 );
 
@@ -38,17 +39,18 @@ pub struct ComInterface
     pub path: Path,
     pub ident: Ident,
     pub visibility: Visibility,
-    pub base_interface: Option<Ident>,
+    pub base_interface: Option<Path>,
     pub variants: IndexMap<ModelTypeSystem, ComInterfaceVariant>,
     pub item_type: crate::utils::InterfaceType,
     pub span: Span,
     pub is_unsafe: bool,
+    pub itf_ref: TokenStream,
+    pub custom_vtable: bool,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct ComInterfaceVariant
 {
-    pub unique_base_interface: Option<Ident>,
     pub type_system: ModelTypeSystem,
     pub iid: GUID,
     pub methods: Vec<ComMethodInfo>,
@@ -101,13 +103,13 @@ impl ComInterface
             .map_err(|msg| ParseError::ComInterface(item.get_ident().unwrap().to_string(), msg))?;
         let base = match base {
             Some(b) => {
-                if b == "NO_BASE" {
+                if b.get_ident().map(|i| i == "NO_BASE") == Some(true) {
                     None
                 } else {
                     Some(b.to_owned())
                 }
             }
-            None => Some(Ident::new("IUnknown", Span::call_site())),
+            None => Some(syn::parse2(quote!(intercom::IUnknown)).unwrap()),
         };
 
         // Visibility for trait interfaces is the visibility of the trait.
@@ -128,14 +130,6 @@ impl ComInterface
             [ModelTypeSystem::Automation, ModelTypeSystem::Raw]
                 .iter()
                 .map(|&ts| {
-                    // IUnknown interfaces do not have type system variants.
-                    let unique_base = match base {
-                        Some(ref iunk) if iunk == "IUnknown" => base.clone(),
-                        ref b => b
-                            .as_ref()
-                            .map(|b| Ident::new(&format!("{}_{:?}", b, ts), Span::call_site())),
-                    };
-
                     let iid_attr = attr.iid(ts).map_err(|msg| {
                         ParseError::ComInterface(item.get_ident().unwrap().to_string(), msg)
                     })?;
@@ -162,7 +156,6 @@ impl ComInterface
                     Ok((
                         ts,
                         ComInterfaceVariant {
-                            unique_base_interface: unique_base,
                             type_system: ts,
                             iid,
                             methods,
@@ -172,15 +165,27 @@ impl ComInterface
                 .collect::<Result<Vec<_>, _>>()?,
         );
 
+        let itf_ref = match itf_type {
+            crate::utils::InterfaceType::Trait => quote_spanned!(item.span() => dyn #path),
+            crate::utils::InterfaceType::Struct => quote_spanned!(item.span() => #path),
+        };
+
         Ok(ComInterface {
             base_interface: base,
             item_type: itf_type,
             is_unsafe: unsafety.is_some(),
             span: item.span(),
+            custom_vtable: attr
+                .custom_vtable()
+                .map_err(|e| ParseError::ComInterface(ident.to_string(), e))?
+                .cloned()
+                .map(|l| l.value)
+                .unwrap_or(false),
             path,
             ident,
             visibility,
             variants,
+            itf_ref,
         })
     }
 }

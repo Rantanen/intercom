@@ -492,7 +492,7 @@ impl<T: ComInterface + ?Sized> From<&ComItf<T>> for Variant
 {
     fn from(src: &ComItf<T>) -> Self
     {
-        let iunk: &ComItf<dyn IUnknown> = src.as_ref();
+        let iunk: &ComItf<dyn IUnknown> = src.as_iunknown();
         Variant::IUnknown(ComRc::from(iunk))
     }
 }

@@ -89,7 +89,7 @@ pub use crate::guid::GUID;
 pub mod error;
 pub use crate::error::{load_error, store_error, ComError, ErrorValue};
 pub mod alloc;
-mod interfaces;
+pub mod interfaces;
 pub mod runtime;
 mod variant;
 pub use crate::variant::{Variant, VariantError};

@@ -344,7 +344,9 @@ impl<T: CoClass> ComBoxData<T>
     /// The `self_iunk` _must_ be a valid COM pointer.
     pub unsafe extern "system" fn add_ref_ptr(self_iunk: RawComPtr) -> u32
     {
-        ComBoxData::add_ref(ComBoxData::<T>::from_ptr(self_iunk))
+        let rc = ComBoxData::add_ref(ComBoxData::<T>::from_ptr(self_iunk));
+        log::trace!("add_ref, final count: {}", rc);
+        rc
     }
 
     /// Pointer variant of the `release` function.
@@ -354,7 +356,9 @@ impl<T: CoClass> ComBoxData<T>
     /// The `self_iunk` _must_ be a valid COM pointer.
     pub unsafe extern "system" fn release_ptr(self_iunk: RawComPtr) -> u32
     {
-        ComBoxData::release(self_iunk as *mut ComBoxData<T>)
+        let rc = ComBoxData::release(self_iunk as *mut ComBoxData<T>);
+        log::trace!("release, final count: {}", rc);
+        rc
     }
 
     /// Pointer variant of the `release` function.
