@@ -9,7 +9,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 pub trait CoClass
 {
     type VTableList;
-    fn create_vtable_list() -> Self::VTableList;
+    const VTABLE: Self::VTableList;
     fn query_interface(vtables: &Self::VTableList, riid: REFIID) -> RawComResult<RawComPtr>;
     fn interface_supports_error_info(riid: REFIID) -> bool;
 }
@@ -192,7 +192,7 @@ impl<T: CoClass> ComBoxData<T>
         // TODO: Fix this to use raw heap allocation at some point. There's
         // no need to construct and immediately detach a Box.
         Box::into_raw(Box::new(ComBoxData {
-            vtable_list: T::create_vtable_list(),
+            vtable_list: T::VTABLE,
             ref_count: AtomicU32::new(0),
             value,
         }))
@@ -294,7 +294,7 @@ impl<T: CoClass> ComBoxData<T>
 
     /// Checks whether the given interface identified by the IID supports error
     /// info through IErrorInfo.
-    pub fn interface_supports_error_info(_this: &mut Self, riid: REFIID) -> raw::HRESULT
+    pub fn interface_supports_error_info(_this: &Self, riid: REFIID) -> raw::HRESULT
     {
         match T::interface_supports_error_info(riid) {
             true => raw::S_OK,

@@ -119,6 +119,28 @@ impl IUnknownAutomationVTableFactory
         }
     }
 }
+impl<I, S> crate::attributes::VTableFor<I, S, RawTypeSystem> for IUnknown
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClass<I, RawTypeSystem> + intercom::CoClass,
+{
+    const VTABLE: Self::VTable = Self::VTable {
+        query_interface: query_interface::<I, S, RawTypeSystem>,
+        add_ref: add_ref::<I, S, RawTypeSystem>,
+        release: release::<I, S, RawTypeSystem>,
+    };
+}
+impl<I, S> crate::attributes::VTableFor<I, S, AutomationTypeSystem> for IUnknown
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClass<I, AutomationTypeSystem> + intercom::CoClass,
+{
+    const VTABLE: Self::VTable = Self::VTable {
+        query_interface: query_interface::<I, S, AutomationTypeSystem>,
+        add_ref: add_ref::<I, S, AutomationTypeSystem>,
+        release: release::<I, S, AutomationTypeSystem>,
+    };
+}
 
 pub unsafe extern "system" fn query_interface<I, S, TS>(
     self_vtable: crate::raw::RawComPtr,
@@ -176,7 +198,10 @@ where
 /// specified interfaces automatically. Only methods that return a
 /// two-parameter `Result<S,E>` value will store the detailed `IErrorInfo`.
 /// Other methods will set a null `IErrorInfo` value.
-#[com_interface(com_iid = "DF0B3D60-548F-101B-8E65-08002B2BD119")]
+#[com_interface(
+    com_iid = "DF0B3D60-548F-101B-8E65-08002B2BD119",
+    implemented_by = intercom::ComBoxData::interface_supports_error_info,
+)]
 pub trait ISupportErrorInfo: IUnknown
 {
     /// Informs the current COM class supports `IErrorInfo` for a specific

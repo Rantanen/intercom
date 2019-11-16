@@ -19,6 +19,7 @@ intercom_attribute!(
         raw_iid : LitStr,
         base : Path,
         custom_vtable : LitBool,
+        implemented_by: Path,
     }
 );
 
@@ -46,6 +47,7 @@ pub struct ComInterface
     pub is_unsafe: bool,
     pub itf_ref: TokenStream,
     pub custom_vtable: bool,
+    pub implemented_by: Option<Path>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -181,6 +183,10 @@ impl ComInterface
                 .cloned()
                 .map(|l| l.value)
                 .unwrap_or(false),
+            implemented_by: attr
+                .implemented_by()
+                .map_err(|e| ParseError::ComInterface(ident.to_string(), e))?
+                .cloned(),
             path,
             ident,
             visibility,

@@ -12,10 +12,14 @@ pub trait ComClass<TInterface: ?Sized, TS: TypeSystem>
     fn offset() -> usize;
 }
 
+pub trait VTableFor<I: ?Sized, S, TS: TypeSystem>: ComInterface<TS>
+{
+    const VTABLE: Self::VTable;
+}
+
 pub trait ComInterface<TS: TypeSystem>
 {
-    type VTable;
-    type VTableFactory;
+    type VTable: 'static;
     fn iid() -> &'static IID;
 }
 

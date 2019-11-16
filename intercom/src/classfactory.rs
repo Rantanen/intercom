@@ -33,10 +33,16 @@ pub struct ClassFactory<T: Default + CoClass>
 impl<T: Default + CoClass> CoClass for ClassFactory<T>
 {
     type VTableList = &'static ClassFactoryVtbl;
-    fn create_vtable_list() -> Self::VTableList
-    {
-        ClassFactory::<T>::create_vtable()
-    }
+
+    const VTABLE: &'static ClassFactoryVtbl = &ClassFactoryVtbl {
+        __base: IUnknownVtbl {
+            query_interface: ComBoxData::<Self>::query_interface_ptr,
+            add_ref: ComBoxData::<Self>::add_ref_ptr,
+            release: ComBoxData::<Self>::release_ptr,
+        },
+        create_instance: Self::create_instance,
+        lock_server: Self::lock_server,
+    };
 
     fn query_interface(vtables: &Self::VTableList, riid: REFIID) -> RawComResult<RawComPtr>
     {

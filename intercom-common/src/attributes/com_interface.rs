@@ -262,7 +262,6 @@ fn process_itf_variant(
     );
     let ts_value_tokens = ts.as_typesystem_tokens(itf.span);
     let ts_type_tokens = ts.as_typesystem_type(itf.span);
-    let vtable_factory = Ident::new(&format!("{}{:?}VTableFactory", itf.ident, ts), itf.span);
     let itf_ref = &itf.itf_ref;
     let generics = match itf.item_type {
         utils::InterfaceType::Struct => quote!(),
@@ -279,10 +278,10 @@ fn process_itf_variant(
     let mut vtbl_fields = vec![];
     let mut vtbl_values = vec![];
     if let Some(ref base) = itf.base_interface {
-        let vtbl = quote_spanned!(itf.span => <dyn #base as intercom::attributes::ComInterface<#ts_type_tokens>>);
-        vtbl_fields.push(quote_spanned!(itf.span => pub __base : #vtbl::VTable, ));
-        vtbl_values
-            .push(quote_spanned!(itf.span => __base : #vtbl::VTableFactory::vtable::<I, S>() ));
+        let cominterface = quote_spanned!(itf.span => <dyn #base as intercom::attributes::ComInterface<#ts_type_tokens>>);
+        vtbl_fields.push(quote_spanned!(itf.span => pub __base : #cominterface::VTable, ));
+        let vtable_for = quote_spanned!(itf.span => <dyn #base as intercom::attributes::VTableFor<I, S, #ts_type_tokens>>);
+        vtbl_values.push(quote_spanned!(itf.span => __base : #vtable_for::VTABLE));
     }
 
     // Gather all the trait methods for the remaining vtable fields.
@@ -346,6 +345,7 @@ fn process_itf_variant(
     // pointer fields so defining the struct is simple enough.
     let itf_bound = match itf.item_type {
         utils::InterfaceType::Struct => quote!(),
+        utils::InterfaceType::Trait if itf.implemented_by.is_some() => quote!(),
         utils::InterfaceType::Trait => quote!(+ #itf_ident),
     };
     if !itf.custom_vtable {
@@ -358,18 +358,13 @@ fn process_itf_variant(
             #visibility struct #vtable_ident { #( #vtbl_fields )* }
 
             #[allow(unused)]
-            #visibility struct #vtable_factory;
-
-            #[allow(unused)]
-            impl #vtable_factory {
-                pub fn vtable<I, S>() -> #vtable_ident
-                where I: ?Sized,
-                      S: intercom::attributes::ComClass<I, #ts_type_tokens> + intercom::CoClass #itf_bound,
-                {
-                    #vtable_ident {
-                        #( #vtbl_values, )*
-                    }
-                }
+            impl<I, S> intercom::attributes::VTableFor<I, S, #ts_type_tokens> for #itf_ref
+            where I: ?Sized,
+                  S: intercom::attributes::ComClass<I, #ts_type_tokens> + intercom::CoClass #itf_bound,
+            {
+                const VTABLE: #vtable_ident = #vtable_ident {
+                    #( #vtbl_values, )*
+                };
             }
         ));
     }
@@ -382,7 +377,6 @@ fn process_itf_variant(
         #[doc(hidden)]
         impl intercom::attributes::ComInterface<#ts_type_tokens> for #itf_ref {
             type VTable = #vtable_ident;
-            type VTableFactory = #vtable_factory;
             fn iid() -> &'static intercom::IID {
                 & #iid_tokens
             }
@@ -549,10 +543,19 @@ fn create_virtual_method(
     // the actual 'data' struct, we'll need to offset the self_vtable
     // with the vtable offset.
     let ret_ty = method_info.returnhandler.com_ty();
-    let self_struct_stmt = if method_info.is_const {
+    let self_struct_stmt = if itf.implemented_by.is_some() {
+        quote!( let self_struct = &*self_combox )
+    } else if method_info.is_const {
         quote!( let self_struct : &#itf_ref = &**self_combox )
     } else {
         quote!( let self_struct : &mut #itf_ref = &mut **self_combox )
+    };
+    let (required_itf, call) = match &itf.implemented_by {
+        Some(path) => (quote!(), quote!(#path(self_struct, #( #in_params ),*))),
+        None => (
+            quote!(+ #itf_ident),
+            quote!(self_struct.#method_rust_ident( #( #in_params ),* )),
+        ),
     };
     let (generics, bounds, s_ref, i_ref) = match itf.item_type {
         utils::InterfaceType::Struct => {
@@ -562,7 +565,7 @@ fn create_virtual_method(
             quote!(<I, S>),
             quote!(
                 where I: ?Sized,
-                      S: intercom::attributes::ComClass<I, #ts_type_tokens> + intercom::CoClass + #itf_ident
+                      S: intercom::attributes::ComClass<I, #ts_type_tokens> + intercom::CoClass #required_itf
             ),
             quote!(S),
             quote!(I),
@@ -591,7 +594,7 @@ fn create_virtual_method(
                     self_combox, self_vtable, std::any::type_name::<#s_ref>(), #method_name)));
 
                 #self_struct_stmt;
-                let #return_ident = self_struct.#method_rust_ident( #( #in_params ),* );
+                let #return_ident = #call;
 
                 intercom::logging::trace(|l| l(module_path!(), format_args!(
                     "[{:p}, through {:p}] Serving {}::{}, OK",
@@ -622,7 +625,7 @@ fn create_virtual_method(
                         self_combox, self_vtable, std::any::type_name::<#s_ref>(), #method_name)));
 
                     #self_struct_stmt;
-                    let #return_ident = self_struct.#method_rust_ident( #( #in_params ),* );
+                    let #return_ident = #call;
 
                     Ok( { #return_statement } )
                 } )();
