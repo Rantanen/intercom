@@ -11,14 +11,14 @@ use crate::tyhandlers::ModelTypeSystem;
 use indexmap::IndexMap;
 use proc_macro2::Span;
 use std::iter::FromIterator;
-use syn::{spanned::Spanned, Ident, LitBool, LitStr, Path, Visibility};
+use syn::{spanned::Spanned, Ident, LitStr, Path, Visibility};
 
 intercom_attribute!(
     ComInterfaceAttr< ComInterfaceAttrParam, NoParams > {
         com_iid : LitStr,
         raw_iid : LitStr,
         base : Path,
-        custom_vtable : LitBool,
+        vtable_of: Path,
         implemented_by: Path,
     }
 );
@@ -46,7 +46,7 @@ pub struct ComInterface
     pub span: Span,
     pub is_unsafe: bool,
     pub itf_ref: TokenStream,
-    pub custom_vtable: bool,
+    pub vtable_of: Option<Path>,
     pub implemented_by: Option<Path>,
 }
 
@@ -177,12 +177,10 @@ impl ComInterface
             item_type: itf_type,
             is_unsafe: unsafety.is_some(),
             span: item.span(),
-            custom_vtable: attr
-                .custom_vtable()
+            vtable_of: attr
+                .vtable_of()
                 .map_err(|e| ParseError::ComInterface(ident.to_string(), e))?
-                .cloned()
-                .map(|l| l.value)
-                .unwrap_or(false),
+                .cloned(),
             implemented_by: attr
                 .implemented_by()
                 .map_err(|e| ParseError::ComInterface(ident.to_string(), e))?

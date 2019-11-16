@@ -30,16 +30,27 @@ pub struct ClassFactory<T: Default + CoClass>
     phantom: std::marker::PhantomData<T>,
 }
 
+impl<T: Default + CoClass> crate::interfaces::IUnknown for ClassFactory<T> {}
+
+impl<T: Default + CoClass> crate::attributes::ComClass<ClassFactory<T>, AutomationTypeSystem>
+    for ClassFactory<T>
+{
+    fn offset() -> usize
+    {
+        0
+    }
+}
+
 impl<T: Default + CoClass> CoClass for ClassFactory<T>
 {
     type VTableList = &'static ClassFactoryVtbl;
 
     const VTABLE: &'static ClassFactoryVtbl = &ClassFactoryVtbl {
-        __base: IUnknownVtbl {
-            query_interface: ComBoxData::<Self>::query_interface_ptr,
-            add_ref: ComBoxData::<Self>::add_ref_ptr,
-            release: ComBoxData::<Self>::release_ptr,
-        },
+        __base: <crate::interfaces::IUnknown as crate::attributes::VTableFor<
+            ClassFactory<T>,
+            ClassFactory<T>,
+            AutomationTypeSystem,
+        >>::VTABLE,
         create_instance: Self::create_instance,
         lock_server: Self::lock_server,
     };
@@ -107,24 +118,12 @@ impl<T: Default + CoClass> ClassFactory<T>
     /// The pointers _must_ be valid.
     pub unsafe extern "system" fn lock_server(self_vtbl: RawComPtr, lock: bool) -> raw::HRESULT
     {
+        let combox = ComBoxData::from_ptr(self_vtbl);
         if lock {
-            ComBoxData::<Self>::add_ref_ptr(self_vtbl);
+            ComBoxData::<Self>::add_ref(combox);
         } else {
-            ComBoxData::<Self>::release_ptr(self_vtbl);
+            ComBoxData::<Self>::release(combox);
         }
         raw::S_OK
-    }
-
-    pub fn create_vtable() -> &'static ClassFactoryVtbl
-    {
-        &ClassFactoryVtbl {
-            __base: IUnknownVtbl {
-                query_interface: ComBoxData::<Self>::query_interface_ptr,
-                add_ref: ComBoxData::<Self>::add_ref_ptr,
-                release: ComBoxData::<Self>::release_ptr,
-            },
-            create_instance: Self::create_instance,
-            lock_server: Self::lock_server,
-        }
     }
 }

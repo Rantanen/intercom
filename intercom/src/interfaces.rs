@@ -12,7 +12,8 @@ use crate::type_system::{AutomationTypeSystem, RawTypeSystem};
 #[com_interface(
     com_iid = "00000000-0000-0000-C000-000000000046",
     raw_iid = "11111111-0000-0000-C000-000000000046",
-    base = NO_BASE, custom_vtable = true )]
+    base = NO_BASE,
+    vtable_of = RawIUnknown )]
 pub trait IUnknown
 {
 }
@@ -50,21 +51,6 @@ pub trait RawIUnknown
     fn release(&self) -> u32;
 }
 
-#[allow(non_camel_case_types)]
-pub struct __IntercomVtableForIUnknown_Automation
-{
-    pub query_interface: unsafe extern "system" fn(
-        this: RawComPtr,
-        riid: crate::REFIID,
-        result: *mut crate::raw::RawComPtr,
-    ) -> HRESULT,
-    pub add_ref: unsafe extern "system" fn(this: RawComPtr) -> u32,
-    pub release: unsafe extern "system" fn(this: RawComPtr) -> u32,
-}
-
-#[allow(non_camel_case_types)]
-type __IntercomVtableForIUnknown_Raw = __IntercomVtableForIUnknown_Automation;
-
 impl<I, S> crate::attributes::VTableFor<I, S, RawTypeSystem> for dyn IUnknown
 where
     I: ?Sized,
@@ -98,9 +84,11 @@ where
     S: intercom::attributes::ComClass<I, TS> + intercom::CoClass,
     TS: crate::type_system::TypeSystem,
 {
-    let offset = <S as intercom::attributes::ComClass<I, TS>>::offset();
-    let self_ptr = (self_vtable as usize - offset) as *mut _;
-    intercom::ComBoxData::<S>::query_interface(&mut *self_ptr, riid, out)
+    intercom::ComBoxData::<S>::query_interface(
+        <S as intercom::attributes::ComClass<I, TS>>::get_box(self_vtable),
+        riid,
+        out,
+    )
 }
 
 pub unsafe extern "system" fn add_ref<I, S, TS>(self_vtable: crate::raw::RawComPtr) -> u32
@@ -109,9 +97,9 @@ where
     S: intercom::attributes::ComClass<I, TS> + intercom::CoClass,
     TS: crate::type_system::TypeSystem,
 {
-    let offset = <S as intercom::attributes::ComClass<I, TS>>::offset();
-    let self_ptr = (self_vtable as usize - offset) as *mut _;
-    intercom::ComBoxData::<S>::add_ref_ptr(self_ptr)
+    intercom::ComBoxData::<S>::add_ref(<S as intercom::attributes::ComClass<I, TS>>::get_box(
+        self_vtable,
+    ))
 }
 
 pub unsafe extern "system" fn release<I, S, TS>(self_vtable: crate::raw::RawComPtr) -> u32
@@ -120,9 +108,9 @@ where
     S: intercom::attributes::ComClass<I, TS> + intercom::CoClass,
     TS: crate::type_system::TypeSystem,
 {
-    let offset = <S as intercom::attributes::ComClass<I, TS>>::offset();
-    let self_ptr = (self_vtable as usize - offset) as *mut _;
-    intercom::ComBoxData::<S>::release_ptr(self_ptr)
+    intercom::ComBoxData::<S>::release(<S as intercom::attributes::ComClass<I, TS>>::get_box(
+        self_vtable,
+    ))
 }
 
 /// The `ISupportErrorInfo` COM interface.
@@ -146,7 +134,7 @@ where
 /// Other methods will set a null `IErrorInfo` value.
 #[com_interface(
     com_iid = "DF0B3D60-548F-101B-8E65-08002B2BD119",
-    implemented_by = intercom::ComBoxData::interface_supports_error_info,
+    implemented_by = intercom::error::interface_implementation,
 )]
 pub trait ISupportErrorInfo: IUnknown
 {

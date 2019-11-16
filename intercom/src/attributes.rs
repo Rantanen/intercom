@@ -1,4 +1,6 @@
-use intercom::{type_system::TypeSystem, IID};
+use crate::combox::{CoClass, ComBoxData};
+use crate::raw::RawComPtr;
+use crate::{type_system::TypeSystem, IID};
 
 pub trait ComImpl<TInterface: ?Sized, TS: TypeSystem>
 where
@@ -7,9 +9,15 @@ where
     fn vtable() -> &'static TInterface::VTable;
 }
 
-pub trait ComClass<TInterface: ?Sized, TS: TypeSystem>
+pub trait ComClass<TInterface: ?Sized, TS: TypeSystem>: CoClass + Sized
 {
     fn offset() -> usize;
+    unsafe fn get_box<'a>(vtable: RawComPtr) -> &'a mut ComBoxData<Self>
+    {
+        let offset = Self::offset();
+        let self_ptr = (vtable as usize - offset) as *mut _;
+        &mut *self_ptr
+    }
 }
 
 pub trait VTableFor<I: ?Sized, S, TS: TypeSystem>: ComInterface<TS>

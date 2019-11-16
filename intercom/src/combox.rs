@@ -292,16 +292,6 @@ impl<T: CoClass> ComBoxData<T>
         rc
     }
 
-    /// Checks whether the given interface identified by the IID supports error
-    /// info through IErrorInfo.
-    pub fn interface_supports_error_info(_this: &Self, riid: REFIID) -> raw::HRESULT
-    {
-        match T::interface_supports_error_info(riid) {
-            true => raw::S_OK,
-            false => raw::S_FALSE,
-        }
-    }
-
     /// Converts a RawComPtr to a ComBoxData reference.
     ///
     /// # Safety
@@ -321,57 +311,6 @@ impl<T: CoClass> ComBoxData<T>
     pub unsafe fn from_ptr<'a>(ptr: RawComPtr) -> &'a mut ComBoxData<T>
     {
         &mut *(ptr as *mut ComBoxData<T>)
-    }
-
-    /// Pointer variant of the `query_interface` function.
-    ///
-    /// # Safety
-    ///
-    /// The `self_iunk` _must_ be a valid COM pointer.
-    pub unsafe extern "system" fn query_interface_ptr(
-        self_iunk: RawComPtr,
-        riid: REFIID,
-        out: *mut RawComPtr,
-    ) -> raw::HRESULT
-    {
-        ComBoxData::query_interface(ComBoxData::<T>::from_ptr(self_iunk), riid, out)
-    }
-
-    /// Pointer variant of the `add_ref` function.
-    ///
-    /// # Safety
-    ///
-    /// The `self_iunk` _must_ be a valid COM pointer.
-    pub unsafe extern "system" fn add_ref_ptr(self_iunk: RawComPtr) -> u32
-    {
-        let rc = ComBoxData::add_ref(ComBoxData::<T>::from_ptr(self_iunk));
-        log::trace!("add_ref, final count: {}", rc);
-        rc
-    }
-
-    /// Pointer variant of the `release` function.
-    ///
-    /// # Safety
-    ///
-    /// The `self_iunk` _must_ be a valid COM pointer.
-    pub unsafe extern "system" fn release_ptr(self_iunk: RawComPtr) -> u32
-    {
-        let rc = ComBoxData::release(self_iunk as *mut ComBoxData<T>);
-        log::trace!("release, final count: {}", rc);
-        rc
-    }
-
-    /// Pointer variant of the `release` function.
-    ///
-    /// # Safety
-    ///
-    /// The `self_iunk` _must_ be a valid COM pointer.
-    pub unsafe extern "system" fn interface_supports_error_info_ptr(
-        self_iunk: RawComPtr,
-        riid: REFIID,
-    ) -> raw::HRESULT
-    {
-        ComBoxData::interface_supports_error_info(ComBoxData::<T>::from_ptr(self_iunk), riid)
     }
 
     /// Returns a reference to the virtual table on the ComBoxData.

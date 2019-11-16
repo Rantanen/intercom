@@ -256,16 +256,24 @@ fn process_itf_variant(
     let itf_path = &itf.path;
     let itf_ident = &itf.ident;
     let visibility = &itf.visibility;
-    let vtable_ident = Ident::new(
-        &format!("__IntercomVtableFor{}_{:?}", itf_ident, ts),
-        itf.span,
-    );
     let ts_value_tokens = ts.as_typesystem_tokens(itf.span);
     let ts_type_tokens = ts.as_typesystem_type(itf.span);
     let itf_ref = &itf.itf_ref;
     let generics = match itf.item_type {
         utils::InterfaceType::Struct => quote!(),
         utils::InterfaceType::Trait => quote!(::<I, S>),
+    };
+    let vtable_path = match &itf.vtable_of {
+        None => {
+            let ident = Ident::new(
+                &format!("__IntercomVtableFor{}_{:?}", itf_ident, ts),
+                itf.span,
+            );
+            parse_quote!(#ident)
+        }
+        Some(path) => quote_spanned!(itf.span =>
+            <#path as intercom::attributes::ComInterface<#ts_type_tokens>>::VTable
+        ),
     };
 
     // Construct the iid(ts) match arm for this type system.
@@ -348,21 +356,21 @@ fn process_itf_variant(
         utils::InterfaceType::Trait if itf.implemented_by.is_some() => quote!(),
         utils::InterfaceType::Trait => quote!(+ #itf_ident),
     };
-    if !itf.custom_vtable {
+    if itf.vtable_of.is_none() {
         output.push(quote_spanned!(itf.span =>
             #[allow(non_camel_case_types)]
             #[allow(non_snake_case)]
             #[allow(clippy::all)]
             #[repr(C)]
             #[doc(hidden)]
-            #visibility struct #vtable_ident { #( #vtbl_fields )* }
+            #visibility struct #vtable_path { #( #vtbl_fields )* }
 
             #[allow(unused)]
             impl<I, S> intercom::attributes::VTableFor<I, S, #ts_type_tokens> for #itf_ref
             where I: ?Sized,
                   S: intercom::attributes::ComClass<I, #ts_type_tokens> + intercom::CoClass #itf_bound,
             {
-                const VTABLE: #vtable_ident = #vtable_ident {
+                const VTABLE: #vtable_path = #vtable_path {
                     #( #vtbl_values, )*
                 };
             }
@@ -376,7 +384,7 @@ fn process_itf_variant(
         #[allow(clippy::all)]
         #[doc(hidden)]
         impl intercom::attributes::ComInterface<#ts_type_tokens> for #itf_ref {
-            type VTable = #vtable_ident;
+            type VTable = #vtable_path;
             fn iid() -> &'static intercom::IID {
                 & #iid_tokens
             }
@@ -551,7 +559,10 @@ fn create_virtual_method(
         quote!( let self_struct : &mut #itf_ref = &mut **self_combox )
     };
     let (required_itf, call) = match &itf.implemented_by {
-        Some(path) => (quote!(), quote!(#path(self_struct, #( #in_params ),*))),
+        Some(path) => (
+            quote!(),
+            quote!(#path::#method_rust_ident(self_struct, #( #in_params ),*)),
+        ),
         None => (
             quote!(+ #itf_ident),
             quote!(self_struct.#method_rust_ident( #( #in_params ),* )),

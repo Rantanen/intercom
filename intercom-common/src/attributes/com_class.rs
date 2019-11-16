@@ -191,36 +191,6 @@ pub fn expand_com_class(
             #[inline(always)]
             fn offset() -> usize { 0 }
         }
-
-        #[allow(non_upper_case_globals)]
-        impl intercom::attributes::ComImpl<
-            intercom::ISupportErrorInfo, intercom::type_system::AutomationTypeSystem>
-            for #struct_ident {
-
-            fn vtable() -> &'static <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable
-            {
-                type T = <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable;
-                & T {
-                    __base : {
-                        type Vtbl = #iunknown_vtbl;
-                        Vtbl {
-                            query_interface
-                                : intercom::ComBoxData::<#struct_ident>
-                                    ::query_interface_ptr,
-                            add_ref
-                                : intercom::ComBoxData::<#struct_ident>
-                                    ::add_ref_ptr,
-                            release
-                                : intercom::ComBoxData::<#struct_ident>
-                                    ::release_ptr,
-                        }
-                    },
-                    interface_supports_error_info
-                        : intercom::ComBoxData::<#struct_ident>
-                            ::interface_supports_error_info_ptr,
-                }
-            }
-        }
     ));
 
     // Mark the struct as having IUnknown.
