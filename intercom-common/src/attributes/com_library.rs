@@ -91,9 +91,6 @@ pub fn expand_com_module(
                 _reserved: *mut std::os::raw::c_void,
             ) -> bool
             {
-                if reason == 1 {
-                    env_logger::init();
-                }
                 true
             }
         ));
