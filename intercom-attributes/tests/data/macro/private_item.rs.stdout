@@ -376,7 +376,7 @@ impl<I: intercom::attributes::ComInterface + IFoo + ?Sized> IFoo for intercom::C
             {
                 ::std::rt::begin_panic(
                     "internal error: entered unreachable code",
-                    &("private_item.rs", 8u32, 5u32),
+                    &("private_item.rs", 10u32, 5u32),
                 )
             }
         };

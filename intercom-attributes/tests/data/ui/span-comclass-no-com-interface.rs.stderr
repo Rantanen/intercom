@@ -1,13 +1,13 @@
 error[E0277]: the trait bound `(dyn NotComInterface + 'static): intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>` is not satisfied
- --> span-comimpl-no-interface.rs:7:1
+ --> span-comclass-no-com-interface.rs:8:1
   |
-7 | #[com_class(NotComInterface)]
+8 | #[com_class(NotComInterface)]
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>` is not implemented for `(dyn NotComInterface + 'static)`
 
 error[E0277]: the trait bound `(dyn NotComInterface + 'static): intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>` is not satisfied
- --> span-comimpl-no-interface.rs:7:1
+ --> span-comclass-no-com-interface.rs:8:1
   |
-7 | #[com_class(NotComInterface)]
+8 | #[com_class(NotComInterface)]
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>` is not implemented for `(dyn NotComInterface + 'static)`
 
 error: aborting due to 2 previous errors
