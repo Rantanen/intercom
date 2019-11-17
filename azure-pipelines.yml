@@ -51,11 +51,14 @@ steps:
     cargo fmt -- -V
   displayName: 'Setup environment'
 
-- script: cargo fmt -- --check
+- script: |
+    cargo fmt -- --check
+    cd test
+    cargo fmt -- --check
   displayName: 'Check style'
   condition: and(succeeded(), eq( variables['rustVersion'], 'nightly' ))
 
-- script: cargo clippy
+- script: cargo clippy --all -- -D warnings
   displayName: 'Run build'
   condition: and(succeeded(), eq( variables['rustVersion'], 'nightly' ))
 
