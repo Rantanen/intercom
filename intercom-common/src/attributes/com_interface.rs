@@ -190,6 +190,8 @@ pub fn expand_com_interface(
     output.push(quote_spanned!(itf.span =>
         impl intercom::attributes::ComInterface for #itf_ref {
 
+            type TSelf = #itf_ref;
+
             #[doc = "Returns the IID of the requested interface."]
             fn iid_ts<TS: intercom::type_system::TypeSystem>() -> &'static intercom::IID
                 where Self: intercom::attributes::ComInterfaceVariant<TS>

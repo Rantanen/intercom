@@ -45,6 +45,14 @@ pub trait ComInterfaceVTableFor<I: ?Sized, S, TS: TypeSystem>: ComInterfaceVaria
 /// interface trait.
 pub trait ComInterface
 {
+    /// The current interface.
+    ///
+    /// This associated type exists only to provide better error messages. When
+    /// the `ComInterfaceVariant` is accessed through this type, the compiler
+    /// will first report the missing `ComInterface` implementation if `Self`
+    /// is not a COM interface.
+    type TSelf: ?Sized;
+
     /// IID of the COM interface.
     fn iid(ts: type_system::TypeSystemName) -> Option<&'static IID>;
 

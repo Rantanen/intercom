@@ -128,8 +128,12 @@ pub fn expand_com_class(
                 }
             ));
 
+            // Access the ComInterfaceVariant through the ComInterface trait to
+            // ensure the error messages will first report missing ComInterface
+            // trait.
             let itf_attrib_data = quote!(
-                <#maybe_dyn #itf as intercom::attributes::ComInterfaceVariant<#ts_type>>);
+                <<#maybe_dyn #itf as intercom::attributes::ComInterface>::TSelf
+                    as intercom::attributes::ComInterfaceVariant<#ts_type>>);
             let itf_vtable_for = quote!(
                 <#maybe_dyn #itf as intercom::attributes::ComInterfaceVTableFor<#maybe_dyn #itf, #cls_ident #ty_generics, #ts_type>>);
 
@@ -159,7 +163,7 @@ pub fn expand_com_class(
 
             // Define the support error info match arms.
             support_error_info_match_arms.push(quote!(
-                if riid == <#maybe_dyn #itf as intercom::attributes::ComInterfaceVariant<#ts_type>>::iid() {
+                if riid == #itf_attrib_data::iid() {
                     true
                 } else
             ));
@@ -311,11 +315,19 @@ fn create_get_typeinfo_function(cls: &model::ComClass) -> Result<TokenStream, St
                 true => quote!(),
                 false => quote_spanned!(itf_path.span() => dyn),
             };
+
+            // Access the ComInterfaceVariant through the ComInterface trait to
+            // ensure the error messages will first report missing ComInterface
+            // trait.
+            let attr_cominterfacevariant = quote!(
+                <#maybe_dyn #itf_path as intercom::attributes::ComInterface>::TSelf
+                    as intercom::attributes::ComInterfaceVariant
+            );
             (
                 quote!( intercom::typelib::InterfaceRef {
                     name: #itf_name.into(),
-                    iid_automation: <#maybe_dyn #itf_path as intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid().clone(),
-                    iid_raw: <#maybe_dyn #itf_path as intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::iid().clone(),
+                    iid_automation: <#attr_cominterfacevariant<intercom::type_system::AutomationTypeSystem>>::iid().clone(),
+                    iid_raw: <#attr_cominterfacevariant<intercom::type_system::RawTypeSystem>>::iid().clone(),
                 } ),
                 quote!(
                     r.extend(<#maybe_dyn #itf_path as intercom::attributes::ComInterfaceTypeInfo>::gather_type_info());

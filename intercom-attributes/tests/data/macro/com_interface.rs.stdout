@@ -3951,6 +3951,7 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
     }
 }
 impl intercom::attributes::ComInterface for dyn Foo {
+    type TSelf = dyn Foo;
     #[doc = "Returns the IID of the requested interface."]
     fn iid_ts<TS: intercom::type_system::TypeSystem>() -> &'static intercom::IID
     where

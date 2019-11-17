@@ -68,16 +68,13 @@ impl intercom::attributes::HasInterface<intercom::IUnknown> for Foo {}
 #[allow(non_snake_case)]
 #[doc(hidden)]
 pub struct __intercom_vtable_for_Foo {
-    _ISupportErrorInfo:
-        &'static <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterfaceVariant<
-            intercom::type_system::AutomationTypeSystem,
-        >>::VTable,
-    Foo_Automation: &'static <Foo as intercom::attributes::ComInterfaceVariant<
-        intercom::type_system::AutomationTypeSystem,
-    >>::VTable,
-    Foo_Raw: &'static <Foo as intercom::attributes::ComInterfaceVariant<
-        intercom::type_system::RawTypeSystem,
-    >>::VTable,
+    _ISupportErrorInfo: &'static <dyn intercom::ISupportErrorInfo as
+                                 intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable,
+    Foo_Automation: &'static <<Foo as
+                              intercom::attributes::ComInterface>::TSelf as
+                             intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable,
+    Foo_Raw: &'static <<Foo as intercom::attributes::ComInterface>::TSelf as
+                      intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable,
 }
 #[automatically_derived]
 #[allow(unused_qualifications)]
@@ -90,16 +87,16 @@ impl ::core::clone::Clone for __intercom_vtable_for_Foo {
                     ::core::clone::AssertParamIsClone<&'static <dyn intercom::ISupportErrorInfo
                                                                as
                                                                intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable>;
-            let _: ::core::clone::AssertParamIsClone<
-                &'static <Foo as intercom::attributes::ComInterfaceVariant<
-                    intercom::type_system::AutomationTypeSystem,
-                >>::VTable,
-            >;
-            let _: ::core::clone::AssertParamIsClone<
-                &'static <Foo as intercom::attributes::ComInterfaceVariant<
-                    intercom::type_system::RawTypeSystem,
-                >>::VTable,
-            >;
+            let _:
+                    ::core::clone::AssertParamIsClone<&'static <<Foo as
+                                                                intercom::attributes::ComInterface>::TSelf
+                                                               as
+                                                               intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable>;
+            let _:
+                    ::core::clone::AssertParamIsClone<&'static <<Foo as
+                                                                intercom::attributes::ComInterface>::TSelf
+                                                               as
+                                                               intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable>;
             *self
         }
     }
@@ -110,12 +107,10 @@ impl ::core::clone::Clone for __intercom_vtable_for_Foo {
 impl ::core::marker::Copy for __intercom_vtable_for_Foo {}
 #[allow(non_snake_case)]
 pub struct Static__intercom_vtable_for_Foo {
-    Foo_Automation: <Foo as intercom::attributes::ComInterfaceVariant<
-        intercom::type_system::AutomationTypeSystem,
-    >>::VTable,
-    Foo_Raw: <Foo as intercom::attributes::ComInterfaceVariant<
-        intercom::type_system::RawTypeSystem,
-    >>::VTable,
+    Foo_Automation: <<Foo as intercom::attributes::ComInterface>::TSelf as
+                    intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable,
+    Foo_Raw: <<Foo as intercom::attributes::ComInterface>::TSelf as
+             intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable,
 }
 #[allow(clippy::all)]
 impl intercom::attributes::ComClass for Foo {
@@ -391,15 +386,20 @@ impl intercom::attributes::ComClass for Foo {
                                                                                                                                                                    ::core::fmt::rt::v1::Count::Implied,},}])));
                    ptr
                } else if riid ==
-                             <Foo as
+                             <<Foo as
+                              intercom::attributes::ComInterface>::TSelf as
                                  intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid()
                 {
                    let ptr =
                        &vtables.Foo_Automation as
-                           *const &<Foo as
+                           *const &<<Foo as
+                                    intercom::attributes::ComInterface>::TSelf
+                                   as
                                    intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable
                            as
-                           *mut &<Foo as
+                           *mut &<<Foo as
+                                  intercom::attributes::ComInterface>::TSelf
+                                 as
                                  intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable
                            as intercom::raw::RawComPtr;
                    intercom::logging::trace(|l|
@@ -518,15 +518,20 @@ impl intercom::attributes::ComClass for Foo {
                                                                                                                                                                    ::core::fmt::rt::v1::Count::Implied,},}])));
                    ptr
                } else if riid ==
-                             <Foo as
+                             <<Foo as
+                              intercom::attributes::ComInterface>::TSelf as
                                  intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::iid()
                 {
                    let ptr =
                        &vtables.Foo_Raw as
-                           *const &<Foo as
+                           *const &<<Foo as
+                                    intercom::attributes::ComInterface>::TSelf
+                                   as
                                    intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable
                            as
-                           *mut &<Foo as
+                           *mut &<<Foo as
+                                  intercom::attributes::ComInterface>::TSelf
+                                 as
                                  intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable
                            as intercom::raw::RawComPtr;
                    intercom::logging::trace(|l|
@@ -715,21 +720,18 @@ impl intercom::attributes::ComClass for Foo {
         }
         unsafe {
             let riid = &*riid;
-            if riid
-                == <Foo as intercom::attributes::ComInterfaceVariant<
-                    intercom::type_system::AutomationTypeSystem,
-                >>::iid()
-            {
+            if riid ==
+                   <<Foo as intercom::attributes::ComInterface>::TSelf as
+                       intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid()
+               {
                 true
-            } else if riid
-                == <Foo as intercom::attributes::ComInterfaceVariant<
-                    intercom::type_system::RawTypeSystem,
-                >>::iid()
-            {
+            } else if riid ==
+                          <<Foo as intercom::attributes::ComInterface>::TSelf
+                              as
+                              intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::iid()
+             {
                 true
-            } else {
-                false
-            }
+            } else { false }
         }
     }
 }
@@ -771,11 +773,15 @@ impl intercom::attributes::ComClassTypeInfo for Foo {
                                                                                                                                                 [intercom::typelib::InterfaceRef{name:
                                                                                                                                                                                      "Foo".into(),
                                                                                                                                                                                  iid_automation:
-                                                                                                                                                                                     <Foo
+                                                                                                                                                                                     <<Foo
+                                                                                                                                                                                      as
+                                                                                                                                                                                      intercom::attributes::ComInterface>::TSelf
                                                                                                                                                                                          as
                                                                                                                                                                                          intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid().clone(),
                                                                                                                                                                                  iid_raw:
-                                                                                                                                                                                     <Foo
+                                                                                                                                                                                     <<Foo
+                                                                                                                                                                                      as
+                                                                                                                                                                                      intercom::attributes::ComInterface>::TSelf
                                                                                                                                                                                          as
                                                                                                                                                                                          intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::iid().clone(),}]))))]);
         r.extend(<Foo as intercom::attributes::ComInterfaceTypeInfo>::gather_type_info());
