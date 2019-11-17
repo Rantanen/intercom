@@ -1,35 +1,47 @@
 extern crate intercom;
 
-mod interface {
+mod interface
+{
 
     #[intercom::com_interface]
-    pub trait MyInterface {
+    pub trait MyInterface
+    {
         fn interface_method(&self) -> u32;
     }
 }
 
-mod class {
+mod class
+{
     #[intercom::com_class(MyStruct, crate::interface::MyInterface)]
     #[derive(Default)]
     pub struct MyStruct;
 }
 
-mod interface_impl {
-    #[intercom::com_impl]
-    impl crate::interface::MyInterface for crate::class::MyStruct {
-        fn interface_method(&self) -> u32 { 0 }
+mod interface_impl
+{
+    impl crate::interface::MyInterface for crate::class::MyStruct
+    {
+        fn interface_method(&self) -> u32
+        {
+            0
+        }
     }
 }
 
-mod class_impl {
-    #[intercom::com_impl]
+mod class_impl
+{
     #[intercom::com_interface]
-    impl crate::class::MyStruct {
-        fn struct_method(&self) -> u32 { 0 }
+    impl crate::class::MyStruct
+    {
+        fn struct_method(&self) -> u32
+        {
+            0
+        }
     }
 }
 
-mod submodule {
+mod submodule
+{
     intercom::com_module!(
         class SubmoduleClass
     );
@@ -39,7 +51,6 @@ mod submodule {
     pub struct SubmoduleClass;
 
     #[intercom::com_interface]
-    #[intercom::com_impl]
     impl SubmoduleClass {}
 }
 

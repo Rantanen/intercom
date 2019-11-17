@@ -1,8 +1,0 @@
-warning: struct is never constructed: `S`
- --> span-comimpl-for-non-comclass.rs:8:1
-  |
-8 | struct S;
-  | ^^^^^^^^^
-  |
-  = note: `#[warn(dead_code)]` on by default
-
