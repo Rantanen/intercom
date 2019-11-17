@@ -330,13 +330,13 @@ fn create_get_typeinfo_function(cls: &model::ComClass) -> Result<TokenStream, St
                     iid_raw: <#maybe_dyn #itf_path as intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::iid().clone(),
                 } ),
                 quote!(
-                    r.extend(<#maybe_dyn #itf_path as intercom::attributes::InterfaceHasTypeInfo>::gather_type_info());
+                    r.extend(<#maybe_dyn #itf_path as intercom::attributes::ComInterfaceTypeInfo>::gather_type_info());
                 ),
             )
         })
         .unzip();
     Ok(quote!(
-        impl #impl_generics intercom::attributes::HasTypeInfo for #cls_ident #ty_generics #where_clause
+        impl #impl_generics intercom::attributes::ComClassTypeInfo for #cls_ident #ty_generics #where_clause
         {
             fn gather_type_info() -> Vec<intercom::typelib::TypeInfo>
             {

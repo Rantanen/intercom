@@ -147,7 +147,7 @@ fn create_gather_module_types(lib: &model::ComLibrary) -> Result<TokenStream, St
 {
     let create_class_typeinfo = lib.coclasses.iter().map(|path| {
         quote!(
-            <#path as intercom::attributes::HasTypeInfo>::gather_type_info()
+            <#path as intercom::attributes::ComClassTypeInfo>::gather_type_info()
         )
     });
     let gather_submodule_types = lib

@@ -679,7 +679,7 @@ fn create_get_typeinfo_function(itf: &model::ComInterface) -> Result<TokenStream
     Ok(quote_spanned!(itf.span =>
         #[allow(non_snake_case)]
         #[allow(dead_code)]
-        impl intercom::attributes::InterfaceHasTypeInfo for #maybe_dyn #itf_path
+        impl intercom::attributes::ComInterfaceTypeInfo for #maybe_dyn #itf_path
         {
             fn gather_type_info() -> Vec<intercom::typelib::TypeInfo>
             {

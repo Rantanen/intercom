@@ -62,12 +62,12 @@ pub trait ComInterfaceVariant<TS: TypeSystem>
     fn iid() -> &'static IID;
 }
 
-pub trait HasTypeInfo
+pub trait ComClassTypeInfo
 {
     fn gather_type_info() -> Vec<crate::typelib::TypeInfo>;
 }
 
-pub trait InterfaceHasTypeInfo
+pub trait ComInterfaceTypeInfo
 {
     fn gather_type_info() -> Vec<crate::typelib::TypeInfo>;
 }
