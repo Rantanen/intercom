@@ -3,7 +3,7 @@ use super::*;
 use crate::prelude::*;
 
 use crate::guid::GUID;
-use ::syn::{Path, Visibility};
+use syn::{Generics, Path, Visibility};
 
 intercom_attribute!(
     ComClassAttr<ComClassAttrParam, Path> {
@@ -19,6 +19,7 @@ pub struct ComClass
     pub clsid: Option<GUID>,
     pub visibility: Visibility,
     pub interfaces: Vec<Path>,
+    pub generics: Generics,
 }
 
 impl ComClass
@@ -69,6 +70,7 @@ impl ComClass
 
         Ok(ComClass {
             visibility: item.vis.clone(),
+            generics: item.generics,
             name,
             clsid,
             interfaces,

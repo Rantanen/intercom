@@ -1,3 +1,4 @@
+use crate::attributes::{ComInterface, HasInterface};
 use crate::type_system::{ExternInput, ExternOutput, TypeSystem};
 use crate::*;
 use intercom_attributes::ForeignType;
@@ -492,7 +493,7 @@ impl<T: ComInterface + ?Sized> From<&ComItf<T>> for Variant
 {
     fn from(src: &ComItf<T>) -> Self
     {
-        let iunk: &ComItf<dyn IUnknown> = src.as_ref();
+        let iunk: &ComItf<dyn IUnknown> = src.as_iunknown();
         Variant::IUnknown(ComRc::from(iunk))
     }
 }

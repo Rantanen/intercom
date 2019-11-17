@@ -1,0 +1,9 @@
+error[E0277]: the trait bound `(dyn NotComInterface + 'static): intercom::attributes::ComInterface` is not satisfied
+ --> span-comclass-no-com-interface.rs:8:1
+  |
+8 | #[com_class(NotComInterface)]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::attributes::ComInterface` is not implemented for `(dyn NotComInterface + 'static)`
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0277`.

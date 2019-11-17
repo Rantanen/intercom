@@ -1,4 +1,6 @@
 use super::*;
+use crate::attributes::ComInterface;
+use crate::interfaces::RawIUnknown;
 use crate::type_system::{
     AutomationTypeSystem, ExternInput, InfallibleExternInput, RawTypeSystem, TypeSystem,
 };
@@ -81,6 +83,16 @@ impl<T: ?Sized> ComItf<T>
     {
         TS::get_ptr(this)
     }
+
+    pub fn as_raw_iunknown(&self) -> &ComItf<dyn RawIUnknown>
+    {
+        unsafe { &*(self as *const _ as *const ComItf<dyn RawIUnknown>) }
+    }
+
+    pub fn as_iunknown(&self) -> &ComItf<dyn IUnknown>
+    {
+        unsafe { &*(self as *const _ as *const ComItf<dyn IUnknown>) }
+    }
 }
 
 impl ComItf<dyn IUnknown>
@@ -98,7 +110,7 @@ impl ComItf<dyn IUnknown>
         };
 
         // Try to query interface using the iid.
-        let iunk: &dyn IUnknown = &*self;
+        let iunk: &dyn RawIUnknown = &*self.as_raw_iunknown();
         match iunk.query_interface(iid) {
             Ok(ptr) => {
                 // Interface was available. Convert the raw pointer into
@@ -126,7 +138,7 @@ impl<T: ComInterface + ?Sized> ComItf<T>
         -> ComResult<ComRc<TTarget>>
     {
         // Get the IUnknown interface.
-        let iunk: &ComItf<dyn IUnknown> = this.as_ref();
+        let iunk = this.as_iunknown();
 
         // Try every type system.
         //
@@ -149,7 +161,7 @@ impl<T: ComInterface + ?Sized> ComItf<T>
 
     pub fn as_rc(this: &Self) -> ComRc<T>
     {
-        let iunk: &ComItf<dyn IUnknown> = this.as_ref();
+        let iunk = this.as_raw_iunknown();
 
         // Calling `add_ref` makes the pointer safe for attach.
         //
@@ -186,8 +198,7 @@ impl<T: ComInterface + ?Sized> std::ops::Deref for ComItf<T>
     }
 }
 
-unsafe impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS>
-    for &'a crate::ComItf<I>
+unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternInput<TS> for &'a crate::ComItf<I>
 where
     I: ForeignType,
 {
@@ -209,7 +220,7 @@ where
     }
 }
 
-unsafe impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS>
+unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternInput<TS>
     for Option<&'a crate::ComItf<I>>
 where
     I: ForeignType,
@@ -235,7 +246,7 @@ where
     }
 }
 
-unsafe impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> InfallibleExternInput<TS>
+unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> InfallibleExternInput<TS>
     for Option<&'a crate::ComItf<I>>
 where
     I: ForeignType,
@@ -273,12 +284,4 @@ extern "system" {
         riid: crate::REFIID,
         out: &mut raw::RawComPtr,
     ) -> crate::raw::HRESULT;
-}
-
-impl<T: ComInterface + ?Sized> AsRef<ComItf<dyn IUnknown>> for ComItf<T>
-{
-    fn as_ref(&self) -> &ComItf<dyn IUnknown>
-    {
-        unsafe { &*(self as *const _ as *const ComItf<dyn IUnknown>) }
-    }
 }

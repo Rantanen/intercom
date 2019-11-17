@@ -8,7 +8,6 @@ pub struct PrimitiveOperations {}
     com_iid = "{12341234-1234-1234-1234-123412340002}",
     raw_iid = "{12341234-1234-1234-1234-123412340003}"
 )]
-#[com_impl]
 impl PrimitiveOperations
 {
     pub fn i8(&self, v: i8) -> i8

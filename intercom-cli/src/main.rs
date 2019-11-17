@@ -20,6 +20,8 @@ mod typelib;
 /// Main entry point.
 fn main()
 {
+    env_logger::init();
+
     // Define the command line arguments using clap.
     let app = App::new("Rust COM utility")
         .version(crate_version!())

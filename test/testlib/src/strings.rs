@@ -36,7 +36,6 @@ impl StringTests
     }
 }
 
-#[com_impl]
 impl IStringTests for StringTests
 {
     fn string_to_index(&self, s: &str) -> ComResult<u32>

@@ -266,6 +266,26 @@ impl ComMethodInfo
 
         in_args.chain(out_args).collect()
     }
+
+    pub fn get_parameters_tokenstream(&self) -> TokenStream
+    {
+        let infallible = self.returnhandler.is_infallible();
+        let in_out_args = self.raw_com_args().into_iter().map(|com_arg| {
+            let name = &com_arg.name;
+            let com_ty = &com_arg
+                .handler
+                .com_ty(com_arg.span, com_arg.dir, infallible);
+            let dir = match com_arg.dir {
+                Direction::In => quote!(),
+                Direction::Out | Direction::Retval => quote_spanned!(com_arg.span => *mut ),
+            };
+            quote_spanned!(com_arg.span => #name : #dir #com_ty )
+        });
+        let self_arg = quote_spanned!(self.rust_self_arg.span()=>
+            self_vtable: intercom::raw::RawComPtr);
+        let args = std::iter::once(self_arg).chain(in_out_args);
+        quote!(#(#args),*)
+    }
 }
 
 fn try_parse_result(ty: &Type) -> Option<(Type, Type)>

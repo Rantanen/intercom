@@ -60,10 +60,21 @@ pub unsafe extern "system" fn DllGetClassObject(
     }
     intercom::raw::E_CLASSNOTAVAILABLE
 }
+#[no_mangle]
+#[allow(non_camel_case_types)]
+#[deprecated]
+#[doc(hidden)]
+pub extern "stdcall" fn DllMain(
+    _dll_instance: *mut std::os::raw::c_void,
+    reason: u32,
+    _reserved: *mut std::os::raw::c_void,
+) -> bool {
+    true
+}
 pub fn __gather_module_types() -> Vec<intercom::typelib::TypeInfo> {
     <[_]>::into_vec(box [
-        <some::path::Type as intercom::attributes::HasTypeInfo>::gather_type_info(),
-        <SimpleType as intercom::attributes::HasTypeInfo>::gather_type_info(),
+        <some::path::Type as intercom::attributes::ComClassTypeInfo>::gather_type_info(),
+        <SimpleType as intercom::attributes::ComClassTypeInfo>::gather_type_info(),
     ])
     .into_iter()
     .flatten()

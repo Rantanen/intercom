@@ -8,66 +8,57 @@
 use super::*;
 use crate::attributes;
 use crate::raw::RawComPtr;
-use crate::type_system::AutomationTypeSystem;
 
-type IUnknownVtbl = <dyn crate::IUnknown as attributes::ComInterface<
-    intercom::type_system::AutomationTypeSystem,
->>::VTable;
-
-#[allow(non_camel_case_types)]
-#[doc(hidden)]
-pub struct ClassFactoryVtbl
+#[com_interface(
+    com_iid = "00000001-0000-0000-C000-000000000046",
+    raw_iid = "11111112-0000-0000-C000-000000000046"
+)]
+pub trait IClassFactory
 {
-    pub __base: IUnknownVtbl,
-    pub create_instance:
-        unsafe extern "system" fn(RawComPtr, RawComPtr, REFIID, *mut RawComPtr) -> raw::HRESULT,
-    pub lock_server: unsafe extern "system" fn(RawComPtr, bool) -> raw::HRESULT,
+    fn create_instance(&self, outer: RawComPtr, riid: REFIID) -> ComResult<RawComPtr>;
+
+    fn lock_server(&self, lock: bool) -> ComResult<()>;
 }
 
 #[doc(hidden)]
-pub struct ClassFactory<T: Default + CoClass>
+#[com_class(IClassFactory)]
+pub struct ClassFactory<T: Default + intercom::attributes::ComClass>
 {
     phantom: std::marker::PhantomData<T>,
 }
 
-impl<T: Default + CoClass> CoClass for ClassFactory<T>
+impl<T: Default + attributes::ComClass> IClassFactory for ClassFactory<T>
 {
-    type VTableList = &'static ClassFactoryVtbl;
-    fn create_vtable_list() -> Self::VTableList
+    fn create_instance(&self, _outer: RawComPtr, riid: REFIID) -> ComResult<RawComPtr>
     {
-        ClassFactory::<T>::create_vtable()
-    }
-
-    fn query_interface(vtables: &Self::VTableList, riid: REFIID) -> RawComResult<RawComPtr>
-    {
-        if riid.is_null() {
-            return Err(raw::E_NOINTERFACE);
-        }
         unsafe {
-            let riid = &*riid;
-            if riid == IUnknown::iid_ts::<AutomationTypeSystem>() || *riid == IID_IClassFactory {
-                Ok(vtables as *const _ as RawComPtr)
+            let instance = ComBox::new(T::default());
+            let mut out = std::ptr::null_mut();
+            let hr = ComBoxData::query_interface(instance.as_ref(), riid, &mut out);
+            if hr == raw::S_OK {
+                Ok(out)
             } else {
-                Err(raw::E_NOINTERFACE)
+                Err(ComError::from(hr))
             }
         }
     }
 
-    fn interface_supports_error_info(_riid: REFIID) -> bool
+    fn lock_server(&self, lock: bool) -> ComResult<()>
     {
-        false
+        unsafe {
+            if lock {
+                ComBoxData::add_ref(ComBoxData::of(self));
+            } else {
+                ComBoxData::release(
+                    ComBoxData::of(self) as *const ComBoxData<Self> as *mut ComBoxData<Self>
+                );
+            }
+        }
+        Ok(())
     }
 }
 
-impl AsRef<IUnknownVtbl> for ClassFactoryVtbl
-{
-    fn as_ref(&self) -> &IUnknownVtbl
-    {
-        &self.__base
-    }
-}
-
-impl<T: Default + CoClass> ClassFactory<T>
+impl<T: Default + attributes::ComClass> ClassFactory<T>
 {
     /// # Safety
     ///
@@ -80,45 +71,5 @@ impl<T: Default + CoClass> ClassFactory<T>
         };
 
         intercom::ComBoxData::query_interface(intercom::ComBox::new(factory).as_mut(), riid, out)
-    }
-
-    /// # Safety
-    ///
-    /// The pointers _must_ be valid.
-    pub unsafe extern "system" fn create_instance(
-        _self_vtbl: RawComPtr,
-        _outer: RawComPtr,
-        riid: REFIID,
-        out: *mut RawComPtr,
-    ) -> raw::HRESULT
-    {
-        let mut combox = ComBox::new(T::default());
-        ComBoxData::query_interface(combox.as_mut(), riid, out)
-    }
-
-    /// # Safety
-    ///
-    /// The pointers _must_ be valid.
-    pub unsafe extern "system" fn lock_server(self_vtbl: RawComPtr, lock: bool) -> raw::HRESULT
-    {
-        if lock {
-            ComBoxData::<Self>::add_ref_ptr(self_vtbl);
-        } else {
-            ComBoxData::<Self>::release_ptr(self_vtbl);
-        }
-        raw::S_OK
-    }
-
-    pub fn create_vtable() -> &'static ClassFactoryVtbl
-    {
-        &ClassFactoryVtbl {
-            __base: IUnknownVtbl {
-                query_interface: ComBoxData::<Self>::query_interface_ptr,
-                add_ref: ComBoxData::<Self>::add_ref_ptr,
-                release: ComBoxData::<Self>::release_ptr,
-            },
-            create_instance: Self::create_instance,
-            lock_server: Self::lock_server,
-        }
     }
 }

@@ -14,4 +14,4 @@ libloading = "0.5"
 handlebars = "2.0"
 glob = "0.3"
 winapi = { version = "0.3", features = [ "winreg", "winbase" ] }
-
+env_logger = "0.7"

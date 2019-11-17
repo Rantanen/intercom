@@ -15,7 +15,6 @@ pub trait ICallback
 #[derive(Default)]
 struct DoCallback(u32);
 
-#[com_impl]
 impl ICallback for DoCallback
 {
     fn callback(&self) -> u32
@@ -40,7 +39,6 @@ pub trait INullableInterface
 #[derive(Default)]
 pub struct NullableTests;
 
-#[com_impl]
 #[com_interface]
 impl NullableTests
 {
@@ -101,7 +99,6 @@ impl NullableTests
     }
 }
 
-#[com_impl]
 impl INullableInterface for NullableTests
 {
     fn nullable_parameter(&self, itf: Option<&ComItf<dyn ICallback>>) -> u32

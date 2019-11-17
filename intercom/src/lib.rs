@@ -10,20 +10,19 @@
 //! A basic example of a calculator type exposed as a COM object.
 //!
 //! ```
-//! use intercom::{com_library, com_class, com_interface, com_impl, ComResult};
+//! use intercom::{com_library, com_class, com_interface, ComResult};
 //!
 //! // Define COM classes to expose from this library.
 //! com_library!(class Calculator);
 //!
 //! // Define the COM class and the interfaces it implements.
-//! #[com_class(Calculator)]
+//! #[com_class(Self)]
 //! #[derive(Default)]
 //! struct Calculator;
 //!
 //! // Define the implementation for the class. The COM interface is defined
 //! // implicitly by the `impl`.
 //! #[com_interface]
-//! #[com_impl]
 //! impl Calculator {
 //!     fn add(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a + b) }
 //!     fn sub(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a - b) }
@@ -89,7 +88,7 @@ pub use crate::guid::GUID;
 pub mod error;
 pub use crate::error::{load_error, store_error, ComError, ErrorValue};
 pub mod alloc;
-mod interfaces;
+pub mod interfaces;
 pub mod runtime;
 mod variant;
 pub use crate::variant::{Variant, VariantError};
@@ -103,26 +102,6 @@ com_module!(
     class intercom::alloc::Allocator,
     class intercom::error::ErrorStore,
 );
-
-/// The `ComInterface` trait defines the COM interface details for a COM
-/// interface trait.
-pub trait ComInterface
-{
-    /// IID of the COM interface.
-    fn iid(ts: type_system::TypeSystemName) -> Option<&'static IID>;
-
-    fn iid_ts<TS: intercom::type_system::TypeSystem>() -> &'static intercom::IID
-    where
-        Self: intercom::attributes::ComInterface<TS>;
-
-    /// Dereferences a `ComItf<T>` into a `&T`.
-    ///
-    /// While in most cases the user crate will implement `T` for `ComItf<T>`,
-    /// this impl exists only in the user crate and cannot be used in generic
-    /// contexts. For generic `ComItf<T>` use, Intercom ipmls `Deref<Target=T>`
-    /// for `ComItf<T>` which requires this method.
-    fn deref(com_itf: &ComItf<Self>) -> &Self;
-}
 
 /// Raw COM pointer type.
 /// Interface ID GUID.
@@ -213,7 +192,7 @@ pub mod raw
         }
     }
 
-    impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> InterfacePtr<TS, I>
+    impl<TS: TypeSystem, I: crate::attributes::ComInterface + ?Sized> InterfacePtr<TS, I>
     {
         pub fn as_unknown(self) -> InterfacePtr<TS, dyn crate::IUnknown>
         {
@@ -225,7 +204,8 @@ pub mod raw
         }
     }
 
-    impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ForeignType for Option<InterfacePtr<TS, I>>
+    impl<TS: TypeSystem, I: crate::attributes::ComInterface + ?Sized> ForeignType
+        for Option<InterfacePtr<TS, I>>
     where
         I: ForeignType,
     {
@@ -264,24 +244,6 @@ pub use crate::interfaces::IUnknown;
 
 pub use crate::interfaces::ISupportErrorInfo;
 // pub use crate::interfaces::__ISupportErrorInfo_AutomationVtbl as ISupportErrorInfoVtbl;
-
-// Do we need this? Would rather not export this through an extern crate
-// for another dll.
-//
-// com_library should have dllmain!() macro or similar that implements this
-// together with the COM registration.
-#[no_mangle]
-#[allow(non_camel_case_types)]
-#[deprecated]
-#[doc(hidden)]
-pub extern "stdcall" fn DllMain(
-    _dll_instance: *mut std::os::raw::c_void,
-    _reason: u32,
-    _reserved: *mut std::os::raw::c_void,
-) -> bool
-{
-    true
-}
 
 /// Basic COM result type.
 ///

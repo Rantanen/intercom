@@ -19,9 +19,6 @@ pub enum ParseError
     #[fail(display = "Parsing [com_interface] item {} failed: {}", _0, _1)]
     ComInterface(String, String),
 
-    #[fail(display = "Parsing [com_impl] {} for {} failed: {}", _0, _1, _2)]
-    ComImpl(String, String, String),
-
     #[fail(display = "Processing crate failed: {}", _0)]
     ComCrate(String),
 
@@ -44,5 +41,3 @@ mod comclass;
 pub use self::comclass::*;
 mod cominterface;
 pub use self::cominterface::*;
-mod comimpl;
-pub use self::comimpl::*;

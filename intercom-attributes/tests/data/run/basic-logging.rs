@@ -18,7 +18,6 @@ trait IAnotherInterface
 {
 }
 
-#[intercom::com_impl]
 impl IInterface for S
 {
     fn call(&self)
@@ -36,7 +35,6 @@ mod submodule
     {
     }
 
-    #[intercom::com_impl]
     impl ISubInterface for S {}
 }
 

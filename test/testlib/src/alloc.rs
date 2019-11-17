@@ -5,7 +5,6 @@ use intercom::*;
 pub struct AllocTests;
 
 #[com_interface]
-#[com_impl]
 impl AllocTests
 {
     pub fn get_bstr_result(&self, value: u32) -> ComResult<String>

@@ -28,14 +28,1039 @@ pub trait Foo {
 
     fn variant_method(&self, input: Variant) -> ComResult<Variant>;
 }
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_simple_method_Automation<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+) -> ()
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::AutomationTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::AutomationTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"simple_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let self_struct = &**self_combox;
+    let __result = self_struct.simple_method();
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::", ", OK"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"simple_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_arg_method_Automation<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    a: <u16 as intercom::type_system::InfallibleExternInput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::ForeignType,
+) -> ()
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::AutomationTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::AutomationTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"arg_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let self_struct = &**self_combox;
+    let __result = self_struct.arg_method(<u16 as intercom::type_system::InfallibleExternInput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::from_foreign_parameter(a));
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::", ", OK"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"arg_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_simple_result_method_Automation<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+) -> <u16 as intercom::type_system::InfallibleExternOutput<
+    intercom::type_system::AutomationTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::AutomationTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::AutomationTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"simple_result_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let self_struct = &**self_combox;
+    let __result = self_struct.simple_result_method();
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::", ", OK"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"simple_result_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    <u16 as intercom::type_system::InfallibleExternOutput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::into_foreign_output(__result)
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_com_result_method_Automation<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    __out: *mut <u16 as intercom::type_system::ExternOutput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+    intercom::type_system::AutomationTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::AutomationTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::AutomationTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"com_result_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let result: Result<
+        <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+            intercom::type_system::AutomationTypeSystem,
+        >>::ForeignType,
+        intercom::ComError,
+    > = (|| {
+        let self_struct = &**self_combox;
+        let __result = self_struct.com_result_method();
+        Ok({
+            match __result {
+                Ok(v1) => {
+                    *__out = <u16 as intercom::type_system::ExternOutput<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::into_foreign_output(v1)?;
+                    intercom::raw::S_OK
+                }
+                Err(e) => {
+                    *__out = intercom::type_system::ExternDefault::extern_default();
+                    intercom::store_error(e).hresult
+                }
+            }
+        })
+    })();
+    match result {
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"com_result_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"com_result_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::ForeignType as intercom::ErrorValue>::from_error(intercom::store_error(
+                err,
+            ))
+        }
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_rust_result_method_Automation<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    __out: *mut <u16 as intercom::type_system::ExternOutput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+    intercom::type_system::AutomationTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::AutomationTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::AutomationTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"rust_result_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let result: Result<
+        <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+            intercom::type_system::AutomationTypeSystem,
+        >>::ForeignType,
+        intercom::ComError,
+    > = (|| {
+        let self_struct = &**self_combox;
+        let __result = self_struct.rust_result_method();
+        Ok({
+            match __result {
+                Ok(v1) => {
+                    *__out = <u16 as intercom::type_system::ExternOutput<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::into_foreign_output(v1)?;
+                    intercom::raw::S_OK
+                }
+                Err(e) => {
+                    *__out = intercom::type_system::ExternDefault::extern_default();
+                    intercom::store_error(e).hresult
+                }
+            }
+        })
+    })();
+    match result {
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"rust_result_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"rust_result_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::ForeignType as intercom::ErrorValue>::from_error(intercom::store_error(
+                err,
+            ))
+        }
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_complete_method_Automation<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    a:
+                                                                  <u16 as
+                                                                  intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+    b:
+                                                                  <i16 as
+                                                                  intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+    __out: *mut <bool as intercom::type_system::ExternOutput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+    intercom::type_system::AutomationTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::AutomationTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::AutomationTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"complete_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let result: Result<
+        <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+            intercom::type_system::AutomationTypeSystem,
+        >>::ForeignType,
+        intercom::ComError,
+    > = (|| {
+        let self_struct = &mut **self_combox;
+        let __result = self_struct.complete_method(
+            <u16 as intercom::type_system::ExternInput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::from_foreign_parameter(a)?,
+            <i16 as intercom::type_system::ExternInput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::from_foreign_parameter(b)?,
+        );
+        Ok({
+            match __result {
+                Ok(v1) => {
+                    *__out = <bool as intercom::type_system::ExternOutput<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::into_foreign_output(v1)?;
+                    intercom::raw::S_OK
+                }
+                Err(e) => {
+                    *__out = intercom::type_system::ExternDefault::extern_default();
+                    intercom::store_error(e).hresult
+                }
+            }
+        })
+    })();
+    match result {
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"complete_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"complete_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::ForeignType as intercom::ErrorValue>::from_error(intercom::store_error(
+                err,
+            ))
+        }
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_string_method_Automation<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    msg: <String as intercom::type_system::InfallibleExternInput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::ForeignType,
+) -> <String as intercom::type_system::InfallibleExternOutput<
+    intercom::type_system::AutomationTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::AutomationTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::AutomationTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"string_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let self_struct = &**self_combox;
+    let __result =
+        self_struct.string_method(<String as intercom::type_system::InfallibleExternInput<
+            intercom::type_system::AutomationTypeSystem,
+        >>::from_foreign_parameter(msg));
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::", ", OK"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"string_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    <String as intercom::type_system::InfallibleExternOutput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::into_foreign_output(__result)
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_comitf_method_Automation<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    itf: <ComItf<dyn Foo> as intercom::type_system::ExternInput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::ForeignType,
+    __out: *mut <ComItf<dyn IUnknown> as intercom::type_system::ExternOutput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+    intercom::type_system::AutomationTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::AutomationTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::AutomationTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"comitf_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let result: Result<
+        <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+            intercom::type_system::AutomationTypeSystem,
+        >>::ForeignType,
+        intercom::ComError,
+    > = (|| {
+        let self_struct = &**self_combox;
+        let __result =
+            self_struct.comitf_method(<ComItf<dyn Foo> as intercom::type_system::ExternInput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::from_foreign_parameter(itf)?);
+        Ok({
+            match __result {
+                Ok(v1) => {
+                    *__out = <ComItf<dyn IUnknown> as intercom::type_system::ExternOutput<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::into_foreign_output(v1)?;
+                    intercom::raw::S_OK
+                }
+                Err(e) => {
+                    *__out = intercom::type_system::ExternDefault::extern_default();
+                    intercom::store_error(e).hresult
+                }
+            }
+        })
+    })();
+    match result {
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"comitf_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"comitf_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::ForeignType as intercom::ErrorValue>::from_error(intercom::store_error(
+                err,
+            ))
+        }
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_bool_method_Automation<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    input: <bool as intercom::type_system::ExternInput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::ForeignType,
+    __out: *mut <bool as intercom::type_system::ExternOutput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+    intercom::type_system::AutomationTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::AutomationTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::AutomationTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"bool_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let result: Result<
+        <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+            intercom::type_system::AutomationTypeSystem,
+        >>::ForeignType,
+        intercom::ComError,
+    > = (|| {
+        let self_struct = &**self_combox;
+        let __result = self_struct.bool_method(<bool as intercom::type_system::ExternInput<
+            intercom::type_system::AutomationTypeSystem,
+        >>::from_foreign_parameter(input)?);
+        Ok({
+            match __result {
+                Ok(v1) => {
+                    *__out = <bool as intercom::type_system::ExternOutput<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::into_foreign_output(v1)?;
+                    intercom::raw::S_OK
+                }
+                Err(e) => {
+                    *__out = intercom::type_system::ExternDefault::extern_default();
+                    intercom::store_error(e).hresult
+                }
+            }
+        })
+    })();
+    match result {
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"bool_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"bool_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::ForeignType as intercom::ErrorValue>::from_error(intercom::store_error(
+                err,
+            ))
+        }
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_variant_method_Automation<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    input: <Variant as intercom::type_system::ExternInput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::ForeignType,
+    __out: *mut <Variant as intercom::type_system::ExternOutput<
+        intercom::type_system::AutomationTypeSystem,
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+    intercom::type_system::AutomationTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::AutomationTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::AutomationTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"variant_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let result: Result<
+        <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+            intercom::type_system::AutomationTypeSystem,
+        >>::ForeignType,
+        intercom::ComError,
+    > = (|| {
+        let self_struct = &**self_combox;
+        let __result =
+            self_struct.variant_method(<Variant as intercom::type_system::ExternInput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::from_foreign_parameter(input)?);
+        Ok({
+            match __result {
+                Ok(v1) => {
+                    *__out = <Variant as intercom::type_system::ExternOutput<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::into_foreign_output(v1)?;
+                    intercom::raw::S_OK
+                }
+                Err(e) => {
+                    *__out = intercom::type_system::ExternDefault::extern_default();
+                    intercom::store_error(e).hresult
+                }
+            }
+        })
+    })();
+    match result {
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"variant_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"variant_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+                intercom::type_system::AutomationTypeSystem,
+            >>::ForeignType as intercom::ErrorValue>::from_error(intercom::store_error(
+                err,
+            ))
+        }
+    }
+}
 #[allow(non_camel_case_types)]
 #[allow(non_snake_case)]
 #[allow(clippy::all)]
 #[repr(C)]
 #[doc(hidden)]
-pub struct __IntercomVtableForFoo_Automation {
+pub struct __FooAutomationVTable {
     pub __base: <dyn intercom::IUnknown as
-                intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable,
+                intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable,
     pub simple_method: unsafe extern "system" fn(self_vtable:
                                                      intercom::raw::RawComPtr)
                            -> (),
@@ -123,12 +1148,179 @@ pub struct __IntercomVtableForFoo_Automation {
                                 <intercom::raw::HRESULT as
                                 intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
 }
+#[automatically_derived]
+#[allow(unused_qualifications)]
+#[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
+#[allow(clippy::all)]
+impl ::core::clone::Clone for __FooAutomationVTable {
+    #[inline]
+    fn clone(&self) -> __FooAutomationVTable {
+        {
+            let _: ::core::clone::AssertParamIsClone<
+                <dyn intercom::IUnknown as intercom::attributes::ComInterfaceVariant<
+                    intercom::type_system::AutomationTypeSystem,
+                >>::VTable,
+            >;
+            let _: ::core::clone::AssertParamIsClone<
+                unsafe extern "system" fn(self_vtable: intercom::raw::RawComPtr) -> (),
+            >;
+            let _: ::core::clone::AssertParamIsClone<
+                unsafe extern "system" fn(
+                    self_vtable: intercom::raw::RawComPtr,
+                    a: <u16 as intercom::type_system::InfallibleExternInput<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::ForeignType,
+                ) -> (),
+            >;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr)
+                                                          ->
+                                                              <u16 as
+                                                              intercom::type_system::InfallibleExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                __out:
+                                                                                    *mut <u16
+                                                                                         as
+                                                                                         intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <intercom::raw::HRESULT
+                                                              as
+                                                              intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                __out:
+                                                                                    *mut <u16
+                                                                                         as
+                                                                                         intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <intercom::raw::HRESULT
+                                                              as
+                                                              intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                a:
+                                                                                    <u16
+                                                                                    as
+                                                                                    intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+                                                                                b:
+                                                                                    <i16
+                                                                                    as
+                                                                                    intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+                                                                                __out:
+                                                                                    *mut <bool
+                                                                                         as
+                                                                                         intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <intercom::raw::HRESULT
+                                                              as
+                                                              intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                msg:
+                                                                                    <String
+                                                                                    as
+                                                                                    intercom::type_system::InfallibleExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <String as
+                                                              intercom::type_system::InfallibleExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                itf:
+                                                                                    <ComItf<dyn Foo>
+                                                                                    as
+                                                                                    intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+                                                                                __out:
+                                                                                    *mut <ComItf<dyn IUnknown>
+                                                                                         as
+                                                                                         intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <intercom::raw::HRESULT
+                                                              as
+                                                              intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                input:
+                                                                                    <bool
+                                                                                    as
+                                                                                    intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+                                                                                __out:
+                                                                                    *mut <bool
+                                                                                         as
+                                                                                         intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <intercom::raw::HRESULT
+                                                              as
+                                                              intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                input:
+                                                                                    <Variant
+                                                                                    as
+                                                                                    intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>>::ForeignType,
+                                                                                __out:
+                                                                                    *mut <Variant
+                                                                                         as
+                                                                                         intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <intercom::raw::HRESULT
+                                                              as
+                                                              intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>>::ForeignType>;
+            *self
+        }
+    }
+}
+#[automatically_derived]
+#[allow(unused_qualifications)]
+#[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
+#[allow(clippy::all)]
+impl ::core::marker::Copy for __FooAutomationVTable {}
+#[allow(unused)]
+impl<I, S>
+    intercom::attributes::ComInterfaceVTableFor<I, S, intercom::type_system::AutomationTypeSystem>
+    for dyn Foo
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::AutomationTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    const VTABLE: __FooAutomationVTable = __FooAutomationVTable {
+        __base: <dyn intercom::IUnknown as intercom::attributes::ComInterfaceVTableFor<
+            I,
+            S,
+            intercom::type_system::AutomationTypeSystem,
+        >>::VTABLE,
+        simple_method: __Foo_simple_method_Automation::<I, S>,
+        arg_method: __Foo_arg_method_Automation::<I, S>,
+        simple_result_method: __Foo_simple_result_method_Automation::<I, S>,
+        com_result_method: __Foo_com_result_method_Automation::<I, S>,
+        rust_result_method: __Foo_rust_result_method_Automation::<I, S>,
+        complete_method: __Foo_complete_method_Automation::<I, S>,
+        string_method: __Foo_string_method_Automation::<I, S>,
+        comitf_method: __Foo_comitf_method_Automation::<I, S>,
+        bool_method: __Foo_bool_method_Automation::<I, S>,
+        variant_method: __Foo_variant_method_Automation::<I, S>,
+    };
+}
 #[allow(non_camel_case_types)]
 #[allow(non_snake_case)]
 #[allow(clippy::all)]
 #[doc(hidden)]
-impl intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem> for dyn Foo {
-    type VTable = __IntercomVtableForFoo_Automation;
+impl intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>
+    for dyn Foo
+{
+    type VTable = __FooAutomationVTable;
     fn iid() -> &'static intercom::IID {
         &intercom::GUID {
             data1: 0u32,
@@ -138,14 +1330,1035 @@ impl intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSys
         }
     }
 }
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_simple_method_Raw<I, S>(self_vtable: intercom::raw::RawComPtr) -> ()
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::RawTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::RawTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"simple_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let self_struct = &**self_combox;
+    let __result = self_struct.simple_method();
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::", ", OK"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"simple_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_arg_method_Raw<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    a: <u16 as intercom::type_system::InfallibleExternInput<
+        intercom::type_system::RawTypeSystem,
+    >>::ForeignType,
+) -> ()
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::RawTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::RawTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"arg_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let self_struct = &**self_combox;
+    let __result = self_struct.arg_method(<u16 as intercom::type_system::InfallibleExternInput<
+        intercom::type_system::RawTypeSystem,
+    >>::from_foreign_parameter(a));
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::", ", OK"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"arg_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_simple_result_method_Raw<I,
+                                                         S>(self_vtable:
+                                                                intercom::raw::RawComPtr)
+ ->
+     <u16 as
+     intercom::type_system::InfallibleExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType
+ where I: ?Sized,
+ S: intercom::attributes::ComClassInterface<I,
+                                            intercom::type_system::RawTypeSystem> +
+intercom::attributes::ComClass + Foo{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::RawTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"simple_result_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let self_struct = &**self_combox;
+    let __result = self_struct.simple_result_method();
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::", ", OK"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"simple_result_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    <u16 as
+        intercom::type_system::InfallibleExternOutput<intercom::type_system::RawTypeSystem>>::into_foreign_output(__result)
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_com_result_method_Raw<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    __out: *mut <u16 as intercom::type_system::ExternOutput<
+        intercom::type_system::RawTypeSystem,
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+    intercom::type_system::RawTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::RawTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::RawTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"com_result_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let result: Result<
+        <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+            intercom::type_system::RawTypeSystem,
+        >>::ForeignType,
+        intercom::ComError,
+    > = (|| {
+        let self_struct = &**self_combox;
+        let __result = self_struct.com_result_method();
+        Ok({
+            match __result {
+                Ok(v1) => {
+                    *__out = <u16 as intercom::type_system::ExternOutput<
+                        intercom::type_system::RawTypeSystem,
+                    >>::into_foreign_output(v1)?;
+                    intercom::raw::S_OK
+                }
+                Err(e) => {
+                    *__out = intercom::type_system::ExternDefault::extern_default();
+                    intercom::store_error(e).hresult
+                }
+            }
+        })
+    })();
+    match result {
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"com_result_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"com_result_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+                intercom::type_system::RawTypeSystem,
+            >>::ForeignType as intercom::ErrorValue>::from_error(intercom::store_error(
+                err,
+            ))
+        }
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_rust_result_method_Raw<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    __out: *mut <u16 as intercom::type_system::ExternOutput<
+        intercom::type_system::RawTypeSystem,
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+    intercom::type_system::RawTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::RawTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::RawTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"rust_result_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let result: Result<
+        <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+            intercom::type_system::RawTypeSystem,
+        >>::ForeignType,
+        intercom::ComError,
+    > = (|| {
+        let self_struct = &**self_combox;
+        let __result = self_struct.rust_result_method();
+        Ok({
+            match __result {
+                Ok(v1) => {
+                    *__out = <u16 as intercom::type_system::ExternOutput<
+                        intercom::type_system::RawTypeSystem,
+                    >>::into_foreign_output(v1)?;
+                    intercom::raw::S_OK
+                }
+                Err(e) => {
+                    *__out = intercom::type_system::ExternDefault::extern_default();
+                    intercom::store_error(e).hresult
+                }
+            }
+        })
+    })();
+    match result {
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"rust_result_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"rust_result_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+                intercom::type_system::RawTypeSystem,
+            >>::ForeignType as intercom::ErrorValue>::from_error(intercom::store_error(
+                err,
+            ))
+        }
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_complete_method_Raw<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    a:
+                                                           <u16 as
+                                                           intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+    b:
+                                                           <i16 as
+                                                           intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+    __out: *mut <bool as intercom::type_system::ExternOutput<
+        intercom::type_system::RawTypeSystem,
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+    intercom::type_system::RawTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::RawTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::RawTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"complete_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let result: Result<
+        <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+            intercom::type_system::RawTypeSystem,
+        >>::ForeignType,
+        intercom::ComError,
+    > = (|| {
+        let self_struct = &mut **self_combox;
+        let __result =
+            self_struct.complete_method(
+                <u16 as intercom::type_system::ExternInput<
+                    intercom::type_system::RawTypeSystem,
+                >>::from_foreign_parameter(a)?,
+                <i16 as intercom::type_system::ExternInput<
+                    intercom::type_system::RawTypeSystem,
+                >>::from_foreign_parameter(b)?,
+            );
+        Ok({
+            match __result {
+                Ok(v1) => {
+                    *__out = <bool as intercom::type_system::ExternOutput<
+                        intercom::type_system::RawTypeSystem,
+                    >>::into_foreign_output(v1)?;
+                    intercom::raw::S_OK
+                }
+                Err(e) => {
+                    *__out = intercom::type_system::ExternDefault::extern_default();
+                    intercom::store_error(e).hresult
+                }
+            }
+        })
+    })();
+    match result {
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"complete_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"complete_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+                intercom::type_system::RawTypeSystem,
+            >>::ForeignType as intercom::ErrorValue>::from_error(intercom::store_error(
+                err,
+            ))
+        }
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_string_method_Raw<I,
+                                                  S>(self_vtable:
+                                                         intercom::raw::RawComPtr,
+                                                     msg:
+                                                         <String as
+                                                         intercom::type_system::InfallibleExternInput<intercom::type_system::RawTypeSystem>>::ForeignType)
+ ->
+     <String as
+     intercom::type_system::InfallibleExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType
+ where I: ?Sized,
+ S: intercom::attributes::ComClassInterface<I,
+                                            intercom::type_system::RawTypeSystem> +
+intercom::attributes::ComClass + Foo{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::RawTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"string_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let self_struct = &**self_combox;
+    let __result =
+        self_struct.string_method(<String as intercom::type_system::InfallibleExternInput<
+            intercom::type_system::RawTypeSystem,
+        >>::from_foreign_parameter(msg));
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::", ", OK"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"string_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    <String as intercom::type_system::InfallibleExternOutput<
+        intercom::type_system::RawTypeSystem,
+    >>::into_foreign_output(__result)
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_comitf_method_Raw<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    itf: <ComItf<dyn Foo> as intercom::type_system::ExternInput<
+        intercom::type_system::RawTypeSystem,
+    >>::ForeignType,
+    __out: *mut <ComItf<dyn IUnknown> as intercom::type_system::ExternOutput<
+        intercom::type_system::RawTypeSystem,
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+    intercom::type_system::RawTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::RawTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::RawTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"comitf_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let result: Result<
+        <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+            intercom::type_system::RawTypeSystem,
+        >>::ForeignType,
+        intercom::ComError,
+    > = (|| {
+        let self_struct = &**self_combox;
+        let __result =
+            self_struct.comitf_method(<ComItf<dyn Foo> as intercom::type_system::ExternInput<
+                intercom::type_system::RawTypeSystem,
+            >>::from_foreign_parameter(itf)?);
+        Ok({
+            match __result {
+                Ok(v1) => {
+                    *__out = <ComItf<dyn IUnknown> as intercom::type_system::ExternOutput<
+                        intercom::type_system::RawTypeSystem,
+                    >>::into_foreign_output(v1)?;
+                    intercom::raw::S_OK
+                }
+                Err(e) => {
+                    *__out = intercom::type_system::ExternDefault::extern_default();
+                    intercom::store_error(e).hresult
+                }
+            }
+        })
+    })();
+    match result {
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"comitf_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"comitf_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+                intercom::type_system::RawTypeSystem,
+            >>::ForeignType as intercom::ErrorValue>::from_error(intercom::store_error(
+                err,
+            ))
+        }
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_bool_method_Raw<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    input:
+                                                       <bool as
+                                                       intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+    __out: *mut <bool as intercom::type_system::ExternOutput<
+        intercom::type_system::RawTypeSystem,
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+    intercom::type_system::RawTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::RawTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::RawTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"bool_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let result: Result<
+        <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+            intercom::type_system::RawTypeSystem,
+        >>::ForeignType,
+        intercom::ComError,
+    > = (|| {
+        let self_struct = &**self_combox;
+        let __result = self_struct.bool_method(<bool as intercom::type_system::ExternInput<
+            intercom::type_system::RawTypeSystem,
+        >>::from_foreign_parameter(input)?);
+        Ok({
+            match __result {
+                Ok(v1) => {
+                    *__out = <bool as intercom::type_system::ExternOutput<
+                        intercom::type_system::RawTypeSystem,
+                    >>::into_foreign_output(v1)?;
+                    intercom::raw::S_OK
+                }
+                Err(e) => {
+                    *__out = intercom::type_system::ExternDefault::extern_default();
+                    intercom::store_error(e).hresult
+                }
+            }
+        })
+    })();
+    match result {
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"bool_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"bool_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+                intercom::type_system::RawTypeSystem,
+            >>::ForeignType as intercom::ErrorValue>::from_error(intercom::store_error(
+                err,
+            ))
+        }
+    }
+}
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+unsafe extern "system" fn __Foo_variant_method_Raw<I, S>(
+    self_vtable: intercom::raw::RawComPtr,
+    input:
+                                                          <Variant as
+                                                          intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+    __out: *mut <Variant as intercom::type_system::ExternOutput<
+        intercom::type_system::RawTypeSystem,
+    >>::ForeignType,
+) -> <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+    intercom::type_system::RawTypeSystem,
+>>::ForeignType
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::RawTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    let offset = <S as intercom::attributes::ComClassInterface<
+        I,
+        intercom::type_system::RawTypeSystem,
+    >>::offset();
+    let self_combox = (self_vtable as usize - offset) as *mut intercom::ComBoxData<S>;
+    intercom::logging::trace(|l| {
+        l(
+            "testcrate",
+            ::core::fmt::Arguments::new_v1(
+                &["[", ", through ", "] Serving ", "::"],
+                &match (
+                    &self_combox,
+                    &self_vtable,
+                    &std::any::type_name::<S>(),
+                    &"variant_method",
+                ) {
+                    (arg0, arg1, arg2, arg3) => [
+                        ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                        ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                        ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                    ],
+                },
+            ),
+        )
+    });
+    let result: Result<
+        <intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+            intercom::type_system::RawTypeSystem,
+        >>::ForeignType,
+        intercom::ComError,
+    > = (|| {
+        let self_struct = &**self_combox;
+        let __result =
+            self_struct.variant_method(<Variant as intercom::type_system::ExternInput<
+                intercom::type_system::RawTypeSystem,
+            >>::from_foreign_parameter(input)?);
+        Ok({
+            match __result {
+                Ok(v1) => {
+                    *__out = <Variant as intercom::type_system::ExternOutput<
+                        intercom::type_system::RawTypeSystem,
+                    >>::into_foreign_output(v1)?;
+                    intercom::raw::S_OK
+                }
+                Err(e) => {
+                    *__out = intercom::type_system::ExternDefault::extern_default();
+                    intercom::store_error(e).hresult
+                }
+            }
+        })
+    })();
+    match result {
+        Ok(v) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", OK"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"variant_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            v
+        }
+        Err(err) => {
+            intercom::logging::trace(|l| {
+                l(
+                    "testcrate",
+                    ::core::fmt::Arguments::new_v1(
+                        &["[", ", through ", "] Serving ", "::", ", ERROR"],
+                        &match (
+                            &self_combox,
+                            &self_vtable,
+                            &std::any::type_name::<S>(),
+                            &"variant_method",
+                        ) {
+                            (arg0, arg1, arg2, arg3) => [
+                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(arg3, ::core::fmt::Display::fmt),
+                            ],
+                        },
+                    ),
+                )
+            });
+            <<intercom::raw::HRESULT as intercom::type_system::ExternOutput<
+                intercom::type_system::RawTypeSystem,
+            >>::ForeignType as intercom::ErrorValue>::from_error(intercom::store_error(
+                err,
+            ))
+        }
+    }
+}
 #[allow(non_camel_case_types)]
 #[allow(non_snake_case)]
 #[allow(clippy::all)]
 #[repr(C)]
 #[doc(hidden)]
-pub struct __IntercomVtableForFoo_Raw {
+pub struct __FooRawVTable {
     pub __base: <dyn intercom::IUnknown as
-                intercom::attributes::ComInterface<intercom::type_system::AutomationTypeSystem>>::VTable,
+                intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable,
     pub simple_method: unsafe extern "system" fn(self_vtable:
                                                      intercom::raw::RawComPtr)
                            -> (),
@@ -233,12 +2446,176 @@ pub struct __IntercomVtableForFoo_Raw {
                                 <intercom::raw::HRESULT as
                                 intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType,
 }
+#[automatically_derived]
+#[allow(unused_qualifications)]
+#[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
+#[allow(clippy::all)]
+impl ::core::clone::Clone for __FooRawVTable {
+    #[inline]
+    fn clone(&self) -> __FooRawVTable {
+        {
+            let _: ::core::clone::AssertParamIsClone<
+                <dyn intercom::IUnknown as intercom::attributes::ComInterfaceVariant<
+                    intercom::type_system::RawTypeSystem,
+                >>::VTable,
+            >;
+            let _: ::core::clone::AssertParamIsClone<
+                unsafe extern "system" fn(self_vtable: intercom::raw::RawComPtr) -> (),
+            >;
+            let _: ::core::clone::AssertParamIsClone<
+                unsafe extern "system" fn(
+                    self_vtable: intercom::raw::RawComPtr,
+                    a: <u16 as intercom::type_system::InfallibleExternInput<
+                        intercom::type_system::RawTypeSystem,
+                    >>::ForeignType,
+                ) -> (),
+            >;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr)
+                                                          ->
+                                                              <u16 as
+                                                              intercom::type_system::InfallibleExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                __out:
+                                                                                    *mut <u16
+                                                                                         as
+                                                                                         intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <intercom::raw::HRESULT
+                                                              as
+                                                              intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                __out:
+                                                                                    *mut <u16
+                                                                                         as
+                                                                                         intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <intercom::raw::HRESULT
+                                                              as
+                                                              intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                a:
+                                                                                    <u16
+                                                                                    as
+                                                                                    intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+                                                                                b:
+                                                                                    <i16
+                                                                                    as
+                                                                                    intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+                                                                                __out:
+                                                                                    *mut <bool
+                                                                                         as
+                                                                                         intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <intercom::raw::HRESULT
+                                                              as
+                                                              intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                msg:
+                                                                                    <String
+                                                                                    as
+                                                                                    intercom::type_system::InfallibleExternInput<intercom::type_system::RawTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <String as
+                                                              intercom::type_system::InfallibleExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                itf:
+                                                                                    <ComItf<dyn Foo>
+                                                                                    as
+                                                                                    intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+                                                                                __out:
+                                                                                    *mut <ComItf<dyn IUnknown>
+                                                                                         as
+                                                                                         intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <intercom::raw::HRESULT
+                                                              as
+                                                              intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                input:
+                                                                                    <bool
+                                                                                    as
+                                                                                    intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+                                                                                __out:
+                                                                                    *mut <bool
+                                                                                         as
+                                                                                         intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <intercom::raw::HRESULT
+                                                              as
+                                                              intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType>;
+            let _:
+                    ::core::clone::AssertParamIsClone<unsafe extern "system" fn(self_vtable:
+                                                                                    intercom::raw::RawComPtr,
+                                                                                input:
+                                                                                    <Variant
+                                                                                    as
+                                                                                    intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>>::ForeignType,
+                                                                                __out:
+                                                                                    *mut <Variant
+                                                                                         as
+                                                                                         intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType)
+                                                          ->
+                                                              <intercom::raw::HRESULT
+                                                              as
+                                                              intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>>::ForeignType>;
+            *self
+        }
+    }
+}
+#[automatically_derived]
+#[allow(unused_qualifications)]
+#[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
+#[allow(clippy::all)]
+impl ::core::marker::Copy for __FooRawVTable {}
+#[allow(unused)]
+impl<I, S> intercom::attributes::ComInterfaceVTableFor<I, S, intercom::type_system::RawTypeSystem>
+    for dyn Foo
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, intercom::type_system::RawTypeSystem>
+        + intercom::attributes::ComClass
+        + Foo,
+{
+    const VTABLE: __FooRawVTable = __FooRawVTable {
+        __base: <dyn intercom::IUnknown as intercom::attributes::ComInterfaceVTableFor<
+            I,
+            S,
+            intercom::type_system::RawTypeSystem,
+        >>::VTABLE,
+        simple_method: __Foo_simple_method_Raw::<I, S>,
+        arg_method: __Foo_arg_method_Raw::<I, S>,
+        simple_result_method: __Foo_simple_result_method_Raw::<I, S>,
+        com_result_method: __Foo_com_result_method_Raw::<I, S>,
+        rust_result_method: __Foo_rust_result_method_Raw::<I, S>,
+        complete_method: __Foo_complete_method_Raw::<I, S>,
+        string_method: __Foo_string_method_Raw::<I, S>,
+        comitf_method: __Foo_comitf_method_Raw::<I, S>,
+        bool_method: __Foo_bool_method_Raw::<I, S>,
+        variant_method: __Foo_variant_method_Raw::<I, S>,
+    };
+}
 #[allow(non_camel_case_types)]
 #[allow(non_snake_case)]
 #[allow(clippy::all)]
 #[doc(hidden)]
-impl intercom::attributes::ComInterface<intercom::type_system::RawTypeSystem> for dyn Foo {
-    type VTable = __IntercomVtableForFoo_Raw;
+impl intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem> for dyn Foo {
+    type VTable = __FooRawVTable;
     fn iid() -> &'static intercom::IID {
         &intercom::GUID {
             data1: 0u32,
@@ -249,7 +2626,7 @@ impl intercom::attributes::ComInterface<intercom::type_system::RawTypeSystem> fo
     }
 }
 #[allow(clippy::all)]
-impl Foo for intercom::ComItf<dyn Foo> {
+impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::ComItf<I> {
     fn arg_method(&self, a: u16) -> () {
         intercom::logging::trace(|l| {
             l(
@@ -290,7 +2667,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
 
@@ -332,7 +2709,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
 
@@ -403,7 +2780,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
             #[allow(unused_unsafe)]
@@ -431,11 +2808,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
                             intercom::type_system::AutomationTypeSystem,
                         >>::from_foreign_output(__out)?)
                     } else {
-                        return Err(intercom::load_error(
-                            self.as_ref(),
-                            &__intercom_iid,
-                            __result,
-                        ));
+                        return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
                 })
             })();
@@ -464,7 +2837,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
             #[allow(unused_unsafe)]
@@ -492,11 +2865,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
                             intercom::type_system::RawTypeSystem,
                         >>::from_foreign_output(__out)?)
                     } else {
-                        return Err(intercom::load_error(
-                            self.as_ref(),
-                            &__intercom_iid,
-                            __result,
-                        ));
+                        return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
                 })
             })();
@@ -560,7 +2929,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
             #[allow(unused_unsafe)]
@@ -581,11 +2950,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
                             intercom::type_system::AutomationTypeSystem,
                         >>::from_foreign_output(__out)?)
                     } else {
-                        return Err(intercom::load_error(
-                            self.as_ref(),
-                            &__intercom_iid,
-                            __result,
-                        ));
+                        return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
                 })
             })();
@@ -614,7 +2979,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
             #[allow(unused_unsafe)]
@@ -635,11 +3000,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
                             intercom::type_system::RawTypeSystem,
                         >>::from_foreign_output(__out)?)
                     } else {
-                        return Err(intercom::load_error(
-                            self.as_ref(),
-                            &__intercom_iid,
-                            __result,
-                        ));
+                        return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
                 })
             })();
@@ -697,7 +3058,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
             #[allow(unused_unsafe)]
@@ -730,11 +3091,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
                             >>::from_foreign_output(__out)?,
                         )
                     } else {
-                        return Err(intercom::load_error(
-                            self.as_ref(),
-                            &__intercom_iid,
-                            __result,
-                        ));
+                        return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
                 })
             })();
@@ -765,7 +3122,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
             #[allow(unused_unsafe)]
@@ -798,11 +3155,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
                             >>::from_foreign_output(__out)?,
                         )
                     } else {
-                        return Err(intercom::load_error(
-                            self.as_ref(),
-                            &__intercom_iid,
-                            __result,
-                        ));
+                        return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
                 })
             })();
@@ -868,7 +3221,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
             #[allow(unused_unsafe)]
@@ -900,11 +3253,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
                             intercom::type_system::AutomationTypeSystem,
                         >>::from_foreign_output(__out)?)
                     } else {
-                        return Err(intercom::load_error(
-                            self.as_ref(),
-                            &__intercom_iid,
-                            __result,
-                        ));
+                        return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
                 })
             })();
@@ -933,7 +3282,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
             #[allow(unused_unsafe)]
@@ -965,11 +3314,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
                             intercom::type_system::RawTypeSystem,
                         >>::from_foreign_output(__out)?)
                     } else {
-                        return Err(intercom::load_error(
-                            self.as_ref(),
-                            &__intercom_iid,
-                            __result,
-                        ));
+                        return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
                 })
             })();
@@ -1033,7 +3378,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
             #[allow(unused_unsafe)]
@@ -1054,11 +3399,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
                             intercom::type_system::AutomationTypeSystem,
                         >>::from_foreign_output(__out)?)
                     } else {
-                        return Err(intercom::load_error(
-                            self.as_ref(),
-                            &__intercom_iid,
-                            __result,
-                        ));
+                        return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
                 })
             })();
@@ -1087,7 +3428,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
             #[allow(unused_unsafe)]
@@ -1108,11 +3449,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
                             intercom::type_system::RawTypeSystem,
                         >>::from_foreign_output(__out)?)
                     } else {
-                        return Err(intercom::load_error(
-                            self.as_ref(),
-                            &__intercom_iid,
-                            __result,
-                        ));
+                        return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
                 })
             })();
@@ -1170,7 +3507,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
 
@@ -1206,7 +3543,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
 
@@ -1277,7 +3614,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
 
@@ -1317,7 +3654,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
 
@@ -1386,7 +3723,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
 
@@ -1432,7 +3769,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
 
@@ -1507,7 +3844,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::AutomationTypeSystem,
                 >>::VTable;
             #[allow(unused_unsafe)]
@@ -1535,11 +3872,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
                             intercom::type_system::AutomationTypeSystem,
                         >>::from_foreign_output(__out)?)
                     } else {
-                        return Err(intercom::load_error(
-                            self.as_ref(),
-                            &__intercom_iid,
-                            __result,
-                        ));
+                        return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
                 })
             })(
@@ -1569,7 +3902,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
             });
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr()
-                as *const *const <dyn Foo as intercom::attributes::ComInterface<
+                as *const *const <dyn Foo as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::RawTypeSystem,
                 >>::VTable;
             #[allow(unused_unsafe)]
@@ -1597,11 +3930,7 @@ impl Foo for intercom::ComItf<dyn Foo> {
                             intercom::type_system::RawTypeSystem,
                         >>::from_foreign_output(__out)?)
                     } else {
-                        return Err(intercom::load_error(
-                            self.as_ref(),
-                            &__intercom_iid,
-                            __result,
-                        ));
+                        return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
                 })
             })(
@@ -1621,23 +3950,24 @@ impl Foo for intercom::ComItf<dyn Foo> {
         };
     }
 }
-impl intercom::ComInterface for dyn Foo {
+impl intercom::attributes::ComInterface for dyn Foo {
+    type TSelf = dyn Foo;
     #[doc = "Returns the IID of the requested interface."]
     fn iid_ts<TS: intercom::type_system::TypeSystem>() -> &'static intercom::IID
     where
-        Self: intercom::attributes::ComInterface<TS>,
+        Self: intercom::attributes::ComInterfaceVariant<TS>,
     {
-        <Self as intercom::attributes::ComInterface<TS>>::iid()
+        <Self as intercom::attributes::ComInterfaceVariant<TS>>::iid()
     }
     fn iid(ts: intercom::type_system::TypeSystemName) -> Option<&'static intercom::IID> {
         match ts {
             intercom::type_system::TypeSystemName::Automation => {
-                Some(<Self as intercom::attributes::ComInterface<
+                Some(<Self as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::AutomationTypeSystem,
                 >>::iid())
             }
             intercom::type_system::TypeSystemName::Raw => {
-                Some(<Self as intercom::attributes::ComInterface<
+                Some(<Self as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::RawTypeSystem,
                 >>::iid())
             }
@@ -1655,7 +3985,7 @@ impl intercom::type_system::ForeignType for dyn Foo {
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
-impl intercom::attributes::InterfaceHasTypeInfo for dyn Foo {
+impl intercom::attributes::ComInterfaceTypeInfo for dyn Foo {
     fn gather_type_info() -> Vec<intercom::typelib::TypeInfo> {
         let variants =
             <[_]>::into_vec(box

@@ -16,6 +16,12 @@ error[E0277]: the trait bound `NotExternType: intercom::type_system::ExternInput
 16 |     fn all_type(&self, bad_type: NotExternType) -> ComResult<NotExternType>;
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::type_system::ExternInput<intercom::type_system::AutomationTypeSystem>` is not implemented for `NotExternType`
 
+error[E0277]: the trait bound `NotExternType: intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>` is not satisfied
+  --> span-externtype-error.rs:16:5
+   |
+16 |     fn all_type(&self, bad_type: NotExternType) -> ComResult<NotExternType>;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::type_system::ExternOutput<intercom::type_system::AutomationTypeSystem>` is not implemented for `NotExternType`
+
 error[E0277]: the trait bound `NotExternType: intercom::type_system::InfallibleExternInput<intercom::type_system::RawTypeSystem>` is not satisfied
   --> span-externtype-error.rs:12:5
    |
@@ -34,6 +40,12 @@ error[E0277]: the trait bound `NotExternType: intercom::type_system::ExternInput
 16 |     fn all_type(&self, bad_type: NotExternType) -> ComResult<NotExternType>;
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::type_system::ExternInput<intercom::type_system::RawTypeSystem>` is not implemented for `NotExternType`
 
-error: aborting due to 6 previous errors
+error[E0277]: the trait bound `NotExternType: intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>` is not satisfied
+  --> span-externtype-error.rs:16:5
+   |
+16 |     fn all_type(&self, bad_type: NotExternType) -> ComResult<NotExternType>;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::type_system::ExternOutput<intercom::type_system::RawTypeSystem>` is not implemented for `NotExternType`
+
+error: aborting due to 8 previous errors
 
 For more information about this error, try `rustc --explain E0277`.

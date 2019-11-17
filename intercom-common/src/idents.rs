@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::tyhandlers::ModelTypeSystem;
-use syn::*;
+use syn::{Ident, Path};
 
 pub trait SomeIdent
 {
@@ -15,6 +15,17 @@ impl SomeIdent for Path
             .cloned()
             .or_else(|| self.segments.last().map(|l| l.ident.clone()))
     }
+}
+
+pub fn vtable(itf: &Ident, ts: ModelTypeSystem) -> Path
+{
+    let vtable_ident = format_ident!("__{}{}VTable", itf, ts);
+    parse_quote!(#vtable_ident)
+}
+
+pub fn com_to_rust_method_impl(itf: &Ident, method: &Ident, ts: ModelTypeSystem) -> Ident
+{
+    Ident::new(&format!("__{}_{}_{:?}", itf, method, ts), method.span())
 }
 
 pub fn with_ts(ident: &Ident, ts: ModelTypeSystem) -> Ident

@@ -15,7 +15,6 @@ pub trait IErrorSource
 pub struct ErrorTests;
 
 #[com_interface]
-#[com_impl]
 impl ErrorTests
 {
     pub fn test_comerror(&self, source: &ComItf<dyn IErrorSource>) -> ComResult<()>
@@ -89,7 +88,6 @@ impl ErrorTests
     }
 }
 
-#[com_impl]
 impl IErrorSource for ErrorTests
 {
     fn return_comerror(&self, hr: raw::HRESULT, desc: &str) -> ComResult<()>

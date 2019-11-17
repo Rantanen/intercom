@@ -28,7 +28,6 @@ struct Calculator {
 }
 
 #[com_interface]
-#[com_impl]
 impl Calculator {
     pub fn new() -> Calculator { Calculator { value: 0 } }
 
@@ -122,13 +121,6 @@ there are four attributes available:
 - `[com_class(CLSID, Itfs...)]` - An attribute defined on a `struct`. This
   attribute implements the necessary `CoClass` for the struct, which allows
   constructing the reference counted `ComBox<T>` instances on the object.
-- `[com_impl]` - Finally the `[com_impl]` attribute specifies the `impl`s that
-  implement the `[com_interface]`s for the `[com_class]` types. While the
-  attribute doesn't provide any extra information for the implementation, it
-  has technical reasons to exist. Its expansion is responsible for defining the
-  delegating methods that know how to translate the COM call coming from the
-  client into a Rust call to the user defined functions or the primary
-  `IUnknown` methods implemented by the `[com_class]` expansion.
 
 [proc macro attributes]: https://github.com/rust-lang/rfcs/blob/master/text/1566-proc-macros.md
 

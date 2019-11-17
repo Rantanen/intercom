@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 use std::error::Error;
 
 use super::*;
-use crate::attributes;
+use crate::attributes::{ComInterface, ComInterfaceVariant};
 use crate::type_system::{AutomationTypeSystem, ExternOutput, RawTypeSystem, TypeSystem};
 
 /// Error structure containing the available information on a COM error.
@@ -378,7 +378,7 @@ impl<'a> TryFrom<&'a dyn IErrorInfo> for ErrorInfo
 }
 
 #[com_interface(com_iid = "1CF2B120-547D-101B-8E65-08002B2BD119")]
-pub trait IErrorInfo
+pub trait IErrorInfo: crate::IUnknown
 {
     fn get_guid(&self) -> ComResult<GUID>;
     fn get_source(&self) -> ComResult<String>;
@@ -387,7 +387,6 @@ pub trait IErrorInfo
     fn get_help_context(&self) -> ComResult<u32>;
 }
 
-#[com_impl]
 impl IErrorInfo for ErrorInfo
 {
     fn get_guid(&self) -> ComResult<GUID>
@@ -449,14 +448,18 @@ where
     com_error
 }
 
-pub fn load_error(iunk: &ComItf<dyn IUnknown>, iid: &GUID, err: raw::HRESULT) -> ComError
+pub fn load_error<I: ComInterface + ?Sized>(
+    iunk: &ComItf<I>,
+    iid: &GUID,
+    err: raw::HRESULT,
+) -> ComError
 {
     // Do not try to load error if this is IUnknown or ISupportErrorInfo.
     // Both of these are used during error handling and may fail.
-    if iid == <dyn IUnknown as attributes::ComInterface<AutomationTypeSystem>>::iid()
-        || iid == <dyn IUnknown as attributes::ComInterface<RawTypeSystem>>::iid()
-        || iid == <dyn ISupportErrorInfo as attributes::ComInterface<AutomationTypeSystem>>::iid()
-        || iid == <dyn ISupportErrorInfo as attributes::ComInterface<RawTypeSystem>>::iid()
+    if iid == <dyn IUnknown as ComInterfaceVariant<AutomationTypeSystem>>::iid()
+        || iid == <dyn IUnknown as ComInterfaceVariant<RawTypeSystem>>::iid()
+        || iid == <dyn ISupportErrorInfo as ComInterfaceVariant<AutomationTypeSystem>>::iid()
+        || iid == <dyn ISupportErrorInfo as ComInterfaceVariant<RawTypeSystem>>::iid()
     {
         return ComError {
             hresult: err,
@@ -533,14 +536,13 @@ pub struct ErrorStore;
     com_iid = "d7f996c5-0b51-4053-82f8-19a7261793a9",
     raw_iid = "7586c49a-abbd-4a06-b588-e3d02b431f01"
 )]
-pub trait IErrorStore
+pub trait IErrorStore: crate::IUnknown
 {
     fn get_error_info(&self) -> ComResult<ComRc<dyn IErrorInfo>>;
     fn set_error_info(&self, info: &ComItf<dyn IErrorInfo>) -> ComResult<()>;
     fn set_error_message(&self, msg: &str) -> ComResult<()>;
 }
 
-#[com_impl]
 impl IErrorStore for ErrorStore
 {
     fn get_error_info(&self) -> ComResult<ComRc<dyn IErrorInfo>>

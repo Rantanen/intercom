@@ -1,22 +1,8 @@
 use super::*;
+use crate::attributes::{ComClass, ComInterface, HasInterface};
 use crate::raw::RawComPtr;
 use crate::type_system::TypeSystemName;
 use std::sync::atomic::{AtomicU32, Ordering};
-
-/// Trait required by any COM coclass type.
-///
-/// Used to specify the virtual table for the `ComBoxData`.
-pub trait CoClass
-{
-    type VTableList;
-    fn create_vtable_list() -> Self::VTableList;
-    fn query_interface(vtables: &Self::VTableList, riid: REFIID) -> RawComResult<RawComPtr>;
-    fn interface_supports_error_info(riid: REFIID) -> bool;
-}
-
-pub trait HasInterface<T: ComInterface + ?Sized>: CoClass
-{
-}
 
 /// Pointer to a COM-enabled Rust struct.
 ///
@@ -30,12 +16,12 @@ pub trait HasInterface<T: ComInterface + ?Sized>: CoClass
 /// Technically the memory layout is specified by the [`ComBoxData`](struct.ComBoxData.html)
 /// type, however that type shouldn't be needed by the user. For all intents
 /// the `ComBox` type is _the_ COM-compatible object handle.
-pub struct ComBox<T: CoClass>
+pub struct ComBox<T: ComClass>
 {
     data: *mut ComBoxData<T>,
 }
 
-impl<T: CoClass> ComBox<T>
+impl<T: ComClass> ComBox<T>
 {
     /// Constructs a new `ComBox` by placing the `value` into reference
     /// counted memory.
@@ -45,7 +31,7 @@ impl<T: CoClass> ComBox<T>
     {
         // Construct a ComBoxData in memory and track the reference on it.
         let cb = ComBoxData::new(value);
-        unsafe { ComBoxData::add_ref(&mut *cb) };
+        unsafe { ComBoxData::add_ref(&*cb) };
 
         // Return the struct.
         ComBox { data: cb }
@@ -65,7 +51,7 @@ impl<T: CoClass> ComBox<T>
             let vtbl = &self.as_ref().vtable_list;
 
             let automation_ptr = match I::iid(TypeSystemName::Automation) {
-                Some(iid) => match <T as CoClass>::query_interface(&vtbl, iid) {
+                Some(iid) => match <T as ComClass>::query_interface(&vtbl, iid) {
                     Ok(itf) => itf,
                     Err(_) => ::std::ptr::null_mut(),
                 },
@@ -73,7 +59,7 @@ impl<T: CoClass> ComBox<T>
             };
 
             let raw_ptr = match I::iid(TypeSystemName::Raw) {
-                Some(iid) => match <T as CoClass>::query_interface(&vtbl, iid) {
+                Some(iid) => match <T as ComClass>::query_interface(&vtbl, iid) {
                     Ok(itf) => itf,
                     Err(_) => ::std::ptr::null_mut(),
                 },
@@ -91,7 +77,7 @@ impl<T: CoClass> ComBox<T>
     }
 }
 
-impl<T: CoClass + std::fmt::Debug> std::fmt::Debug for ComBox<T>
+impl<T: ComClass + std::fmt::Debug> std::fmt::Debug for ComBox<T>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
     {
@@ -101,7 +87,7 @@ impl<T: CoClass + std::fmt::Debug> std::fmt::Debug for ComBox<T>
     }
 }
 
-impl<T: CoClass> Drop for ComBox<T>
+impl<T: ComClass> Drop for ComBox<T>
 {
     /// Decreases the reference count by one. If this is the last reference
     /// the memory will be deallocated.
@@ -111,7 +97,7 @@ impl<T: CoClass> Drop for ComBox<T>
     }
 }
 
-impl<T: CoClass> AsMut<ComBoxData<T>> for ComBox<T>
+impl<T: ComClass> AsMut<ComBoxData<T>> for ComBox<T>
 {
     fn as_mut(&mut self) -> &mut ComBoxData<T>
     {
@@ -120,7 +106,7 @@ impl<T: CoClass> AsMut<ComBoxData<T>> for ComBox<T>
     }
 }
 
-impl<T: CoClass> AsRef<ComBoxData<T>> for ComBox<T>
+impl<T: ComClass> AsRef<ComBoxData<T>> for ComBox<T>
 {
     fn as_ref(&self) -> &ComBoxData<T>
     {
@@ -171,14 +157,14 @@ impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<&ComBox<T>> for ComRc<I>
 /// and `release` must be used correctly together. Failure to do so will result
 /// either in memory leaks or access to dangling pointers.
 #[repr(C)]
-pub struct ComBoxData<T: CoClass>
+pub struct ComBoxData<T: ComClass>
 {
     vtable_list: T::VTableList,
     ref_count: AtomicU32,
     value: T,
 }
 
-impl<T: CoClass> ComBoxData<T>
+impl<T: ComClass> ComBoxData<T>
 {
     /// Creates a new ComBoxData and returns a pointer to it.
     ///
@@ -192,7 +178,7 @@ impl<T: CoClass> ComBoxData<T>
         // TODO: Fix this to use raw heap allocation at some point. There's
         // no need to construct and immediately detach a Box.
         Box::into_raw(Box::new(ComBoxData {
-            vtable_list: T::create_vtable_list(),
+            vtable_list: T::VTABLE,
             ref_count: AtomicU32::new(0),
             value,
         }))
@@ -209,11 +195,7 @@ impl<T: CoClass> ComBoxData<T>
     /// # Safety
     ///
     /// The `out` pointer must be valid for writing the interface pointer to.
-    pub unsafe fn query_interface(
-        this: &mut Self,
-        riid: REFIID,
-        out: *mut RawComPtr,
-    ) -> raw::HRESULT
+    pub unsafe fn query_interface(this: &Self, riid: REFIID, out: *mut RawComPtr) -> raw::HRESULT
     {
         match T::query_interface(&this.vtable_list, riid) {
             Ok(ptr) => {
@@ -237,7 +219,7 @@ impl<T: CoClass> ComBoxData<T>
     /// The method isn't technically unsafe in regard to Rust unsafety, but
     /// it's marked as unsafe to discourage it's use due to high risks of
     /// memory leaks.
-    pub unsafe fn add_ref(this: &mut Self) -> u32
+    pub unsafe fn add_ref(this: &Self) -> u32
     {
         let previous_value = this.ref_count.fetch_add(1, Ordering::Relaxed);
         (previous_value + 1)
@@ -292,16 +274,6 @@ impl<T: CoClass> ComBoxData<T>
         rc
     }
 
-    /// Checks whether the given interface identified by the IID supports error
-    /// info through IErrorInfo.
-    pub fn interface_supports_error_info(_this: &mut Self, riid: REFIID) -> raw::HRESULT
-    {
-        match T::interface_supports_error_info(riid) {
-            true => raw::S_OK,
-            false => raw::S_FALSE,
-        }
-    }
-
     /// Converts a RawComPtr to a ComBoxData reference.
     ///
     /// # Safety
@@ -321,53 +293,6 @@ impl<T: CoClass> ComBoxData<T>
     pub unsafe fn from_ptr<'a>(ptr: RawComPtr) -> &'a mut ComBoxData<T>
     {
         &mut *(ptr as *mut ComBoxData<T>)
-    }
-
-    /// Pointer variant of the `query_interface` function.
-    ///
-    /// # Safety
-    ///
-    /// The `self_iunk` _must_ be a valid COM pointer.
-    pub unsafe extern "system" fn query_interface_ptr(
-        self_iunk: RawComPtr,
-        riid: REFIID,
-        out: *mut RawComPtr,
-    ) -> raw::HRESULT
-    {
-        ComBoxData::query_interface(ComBoxData::<T>::from_ptr(self_iunk), riid, out)
-    }
-
-    /// Pointer variant of the `add_ref` function.
-    ///
-    /// # Safety
-    ///
-    /// The `self_iunk` _must_ be a valid COM pointer.
-    pub unsafe extern "system" fn add_ref_ptr(self_iunk: RawComPtr) -> u32
-    {
-        ComBoxData::add_ref(ComBoxData::<T>::from_ptr(self_iunk))
-    }
-
-    /// Pointer variant of the `release` function.
-    ///
-    /// # Safety
-    ///
-    /// The `self_iunk` _must_ be a valid COM pointer.
-    pub unsafe extern "system" fn release_ptr(self_iunk: RawComPtr) -> u32
-    {
-        ComBoxData::release(self_iunk as *mut ComBoxData<T>)
-    }
-
-    /// Pointer variant of the `release` function.
-    ///
-    /// # Safety
-    ///
-    /// The `self_iunk` _must_ be a valid COM pointer.
-    pub unsafe extern "system" fn interface_supports_error_info_ptr(
-        self_iunk: RawComPtr,
-        riid: REFIID,
-    ) -> raw::HRESULT
-    {
-        ComBoxData::interface_supports_error_info(ComBoxData::<T>::from_ptr(self_iunk), riid)
     }
 
     /// Returns a reference to the virtual table on the ComBoxData.
@@ -449,7 +374,7 @@ impl<T: CoClass> ComBoxData<T>
 
 impl<T> std::ops::Deref for ComBoxData<T>
 where
-    T: CoClass,
+    T: ComClass,
 {
     type Target = T;
     fn deref(&self) -> &T
@@ -460,7 +385,7 @@ where
 
 impl<T> std::ops::DerefMut for ComBoxData<T>
 where
-    T: CoClass,
+    T: ComClass,
 {
     fn deref_mut(&mut self) -> &mut T
     {
@@ -470,7 +395,7 @@ where
 
 impl<T> std::ops::Deref for ComBox<T>
 where
-    T: CoClass,
+    T: ComClass,
 {
     type Target = T;
     fn deref(&self) -> &T
@@ -481,7 +406,7 @@ where
 
 impl<T> std::ops::DerefMut for ComBox<T>
 where
-    T: CoClass,
+    T: ComClass,
 {
     fn deref_mut(&mut self) -> &mut T
     {
@@ -489,7 +414,7 @@ where
     }
 }
 
-impl<T: Default + CoClass> Default for ComBox<T>
+impl<T: Default + ComClass> Default for ComBox<T>
 {
     fn default() -> Self
     {

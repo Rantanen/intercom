@@ -80,7 +80,7 @@ code is that there's no way to inspect the depending code in any way.
 ### Compile time
 
 Compile time code is defined in `intercom-attributes` and `intercom-build`.
-The attributes, such as `[com_interface]` or `[com_impl]` get expanded during
+The attributes, such as `[com_interface]` or `[com_class]` are expanded during
 the compilation of the depending code while the build utilities are invoked
 during the build process.
 

@@ -6,7 +6,6 @@ use strings::{IStringTests, STRING_DATA};
 pub struct TypeSystemCaller;
 
 #[com_interface]
-#[com_impl]
 impl TypeSystemCaller
 {
     pub fn new() -> Self

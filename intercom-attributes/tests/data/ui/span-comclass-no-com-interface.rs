@@ -1,11 +1,11 @@
-
 extern crate intercom;
 use intercom::*;
 
-trait NotComInterface {}
+trait NotComInterface
+{
+}
 
 #[com_class(NotComInterface)]
-struct S;
+pub struct S;
 
-#[com_impl]
 impl NotComInterface for S {}

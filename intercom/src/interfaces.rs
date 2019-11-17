@@ -1,4 +1,6 @@
 use super::*;
+use crate::raw::HRESULT;
+use crate::type_system::{AutomationTypeSystem, RawTypeSystem};
 
 /// The `IUnknown` COM interface.
 ///
@@ -7,8 +9,20 @@ use super::*;
 /// and interface discovery.
 ///
 /// For Rust code, Intercom implements the interface automatically.
-#[com_interface( com_iid = "00000000-0000-0000-C000-000000000046", base = NO_BASE )]
+#[com_interface(
+    com_iid = "00000000-0000-0000-C000-000000000046",
+    raw_iid = "11111111-0000-0000-C000-000000000046",
+    base = NO_BASE,
+    vtable_of = RawIUnknown )]
 pub trait IUnknown
+{
+}
+
+#[com_interface(
+    com_iid = "00000000-0000-0000-C000-000000000046",
+    raw_iid = "11111111-0000-0000-C000-000000000046",
+    base = NO_BASE )]
+pub trait RawIUnknown
 {
     /// Tries to get a different COM interface for the current object.
     ///
@@ -37,6 +51,85 @@ pub trait IUnknown
     fn release(&self) -> u32;
 }
 
+impl<I, S> crate::attributes::ComInterfaceVTableFor<I, S, RawTypeSystem> for dyn IUnknown
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, RawTypeSystem> + intercom::attributes::ComClass,
+{
+    const VTABLE: Self::VTable = Self::VTable {
+        query_interface: query_interface::<I, S, RawTypeSystem>,
+        add_ref: add_ref::<I, S, RawTypeSystem>,
+        release: release::<I, S, RawTypeSystem>,
+    };
+}
+impl<I, S> crate::attributes::ComInterfaceVTableFor<I, S, AutomationTypeSystem> for dyn IUnknown
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, AutomationTypeSystem>
+        + intercom::attributes::ComClass,
+{
+    const VTABLE: Self::VTable = Self::VTable {
+        query_interface: query_interface::<I, S, AutomationTypeSystem>,
+        add_ref: add_ref::<I, S, AutomationTypeSystem>,
+        release: release::<I, S, AutomationTypeSystem>,
+    };
+}
+
+#[doc(hidden)]
+pub unsafe extern "system" fn query_interface<I, S, TS>(
+    self_vtable: crate::raw::RawComPtr,
+    riid: *const crate::GUID,
+    out: *mut *mut std::ffi::c_void,
+) -> HRESULT
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, TS> + intercom::attributes::ComClass,
+    TS: crate::type_system::TypeSystem,
+{
+    let combox = S::get_box(self_vtable);
+    log::trace!(
+        "[{:p}, through {:p}] Serving {}::query_interface",
+        combox,
+        self_vtable,
+        std::any::type_name::<S>()
+    );
+    intercom::ComBoxData::<S>::query_interface(combox, riid, out)
+}
+
+#[doc(hidden)]
+pub unsafe extern "system" fn add_ref<I, S, TS>(self_vtable: crate::raw::RawComPtr) -> u32
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, TS> + intercom::attributes::ComClass,
+    TS: crate::type_system::TypeSystem,
+{
+    let combox = S::get_box(self_vtable);
+    log::trace!(
+        "[{:p}, through {:p}] Serving {}::add_ref",
+        combox,
+        self_vtable,
+        std::any::type_name::<S>()
+    );
+    intercom::ComBoxData::<S>::add_ref(combox)
+}
+
+#[doc(hidden)]
+pub unsafe extern "system" fn release<I, S, TS>(self_vtable: crate::raw::RawComPtr) -> u32
+where
+    I: ?Sized,
+    S: intercom::attributes::ComClassInterface<I, TS> + intercom::attributes::ComClass,
+    TS: crate::type_system::TypeSystem,
+{
+    let combox = S::get_box(self_vtable);
+    log::trace!(
+        "[{:p}, through {:p}] Serving {}::release",
+        combox,
+        self_vtable,
+        std::any::type_name::<S>()
+    );
+    intercom::ComBoxData::<S>::release(combox)
+}
+
 /// The `ISupportErrorInfo` COM interface.
 ///
 /// The `ISupportErrorInfo` is part of COM error handling concept. As the
@@ -56,8 +149,12 @@ pub trait IUnknown
 /// specified interfaces automatically. Only methods that return a
 /// two-parameter `Result<S,E>` value will store the detailed `IErrorInfo`.
 /// Other methods will set a null `IErrorInfo` value.
-#[com_interface(com_iid = "DF0B3D60-548F-101B-8E65-08002B2BD119")]
-pub trait ISupportErrorInfo
+#[com_interface(
+    com_iid = "DF0B3D60-548F-101B-8E65-08002B2BD119",
+    raw_iid = "4C667A45-1C4F-4761-8EBF-34E7699BD06E",
+    implemented_by = isupporterrorinfo
+)]
+pub trait ISupportErrorInfo: IUnknown
 {
     /// Informs the current COM class supports `IErrorInfo` for a specific
     /// interface.
@@ -80,4 +177,21 @@ pub trait ISupportErrorInfo
     /// `S_OK` from this method.
     ///
     fn interface_supports_error_info(&self, riid: crate::REFIID) -> crate::raw::HRESULT;
+}
+
+pub mod isupporterrorinfo
+{
+    use crate::{combox::ComBoxData, raw, REFIID};
+
+    /// Checks whether the given interface identified by the IID supports error
+    /// info through IErrorInfo.
+    pub fn interface_supports_error_info<S>(_this: &ComBoxData<S>, riid: REFIID) -> raw::HRESULT
+    where
+        S: intercom::attributes::ComClass,
+    {
+        match S::interface_supports_error_info(riid) {
+            true => raw::S_OK,
+            false => raw::S_FALSE,
+        }
+    }
 }

@@ -6,7 +6,6 @@ use std::convert::TryFrom;
 pub struct ResultOperations {}
 
 #[com_interface]
-#[com_impl]
 impl ResultOperations
 {
     pub fn s_ok(&mut self) -> raw::HRESULT
