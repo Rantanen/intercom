@@ -195,9 +195,9 @@ pub fn expand_com_interface(
 
             #[doc = "Returns the IID of the requested interface."]
             fn iid_ts<TS: intercom::type_system::TypeSystem>() -> &'static intercom::IID
-                where Self: intercom::attributes::ComInterfaceTypeSystem<TS>
+                where Self: intercom::attributes::ComInterfaceVariant<TS>
             {
-                <Self as intercom::attributes::ComInterfaceTypeSystem<TS>>::iid()
+                <Self as intercom::attributes::ComInterfaceVariant<TS>>::iid()
             }
 
             fn iid(
@@ -272,21 +272,21 @@ fn process_itf_variant(
             parse_quote!(#ident)
         }
         Some(path) => quote_spanned!(itf.span =>
-            <#path as intercom::attributes::ComInterfaceTypeSystem<#ts_type_tokens>>::VTable
+            <#path as intercom::attributes::ComInterfaceVariant<#ts_type_tokens>>::VTable
         ),
     };
 
     // Construct the iid(ts) match arm for this type system.
     itf_output
         .iid_arms
-        .push(quote_spanned!(itf.span => #ts_value_tokens => Some( <Self as intercom::attributes::ComInterfaceTypeSystem<#ts_type_tokens>>::iid() ) ));
+        .push(quote_spanned!(itf.span => #ts_value_tokens => Some( <Self as intercom::attributes::ComInterfaceVariant<#ts_type_tokens>>::iid() ) ));
 
     // Create a vector for the virtual table fields and insert the base
     // interface virtual table in it if required.
     let mut vtbl_fields = vec![];
     let mut vtbl_values = vec![];
     if let Some(ref base) = itf.base_interface {
-        let cominterface = quote_spanned!(itf.span => <dyn #base as intercom::attributes::ComInterfaceTypeSystem<#ts_type_tokens>>);
+        let cominterface = quote_spanned!(itf.span => <dyn #base as intercom::attributes::ComInterfaceVariant<#ts_type_tokens>>);
         vtbl_fields.push(quote_spanned!(itf.span => pub __base : #cominterface::VTable, ));
         let vtable_for = quote_spanned!(itf.span => <dyn #base as intercom::attributes::VTableFor<I, S, #ts_type_tokens>>);
         vtbl_values.push(quote_spanned!(itf.span => __base : #vtable_for::VTABLE));
@@ -383,7 +383,7 @@ fn process_itf_variant(
         #[allow(non_snake_case)]
         #[allow(clippy::all)]
         #[doc(hidden)]
-        impl intercom::attributes::ComInterfaceTypeSystem<#ts_type_tokens> for #itf_ref {
+        impl intercom::attributes::ComInterfaceVariant<#ts_type_tokens> for #itf_ref {
             type VTable = #vtable_path;
             fn iid() -> &'static intercom::IID {
                 & #iid_tokens
@@ -466,7 +466,7 @@ fn rust_to_com_delegate(
         quote_spanned!(method_info.signature_span =>
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr() as *const *const <#maybe_dyn #itf_path as
-                intercom::attributes::ComInterfaceTypeSystem<#ts_type>>::VTable;
+                intercom::attributes::ComInterfaceVariant<#ts_type>>::VTable;
 
             #[allow(unused_unsafe)]  // The fn itself _might_ be unsafe.
             unsafe {
@@ -481,7 +481,7 @@ fn rust_to_com_delegate(
         quote_spanned!(method_info.signature_span =>
             #[allow(unused_imports)]
             let vtbl = comptr.ptr.as_ptr() as *const *const <#maybe_dyn #itf_path as
-                intercom::attributes::ComInterfaceTypeSystem<#ts_type>>::VTable;
+                intercom::attributes::ComInterfaceVariant<#ts_type>>::VTable;
 
             // Use an IIFE to act as a try/catch block. The various template
             // substitutions might end up using ?'s for error handling. The IIFE allows

@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 use std::error::Error;
 
 use super::*;
-use crate::attributes;
+use crate::attributes::{ComInterface, ComInterfaceVariant};
 use crate::type_system::{AutomationTypeSystem, ExternOutput, RawTypeSystem, TypeSystem};
 
 /// Error structure containing the available information on a COM error.
@@ -449,7 +449,7 @@ where
     com_error
 }
 
-pub fn load_error<I: attributes::ComInterface + ?Sized>(
+pub fn load_error<I: ComInterface + ?Sized>(
     iunk: &ComItf<I>,
     iid: &GUID,
     err: raw::HRESULT,
@@ -457,13 +457,10 @@ pub fn load_error<I: attributes::ComInterface + ?Sized>(
 {
     // Do not try to load error if this is IUnknown or ISupportErrorInfo.
     // Both of these are used during error handling and may fail.
-    if iid == <dyn IUnknown as attributes::ComInterfaceTypeSystem<AutomationTypeSystem>>::iid()
-        || iid == <dyn IUnknown as attributes::ComInterfaceTypeSystem<RawTypeSystem>>::iid()
-        || iid == <dyn ISupportErrorInfo as attributes::ComInterfaceTypeSystem<
-            AutomationTypeSystem,
-        >>::iid()
-        || iid
-            == <dyn ISupportErrorInfo as attributes::ComInterfaceTypeSystem<RawTypeSystem>>::iid()
+    if iid == <dyn IUnknown as ComInterfaceVariant<AutomationTypeSystem>>::iid()
+        || iid == <dyn IUnknown as ComInterfaceVariant<RawTypeSystem>>::iid()
+        || iid == <dyn ISupportErrorInfo as ComInterfaceVariant<AutomationTypeSystem>>::iid()
+        || iid == <dyn ISupportErrorInfo as ComInterfaceVariant<RawTypeSystem>>::iid()
     {
         return ComError {
             hresult: err,

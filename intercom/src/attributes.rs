@@ -31,7 +31,7 @@ pub trait ComClassInterface<TInterface: ?Sized, TS: TypeSystem>: ComClass + Size
     }
 }
 
-pub trait VTableFor<I: ?Sized, S, TS: TypeSystem>: ComInterfaceTypeSystem<TS>
+pub trait VTableFor<I: ?Sized, S, TS: TypeSystem>: ComInterfaceVariant<TS>
 {
     const VTABLE: Self::VTable;
 }
@@ -45,7 +45,7 @@ pub trait ComInterface
 
     fn iid_ts<TS: intercom::type_system::TypeSystem>() -> &'static intercom::IID
     where
-        Self: intercom::attributes::ComInterfaceTypeSystem<TS>;
+        Self: intercom::attributes::ComInterfaceVariant<TS>;
 
     /// Dereferences a `ComItf<T>` into a `&T`.
     ///
@@ -56,7 +56,7 @@ pub trait ComInterface
     fn deref(com_itf: &crate::ComItf<Self>) -> &Self;
 }
 
-pub trait ComInterfaceTypeSystem<TS: TypeSystem>
+pub trait ComInterfaceVariant<TS: TypeSystem>
 {
     type VTable: 'static;
     fn iid() -> &'static IID;

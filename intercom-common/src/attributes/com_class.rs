@@ -33,13 +33,13 @@ pub fn expand_com_class(
     // on the root IUnknown interface, the self_vtable here should already be
     // the IUnknown we need.
     let support_error_info_vtbl = quote!(
-        <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterfaceTypeSystem<
+        <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterfaceVariant<
             intercom::type_system::AutomationTypeSystem,
         >>::VTable
     );
     let mut query_interface_match_arms = vec![
         quote!(
-            if riid == <dyn intercom::IUnknown as intercom::attributes::ComInterfaceTypeSystem<intercom::type_system::AutomationTypeSystem>>::iid() {
+            if riid == <dyn intercom::IUnknown as intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid() {
                 let ptr = ( &vtables._ISupportErrorInfo )
                     as *const &#support_error_info_vtbl
                     as *mut &#support_error_info_vtbl
@@ -51,7 +51,7 @@ pub fn expand_com_class(
             } else
         ),
         quote!(
-            if riid == <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterfaceTypeSystem<intercom::type_system::AutomationTypeSystem>>::iid() {
+            if riid == <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid() {
                 let ptr = ( &vtables._ISupportErrorInfo )
                     as *const &#support_error_info_vtbl
                     as *mut &#support_error_info_vtbl
@@ -81,7 +81,7 @@ pub fn expand_com_class(
     let mut vtable_list_field_defs = vec![];
     let mut vtable_list_field_decls = vec![quote!(
         _ISupportErrorInfo:
-            &'static <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterfaceTypeSystem<
+            &'static <dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterfaceVariant<
                 intercom::type_system::AutomationTypeSystem,
             >>::VTable
     )];
@@ -136,7 +136,7 @@ pub fn expand_com_class(
             ));
 
             let itf_attrib_data = quote!(
-                <#maybe_dyn #itf as intercom::attributes::ComInterfaceTypeSystem<#ts_type>>);
+                <#maybe_dyn #itf as intercom::attributes::ComInterfaceVariant<#ts_type>>);
             let itf_vtable_for = quote!(
                 <#maybe_dyn #itf as intercom::attributes::VTableFor<#maybe_dyn #itf, #cls_ident #ty_generics, #ts_type>>);
 
@@ -166,7 +166,7 @@ pub fn expand_com_class(
 
             // Define the support error info match arms.
             support_error_info_match_arms.push(quote!(
-                if riid == <#maybe_dyn #itf as intercom::attributes::ComInterfaceTypeSystem<#ts_type>>::iid() {
+                if riid == <#maybe_dyn #itf as intercom::attributes::ComInterfaceVariant<#ts_type>>::iid() {
                     true
                 } else
             ));
@@ -178,7 +178,7 @@ pub fn expand_com_class(
     //
     // The primary IUnknown virtual table is embedded in this one.
     let iunknown_vtbl = quote!(
-        <dyn intercom::IUnknown as intercom::attributes::ComInterfaceTypeSystem<
+        <dyn intercom::IUnknown as intercom::attributes::ComInterfaceVariant<
             intercom::type_system::AutomationTypeSystem,
         >>::VTable
     );
@@ -326,8 +326,8 @@ fn create_get_typeinfo_function(cls: &model::ComClass) -> Result<TokenStream, St
             (
                 quote!( intercom::typelib::InterfaceRef {
                     name: #itf_name.into(),
-                    iid_automation: <#maybe_dyn #itf_path as intercom::attributes::ComInterfaceTypeSystem<intercom::type_system::AutomationTypeSystem>>::iid().clone(),
-                    iid_raw: <#maybe_dyn #itf_path as intercom::attributes::ComInterfaceTypeSystem<intercom::type_system::RawTypeSystem>>::iid().clone(),
+                    iid_automation: <#maybe_dyn #itf_path as intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid().clone(),
+                    iid_raw: <#maybe_dyn #itf_path as intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::iid().clone(),
                 } ),
                 quote!(
                     r.extend(<#maybe_dyn #itf_path as intercom::attributes::InterfaceHasTypeInfo>::gather_type_info());
