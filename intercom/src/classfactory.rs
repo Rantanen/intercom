@@ -23,12 +23,12 @@ pub trait IClassFactory
 
 #[doc(hidden)]
 #[com_class(IClassFactory)]
-pub struct ClassFactory<T: Default + intercom::CoClass>
+pub struct ClassFactory<T: Default + intercom::attributes::ComClass>
 {
     phantom: std::marker::PhantomData<T>,
 }
 
-impl<T: Default + CoClass> IClassFactory for ClassFactory<T>
+impl<T: Default + attributes::ComClass> IClassFactory for ClassFactory<T>
 {
     fn create_instance(&self, outer: RawComPtr, riid: REFIID) -> ComResult<RawComPtr>
     {
@@ -59,7 +59,7 @@ impl<T: Default + CoClass> IClassFactory for ClassFactory<T>
     }
 }
 
-impl<T: Default + CoClass> ClassFactory<T>
+impl<T: Default + attributes::ComClass> ClassFactory<T>
 {
     /// # Safety
     ///

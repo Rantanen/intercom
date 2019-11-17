@@ -54,7 +54,7 @@ pub trait RawIUnknown
 impl<I, S> crate::attributes::VTableFor<I, S, RawTypeSystem> for dyn IUnknown
 where
     I: ?Sized,
-    S: intercom::attributes::ComClass<I, RawTypeSystem> + intercom::CoClass,
+    S: intercom::attributes::ComClassInterface<I, RawTypeSystem> + intercom::attributes::ComClass,
 {
     const VTABLE: Self::VTable = Self::VTable {
         query_interface: query_interface::<I, S, RawTypeSystem>,
@@ -65,7 +65,8 @@ where
 impl<I, S> crate::attributes::VTableFor<I, S, AutomationTypeSystem> for dyn IUnknown
 where
     I: ?Sized,
-    S: intercom::attributes::ComClass<I, AutomationTypeSystem> + intercom::CoClass,
+    S: intercom::attributes::ComClassInterface<I, AutomationTypeSystem>
+        + intercom::attributes::ComClass,
 {
     const VTABLE: Self::VTable = Self::VTable {
         query_interface: query_interface::<I, S, AutomationTypeSystem>,
@@ -81,7 +82,7 @@ pub unsafe extern "system" fn query_interface<I, S, TS>(
 ) -> HRESULT
 where
     I: ?Sized,
-    S: intercom::attributes::ComClass<I, TS> + intercom::CoClass,
+    S: intercom::attributes::ComClassInterface<I, TS> + intercom::attributes::ComClass,
     TS: crate::type_system::TypeSystem,
 {
     intercom::ComBoxData::<S>::query_interface(S::get_box(self_vtable), riid, out)
@@ -90,7 +91,7 @@ where
 pub unsafe extern "system" fn add_ref<I, S, TS>(self_vtable: crate::raw::RawComPtr) -> u32
 where
     I: ?Sized,
-    S: intercom::attributes::ComClass<I, TS> + intercom::CoClass,
+    S: intercom::attributes::ComClassInterface<I, TS> + intercom::attributes::ComClass,
     TS: crate::type_system::TypeSystem,
 {
     intercom::ComBoxData::<S>::add_ref(S::get_box(self_vtable))
@@ -99,7 +100,7 @@ where
 pub unsafe extern "system" fn release<I, S, TS>(self_vtable: crate::raw::RawComPtr) -> u32
 where
     I: ?Sized,
-    S: intercom::attributes::ComClass<I, TS> + intercom::CoClass,
+    S: intercom::attributes::ComClassInterface<I, TS> + intercom::attributes::ComClass,
     TS: crate::type_system::TypeSystem,
 {
     intercom::ComBoxData::<S>::release(S::get_box(self_vtable))
@@ -162,7 +163,7 @@ pub mod isupporterrorinfo
     /// info through IErrorInfo.
     pub fn interface_supports_error_info<S>(_this: &ComBoxData<S>, riid: REFIID) -> raw::HRESULT
     where
-        S: intercom::combox::CoClass,
+        S: intercom::attributes::ComClass,
     {
         match S::interface_supports_error_info(riid) {
             true => raw::S_OK,

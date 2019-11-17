@@ -1,3 +1,4 @@
+use crate::attributes::{ComInterface, HasInterface};
 use crate::type_system::{ExternInput, ExternOutput, TypeSystem};
 use crate::*;
 use intercom_attributes::ForeignType;

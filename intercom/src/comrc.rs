@@ -1,4 +1,5 @@
 use super::*;
+use crate::attributes::ComInterface;
 use crate::type_system::{ExternInput, ExternOutput, TypeSystem};
 
 /// Reference counted handle to the `ComBox` data.
@@ -158,7 +159,7 @@ impl<T: ComInterface + ?Sized> std::borrow::Borrow<ComItf<T>> for ComRc<T>
     }
 }
 
-unsafe impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS> for crate::ComRc<I>
+unsafe impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternInput<TS> for crate::ComRc<I>
 where
     I: ForeignType,
 {
@@ -186,7 +187,7 @@ where
     }
 }
 
-unsafe impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternOutput<TS> for crate::ComRc<I>
+unsafe impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternOutput<TS> for crate::ComRc<I>
 where
     I: ForeignType,
 {
@@ -206,8 +207,7 @@ where
     }
 }
 
-unsafe impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS>
-    for Option<crate::ComRc<I>>
+unsafe impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternInput<TS> for Option<crate::ComRc<I>>
 where
     I: ForeignType,
 {
@@ -235,8 +235,7 @@ where
     }
 }
 
-unsafe impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternOutput<TS>
-    for Option<crate::ComRc<I>>
+unsafe impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternOutput<TS> for Option<crate::ComRc<I>>
 where
     I: ForeignType,
 {

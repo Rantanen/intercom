@@ -1,22 +1,8 @@
 use super::*;
+use crate::attributes::{ComClass, ComInterface, HasInterface};
 use crate::raw::RawComPtr;
 use crate::type_system::TypeSystemName;
 use std::sync::atomic::{AtomicU32, Ordering};
-
-/// Trait required by any COM coclass type.
-///
-/// Used to specify the virtual table for the `ComBoxData`.
-pub trait CoClass
-{
-    type VTableList;
-    const VTABLE: Self::VTableList;
-    fn query_interface(vtables: &Self::VTableList, riid: REFIID) -> RawComResult<RawComPtr>;
-    fn interface_supports_error_info(riid: REFIID) -> bool;
-}
-
-pub trait HasInterface<T: ComInterface + ?Sized>: CoClass
-{
-}
 
 /// Pointer to a COM-enabled Rust struct.
 ///
@@ -30,12 +16,12 @@ pub trait HasInterface<T: ComInterface + ?Sized>: CoClass
 /// Technically the memory layout is specified by the [`ComBoxData`](struct.ComBoxData.html)
 /// type, however that type shouldn't be needed by the user. For all intents
 /// the `ComBox` type is _the_ COM-compatible object handle.
-pub struct ComBox<T: CoClass>
+pub struct ComBox<T: ComClass>
 {
     data: *mut ComBoxData<T>,
 }
 
-impl<T: CoClass> ComBox<T>
+impl<T: ComClass> ComBox<T>
 {
     /// Constructs a new `ComBox` by placing the `value` into reference
     /// counted memory.
@@ -65,7 +51,7 @@ impl<T: CoClass> ComBox<T>
             let vtbl = &self.as_ref().vtable_list;
 
             let automation_ptr = match I::iid(TypeSystemName::Automation) {
-                Some(iid) => match <T as CoClass>::query_interface(&vtbl, iid) {
+                Some(iid) => match <T as ComClass>::query_interface(&vtbl, iid) {
                     Ok(itf) => itf,
                     Err(_) => ::std::ptr::null_mut(),
                 },
@@ -73,7 +59,7 @@ impl<T: CoClass> ComBox<T>
             };
 
             let raw_ptr = match I::iid(TypeSystemName::Raw) {
-                Some(iid) => match <T as CoClass>::query_interface(&vtbl, iid) {
+                Some(iid) => match <T as ComClass>::query_interface(&vtbl, iid) {
                     Ok(itf) => itf,
                     Err(_) => ::std::ptr::null_mut(),
                 },
@@ -91,7 +77,7 @@ impl<T: CoClass> ComBox<T>
     }
 }
 
-impl<T: CoClass + std::fmt::Debug> std::fmt::Debug for ComBox<T>
+impl<T: ComClass + std::fmt::Debug> std::fmt::Debug for ComBox<T>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
     {
@@ -101,7 +87,7 @@ impl<T: CoClass + std::fmt::Debug> std::fmt::Debug for ComBox<T>
     }
 }
 
-impl<T: CoClass> Drop for ComBox<T>
+impl<T: ComClass> Drop for ComBox<T>
 {
     /// Decreases the reference count by one. If this is the last reference
     /// the memory will be deallocated.
@@ -111,7 +97,7 @@ impl<T: CoClass> Drop for ComBox<T>
     }
 }
 
-impl<T: CoClass> AsMut<ComBoxData<T>> for ComBox<T>
+impl<T: ComClass> AsMut<ComBoxData<T>> for ComBox<T>
 {
     fn as_mut(&mut self) -> &mut ComBoxData<T>
     {
@@ -120,7 +106,7 @@ impl<T: CoClass> AsMut<ComBoxData<T>> for ComBox<T>
     }
 }
 
-impl<T: CoClass> AsRef<ComBoxData<T>> for ComBox<T>
+impl<T: ComClass> AsRef<ComBoxData<T>> for ComBox<T>
 {
     fn as_ref(&self) -> &ComBoxData<T>
     {
@@ -171,14 +157,14 @@ impl<I: ComInterface + ?Sized, T: HasInterface<I>> From<&ComBox<T>> for ComRc<I>
 /// and `release` must be used correctly together. Failure to do so will result
 /// either in memory leaks or access to dangling pointers.
 #[repr(C)]
-pub struct ComBoxData<T: CoClass>
+pub struct ComBoxData<T: ComClass>
 {
     vtable_list: T::VTableList,
     ref_count: AtomicU32,
     value: T,
 }
 
-impl<T: CoClass> ComBoxData<T>
+impl<T: ComClass> ComBoxData<T>
 {
     /// Creates a new ComBoxData and returns a pointer to it.
     ///
@@ -388,7 +374,7 @@ impl<T: CoClass> ComBoxData<T>
 
 impl<T> std::ops::Deref for ComBoxData<T>
 where
-    T: CoClass,
+    T: ComClass,
 {
     type Target = T;
     fn deref(&self) -> &T
@@ -399,7 +385,7 @@ where
 
 impl<T> std::ops::DerefMut for ComBoxData<T>
 where
-    T: CoClass,
+    T: ComClass,
 {
     fn deref_mut(&mut self) -> &mut T
     {
@@ -409,7 +395,7 @@ where
 
 impl<T> std::ops::Deref for ComBox<T>
 where
-    T: CoClass,
+    T: ComClass,
 {
     type Target = T;
     fn deref(&self) -> &T
@@ -420,7 +406,7 @@ where
 
 impl<T> std::ops::DerefMut for ComBox<T>
 where
-    T: CoClass,
+    T: ComClass,
 {
     fn deref_mut(&mut self) -> &mut T
     {
@@ -428,7 +414,7 @@ where
     }
 }
 
-impl<T: Default + CoClass> Default for ComBox<T>
+impl<T: Default + ComClass> Default for ComBox<T>
 {
     fn default() -> Self
     {

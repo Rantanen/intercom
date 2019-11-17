@@ -1,4 +1,5 @@
 use super::*;
+use crate::attributes::ComInterface;
 use crate::interfaces::RawIUnknown;
 use crate::type_system::{
     AutomationTypeSystem, ExternInput, InfallibleExternInput, RawTypeSystem, TypeSystem,
@@ -197,8 +198,7 @@ impl<T: ComInterface + ?Sized> std::ops::Deref for ComItf<T>
     }
 }
 
-unsafe impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS>
-    for &'a crate::ComItf<I>
+unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternInput<TS> for &'a crate::ComItf<I>
 where
     I: ForeignType,
 {
@@ -220,7 +220,7 @@ where
     }
 }
 
-unsafe impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> ExternInput<TS>
+unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternInput<TS>
     for Option<&'a crate::ComItf<I>>
 where
     I: ForeignType,
@@ -246,7 +246,7 @@ where
     }
 }
 
-unsafe impl<'a, TS: TypeSystem, I: crate::ComInterface + ?Sized> InfallibleExternInput<TS>
+unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> InfallibleExternInput<TS>
     for Option<&'a crate::ComItf<I>>
 where
     I: ForeignType,

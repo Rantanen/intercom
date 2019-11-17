@@ -104,26 +104,6 @@ com_module!(
     class intercom::error::ErrorStore,
 );
 
-/// The `ComInterface` trait defines the COM interface details for a COM
-/// interface trait.
-pub trait ComInterface
-{
-    /// IID of the COM interface.
-    fn iid(ts: type_system::TypeSystemName) -> Option<&'static IID>;
-
-    fn iid_ts<TS: intercom::type_system::TypeSystem>() -> &'static intercom::IID
-    where
-        Self: intercom::attributes::ComInterface<TS>;
-
-    /// Dereferences a `ComItf<T>` into a `&T`.
-    ///
-    /// While in most cases the user crate will implement `T` for `ComItf<T>`,
-    /// this impl exists only in the user crate and cannot be used in generic
-    /// contexts. For generic `ComItf<T>` use, Intercom ipmls `Deref<Target=T>`
-    /// for `ComItf<T>` which requires this method.
-    fn deref(com_itf: &ComItf<Self>) -> &Self;
-}
-
 /// Raw COM pointer type.
 /// Interface ID GUID.
 pub type IID = GUID;
@@ -213,7 +193,7 @@ pub mod raw
         }
     }
 
-    impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> InterfacePtr<TS, I>
+    impl<TS: TypeSystem, I: crate::attributes::ComInterface + ?Sized> InterfacePtr<TS, I>
     {
         pub fn as_unknown(self) -> InterfacePtr<TS, dyn crate::IUnknown>
         {
@@ -225,7 +205,8 @@ pub mod raw
         }
     }
 
-    impl<TS: TypeSystem, I: crate::ComInterface + ?Sized> ForeignType for Option<InterfacePtr<TS, I>>
+    impl<TS: TypeSystem, I: crate::attributes::ComInterface + ?Sized> ForeignType
+        for Option<InterfacePtr<TS, I>>
     where
         I: ForeignType,
     {

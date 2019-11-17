@@ -449,7 +449,7 @@ where
     com_error
 }
 
-pub fn load_error<I: crate::ComInterface + ?Sized>(
+pub fn load_error<I: attributes::ComInterface + ?Sized>(
     iunk: &ComItf<I>,
     iid: &GUID,
     err: raw::HRESULT,
@@ -457,10 +457,13 @@ pub fn load_error<I: crate::ComInterface + ?Sized>(
 {
     // Do not try to load error if this is IUnknown or ISupportErrorInfo.
     // Both of these are used during error handling and may fail.
-    if iid == <dyn IUnknown as attributes::ComInterface<AutomationTypeSystem>>::iid()
-        || iid == <dyn IUnknown as attributes::ComInterface<RawTypeSystem>>::iid()
-        || iid == <dyn ISupportErrorInfo as attributes::ComInterface<AutomationTypeSystem>>::iid()
-        || iid == <dyn ISupportErrorInfo as attributes::ComInterface<RawTypeSystem>>::iid()
+    if iid == <dyn IUnknown as attributes::ComInterfaceTypeSystem<AutomationTypeSystem>>::iid()
+        || iid == <dyn IUnknown as attributes::ComInterfaceTypeSystem<RawTypeSystem>>::iid()
+        || iid == <dyn ISupportErrorInfo as attributes::ComInterfaceTypeSystem<
+            AutomationTypeSystem,
+        >>::iid()
+        || iid
+            == <dyn ISupportErrorInfo as attributes::ComInterfaceTypeSystem<RawTypeSystem>>::iid()
     {
         return ComError {
             hresult: err,
