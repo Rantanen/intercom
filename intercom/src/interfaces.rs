@@ -86,7 +86,14 @@ where
     S: intercom::attributes::ComClassInterface<I, TS> + intercom::attributes::ComClass,
     TS: crate::type_system::TypeSystem,
 {
-    intercom::ComBoxData::<S>::query_interface(S::get_box(self_vtable), riid, out)
+    let combox = S::get_box(self_vtable);
+    log::trace!(
+        "[{:p}, through {:p}] Serving {}::query_interface",
+        combox,
+        self_vtable,
+        std::any::type_name::<S>()
+    );
+    intercom::ComBoxData::<S>::query_interface(combox, riid, out)
 }
 
 #[doc(hidden)]
@@ -96,7 +103,14 @@ where
     S: intercom::attributes::ComClassInterface<I, TS> + intercom::attributes::ComClass,
     TS: crate::type_system::TypeSystem,
 {
-    intercom::ComBoxData::<S>::add_ref(S::get_box(self_vtable))
+    let combox = S::get_box(self_vtable);
+    log::trace!(
+        "[{:p}, through {:p}] Serving {}::add_ref",
+        combox,
+        self_vtable,
+        std::any::type_name::<S>()
+    );
+    intercom::ComBoxData::<S>::add_ref(combox)
 }
 
 #[doc(hidden)]
@@ -106,7 +120,14 @@ where
     S: intercom::attributes::ComClassInterface<I, TS> + intercom::attributes::ComClass,
     TS: crate::type_system::TypeSystem,
 {
-    intercom::ComBoxData::<S>::release(S::get_box(self_vtable))
+    let combox = S::get_box(self_vtable);
+    log::trace!(
+        "[{:p}, through {:p}] Serving {}::release",
+        combox,
+        self_vtable,
+        std::any::type_name::<S>()
+    );
+    intercom::ComBoxData::<S>::release(combox)
 }
 
 /// The `ISupportErrorInfo` COM interface.
