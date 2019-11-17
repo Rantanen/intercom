@@ -51,7 +51,7 @@ pub trait RawIUnknown
     fn release(&self) -> u32;
 }
 
-impl<I, S> crate::attributes::VTableFor<I, S, RawTypeSystem> for dyn IUnknown
+impl<I, S> crate::attributes::ComInterfaceVTableFor<I, S, RawTypeSystem> for dyn IUnknown
 where
     I: ?Sized,
     S: intercom::attributes::ComClassInterface<I, RawTypeSystem> + intercom::attributes::ComClass,
@@ -62,7 +62,7 @@ where
         release: release::<I, S, RawTypeSystem>,
     };
 }
-impl<I, S> crate::attributes::VTableFor<I, S, AutomationTypeSystem> for dyn IUnknown
+impl<I, S> crate::attributes::ComInterfaceVTableFor<I, S, AutomationTypeSystem> for dyn IUnknown
 where
     I: ?Sized,
     S: intercom::attributes::ComClassInterface<I, AutomationTypeSystem>

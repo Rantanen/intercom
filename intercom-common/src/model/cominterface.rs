@@ -4,14 +4,14 @@ use crate::prelude::*;
 
 use crate::ast_converters::*;
 use crate::guid::GUID;
-use crate::idents::SomeIdent;
+use crate::idents::{self, SomeIdent};
 use crate::methodinfo::ComMethodInfo;
 use crate::quote::ToTokens;
 use crate::tyhandlers::ModelTypeSystem;
 use indexmap::IndexMap;
 use proc_macro2::Span;
 use std::iter::FromIterator;
-use syn::{spanned::Spanned, Ident, LitStr, Path, Visibility};
+use syn::{spanned::Spanned, Ident, LitStr, Path, TypePath, Visibility};
 
 intercom_attribute!(
     ComInterfaceAttr< ComInterfaceAttrParam, NoParams > {
@@ -191,6 +191,21 @@ impl ComInterface
             variants,
             itf_ref,
         })
+    }
+
+    pub fn vtable(&self, ts: ModelTypeSystem) -> TypePath
+    {
+        let ts_type_tokens = ts.as_typesystem_type(self.ident.span());
+        let tt = match &self.vtable_of {
+            Some(path) => {
+                quote_spanned!(self.ident.span() => <#path as intercom::attributes::ComInterfaceVariant<#ts_type_tokens>>::VTable)
+            }
+            None => {
+                let ident = idents::vtable(&self.ident, ts);
+                quote!(#ident)
+            }
+        };
+        syn::parse2(tt).unwrap()
     }
 }
 

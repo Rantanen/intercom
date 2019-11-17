@@ -76,6 +76,14 @@ impl ModelTypeSystem
     }
 }
 
+impl quote::IdentFragment for ModelTypeSystem
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result
+    {
+        write!(f, "{:?}", self)
+    }
+}
+
 /// Type usage context.
 pub struct TypeContext
 {
