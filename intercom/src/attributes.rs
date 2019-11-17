@@ -31,7 +31,7 @@ pub trait ComClassInterface<TInterface: ?Sized, TS: TypeSystem>: ComClass + Size
     }
 }
 
-pub trait VTableFor<I: ?Sized, S, TS: TypeSystem>: ComInterfaceVariant<TS>
+pub trait ComInterfaceVTableFor<I: ?Sized, S, TS: TypeSystem>: ComInterfaceVariant<TS>
 {
     const VTABLE: Self::VTable;
 }

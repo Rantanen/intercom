@@ -88,7 +88,7 @@ pub fn expand_com_class(
     let mut vtable_list_field_values = vec![];
     let mut vtable_list_field_ptrs = vec![quote!(
                  _ISupportErrorInfo :
-                &<dyn intercom::ISupportErrorInfo as intercom::attributes::VTableFor<
+                &<dyn intercom::ISupportErrorInfo as intercom::attributes::ComInterfaceVTableFor<
                     dyn intercom::ISupportErrorInfo,
                     #cls_ident #ty_generics,
                     intercom::type_system::AutomationTypeSystem>>::VTABLE
@@ -138,7 +138,7 @@ pub fn expand_com_class(
             let itf_attrib_data = quote!(
                 <#maybe_dyn #itf as intercom::attributes::ComInterfaceVariant<#ts_type>>);
             let itf_vtable_for = quote!(
-                <#maybe_dyn #itf as intercom::attributes::VTableFor<#maybe_dyn #itf, #cls_ident #ty_generics, #ts_type>>);
+                <#maybe_dyn #itf as intercom::attributes::ComInterfaceVTableFor<#maybe_dyn #itf, #cls_ident #ty_generics, #ts_type>>);
 
             // Add the interface in the vtable list.
             vtable_list_field_defs.push(quote!( #itf_variant : #itf_attrib_data::VTable));

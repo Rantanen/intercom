@@ -288,7 +288,7 @@ fn process_itf_variant(
     if let Some(ref base) = itf.base_interface {
         let cominterface = quote_spanned!(itf.span => <dyn #base as intercom::attributes::ComInterfaceVariant<#ts_type_tokens>>);
         vtbl_fields.push(quote_spanned!(itf.span => pub __base : #cominterface::VTable, ));
-        let vtable_for = quote_spanned!(itf.span => <dyn #base as intercom::attributes::VTableFor<I, S, #ts_type_tokens>>);
+        let vtable_for = quote_spanned!(itf.span => <dyn #base as intercom::attributes::ComInterfaceVTableFor<I, S, #ts_type_tokens>>);
         vtbl_values.push(quote_spanned!(itf.span => __base : #vtable_for::VTABLE));
     }
 
@@ -366,7 +366,7 @@ fn process_itf_variant(
             #visibility struct #vtable_path { #( #vtbl_fields )* }
 
             #[allow(unused)]
-            impl<I, S> intercom::attributes::VTableFor<I, S, #ts_type_tokens> for #itf_ref
+            impl<I, S> intercom::attributes::ComInterfaceVTableFor<I, S, #ts_type_tokens> for #itf_ref
             where I: ?Sized,
                   S: intercom::attributes::ComClassInterface<I, #ts_type_tokens> + intercom::attributes::ComClass #itf_bound,
             {
