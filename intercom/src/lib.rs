@@ -10,20 +10,19 @@
 //! A basic example of a calculator type exposed as a COM object.
 //!
 //! ```
-//! use intercom::{com_library, com_class, com_interface, com_impl, ComResult};
+//! use intercom::{com_library, com_class, com_interface, ComResult};
 //!
 //! // Define COM classes to expose from this library.
 //! com_library!(class Calculator);
 //!
 //! // Define the COM class and the interfaces it implements.
-//! #[com_class(Calculator)]
+//! #[com_class(Self)]
 //! #[derive(Default)]
 //! struct Calculator;
 //!
 //! // Define the implementation for the class. The COM interface is defined
 //! // implicitly by the `impl`.
 //! #[com_interface]
-//! #[com_impl]
 //! impl Calculator {
 //!     fn add(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a + b) }
 //!     fn sub(&self, a: i32, b: i32) -> ComResult<i32> { Ok(a - b) }

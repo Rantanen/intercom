@@ -6,7 +6,6 @@ use std::os::raw::c_char;
 pub struct UnicodeConversion;
 
 #[com_interface]
-#[com_impl]
 impl UnicodeConversion
 {
     fn utf8_to_utf16(&self, input: *const c_char) -> ComResult<*mut u16>

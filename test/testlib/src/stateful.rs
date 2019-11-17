@@ -15,7 +15,6 @@ impl Default for StatefulOperations
 }
 
 #[com_interface]
-#[com_impl]
 impl StatefulOperations
 {
     pub fn put_value(&mut self, v: i32)

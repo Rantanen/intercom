@@ -17,7 +17,6 @@ trait IRefCount
 pub struct ClassCreator {}
 
 #[com_interface]
-#[com_impl]
 impl ClassCreator
 {
     pub fn create_root(&self, id: i32) -> ComResult<ComRc<CreatedClass>>
@@ -47,7 +46,6 @@ pub struct CreatedClass
 }
 
 #[com_interface]
-#[com_impl]
 impl CreatedClass
 {
     pub fn new_with_id(id: i32) -> CreatedClass
@@ -69,7 +67,6 @@ impl CreatedClass
     }
 }
 
-#[com_impl]
 impl IRefCount for CreatedClass
 {
     fn get_ref_count(&self) -> u32
@@ -85,7 +82,6 @@ pub trait IParent
     fn get_id(&self) -> i32;
 }
 
-#[com_impl]
 impl IParent for CreatedClass
 {
     fn get_id(&self) -> i32
@@ -99,7 +95,6 @@ impl IParent for CreatedClass
 pub struct RefCountOperations {}
 
 #[com_interface]
-#[com_impl]
 impl RefCountOperations
 {
     pub fn get_new(&self) -> ComResult<ComRc<RefCountOperations>>

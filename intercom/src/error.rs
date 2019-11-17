@@ -387,7 +387,6 @@ pub trait IErrorInfo: crate::IUnknown
     fn get_help_context(&self) -> ComResult<u32>;
 }
 
-#[com_impl]
 impl IErrorInfo for ErrorInfo
 {
     fn get_guid(&self) -> ComResult<GUID>
@@ -544,7 +543,6 @@ pub trait IErrorStore: crate::IUnknown
     fn set_error_message(&self, msg: &str) -> ComResult<()>;
 }
 
-#[com_impl]
 impl IErrorStore for ErrorStore
 {
     fn get_error_info(&self) -> ComResult<ComRc<dyn IErrorInfo>>

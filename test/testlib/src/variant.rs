@@ -24,7 +24,6 @@ impl VariantImpl
     }
 }
 
-#[com_impl]
 impl IVariantInterface for VariantImpl
 {
     fn do_stuff(&self) -> Result<Variant, ComError>
@@ -34,7 +33,6 @@ impl IVariantInterface for VariantImpl
 }
 
 #[com_interface]
-#[com_impl]
 impl VariantTests
 {
     pub fn variant_parameter(&self, vt: u16, variant: Variant) -> Result<(), ComError>

@@ -57,29 +57,6 @@ pub fn com_interface(attr: TokenStream, tokens: TokenStream) -> TokenStream
     }
 }
 
-/// Defines an implementation of an intercom interface.
-///
-/// ```rust,ignore
-/// #[com_impl]
-/// impl Foo for Struct { /* ... */ }
-/// ```
-///
-/// Associated types: `impl Trait for Struct`, `impl Struct`
-///
-/// The attribute allows Intercom to implement raw FFI functions for the
-/// interface's methods. Intercom allows the use of non-FFI compatible types
-/// as arguments and return values for the interface methods. The automatic
-/// FFI layer handles conversion between these types and FFI compatible types.
-#[proc_macro_attribute]
-#[allow(clippy::needless_pass_by_value)]
-pub fn com_impl(attr: TokenStream, tokens: TokenStream) -> TokenStream
-{
-    match expand_com_impl(&attr, tokens) {
-        Ok(t) => t,
-        Err(e) => panic!("{}", e),
-    }
-}
-
 /// Defines a COM class that implements one or more COM interfaces.
 ///
 /// ```rust,ignore

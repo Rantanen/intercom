@@ -112,14 +112,7 @@ pub fn expand_com_class(
             let itf_variant = Ident::new(&format!("{}_{:?}", itf_ident, ts), itf.span());
             let ts_type = ts.as_typesystem_type(itf.span());
 
-            // Store the field offset globally. We need this offset when implementing
-            // the delegating query_interface methods. The only place where we know
-            // the actual layout of the vtable is here. Thus we need to store this
-            // offset somewhere where the com_impl's can access it.
-            //
-            // Rust doesn't allow pointer derefs or conversions in consts so we'll
-            // use an inline fn instead. LLVM should be able to reduce this into a
-            // constant expression during compilation.
+            // Implement ComClassInterface.
             output.push(quote!(
                 #[allow(non_snake_case)]
                 impl #impl_generics intercom::attributes::ComClassInterface<

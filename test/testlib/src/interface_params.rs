@@ -15,7 +15,6 @@ pub struct SharedImplementation
     value: u32,
 }
 
-#[com_impl]
 impl ISharedInterface for SharedImplementation
 {
     fn get_value(&self) -> u32

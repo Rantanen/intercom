@@ -53,20 +53,6 @@ pub fn get_ident_and_fns(item: &Item) -> Option<InterfaceData>
 
 pub type ImplData<'a> = (Option<Path>, Path, Vec<&'a Signature>);
 
-pub fn get_impl_data(item: &Item) -> Option<ImplData>
-{
-    if let Item::Impl(ItemImpl {
-        ref trait_,
-        ref self_ty,
-        ref items,
-        ..
-    }) = *item
-    {
-        return Some(get_impl_data_raw(trait_, self_ty, items));
-    }
-    None
-}
-
 fn get_impl_data_raw<'a>(
     trait_ref: &'a Option<(Option<Token!(!)>, Path, Token!(for))>,
     struct_ty: &'a Type,
@@ -76,11 +62,11 @@ fn get_impl_data_raw<'a>(
     let struct_path = match struct_ty {
         syn::Type::Path(typepath) => {
             if typepath.qself.is_some() {
-                panic!("#[com_impl] cannot use associated types");
+                panic!("#[com_interface] cannot use associated types");
             }
             typepath.path.clone()
         }
-        _ => panic!("#[com_impl] must be defined for Path"),
+        _ => panic!("#[com_interface] must be defined for Path"),
     };
 
     let trait_path = trait_ref.as_ref().map(|(_, path, _)| path.clone());

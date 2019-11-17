@@ -66,7 +66,6 @@ pub trait IAllocator: crate::IUnknown
     unsafe fn free(&self, ptr: *mut raw::c_void);
 }
 
-#[crate::com_impl]
 impl IAllocator for Allocator
 {
     unsafe fn alloc_bstr(&self, text: *const u16, len: u32) -> OutBSTR

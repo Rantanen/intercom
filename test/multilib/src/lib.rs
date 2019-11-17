@@ -25,7 +25,6 @@ impl HelloWorld
     }
 }
 
-#[com_impl]
 impl IHelloWorld for HelloWorld
 {
     fn get_hello(&self) -> ComResult<String>

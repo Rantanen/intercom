@@ -18,7 +18,6 @@ trait IAnotherInterface
 {
 }
 
-#[intercom::com_impl]
 impl IInterface for S
 {
     fn call(&self) -> intercom::ComResult<String>
