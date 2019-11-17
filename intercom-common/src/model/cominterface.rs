@@ -11,7 +11,7 @@ use crate::tyhandlers::ModelTypeSystem;
 use indexmap::IndexMap;
 use proc_macro2::Span;
 use std::iter::FromIterator;
-use syn::{spanned::Spanned, Ident, LitStr, Path, TypePath, Visibility};
+use syn::{Ident, LitStr, Path, TypePath, Visibility};
 
 intercom_attribute!(
     ComInterfaceAttr< ComInterfaceAttrParam, NoParams > {
