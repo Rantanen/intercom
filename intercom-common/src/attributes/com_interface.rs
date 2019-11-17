@@ -491,6 +491,7 @@ fn create_virtual_method(
     let method_impl_ident = idents::com_to_rust_method_impl(itf_ident, method_ident, ts);
     let infallible = method_info.returnhandler.is_infallible();
     let itf_ident = &itf.ident;
+    let itf_path = &itf.path;
     let ts_type_tokens = ts.as_typesystem_type(itf.span);
     let params = method_info.get_parameters_tokenstream();
     let attr_comclassinterface = quote!(intercom::attributes::ComClassInterface);
@@ -536,9 +537,7 @@ fn create_virtual_method(
     // anywya, we won't use generic parameters on struct impl based implicit
     // interfaces.
     let (generics, bounds, s_ref, i_ref) = match itf.item_type {
-        utils::InterfaceType::Struct => {
-            (quote!(), quote!(), quote!(#itf_ident), quote!(#itf_ident))
-        }
+        utils::InterfaceType::Struct => (quote!(), quote!(), quote!(#itf_path), quote!(#itf_path)),
         utils::InterfaceType::Trait => (
             quote!(<I, S>),
             quote!(

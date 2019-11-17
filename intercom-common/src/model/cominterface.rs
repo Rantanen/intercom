@@ -236,7 +236,10 @@ mod test
 
         assert_eq!(itf.path, parse_quote!(ITrait));
         assert_eq!(itf.visibility, Visibility::Inherited);
-        assert_eq!(itf.base_interface.as_ref().unwrap(), "IUnknown");
+        assert_eq!(
+            itf.base_interface.as_ref().unwrap(),
+            &parse_quote!(intercom::IUnknown)
+        );
 
         let variant = &itf.variants[&Automation];
         assert_eq!(
@@ -277,7 +280,10 @@ mod test
 
         let pub_visibility: Visibility = parse_quote!(pub);
         assert_eq!(itf.visibility, pub_visibility);
-        assert_eq!(itf.base_interface.as_ref().unwrap(), "IUnknown");
+        assert_eq!(
+            itf.base_interface.as_ref().unwrap(),
+            &parse_quote!(intercom::IUnknown)
+        );
 
         let variant = &itf.variants[&Automation];
         assert_eq!(
@@ -318,7 +324,7 @@ mod test
 
         let pub_visibility: Visibility = parse_quote!(pub);
         assert_eq!(itf.visibility, pub_visibility);
-        assert_eq!(itf.base_interface.as_ref().unwrap(), "IBase");
+        assert_eq!(itf.base_interface.as_ref().unwrap(), &parse_quote!(IBase));
 
         let variant = &itf.variants[&ModelTypeSystem::Automation];
         assert_eq!(
