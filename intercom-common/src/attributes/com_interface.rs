@@ -318,6 +318,7 @@ fn process_itf_variant(
             #[allow(clippy::all)]
             #[repr(C)]
             #[doc(hidden)]
+            #[derive(Clone, Copy)]
             #visibility struct #vtable_path { #( #vtbl_fields, )* }
 
             #[allow(unused)]

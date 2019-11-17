@@ -31,7 +31,7 @@ impl<T: ComClass> ComBox<T>
     {
         // Construct a ComBoxData in memory and track the reference on it.
         let cb = ComBoxData::new(value);
-        unsafe { ComBoxData::add_ref(&mut *cb) };
+        unsafe { ComBoxData::add_ref(&*cb) };
 
         // Return the struct.
         ComBox { data: cb }

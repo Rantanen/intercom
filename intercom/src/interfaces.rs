@@ -75,6 +75,7 @@ where
     };
 }
 
+#[doc(hidden)]
 pub unsafe extern "system" fn query_interface<I, S, TS>(
     self_vtable: crate::raw::RawComPtr,
     riid: *const crate::GUID,
@@ -88,6 +89,7 @@ where
     intercom::ComBoxData::<S>::query_interface(S::get_box(self_vtable), riid, out)
 }
 
+#[doc(hidden)]
 pub unsafe extern "system" fn add_ref<I, S, TS>(self_vtable: crate::raw::RawComPtr) -> u32
 where
     I: ?Sized,
@@ -97,6 +99,7 @@ where
     intercom::ComBoxData::<S>::add_ref(S::get_box(self_vtable))
 }
 
+#[doc(hidden)]
 pub unsafe extern "system" fn release<I, S, TS>(self_vtable: crate::raw::RawComPtr) -> u32
 where
     I: ?Sized,

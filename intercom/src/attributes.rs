@@ -10,7 +10,7 @@ use crate::{type_system::TypeSystem, IID};
 /// Used to specify the virtual table for the `ComBoxData`.
 pub trait ComClass
 {
-    type VTableList;
+    type VTableList: Copy;
     const VTABLE: Self::VTableList;
     fn query_interface(vtables: &Self::VTableList, riid: REFIID) -> RawComResult<RawComPtr>;
     fn interface_supports_error_info(riid: REFIID) -> bool;
@@ -23,6 +23,11 @@ pub trait HasInterface<T: ComInterface + ?Sized>: ComClass
 pub trait ComClassInterface<TInterface: ?Sized, TS: TypeSystem>: ComClass + Sized
 {
     fn offset() -> usize;
+
+    /// # Safety
+    ///
+    /// The `vtable` must be a valid pointer that points to the `TInterface`
+    /// part of the `self`'s virtual table list.
     unsafe fn get_box<'a>(vtable: RawComPtr) -> &'a mut ComBoxData<Self>
     {
         let offset = Self::offset();
@@ -58,7 +63,7 @@ pub trait ComInterface
 
 pub trait ComInterfaceVariant<TS: TypeSystem>
 {
-    type VTable: 'static;
+    type VTable: Copy + 'static;
     fn iid() -> &'static IID;
 }
 
