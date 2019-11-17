@@ -76,11 +76,6 @@ pub fn expand_com_module(
         let dll_get_class_object = get_dll_get_class_object_function();
         output.push(dll_get_class_object);
         output.push(quote!(
-            // Do we need this? Would rather not export this through an extern crate
-            // for another dll.
-            //
-            // com_library should have dllmain!() macro or similar that implements this
-            // together with the COM registration.
             #[no_mangle]
             #[allow(non_camel_case_types)]
             #[deprecated]
