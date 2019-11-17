@@ -8,7 +8,6 @@
 use super::*;
 use crate::attributes;
 use crate::raw::RawComPtr;
-use crate::type_system::AutomationTypeSystem;
 
 #[com_interface(
     com_iid = "00000001-0000-0000-C000-000000000046",
@@ -30,7 +29,7 @@ pub struct ClassFactory<T: Default + intercom::attributes::ComClass>
 
 impl<T: Default + attributes::ComClass> IClassFactory for ClassFactory<T>
 {
-    fn create_instance(&self, outer: RawComPtr, riid: REFIID) -> ComResult<RawComPtr>
+    fn create_instance(&self, _outer: RawComPtr, riid: REFIID) -> ComResult<RawComPtr>
     {
         unsafe {
             let instance = ComBox::new(T::default());

@@ -1,5 +1,5 @@
 use super::*;
-use crate::raw::{RawComPtr, HRESULT};
+use crate::raw::HRESULT;
 use crate::type_system::{AutomationTypeSystem, RawTypeSystem};
 
 /// The `IUnknown` COM interface.

@@ -177,11 +177,6 @@ pub fn expand_com_class(
     // ISupportErrorInfo virtual table instance.
     //
     // The primary IUnknown virtual table is embedded in this one.
-    let iunknown_vtbl = quote!(
-        <dyn intercom::IUnknown as intercom::attributes::ComInterfaceVariant<
-            intercom::type_system::AutomationTypeSystem,
-        >>::VTable
-    );
     output.push(quote!(
         #[allow(non_snake_case)]
         impl #impl_generics intercom::attributes::ComClassInterface<

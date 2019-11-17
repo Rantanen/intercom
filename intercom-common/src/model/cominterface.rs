@@ -198,7 +198,7 @@ impl ComInterface
         let ts_type_tokens = ts.as_typesystem_type(self.ident.span());
         let tt = match &self.vtable_of {
             Some(path) => {
-                quote_spanned!(self.ident.span() => <#path as intercom::attributes::ComInterfaceVariant<#ts_type_tokens>>::VTable)
+                quote_spanned!(self.ident.span() => <dyn #path as intercom::attributes::ComInterfaceVariant<#ts_type_tokens>>::VTable)
             }
             None => {
                 let ident = idents::vtable(&self.ident, ts);
