@@ -168,15 +168,15 @@ impl ComInterface
         );
 
         let itf_ref = match itf_type {
-            crate::utils::InterfaceType::Trait => quote_spanned!(item.span() => dyn #path),
-            crate::utils::InterfaceType::Struct => quote_spanned!(item.span() => #path),
+            crate::utils::InterfaceType::Trait => quote_spanned!(ident.span() => dyn #path),
+            crate::utils::InterfaceType::Struct => quote_spanned!(ident.span() => #path),
         };
 
         Ok(ComInterface {
             base_interface: base,
             item_type: itf_type,
             is_unsafe: unsafety.is_some(),
-            span: item.span(),
+            span: ident.span(),
             vtable_of: attr
                 .vtable_of()
                 .map_err(|e| ParseError::ComInterface(ident.to_string(), e))?

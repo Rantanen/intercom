@@ -259,10 +259,10 @@ fn process_itf_variant(
     let ts_type_tokens = ts.as_typesystem_type(itf.span);
     let itf_ref = &itf.itf_ref;
     let vtable_path = itf.vtable(ts);
-    let attr_cominterfacevariant =
-        quote!(intercom::attributes::ComInterfaceVariant<#ts_type_tokens>);
-    let attr_cominterfacevtablefor =
-        quote!(intercom::attributes::ComInterfaceVTableFor<I, S, #ts_type_tokens>);
+    let attr_cominterfacevariant = quote_spanned!(itf_ident.span() =>
+        intercom::attributes::ComInterfaceVariant<#ts_type_tokens>);
+    let attr_cominterfacevtablefor = quote_spanned!(itf_ident.span() =>
+        intercom::attributes::ComInterfaceVTableFor<I, S, #ts_type_tokens>);
 
     // Construct the iid(ts) match arm for this type system.
     itf_output
