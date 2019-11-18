@@ -1,6 +1,6 @@
 
 #include "../cpp-utility/os.hpp"
-#include "../cpp-utility/catch.hpp"
+#include "../dependencies/catch.hpp"
 
 #include "libraries.hpp"
 #include "generated/multi_lib.hpp"

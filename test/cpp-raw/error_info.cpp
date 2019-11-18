@@ -4,7 +4,7 @@
 using std::char_traits;
 
 #include "../cpp-utility/os.hpp"
-#include "../cpp-utility/catch.hpp"
+#include "../dependencies/catch.hpp"
 #include "testlib.hpp"
 #include <iostream>
 using namespace std;

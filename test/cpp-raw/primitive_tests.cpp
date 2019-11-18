@@ -3,7 +3,7 @@
 #include <limits>
 
 #include "../cpp-utility/os.hpp"
-#include "../cpp-utility/catch.hpp"
+#include "../dependencies/catch.hpp"
 
 #include "testlib.hpp"
 

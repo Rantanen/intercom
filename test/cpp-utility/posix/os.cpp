@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <mutex>
 
-#include "catch.hpp"
+#include "../../dependencies/catch.hpp"
 #include "../os.hpp"
 #include "../generated/test_lib.hpp"
 #include "../../runpath/init.h"
