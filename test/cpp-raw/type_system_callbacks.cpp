@@ -6,7 +6,7 @@ using std::char_traits;
 using namespace std;
 
 #include "../cpp-utility/os.hpp"
-#include "../cpp-utility/catch.hpp"
+#include "../dependencies/catch.hpp"
 
 #define INTERCOM_FLATTEN_DECLARATIONS
 #include "testlib.hpp"
