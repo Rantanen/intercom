@@ -241,6 +241,41 @@ pub fn pascal_case<T: AsRef<str>>(input: T) -> String
     output
 }
 
+/// Convert the Rust identifier from `PascalCase` to `snake_case`
+pub fn snake_case<T: AsRef<str>>(input: T) -> String
+{
+    let input = input.as_ref();
+
+    // Allocate the output string. We'll never increase the amount of
+    // characters so we can reserve string buffer using the input string length.
+    let mut output = String::new();
+    output.reserve(input.len() * 2);
+
+    // The first character should be upper case so lowercase it as is.
+    let mut iter = input.chars();
+    if let Some(c) = iter.next() {
+        output.extend(c.to_lowercase());
+    }
+
+    // Process each remaining character from the input.
+    loop {
+        let c = match iter.next() {
+            Some(c) => c,
+            None => break,
+        };
+
+        // Skip any leading lower case letters.
+        if !c.is_uppercase() {
+            output.push(c);
+            continue;
+        }
+
+        output.push('_');
+        output.extend(c.to_lowercase());
+    }
+    output
+}
+
 #[cfg(test)]
 mod test
 {

@@ -268,7 +268,7 @@ pub fn expand_com_class(
 
     // CLSID constant for the class.
     let clsid_ident = idents::clsid(cls_ident);
-    if let Some(ref guid) = cls.clsid {
+    if let model::ClassClsid::GUID(ref guid) = cls.clsid {
         let clsid_guid_tokens = utils::get_guid_tokens(guid, Span::call_site());
         let clsid_doc = format!("`{}` class ID.", cls_ident);
         let clsid_const = quote!(
@@ -295,16 +295,19 @@ fn create_get_typeinfo_function(cls: &model::ComClass) -> Result<TokenStream, St
     );
     let cls_ident = &cls.name;
     let cls_name = cls.name.to_string();
+
+    // Resolve the CLSID. If there is no CLSID, this type is private and should
+    // not type info should be created.
     let clsid = match &cls.clsid {
-        Some(guid) => guid,
-        None => {
+        model::ClassClsid::GUID(guid) => utils::get_guid_tokens(&guid, Span::call_site()),
+        model::ClassClsid::Path(path) => quote!(#path),
+        model::ClassClsid::None => {
             return Ok(quote!(
                 pub(crate) fn #fn_name() -> Vec<intercom::typelib::TypeInfo>
                 { vec![] }
             ))
         }
     };
-    let clsid_tokens = utils::get_guid_tokens(&clsid, Span::call_site());
     let (impl_generics, ty_generics, where_clause) = cls.generics.split_for_impl();
     let (interfaces, interface_info): (Vec<_>, Vec<_>) = cls
         .interfaces
@@ -343,7 +346,7 @@ fn create_get_typeinfo_function(cls: &model::ComClass) -> Result<TokenStream, St
                 let mut r = vec![ intercom::typelib::TypeInfo::Class(
                     intercom::ComBox::new( intercom::typelib::CoClass::__new(
                         #cls_name.into(),
-                        #clsid_tokens,
+                        #clsid,
                         vec![ #( #interfaces ),* ]
                     ) ) )
                 ];

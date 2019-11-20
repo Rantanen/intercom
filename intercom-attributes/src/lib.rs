@@ -125,6 +125,24 @@ pub fn com_library(args: TokenStream) -> TokenStream
     }
 }
 
+/// Defines a CLSID.
+///
+/// ```rust,ignore
+/// clsid!(ComClassType, clsid = "...")]
+/// ```
+///
+/// - `clsid` - Specific CLSID. If omitted, a CLSID will be generated.
+///
+/// The macro results in the implementation of CLSID_COM_CLASS_TYPE constant.
+#[proc_macro]
+pub fn clsid(args: TokenStream) -> TokenStream
+{
+    match expand_clsid(args) {
+        Ok(t) => t,
+        Err(e) => panic!("{}", e),
+    }
+}
+
 /// Derives the implementation of the trait ForeignType for a type.
 #[proc_macro_derive(ForeignType)]
 pub fn named_type_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream

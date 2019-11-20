@@ -25,6 +25,9 @@ pub enum ParseError
     #[fail(display = "Reading TOML failed: {}", _0)]
     CargoToml(String),
 
+    #[fail(display = "Parsing Clsid failed: {}", _0)]
+    Clsid(String),
+
     #[doc(hidden)]
     #[fail(display = "<Internal>")]
     __NonExhaustive,
@@ -41,3 +44,5 @@ mod comclass;
 pub use self::comclass::*;
 mod cominterface;
 pub use self::cominterface::*;
+mod clsid;
+pub use self::clsid::*;

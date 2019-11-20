@@ -1,4 +1,4 @@
-use super::macros::*;
+use super::macros::{OneOf2, StrOption};
 use super::*;
 use crate::prelude::*;
 
@@ -7,16 +7,24 @@ use syn::{Generics, Path, Visibility};
 
 intercom_attribute!(
     ComClassAttr<ComClassAttrParam, Path> {
-        clsid : StrOption,
+        clsid: OneOf2<StrOption, Path>,
     }
 );
+
+#[derive(Debug, PartialEq)]
+pub enum ClassClsid
+{
+    None,
+    GUID(GUID),
+    Path(Path),
+}
 
 /// Details of a struct marked with `#[com_class]` attribute.
 #[derive(Debug, PartialEq)]
 pub struct ComClass
 {
     pub name: Ident,
-    pub clsid: Option<GUID>,
+    pub clsid: ClassClsid,
     pub visibility: Visibility,
     pub interfaces: Vec<Path>,
     pub generics: Generics,
@@ -47,14 +55,17 @@ impl ComClass
             .clsid()
             .map_err(|msg| ParseError::ComClass(item.ident.to_string(), msg))?;
         let clsid = match clsid_attr {
-            None => Some(crate::utils::generate_clsid(
+            None => ClassClsid::GUID(crate::utils::generate_clsid(
                 crate_name,
                 &item.ident.to_string(),
             )),
-            Some(StrOption::Str(clsid)) => Some(GUID::parse(&clsid.value()).map_err(|_| {
-                ParseError::ComClass(item.ident.to_string(), "Bad CLSID format".into())
-            })?),
-            Some(StrOption::None) => None,
+            Some(OneOf2::A(StrOption::Str(clsid))) => {
+                ClassClsid::GUID(GUID::parse(&clsid.value()).map_err(|_| {
+                    ParseError::ComClass(item.ident.to_string(), "Bad CLSID format".into())
+                })?)
+            }
+            Some(OneOf2::A(StrOption::None)) => ClassClsid::None,
+            Some(OneOf2::B(path)) => ClassClsid::Path(path.clone()),
         };
 
         // Remaining parameters are coclasses.
@@ -115,7 +126,7 @@ mod test
         assert_eq!(cls.name, "S");
         assert_eq!(
             cls.clsid,
-            Some(GUID::parse("12345678-1234-1234-1234-567890ABCDEF").unwrap())
+            ClassClsid::GUID(GUID::parse("12345678-1234-1234-1234-567890ABCDEF").unwrap())
         );
         assert_eq!(cls.interfaces.len(), 2);
         assert_eq!(cls.interfaces[0], parse_quote!(Foo));
@@ -145,7 +156,7 @@ mod test
         assert_eq!(cls.name, "MyStruct");
         assert_eq!(
             cls.clsid,
-            Some(GUID::parse("28F57CBA-6AF4-3D3F-7C55-1CF1394D5C7A").unwrap())
+            ClassClsid::GUID(GUID::parse("28F57CBA-6AF4-3D3F-7C55-1CF1394D5C7A").unwrap())
         );
         assert_eq!(cls.interfaces.len(), 3);
         assert_eq!(cls.interfaces[0], parse_quote!(MyStruct));
@@ -166,7 +177,7 @@ mod test
         .expect("com_class attribute parsing failed");
 
         assert_eq!(cls.name, "EmptyType");
-        assert_eq!(cls.clsid, None);
+        assert_eq!(cls.clsid, ClassClsid::None);
         assert_eq!(cls.interfaces.len(), 0);
     }
 
@@ -183,7 +194,24 @@ mod test
         .expect("com_class attribute parsing failed");
 
         assert_eq!(cls.name, "EmptyType");
-        assert_eq!(cls.clsid, None);
+        assert_eq!(cls.clsid, ClassClsid::None);
+        assert_eq!(cls.interfaces.len(), 1);
+    }
+
+    #[test]
+    fn parse_com_class_with_existing_guid()
+    {
+        let cls = ComClass::parse(
+            "not used",
+            quote!(clsid = path::to::GUID, ITestInterface),
+            quote!(
+                struct EmptyType;
+            ),
+        )
+        .expect("com_class attribute parsing failed");
+
+        assert_eq!(cls.name, "EmptyType");
+        assert_eq!(cls.clsid, ClassClsid::Path(parse_quote!(path::to::GUID)));
         assert_eq!(cls.interfaces.len(), 1);
     }
 }
