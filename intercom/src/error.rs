@@ -36,7 +36,7 @@ impl std::fmt::Display for ComError
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
     {
-        write!(f, "COM error ({:#x})", self.hresult.hr)
+        write!(f, "{}", self.description().unwrap_or("Unknown error"))
     }
 }
 
