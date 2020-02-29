@@ -190,7 +190,7 @@ impl From<std::io::Error> for ComError
             std::io::ErrorKind::InvalidInput => ComError::E_INVALIDARG,
             _ => ComError::E_FAIL,
         }
-        .with_message(io_error.description().to_owned())
+        .with_message(io_error.to_string())
     }
 }
 
