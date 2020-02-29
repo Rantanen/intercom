@@ -36,7 +36,10 @@ impl std::fmt::Display for ComError
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
     {
-        write!(f, "COM error ({:#x})", self.hresult.hr)
+        match self.description() {
+            Some(desc) => write!(f, "{}", desc),
+            None => write!(f, "COM error ({:#x})", self.hresult.hr),
+        }
     }
 }
 
@@ -172,10 +175,7 @@ impl From<ComError> for std::io::Error
             _ => std::io::ErrorKind::Other,
         };
 
-        std::io::Error::new(
-            error_kind,
-            com_error.description().unwrap_or("Unknown error"),
-        )
+        std::io::Error::new(error_kind, com_error.to_string())
     }
 }
 
@@ -193,7 +193,7 @@ impl From<std::io::Error> for ComError
             std::io::ErrorKind::InvalidInput => ComError::E_INVALIDARG,
             _ => ComError::E_FAIL,
         }
-        .with_message(io_error.description().to_owned())
+        .with_message(io_error.to_string())
     }
 }
 

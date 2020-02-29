@@ -628,7 +628,6 @@ pub mod raw
 
     use super::intercom_attributes::ForeignType;
     use crate::type_system::TypeSystem;
-    use std;
     use std::time::{Duration, SystemTime};
 
     #[repr(C)]

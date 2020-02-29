@@ -222,7 +222,7 @@ impl<T: ComClass> ComBoxData<T>
     pub unsafe fn add_ref(this: &Self) -> u32
     {
         let previous_value = this.ref_count.fetch_add(1, Ordering::Relaxed);
-        (previous_value + 1)
+        previous_value + 1
     }
 
     /// Gets the reference count of the object.
