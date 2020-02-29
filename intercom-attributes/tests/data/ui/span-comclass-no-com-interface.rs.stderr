@@ -3,6 +3,8 @@ error[E0277]: the trait bound `(dyn NotComInterface + 'static): intercom::attrib
   |
 8 | #[com_class(NotComInterface)]
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::attributes::ComInterface` is not implemented for `(dyn NotComInterface + 'static)`
+  |
+  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: aborting due to previous error
 

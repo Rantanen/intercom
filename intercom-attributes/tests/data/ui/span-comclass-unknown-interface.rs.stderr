@@ -2,8 +2,16 @@ error[E0405]: cannot find trait `IDoesNotExist` in this scope
  --> span-comclass-unknown-interface.rs:5:13
   |
 5 | #[com_class(IDoesNotExist)]
+  |             ^^^^^^^^^^^^^- help: you might be missing a type parameter: `<IDoesNotExist>`
+  |             |
+  |             not found in this scope
+
+error[E0405]: cannot find trait `IDoesNotExist` in this scope
+ --> span-comclass-unknown-interface.rs:5:13
+  |
+5 | #[com_class(IDoesNotExist)]
   |             ^^^^^^^^^^^^^ not found in this scope
 
-error: aborting due to previous error
+error: aborting due to 2 previous errors
 
 For more information about this error, try `rustc --explain E0405`.
