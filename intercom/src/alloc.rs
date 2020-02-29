@@ -163,7 +163,6 @@ mod os
 #[cfg(not(windows))]
 mod os
 {
-    use libc;
     use std::os::raw;
 
     /// # Safety

@@ -379,7 +379,6 @@ mod os
 mod os
 {
     use crate::raw::OutBSTR;
-    use libc;
 
     #[doc(hidden)]
     pub unsafe fn SysAllocStringLen(psz: *const u16, len: u32) -> OutBSTR
