@@ -1,35 +1,35 @@
-<TIMESTAMP> INFO  [testcrate] Acquire S as IInterface
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(21495B79-90CF-33C7-7032-9BC7C31AD5F9)
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(21495B79-90CF-33C7-7032-9BC7C31AD5F9) -> IInterface (Automation) [xxxxxxxx]
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(C96D83CC-F4BC-3B80-6951-3692BB4FDBC7)
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(C96D83CC-F4BC-3B80-6951-3692BB4FDBC7) -> IInterface (Raw) [xxxxxxxx]
-<TIMESTAMP> INFO  [testcrate] Call IInterface::call
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] Calling IInterface::call
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] Calling IInterface::call, type system: Automation
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] Serving testcrate::S::call
+INFO  [testcrate] Acquire S as IInterface
+TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(21495B79-90CF-33C7-7032-9BC7C31AD5F9)
+TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(21495B79-90CF-33C7-7032-9BC7C31AD5F9) -> IInterface (Automation) [xxxxxxxx]
+TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(C96D83CC-F4BC-3B80-6951-3692BB4FDBC7)
+TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(C96D83CC-F4BC-3B80-6951-3692BB4FDBC7) -> IInterface (Raw) [xxxxxxxx]
+INFO  [testcrate] Call IInterface::call
+TRACE [generated::testcrate] [xxxxxxxx] Calling IInterface::call
+TRACE [generated::testcrate] [xxxxxxxx] Calling IInterface::call, type system: Automation
+TRACE [generated::testcrate] [xxxxxxxx] Serving testcrate::S::call
 Call
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] Serving testcrate::S::call, OK
-<TIMESTAMP> INFO  [testcrate] Query ISubInterface
-<TIMESTAMP> TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::query_interface
-<TIMESTAMP> TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::query_interface, type system: Automation
-<TIMESTAMP> TRACE [intercom::interfaces] [xxxxxxxx] Serving testcrate::S::query_interface
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(4CC91049-3D9A-3498-46FF-932AEDA28A33)
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(4CC91049-3D9A-3498-46FF-932AEDA28A33) -> ISubInterface (Raw) [xxxxxxxx]
-<TIMESTAMP> TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::release
-<TIMESTAMP> TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::release, type system: Raw
-<TIMESTAMP> TRACE [intercom::interfaces] [xxxxxxxx] Serving testcrate::S::release
-<TIMESTAMP> INFO  [testcrate] Query IAnotherInterface
-<TIMESTAMP> TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::query_interface
-<TIMESTAMP> TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::query_interface, type system: Automation
-<TIMESTAMP> TRACE [intercom::interfaces] [xxxxxxxx] Serving testcrate::S::query_interface
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(46B4908C-8685-327F-7766-42C217D7984B)
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(46B4908C-8685-327F-7766-42C217D7984B) -> E_NOINTERFACE
-<TIMESTAMP> TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::query_interface
-<TIMESTAMP> TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::query_interface, type system: Automation
-<TIMESTAMP> TRACE [intercom::interfaces] [xxxxxxxx] Serving testcrate::S::query_interface
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(25A761EE-99D6-3A40-57CF-7F6A4ACD1615)
-<TIMESTAMP> TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(25A761EE-99D6-3A40-57CF-7F6A4ACD1615) -> E_NOINTERFACE
-<TIMESTAMP> INFO  [testcrate] Cleanup
-<TIMESTAMP> TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::release
-<TIMESTAMP> TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::release, type system: Automation
-<TIMESTAMP> TRACE [intercom::interfaces] [xxxxxxxx] Serving testcrate::S::release
+TRACE [generated::testcrate] [xxxxxxxx] Serving testcrate::S::call, OK
+INFO  [testcrate] Query ISubInterface
+TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::query_interface
+TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::query_interface, type system: Automation
+TRACE [intercom::interfaces] [xxxxxxxx] Serving testcrate::S::query_interface
+TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(4CC91049-3D9A-3498-46FF-932AEDA28A33)
+TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(4CC91049-3D9A-3498-46FF-932AEDA28A33) -> ISubInterface (Raw) [xxxxxxxx]
+TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::release
+TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::release, type system: Raw
+TRACE [intercom::interfaces] [xxxxxxxx] Serving testcrate::S::release
+INFO  [testcrate] Query IAnotherInterface
+TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::query_interface
+TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::query_interface, type system: Automation
+TRACE [intercom::interfaces] [xxxxxxxx] Serving testcrate::S::query_interface
+TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(46B4908C-8685-327F-7766-42C217D7984B)
+TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(46B4908C-8685-327F-7766-42C217D7984B) -> E_NOINTERFACE
+TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::query_interface
+TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::query_interface, type system: Automation
+TRACE [intercom::interfaces] [xxxxxxxx] Serving testcrate::S::query_interface
+TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(25A761EE-99D6-3A40-57CF-7F6A4ACD1615)
+TRACE [generated::testcrate] [xxxxxxxx] S::query_interface(25A761EE-99D6-3A40-57CF-7F6A4ACD1615) -> E_NOINTERFACE
+INFO  [testcrate] Cleanup
+TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::release
+TRACE [generated::intercom::interfaces] [xxxxxxxx] Calling RawIUnknown::release, type system: Automation
+TRACE [intercom::interfaces] [xxxxxxxx] Serving testcrate::S::release
