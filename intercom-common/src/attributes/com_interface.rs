@@ -137,6 +137,7 @@ pub fn expand_com_interface(
         };
         output.push(quote_spanned!(itf.span =>
             #[allow(clippy::all)]
+            #[allow(unused_braces)]
             #unsafety impl<I: intercom::attributes::ComInterface + #itf_path + ?Sized> #itf_path for intercom::ComItf<I> {
                 #( #impls )*
             }
