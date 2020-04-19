@@ -98,6 +98,9 @@ pub use type_system::ForeignType;
 pub mod attributes;
 pub mod logging;
 
+#[cfg(windows)]
+pub mod registry;
+
 com_module!(
     class intercom::alloc::Allocator,
     class intercom::error::ErrorStore,
