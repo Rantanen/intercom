@@ -76,7 +76,8 @@ pub fn expand_com_module(
         let dll_get_class_object = get_dll_get_class_object_function();
         output.push(dll_get_class_object);
         output.push(quote!(
-            static mut DLL_INSTANCE: *mut std::os::raw::c_void = 0 as _;
+            #[doc(hidden)]
+            static mut __INTERCOM_DLL_INSTANCE: *mut std::os::raw::c_void = 0 as _;
 
             #[cfg(windows)]
             #[no_mangle]
@@ -92,7 +93,7 @@ pub fn expand_com_module(
                 match reason {
                     // DLL_PROCESS_ATTACH
                     1 => unsafe {
-                        DLL_INSTANCE = dll_instance;
+                        __INTERCOM_DLL_INSTANCE = dll_instance;
                     },
                     _ => {}
                 }
@@ -273,7 +274,7 @@ fn get_register_server_function(lib: &model::ComLibrary) -> TokenStream
                         .into_iter().chain(__gather_module_types())
                         .collect()
             );
-            match intercom::registry::register(DLL_INSTANCE, tlib) {
+            match intercom::registry::register(__INTERCOM_DLL_INSTANCE, tlib) {
                 Ok(_) => intercom::raw::S_OK,
                 Err(hr) => hr,
             }
@@ -294,7 +295,7 @@ fn get_register_server_function(lib: &model::ComLibrary) -> TokenStream
                         .into_iter().chain(__gather_module_types())
                         .collect()
             );
-            match intercom::registry::unregister(DLL_INSTANCE, tlib) {
+            match intercom::registry::unregister(__INTERCOM_DLL_INSTANCE, tlib) {
                 Ok(_) => intercom::raw::S_OK,
                 Err(hr) => hr,
             }
