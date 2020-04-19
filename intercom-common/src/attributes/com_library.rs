@@ -76,6 +76,7 @@ pub fn expand_com_module(
         let dll_get_class_object = get_dll_get_class_object_function();
         output.push(dll_get_class_object);
         output.push(quote!(
+            #[cfg(windows)]
             #[doc(hidden)]
             static mut __INTERCOM_DLL_INSTANCE: *mut std::os::raw::c_void = 0 as _;
 
