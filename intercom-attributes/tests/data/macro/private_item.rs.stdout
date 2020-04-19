@@ -37,8 +37,7 @@ where
                     &self_vtable,
                     &std::any::type_name::<S>(),
                     &"trait_method",
-                )
-                {
+                ) {
                     (arg0, arg1, arg2, arg3) => [
                         ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
                         ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
@@ -61,8 +60,7 @@ where
                     &self_vtable,
                     &std::any::type_name::<S>(),
                     &"trait_method",
-                )
-                {
+                ) {
                     (arg0, arg1, arg2, arg3) => [
                         ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
                         ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
@@ -173,8 +171,7 @@ where
                     &self_vtable,
                     &std::any::type_name::<S>(),
                     &"trait_method",
-                )
-                {
+                ) {
                     (arg0, arg1, arg2, arg3) => [
                         ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
                         ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
@@ -197,8 +194,7 @@ where
                     &self_vtable,
                     &std::any::type_name::<S>(),
                     &"trait_method",
-                )
-                {
+                ) {
                     (arg0, arg1, arg2, arg3) => [
                         ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
                         ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
@@ -282,6 +278,7 @@ impl intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSys
     }
 }
 #[allow(clippy::all)]
+#[allow(unused_braces)]
 impl<I: intercom::attributes::ComInterface + IFoo + ?Sized> IFoo for intercom::ComItf<I> {
     fn trait_method(&self) -> () {
         intercom::logging::trace(|l| {
@@ -289,8 +286,7 @@ impl<I: intercom::attributes::ComInterface + IFoo + ?Sized> IFoo for intercom::C
                 "testcrate",
                 ::core::fmt::Arguments::new_v1(
                     &["[", "] Calling ", "::"],
-                    &match (&self, &"IFoo", &"trait_method")
-                    {
+                    &match (&self, &"IFoo", &"trait_method") {
                         (arg0, arg1, arg2) => [
                             ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
                             ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
@@ -310,8 +306,7 @@ impl<I: intercom::attributes::ComInterface + IFoo + ?Sized> IFoo for intercom::C
                     "testcrate",
                     ::core::fmt::Arguments::new_v1(
                         &["[", ", with ", "] Calling ", "::", ", type system: "],
-                        &match (&self, &comptr.ptr, &"IFoo", &"trait_method", &"Automation")
-                        {
+                        &match (&self, &comptr.ptr, &"IFoo", &"trait_method", &"Automation") {
                             (arg0, arg1, arg2, arg3, arg4) => [
                                 ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
                                 ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
@@ -341,15 +336,13 @@ impl<I: intercom::attributes::ComInterface + IFoo + ?Sized> IFoo for intercom::C
                 return {};
             }
         }
-        if let Some(comptr) = intercom::ComItf::ptr::<intercom::type_system::RawTypeSystem>(self)
-        {
+        if let Some(comptr) = intercom::ComItf::ptr::<intercom::type_system::RawTypeSystem>(self) {
             intercom::logging::trace(|l| {
                 l(
                     "testcrate",
                     ::core::fmt::Arguments::new_v1(
                         &["[", ", with ", "] Calling ", "::", ", type system: "],
-                        &match (&self, &comptr.ptr, &"IFoo", &"trait_method", &"Raw")
-                        {
+                        &match (&self, &comptr.ptr, &"IFoo", &"trait_method", &"Raw") {
                             (arg0, arg1, arg2, arg3, arg4) => [
                                 ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
                                 ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
@@ -397,27 +390,28 @@ impl intercom::attributes::ComInterface for dyn IFoo {
         <Self as intercom::attributes::ComInterfaceVariant<TS>>::iid()
     }
     fn iid(ts: intercom::type_system::TypeSystemName) -> Option<&'static intercom::IID> {
-        match ts
-        {
-            intercom::type_system::TypeSystemName::Automation =>
-            {
+        match ts {
+            intercom::type_system::TypeSystemName::Automation => {
                 Some(<Self as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::AutomationTypeSystem,
                 >>::iid())
-            },
-            intercom::type_system::TypeSystemName::Raw =>
-            {
+            }
+            intercom::type_system::TypeSystemName::Raw => {
                 Some(<Self as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::RawTypeSystem,
                 >>::iid())
-            },
+            }
         }
     }
-    fn deref(com_itf: &intercom::ComItf<dyn IFoo>) -> &(dyn IFoo + 'static) { com_itf }
+    fn deref(com_itf: &intercom::ComItf<dyn IFoo>) -> &(dyn IFoo + 'static) {
+        com_itf
+    }
 }
 impl intercom::type_system::ForeignType for dyn IFoo {
     #[doc = r" The name of the type."]
-    fn type_name() -> &'static str { "IFoo" }
+    fn type_name() -> &'static str {
+        "IFoo"
+    }
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -440,7 +434,7 @@ impl intercom::attributes::ComInterfaceTypeInfo for dyn IFoo {
                         indirection_level: 0,
                         direction: intercom::typelib::Direction::Return,
                     },
-                    parameters: <[_]>::into_vec(box []),
+                    parameters: ::alloc::vec::Vec::new(),
                 })]),
             }),
             intercom::ComBox::new(intercom::typelib::InterfaceVariant {
@@ -459,7 +453,7 @@ impl intercom::attributes::ComInterfaceTypeInfo for dyn IFoo {
                         indirection_level: 0,
                         direction: intercom::typelib::Direction::Return,
                     },
-                    parameters: <[_]>::into_vec(box []),
+                    parameters: ::alloc::vec::Vec::new(),
                 })]),
             }),
         ]);
@@ -521,7 +515,9 @@ impl
     > for Foo
 {
     #[inline(always)]
-    fn offset() -> usize { 0 }
+    fn offset() -> usize {
+        0
+    }
 }
 impl intercom::attributes::HasInterface<intercom::IUnknown> for Foo {}
 #[allow(non_snake_case)]
@@ -627,15 +623,13 @@ impl intercom::attributes::ComClass for Foo {
         vtables: &Self::VTableList,
         riid: intercom::REFIID,
     ) -> intercom::RawComResult<intercom::raw::RawComPtr> {
-        if riid.is_null()
-        {
+        if riid.is_null() {
             intercom::logging::error(|l| {
                 l(
                     "testcrate",
                     ::core::fmt::Arguments::new_v1(
                         &["[", "] ", "::query_interface(NULL)"],
-                        &match (&vtables, &"Foo")
-                        {
+                        &match (&vtables, &"Foo") {
                             (arg0, arg1) => [
                                 ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
                                 ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
@@ -653,8 +647,7 @@ impl intercom::attributes::ComClass for Foo {
                     "testcrate",
                     ::core::fmt::Arguments::new_v1_formatted(
                         &["[", "] ", "::query_interface(", ")"],
-                        &match (&vtables, &"Foo", &riid)
-                        {
+                        &match (&vtables, &"Foo", &riid) {
                             (arg0, arg1, arg2) => [
                                 ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
                                 ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
@@ -1472,8 +1465,7 @@ impl intercom::attributes::ComClass for Foo {
         }
     }
     fn interface_supports_error_info(riid: intercom::REFIID) -> bool {
-        if riid.is_null()
-        {
+        if riid.is_null() {
             return false;
         }
         unsafe {
@@ -1591,8 +1583,7 @@ unsafe extern "system" fn __Foo_struct_method_Automation(
                     &self_vtable,
                     &std::any::type_name::<Foo>(),
                     &"struct_method",
-                )
-                {
+                ) {
                     (arg0, arg1, arg2, arg3) => [
                         ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
                         ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
@@ -1615,8 +1606,7 @@ unsafe extern "system" fn __Foo_struct_method_Automation(
                     &self_vtable,
                     &std::any::type_name::<Foo>(),
                     &"struct_method",
-                )
-                {
+                ) {
                     (arg0, arg1, arg2, arg3) => [
                         ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
                         ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
@@ -1720,8 +1710,7 @@ unsafe extern "system" fn __Foo_struct_method_Raw(self_vtable: intercom::raw::Ra
                     &self_vtable,
                     &std::any::type_name::<Foo>(),
                     &"struct_method",
-                )
-                {
+                ) {
                     (arg0, arg1, arg2, arg3) => [
                         ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
                         ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
@@ -1744,8 +1733,7 @@ unsafe extern "system" fn __Foo_struct_method_Raw(self_vtable: intercom::raw::Ra
                     &self_vtable,
                     &std::any::type_name::<Foo>(),
                     &"struct_method",
-                )
-                {
+                ) {
                     (arg0, arg1, arg2, arg3) => [
                         ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
                         ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Pointer::fmt),
@@ -1837,20 +1825,17 @@ impl intercom::attributes::ComInterface for Foo {
         <Self as intercom::attributes::ComInterfaceVariant<TS>>::iid()
     }
     fn iid(ts: intercom::type_system::TypeSystemName) -> Option<&'static intercom::IID> {
-        match ts
-        {
-            intercom::type_system::TypeSystemName::Automation =>
-            {
+        match ts {
+            intercom::type_system::TypeSystemName::Automation => {
                 Some(<Self as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::AutomationTypeSystem,
                 >>::iid())
-            },
-            intercom::type_system::TypeSystemName::Raw =>
-            {
+            }
+            intercom::type_system::TypeSystemName::Raw => {
                 Some(<Self as intercom::attributes::ComInterfaceVariant<
                     intercom::type_system::RawTypeSystem,
                 >>::iid())
-            },
+            }
         }
     }
     fn deref(com_itf: &intercom::ComItf<Foo>) -> &Foo {
@@ -1872,7 +1857,9 @@ impl intercom::attributes::ComInterface for Foo {
 }
 impl intercom::type_system::ForeignType for Foo {
     #[doc = r" The name of the type."]
-    fn type_name() -> &'static str { "Foo" }
+    fn type_name() -> &'static str {
+        "Foo"
+    }
 }
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -1895,7 +1882,7 @@ impl intercom::attributes::ComInterfaceTypeInfo for Foo {
                         indirection_level: 0,
                         direction: intercom::typelib::Direction::Return,
                     },
-                    parameters: <[_]>::into_vec(box []),
+                    parameters: ::alloc::vec::Vec::new(),
                 })]),
             }),
             intercom::ComBox::new(intercom::typelib::InterfaceVariant {
@@ -1914,7 +1901,7 @@ impl intercom::attributes::ComInterfaceTypeInfo for Foo {
                         indirection_level: 0,
                         direction: intercom::typelib::Direction::Return,
                     },
-                    parameters: <[_]>::into_vec(box []),
+                    parameters: ::alloc::vec::Vec::new(),
                 })]),
             }),
         ]);
