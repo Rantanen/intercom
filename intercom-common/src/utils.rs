@@ -72,7 +72,7 @@ fn get_impl_data_raw<'a>(
     let trait_path = trait_ref.as_ref().map(|(_, path, _)| path.clone());
 
     let methods_opt: Option<Vec<&Signature>> = items.iter().map(|i| get_impl_method(i)).collect();
-    let methods = methods_opt.unwrap_or_else(|| vec![]);
+    let methods = methods_opt.unwrap_or_else(Vec::new);
 
     (trait_path, struct_path, methods)
 }
