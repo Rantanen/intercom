@@ -1,0 +1,10 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\.rust]
+@="Rust.Example"
+
+[HKEY_CLASSES_ROOT\.rust\ShellEx]
+
+[HKEY_CLASSES_ROOT\.rust\ShellEx\{e357fccd-a995-4576-b01f-234630154e96}]
+@="{61A6080E-0E9F-3CEF-50A7-622D16145B78}"
+
