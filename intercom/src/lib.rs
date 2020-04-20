@@ -101,6 +101,23 @@ pub mod logging;
 #[cfg(windows)]
 pub mod registry;
 
+// No-ops on non-windows platforms.
+#[cfg(not(windows))]
+pub mod registry
+{
+    /// Registers a type library.
+    pub fn register(dll: HANDLE, lib: TypeLib) -> Result<(), HRESULT>
+    {
+        Ok(())
+    }
+
+    /// Unregisters a type library.
+    pub fn unregister(dll: HANDLE, lib: TypeLib) -> Result<(), HRESULT>
+    {
+        Ok(())
+    }
+}
+
 com_module!(
     class intercom::alloc::Allocator,
     class intercom::error::ErrorStore,
