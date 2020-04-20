@@ -105,8 +105,8 @@ pub mod registry;
 #[cfg(not(windows))]
 pub mod registry
 {
-    use crate::typelib::TypeLib;
     use crate::raw::HRESULT;
+    use crate::typelib::TypeLib;
 
     type HANDLE = *mut std::os::raw::c_void;
 
