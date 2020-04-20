@@ -1,0 +1,16 @@
+[package]
+name = "thumbnail_provider"
+version = "0.1.0"
+authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
+edition = "2018"
+
+[lib]
+crate-type = [ "cdylib" ]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+intercom = { path = "../../intercom" }
+winapi = { version = "0.3", features = [ "winbase", "objidlbase", "wingdi", "debugapi" ] }
+simple-logging = "2.0"
+log = "0.4"

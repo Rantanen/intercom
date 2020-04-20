@@ -66,6 +66,13 @@ pub fn expand_com_module(
         }
     ));
 
+    // Figure the on_load() function to invoke in DllMain.
+    let on_load = if let Some(ref on_load) = &lib.on_load {
+        quote!(#on_load();)
+    } else {
+        quote!()
+    };
+
     // Implement DllGetClassObject and DllMain.
     //
     // This is more or less the only symbolic entry point that the COM
@@ -93,6 +100,7 @@ pub fn expand_com_module(
                     // DLL_PROCESS_ATTACH
                     1 => unsafe {
                         __INTERCOM_DLL_INSTANCE = dll_instance;
+                        #on_load
                     },
                     _ => {}
                 }
