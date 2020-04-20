@@ -105,14 +105,19 @@ pub mod registry;
 #[cfg(not(windows))]
 pub mod registry
 {
+    use crate::typelib::TypeLib;
+    use crate::raw::HRESULT;
+
+    type HANDLE = *mut std::os::raw::c_void;
+
     /// Registers a type library.
-    pub fn register(dll: HANDLE, lib: TypeLib) -> Result<(), HRESULT>
+    pub fn register(_dll: HANDLE, _lib: TypeLib) -> Result<(), HRESULT>
     {
         Ok(())
     }
 
     /// Unregisters a type library.
-    pub fn unregister(dll: HANDLE, lib: TypeLib) -> Result<(), HRESULT>
+    pub fn unregister(_dll: HANDLE, _lib: TypeLib) -> Result<(), HRESULT>
     {
         Ok(())
     }
