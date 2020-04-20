@@ -98,6 +98,31 @@ pub use type_system::ForeignType;
 pub mod attributes;
 pub mod logging;
 
+#[cfg(windows)]
+pub mod registry;
+
+// No-ops on non-windows platforms.
+#[cfg(not(windows))]
+pub mod registry
+{
+    use crate::raw::HRESULT;
+    use crate::typelib::TypeLib;
+
+    type HANDLE = *mut std::os::raw::c_void;
+
+    /// Registers a type library.
+    pub fn register(_dll: HANDLE, _lib: TypeLib) -> Result<(), HRESULT>
+    {
+        Ok(())
+    }
+
+    /// Unregisters a type library.
+    pub fn unregister(_dll: HANDLE, _lib: TypeLib) -> Result<(), HRESULT>
+    {
+        Ok(())
+    }
+}
+
 com_module!(
     class intercom::alloc::Allocator,
     class intercom::error::ErrorStore,

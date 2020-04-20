@@ -608,6 +608,18 @@ pub mod raw
             #[allow(overflowing_literals)]
             HRESULT { hr: hr as i32 }
         }
+
+        /// Returns true if the HRESULT represents a success-value.
+        pub fn is_success(&self) -> bool
+        {
+            self.hr >= 0
+        }
+
+        /// Returns true if the HRESULT represents an error-value.
+        pub fn is_error(&self) -> bool
+        {
+            !self.is_success()
+        }
     }
 
     macro_rules! make_hr {

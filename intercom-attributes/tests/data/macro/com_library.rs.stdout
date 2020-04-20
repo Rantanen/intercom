@@ -60,15 +60,23 @@ pub unsafe extern "system" fn DllGetClassObject(
     }
     intercom::raw::E_CLASSNOTAVAILABLE
 }
+#[doc(hidden)]
+static mut __INTERCOM_DLL_INSTANCE: *mut std::os::raw::c_void = 0 as _;
 #[no_mangle]
 #[allow(non_camel_case_types)]
 #[deprecated]
 #[doc(hidden)]
 pub extern "stdcall" fn DllMain(
-    _dll_instance: *mut std::os::raw::c_void,
+    dll_instance: *mut std::os::raw::c_void,
     reason: u32,
     _reserved: *mut std::os::raw::c_void,
 ) -> bool {
+    match reason {
+        1 => unsafe {
+            __INTERCOM_DLL_INSTANCE = dll_instance;
+        },
+        _ => {}
+    }
     true
 }
 pub fn __gather_module_types() -> Vec<intercom::typelib::TypeInfo> {
@@ -138,4 +146,52 @@ pub unsafe extern "system" fn IntercomListClassObjects(
     *pcount = available_classes.len();
     *pclsids = available_classes.as_ptr();
     intercom::raw::S_OK
+}
+#[no_mangle]
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+pub unsafe extern "system" fn DllRegisterServer() -> intercom::raw::HRESULT {
+    let mut tlib = intercom::typelib::TypeLib::__new(
+        "TestLib".into(),
+        intercom::GUID {
+            data1: 0u32,
+            data2: 0u16,
+            data3: 0u16,
+            data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
+        },
+        "0.1".into(),
+        intercom::__gather_module_types()
+            .into_iter()
+            .chain(__gather_module_types())
+            .collect(),
+    );
+    match intercom::registry::register(__INTERCOM_DLL_INSTANCE, tlib) {
+        Ok(_) => intercom::raw::S_OK,
+        Err(hr) => hr,
+    }
+}
+#[no_mangle]
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+pub unsafe extern "system" fn DllUnregisterServer() -> intercom::raw::HRESULT {
+    let mut tlib = intercom::typelib::TypeLib::__new(
+        "TestLib".into(),
+        intercom::GUID {
+            data1: 0u32,
+            data2: 0u16,
+            data3: 0u16,
+            data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
+        },
+        "0.1".into(),
+        intercom::__gather_module_types()
+            .into_iter()
+            .chain(__gather_module_types())
+            .collect(),
+    );
+    match intercom::registry::unregister(__INTERCOM_DLL_INSTANCE, tlib) {
+        Ok(_) => intercom::raw::S_OK,
+        Err(hr) => hr,
+    }
 }

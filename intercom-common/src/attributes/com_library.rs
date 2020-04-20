@@ -76,16 +76,26 @@ pub fn expand_com_module(
         let dll_get_class_object = get_dll_get_class_object_function();
         output.push(dll_get_class_object);
         output.push(quote!(
+            #[doc(hidden)]
+            static mut __INTERCOM_DLL_INSTANCE: *mut std::os::raw::c_void = 0 as _;
+
             #[no_mangle]
             #[allow(non_camel_case_types)]
             #[deprecated]
             #[doc(hidden)]
             pub extern "stdcall" fn DllMain(
-                _dll_instance: *mut std::os::raw::c_void,
+                dll_instance: *mut std::os::raw::c_void,
                 reason: u32,
                 _reserved: *mut std::os::raw::c_void,
             ) -> bool
             {
+                match reason {
+                    // DLL_PROCESS_ATTACH
+                    1 => unsafe {
+                        __INTERCOM_DLL_INSTANCE = dll_instance;
+                    },
+                    _ => {}
+                }
                 true
             }
         ));
@@ -97,11 +107,15 @@ pub fn expand_com_module(
         output.push(create_get_typelib_function(&lib).map_err(model::ParseError::ComLibrary)?);
     }
 
-    // Implement DllListClassObjects
-    // DllListClassObjects returns all CLSIDs implemented in the crate.
+    // Implement the global DLL entry points
     if com_library {
+        // DllListClassObjects returns all CLSIDs implemented in the crate.
         let list_class_objects = get_intercom_list_class_objects_function();
         output.push(list_class_objects);
+
+        // DllListClassObjects returns all CLSIDs implemented in the crate.
+        let dll_register_server = get_register_server_function(&lib);
+        output.push(dll_register_server);
     }
 
     Ok(TokenStream::from_iter(output.into_iter()).into())
@@ -235,6 +249,53 @@ fn get_intercom_list_class_objects_function() -> TokenStream
             *pclsids = available_classes.as_ptr();
 
             intercom::raw::S_OK
+        }
+    )
+}
+
+fn get_register_server_function(lib: &model::ComLibrary) -> TokenStream
+{
+    let lib_name = lib_name();
+    let libid = utils::get_guid_tokens(&lib.libid, Span::call_site());
+    quote!(
+        #[no_mangle]
+        #[allow(non_snake_case)]
+        #[allow(dead_code)]
+        #[doc(hidden)]
+        pub unsafe extern "system" fn DllRegisterServer() -> intercom::raw::HRESULT
+        {
+            let mut tlib = intercom::typelib::TypeLib::__new(
+                    #lib_name.into(),
+                    #libid,
+                    "0.1".into(),
+                    intercom::__gather_module_types()
+                        .into_iter().chain(__gather_module_types())
+                        .collect()
+            );
+            match intercom::registry::register(__INTERCOM_DLL_INSTANCE, tlib) {
+                Ok(_) => intercom::raw::S_OK,
+                Err(hr) => hr,
+            }
+        }
+
+        #[no_mangle]
+        #[allow(non_snake_case)]
+        #[allow(dead_code)]
+        #[doc(hidden)]
+        pub unsafe extern "system" fn DllUnregisterServer() -> intercom::raw::HRESULT
+        {
+            let mut tlib = intercom::typelib::TypeLib::__new(
+                    #lib_name.into(),
+                    #libid,
+                    "0.1".into(),
+                    intercom::__gather_module_types()
+                        .into_iter().chain(__gather_module_types())
+                        .collect()
+            );
+            match intercom::registry::unregister(__INTERCOM_DLL_INSTANCE, tlib) {
+                Ok(_) => intercom::raw::S_OK,
+                Err(hr) => hr,
+            }
         }
     )
 }
