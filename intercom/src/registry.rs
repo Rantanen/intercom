@@ -229,7 +229,7 @@ pub fn register_typelib(
     let arch = "win64";
 
     let data = vec![
-        (format!("TypeLib\\{}", lib.libid), "", description.clone()),
+        (format!("TypeLib\\{}", lib.libid), "", description),
         (
             format!("TypeLib\\{}\\{}", lib.libid, lib.version),
             "",
@@ -287,7 +287,7 @@ pub fn register_class(
         (curver.clone(), "", description.clone()),
         (format!("{}\\CLSID", curver), "", cls.clsid.to_string()),
         (format!("{}\\CurVer", latest), "", curver.clone()),
-        (format!("CLSID\\{}", cls.clsid), "", description.clone()),
+        (format!("CLSID\\{}", cls.clsid), "", description),
         (
             format!("CLSID\\{}\\InprocServer32", cls.clsid),
             "",
@@ -298,11 +298,7 @@ pub fn register_class(
             "ThreadingModel",
             "Both".to_string(),
         ),
-        (
-            format!("CLSID\\{}\\ProgID", cls.clsid),
-            "",
-            curver.to_string(),
-        ),
+        (format!("CLSID\\{}\\ProgID", cls.clsid), "", curver),
         (
             format!("CLSID\\{}\\TypeLib", cls.clsid),
             "",
@@ -311,7 +307,7 @@ pub fn register_class(
         (
             format!("CLSID\\{}\\VersionIndependentProgID", cls.clsid),
             "",
-            latest.to_string(),
+            latest,
         ),
     ];
 
