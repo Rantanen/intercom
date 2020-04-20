@@ -60,10 +60,8 @@ pub unsafe extern "system" fn DllGetClassObject(
     }
     intercom::raw::E_CLASSNOTAVAILABLE
 }
-#[cfg(windows)]
 #[doc(hidden)]
 static mut __INTERCOM_DLL_INSTANCE: *mut std::os::raw::c_void = 0 as _;
-#[cfg(windows)]
 #[no_mangle]
 #[allow(non_camel_case_types)]
 #[deprecated]
@@ -149,7 +147,6 @@ pub unsafe extern "system" fn IntercomListClassObjects(
     *pclsids = available_classes.as_ptr();
     intercom::raw::S_OK
 }
-#[cfg(windows)]
 #[no_mangle]
 #[allow(non_snake_case)]
 #[allow(dead_code)]
@@ -174,7 +171,6 @@ pub unsafe extern "system" fn DllRegisterServer() -> intercom::raw::HRESULT {
         Err(hr) => hr,
     }
 }
-#[cfg(windows)]
 #[no_mangle]
 #[allow(non_snake_case)]
 #[allow(dead_code)]
