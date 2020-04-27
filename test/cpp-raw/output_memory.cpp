@@ -18,7 +18,9 @@ struct OutputTests : public IOutputMemoryTests_Automation
         OUT IUnknown** o2
     )
     {
-        return intercom::EC_NOTIMPL;
+        (*o1 = input)->AddRef();
+        (*o2 = input)->AddRef();
+        return intercom::SC_OK;
     }
 
     virtual intercom::HRESULT INTERCOM_CC Fail(
@@ -28,7 +30,10 @@ struct OutputTests : public IOutputMemoryTests_Automation
         OUT IUnknown** o3
     )
     {
-        return intercom::EC_NOTIMPL;
+        (*o1 = input)->AddRef();
+        *o2 = nullptr;
+        (*o3 = input)->AddRef();
+        return intercom::SC_OK;
     }
 
     virtual intercom::HRESULT INTERCOM_CC CallSucceed(
@@ -93,6 +98,25 @@ TEST_CASE( "OutputMemory" )
             REQUIRE( inputObject.releases == 2 );
             REQUIRE( inputObject.references == 0 );
         }
+
+        SECTION( "Foreign to Rust" )
+        {
+            // Separate OutputTests to keep track of AddRefs.
+            OutputTests testObject;
+            REQUIRE( testObject.references == 0 );
+
+            REQUIRE( intercom::SC_OK == pTests->CallSucceed(&testObject, &inputObject) );
+
+            // The test object shouldn't have been AddRef'd.
+            REQUIRE( testObject.addRefs == 0 );
+            REQUIRE( testObject.releases == 0 );
+            REQUIRE( testObject.references == 0 );
+
+            // The input object should have all references cleaned after they were added.
+            REQUIRE( inputObject.addRefs == 2 );
+            REQUIRE( inputObject.releases == 2 );
+            REQUIRE( inputObject.references == 0 );
+        }
     }
 
     SECTION( "Fail" )
@@ -117,6 +141,25 @@ TEST_CASE( "OutputMemory" )
             REQUIRE( o1 == nullptr );
             REQUIRE( o2 == nullptr );
             REQUIRE( o3 == nullptr );
+        }
+
+        SECTION( "Foreign to Rust" )
+        {
+            // Separate OutputTests to keep track of AddRefs.
+            OutputTests testObject;
+            REQUIRE( testObject.references == 0 );
+
+            REQUIRE( intercom::EC_FAIL == pTests->CallFail(&testObject, &inputObject) );
+
+            // The test object shouldn't have been AddRef'd.
+            REQUIRE( testObject.addRefs == 0 );
+            REQUIRE( testObject.releases == 0 );
+            REQUIRE( testObject.references == 0 );
+
+            // The input object should have all references cleaned after they were added.
+            REQUIRE( inputObject.addRefs == 2 );
+            REQUIRE( inputObject.releases == 2 );
+            REQUIRE( inputObject.references == 0 );
         }
     }
 

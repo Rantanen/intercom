@@ -142,8 +142,12 @@ impl TypeHandler
             Direction::In => quote_spanned!(span=>
                     #maybe_ref <#ty as #tr<#ts>>
                         ::from_foreign_parameter(#ident)#unwrap#maybe_as_ref),
+
+            // Output variables do not use #unwrap to avoid jumping out before all parameters have
+            // been converted from foreign output. This ensures all parameters are brought under
+            // Rust's memory management.
             Direction::Out | Direction::Retval => quote_spanned!(span=>
-                    <#ty as #tr<#ts>>::from_foreign_output(#ident)#unwrap),
+                    <#ty as #tr<#ts>>::from_foreign_output(#ident)),
         }
     }
 

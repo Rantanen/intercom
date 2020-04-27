@@ -175,8 +175,9 @@ impl ReturnHandler for ErrorResultHandler
         // Format the final Ok value.
         // If there is only one, it should be a raw value;
         // If there are multiple value turn them into a tuple.
-        let ok_values = get_rust_ok_values(self.com_out_args(), self.is_infallible());
-        let ok_tokens = if ok_values.len() != 1 {
+        let (temp_values, ok_values) =
+            get_rust_ok_values(self.com_out_args(), self.is_infallible());
+        let ok_values = if ok_values.len() != 1 {
             quote!( ( #( #ok_values ),* ) )
         } else {
             quote!( #( #ok_values )* )
@@ -187,7 +188,8 @@ impl ReturnHandler for ErrorResultHandler
         quote!(
             // TODO: HRESULT::succeeded
             if #result == intercom::raw::S_OK || #result == intercom::raw::S_FALSE {
-                Ok( #ok_tokens )
+                #( #temp_values; )*
+                Ok( #ok_values )
             } else {
                 return Err( intercom::load_error(
                         self,
@@ -321,17 +323,28 @@ fn write_out_values(
 }
 
 /// Gets the result as Rust types for a success return value.
-fn get_rust_ok_values(out_args: Vec<ComArg>, infallible: bool) -> Vec<TokenStream>
+fn get_rust_ok_values(
+    out_args: Vec<ComArg>,
+    infallible: bool,
+) -> (Vec<TokenStream>, Vec<TokenStream>)
 {
-    let mut tokens = vec![];
+    let mut temp_tokens = vec![];
+    let mut ok_tokens = vec![];
     for out_arg in out_args {
         let value =
             out_arg
                 .handler
                 .com_to_rust(&out_arg.name, out_arg.span, Direction::Retval, infallible);
-        tokens.push(value);
+        let temp_name = Ident::new(&format!("__{}_guard", out_arg.name), out_arg.span);
+        let unwrap = match infallible {
+            true => quote!(),
+            false => quote!(?),
+        };
+
+        temp_tokens.push(quote!(let #temp_name = #value));
+        ok_tokens.push(quote!(#temp_name#unwrap));
     }
-    tokens
+    (temp_tokens, ok_tokens)
 }
 
 /// Resolves the correct return handler to use.
