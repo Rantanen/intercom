@@ -276,13 +276,18 @@ where
         let self_struct = &**self_combox;
         let __result = self_struct.com_result_method();
         Ok({
-            match __result {
-                Ok(v1) => {
-                    *__out = <u16 as intercom::type_system::ExternOutput<
+            match __result.and_then(|v1| {
+                let ____out_guard =
+                    intercom::type_system::OutputGuard::<
                         intercom::type_system::AutomationTypeSystem,
-                    >>::into_foreign_output(v1)?;
-                    intercom::raw::S_OK
-                }
+                        u16,
+                    >::wrap(<u16 as intercom::type_system::ExternOutput<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::into_foreign_output(v1)?);
+                *__out = ____out_guard.consume();
+                Ok(intercom::raw::S_OK)
+            }) {
+                Ok(s) => s,
                 Err(e) => {
                     *__out = intercom::type_system::ExternDefault::extern_default();
                     intercom::store_error(e).hresult
@@ -397,13 +402,18 @@ where
         let self_struct = &**self_combox;
         let __result = self_struct.rust_result_method();
         Ok({
-            match __result {
-                Ok(v1) => {
-                    *__out = <u16 as intercom::type_system::ExternOutput<
+            match __result.and_then(|v1| {
+                let ____out_guard =
+                    intercom::type_system::OutputGuard::<
                         intercom::type_system::AutomationTypeSystem,
-                    >>::into_foreign_output(v1)?;
-                    intercom::raw::S_OK
-                }
+                        u16,
+                    >::wrap(<u16 as intercom::type_system::ExternOutput<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::into_foreign_output(v1)?);
+                *__out = ____out_guard.consume();
+                Ok(intercom::raw::S_OK)
+            }) {
+                Ok(s) => s,
                 Err(e) => {
                     *__out = intercom::type_system::ExternDefault::extern_default();
                     intercom::store_error(e).hresult
@@ -531,13 +541,18 @@ where
             >>::from_foreign_parameter(b)?,
         );
         Ok({
-            match __result {
-                Ok(v1) => {
-                    *__out = <bool as intercom::type_system::ExternOutput<
+            match __result.and_then(|v1| {
+                let ____out_guard =
+                    intercom::type_system::OutputGuard::<
                         intercom::type_system::AutomationTypeSystem,
-                    >>::into_foreign_output(v1)?;
-                    intercom::raw::S_OK
-                }
+                        bool,
+                    >::wrap(<bool as intercom::type_system::ExternOutput<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::into_foreign_output(v1)?);
+                *__out = ____out_guard.consume();
+                Ok(intercom::raw::S_OK)
+            }) {
+                Ok(s) => s,
                 Err(e) => {
                     *__out = intercom::type_system::ExternDefault::extern_default();
                     intercom::store_error(e).hresult
@@ -731,13 +746,19 @@ where
                 intercom::type_system::AutomationTypeSystem,
             >>::from_foreign_parameter(itf)?);
         Ok({
-            match __result {
-                Ok(v1) => {
-                    *__out = <ComItf<dyn IUnknown> as intercom::type_system::ExternOutput<
+            match __result.and_then(|v1| {
+                let ____out_guard = intercom::type_system::OutputGuard::<
+                    intercom::type_system::AutomationTypeSystem,
+                    ComItf<dyn IUnknown>,
+                >::wrap(
+                    <ComItf<dyn IUnknown> as intercom::type_system::ExternOutput<
                         intercom::type_system::AutomationTypeSystem,
-                    >>::into_foreign_output(v1)?;
-                    intercom::raw::S_OK
-                }
+                    >>::into_foreign_output(v1)?,
+                );
+                *__out = ____out_guard.consume();
+                Ok(intercom::raw::S_OK)
+            }) {
+                Ok(s) => s,
                 Err(e) => {
                     *__out = intercom::type_system::ExternDefault::extern_default();
                     intercom::store_error(e).hresult
@@ -857,13 +878,18 @@ where
             intercom::type_system::AutomationTypeSystem,
         >>::from_foreign_parameter(input)?);
         Ok({
-            match __result {
-                Ok(v1) => {
-                    *__out = <bool as intercom::type_system::ExternOutput<
+            match __result.and_then(|v1| {
+                let ____out_guard =
+                    intercom::type_system::OutputGuard::<
                         intercom::type_system::AutomationTypeSystem,
-                    >>::into_foreign_output(v1)?;
-                    intercom::raw::S_OK
-                }
+                        bool,
+                    >::wrap(<bool as intercom::type_system::ExternOutput<
+                        intercom::type_system::AutomationTypeSystem,
+                    >>::into_foreign_output(v1)?);
+                *__out = ____out_guard.consume();
+                Ok(intercom::raw::S_OK)
+            }) {
+                Ok(s) => s,
                 Err(e) => {
                     *__out = intercom::type_system::ExternDefault::extern_default();
                     intercom::store_error(e).hresult
@@ -984,13 +1010,19 @@ where
                 intercom::type_system::AutomationTypeSystem,
             >>::from_foreign_parameter(input)?);
         Ok({
-            match __result {
-                Ok(v1) => {
-                    *__out = <Variant as intercom::type_system::ExternOutput<
+            match __result.and_then(|v1| {
+                let ____out_guard = intercom::type_system::OutputGuard::<
+                    intercom::type_system::AutomationTypeSystem,
+                    Variant,
+                >::wrap(
+                    <Variant as intercom::type_system::ExternOutput<
                         intercom::type_system::AutomationTypeSystem,
-                    >>::into_foreign_output(v1)?;
-                    intercom::raw::S_OK
-                }
+                    >>::into_foreign_output(v1)?,
+                );
+                *__out = ____out_guard.consume();
+                Ok(intercom::raw::S_OK)
+            }) {
+                Ok(s) => s,
                 Err(e) => {
                     *__out = intercom::type_system::ExternDefault::extern_default();
                     intercom::store_error(e).hresult
@@ -1574,13 +1606,19 @@ where
         let self_struct = &**self_combox;
         let __result = self_struct.com_result_method();
         Ok({
-            match __result {
-                Ok(v1) => {
-                    *__out = <u16 as intercom::type_system::ExternOutput<
+            match __result.and_then(|v1| {
+                let ____out_guard = intercom::type_system::OutputGuard::<
+                    intercom::type_system::RawTypeSystem,
+                    u16,
+                >::wrap(
+                    <u16 as intercom::type_system::ExternOutput<
                         intercom::type_system::RawTypeSystem,
-                    >>::into_foreign_output(v1)?;
-                    intercom::raw::S_OK
-                }
+                    >>::into_foreign_output(v1)?,
+                );
+                *__out = ____out_guard.consume();
+                Ok(intercom::raw::S_OK)
+            }) {
+                Ok(s) => s,
                 Err(e) => {
                     *__out = intercom::type_system::ExternDefault::extern_default();
                     intercom::store_error(e).hresult
@@ -1695,13 +1733,19 @@ where
         let self_struct = &**self_combox;
         let __result = self_struct.rust_result_method();
         Ok({
-            match __result {
-                Ok(v1) => {
-                    *__out = <u16 as intercom::type_system::ExternOutput<
+            match __result.and_then(|v1| {
+                let ____out_guard = intercom::type_system::OutputGuard::<
+                    intercom::type_system::RawTypeSystem,
+                    u16,
+                >::wrap(
+                    <u16 as intercom::type_system::ExternOutput<
                         intercom::type_system::RawTypeSystem,
-                    >>::into_foreign_output(v1)?;
-                    intercom::raw::S_OK
-                }
+                    >>::into_foreign_output(v1)?,
+                );
+                *__out = ____out_guard.consume();
+                Ok(intercom::raw::S_OK)
+            }) {
+                Ok(s) => s,
                 Err(e) => {
                     *__out = intercom::type_system::ExternDefault::extern_default();
                     intercom::store_error(e).hresult
@@ -1830,13 +1874,19 @@ where
                 >>::from_foreign_parameter(b)?,
             );
         Ok({
-            match __result {
-                Ok(v1) => {
-                    *__out = <bool as intercom::type_system::ExternOutput<
+            match __result.and_then(|v1| {
+                let ____out_guard = intercom::type_system::OutputGuard::<
+                    intercom::type_system::RawTypeSystem,
+                    bool,
+                >::wrap(
+                    <bool as intercom::type_system::ExternOutput<
                         intercom::type_system::RawTypeSystem,
-                    >>::into_foreign_output(v1)?;
-                    intercom::raw::S_OK
-                }
+                    >>::into_foreign_output(v1)?,
+                );
+                *__out = ____out_guard.consume();
+                Ok(intercom::raw::S_OK)
+            }) {
+                Ok(s) => s,
                 Err(e) => {
                     *__out = intercom::type_system::ExternDefault::extern_default();
                     intercom::store_error(e).hresult
@@ -2029,13 +2079,19 @@ where
                 intercom::type_system::RawTypeSystem,
             >>::from_foreign_parameter(itf)?);
         Ok({
-            match __result {
-                Ok(v1) => {
-                    *__out = <ComItf<dyn IUnknown> as intercom::type_system::ExternOutput<
+            match __result.and_then(|v1| {
+                let ____out_guard = intercom::type_system::OutputGuard::<
+                    intercom::type_system::RawTypeSystem,
+                    ComItf<dyn IUnknown>,
+                >::wrap(
+                    <ComItf<dyn IUnknown> as intercom::type_system::ExternOutput<
                         intercom::type_system::RawTypeSystem,
-                    >>::into_foreign_output(v1)?;
-                    intercom::raw::S_OK
-                }
+                    >>::into_foreign_output(v1)?,
+                );
+                *__out = ____out_guard.consume();
+                Ok(intercom::raw::S_OK)
+            }) {
+                Ok(s) => s,
                 Err(e) => {
                     *__out = intercom::type_system::ExternDefault::extern_default();
                     intercom::store_error(e).hresult
@@ -2155,13 +2211,19 @@ where
             intercom::type_system::RawTypeSystem,
         >>::from_foreign_parameter(input)?);
         Ok({
-            match __result {
-                Ok(v1) => {
-                    *__out = <bool as intercom::type_system::ExternOutput<
+            match __result.and_then(|v1| {
+                let ____out_guard = intercom::type_system::OutputGuard::<
+                    intercom::type_system::RawTypeSystem,
+                    bool,
+                >::wrap(
+                    <bool as intercom::type_system::ExternOutput<
                         intercom::type_system::RawTypeSystem,
-                    >>::into_foreign_output(v1)?;
-                    intercom::raw::S_OK
-                }
+                    >>::into_foreign_output(v1)?,
+                );
+                *__out = ____out_guard.consume();
+                Ok(intercom::raw::S_OK)
+            }) {
+                Ok(s) => s,
                 Err(e) => {
                     *__out = intercom::type_system::ExternDefault::extern_default();
                     intercom::store_error(e).hresult
@@ -2282,13 +2344,19 @@ where
                 intercom::type_system::RawTypeSystem,
             >>::from_foreign_parameter(input)?);
         Ok({
-            match __result {
-                Ok(v1) => {
-                    *__out = <Variant as intercom::type_system::ExternOutput<
+            match __result.and_then(|v1| {
+                let ____out_guard = intercom::type_system::OutputGuard::<
+                    intercom::type_system::RawTypeSystem,
+                    Variant,
+                >::wrap(
+                    <Variant as intercom::type_system::ExternOutput<
                         intercom::type_system::RawTypeSystem,
-                    >>::into_foreign_output(v1)?;
-                    intercom::raw::S_OK
-                }
+                    >>::into_foreign_output(v1)?,
+                );
+                *__out = ____out_guard.consume();
+                Ok(intercom::raw::S_OK)
+            }) {
+                Ok(s) => s,
                 Err(e) => {
                     *__out = intercom::type_system::ExternDefault::extern_default();
                     intercom::store_error(e).hresult
@@ -2802,9 +2870,10 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                 };
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
-                        Ok(<bool as intercom::type_system::ExternOutput<
+                        let ____out_guard = <bool as intercom::type_system::ExternOutput<
                             intercom::type_system::AutomationTypeSystem,
-                        >>::from_foreign_output(__out)?)
+                        >>::from_foreign_output(__out);
+                        Ok(____out_guard?)
                     } else {
                         return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
@@ -2859,9 +2928,10 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                 };
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
-                        Ok(<bool as intercom::type_system::ExternOutput<
+                        let ____out_guard = <bool as intercom::type_system::ExternOutput<
                             intercom::type_system::RawTypeSystem,
-                        >>::from_foreign_output(__out)?)
+                        >>::from_foreign_output(__out);
+                        Ok(____out_guard?)
                     } else {
                         return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
@@ -2941,9 +3011,10 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                 };
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
-                        Ok(<u16 as intercom::type_system::ExternOutput<
+                        let ____out_guard = <u16 as intercom::type_system::ExternOutput<
                             intercom::type_system::AutomationTypeSystem,
-                        >>::from_foreign_output(__out)?)
+                        >>::from_foreign_output(__out);
+                        Ok(____out_guard?)
                     } else {
                         return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
@@ -2991,9 +3062,10 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                 };
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
-                        Ok(<u16 as intercom::type_system::ExternOutput<
+                        let ____out_guard = <u16 as intercom::type_system::ExternOutput<
                             intercom::type_system::RawTypeSystem,
-                        >>::from_foreign_output(__out)?)
+                        >>::from_foreign_output(__out);
+                        Ok(____out_guard?)
                     } else {
                         return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
@@ -3077,11 +3149,11 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                 };
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
-                        Ok(
+                        let ____out_guard =
                             <ComItf<dyn IUnknown> as intercom::type_system::ExternOutput<
                                 intercom::type_system::AutomationTypeSystem,
-                            >>::from_foreign_output(__out)?,
-                        )
+                            >>::from_foreign_output(__out);
+                        Ok(____out_guard?)
                     } else {
                         return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
@@ -3141,11 +3213,11 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                 };
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
-                        Ok(
+                        let ____out_guard =
                             <ComItf<dyn IUnknown> as intercom::type_system::ExternOutput<
                                 intercom::type_system::RawTypeSystem,
-                            >>::from_foreign_output(__out)?,
-                        )
+                            >>::from_foreign_output(__out);
+                        Ok(____out_guard?)
                     } else {
                         return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
@@ -3238,9 +3310,10 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                 };
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
-                        Ok(<bool as intercom::type_system::ExternOutput<
+                        let ____out_guard = <bool as intercom::type_system::ExternOutput<
                             intercom::type_system::AutomationTypeSystem,
-                        >>::from_foreign_output(__out)?)
+                        >>::from_foreign_output(__out);
+                        Ok(____out_guard?)
                     } else {
                         return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
@@ -3299,9 +3372,10 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                 };
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
-                        Ok(<bool as intercom::type_system::ExternOutput<
+                        let ____out_guard = <bool as intercom::type_system::ExternOutput<
                             intercom::type_system::RawTypeSystem,
-                        >>::from_foreign_output(__out)?)
+                        >>::from_foreign_output(__out);
+                        Ok(____out_guard?)
                     } else {
                         return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
@@ -3381,9 +3455,10 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                 };
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
-                        Ok(<u16 as intercom::type_system::ExternOutput<
+                        let ____out_guard = <u16 as intercom::type_system::ExternOutput<
                             intercom::type_system::AutomationTypeSystem,
-                        >>::from_foreign_output(__out)?)
+                        >>::from_foreign_output(__out);
+                        Ok(____out_guard?)
                     } else {
                         return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
@@ -3431,9 +3506,10 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                 };
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
-                        Ok(<u16 as intercom::type_system::ExternOutput<
+                        let ____out_guard = <u16 as intercom::type_system::ExternOutput<
                             intercom::type_system::RawTypeSystem,
-                        >>::from_foreign_output(__out)?)
+                        >>::from_foreign_output(__out);
+                        Ok(____out_guard?)
                     } else {
                         return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
@@ -3842,9 +3918,10 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                 };
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
-                        Ok(<Variant as intercom::type_system::ExternOutput<
+                        let ____out_guard = <Variant as intercom::type_system::ExternOutput<
                             intercom::type_system::AutomationTypeSystem,
-                        >>::from_foreign_output(__out)?)
+                        >>::from_foreign_output(__out);
+                        Ok(____out_guard?)
                     } else {
                         return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
@@ -3900,9 +3977,10 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                 };
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
-                        Ok(<Variant as intercom::type_system::ExternOutput<
+                        let ____out_guard = <Variant as intercom::type_system::ExternOutput<
                             intercom::type_system::RawTypeSystem,
-                        >>::from_foreign_output(__out)?)
+                        >>::from_foreign_output(__out);
+                        Ok(____out_guard?)
                     } else {
                         return Err(intercom::load_error(self, &__intercom_iid, __result));
                     }
