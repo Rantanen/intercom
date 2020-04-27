@@ -231,12 +231,15 @@ impl ReturnHandler for ErrorResultHandler
             self.type_system,
         );
         quote!(
-            match #result {
-                Ok( #ok_pattern ) => {
-                    #( #temp_writes; )*
-                    #( #ok_writes; )*
-                    intercom::raw::S_OK
-                },
+            match #result.and_then(|#ok_pattern| {
+                // These may fail, resulting in early exit from the lambda.
+                #( #temp_writes; )*
+
+                // Once we get here, everything should succeed.
+                #( #ok_writes; )*
+                Ok( intercom::raw::S_OK )
+            }) {
+                Ok( s ) => s,
                 Err( e ) => {
                     #( #err_writes );*;
                     intercom::store_error( e ).hresult

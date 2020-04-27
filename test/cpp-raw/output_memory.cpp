@@ -114,9 +114,9 @@ TEST_CASE( "OutputMemory" )
             REQUIRE( inputObject.references == 0 );
 
             // We'll want to require these as well, but they aren't implemented currently.
-            // REQUIRE( o1 == nullptr );
-            // REQUIRE( o2 == nullptr );
-            // REQUIRE( o3 == nullptr );
+            REQUIRE( o1 == nullptr );
+            REQUIRE( o2 == nullptr );
+            REQUIRE( o3 == nullptr );
         }
     }
 
