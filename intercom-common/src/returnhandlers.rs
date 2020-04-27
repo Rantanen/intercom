@@ -223,15 +223,20 @@ impl ReturnHandler for ErrorResultHandler
             }
         };
 
-        let (ok_writes, err_writes) = write_out_values(
+        let (temp_writes, ok_writes, err_writes) = write_out_values(
             &ok_idents,
             self.com_out_args(),
             self.is_infallible(),
             self.span,
+            self.type_system,
         );
         quote!(
             match #result {
-                Ok( #ok_pattern ) => { #( #ok_writes );*; intercom::raw::S_OK },
+                Ok( #ok_pattern ) => {
+                    #( #temp_writes; )*
+                    #( #ok_writes; )*
+                    intercom::raw::S_OK
+                },
                 Err( e ) => {
                     #( #err_writes );*;
                     intercom::store_error( e ).hresult
@@ -288,22 +293,28 @@ fn write_out_values(
     out_args: Vec<ComArg>,
     infallible: bool,
     span: Span,
-) -> (Vec<TokenStream>, Vec<TokenStream>)
+    ts: ModelTypeSystem,
+) -> (Vec<TokenStream>, Vec<TokenStream>, Vec<TokenStream>)
 {
+    let ts = ts.as_typesystem_type(span);
+    let mut temp_tokens = vec![];
     let mut ok_tokens = vec![];
     let mut err_tokens = vec![];
     for (ident, out_arg) in idents.iter().zip(out_args) {
         let arg_name = out_arg.name;
+        let temp_name = Ident::new(&format!("__{}_guard", arg_name), span);
+        let ty = out_arg.ty;
         let ok_value = out_arg
             .handler
             .rust_to_com(ident, span, Direction::Out, infallible);
         let err_value = out_arg.handler.default_value();
 
-        ok_tokens.push(quote!( *#arg_name = #ok_value ));
+        temp_tokens.push(quote!( let #temp_name = intercom::type_system::OutputGuard::<#ts, #ty>::wrap( #ok_value ) ));
+        ok_tokens.push(quote!( *#arg_name = #temp_name.consume() ));
         err_tokens.push(quote!( *#arg_name = #err_value ));
     }
 
-    (ok_tokens, err_tokens)
+    (temp_tokens, ok_tokens, err_tokens)
 }
 
 /// Gets the result as Rust types for a success return value.
