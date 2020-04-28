@@ -1,3 +1,5 @@
+#![allow(clippy::type_complexity)]
+
 use intercom::prelude::*;
 use intercom::type_system::{ExternOutput, TypeSystem};
 use intercom::IUnknown;

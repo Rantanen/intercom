@@ -50,7 +50,7 @@ impl NullableTests
             Some(ComRc::from(ComBox::new(DoCallback(v))))
         };
 
-        if itf.nullable_parameter(opt.as_ref().map(|rc| &**rc)) != v {
+        if itf.nullable_parameter(opt.as_deref()) != v {
             Err(ComError::E_FAIL)
         } else {
             Ok(())

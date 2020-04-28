@@ -1,4 +1,5 @@
 #![crate_type = "dylib"]
+#![allow(clippy::match_bool)]
 
 extern crate intercom;
 use intercom::*;
