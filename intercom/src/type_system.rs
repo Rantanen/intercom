@@ -156,6 +156,24 @@ pub unsafe trait ExternOutput<TS: TypeSystem>: Sized
     /// the memory. The caller must ensure that it owns the source parameter
     /// and is allowed to pass the ownership in this way.
     unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>;
+
+    /// # Safety
+    ///
+    /// The source ownership is transferred to the function invoker. In case of
+    /// pointers, the function (or the `Self` type) is given the ownership of
+    /// the memory. The caller must ensure that it owns the source parameter
+    /// and is allowed to pass the ownership in this way.
+    unsafe fn drop_foreign_output(source: Self::ForeignType)
+    {
+        // Default implementation just converts this back to the original.
+        //
+        // The `from_foreign_output` is supposed to ensure unused memory isn't leaked and dropping
+        // the return value will clean up the remaining memory.
+        //
+        // Type-specific implementation can clean up the source memory without going through the
+        // trouble of creating  new `Self` value.
+        let _ = Self::from_foreign_output(source);
+    }
 }
 
 /// Defines a type that may be used as a parameter type in Intercom interfaces.
@@ -209,6 +227,56 @@ pub unsafe trait InfallibleExternOutput<TS: TypeSystem>: Sized
     /// the memory. The caller must ensure that it owns the source parameter
     /// and is allowed to pass the ownership in this way.
     unsafe fn from_foreign_output(source: Self::ForeignType) -> Self;
+}
+
+/// Holds a conversion result foreign value and cleans it up unless consumed
+pub struct OutputGuard<TS, TType>
+where
+    TS: TypeSystem,
+    TType: ExternOutput<TS>,
+{
+    value: std::mem::ManuallyDrop<TType::ForeignType>,
+}
+
+impl<TS, TType> OutputGuard<TS, TType>
+where
+    TS: TypeSystem,
+    TType: ExternOutput<TS>,
+{
+    /// Wrap a foreign value in the guard.
+    pub fn wrap(value: TType::ForeignType) -> OutputGuard<TS, TType>
+    {
+        OutputGuard {
+            value: std::mem::ManuallyDrop::new(value),
+        }
+    }
+
+    /// Consume the guard to acquire the final value and giving up on having to clean it later.
+    pub fn consume(self) -> TType::ForeignType
+    {
+        unsafe {
+            // Read the value out of the guard and forget the guard to avoid
+            // dropping it, which would clean the value.
+            let value = std::ptr::read(&self.value);
+            std::mem::forget(self);
+            std::mem::ManuallyDrop::into_inner(value)
+        }
+    }
+}
+
+impl<TS, TType> Drop for OutputGuard<TS, TType>
+where
+    TS: TypeSystem,
+    TType: ExternOutput<TS>,
+{
+    fn drop(&mut self)
+    {
+        unsafe {
+            // Clean the value on drop..
+            let v = std::mem::ManuallyDrop::take(&mut self.value);
+            TType::drop_foreign_output(v);
+        }
+    }
 }
 
 /// A quick macro for implementing ExternInput/etc. for various basic types

@@ -175,8 +175,9 @@ impl ReturnHandler for ErrorResultHandler
         // Format the final Ok value.
         // If there is only one, it should be a raw value;
         // If there are multiple value turn them into a tuple.
-        let ok_values = get_rust_ok_values(self.com_out_args(), self.is_infallible());
-        let ok_tokens = if ok_values.len() != 1 {
+        let (temp_values, ok_values) =
+            get_rust_ok_values(self.com_out_args(), self.is_infallible());
+        let ok_values = if ok_values.len() != 1 {
             quote!( ( #( #ok_values ),* ) )
         } else {
             quote!( #( #ok_values )* )
@@ -187,7 +188,8 @@ impl ReturnHandler for ErrorResultHandler
         quote!(
             // TODO: HRESULT::succeeded
             if #result == intercom::raw::S_OK || #result == intercom::raw::S_FALSE {
-                Ok( #ok_tokens )
+                #( #temp_values; )*
+                Ok( #ok_values )
             } else {
                 return Err( intercom::load_error(
                         self,
@@ -223,15 +225,23 @@ impl ReturnHandler for ErrorResultHandler
             }
         };
 
-        let (ok_writes, err_writes) = write_out_values(
+        let (temp_writes, ok_writes, err_writes) = write_out_values(
             &ok_idents,
             self.com_out_args(),
             self.is_infallible(),
             self.span,
+            self.type_system,
         );
         quote!(
-            match #result {
-                Ok( #ok_pattern ) => { #( #ok_writes );*; intercom::raw::S_OK },
+            match #result.and_then(|#ok_pattern| {
+                // These may fail, resulting in early exit from the lambda.
+                #( #temp_writes; )*
+
+                // Once we get here, everything should succeed.
+                #( #ok_writes; )*
+                Ok( intercom::raw::S_OK )
+            }) {
+                Ok( s ) => s,
                 Err( e ) => {
                     #( #err_writes );*;
                     intercom::store_error( e ).hresult
@@ -288,36 +298,53 @@ fn write_out_values(
     out_args: Vec<ComArg>,
     infallible: bool,
     span: Span,
-) -> (Vec<TokenStream>, Vec<TokenStream>)
+    ts: ModelTypeSystem,
+) -> (Vec<TokenStream>, Vec<TokenStream>, Vec<TokenStream>)
 {
+    let ts = ts.as_typesystem_type(span);
+    let mut temp_tokens = vec![];
     let mut ok_tokens = vec![];
     let mut err_tokens = vec![];
     for (ident, out_arg) in idents.iter().zip(out_args) {
         let arg_name = out_arg.name;
+        let temp_name = Ident::new(&format!("__{}_guard", arg_name), span);
+        let ty = out_arg.ty;
         let ok_value = out_arg
             .handler
             .rust_to_com(ident, span, Direction::Out, infallible);
         let err_value = out_arg.handler.default_value();
 
-        ok_tokens.push(quote!( *#arg_name = #ok_value ));
+        temp_tokens.push(quote!( let #temp_name = intercom::type_system::OutputGuard::<#ts, #ty>::wrap( #ok_value ) ));
+        ok_tokens.push(quote!( *#arg_name = #temp_name.consume() ));
         err_tokens.push(quote!( *#arg_name = #err_value ));
     }
 
-    (ok_tokens, err_tokens)
+    (temp_tokens, ok_tokens, err_tokens)
 }
 
 /// Gets the result as Rust types for a success return value.
-fn get_rust_ok_values(out_args: Vec<ComArg>, infallible: bool) -> Vec<TokenStream>
+fn get_rust_ok_values(
+    out_args: Vec<ComArg>,
+    infallible: bool,
+) -> (Vec<TokenStream>, Vec<TokenStream>)
 {
-    let mut tokens = vec![];
+    let mut temp_tokens = vec![];
+    let mut ok_tokens = vec![];
     for out_arg in out_args {
         let value =
             out_arg
                 .handler
                 .com_to_rust(&out_arg.name, out_arg.span, Direction::Retval, infallible);
-        tokens.push(value);
+        let temp_name = Ident::new(&format!("__{}_guard", out_arg.name), out_arg.span);
+        let unwrap = match infallible {
+            true => quote!(),
+            false => quote!(?),
+        };
+
+        temp_tokens.push(quote!(let #temp_name = #value));
+        ok_tokens.push(quote!(#temp_name#unwrap));
     }
-    tokens
+    (temp_tokens, ok_tokens)
 }
 
 /// Resolves the correct return handler to use.

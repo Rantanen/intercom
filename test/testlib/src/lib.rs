@@ -9,6 +9,7 @@ pub mod alloc;
 pub mod error_info;
 pub mod interface_params;
 pub mod nullable_parameters;
+pub mod output_memory;
 pub mod primitive;
 pub mod result;
 pub mod return_interfaces;
@@ -34,4 +35,5 @@ com_library! {
     class variant::VariantTests,
     class variant::VariantImpl,
     class unicode::UnicodeConversion,
+    class output_memory::OutputMemoryTests,
 }
