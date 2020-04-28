@@ -6,7 +6,7 @@ using namespace std;
 
 #include "testlib.hpp"
 
-TEST_CASE( "Methods accept and return COM objects" )
+TEST_CASE( "return_interfaces" )
 {
     // Initialize COM.
     InitializeRuntime();

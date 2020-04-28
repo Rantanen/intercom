@@ -89,7 +89,7 @@ public:
     virtual intercom::REF_COUNT_32 INTERCOM_CC Release() { return 1; }
 };
 
-TEST_CASE( "Nullable parameters" )
+TEST_CASE( "nullable_parameters" )
 {
     // Initialize COM.
     InitializeRuntime();

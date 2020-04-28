@@ -98,7 +98,7 @@ namespace
 	};
 }
 
-TEST_CASE( "Variant parameters" )
+TEST_CASE( "variant" )
 {
     // Initialize COM.
     InitializeRuntime();

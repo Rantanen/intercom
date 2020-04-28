@@ -57,7 +57,7 @@ struct OutputTests : public IOutputMemoryTests_Automation
     virtual intercom::REF_COUNT_32 INTERCOM_CC Release() { ++releases; return --references; }
 };
 
-TEST_CASE( "OutputMemory" )
+TEST_CASE( "output_memory" )
 {
     // Initialize COM.
     InitializeRuntime();

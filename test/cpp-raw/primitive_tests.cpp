@@ -7,7 +7,7 @@
 
 #include "testlib.hpp"
 
-TEST_CASE( "Primitive types are supported" )
+TEST_CASE( "primitive_tests" )
 {
     // Initialize COM.
     InitializeRuntime();

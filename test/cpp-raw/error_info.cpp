@@ -232,7 +232,7 @@ namespace
     }
 }
 
-TEST_CASE( "Interfaces support error info" )
+TEST_CASE( "error_info" )
 {
     // Initialize COM.
     InitializeRuntime();
