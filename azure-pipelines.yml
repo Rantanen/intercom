@@ -58,12 +58,19 @@ steps:
   displayName: 'Check style'
   condition: and(succeeded(), eq( variables['rustVersion'], 'nightly' ))
 
-- script: cargo clippy --all -- -D warnings
+- script: |
+    cargo clippy --all -- -D warnings
   displayName: 'Run build'
   condition: and(succeeded(), eq( variables['rustVersion'], 'nightly' ))
 
 - script: cargo test
   displayName: 'Run unit tests'
+  condition: and(succeeded(), eq( variables['rustVersion'], 'nightly' ))
+
+- script: |
+    cd test
+    cargo clippy --all -- -D warnings
+  displayName: 'Clippy integration tests'
   condition: and(succeeded(), eq( variables['rustVersion'], 'nightly' ))
 
 - script: |
