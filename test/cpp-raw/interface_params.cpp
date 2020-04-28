@@ -21,7 +21,7 @@ class CppImplementation : public ISharedInterface_Automation
     virtual intercom::REF_COUNT_32 INTERCOM_CC Release() { return 1; }
 };
 
-TEST_CASE( "Methods accept COM interfaces as parameters." )
+TEST_CASE( "interface_params" )
 {
     // Initialize COM.
     InitializeRuntime();

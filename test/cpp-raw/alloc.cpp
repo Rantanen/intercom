@@ -3,7 +3,7 @@
 
 #include "testlib.hpp"
 
-TEST_CASE( "Library supports allocator" )
+TEST_CASE( "alloc" )
 {
     // Initialize COM.
     InitializeRuntime();

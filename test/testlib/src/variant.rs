@@ -51,6 +51,8 @@ impl VariantTests
         //
         // We need to do this before because the match below deconstructs the variant.
         let mut data = format!("{:?}", variant);
+        #[allow(clippy::bool_comparison)]
+        #[allow(clippy::float_cmp)]
         let r = match vt {
             0 => Ok(true),
             1 => Ok(true),
@@ -63,31 +65,31 @@ impl VariantTests
                 let st = DateTime::<Utc>::from(SystemTime::try_from(variant)?);
                 let expected = DateTime::<Utc>::from(raw::VariantDate::com_epoch());
                 data = st.to_string();
-                DateTime::<Utc>::from(st) == expected
+                st == expected
             }),
             702 => Ok({
                 let st = DateTime::<Utc>::from(SystemTime::try_from(variant)?);
                 let expected = DateTime::parse_from_rfc3339("2000-01-02T03:04:05-00:00").unwrap();
                 data = st.to_string();
-                DateTime::<Utc>::from(st) == expected
+                st == expected
             }),
             703 => Ok({
                 let st = DateTime::<Utc>::from(SystemTime::try_from(variant)?);
                 let expected = DateTime::parse_from_rfc3339("2000-01-01T00:00:00-00:00").unwrap();
                 data = st.to_string();
-                DateTime::<Utc>::from(st) == expected
+                st == expected
             }),
             704 => Ok({
                 let st = DateTime::<Utc>::from(SystemTime::try_from(variant)?);
                 let expected = DateTime::parse_from_rfc3339("1800-01-02T03:04:05-00:00").unwrap();
                 data = st.to_string();
-                DateTime::<Utc>::from(st) == expected
+                st == expected
             }),
             705 => Ok({
                 let st = DateTime::<Utc>::from(SystemTime::try_from(variant)?);
                 let expected = DateTime::parse_from_rfc3339("1800-01-01T00:00:00-00:00").unwrap();
                 data = st.to_string();
-                DateTime::<Utc>::from(st) == expected
+                st == expected
             }),
             8 => Ok({
                 let bstr: BString = BString::try_from(variant)?;
@@ -106,7 +108,7 @@ impl VariantTests
             19 => Ok(1292929u32 == u32::try_from(variant)?),
             20 => Ok(-1i64 == i64::try_from(variant)?),
             21 => Ok(129292929u64 == u64::try_from(variant)?),
-            _ => Err(ComError::E_NOTIMPL)?,
+            _ => return Err(ComError::E_NOTIMPL),
         };
 
         // Return the result depending on what we got.
@@ -120,7 +122,7 @@ impl VariantTests
     pub fn bad_variant_parameter(&self, vt: u16, variant: Variant) -> ComResult<()>
     {
         let r: ComResult<()> = (|| {
-            Ok(match vt {
+            match vt {
                 0 => {
                     <()>::try_from(variant)?;
                 }
@@ -166,8 +168,9 @@ impl VariantTests
                 21 => {
                     u64::try_from(variant)?;
                 }
-                _ => Err(ComError::E_NOTIMPL)?,
-            })
+                _ => return Err(ComError::E_NOTIMPL),
+            };
+            Ok(())
         })();
 
         match r {
@@ -217,7 +220,7 @@ impl VariantTests
             19 => Ok(Variant::from(1292929u32)),
             20 => Ok(Variant::from(-1i64)),
             21 => Ok(Variant::from(129292929u64)),
-            _ => Err(ComError::E_NOTIMPL)?,
+            _ => Err(ComError::E_NOTIMPL),
         }
     }
 
@@ -232,7 +235,7 @@ impl VariantTests
                     )),
                 }
             }
-            _ => Err(ComError::E_INVALIDARG)?,
+            _ => Err(ComError::E_INVALIDARG),
         }
     }
 }

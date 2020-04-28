@@ -4,7 +4,7 @@
 
 #include "testlib.hpp"
 
-TEST_CASE( "Basic IUnknown implementation works" )
+TEST_CASE( "iunknown" )
 {
     // Initialize COM.
     InitializeRuntime();

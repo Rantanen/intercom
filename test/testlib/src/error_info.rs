@@ -30,8 +30,7 @@ impl ErrorTests
                 }
 
                 if e.description() != Some("Error message") {
-                    return Err(ComError::E_INVALIDARG
-                        .with_message(format!("Bad message: {:?}", e.description())));
+                    return Err(ComError::E_INVALIDARG.with_message(format!("Bad message: {}", e)));
                 }
 
                 Ok(())
@@ -76,10 +75,8 @@ impl ErrorTests
                     );
                 }
 
-                use std::error::Error;
-                if e.description() != "Access denied" {
-                    return Err(ComError::E_INVALIDARG
-                        .with_message(format!("Bad message: {:?}", e.description())));
+                if e.to_string() != "Access denied" {
+                    return Err(ComError::E_INVALIDARG.with_message(format!("Bad message: {}", e)));
                 }
 
                 Ok(())

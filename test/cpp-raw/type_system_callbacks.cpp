@@ -472,7 +472,7 @@ class AutomationImplementation : public IStringTests_Automation
     virtual intercom::REF_COUNT_32 INTERCOM_CC Release() { return 1; }
 };
 
-TEST_CASE( "Callback invocations adapt to type systems." )
+TEST_CASE( "type_system_callbacks" )
 {
     // Initialize COM.
     InitializeRuntime();

@@ -40,26 +40,21 @@ impl IStringTests for StringTests
 {
     fn string_to_index(&self, s: &str) -> ComResult<u32>
     {
-        for candidate in 0..STRING_DATA.len() {
-            if s == STRING_DATA[candidate] {
-                return Ok(candidate as u32);
+        for (idx, &candidate) in STRING_DATA.iter().enumerate() {
+            if s == candidate {
+                return Ok(idx as u32);
             }
         }
 
-        println!("Unrecognized string: {}", s);
         Err(ComError::E_FAIL)
     }
 
     fn index_to_string(&self, i: u32) -> ComResult<String>
     {
-        for candidate in 0..STRING_DATA.len() {
-            if i as usize == candidate {
-                return Ok(STRING_DATA[candidate].to_owned());
-            }
-        }
-
-        println!("Unrecognized index: {}", i);
-        Err(ComError::E_FAIL)
+        STRING_DATA
+            .get(i as usize)
+            .map(|s| s.to_string())
+            .ok_or_else(|| ComError::E_FAIL)
     }
 
     fn bstr_parameter(&self, s: &BStr, ptr: usize) -> ComResult<()>

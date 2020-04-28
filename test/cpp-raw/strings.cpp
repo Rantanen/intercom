@@ -82,7 +82,7 @@ void check_equal( const char16_t* text, intercom::BSTR right )
     }
 }
 
-TEST_CASE( "Using BSTR in interface works" )
+TEST_CASE( "strings" )
 {
     // Initialize COM.
     InitializeRuntime();

@@ -40,7 +40,7 @@ impl UnicodeConversion
         let slice = unsafe {
             // Find the first zero byte.
             let mut len = 0usize;
-            while *input.offset(len as isize) != 0 {
+            while *input.add(len) != 0 {
                 len += 1;
             }
 

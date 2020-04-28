@@ -3,7 +3,7 @@
 
 #include "testlib.hpp"
 
-TEST_CASE( "Results can be returned" )
+TEST_CASE( "result" )
 {
     // Initialize COM.
     InitializeRuntime();

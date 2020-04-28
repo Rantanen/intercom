@@ -4,7 +4,7 @@
 
 #include "testlib.hpp"
 
-TEST_CASE( "Objects maintain their state" )
+TEST_CASE( "stateful" )
 {
     // Initialize COM.
     InitializeRuntime();
