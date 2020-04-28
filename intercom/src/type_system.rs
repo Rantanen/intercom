@@ -229,7 +229,7 @@ pub unsafe trait InfallibleExternOutput<TS: TypeSystem>: Sized
     unsafe fn from_foreign_output(source: Self::ForeignType) -> Self;
 }
 
-/// Holds a conversion result and returns it back to the original type
+/// Holds a conversion result foreign value and cleans it up unless consumed
 pub struct OutputGuard<TS, TType>
 where
     TS: TypeSystem,
@@ -243,6 +243,7 @@ where
     TS: TypeSystem,
     TType: ExternOutput<TS>,
 {
+    /// Wrap a foreign value in the guard.
     pub fn wrap(value: TType::ForeignType) -> OutputGuard<TS, TType>
     {
         OutputGuard {
@@ -250,9 +251,12 @@ where
         }
     }
 
+    /// Consume the guard to acquire the final value and giving up on having to clean it later.
     pub fn consume(self) -> TType::ForeignType
     {
         unsafe {
+            // Read the value out of the guard and forget the guard to avoid
+            // dropping it, which would clean the value.
             let value = std::ptr::read(&self.value);
             std::mem::forget(self);
             std::mem::ManuallyDrop::into_inner(value)
@@ -268,6 +272,7 @@ where
     fn drop(&mut self)
     {
         unsafe {
+            // Clean the value on drop..
             let v = std::mem::ManuallyDrop::take(&mut self.value);
             TType::drop_foreign_output(v);
         }
