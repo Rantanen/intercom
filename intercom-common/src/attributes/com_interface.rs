@@ -288,6 +288,9 @@ fn process_itf_variant(
         vtbl_fields.push(vtbl_field);
         vtbl_values.push(vtbl_value);
 
+        // Ensure the MethodImpl exists for the method.
+        // These are shared by type systems so only one type system needs to
+        // add them here.
         let method_name = method_info.name.to_string();
         if !itf_output.method_impls.contains_key(&method_name) {
             itf_output
