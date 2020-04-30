@@ -19,6 +19,9 @@ pub enum ParseError
     #[fail(display = "Parsing [com_interface] item {} failed: {}", _0, _1)]
     ComInterface(String, String),
 
+    #[fail(display = "Parsing [com_signature] item {} failed: {}", _0, _1)]
+    ComSignature(String, String),
+
     #[fail(display = "Processing crate failed: {}", _0)]
     ComCrate(String),
 
@@ -41,3 +44,5 @@ mod comclass;
 pub use self::comclass::*;
 mod cominterface;
 pub use self::cominterface::*;
+mod comsignature;
+pub use self::comsignature::*;

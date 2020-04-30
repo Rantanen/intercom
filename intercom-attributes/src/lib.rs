@@ -125,6 +125,21 @@ pub fn com_library(args: TokenStream) -> TokenStream
     }
 }
 
+/// Metadata for method signature.
+///
+/// ```rust,ignore
+/// #[com_interface]
+/// pub trait IFoo {
+///     #[signature(OUT, a, b, c)]
+///     fn foo(&self, a: u32, b: u32, c: u32) -> ComResult<u32>;
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn com_signature(_attr: TokenStream, tokens: TokenStream) -> TokenStream
+{
+    tokens
+}
+
 /// Derives the implementation of the trait ForeignType for a type.
 #[proc_macro_derive(ForeignType)]
 pub fn named_type_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream

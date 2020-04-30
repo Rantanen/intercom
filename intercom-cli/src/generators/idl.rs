@@ -160,7 +160,11 @@ impl IdlMethod
             args: method
                 .parameters
                 .iter()
-                .map(|arg| IdlArg::try_from(arg, opts, ctx))
+                .enumerate()
+                .map(|(idx, arg)| {
+                    let is_last = idx == method.parameters.len() - 1;
+                    IdlArg::try_from(arg, opts, is_last, ctx)
+                })
                 .collect::<Result<Vec<_>, _>>()?,
         })
     }
@@ -171,6 +175,7 @@ impl IdlArg
     fn try_from(
         arg: &Arg,
         opts: &TypeSystemOptions,
+        is_last: bool,
         ctx: &LibraryContext,
     ) -> Result<Self, GeneratorError>
     {
@@ -180,7 +185,11 @@ impl IdlArg
             Direction::Out => attrs.push("out"),
             Direction::Retval => {
                 attrs.push("out");
-                attrs.push("retval");
+
+                // Only the last parameter in the IDL is allowed [[retval]]
+                if is_last {
+                    attrs.push("retval");
+                }
             }
             Direction::Return => {
                 return Err("Direction::Return is invalid direction for arguments"
