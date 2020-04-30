@@ -70,7 +70,7 @@ pub fn expand_com_interface(
         process_itf_variant(&itf, *ts, itf_variant, &mut output, &mut itf_output);
     }
 
-    if itf.item_type == utils::InterfaceType::Trait {
+    if itf.item_type == model::InterfaceType::Trait {
         let mut impls = vec![];
         for (_, method) in itf_output.method_impls.iter() {
             let method_rust_ident = &method.info.name;
@@ -146,7 +146,7 @@ pub fn expand_com_interface(
 
     // Implement the ComInterface for the trait.
     let iid_arms = itf_output.iid_arms;
-    let (deref_impl, deref_ret) = if itf.item_type == utils::InterfaceType::Trait {
+    let (deref_impl, deref_ret) = if itf.item_type == model::InterfaceType::Trait {
         (
             quote_spanned!(itf.span => com_itf),
             quote_spanned!(itf.span => &( dyn #itf_path + 'static ) ),
@@ -313,9 +313,9 @@ fn process_itf_variant(
     // Create the vtable. We've already gathered all the vtable method
     // pointer fields so defining the struct is simple enough.
     let itf_bound = match itf.item_type {
-        utils::InterfaceType::Struct => quote!(),
-        utils::InterfaceType::Trait if itf.implemented_by.is_some() => quote!(),
-        utils::InterfaceType::Trait => quote!(+ #itf_ident),
+        model::InterfaceType::Struct => quote!(),
+        model::InterfaceType::Trait if itf.implemented_by.is_some() => quote!(),
+        model::InterfaceType::Trait => quote!(+ #itf_ident),
     };
     if itf.vtable_of.is_none() {
         output.push(quote_spanned!(itf.span =>
@@ -472,8 +472,8 @@ fn format_method_vtable_entries(
     let method_impl_ident = idents::com_to_rust_method_impl(itf_ident, method_ident, ts);
     let ret_ty = method_info.returnhandler.com_ty();
     let generics = match itf.item_type {
-        utils::InterfaceType::Struct => quote!(),
-        utils::InterfaceType::Trait => quote!(::<I, S>),
+        model::InterfaceType::Struct => quote!(),
+        model::InterfaceType::Trait => quote!(::<I, S>),
     };
     let params = method_info.get_parameters_tokenstream();
 
@@ -543,8 +543,8 @@ fn create_virtual_method(
     // anywya, we won't use generic parameters on struct impl based implicit
     // interfaces.
     let (generics, bounds, s_ref, i_ref) = match itf.item_type {
-        utils::InterfaceType::Struct => (quote!(), quote!(), quote!(#itf_path), quote!(#itf_path)),
-        utils::InterfaceType::Trait => (
+        model::InterfaceType::Struct => (quote!(), quote!(), quote!(#itf_path), quote!(#itf_path)),
+        model::InterfaceType::Trait => (
             quote!(<I, S>),
             quote!(
                 where I: ?Sized,
@@ -629,7 +629,7 @@ fn create_get_typeinfo_function(itf: &model::ComInterface) -> Result<TokenStream
     for (ts, variant) in &itf.variants {
         variant_tokens.push(create_typeinfo_for_variant(itf, *ts, &variant)?);
     }
-    let is_impl_interface = itf.item_type == utils::InterfaceType::Struct;
+    let is_impl_interface = itf.item_type == model::InterfaceType::Struct;
 
     Ok(quote_spanned!(itf.span =>
         #[allow(non_snake_case)]

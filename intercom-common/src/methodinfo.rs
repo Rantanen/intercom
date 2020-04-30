@@ -1,9 +1,12 @@
 use crate::prelude::*;
 use proc_macro2::Span;
 use std::rc::Rc;
-use syn::{spanned::Spanned, FnArg, PathArguments, Receiver, ReturnType, Signature, Type};
+use syn::{
+    spanned::Spanned, Attribute, FnArg, PathArguments, Receiver, ReturnType, Signature, Type,
+};
 
 use crate::ast_converters::*;
+use crate::model::{ComSignature, SignatureItem};
 use crate::returnhandlers::{get_return_handler, ReturnHandler};
 use crate::tyhandlers::{get_ty_handler, Direction, ModelTypeSystem, TypeContext, TypeHandler};
 use crate::utils;
@@ -14,6 +17,7 @@ pub enum ComMethodInfoError
     TooFewArguments,
     BadSelfArg,
     BadArg(Box<FnArg>),
+    Signature,
     BadReturnType,
 }
 
@@ -63,6 +67,7 @@ impl RustArg
     }
 }
 
+#[derive(Clone)]
 pub struct ComArg
 {
     /// Name of the argument.
@@ -168,6 +173,11 @@ pub struct ComMethodInfo
 
     /// Is the method infallible.
     pub infallible: bool,
+
+    /// Parameter map for the COM parameters.
+    ///
+    /// For the Nth COM-parameter, args[param_map[N]] is the respective RustArg.
+    pub param_map: Vec<usize>,
 }
 
 impl PartialEq for ComMethodInfo
@@ -189,6 +199,7 @@ impl ComMethodInfo
     /// Constructs new COM method info from a Rust method signature.
     pub fn new(
         decl: &Signature,
+        attrs: &[Attribute],
         type_system: ModelTypeSystem,
     ) -> Result<ComMethodInfo, ComMethodInfoError>
     {
@@ -209,7 +220,7 @@ impl ComMethodInfo
         };
 
         // Process other arguments.
-        let args = iter
+        let args: Vec<RustArg> = iter
             .map(|arg| {
                 let ty = arg
                     .get_ty()
@@ -240,6 +251,37 @@ impl ComMethodInfo
         let returnhandler =
             get_return_handler(&retval_type, &return_type, retval_span, type_system)
                 .or(Err(ComMethodInfoError::BadReturnType))?;
+
+        let signature = attrs
+            .iter()
+            .find(|attr| match attr.path.get_ident() {
+                Some(ident) => ident == "com_signature",
+                None => false,
+            })
+            .map(|attr| ComSignature::from_ast(attr.tokens.clone(), &decl.ident))
+            .transpose()
+            .map_err(|_| ComMethodInfoError::Signature)?;
+        let param_mapping_indices = signature
+            .map(|sig| {
+                sig.params
+                    .iter()
+                    .map(|p| match p {
+                        SignatureItem::Input(ident) => args
+                            .iter()
+                            .enumerate()
+                            .find(|(_, arg)| ident == &arg.name)
+                            .map(|(idx, _)| idx)
+                            .ok_or_else(|| ComMethodInfoError::Signature),
+                        SignatureItem::Output(idx) => Ok(args.len() + *idx as usize),
+                    })
+                    .collect::<Result<Vec<_>, _>>()
+            })
+            .transpose()?
+            .unwrap_or_else(|| {
+                let range = 0..(args.len() + returnhandler.com_out_args().len());
+                range.collect::<Vec<_>>()
+            });
+
         Ok(ComMethodInfo {
             name: n,
             infallible: returnhandler.is_infallible(),
@@ -253,6 +295,7 @@ impl ComMethodInfo
             args,
             is_unsafe: unsafety,
             type_system,
+            param_map: param_mapping_indices,
         })
     }
 
@@ -264,7 +307,11 @@ impl ComMethodInfo
             .map(|ca| ComArg::from_rustarg(ca.clone(), Direction::In, self.type_system));
         let out_args = self.returnhandler.com_out_args();
 
-        in_args.chain(out_args).collect()
+        let all_args: Vec<_> = in_args.chain(out_args).collect();
+        self.param_map
+            .iter()
+            .map(|&idx| all_args[idx].clone())
+            .collect()
     }
 
     pub fn get_parameters_tokenstream(&self) -> TokenStream
@@ -405,6 +452,6 @@ mod tests
             Item::Fn(ref f) => &f.sig,
             _ => panic!("Code isn't function"),
         };
-        ComMethodInfo::new(sig, ts).unwrap()
+        ComMethodInfo::new(sig, &vec![], ts).unwrap()
     }
 }

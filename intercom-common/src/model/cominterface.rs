@@ -11,7 +11,10 @@ use crate::tyhandlers::ModelTypeSystem;
 use indexmap::IndexMap;
 use proc_macro2::Span;
 use std::iter::FromIterator;
-use syn::{Ident, LitStr, Path, TypePath, Visibility};
+use syn::{
+    Attribute, Ident, ImplItem, Item, ItemImpl, ItemTrait, LitStr, Path, Signature, TraitItem,
+    Type, TypePath, Visibility,
+};
 
 intercom_attribute!(
     ComInterfaceAttr< ComInterfaceAttrParam, NoParams > {
@@ -42,7 +45,7 @@ pub struct ComInterface
     pub visibility: Visibility,
     pub base_interface: Option<Path>,
     pub variants: IndexMap<ModelTypeSystem, ComInterfaceVariant>,
-    pub item_type: crate::utils::InterfaceType,
+    pub item_type: InterfaceType,
     pub span: Span,
     pub is_unsafe: bool,
     pub itf_ref: TokenStream,
@@ -80,13 +83,12 @@ impl ComInterface
 
         // Get the interface details. As [com_interface] can be applied to both
         // impls and traits this handles both of those.
-        let (path, fns, itf_type, unsafety) =
-            crate::utils::get_ident_and_fns(&item).ok_or_else(|| {
-                ParseError::ComInterface(
-                    item.get_ident().unwrap().to_string(),
-                    "Unsupported associated item".into(),
-                )
-            })?;
+        let (path, fns, itf_type, unsafety) = get_ident_and_fns(&item).ok_or_else(|| {
+            ParseError::ComInterface(
+                item.get_ident().unwrap().to_string(),
+                "Unsupported associated item".into(),
+            )
+        })?;
 
         let ident = path.get_some_ident().ok_or_else(|| {
             ParseError::ComInterface(
@@ -151,7 +153,7 @@ impl ComInterface
                     //       something smarter.
                     let methods = fns
                         .iter()
-                        .map(|sig| ComMethodInfo::new(sig, ts))
+                        .map(|data| ComMethodInfo::new(data.sig, data.attrs, ts))
                         .filter_map(Result::ok)
                         .collect::<Vec<_>>();
 
@@ -168,8 +170,8 @@ impl ComInterface
         );
 
         let itf_ref = match itf_type {
-            crate::utils::InterfaceType::Trait => quote_spanned!(ident.span() => dyn #path),
-            crate::utils::InterfaceType::Struct => quote_spanned!(ident.span() => #path),
+            InterfaceType::Trait => quote_spanned!(ident.span() => dyn #path),
+            InterfaceType::Struct => quote_spanned!(ident.span() => #path),
         };
 
         Ok(ComInterface {
@@ -206,6 +208,106 @@ impl ComInterface
             }
         };
         syn::parse2(tt).unwrap()
+    }
+}
+
+#[derive(PartialEq, Debug, Clone, Copy)]
+pub enum InterfaceType
+{
+    Trait,
+    Struct,
+}
+
+pub struct MethodData<'a>
+{
+    attrs: &'a Vec<Attribute>,
+    sig: &'a Signature,
+}
+
+pub type InterfaceData<'a> = (
+    Path,
+    Vec<MethodData<'a>>,
+    InterfaceType,
+    Option<Token!(unsafe)>,
+);
+
+pub type ImplData<'a> = (Option<Path>, Path, Vec<MethodData<'a>>);
+
+fn get_ident_and_fns(item: &Item) -> Option<InterfaceData>
+{
+    match *item {
+        Item::Impl(ItemImpl {
+            ref unsafety,
+            ref trait_,
+            ref self_ty,
+            ref items,
+            ..
+        }) => {
+            let (_, struct_ident, items) = get_impl_data_raw(trait_, self_ty, items);
+            Some((struct_ident, items, InterfaceType::Struct, *unsafety))
+        }
+        Item::Trait(ItemTrait {
+            ref ident,
+            unsafety,
+            ref items,
+            ..
+        }) => {
+            let methods: Option<Vec<MethodData>> =
+                items.iter().map(|i| get_trait_method(i)).collect();
+            let path = syn::Path::from(ident.clone());
+
+            match methods {
+                Some(m) => Some((path, m, InterfaceType::Trait, unsafety)),
+                None => None,
+            }
+        }
+        _ => None,
+    }
+}
+
+fn get_impl_data_raw<'a>(
+    trait_ref: &'a Option<(Option<Token!(!)>, Path, Token!(for))>,
+    struct_ty: &'a Type,
+    items: &'a [ImplItem],
+) -> ImplData<'a>
+{
+    let struct_path = match struct_ty {
+        syn::Type::Path(typepath) => {
+            if typepath.qself.is_some() {
+                panic!("#[com_interface] cannot use associated types");
+            }
+            typepath.path.clone()
+        }
+        _ => panic!("#[com_interface] must be defined for Path"),
+    };
+
+    let trait_path = trait_ref.as_ref().map(|(_, path, _)| path.clone());
+
+    let methods_opt: Option<Vec<MethodData>> = items.iter().map(|i| get_impl_method(i)).collect();
+    let methods = methods_opt.unwrap_or_else(Vec::new);
+
+    (trait_path, struct_path, methods)
+}
+
+fn get_impl_method(i: &ImplItem) -> Option<MethodData>
+{
+    match *i {
+        ImplItem::Method(ref item) => Some(MethodData {
+            sig: &item.sig,
+            attrs: &item.attrs,
+        }),
+        _ => None,
+    }
+}
+
+fn get_trait_method(i: &TraitItem) -> Option<MethodData>
+{
+    match *i {
+        TraitItem::Method(ref item) => Some(MethodData {
+            sig: &item.sig,
+            attrs: &item.attrs,
+        }),
+        _ => None,
     }
 }
 
