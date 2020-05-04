@@ -37,4 +37,16 @@ com_library! {
     class variant::VariantImpl,
     class unicode::UnicodeConversion,
     class output_memory::OutputMemoryTests,
+
+    interface IOnlyInterface,
+
+    // Ensure exporting interfaces that would otherwise be included as well
+    // does not cause problem.
+    interface interface_params::ISharedInterface,
+}
+
+#[com_interface]
+pub trait IOnlyInterface
+{
+    fn method(&self) -> ComResult<u32>;
 }

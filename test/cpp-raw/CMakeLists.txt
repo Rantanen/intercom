@@ -24,6 +24,7 @@ ${PROJECT_SOURCE_DIR}/type_system_callbacks.cpp
 ${PROJECT_SOURCE_DIR}/variant.cpp
 ${PROJECT_SOURCE_DIR}/nullable_parameters.cpp
 ${PROJECT_SOURCE_DIR}/output_memory.cpp
+${PROJECT_SOURCE_DIR}/only_interface.cpp
 )
 
 include_directories("${PROJECT_BINARY_DIR}")

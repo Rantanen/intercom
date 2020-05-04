@@ -164,6 +164,11 @@ fn create_gather_module_types(lib: &model::ComLibrary) -> Result<TokenStream, St
             <#path as intercom::attributes::ComClassTypeInfo>::gather_type_info()
         )
     });
+    let create_interface_typeinfo = lib.interfaces.iter().map(|path| {
+        quote!(
+            <dyn #path as intercom::attributes::ComInterfaceTypeInfo>::gather_type_info()
+        )
+    });
     let gather_submodule_types = lib
         .submodules
         .iter()
@@ -174,6 +179,7 @@ fn create_gather_module_types(lib: &model::ComLibrary) -> Result<TokenStream, St
             vec![
                 #( #create_class_typeinfo, )*
                 #( #gather_submodule_types, )*
+                #( #create_interface_typeinfo, )*
             ]
             .into_iter()
             .flatten()

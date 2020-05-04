@@ -1,0 +1,9 @@
+error[E0404]: expected trait, found struct `Struct`
+  --> com_library-struct-interface.rs:11:15
+   |
+11 |     interface Struct,
+   |               ^^^^^^ not a trait
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0404`.
