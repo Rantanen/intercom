@@ -36,8 +36,6 @@ intercom_attribute!(
     }
 );
 
-const EMPTY: [Path; 0] = [];
-
 /// COM library details derived from the `com_library` attribute.
 #[derive(Debug, PartialEq)]
 pub struct ComLibrary
