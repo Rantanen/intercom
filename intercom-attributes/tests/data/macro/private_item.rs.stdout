@@ -333,6 +333,8 @@ impl<I: intercom::attributes::ComInterface + IFoo + ?Sized> IFoo for intercom::C
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
+
+                #[allow(unused_braces)]
                 return {};
             }
         }
@@ -369,6 +371,8 @@ impl<I: intercom::attributes::ComInterface + IFoo + ?Sized> IFoo for intercom::C
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
+
+                #[allow(unused_braces)]
                 return {};
             }
         }
@@ -460,7 +464,7 @@ impl intercom::attributes::ComInterfaceTypeInfo for dyn IFoo {
         <[_]>::into_vec(box [intercom::typelib::TypeInfo::Interface(
             intercom::ComBox::new(intercom::typelib::Interface {
                 name: "IFoo".into(),
-                variants: variants,
+                variants,
                 options: intercom::typelib::InterfaceOptions {
                     class_impl_interface: false,
                     ..Default::default()
@@ -1908,7 +1912,7 @@ impl intercom::attributes::ComInterfaceTypeInfo for Foo {
         <[_]>::into_vec(box [intercom::typelib::TypeInfo::Interface(
             intercom::ComBox::new(intercom::typelib::Interface {
                 name: "Foo".into(),
-                variants: variants,
+                variants,
                 options: intercom::typelib::InterfaceOptions {
                     class_impl_interface: true,
                     ..Default::default()
