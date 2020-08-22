@@ -432,6 +432,7 @@ fn rust_to_com_delegate(
                 let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
 
                 let __intercom_iid = #iid_tokens;
+                #[allow(unused_braces)]
                 return { #return_statement };
             }
         )
@@ -450,6 +451,7 @@ fn rust_to_com_delegate(
                 let #return_ident = ((**vtbl).#method_ident)( #( #params ),* );
 
                 let __intercom_iid = #iid_tokens;
+                #[allow(unused_braces)]
                 Ok( { #return_statement } )
             } )();
 

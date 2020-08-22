@@ -175,7 +175,7 @@ impl From<ComError> for std::io::Error
             _ => std::io::ErrorKind::Other,
         };
 
-        std::io::Error::new(error_kind, com_error.to_string())
+        std::io::Error::new(error_kind, com_error)
     }
 }
 
