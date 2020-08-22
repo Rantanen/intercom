@@ -2755,6 +2755,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
+
+                #[allow(unused_braces)]
                 return {};
             }
         }
@@ -2797,6 +2799,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
+
+                #[allow(unused_braces)]
                 return {};
             }
         }
@@ -2868,6 +2872,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
+
+                #[allow(unused_braces)]
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
                         let ____out_guard = <bool as intercom::type_system::ExternOutput<
@@ -2926,6 +2932,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
+
+                #[allow(unused_braces)]
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
                         let ____out_guard = <bool as intercom::type_system::ExternOutput<
@@ -3009,6 +3017,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
+
+                #[allow(unused_braces)]
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
                         let ____out_guard = <u16 as intercom::type_system::ExternOutput<
@@ -3060,6 +3070,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
+
+                #[allow(unused_braces)]
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
                         let ____out_guard = <u16 as intercom::type_system::ExternOutput<
@@ -3147,6 +3159,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
+
+                #[allow(unused_braces)]
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
                         let ____out_guard =
@@ -3211,6 +3225,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
+
+                #[allow(unused_braces)]
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
                         let ____out_guard =
@@ -3308,6 +3324,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
+
+                #[allow(unused_braces)]
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
                         let ____out_guard = <bool as intercom::type_system::ExternOutput<
@@ -3370,6 +3388,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
+
+                #[allow(unused_braces)]
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
                         let ____out_guard = <bool as intercom::type_system::ExternOutput<
@@ -3453,6 +3473,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
+
+                #[allow(unused_braces)]
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
                         let ____out_guard = <u16 as intercom::type_system::ExternOutput<
@@ -3504,6 +3526,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
+
+                #[allow(unused_braces)]
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
                         let ____out_guard = <u16 as intercom::type_system::ExternOutput<
@@ -3579,6 +3603,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
+
+                #[allow(unused_braces)]
                 return {};
             }
         }
@@ -3615,6 +3641,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
+
+                #[allow(unused_braces)]
                 return {};
             }
         }
@@ -3683,6 +3711,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
+
+                #[allow(unused_braces)]
                 return {
                     <u16 as intercom::type_system::InfallibleExternOutput<
                         intercom::type_system::AutomationTypeSystem,
@@ -3723,6 +3753,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
+
+                #[allow(unused_braces)]
                 return {
                     <u16 as intercom::type_system::InfallibleExternOutput<
                         intercom::type_system::RawTypeSystem,
@@ -3795,6 +3827,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
+
+                #[allow(unused_braces)]
                 return {
                     <String as intercom::type_system::InfallibleExternOutput<
                         intercom::type_system::AutomationTypeSystem,
@@ -3841,6 +3875,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
+
+                #[allow(unused_braces)]
                 return {
                     <String as intercom::type_system::InfallibleExternOutput<
                         intercom::type_system::RawTypeSystem,
@@ -3916,6 +3952,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
                 };
+
+                #[allow(unused_braces)]
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
                         let ____out_guard = <Variant as intercom::type_system::ExternOutput<
@@ -3975,6 +4013,8 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
                     data3: 0u16,
                     data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8],
                 };
+
+                #[allow(unused_braces)]
                 Ok({
                     if __result == intercom::raw::S_OK || __result == intercom::raw::S_FALSE {
                         let ____out_guard = <Variant as intercom::type_system::ExternOutput<
@@ -4885,7 +4925,7 @@ impl intercom::attributes::ComInterfaceTypeInfo for dyn Foo {
         <[_]>::into_vec(box [intercom::typelib::TypeInfo::Interface(
             intercom::ComBox::new(intercom::typelib::Interface {
                 name: "Foo".into(),
-                variants: variants,
+                variants,
                 options: intercom::typelib::InterfaceOptions {
                     class_impl_interface: false,
                     ..Default::default()

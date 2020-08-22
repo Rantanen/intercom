@@ -213,10 +213,10 @@ impl ComMethodInfo
             .map(|arg| {
                 let ty = arg
                     .get_ty()
-                    .or_else(|_| Err(ComMethodInfoError::BadArg(Box::new(arg.clone()))))?;
+                    .map_err(|_| ComMethodInfoError::BadArg(Box::new(arg.clone())))?;
                 let ident = arg
                     .get_ident()
-                    .or_else(|_| Err(ComMethodInfoError::BadArg(Box::new(arg.clone()))))?;
+                    .map_err(|_| ComMethodInfoError::BadArg(Box::new(arg.clone())))?;
 
                 Ok(RustArg::new(ident, ty, arg.span(), type_system))
             })
