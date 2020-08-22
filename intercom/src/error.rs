@@ -469,10 +469,7 @@ pub fn load_error<I: ComInterface + ?Sized>(
 
     // Try to get the ISupportErrorInfo and query that for the IID.
     let supports_errorinfo = match ComItf::query_interface::<dyn ISupportErrorInfo>(iunk) {
-        Ok(rc) => match rc.interface_supports_error_info(iid) {
-            intercom::raw::S_OK => true,
-            _ => false,
-        },
+        Ok(rc) => matches!(rc.interface_supports_error_info(iid), intercom::raw::S_OK),
         _ => false,
     };
 

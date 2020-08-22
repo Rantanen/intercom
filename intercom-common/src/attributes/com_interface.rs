@@ -645,7 +645,7 @@ fn create_get_typeinfo_function(itf: &model::ComInterface) -> Result<TokenStream
                 vec![ intercom::typelib::TypeInfo::Interface(
                     intercom::ComBox::new( intercom::typelib::Interface {
                         name: #itf_name.into(),
-                        variants: variants,
+                        variants,
                         options: intercom::typelib::InterfaceOptions {
                             class_impl_interface: #is_impl_interface,
                             ..Default::default()
