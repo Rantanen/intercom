@@ -1,7 +1,7 @@
 #![allow(clippy::type_complexity)]
 
 use intercom::prelude::*;
-use intercom::type_system::{ExternType, ExternOutput, TypeSystem};
+use intercom::type_system::{ExternOutput, ExternType, TypeSystem};
 use intercom::IUnknown;
 use std::ffi::c_void;
 
