@@ -105,6 +105,11 @@ pub trait ForeignType
     }
 }
 
+pub unsafe trait ExternType<TS: TypeSystem>
+{
+    type ForeignType: ForeignType;
+}
+
 /// Defines a type that may be used as a parameter type in Intercom interfaces.
 ///
 /// # Safety
@@ -113,10 +118,8 @@ pub trait ForeignType
 /// This trait will be used within the code generated in the procedural macros.
 /// It is important to ensure this trait is implemented in such a way that its
 /// use in the macros is sound.
-pub unsafe trait ExternInput<TS: TypeSystem>: Sized
+pub unsafe trait ExternInput<TS: TypeSystem>: ExternType<TS> + Sized
 {
-    type ForeignType: ForeignType;
-
     type Lease;
 
     /// # Safety
@@ -143,10 +146,8 @@ pub unsafe trait ExternInput<TS: TypeSystem>: Sized
 /// This trait will be used within the code generated in the procedural macros.
 /// It is important to ensure this trait is implemented in such a way that its
 /// use in the macros is sound.
-pub unsafe trait ExternOutput<TS: TypeSystem>: Sized
+pub unsafe trait ExternOutput<TS: TypeSystem>: ExternType<TS> + Sized
 {
-    type ForeignType: ForeignType;
-
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>;
 
     /// # Safety
@@ -184,10 +185,8 @@ pub unsafe trait ExternOutput<TS: TypeSystem>: Sized
 /// This trait will be used within the code generated in the procedural macros.
 /// It is important to ensure this trait is implemented in such a way that its
 /// use in the macros is sound.
-pub unsafe trait InfallibleExternInput<TS: TypeSystem>: Sized
+pub unsafe trait InfallibleExternInput<TS: TypeSystem>: ExternType<TS> + Sized
 {
-    type ForeignType: ForeignType;
-
     type Lease;
 
     /// # Safety
@@ -214,10 +213,8 @@ pub unsafe trait InfallibleExternInput<TS: TypeSystem>: Sized
 /// This trait will be used within the code generated in the procedural macros.
 /// It is important to ensure this trait is implemented in such a way that its
 /// use in the macros is sound.
-pub unsafe trait InfallibleExternOutput<TS: TypeSystem>: Sized
+pub unsafe trait InfallibleExternOutput<TS: TypeSystem>: ExternType<TS> + Sized
 {
-    type ForeignType: ForeignType;
-
     fn into_foreign_output(self) -> Self::ForeignType;
 
     /// # Safety
@@ -292,9 +289,13 @@ macro_rules! self_extern {
             }
         }
 
-        unsafe impl<TS: TypeSystem> ExternInput<TS> for $t
+        unsafe impl<TS: TypeSystem> ExternType<TS> for $t
         {
             type ForeignType = $t;
+        }
+
+        unsafe impl<TS: TypeSystem> ExternInput<TS> for $t
+        {
             type Lease = ();
             unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
             {
@@ -310,7 +311,6 @@ macro_rules! self_extern {
 
         unsafe impl<TS: TypeSystem> ExternOutput<TS> for $t
         {
-            type ForeignType = $t;
             fn into_foreign_output(self) -> ComResult<Self::ForeignType>
             {
                 Ok(self)
@@ -324,7 +324,6 @@ macro_rules! self_extern {
 
         unsafe impl<TS: TypeSystem> InfallibleExternInput<TS> for $t
         {
-            type ForeignType = $t;
             type Lease = ();
             unsafe fn into_foreign_parameter(self) -> (Self::ForeignType, ())
             {
@@ -340,7 +339,6 @@ macro_rules! self_extern {
 
         unsafe impl<TS: TypeSystem> InfallibleExternOutput<TS> for $t
         {
-            type ForeignType = $t;
             fn into_foreign_output(self) -> Self::ForeignType
             {
                 self
@@ -382,9 +380,13 @@ self_extern!(std::ffi::c_void);
 
 macro_rules! extern_ptr {
     ( $mut:tt ) => {
-        unsafe impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternOutput<TS> for *$mut TPtr
+        unsafe impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternType<TS> for *$mut TPtr
         {
             type ForeignType = Self;
+        }
+
+        unsafe impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternOutput<TS> for *$mut TPtr
+        {
             fn into_foreign_output(self) -> ComResult<Self::ForeignType>
             {
                 Ok(self)
@@ -398,7 +400,6 @@ macro_rules! extern_ptr {
 
         unsafe impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternInput<TS> for *$mut TPtr
         {
-            type ForeignType = Self;
             type Lease = ();
             unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
             {
@@ -414,7 +415,6 @@ macro_rules! extern_ptr {
 
         unsafe impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> InfallibleExternOutput<TS> for *$mut TPtr
         {
-            type ForeignType = Self;
             fn into_foreign_output(self) -> Self::ForeignType
             {
                 self
@@ -428,7 +428,6 @@ macro_rules! extern_ptr {
 
         unsafe impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> InfallibleExternInput<TS> for *$mut TPtr
         {
-            type ForeignType = Self;
             type Lease = ();
             unsafe fn into_foreign_parameter(self) -> (Self::ForeignType, ())
             {

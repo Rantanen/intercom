@@ -11,5 +11,6 @@ pub use self::com_library::expand_com_module;
 
 mod type_info;
 pub use self::type_info::expand_bidirectional_type_info;
+pub use self::type_info::expand_derive_extern_input;
 pub use self::type_info::expand_derive_extern_output;
-pub use self::type_info::expand_derive_extern_parameter;
+pub use self::type_info::expand_derive_extern_type;

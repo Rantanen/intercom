@@ -153,22 +153,16 @@ pub mod raw
 
     pub type RawComPtr = *mut c_void;
 
-    #[derive(Clone, Copy, intercom_attributes::ExternInput, intercom_attributes::ForeignType)]
-    #[repr(transparent)]
-    pub struct InBSTR(pub *const u16);
-
     #[derive(
         Clone,
         Copy,
+        intercom_attributes::ExternType,
         intercom_attributes::ExternInput,
         intercom_attributes::ExternOutput,
         intercom_attributes::ForeignType,
     )]
     #[repr(transparent)]
-    pub struct OutBSTR(pub *mut u16);
-
-    pub type InCStr = *const std::os::raw::c_char;
-    pub type OutCStr = *mut std::os::raw::c_char;
+    pub struct BSTR(pub *mut u16);
 
     #[repr(transparent)]
     #[derive(PartialEq, Eq)]

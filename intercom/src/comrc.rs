@@ -1,6 +1,6 @@
 use super::*;
 use crate::attributes::ComInterface;
-use crate::type_system::{ExternInput, ExternOutput, TypeSystem};
+use crate::type_system::{ExternInput, ExternOutput, ExternType, TypeSystem};
 
 /// Reference counted handle to the `ComBox` data.
 ///
@@ -159,7 +159,7 @@ impl<T: ComInterface + ?Sized> std::borrow::Borrow<ComItf<T>> for ComRc<T>
     }
 }
 
-unsafe impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternInput<TS> for crate::ComRc<I>
+unsafe impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS> for crate::ComRc<I>
 where
     I: ForeignType,
 {
@@ -167,7 +167,19 @@ where
     // to pass in from C as there are no guarantees the external code would not
     // pass in a null pointer.
     type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
+}
 
+unsafe impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS> for Option<crate::ComRc<I>>
+where
+    I: ForeignType,
+{
+    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
+}
+
+unsafe impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternInput<TS> for crate::ComRc<I>
+where
+    I: ForeignType,
+{
     type Lease = Self;
     unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
@@ -191,8 +203,6 @@ unsafe impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternOutput<TS> for crate
 where
     I: ForeignType,
 {
-    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
-
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>
     {
         Ok(ComItf::ptr(&ComRc::detach(self)))
@@ -211,8 +221,6 @@ unsafe impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternInput<TS> for Option
 where
     I: ForeignType,
 {
-    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
-
     type Lease = Self;
     unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
@@ -239,8 +247,6 @@ unsafe impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternOutput<TS> for Optio
 where
     I: ForeignType,
 {
-    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
-
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>
     {
         match self {

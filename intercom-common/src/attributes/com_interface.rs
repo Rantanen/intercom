@@ -378,7 +378,7 @@ fn rust_to_com_delegate(
         .iter()
         .map(|ca| {
             let ident = &ca.name;
-            let ty = &ca.handler.com_ty(ca.span, Direction::Retval, infallible);
+            let ty = &ca.handler.com_ty(ca.span);
             let default = ca.handler.default_value();
             quote_spanned!(ca.span => let mut #ident : #ty = #default; )
         })
@@ -667,17 +667,16 @@ fn create_typeinfo_for_variant(
     let ts_type = ts.as_typesystem_type(itf.span);
     let iid_tokens = utils::get_guid_tokens(&itf_variant.iid, itf.span);
     let methods = itf_variant.methods.iter().map( |m| {
-        let infallible = m.returnhandler.is_infallible();
         let method_name = m.name.to_string();
         let return_type = match &m.return_type {
             Some(rt) => quote_spanned!(m.signature_span =>
                 intercom::typelib::Arg {
                     name: "".into(),
                     ty: <
-                        <#rt as intercom::type_system::ExternOutput<#ts_type>>::ForeignType
+                        <#rt as intercom::type_system::ExternType<#ts_type>>::ForeignType
                         as intercom::type_system::ForeignType>::type_name().into(),
                     indirection_level: <
-                        <#rt as intercom::type_system::ExternOutput<#ts_type>>::ForeignType
+                        <#rt as intercom::type_system::ExternType<#ts_type>>::ForeignType
                         as intercom::type_system::ForeignType>::indirection_level(),
                     direction: intercom::typelib::Direction::Return,
                 }),
@@ -690,7 +689,7 @@ fn create_typeinfo_for_variant(
         };
 
         let params = m.raw_com_args().into_iter().map(|arg| {
-            let com_ty = arg.handler.com_ty(arg.span, arg.dir, infallible);
+            let com_ty = arg.handler.com_ty(arg.span);
             let arg_name = arg.name.to_string();
             let dir_ident = Ident::new(match arg.dir {
                 Direction::In => "In",
@@ -698,15 +697,10 @@ fn create_typeinfo_for_variant(
                 Direction::Retval => "Retval"
             }, arg.span);
 
-            let ty_info_trait = Ident::new(match arg.dir {
-                Direction::Out | Direction::Retval => "ForeignType",
-                Direction::In => "ForeignType",
-            }, arg.span);
-
             quote_spanned!(arg.span => intercom::typelib::Arg {
                 name: #arg_name.into(),
-                ty: <#com_ty as intercom::type_system::#ty_info_trait>::type_name().into(),
-                indirection_level: <#com_ty as intercom::type_system::#ty_info_trait>::indirection_level(),
+                ty: <#com_ty as intercom::type_system::ForeignType>::type_name().into(),
+                indirection_level: <#com_ty as intercom::type_system::ForeignType>::indirection_level(),
                 direction: intercom::typelib::Direction::#dir_ident,
             })
         }).collect::<Vec<_>>();

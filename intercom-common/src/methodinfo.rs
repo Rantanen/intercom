@@ -269,12 +269,9 @@ impl ComMethodInfo
 
     pub fn get_parameters_tokenstream(&self) -> TokenStream
     {
-        let infallible = self.returnhandler.is_infallible();
         let in_out_args = self.raw_com_args().into_iter().map(|com_arg| {
             let name = &com_arg.name;
-            let com_ty = &com_arg
-                .handler
-                .com_ty(com_arg.span, com_arg.dir, infallible);
+            let com_ty = &com_arg.handler.com_ty(com_arg.span);
             let dir = match com_arg.dir {
                 Direction::In => quote!(),
                 Direction::Out | Direction::Retval => quote_spanned!(com_arg.span => *mut ),

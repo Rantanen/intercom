@@ -115,13 +115,15 @@ impl TypeHandler
     }
 
     /// The COM type.
-    pub fn com_ty(&self, span: Span, dir: Direction, infallible: bool) -> Type
+    pub fn com_ty(&self, span: Span) -> Type
     {
         // Construct bits for the quote.
         let ty = &self.ty;
         let ts = self.context.type_system.as_typesystem_type(span);
-        let (tr, _unwrap) = resolve_type_handling(dir, infallible, span);
-        syn::parse2(quote_spanned!(span => <#ty as #tr<#ts>>::ForeignType)).unwrap()
+        syn::parse2(
+            quote_spanned!(span => <#ty as intercom::type_system::ExternType<#ts>>::ForeignType),
+        )
+        .unwrap()
     }
 
     /// Converts a COM parameter named by the ident into a Rust type.

@@ -24,12 +24,36 @@ pub fn expand_bidirectional_type_info(
     Ok(result.into())
 }
 
+/// Expands the `ExternType` derive attribute.
+///
+/// The attribute expansion results in the following items:
+///
+/// - Implementation of the ExternType trait.
+pub fn expand_derive_extern_type(
+    item_tokens: TokenStreamNightly,
+) -> Result<TokenStreamNightly, syn::Error>
+{
+    // Get the name of the type we want to implement the trait for.
+    let input: syn::DeriveInput = syn::parse(item_tokens)?;
+    let name = &input.ident;
+
+    // Immpl requires the the generics in particular way.
+    let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+    let result = quote! {
+        unsafe impl<TS: intercom::type_system::TypeSystem> #impl_generics intercom::type_system::ExternType<TS> for #name #ty_generics #where_clause {
+            type ForeignType = #name;
+        }
+    };
+
+    Ok(result.into())
+}
+
 /// Expands the `ExternInput` derive attribute.
 ///
 /// The attribute expansion results in the following items:
 ///
 /// - Implementation of the ExternInput trait.
-pub fn expand_derive_extern_parameter(
+pub fn expand_derive_extern_input(
     item_tokens: TokenStreamNightly,
 ) -> Result<TokenStreamNightly, syn::Error>
 {
@@ -42,7 +66,6 @@ pub fn expand_derive_extern_parameter(
     let result = quote! {
         unsafe impl<TS: intercom::type_system::TypeSystem> #impl_generics intercom::type_system::ExternInput<TS> for #name #ty_generics #where_clause {
 
-            type ForeignType = #name;
             type Lease = ();
 
             #[inline(always)]
@@ -60,7 +83,6 @@ pub fn expand_derive_extern_parameter(
 
         unsafe impl<TS: intercom::type_system::TypeSystem> #impl_generics intercom::type_system::InfallibleExternInput<TS> for #name #ty_generics #where_clause {
 
-            type ForeignType = #name;
             type Lease = ();
 
             #[inline(always)]
@@ -98,8 +120,6 @@ pub fn expand_derive_extern_output(
     let result = quote! {
         unsafe impl<TS: intercom::type_system::TypeSystem> #impl_generics intercom::type_system::ExternOutput<TS> for #name #ty_generics #where_clause {
 
-            type ForeignType = #name;
-
             #[inline(always)]
             fn into_foreign_output(self) -> intercom::ComResult<Self::ForeignType> {
                 Ok(self)
@@ -112,8 +132,6 @@ pub fn expand_derive_extern_output(
         }
 
         unsafe impl<TS: intercom::type_system::TypeSystem> #impl_generics intercom::type_system::InfallibleExternOutput<TS> for #name #ty_generics #where_clause {
-
-            type ForeignType = #name;
 
             #[inline(always)]
             fn into_foreign_output(self) -> Self::ForeignType {

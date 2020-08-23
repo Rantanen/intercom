@@ -135,11 +135,21 @@ pub fn named_type_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStr
     }
 }
 
+/// Derives the implementation of the trait ExternType for a type.
+#[proc_macro_derive(ExternType)]
+pub fn derive_extern_type(input: proc_macro::TokenStream) -> proc_macro::TokenStream
+{
+    match expand_derive_extern_type(input) {
+        Ok(t) => t,
+        Err(e) => panic!("{}", e),
+    }
+}
+
 /// Derives the implementation of the trait ExternInput for a type.
 #[proc_macro_derive(ExternInput)]
-pub fn derive_extern_parameter(input: proc_macro::TokenStream) -> proc_macro::TokenStream
+pub fn derive_extern_input(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 {
-    match expand_derive_extern_parameter(input) {
+    match expand_derive_extern_input(input) {
         Ok(t) => t,
         Err(e) => panic!("{}", e),
     }
