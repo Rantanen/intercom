@@ -2,7 +2,7 @@ use super::*;
 use crate::attributes::ComInterface;
 use crate::interfaces::RawIUnknown;
 use crate::type_system::{
-    AutomationTypeSystem, ExternInput, InfallibleExternInput, RawTypeSystem, TypeSystem,
+    AutomationTypeSystem, ExternInput, ExternType, InfallibleExternInput, RawTypeSystem, TypeSystem,
 };
 use std::marker::PhantomData;
 
@@ -198,12 +198,25 @@ impl<T: ComInterface + ?Sized> std::ops::Deref for ComItf<T>
     }
 }
 
-unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternInput<TS> for &'a crate::ComItf<I>
+unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS> for &'a crate::ComItf<I>
 where
     I: ForeignType,
 {
     type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
+}
 
+unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS>
+    for Option<&'a crate::ComItf<I>>
+where
+    I: ForeignType,
+{
+    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
+}
+
+unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternInput<TS> for &'a crate::ComItf<I>
+where
+    I: ForeignType,
+{
     type Lease = ();
     unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
@@ -225,8 +238,6 @@ unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternInput<TS>
 where
     I: ForeignType,
 {
-    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
-
     type Lease = ();
     unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, Self::Lease)>
     {
@@ -251,8 +262,6 @@ unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> InfallibleExternInput<
 where
     I: ForeignType,
 {
-    type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
-
     type Lease = ();
     unsafe fn into_foreign_parameter(self) -> (Self::ForeignType, Self::Lease)
     {

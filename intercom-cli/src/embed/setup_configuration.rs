@@ -18,7 +18,7 @@ const CLSID_SetupConfiguration: GUID = GUID {
 };
 
 #[repr(C)]
-#[derive(Default, ForeignType, ExternOutput, ExternInput, Debug)]
+#[derive(Default, ForeignType, ExternType, ExternOutput, ExternInput, Debug)]
 pub struct FILETIME
 {
     low_part: u32,

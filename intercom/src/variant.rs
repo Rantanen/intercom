@@ -1,5 +1,5 @@
 use crate::attributes::{ComInterface, HasInterface};
-use crate::type_system::{ExternInput, ExternOutput, TypeSystem};
+use crate::type_system::{ExternInput, ExternOutput, ExternType, TypeSystem};
 use crate::*;
 use intercom_attributes::ForeignType;
 use std::convert::TryFrom;
@@ -120,10 +120,13 @@ impl Default for Variant
     }
 }
 
-unsafe impl<TS: TypeSystem> ExternInput<TS> for Variant
+unsafe impl<TS: TypeSystem> ExternType<TS> for Variant
 {
     type ForeignType = raw::Variant<TS>;
+}
 
+unsafe impl<TS: TypeSystem> ExternInput<TS> for Variant
+{
     type Lease = ();
     unsafe fn into_foreign_parameter(self) -> ComResult<(Self::ForeignType, ())>
     {
@@ -139,8 +142,6 @@ unsafe impl<TS: TypeSystem> ExternInput<TS> for Variant
 
 unsafe impl<TS: TypeSystem> ExternOutput<TS> for Variant
 {
-    type ForeignType = raw::Variant<TS>;
-
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>
     {
         Self::ForeignType::try_from(self)

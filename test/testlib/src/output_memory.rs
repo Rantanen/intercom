@@ -1,7 +1,7 @@
 #![allow(clippy::type_complexity)]
 
 use intercom::prelude::*;
-use intercom::type_system::{ExternOutput, TypeSystem};
+use intercom::type_system::{ExternOutput, ExternType, TypeSystem};
 use intercom::IUnknown;
 use std::ffi::c_void;
 
@@ -74,10 +74,13 @@ impl IOutputMemoryTests for OutputMemoryTests
 
 /// A type that fails all conversions.
 pub struct FailingType;
-unsafe impl<TS: TypeSystem> ExternOutput<TS> for FailingType
+unsafe impl<TS: TypeSystem> ExternType<TS> for FailingType
 {
     type ForeignType = *mut c_void;
+}
 
+unsafe impl<TS: TypeSystem> ExternOutput<TS> for FailingType
+{
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>
     {
         Err(ComError::E_FAIL)

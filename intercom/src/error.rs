@@ -3,7 +3,9 @@ use std::error::Error;
 
 use super::*;
 use crate::attributes::{ComInterface, ComInterfaceVariant};
-use crate::type_system::{AutomationTypeSystem, ExternOutput, RawTypeSystem, TypeSystem};
+use crate::type_system::{
+    AutomationTypeSystem, ExternOutput, ExternType, RawTypeSystem, TypeSystem,
+};
 
 /// Error structure containing the available information on a COM error.
 #[derive(Debug)]
@@ -43,10 +45,13 @@ impl std::fmt::Display for ComError
     }
 }
 
-unsafe impl<TS: TypeSystem> ExternOutput<TS> for ComError
+unsafe impl<TS: TypeSystem> ExternType<TS> for ComError
 {
     type ForeignType = raw::HRESULT;
+}
 
+unsafe impl<TS: TypeSystem> ExternOutput<TS> for ComError
+{
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>
     {
         Ok(self.hresult)
@@ -61,10 +66,13 @@ unsafe impl<TS: TypeSystem> ExternOutput<TS> for ComError
     }
 }
 
-unsafe impl<TS: TypeSystem> ExternOutput<TS> for std::io::Error
+unsafe impl<TS: TypeSystem> ExternType<TS> for std::io::Error
 {
     type ForeignType = raw::HRESULT;
+}
 
+unsafe impl<TS: TypeSystem> ExternOutput<TS> for std::io::Error
+{
     fn into_foreign_output(self) -> ComResult<Self::ForeignType>
     {
         let com_error: ComError = ComError::from(self);

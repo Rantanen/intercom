@@ -1,5 +1,5 @@
 use super::*;
-use intercom::raw::OutBSTR;
+use intercom::raw::BSTR;
 use std::os::raw;
 
 /// A memory allocator to be used for allocating/deallocating memory shared
@@ -27,7 +27,7 @@ pub trait IAllocator: crate::IUnknown
     /// to the given `len`. The returned value must be freed using BSTR aware
     /// free function, such as the `free_bstr` in this interface or the
     /// `SysFreeString` function on Windows.
-    unsafe fn alloc_bstr(&self, text: *const u16, len: u32) -> OutBSTR;
+    unsafe fn alloc_bstr(&self, text: *const u16, len: u32) -> BSTR;
 
     /// Frees a BSTR value.
     ///
@@ -38,7 +38,7 @@ pub trait IAllocator: crate::IUnknown
     /// # Safety
     ///
     /// The function is safe as long as the `bstr` is a valid BSTR value.
-    unsafe fn free_bstr(&self, bstr: OutBSTR);
+    unsafe fn free_bstr(&self, bstr: BSTR);
 
     /// Allocates a segment of memory that is safe to pass through intercom
     /// interfaces.
@@ -68,12 +68,12 @@ pub trait IAllocator: crate::IUnknown
 
 impl IAllocator for Allocator
 {
-    unsafe fn alloc_bstr(&self, text: *const u16, len: u32) -> OutBSTR
+    unsafe fn alloc_bstr(&self, text: *const u16, len: u32) -> BSTR
     {
-        OutBSTR(os::alloc_bstr(text, len))
+        BSTR(os::alloc_bstr(text, len))
     }
 
-    unsafe fn free_bstr(&self, bstr: OutBSTR)
+    unsafe fn free_bstr(&self, bstr: BSTR)
     {
         os::free_bstr(bstr.0)
     }

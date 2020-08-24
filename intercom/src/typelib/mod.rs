@@ -1,6 +1,6 @@
 use crate::{
     com_class, com_interface, type_system::TypeSystemName, ComBox, ComError, ComItf, ComRc,
-    ComResult, GUID,
+    ComResult, ExternOutput, ExternType, ForeignType, GUID,
 };
 
 use std::borrow::Cow;
@@ -62,7 +62,7 @@ pub enum TypeInfo
     Interface(ComBox<Interface>),
 }
 
-#[derive(intercom::ExternOutput, intercom::ForeignType, Debug)]
+#[derive(ExternType, ExternOutput, ForeignType, Debug)]
 #[repr(C)]
 pub enum TypeInfoKind
 {
@@ -110,7 +110,7 @@ pub struct Interface
     pub options: InterfaceOptions,
 }
 
-#[derive(Debug, Clone, Default, intercom::ExternOutput, intercom::ForeignType)]
+#[derive(Debug, Clone, Default, ExternType, ExternOutput, ForeignType)]
 #[repr(C)]
 pub struct InterfaceOptions
 {
@@ -167,7 +167,7 @@ pub struct Arg
     pub direction: Direction,
 }
 
-#[derive(Debug, Clone, Copy, intercom::ExternOutput, intercom::ForeignType, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, ExternType, ExternOutput, ForeignType, PartialEq, Eq)]
 #[repr(C)]
 pub enum Direction
 {

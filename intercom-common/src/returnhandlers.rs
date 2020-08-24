@@ -23,11 +23,8 @@ pub trait ReturnHandler: ::std::fmt::Debug
     /// The return type for COM implementation.
     fn com_ty(&self) -> Type
     {
-        tyhandlers::get_ty_handler(&self.rust_ty(), TypeContext::new(self.type_system())).com_ty(
-            self.return_type_span(),
-            Direction::Retval,
-            self.is_infallible(),
-        )
+        tyhandlers::get_ty_handler(&self.rust_ty(), TypeContext::new(self.type_system()))
+            .com_ty(self.return_type_span())
     }
 
     /// Gets the return statement for converting the COM result into Rust
@@ -165,7 +162,7 @@ impl ReturnHandler for ErrorResultHandler
         let ts = self.type_system.as_typesystem_type(self.span);
         syn::parse2(quote_spanned!(self.span=>
             < intercom::raw::HRESULT as
-                intercom::type_system::ExternOutput< #ts >>
+                intercom::type_system::ExternType< #ts >>
                     ::ForeignType ))
         .unwrap()
     }
