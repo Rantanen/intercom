@@ -199,9 +199,7 @@ impl ComMethodInfo
         let n = decl.ident.clone();
         let unsafety = decl.unsafety.is_some();
         let mut iter = decl.inputs.iter();
-        let rust_self_arg = iter
-            .next()
-            .ok_or_else(|| ComMethodInfoError::TooFewArguments)?;
+        let rust_self_arg = iter.next().ok_or(ComMethodInfoError::TooFewArguments)?;
 
         let (is_const, rust_self_arg) = match *rust_self_arg {
             FnArg::Receiver(ref self_arg) => (self_arg.mutability.is_none(), self_arg.clone()),

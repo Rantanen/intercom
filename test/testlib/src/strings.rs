@@ -54,7 +54,7 @@ impl IStringTests for StringTests
         STRING_DATA
             .get(i as usize)
             .map(|s| s.to_string())
-            .ok_or_else(|| ComError::E_FAIL)
+            .ok_or(ComError::E_FAIL)
     }
 
     fn bstr_parameter(&self, s: &BStr, ptr: usize) -> ComResult<()>
