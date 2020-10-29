@@ -30,7 +30,7 @@ pool:
 steps:
 - script: |
     curl -sSf -o rustup-init.exe https://win.rustup.rs
-    rustup-init.exe --default-toolchain $(rustVersion) -y --default-host x86_64-pc-windows-msvc
+    rustup-init.exe --default-toolchain none -y --default-host x86_64-pc-windows-msvc
   displayName: 'Update environment (Windows)'
   condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
 
