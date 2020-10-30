@@ -116,7 +116,7 @@ impl<T: ComInterface + ?Sized> ComRc<T>
                 // On success construct the ComRc. We are using Automation type
                 // system as that's the IID we used earlier.
                 crate::raw::S_OK => {
-                    let ptr = raw::InterfacePtr::new(out).ok_or_else(|| ComError::E_POINTER)?;
+                    let ptr = raw::InterfacePtr::new(out).ok_or(ComError::E_POINTER)?;
                     let comitf = ComItf::wrap::<AutomationTypeSystem>(ptr);
                     Ok(ComRc::attach(comitf))
                 }

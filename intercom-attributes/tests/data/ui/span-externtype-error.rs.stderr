@@ -1,38 +1,38 @@
-error[E0277]: the trait bound `NotExternType: intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>` is not satisfied
+error[E0277]: the trait bound `NotExternType: ExternType<AutomationTypeSystem>` is not satisfied
   --> span-externtype-error.rs:12:5
    |
 12 |     fn arg_type(&self, bad_type: NotExternType);
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>` is not implemented for `NotExternType`
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ExternType<AutomationTypeSystem>` is not implemented for `NotExternType`
 
-error[E0277]: the trait bound `NotExternType: intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>` is not satisfied
+error[E0277]: the trait bound `NotExternType: ExternType<AutomationTypeSystem>` is not satisfied
   --> span-externtype-error.rs:14:5
    |
 14 |     fn ret_type(&self) -> ComResult<NotExternType>;
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>` is not implemented for `NotExternType`
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ExternType<AutomationTypeSystem>` is not implemented for `NotExternType`
 
-error[E0277]: the trait bound `NotExternType: intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>` is not satisfied
+error[E0277]: the trait bound `NotExternType: ExternType<AutomationTypeSystem>` is not satisfied
   --> span-externtype-error.rs:16:5
    |
 16 |     fn all_type(&self, bad_type: NotExternType) -> ComResult<NotExternType>;
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::type_system::ExternType<intercom::type_system::AutomationTypeSystem>` is not implemented for `NotExternType`
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ExternType<AutomationTypeSystem>` is not implemented for `NotExternType`
 
-error[E0277]: the trait bound `NotExternType: intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>` is not satisfied
+error[E0277]: the trait bound `NotExternType: ExternType<RawTypeSystem>` is not satisfied
   --> span-externtype-error.rs:12:5
    |
 12 |     fn arg_type(&self, bad_type: NotExternType);
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>` is not implemented for `NotExternType`
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ExternType<RawTypeSystem>` is not implemented for `NotExternType`
 
-error[E0277]: the trait bound `NotExternType: intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>` is not satisfied
+error[E0277]: the trait bound `NotExternType: ExternType<RawTypeSystem>` is not satisfied
   --> span-externtype-error.rs:14:5
    |
 14 |     fn ret_type(&self) -> ComResult<NotExternType>;
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>` is not implemented for `NotExternType`
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ExternType<RawTypeSystem>` is not implemented for `NotExternType`
 
-error[E0277]: the trait bound `NotExternType: intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>` is not satisfied
+error[E0277]: the trait bound `NotExternType: ExternType<RawTypeSystem>` is not satisfied
   --> span-externtype-error.rs:16:5
    |
 16 |     fn all_type(&self, bad_type: NotExternType) -> ComResult<NotExternType>;
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `intercom::type_system::ExternType<intercom::type_system::RawTypeSystem>` is not implemented for `NotExternType`
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ExternType<RawTypeSystem>` is not implemented for `NotExternType`
 
 error: aborting due to 6 previous errors
 
