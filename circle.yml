@@ -15,10 +15,11 @@ jobs:
                 command: |
                     rustc -vV
                     cargo -vV
+                    rustup -vV
             - run:
                 name: "Run rustfmt"
                 command: |
-                    rustup component add rustfmt-preview
+                    rustup toolchain install nightly --allow-downgrade -c rustfmt
                     cargo fmt -- --check
             - run:
                 name: "Cargo test"
