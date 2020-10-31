@@ -3,9 +3,6 @@
 
 [![crates.io](https://img.shields.io/crates/v/intercom.svg)](https://crates.io/crates/intercom)
 [![Build Status](https://dev.azure.com/intercom-rs/Intercom/_apis/build/status/Rantanen.intercom?branchName=master)](https://dev.azure.com/intercom-rs/Intercom/_build/latest?definitionId=1&branchName=master)
-[![Build status](https://ci.appveyor.com/api/projects/status/q88b7xk6l72kup0y/branch/master?svg=true)](https://ci.appveyor.com/project/Rantanen/intercom/branch/master)
-[![Build Status](https://travis-ci.org/Rantanen/intercom.svg?branch=master)](https://travis-ci.org/Rantanen/intercom)
-[![CircleCI](https://circleci.com/gh/Rantanen/intercom/tree/master.svg?style=svg)](https://circleci.com/gh/Rantanen/intercom/tree/master)
 [![codecov](https://codecov.io/gh/Rantanen/intercom/branch/master/graph/badge.svg)](https://codecov.io/gh/Rantanen/intercom)
 
 Intercom enables the user to write reusable components in Rust, that are
