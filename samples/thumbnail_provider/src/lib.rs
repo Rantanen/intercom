@@ -92,17 +92,17 @@ impl Drop for ThumbnailProvider
 
 // New types for deriving Intercom traits.
 
-#[derive(intercom::ForeignType, intercom::ExternOutput)]
+#[derive(intercom::ExternType, intercom::ForeignType, intercom::ExternOutput)]
 #[allow(non_camel_case_types)]
 #[repr(transparent)]
 struct ComHBITMAP(HBITMAP);
 
-#[derive(intercom::ForeignType, intercom::ExternOutput, intercom::ExternInput)]
+#[derive(intercom::ExternType, intercom::ForeignType, intercom::ExternOutput, intercom::ExternInput)]
 #[allow(non_camel_case_types)]
 #[repr(transparent)]
 struct ComULARGE_INTEGER(ULARGE_INTEGER);
 
-#[derive(intercom::ForeignType, intercom::ExternOutput, intercom::ExternInput)]
+#[derive(intercom::ExternType, intercom::ForeignType, intercom::ExternOutput, intercom::ExternInput)]
 #[allow(non_camel_case_types)]
 #[repr(transparent)]
 struct ComSTATSTG(STATSTG);
