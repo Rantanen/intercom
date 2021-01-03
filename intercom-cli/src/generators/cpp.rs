@@ -62,14 +62,14 @@ impl CppLibrary
 {
     fn try_from(lib: TypeLib, opts: &ModelOptions) -> Result<Self, GeneratorError>
     {
-        let ctx = LibraryContext::try_from(&lib)?;
+        let ctx = LibraryContext::from(&lib);
 
         let mut interfaces = vec![];
         let mut coclasses = vec![];
         for t in &lib.types {
             match t {
                 TypeInfo::Class(cls) => {
-                    coclasses.push(CppClass::try_from(cls.as_ref(), opts, &ctx)?)
+                    coclasses.push(CppClass::from(cls.as_ref(), opts, &ctx))
                 }
                 TypeInfo::Interface(itf) => {
                     interfaces.push(CppInterface::gather(itf.as_ref(), opts, &ctx)?)
@@ -218,11 +218,11 @@ impl CppArg
 
 impl CppClass
 {
-    fn try_from(
+    fn from(
         cls: &CoClass,
         opts: &ModelOptions,
         ctx: &LibraryContext,
-    ) -> Result<Self, GeneratorError>
+    ) -> Self
     {
         let interfaces = cls
             .interfaces
@@ -237,12 +237,12 @@ impl CppClass
                     .collect::<Vec<_>>()
             })
             .collect::<Vec<_>>();
-        Ok(CppClass {
+        CppClass {
             name: cls.name.to_string(),
             clsid_struct: guid_as_struct(&cls.clsid),
             interface_count: interfaces.len(),
             interfaces,
-        })
+        }
     }
 }
 

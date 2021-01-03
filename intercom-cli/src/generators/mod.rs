@@ -52,7 +52,7 @@ pub struct LibraryContext<'a>
 
 impl<'a> LibraryContext<'a>
 {
-    fn try_from(lib: &'a TypeLib) -> Result<LibraryContext<'a>, GeneratorError>
+    fn from(lib: &'a TypeLib) -> LibraryContext<'a>
     {
         let itfs_by_name: HashMap<String, &Interface> = lib
             .types
@@ -78,10 +78,10 @@ impl<'a> LibraryContext<'a>
                 )
             })
             .collect();
-        Ok(LibraryContext {
+        LibraryContext {
             itfs_by_name,
             itfs_by_ref,
-        })
+        }
     }
 }
 

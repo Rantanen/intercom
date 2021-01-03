@@ -112,7 +112,7 @@ pub fn expand_com_module(
     // Implement get_intercom_typelib()
     output.push(create_gather_module_types(&lib).map_err(model::ParseError::ComLibrary)?);
     if com_library {
-        output.push(create_get_typelib_function(&lib).map_err(model::ParseError::ComLibrary)?);
+        output.push(create_get_typelib_function(&lib));
     }
 
     // Implement the global DLL entry points
@@ -188,11 +188,11 @@ fn create_gather_module_types(lib: &model::ComLibrary) -> Result<TokenStream, St
     ))
 }
 
-fn create_get_typelib_function(lib: &model::ComLibrary) -> Result<TokenStream, String>
+fn create_get_typelib_function(lib: &model::ComLibrary) -> TokenStream
 {
     let lib_name = lib_name();
     let libid = utils::get_guid_tokens(&lib.libid, Span::call_site());
-    Ok(quote!(
+    quote!(
         #[no_mangle]
         pub unsafe extern "system" fn IntercomTypeLib(
             type_system: intercom::type_system::TypeSystemName,
@@ -213,7 +213,7 @@ fn create_get_typelib_function(lib: &model::ComLibrary) -> Result<TokenStream, S
 
             intercom::raw::S_OK
         }
-    ))
+    )
 }
 
 fn get_intercom_list_class_objects_function() -> TokenStream

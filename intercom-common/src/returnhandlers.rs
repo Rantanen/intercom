@@ -350,7 +350,7 @@ pub fn get_return_handler(
     return_ty: &Option<Type>,
     span: Span,
     type_system: ModelTypeSystem,
-) -> Result<Box<dyn ReturnHandler>, ()>
+) -> Result<Box<dyn ReturnHandler>, &'static str>
 {
     Ok(match (retval_ty, return_ty) {
         (&None, &None) => Box::new(VoidHandler(span)),
@@ -365,6 +365,6 @@ pub fn get_return_handler(
         // Unsupported return scheme. Note we are using Result::Err instead of
         // Option::None here because having no return handler is unsupported
         // error case.
-        _ => return Err(()),
+        _ => return Err("Unsupported return type configuration"),
     })
 }

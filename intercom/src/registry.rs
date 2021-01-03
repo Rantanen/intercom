@@ -257,10 +257,10 @@ pub fn register_typelib(
     for d in data.iter().rev() {
         if do_register {
             let key = CLASSES_ROOT.open_key(&d.0)?;
-            if d.2 != "" {
+            if !d.2.is_empty() {
                 key.set_string_value(d.1, &d.2)?;
             }
-        } else if d.1 == "" {
+        } else if d.1.is_empty() {
             // Delete key.
             // Only process default-values so we won't delete keys multiple times.
             CLASSES_ROOT.delete_key(&d.0)?;
@@ -317,7 +317,7 @@ pub fn register_class(
         if do_register {
             let key = CLASSES_ROOT.open_key(&d.0)?;
             key.set_string_value(d.1, &d.2)?;
-        } else if d.1 == "" {
+        } else if d.1.is_empty() {
             // Delete key.
             // Only process default-values so we won't delete keys multiple times.
             CLASSES_ROOT.delete_key(&d.0)?;
