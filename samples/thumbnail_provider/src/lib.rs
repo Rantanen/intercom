@@ -29,7 +29,10 @@ fn on_load()
     .unwrap();
 }
 
-#[com_class(IInitializeWithStream, IThumbnailProvider)]
+#[com_class(
+    clsid = "61a6080e-0e9f-3cef-50a7-622d16145b78",
+    IInitializeWithStream,
+    IThumbnailProvider)]
 #[derive(Default)]
 struct ThumbnailProvider
 {
