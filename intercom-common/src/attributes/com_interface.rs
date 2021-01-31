@@ -4,7 +4,7 @@ use crate::prelude::*;
 use std::collections::BTreeMap;
 use std::iter;
 
-use crate::idents::{self, SomeIdent};
+use crate::idents;
 use crate::methodinfo::ComMethodInfo;
 use crate::model;
 use crate::tyhandlers::{Direction, ModelTypeSystem};
@@ -229,9 +229,7 @@ pub fn expand_com_interface(
     ));
 
     // Create runtime type info.
-    output.push(create_get_typeinfo_function(&itf).map_err(|e| {
-        model::ParseError::ComInterface(itf_path.get_some_ident().unwrap().to_string(), e)
-    })?);
+    output.push(create_get_typeinfo_function(&itf));
 
     Ok(tokens_to_tokenstream(item_tokens, output))
 }
@@ -623,17 +621,17 @@ fn create_virtual_method(
     )
 }
 
-fn create_get_typeinfo_function(itf: &model::ComInterface) -> Result<TokenStream, String>
+fn create_get_typeinfo_function(itf: &model::ComInterface) -> TokenStream
 {
     let itf_name = itf.ident.to_string();
     let itf_ref = &itf.itf_ref;
     let mut variant_tokens = vec![];
     for (ts, variant) in &itf.variants {
-        variant_tokens.push(create_typeinfo_for_variant(itf, *ts, &variant)?);
+        variant_tokens.push(create_typeinfo_for_variant(itf, *ts, &variant));
     }
     let is_impl_interface = itf.item_type == utils::InterfaceType::Struct;
 
-    Ok(quote_spanned!(itf.span =>
+    quote_spanned!(itf.span =>
         #[allow(non_snake_case)]
         #[allow(dead_code)]
         impl intercom::attributes::ComInterfaceTypeInfo for #itf_ref
@@ -654,14 +652,14 @@ fn create_get_typeinfo_function(itf: &model::ComInterface) -> Result<TokenStream
                 ) ]
             }
         }
-    ))
+    )
 }
 
 fn create_typeinfo_for_variant(
     itf: &model::ComInterface,
     ts: ModelTypeSystem,
     itf_variant: &model::ComInterfaceVariant,
-) -> Result<TokenStream, String>
+) -> TokenStream
 {
     let ts_tokens = ts.as_typesystem_tokens(itf.span);
     let ts_type = ts.as_typesystem_type(itf.span);
@@ -714,11 +712,11 @@ fn create_typeinfo_for_variant(
         )
     }).collect::<Vec<_>>();
 
-    Ok(quote_spanned!(itf.span =>
+    quote_spanned!(itf.span =>
         intercom::ComBox::new( intercom::typelib::InterfaceVariant {
             ts: #ts_tokens,
             iid: #iid_tokens,
             methods: vec![ #( #methods ),* ],
         })
-    ))
+    )
 }

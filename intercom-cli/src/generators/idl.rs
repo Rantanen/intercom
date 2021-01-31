@@ -66,9 +66,7 @@ impl IdlLibrary
         let mut coclasses = vec![];
         for t in &lib.types {
             match t {
-                TypeInfo::Class(cls) => {
-                    coclasses.push(IdlClass::from(cls.as_ref(), opts, &ctx))
-                }
+                TypeInfo::Class(cls) => coclasses.push(IdlClass::from(cls.as_ref(), opts, &ctx)),
                 TypeInfo::Interface(itf) => {
                     interfaces.push(IdlInterface::gather(itf.as_ref(), opts, &ctx)?)
                 }
@@ -96,8 +94,7 @@ impl IdlInterface
         ctx: &LibraryContext,
     ) -> Result<Vec<Self>, GeneratorError>
     {
-        Ok(opts
-            .type_systems
+        opts.type_systems
             .iter()
             .map(
                 |ts_opts| match itf.variants.iter().find(|v| v.as_ref().ts == ts_opts.ts) {
@@ -106,7 +103,7 @@ impl IdlInterface
                 },
             )
             .filter_map(|i| i)
-            .collect::<Result<Vec<_>, _>>()?)
+            .collect::<Result<Vec<_>, _>>()
     }
 
     fn try_from(
@@ -219,11 +216,7 @@ impl IdlArg
 
 impl IdlClass
 {
-    fn from(
-        cls: &CoClass,
-        opts: &ModelOptions,
-        ctx: &LibraryContext,
-    ) -> Self
+    fn from(cls: &CoClass, opts: &ModelOptions, ctx: &LibraryContext) -> Self
     {
         let interfaces = cls
             .interfaces

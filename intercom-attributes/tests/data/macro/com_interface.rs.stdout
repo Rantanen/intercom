@@ -2807,9 +2807,7 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
             }
         }
         {
-            {
-                ::std::rt::begin_panic("internal error: entered unreachable code")
-            }
+            ::core::panicking::panic("internal error: entered unreachable code")
         };
     }
     fn bool_method(&self, input: bool) -> ComResult<bool> {
@@ -2953,9 +2951,7 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
             };
         }
         {
-            {
-                ::std::rt::begin_panic("internal error: entered unreachable code")
-            }
+            ::core::panicking::panic("internal error: entered unreachable code")
         };
     }
     fn com_result_method(&self) -> ComResult<u16> {
@@ -3091,9 +3087,7 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
             };
         }
         {
-            {
-                ::std::rt::begin_panic("internal error: entered unreachable code")
-            }
+            ::core::panicking::panic("internal error: entered unreachable code")
         };
     }
     fn comitf_method(&self, itf: ComItf<dyn Foo>) -> ComResult<ComItf<dyn IUnknown>> {
@@ -3249,9 +3243,7 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
             };
         }
         {
-            {
-                ::std::rt::begin_panic("internal error: entered unreachable code")
-            }
+            ::core::panicking::panic("internal error: entered unreachable code")
         };
     }
     fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
@@ -3409,9 +3401,7 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
             };
         }
         {
-            {
-                ::std::rt::begin_panic("internal error: entered unreachable code")
-            }
+            ::core::panicking::panic("internal error: entered unreachable code")
         };
     }
     fn rust_result_method(&self) -> Result<u16, i32> {
@@ -3547,9 +3537,7 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
             };
         }
         {
-            {
-                ::std::rt::begin_panic("internal error: entered unreachable code")
-            }
+            ::core::panicking::panic("internal error: entered unreachable code")
         };
     }
     fn simple_method(&self) -> () {
@@ -3649,9 +3637,7 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
             }
         }
         {
-            {
-                ::std::rt::begin_panic("internal error: entered unreachable code")
-            }
+            ::core::panicking::panic("internal error: entered unreachable code")
         };
     }
     fn simple_result_method(&self) -> u16 {
@@ -3765,9 +3751,7 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
             }
         }
         {
-            {
-                ::std::rt::begin_panic("internal error: entered unreachable code")
-            }
+            ::core::panicking::panic("internal error: entered unreachable code")
         };
     }
     fn string_method(&self, msg: String) -> String {
@@ -3887,9 +3871,7 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
             }
         }
         {
-            {
-                ::std::rt::begin_panic("internal error: entered unreachable code")
-            }
+            ::core::panicking::panic("internal error: entered unreachable code")
         };
     }
     fn variant_method(&self, input: Variant) -> ComResult<Variant> {
@@ -4035,9 +4017,7 @@ impl<I: intercom::attributes::ComInterface + Foo + ?Sized> Foo for intercom::Com
             };
         }
         {
-            {
-                ::std::rt::begin_panic("internal error: entered unreachable code")
-            }
+            ::core::panicking::panic("internal error: entered unreachable code")
         };
     }
 }
