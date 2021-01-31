@@ -269,6 +269,19 @@ fn get_intercom_list_class_objects_function() -> TokenStream
 
 fn get_register_server_function(lib: &model::ComLibrary) -> TokenStream
 {
+    // We'll need token streams to for the hook functions to use in the quote macros. If the user
+    // did not specify hook functions to use, we'll define the token streams as empty.
+    let on_register = if let Some(ref on_register) = &lib.on_register {
+        quote!(if let Err(hr) = #on_register() { return hr; })
+    } else {
+        quote!()
+    };
+    let on_unregister = if let Some(ref on_unregister) = &lib.on_unregister {
+        quote!(if let Err(hr) = #on_unregister() { return hr; })
+    } else {
+        quote!()
+    };
+
     let lib_name = lib_name();
     let libid = utils::get_guid_tokens(&lib.libid, Span::call_site());
     quote!(
@@ -286,10 +299,14 @@ fn get_register_server_function(lib: &model::ComLibrary) -> TokenStream
                         .into_iter().chain(__gather_module_types())
                         .collect()
             );
-            match intercom::registry::register(__INTERCOM_DLL_INSTANCE, tlib) {
-                Ok(_) => intercom::raw::S_OK,
-                Err(hr) => hr,
+
+            if let Err(hr) = intercom::registry::register(__INTERCOM_DLL_INSTANCE, tlib) {
+                return hr;
             }
+
+            #on_register
+
+            intercom::raw::S_OK
         }
 
         #[no_mangle]
@@ -306,10 +323,14 @@ fn get_register_server_function(lib: &model::ComLibrary) -> TokenStream
                         .into_iter().chain(__gather_module_types())
                         .collect()
             );
-            match intercom::registry::unregister(__INTERCOM_DLL_INSTANCE, tlib) {
-                Ok(_) => intercom::raw::S_OK,
-                Err(hr) => hr,
+
+            if let Err(hr) = intercom::registry::unregister(__INTERCOM_DLL_INSTANCE, tlib) {
+                return hr;
             }
+
+            #on_unregister
+
+            intercom::raw::S_OK
         }
     )
 }

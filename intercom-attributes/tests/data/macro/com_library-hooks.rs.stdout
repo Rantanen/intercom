@@ -1,0 +1,186 @@
+#![feature(prelude_import)]
+#![no_std]
+#[prelude_import]
+use std::prelude::v1::*;
+#[macro_use]
+extern crate std;
+extern crate intercom;
+use intercom::*;
+
+fn custom_load() -> ComResult<()> {
+    Ok(())
+}
+
+fn custom_register() -> ComResult<()> {
+    Ok(())
+}
+
+fn custom_unregister() -> ComResult<()> {
+    Ok(())
+}
+
+#[allow(dead_code)]
+#[doc(hidden)]
+pub unsafe fn __get_module_class_factory(
+    rclsid: intercom::REFCLSID,
+    riid: intercom::REFIID,
+    pout: *mut intercom::raw::RawComPtr,
+) -> Option<intercom::raw::HRESULT> {
+    match *rclsid {
+        _ => {}
+    };
+    None
+}
+#[no_mangle]
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+pub unsafe extern "system" fn DllGetClassObject(
+    rclsid: intercom::REFCLSID,
+    riid: intercom::REFIID,
+    pout: *mut intercom::raw::RawComPtr,
+) -> intercom::raw::HRESULT {
+    if let Some(hr) = __get_module_class_factory(rclsid, riid, pout) {
+        return hr;
+    }
+    if let Some(hr) = intercom::__get_module_class_factory(rclsid, riid, pout) {
+        return hr;
+    }
+    intercom::raw::E_CLASSNOTAVAILABLE
+}
+#[doc(hidden)]
+static mut __INTERCOM_DLL_INSTANCE: *mut std::os::raw::c_void = 0 as _;
+#[no_mangle]
+#[allow(non_camel_case_types)]
+#[deprecated]
+#[doc(hidden)]
+pub extern "stdcall" fn DllMain(
+    dll_instance: *mut std::os::raw::c_void,
+    reason: u32,
+    _reserved: *mut std::os::raw::c_void,
+) -> bool {
+    match reason {
+        1 => unsafe {
+            __INTERCOM_DLL_INSTANCE = dll_instance;
+            custom_load();
+        },
+        _ => {}
+    }
+    true
+}
+pub fn __gather_module_types() -> Vec<intercom::typelib::TypeInfo> {
+    ::alloc::vec::Vec::new().into_iter().flatten().collect()
+}
+#[no_mangle]
+pub unsafe extern "system" fn IntercomTypeLib(
+    type_system: intercom::type_system::TypeSystemName,
+    out: *mut intercom::raw::RawComPtr,
+) -> intercom::raw::HRESULT {
+    let mut tlib = intercom::ComBox::new(intercom::typelib::TypeLib::__new(
+        "TestLib".into(),
+        intercom::GUID {
+            data1: 0u32,
+            data2: 0u16,
+            data3: 0u16,
+            data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
+        },
+        "0.1".into(),
+        intercom::__gather_module_types()
+            .into_iter()
+            .chain(__gather_module_types())
+            .collect(),
+    ));
+    let rc = intercom::ComRc::<intercom::typelib::IIntercomTypeLib>::from(&tlib);
+    let itf = intercom::ComRc::detach(rc);
+    *out = type_system.get_ptr(&itf);
+    intercom::raw::S_OK
+}
+#[no_mangle]
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+pub unsafe extern "system" fn IntercomListClassObjects(
+    pcount: *mut usize,
+    pclsids: *mut *const intercom::CLSID,
+) -> intercom::raw::HRESULT {
+    if pcount.is_null() {
+        return intercom::raw::E_POINTER;
+    }
+    if pclsids.is_null() {
+        return intercom::raw::E_POINTER;
+    }
+    static mut AVAILABLE_CLASSES: Option<Vec<intercom::CLSID>> = None;
+    static INIT_AVAILABLE_CLASSES: std::sync::Once = std::sync::Once::new();
+    INIT_AVAILABLE_CLASSES.call_once(|| unsafe {
+        AVAILABLE_CLASSES = Some(
+            __gather_module_types()
+                .into_iter()
+                .chain(intercom::__gather_module_types())
+                .filter_map(|ty| match ty {
+                    intercom::typelib::TypeInfo::Class(cls) => Some(cls.clsid.clone()),
+                    _ => None,
+                })
+                .collect(),
+        );
+    });
+    let available_classes = AVAILABLE_CLASSES
+        .as_ref()
+        .expect("AVAILABLE_CLASSES was not initialized");
+    *pcount = available_classes.len();
+    *pclsids = available_classes.as_ptr();
+    intercom::raw::S_OK
+}
+#[no_mangle]
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+pub unsafe extern "system" fn DllRegisterServer() -> intercom::raw::HRESULT {
+    let mut tlib = intercom::typelib::TypeLib::__new(
+        "TestLib".into(),
+        intercom::GUID {
+            data1: 0u32,
+            data2: 0u16,
+            data3: 0u16,
+            data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
+        },
+        "0.1".into(),
+        intercom::__gather_module_types()
+            .into_iter()
+            .chain(__gather_module_types())
+            .collect(),
+    );
+    if let Err(hr) = intercom::registry::register(__INTERCOM_DLL_INSTANCE, tlib) {
+        return hr;
+    }
+    if let Err(hr) = custom_register() {
+        return hr;
+    }
+    intercom::raw::S_OK
+}
+#[no_mangle]
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+#[doc(hidden)]
+pub unsafe extern "system" fn DllUnregisterServer() -> intercom::raw::HRESULT {
+    let mut tlib = intercom::typelib::TypeLib::__new(
+        "TestLib".into(),
+        intercom::GUID {
+            data1: 0u32,
+            data2: 0u16,
+            data3: 0u16,
+            data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
+        },
+        "0.1".into(),
+        intercom::__gather_module_types()
+            .into_iter()
+            .chain(__gather_module_types())
+            .collect(),
+    );
+    if let Err(hr) = intercom::registry::unregister(__INTERCOM_DLL_INSTANCE, tlib) {
+        return hr;
+    }
+    if let Err(hr) = custom_unregister() {
+        return hr;
+    }
+    intercom::raw::S_OK
+}

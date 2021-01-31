@@ -166,10 +166,10 @@ pub unsafe extern "system" fn DllRegisterServer() -> intercom::raw::HRESULT {
             .chain(__gather_module_types())
             .collect(),
     );
-    match intercom::registry::register(__INTERCOM_DLL_INSTANCE, tlib) {
-        Ok(_) => intercom::raw::S_OK,
-        Err(hr) => hr,
+    if let Err(hr) = intercom::registry::register(__INTERCOM_DLL_INSTANCE, tlib) {
+        return hr;
     }
+    intercom::raw::S_OK
 }
 #[no_mangle]
 #[allow(non_snake_case)]
@@ -190,8 +190,8 @@ pub unsafe extern "system" fn DllUnregisterServer() -> intercom::raw::HRESULT {
             .chain(__gather_module_types())
             .collect(),
     );
-    match intercom::registry::unregister(__INTERCOM_DLL_INSTANCE, tlib) {
-        Ok(_) => intercom::raw::S_OK,
-        Err(hr) => hr,
+    if let Err(hr) = intercom::registry::unregister(__INTERCOM_DLL_INSTANCE, tlib) {
+        return hr;
     }
+    intercom::raw::S_OK
 }
