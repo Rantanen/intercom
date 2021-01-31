@@ -68,9 +68,7 @@ impl CppLibrary
         let mut coclasses = vec![];
         for t in &lib.types {
             match t {
-                TypeInfo::Class(cls) => {
-                    coclasses.push(CppClass::from(cls.as_ref(), opts, &ctx))
-                }
+                TypeInfo::Class(cls) => coclasses.push(CppClass::from(cls.as_ref(), opts, &ctx)),
                 TypeInfo::Interface(itf) => {
                     interfaces.push(CppInterface::gather(itf.as_ref(), opts, &ctx)?)
                 }
@@ -98,8 +96,7 @@ impl CppInterface
         ctx: &LibraryContext,
     ) -> Result<Vec<Self>, GeneratorError>
     {
-        Ok(opts
-            .type_systems
+        opts.type_systems
             .iter()
             .map(
                 |ts_opts| match itf.variants.iter().find(|v| v.as_ref().ts == ts_opts.ts) {
@@ -108,7 +105,7 @@ impl CppInterface
                 },
             )
             .filter_map(|i| i)
-            .collect::<Result<Vec<_>, _>>()?)
+            .collect::<Result<Vec<_>, _>>()
     }
 
     fn try_from(
@@ -218,11 +215,7 @@ impl CppArg
 
 impl CppClass
 {
-    fn from(
-        cls: &CoClass,
-        opts: &ModelOptions,
-        ctx: &LibraryContext,
-    ) -> Self
+    fn from(cls: &CoClass, opts: &ModelOptions, ctx: &LibraryContext) -> Self
     {
         let interfaces = cls
             .interfaces
