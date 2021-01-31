@@ -110,7 +110,7 @@ pub fn expand_com_module(
     }
 
     // Implement get_intercom_typelib()
-    output.push(create_gather_module_types(&lib).map_err(model::ParseError::ComLibrary)?);
+    output.push(create_gather_module_types(&lib));
     if com_library {
         output.push(create_get_typelib_function(&lib));
     }
@@ -157,7 +157,7 @@ fn get_dll_get_class_object_function() -> TokenStream
     )
 }
 
-fn create_gather_module_types(lib: &model::ComLibrary) -> Result<TokenStream, String>
+fn create_gather_module_types(lib: &model::ComLibrary) -> TokenStream
 {
     let create_class_typeinfo = lib.coclasses.iter().map(|path| {
         quote!(
@@ -173,7 +173,7 @@ fn create_gather_module_types(lib: &model::ComLibrary) -> Result<TokenStream, St
         .submodules
         .iter()
         .map(|path| quote!( #path::__gather_module_types()));
-    Ok(quote!(
+    quote!(
         pub fn __gather_module_types() -> Vec<intercom::typelib::TypeInfo>
         {
             vec![
@@ -185,7 +185,7 @@ fn create_gather_module_types(lib: &model::ComLibrary) -> Result<TokenStream, St
             .flatten()
             .collect()
         }
-    ))
+    )
 }
 
 fn create_get_typelib_function(lib: &model::ComLibrary) -> TokenStream

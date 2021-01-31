@@ -279,15 +279,12 @@ pub fn expand_com_class(
         output.push(clsid_const);
     }
 
-    output.push(
-        create_get_typeinfo_function(&cls)
-            .map_err(|e| model::ParseError::ComClass(cls.name.to_string(), e))?,
-    );
+    output.push(create_get_typeinfo_function(&cls));
 
     Ok(tokens_to_tokenstream(item_tokens, output))
 }
 
-fn create_get_typeinfo_function(cls: &model::ComClass) -> Result<TokenStream, String>
+fn create_get_typeinfo_function(cls: &model::ComClass) -> TokenStream
 {
     let fn_name = Ident::new(
         &format!("get_intercom_coclass_info_for_{}", cls.name),
@@ -298,10 +295,10 @@ fn create_get_typeinfo_function(cls: &model::ComClass) -> Result<TokenStream, St
     let clsid = match &cls.clsid {
         Some(guid) => guid,
         None => {
-            return Ok(quote!(
+            return quote!(
                 pub(crate) fn #fn_name() -> Vec<intercom::typelib::TypeInfo>
                 { vec![] }
-            ))
+            )
         }
     };
     let clsid_tokens = utils::get_guid_tokens(&clsid, Span::call_site());
@@ -335,7 +332,7 @@ fn create_get_typeinfo_function(cls: &model::ComClass) -> Result<TokenStream, St
             )
         })
         .unzip();
-    Ok(quote!(
+    quote!(
         impl #impl_generics intercom::attributes::ComClassTypeInfo for #cls_ident #ty_generics #where_clause
         {
             fn gather_type_info() -> Vec<intercom::typelib::TypeInfo>
@@ -351,5 +348,5 @@ fn create_get_typeinfo_function(cls: &model::ComClass) -> Result<TokenStream, St
                 r
             }
         }
-    ))
+    )
 }
