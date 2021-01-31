@@ -104,7 +104,7 @@ impl GetIdent for Item
             Item::Use(..) | Item::ForeignMod(..) | Item::Verbatim(..) => {
                 return Err("Item type not supported for Ident".to_string())
             }
-            Item::__Nonexhaustive => panic!(),
+            _ => panic!(),
         })
     }
 }
@@ -137,7 +137,7 @@ impl GetAttributes for Item
             Item::ForeignMod(ref i) => i.attrs.clone(),
             Item::TraitAlias(ref i) => i.attrs.clone(),
             Item::Verbatim(..) => vec![],
-            Item::__Nonexhaustive => panic!(),
+            _ => panic!(),
         })
     }
 }
