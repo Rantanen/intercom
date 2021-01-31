@@ -3,6 +3,7 @@ use crate::typelib::*;
 use std::convert::TryInto;
 use std::ffi::{c_void, CStr, CString};
 
+#[allow(clippy::upper_case_acronyms)]
 type HANDLE = *mut c_void;
 
 /// Convert the Rust identifier from `snake_case` to `PascalCase`
@@ -192,7 +193,7 @@ fn register_or_unregister(dll: HANDLE, lib: TypeLib, do_register: bool) -> Resul
         TypeInfo::Class(cls) => Some(cls),
         _ => None,
     }) {
-        register_class(&path, &lib, &lib_name, &lib_version, &cls, do_register)?;
+        register_class(&path, &lib, &lib_name, &lib_version, cls, do_register)?;
     }
 
     Ok(())

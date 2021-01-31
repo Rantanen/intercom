@@ -198,15 +198,14 @@ impl<T: ComInterface + ?Sized> std::ops::Deref for ComItf<T>
     }
 }
 
-unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS> for &'a crate::ComItf<I>
+impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS> for &'a crate::ComItf<I>
 where
     I: ForeignType,
 {
     type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
 }
 
-unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS>
-    for Option<&'a crate::ComItf<I>>
+impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS> for Option<&'a crate::ComItf<I>>
 where
     I: ForeignType,
 {

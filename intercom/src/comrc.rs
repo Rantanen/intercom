@@ -159,7 +159,7 @@ impl<T: ComInterface + ?Sized> std::borrow::Borrow<ComItf<T>> for ComRc<T>
     }
 }
 
-unsafe impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS> for crate::ComRc<I>
+impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS> for crate::ComRc<I>
 where
     I: ForeignType,
 {
@@ -169,7 +169,7 @@ where
     type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
 }
 
-unsafe impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS> for Option<crate::ComRc<I>>
+impl<TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS> for Option<crate::ComRc<I>>
 where
     I: ForeignType,
 {
@@ -236,10 +236,7 @@ where
     type Owned = Self;
     unsafe fn from_foreign_parameter(source: Self::ForeignType) -> ComResult<Self>
     {
-        Ok(match source {
-            Some(ptr) => Some(ComRc::from(ptr)),
-            None => None,
-        })
+        Ok(source.map(ComRc::from))
     }
 }
 
@@ -260,9 +257,6 @@ where
 
     unsafe fn from_foreign_output(source: Self::ForeignType) -> ComResult<Self>
     {
-        Ok(match source {
-            Some(ptr) => Some(ComRc::wrap(ptr)),
-            None => None,
-        })
+        Ok(source.map(|ptr| ComRc::wrap(ptr)))
     }
 }

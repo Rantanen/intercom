@@ -19,6 +19,7 @@ const CLSID_SetupConfiguration: GUID = GUID {
 
 #[repr(C)]
 #[derive(Default, ForeignType, ExternType, ExternOutput, ExternInput, Debug)]
+#[allow(clippy::upper_case_acronyms)]
 pub struct FILETIME
 {
     low_part: u32,
@@ -103,12 +104,9 @@ fn find_path(roots: &[&PathBuf], path: &str) -> Option<PathBuf>
         let root_str = root.to_string_lossy();
         let pattern = format!("{}/**/{}", root_str, path);
 
-        // Go through all entries.
-        for entry in glob::glob_with(&pattern, options).unwrap() {
-            if let Ok(entry_path) = entry {
-                // The first entry we find, we'll return.
-                return Some(entry_path);
-            }
+        // Return the first entry that exists.
+        if let Some(first) = glob::glob_with(&pattern, options).unwrap().flatten().next() {
+            return Some(first);
         }
     }
 

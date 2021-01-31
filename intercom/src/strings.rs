@@ -525,7 +525,7 @@ impl TryFrom<IntercomString> for String
 }
 
 // String
-unsafe impl ExternType<AutomationTypeSystem> for String
+impl ExternType<AutomationTypeSystem> for String
 {
     type ForeignType = BSTR;
 }
@@ -549,7 +549,7 @@ unsafe impl ExternInput<AutomationTypeSystem> for String
     }
 }
 
-unsafe impl ExternType<RawTypeSystem> for String
+impl ExternType<RawTypeSystem> for String
 {
     type ForeignType = *mut c_char;
 }
@@ -611,12 +611,12 @@ unsafe impl ExternOutput<RawTypeSystem> for String
 }
 
 // &str
-unsafe impl<'a> ExternType<AutomationTypeSystem> for &'a str
+impl<'a> ExternType<AutomationTypeSystem> for &'a str
 {
     type ForeignType = BSTR;
 }
 
-unsafe impl<'a> ExternType<RawTypeSystem> for &'a str
+impl<'a> ExternType<RawTypeSystem> for &'a str
 {
     type ForeignType = *mut c_char;
 }
@@ -660,12 +660,12 @@ unsafe impl<'a> ExternInput<RawTypeSystem> for &'a str
 }
 
 // BString
-unsafe impl<'a> ExternType<AutomationTypeSystem> for BString
+impl<'a> ExternType<AutomationTypeSystem> for BString
 {
     type ForeignType = BSTR;
 }
 
-unsafe impl<'a> ExternType<RawTypeSystem> for BString
+impl<'a> ExternType<RawTypeSystem> for BString
 {
     type ForeignType = *mut c_char;
 }
@@ -747,12 +747,12 @@ unsafe impl ExternOutput<RawTypeSystem> for BString
 }
 
 // CString
-unsafe impl ExternType<AutomationTypeSystem> for CString
+impl ExternType<AutomationTypeSystem> for CString
 {
     type ForeignType = BSTR;
 }
 
-unsafe impl ExternType<RawTypeSystem> for CString
+impl ExternType<RawTypeSystem> for CString
 {
     type ForeignType = *mut c_char;
 }
@@ -835,12 +835,12 @@ unsafe impl ExternOutput<RawTypeSystem> for CString
 }
 
 // &CStr
-unsafe impl<'a> ExternType<AutomationTypeSystem> for &'a CStr
+impl<'a> ExternType<AutomationTypeSystem> for &'a CStr
 {
     type ForeignType = BSTR;
 }
 
-unsafe impl<'a> ExternType<RawTypeSystem> for &'a CStr
+impl<'a> ExternType<RawTypeSystem> for &'a CStr
 {
     type ForeignType = *mut c_char;
 }
@@ -885,12 +885,12 @@ unsafe impl<'a> ExternInput<RawTypeSystem> for &'a CStr
 }
 
 // &BStr
-unsafe impl<'a> ExternType<AutomationTypeSystem> for &'a BStr
+impl<'a> ExternType<AutomationTypeSystem> for &'a BStr
 {
     type ForeignType = BSTR;
 }
 
-unsafe impl<'a> ExternType<RawTypeSystem> for &'a BStr
+impl<'a> ExternType<RawTypeSystem> for &'a BStr
 {
     type ForeignType = *mut c_char;
 }

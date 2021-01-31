@@ -82,7 +82,7 @@ fn run_cmd(matches: &ArgMatches) -> Result<PathBuf, failure::Error>
 
     std::io::copy(
         &mut File::open(for_output.as_ref())?,
-        get_output(&matches)?.as_mut(),
+        get_output(matches)?.as_mut(),
     )?;
     Ok(temp)
 }

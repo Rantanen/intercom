@@ -40,7 +40,7 @@ pub fn expand_derive_extern_type(
     // Immpl requires the the generics in particular way.
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
     let result = quote! {
-        unsafe impl<TS: intercom::type_system::TypeSystem> #impl_generics intercom::type_system::ExternType<TS> for #name #ty_generics #where_clause {
+        impl<TS: intercom::type_system::TypeSystem> #impl_generics intercom::type_system::ExternType<TS> for #name #ty_generics #where_clause {
             type ForeignType = #name;
         }
     };

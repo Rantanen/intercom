@@ -38,14 +38,10 @@ pub fn get_ident_and_fns(item: &Item) -> Option<InterfaceData>
             ref items,
             ..
         }) => {
-            let methods: Option<Vec<&Signature>> =
-                items.iter().map(|i| get_trait_method(i)).collect();
+            let methods: Option<Vec<&Signature>> = items.iter().map(get_trait_method).collect();
             let path = syn::Path::from(ident.clone());
 
-            match methods {
-                Some(m) => Some((path, m, InterfaceType::Trait, unsafety)),
-                None => None,
-            }
+            methods.map(|m| (path, m, InterfaceType::Trait, unsafety))
         }
         _ => None,
     }
@@ -71,7 +67,7 @@ fn get_impl_data_raw<'a>(
 
     let trait_path = trait_ref.as_ref().map(|(_, path, _)| path.clone());
 
-    let methods_opt: Option<Vec<&Signature>> = items.iter().map(|i| get_impl_method(i)).collect();
+    let methods_opt: Option<Vec<&Signature>> = items.iter().map(get_impl_method).collect();
     let methods = methods_opt.unwrap_or_else(Vec::new);
 
     (trait_path, struct_path, methods)

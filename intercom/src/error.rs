@@ -45,7 +45,7 @@ impl std::fmt::Display for ComError
     }
 }
 
-unsafe impl<TS: TypeSystem> ExternType<TS> for ComError
+impl<TS: TypeSystem> ExternType<TS> for ComError
 {
     type ForeignType = raw::HRESULT;
 }
@@ -66,7 +66,7 @@ unsafe impl<TS: TypeSystem> ExternOutput<TS> for ComError
     }
 }
 
-unsafe impl<TS: TypeSystem> ExternType<TS> for std::io::Error
+impl<TS: TypeSystem> ExternType<TS> for std::io::Error
 {
     type ForeignType = raw::HRESULT;
 }
@@ -543,21 +543,21 @@ pub struct ErrorStore;
 )]
 pub trait IErrorStore: crate::IUnknown
 {
-    fn get_error_info(&self) -> ComResult<ComRc<dyn IErrorInfo>>;
+    fn get_error_info(&self) -> ComResult<Option<ComRc<dyn IErrorInfo>>>;
     fn set_error_info(&self, info: &ComItf<dyn IErrorInfo>) -> ComResult<()>;
     fn set_error_message(&self, msg: &str) -> ComResult<()>;
 }
 
 impl IErrorStore for ErrorStore
 {
-    fn get_error_info(&self) -> ComResult<ComRc<dyn IErrorInfo>>
+    fn get_error_info(&self) -> ComResult<Option<ComRc<dyn IErrorInfo>>>
     {
-        Ok(get_error_info().unwrap()) // FIXME Option
+        Ok(get_error_info())
     }
 
     fn set_error_info(&self, info: &ComItf<dyn IErrorInfo>) -> ComResult<()>
     {
-        set_error_info(&info)
+        unsafe { error_store::SetErrorInfo(0, ComItf::ptr(info)).into() }
     }
 
     fn set_error_message(&self, msg: &str) -> ComResult<()>
@@ -581,16 +581,8 @@ fn get_error_info() -> Option<ComRc<dyn IErrorInfo>>
             raw::S_OK => {}
             _ => return None,
         }
-        match error_ptr {
-            Some(ptr) => Some(ComRc::wrap(ptr)),
-            None => None,
-        }
+        error_ptr.map(|ptr| ComRc::wrap(ptr))
     }
-}
-
-fn set_error_info(info: &ComItf<dyn IErrorInfo>) -> ComResult<()>
-{
-    unsafe { error_store::SetErrorInfo(0, ComItf::ptr(info)).into() }
 }
 
 pub mod raw

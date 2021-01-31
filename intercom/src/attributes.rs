@@ -16,9 +16,7 @@ pub trait ComClass
     fn interface_supports_error_info(riid: REFIID) -> bool;
 }
 
-pub trait HasInterface<T: ComInterface + ?Sized>: ComClass
-{
-}
+pub trait HasInterface<T: ComInterface + ?Sized>: ComClass {}
 
 pub trait ComClassInterface<TInterface: ?Sized, TS: TypeSystem>: ComClass + Sized
 {
