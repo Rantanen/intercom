@@ -164,7 +164,7 @@ pub fn expand_com_interface(
         (
             quote_spanned!(itf.span =>
                 let some_iunk : &intercom::ComItf<dyn intercom::interfaces::RawIUnknown> = com_itf.as_raw_iunknown();
-                let iunknown_iid = intercom::IUnknown::iid(
+                let iunknown_iid = <dyn intercom::IUnknown>::iid(
                         intercom::type_system::TypeSystemName::Automation )
                             .expect( "IUnknown must have Automation IID" );
                 let primary_iunk = some_iunk.query_interface( iunknown_iid )

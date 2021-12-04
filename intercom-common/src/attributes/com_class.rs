@@ -188,7 +188,7 @@ pub fn expand_com_class(
 
     // Mark the struct as having IUnknown.
     output.push(quote!(
-        impl #impl_generics intercom::attributes::HasInterface< intercom::IUnknown > for #cls_ident #ty_generics #where_clause {}
+        impl #impl_generics intercom::attributes::HasInterface< dyn intercom::IUnknown > for #cls_ident #ty_generics #where_clause {}
     ));
 
     // The ComClass implementation.
