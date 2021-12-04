@@ -4,22 +4,22 @@ trigger:
 strategy:
     matrix:
         Linux_nightly:
-            imageName: "ubuntu-16.04"
+            imageName: "ubuntu-20.04"
             rustVersion: nightly
             cmake_generator_opts:
             memcheck: valgrind --error-exitcode=1 --leak-check=full
         Windows_nightly:
-            imageName: "vs2017-win2016"
+            imageName: "windows-2019"
             rustVersion: nightly
             cmake_generator_opts: -DCMAKE_GENERATOR_PLATFORM=x64
             memcheck:
         Linux_stable:
-            imageName: "ubuntu-16.04"
+            imageName: "ubuntu-20.04"
             rustVersion: stable
             cmake_generator_opts:
             memcheck: valgrind --error-exitcode=1 --leak-check=full
         Windows_stable:
-            imageName: "vs2017-win2016"
+            imageName: "windows-2019"
             rustVersion: stable
             cmake_generator_opts: -DCMAKE_GENERATOR_PLATFORM=x64
             memcheck:
@@ -87,7 +87,7 @@ steps:
   displayName: "Run integration tests"
 
 - script: |
-    "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.6.1 Tools/tlbimp" test/target/debug/test_lib.dll /MACHINE:X64 /out:test/cs/TestLib.Interop.dll
+    "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.8 Tools/tlbimp" test/target/debug/test_lib.dll /MACHINE:X64 /out:test/cs/TestLib.Interop.dll
   displayName: "Generate C# type library"
   condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
 
