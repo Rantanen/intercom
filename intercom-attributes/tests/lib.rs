@@ -71,7 +71,7 @@ impl OutputResult
             Expected(String),
             Actual(String),
             Same(String),
-        };
+        }
 
         // Resolve the changed lines so we can print only the context.
         let mut all_lines = vec![];
@@ -173,8 +173,7 @@ fn build(cwd: &str, path: &str, mode: TestMode) -> (bool, String, String)
 
     // In expansion mode add the 'pretty=expanded' option.
     if let TestMode::Macro = mode {
-        cmd.arg("--pretty=expanded");
-        cmd.arg("-Z").arg("unstable-options");
+        cmd.arg("-Zunpretty=expanded");
     }
 
     // Get the output.
@@ -267,10 +266,8 @@ fn find_intercom_fmt() -> std::io::Result<PathBuf>
         // Move towards root
         assert!(
             intercom_fmt_dir.pop(),
-            format!(
-                "Could not locate intercom-fmt. Search started from \"{0}\".",
-                original_path
-            )
+            "Could not locate intercom-fmt. Search started from \"{0}\".",
+            original_path
         );
     }
 }

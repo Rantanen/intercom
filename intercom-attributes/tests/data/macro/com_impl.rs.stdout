@@ -1,7 +1,7 @@
 #![feature(prelude_import)]
 #![no_std]
 #[prelude_import]
-use std::prelude::v1::*;
+use std::prelude::rust_2015::*;
 #[macro_use]
 extern crate std;
 extern crate intercom;
@@ -60,9 +60,11 @@ impl
     > for Foo
 {
     #[inline(always)]
-    fn offset() -> usize { 0 }
+    fn offset() -> usize {
+        0
+    }
 }
-impl intercom::attributes::HasInterface<intercom::IUnknown> for Foo {}
+impl intercom::attributes::HasInterface<dyn intercom::IUnknown> for Foo {}
 #[allow(non_snake_case)]
 #[doc(hidden)]
 pub struct __intercom_vtable_for_Foo {
@@ -135,18 +137,16 @@ impl intercom::attributes::ComClass for Foo {
         vtables: &Self::VTableList,
         riid: intercom::REFIID,
     ) -> intercom::RawComResult<intercom::raw::RawComPtr> {
-        if riid.is_null()
-        {
+        if riid.is_null() {
             intercom::logging::error(|l| {
                 l(
                     "testcrate",
                     ::core::fmt::Arguments::new_v1(
                         &["[", "] ", "::query_interface(NULL)"],
-                        &match (&vtables, &"Foo")
-                        {
-                            (arg0, arg1) => [
-                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
-                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
+                        &match (&vtables, &"Foo") {
+                            _args => [
+                                ::core::fmt::ArgumentV1::new(_args.0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(_args.1, ::core::fmt::Display::fmt),
                             ],
                         },
                     ),
@@ -161,12 +161,11 @@ impl intercom::attributes::ComClass for Foo {
                     "testcrate",
                     ::core::fmt::Arguments::new_v1_formatted(
                         &["[", "] ", "::query_interface(", ")"],
-                        &match (&vtables, &"Foo", &riid)
-                        {
-                            (arg0, arg1, arg2) => [
-                                ::core::fmt::ArgumentV1::new(arg0, ::core::fmt::Pointer::fmt),
-                                ::core::fmt::ArgumentV1::new(arg1, ::core::fmt::Display::fmt),
-                                ::core::fmt::ArgumentV1::new(arg2, ::core::fmt::UpperHex::fmt),
+                        &match (&vtables, &"Foo", &riid) {
+                            _args => [
+                                ::core::fmt::ArgumentV1::new(_args.0, ::core::fmt::Pointer::fmt),
+                                ::core::fmt::ArgumentV1::new(_args.1, ::core::fmt::Display::fmt),
+                                ::core::fmt::ArgumentV1::new(_args.2, ::core::fmt::UpperHex::fmt),
                             ],
                         },
                         &[
@@ -201,6 +200,7 @@ impl intercom::attributes::ComClass for Foo {
                                 },
                             },
                         ],
+                        unsafe { ::core::fmt::UnsafeArg::new() },
                     ),
                 )
             });
@@ -228,18 +228,15 @@ impl intercom::attributes::ComClass for Foo {
                                                                                                    &riid,
                                                                                                    &ptr)
                                                                                                 {
-                                                                                                (arg0,
-                                                                                                 arg1,
-                                                                                                 arg2,
-                                                                                                 arg3)
+                                                                                                _args
                                                                                                 =>
-                                                                                                [::core::fmt::ArgumentV1::new(arg0,
+                                                                                                [::core::fmt::ArgumentV1::new(_args.0,
                                                                                                                               ::core::fmt::Pointer::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg1,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.1,
                                                                                                                               ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg2,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.2,
                                                                                                                               ::core::fmt::UpperHex::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg3,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.3,
                                                                                                                               ::core::fmt::Pointer::fmt)],
                                                                                             },
                                                                                            &[::core::fmt::rt::v1::Argument{position:
@@ -293,7 +290,11 @@ impl intercom::attributes::ComClass for Foo {
                                                                                                                                                                precision:
                                                                                                                                                                    ::core::fmt::rt::v1::Count::Implied,
                                                                                                                                                                width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}])));
+                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}],
+                                                                                           unsafe
+                                                                                           {
+                                                                                               ::core::fmt::UnsafeArg::new()
+                                                                                           })));
                    ptr
                } else if riid ==
                              <dyn intercom::ISupportErrorInfo as
@@ -319,18 +320,15 @@ impl intercom::attributes::ComClass for Foo {
                                                                                                    &riid,
                                                                                                    &ptr)
                                                                                                 {
-                                                                                                (arg0,
-                                                                                                 arg1,
-                                                                                                 arg2,
-                                                                                                 arg3)
+                                                                                                _args
                                                                                                 =>
-                                                                                                [::core::fmt::ArgumentV1::new(arg0,
+                                                                                                [::core::fmt::ArgumentV1::new(_args.0,
                                                                                                                               ::core::fmt::Pointer::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg1,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.1,
                                                                                                                               ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg2,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.2,
                                                                                                                               ::core::fmt::UpperHex::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg3,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.3,
                                                                                                                               ::core::fmt::Pointer::fmt)],
                                                                                             },
                                                                                            &[::core::fmt::rt::v1::Argument{position:
@@ -384,7 +382,11 @@ impl intercom::attributes::ComClass for Foo {
                                                                                                                                                                precision:
                                                                                                                                                                    ::core::fmt::rt::v1::Count::Implied,
                                                                                                                                                                width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}])));
+                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}],
+                                                                                           unsafe
+                                                                                           {
+                                                                                               ::core::fmt::UnsafeArg::new()
+                                                                                           })));
                    ptr
                } else if riid ==
                              <<Foo as
@@ -419,24 +421,19 @@ impl intercom::attributes::ComClass for Foo {
                                                                                                    &"Automation",
                                                                                                    &ptr)
                                                                                                 {
-                                                                                                (arg0,
-                                                                                                 arg1,
-                                                                                                 arg2,
-                                                                                                 arg3,
-                                                                                                 arg4,
-                                                                                                 arg5)
+                                                                                                _args
                                                                                                 =>
-                                                                                                [::core::fmt::ArgumentV1::new(arg0,
+                                                                                                [::core::fmt::ArgumentV1::new(_args.0,
                                                                                                                               ::core::fmt::Pointer::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg1,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.1,
                                                                                                                               ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg2,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.2,
                                                                                                                               ::core::fmt::UpperHex::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg3,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.3,
                                                                                                                               ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg4,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.4,
                                                                                                                               ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg5,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.5,
                                                                                                                               ::core::fmt::Pointer::fmt)],
                                                                                             },
                                                                                            &[::core::fmt::rt::v1::Argument{position:
@@ -516,7 +513,11 @@ impl intercom::attributes::ComClass for Foo {
                                                                                                                                                                precision:
                                                                                                                                                                    ::core::fmt::rt::v1::Count::Implied,
                                                                                                                                                                width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}])));
+                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}],
+                                                                                           unsafe
+                                                                                           {
+                                                                                               ::core::fmt::UnsafeArg::new()
+                                                                                           })));
                    ptr
                } else if riid ==
                              <<Foo as
@@ -551,24 +552,19 @@ impl intercom::attributes::ComClass for Foo {
                                                                                                    &"Raw",
                                                                                                    &ptr)
                                                                                                 {
-                                                                                                (arg0,
-                                                                                                 arg1,
-                                                                                                 arg2,
-                                                                                                 arg3,
-                                                                                                 arg4,
-                                                                                                 arg5)
+                                                                                                _args
                                                                                                 =>
-                                                                                                [::core::fmt::ArgumentV1::new(arg0,
+                                                                                                [::core::fmt::ArgumentV1::new(_args.0,
                                                                                                                               ::core::fmt::Pointer::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg1,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.1,
                                                                                                                               ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg2,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.2,
                                                                                                                               ::core::fmt::UpperHex::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg3,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.3,
                                                                                                                               ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg4,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.4,
                                                                                                                               ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg5,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.5,
                                                                                                                               ::core::fmt::Pointer::fmt)],
                                                                                             },
                                                                                            &[::core::fmt::rt::v1::Argument{position:
@@ -648,7 +644,11 @@ impl intercom::attributes::ComClass for Foo {
                                                                                                                                                                precision:
                                                                                                                                                                    ::core::fmt::rt::v1::Count::Implied,
                                                                                                                                                                width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}])));
+                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}],
+                                                                                           unsafe
+                                                                                           {
+                                                                                               ::core::fmt::UnsafeArg::new()
+                                                                                           })));
                    ptr
                } else {
                    intercom::logging::trace(|l|
@@ -661,15 +661,13 @@ impl intercom::attributes::ComClass for Foo {
                                                                                                    &"Foo",
                                                                                                    &riid)
                                                                                                 {
-                                                                                                (arg0,
-                                                                                                 arg1,
-                                                                                                 arg2)
+                                                                                                _args
                                                                                                 =>
-                                                                                                [::core::fmt::ArgumentV1::new(arg0,
+                                                                                                [::core::fmt::ArgumentV1::new(_args.0,
                                                                                                                               ::core::fmt::Pointer::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg1,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.1,
                                                                                                                               ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(arg2,
+                                                                                                 ::core::fmt::ArgumentV1::new(_args.2,
                                                                                                                               ::core::fmt::UpperHex::fmt)],
                                                                                             },
                                                                                            &[::core::fmt::rt::v1::Argument{position:
@@ -710,14 +708,17 @@ impl intercom::attributes::ComClass for Foo {
                                                                                                                                                                precision:
                                                                                                                                                                    ::core::fmt::rt::v1::Count::Implied,
                                                                                                                                                                width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}])));
+                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}],
+                                                                                           unsafe
+                                                                                           {
+                                                                                               ::core::fmt::UnsafeArg::new()
+                                                                                           })));
                    return Err(intercom::raw::E_NOINTERFACE)
                })
         }
     }
     fn interface_supports_error_info(riid: intercom::REFIID) -> bool {
-        if riid.is_null()
-        {
+        if riid.is_null() {
             return false;
         }
         unsafe {
@@ -794,13 +795,31 @@ impl Foo {
     fn static_method(a: u16, b: i16) {}
     fn simple_method(&self) {}
     fn arg_method(&self, a: u16) {}
-    fn simple_result_method(&self) -> u16 { 0 }
-    fn com_result_method(&self) -> ComResult<u16> { Ok(0) }
-    fn rust_result_method(&self) -> Result<u16, i32> { Ok(0) }
-    fn tuple_result_method(&self) -> Result<(u8, u16, u32), i32> { Ok(0) }
-    fn string_method(&self, input: String) -> String { input }
-    fn string_result_method(&self, input: String) -> ComResult<String> { Ok(input) }
-    fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> { Ok(true) }
-    fn bool_method(&self, input: bool) -> ComResult<bool> { Ok(input) }
-    fn variant_method(&self, input: Variant) -> ComResult<Variant> { Ok(input) }
+    fn simple_result_method(&self) -> u16 {
+        0
+    }
+    fn com_result_method(&self) -> ComResult<u16> {
+        Ok(0)
+    }
+    fn rust_result_method(&self) -> Result<u16, i32> {
+        Ok(0)
+    }
+    fn tuple_result_method(&self) -> Result<(u8, u16, u32), i32> {
+        Ok(0)
+    }
+    fn string_method(&self, input: String) -> String {
+        input
+    }
+    fn string_result_method(&self, input: String) -> ComResult<String> {
+        Ok(input)
+    }
+    fn complete_method(&mut self, a: u16, b: i16) -> ComResult<bool> {
+        Ok(true)
+    }
+    fn bool_method(&self, input: bool) -> ComResult<bool> {
+        Ok(input)
+    }
+    fn variant_method(&self, input: Variant) -> ComResult<Variant> {
+        Ok(input)
+    }
 }

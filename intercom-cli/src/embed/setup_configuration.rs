@@ -331,7 +331,7 @@ mod test
         // First attempt to get the property without the "BuildTools" product.
         // If we don't get a result then try "BuildTools" explicitly.
         // We do this in two steps to avoid issues when the developer has both the Visual Studio and the BuildTools installed.
-        let v = Some("[15, 16)");
+        let v = Some("[15, 99)");
         match get_vswhere_property_for_products(property, &[], v) {
             Ok(value) => value,
             Err(_) => get_vswhere_property_for_products(property, &["BuildTools"], v).unwrap(),
