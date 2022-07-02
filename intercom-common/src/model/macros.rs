@@ -40,7 +40,7 @@ impl Parse for StrOption
 
 /// Defines intercom attribute parameter parsing.
 ///
-/// ```
+/// ```ignore
 /// intercom_attribute!(
 ///     SomeAttr< SomeAttrParam, Ident > {
 ///         param1: Ident,
@@ -52,7 +52,7 @@ impl Parse for StrOption
 ///
 /// Will define structures to parse attribute params such as:
 ///
-/// ```
+/// ```ignore
 /// #[some_attr( Ident1, Ident2, Ident3 )]
 /// #[some_attr( param1 = SomeIdent, List, Idents )]
 /// #[some_attr( param2 = "literal", param3 = expression() + 1 )]

@@ -80,10 +80,13 @@ pub extern "system" fn DllMain(
     true
 }
 pub fn __gather_module_types() -> Vec<intercom::typelib::TypeInfo> {
-    <[_]>::into_vec(box [
-        <some::path::Type as intercom::attributes::ComClassTypeInfo>::gather_type_info(),
-        <SimpleType as intercom::attributes::ComClassTypeInfo>::gather_type_info(),
-    ])
+    <[_]>::into_vec(
+        #[rustc_box]
+        ::alloc::boxed::Box::new([
+            <some::path::Type as intercom::attributes::ComClassTypeInfo>::gather_type_info(),
+            <SimpleType as intercom::attributes::ComClassTypeInfo>::gather_type_info(),
+        ]),
+    )
     .into_iter()
     .flatten()
     .collect()

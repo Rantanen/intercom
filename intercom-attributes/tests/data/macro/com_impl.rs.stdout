@@ -69,12 +69,12 @@ impl intercom::attributes::HasInterface<dyn intercom::IUnknown> for Foo {}
 #[doc(hidden)]
 pub struct __intercom_vtable_for_Foo {
     _ISupportErrorInfo: &'static <dyn intercom::ISupportErrorInfo as
-                                 intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable,
+    intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable,
     Foo_Automation: &'static <<Foo as
-                              intercom::attributes::ComInterface>::TSelf as
-                             intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable,
+    intercom::attributes::ComInterface>::TSelf as
+    intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable,
     Foo_Raw: &'static <<Foo as intercom::attributes::ComInterface>::TSelf as
-                      intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable,
+    intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable,
 }
 #[automatically_derived]
 #[allow(unused_qualifications)]
@@ -85,18 +85,16 @@ impl ::core::clone::Clone for __intercom_vtable_for_Foo {
         {
             let _:
                     ::core::clone::AssertParamIsClone<&'static <dyn intercom::ISupportErrorInfo
-                                                               as
-                                                               intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable>;
+                    as
+                    intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable>;
             let _:
                     ::core::clone::AssertParamIsClone<&'static <<Foo as
-                                                                intercom::attributes::ComInterface>::TSelf
-                                                               as
-                                                               intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable>;
+                    intercom::attributes::ComInterface>::TSelf as
+                    intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable>;
             let _:
                     ::core::clone::AssertParamIsClone<&'static <<Foo as
-                                                                intercom::attributes::ComInterface>::TSelf
-                                                               as
-                                                               intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable>;
+                    intercom::attributes::ComInterface>::TSelf as
+                    intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable>;
             *self
         }
     }
@@ -108,9 +106,9 @@ impl ::core::marker::Copy for __intercom_vtable_for_Foo {}
 #[allow(non_snake_case)]
 pub struct Static__intercom_vtable_for_Foo {
     Foo_Automation: <<Foo as intercom::attributes::ComInterface>::TSelf as
-                    intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable,
+    intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable,
     Foo_Raw: <<Foo as intercom::attributes::ComInterface>::TSelf as
-             intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable,
+    intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable,
 }
 #[allow(clippy::all)]
 impl intercom::attributes::ComClass for Foo {
@@ -143,12 +141,10 @@ impl intercom::attributes::ComClass for Foo {
                     "testcrate",
                     ::core::fmt::Arguments::new_v1(
                         &["[", "] ", "::query_interface(NULL)"],
-                        &match (&vtables, &"Foo") {
-                            _args => [
-                                ::core::fmt::ArgumentV1::new(_args.0, ::core::fmt::Pointer::fmt),
-                                ::core::fmt::ArgumentV1::new(_args.1, ::core::fmt::Display::fmt),
-                            ],
-                        },
+                        &[
+                            ::core::fmt::ArgumentV1::new_pointer(&vtables),
+                            ::core::fmt::ArgumentV1::new_display(&"Foo"),
+                        ],
                     ),
                 )
             });
@@ -161,13 +157,11 @@ impl intercom::attributes::ComClass for Foo {
                     "testcrate",
                     ::core::fmt::Arguments::new_v1_formatted(
                         &["[", "] ", "::query_interface(", ")"],
-                        &match (&vtables, &"Foo", &riid) {
-                            _args => [
-                                ::core::fmt::ArgumentV1::new(_args.0, ::core::fmt::Pointer::fmt),
-                                ::core::fmt::ArgumentV1::new(_args.1, ::core::fmt::Display::fmt),
-                                ::core::fmt::ArgumentV1::new(_args.2, ::core::fmt::UpperHex::fmt),
-                            ],
-                        },
+                        &[
+                            ::core::fmt::ArgumentV1::new_pointer(&vtables),
+                            ::core::fmt::ArgumentV1::new_display(&"Foo"),
+                            ::core::fmt::ArgumentV1::new_upper_hex(&riid),
+                        ],
                         &[
                             ::core::fmt::rt::v1::Argument {
                                 position: 0usize,
@@ -205,516 +199,335 @@ impl intercom::attributes::ComClass for Foo {
                 )
             });
             Ok(if riid ==
-                      <dyn intercom::IUnknown as
-                          intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid()
-                  {
-                   let ptr =
-                       (&vtables._ISupportErrorInfo) as
-                           *const &<dyn intercom::ISupportErrorInfo as
-                                   intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable
-                           as
-                           *mut &<dyn intercom::ISupportErrorInfo as
-                                 intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable
-                           as intercom::raw::RawComPtr;
-                   intercom::logging::trace(|l|
-                                                l("testcrate",
-                                                  ::core::fmt::Arguments::new_v1_formatted(&["[",
-                                                                                             "] ",
-                                                                                             "::query_interface(",
-                                                                                             ") -> IUnknown [",
-                                                                                             "]"],
-                                                                                           &match (&vtables,
-                                                                                                   &"Foo",
-                                                                                                   &riid,
-                                                                                                   &ptr)
-                                                                                                {
-                                                                                                _args
-                                                                                                =>
-                                                                                                [::core::fmt::ArgumentV1::new(_args.0,
-                                                                                                                              ::core::fmt::Pointer::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.1,
-                                                                                                                              ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.2,
-                                                                                                                              ::core::fmt::UpperHex::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.3,
-                                                                                                                              ::core::fmt::Pointer::fmt)],
-                                                                                            },
-                                                                                           &[::core::fmt::rt::v1::Argument{position:
-                                                                                                                               0usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               1usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               2usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   2u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               3usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}],
-                                                                                           unsafe
-                                                                                           {
-                                                                                               ::core::fmt::UnsafeArg::new()
-                                                                                           })));
-                   ptr
-               } else if riid ==
-                             <dyn intercom::ISupportErrorInfo as
-                                 intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid()
-                {
-                   let ptr =
-                       (&vtables._ISupportErrorInfo) as
-                           *const &<dyn intercom::ISupportErrorInfo as
-                                   intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable
-                           as
-                           *mut &<dyn intercom::ISupportErrorInfo as
-                                 intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable
-                           as intercom::raw::RawComPtr;
-                   intercom::logging::trace(|l|
-                                                l("testcrate",
-                                                  ::core::fmt::Arguments::new_v1_formatted(&["[",
-                                                                                             "] ",
-                                                                                             "::query_interface(",
-                                                                                             ") -> ISupportErrorInfo [",
-                                                                                             "]"],
-                                                                                           &match (&vtables,
-                                                                                                   &"Foo",
-                                                                                                   &riid,
-                                                                                                   &ptr)
-                                                                                                {
-                                                                                                _args
-                                                                                                =>
-                                                                                                [::core::fmt::ArgumentV1::new(_args.0,
-                                                                                                                              ::core::fmt::Pointer::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.1,
-                                                                                                                              ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.2,
-                                                                                                                              ::core::fmt::UpperHex::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.3,
-                                                                                                                              ::core::fmt::Pointer::fmt)],
-                                                                                            },
-                                                                                           &[::core::fmt::rt::v1::Argument{position:
-                                                                                                                               0usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               1usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               2usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   2u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               3usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}],
-                                                                                           unsafe
-                                                                                           {
-                                                                                               ::core::fmt::UnsafeArg::new()
-                                                                                           })));
-                   ptr
-               } else if riid ==
-                             <<Foo as
-                              intercom::attributes::ComInterface>::TSelf as
-                                 intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid()
-                {
-                   let ptr =
-                       &vtables.Foo_Automation as
-                           *const &<<Foo as
-                                    intercom::attributes::ComInterface>::TSelf
+                            <dyn intercom::IUnknown as
+                                    intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid()
+                        {
+                        let ptr =
+                            (&vtables._ISupportErrorInfo) as
+                                        *const &<dyn intercom::ISupportErrorInfo as
+                                        intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable
+                                    as
+                                    *mut &<dyn intercom::ISupportErrorInfo as
+                                    intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable
+                                as intercom::raw::RawComPtr;
+                        intercom::logging::trace(|l|
+                                l("testcrate",
+                                    ::core::fmt::Arguments::new_v1_formatted(&["[", "] ",
+                                                    "::query_interface(", ") -> IUnknown [", "]"],
+                                        &[::core::fmt::ArgumentV1::new_pointer(&vtables),
+                                                    ::core::fmt::ArgumentV1::new_display(&"Foo"),
+                                                    ::core::fmt::ArgumentV1::new_upper_hex(&riid),
+                                                    ::core::fmt::ArgumentV1::new_pointer(&ptr)],
+                                        &[::core::fmt::rt::v1::Argument {
+                                                        position: 0usize,
+                                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                                            fill: ' ',
+                                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                            flags: 0u32,
+                                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                                        },
+                                                    },
+                                                    ::core::fmt::rt::v1::Argument {
+                                                        position: 1usize,
+                                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                                            fill: ' ',
+                                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                            flags: 0u32,
+                                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                                        },
+                                                    },
+                                                    ::core::fmt::rt::v1::Argument {
+                                                        position: 2usize,
+                                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                                            fill: ' ',
+                                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                            flags: 2u32,
+                                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                                        },
+                                                    },
+                                                    ::core::fmt::rt::v1::Argument {
+                                                        position: 3usize,
+                                                        format: ::core::fmt::rt::v1::FormatSpec {
+                                                            fill: ' ',
+                                                            align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                            flags: 0u32,
+                                                            precision: ::core::fmt::rt::v1::Count::Implied,
+                                                            width: ::core::fmt::rt::v1::Count::Implied,
+                                                        },
+                                                    }], unsafe { ::core::fmt::UnsafeArg::new() })));
+                        ptr
+                    } else if riid ==
+                           <dyn intercom::ISupportErrorInfo as
+                                   intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid()
+                       {
+                       let ptr =
+                           (&vtables._ISupportErrorInfo) as
+                                       *const &<dyn intercom::ISupportErrorInfo as
+                                       intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable
                                    as
+                                   *mut &<dyn intercom::ISupportErrorInfo as
                                    intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable
-                           as
-                           *mut &<<Foo as
-                                  intercom::attributes::ComInterface>::TSelf
-                                 as
-                                 intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable
-                           as intercom::raw::RawComPtr;
-                   intercom::logging::trace(|l|
-                                                l("testcrate",
-                                                  ::core::fmt::Arguments::new_v1_formatted(&["[",
-                                                                                             "] ",
-                                                                                             "::query_interface(",
-                                                                                             ") -> ",
-                                                                                             " (",
-                                                                                             ") [",
-                                                                                             "]"],
-                                                                                           &match (&vtables,
-                                                                                                   &"Foo",
-                                                                                                   &riid,
-                                                                                                   &"Foo",
-                                                                                                   &"Automation",
-                                                                                                   &ptr)
-                                                                                                {
-                                                                                                _args
-                                                                                                =>
-                                                                                                [::core::fmt::ArgumentV1::new(_args.0,
-                                                                                                                              ::core::fmt::Pointer::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.1,
-                                                                                                                              ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.2,
-                                                                                                                              ::core::fmt::UpperHex::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.3,
-                                                                                                                              ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.4,
-                                                                                                                              ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.5,
-                                                                                                                              ::core::fmt::Pointer::fmt)],
-                                                                                            },
-                                                                                           &[::core::fmt::rt::v1::Argument{position:
-                                                                                                                               0usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               1usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               2usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   2u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               3usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               4usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               5usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}],
-                                                                                           unsafe
-                                                                                           {
-                                                                                               ::core::fmt::UnsafeArg::new()
-                                                                                           })));
-                   ptr
-               } else if riid ==
-                             <<Foo as
-                              intercom::attributes::ComInterface>::TSelf as
-                                 intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::iid()
-                {
-                   let ptr =
-                       &vtables.Foo_Raw as
-                           *const &<<Foo as
-                                    intercom::attributes::ComInterface>::TSelf
+                               as intercom::raw::RawComPtr;
+                       intercom::logging::trace(|l|
+                               l("testcrate",
+                                   ::core::fmt::Arguments::new_v1_formatted(&["[", "] ",
+                                                   "::query_interface(", ") -> ISupportErrorInfo [", "]"],
+                                       &[::core::fmt::ArgumentV1::new_pointer(&vtables),
+                                                   ::core::fmt::ArgumentV1::new_display(&"Foo"),
+                                                   ::core::fmt::ArgumentV1::new_upper_hex(&riid),
+                                                   ::core::fmt::ArgumentV1::new_pointer(&ptr)],
+                                       &[::core::fmt::rt::v1::Argument {
+                                                       position: 0usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 1usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 2usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 2u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 3usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   }], unsafe { ::core::fmt::UnsafeArg::new() })));
+                       ptr
+                   } else if riid ==
+                           <<Foo as intercom::attributes::ComInterface>::TSelf as
+                                   intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid()
+                       {
+                       let ptr =
+                           &vtables.Foo_Automation as
+                                       *const &<<Foo as intercom::attributes::ComInterface>::TSelf
+                                       as
+                                       intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable
                                    as
+                                   *mut &<<Foo as intercom::attributes::ComInterface>::TSelf as
+                                   intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::VTable
+                               as intercom::raw::RawComPtr;
+                       intercom::logging::trace(|l|
+                               l("testcrate",
+                                   ::core::fmt::Arguments::new_v1_formatted(&["[", "] ",
+                                                   "::query_interface(", ") -> ", " (", ") [", "]"],
+                                       &[::core::fmt::ArgumentV1::new_pointer(&vtables),
+                                                   ::core::fmt::ArgumentV1::new_display(&"Foo"),
+                                                   ::core::fmt::ArgumentV1::new_upper_hex(&riid),
+                                                   ::core::fmt::ArgumentV1::new_display(&"Foo"),
+                                                   ::core::fmt::ArgumentV1::new_display(&"Automation"),
+                                                   ::core::fmt::ArgumentV1::new_pointer(&ptr)],
+                                       &[::core::fmt::rt::v1::Argument {
+                                                       position: 0usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 1usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 2usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 2u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 3usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 4usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 5usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   }], unsafe { ::core::fmt::UnsafeArg::new() })));
+                       ptr
+                   } else if riid ==
+                           <<Foo as intercom::attributes::ComInterface>::TSelf as
+                                   intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::iid()
+                       {
+                       let ptr =
+                           &vtables.Foo_Raw as
+                                       *const &<<Foo as intercom::attributes::ComInterface>::TSelf
+                                       as
+                                       intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable
+                                   as
+                                   *mut &<<Foo as intercom::attributes::ComInterface>::TSelf as
                                    intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable
-                           as
-                           *mut &<<Foo as
-                                  intercom::attributes::ComInterface>::TSelf
-                                 as
-                                 intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::VTable
-                           as intercom::raw::RawComPtr;
-                   intercom::logging::trace(|l|
-                                                l("testcrate",
-                                                  ::core::fmt::Arguments::new_v1_formatted(&["[",
-                                                                                             "] ",
-                                                                                             "::query_interface(",
-                                                                                             ") -> ",
-                                                                                             " (",
-                                                                                             ") [",
-                                                                                             "]"],
-                                                                                           &match (&vtables,
-                                                                                                   &"Foo",
-                                                                                                   &riid,
-                                                                                                   &"Foo",
-                                                                                                   &"Raw",
-                                                                                                   &ptr)
-                                                                                                {
-                                                                                                _args
-                                                                                                =>
-                                                                                                [::core::fmt::ArgumentV1::new(_args.0,
-                                                                                                                              ::core::fmt::Pointer::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.1,
-                                                                                                                              ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.2,
-                                                                                                                              ::core::fmt::UpperHex::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.3,
-                                                                                                                              ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.4,
-                                                                                                                              ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.5,
-                                                                                                                              ::core::fmt::Pointer::fmt)],
-                                                                                            },
-                                                                                           &[::core::fmt::rt::v1::Argument{position:
-                                                                                                                               0usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               1usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               2usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   2u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               3usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               4usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               5usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}],
-                                                                                           unsafe
-                                                                                           {
-                                                                                               ::core::fmt::UnsafeArg::new()
-                                                                                           })));
-                   ptr
-               } else {
-                   intercom::logging::trace(|l|
-                                                l("testcrate",
-                                                  ::core::fmt::Arguments::new_v1_formatted(&["[",
-                                                                                             "] ",
-                                                                                             "::query_interface(",
-                                                                                             ") -> E_NOINTERFACE"],
-                                                                                           &match (&vtables,
-                                                                                                   &"Foo",
-                                                                                                   &riid)
-                                                                                                {
-                                                                                                _args
-                                                                                                =>
-                                                                                                [::core::fmt::ArgumentV1::new(_args.0,
-                                                                                                                              ::core::fmt::Pointer::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.1,
-                                                                                                                              ::core::fmt::Display::fmt),
-                                                                                                 ::core::fmt::ArgumentV1::new(_args.2,
-                                                                                                                              ::core::fmt::UpperHex::fmt)],
-                                                                                            },
-                                                                                           &[::core::fmt::rt::v1::Argument{position:
-                                                                                                                               0usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               1usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   0u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},},
-                                                                                             ::core::fmt::rt::v1::Argument{position:
-                                                                                                                               2usize,
-                                                                                                                           format:
-                                                                                                                               ::core::fmt::rt::v1::FormatSpec{fill:
-                                                                                                                                                                   ' ',
-                                                                                                                                                               align:
-                                                                                                                                                                   ::core::fmt::rt::v1::Alignment::Unknown,
-                                                                                                                                                               flags:
-                                                                                                                                                                   2u32,
-                                                                                                                                                               precision:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,
-                                                                                                                                                               width:
-                                                                                                                                                                   ::core::fmt::rt::v1::Count::Implied,},}],
-                                                                                           unsafe
-                                                                                           {
-                                                                                               ::core::fmt::UnsafeArg::new()
-                                                                                           })));
-                   return Err(intercom::raw::E_NOINTERFACE)
-               })
+                               as intercom::raw::RawComPtr;
+                       intercom::logging::trace(|l|
+                               l("testcrate",
+                                   ::core::fmt::Arguments::new_v1_formatted(&["[", "] ",
+                                                   "::query_interface(", ") -> ", " (", ") [", "]"],
+                                       &[::core::fmt::ArgumentV1::new_pointer(&vtables),
+                                                   ::core::fmt::ArgumentV1::new_display(&"Foo"),
+                                                   ::core::fmt::ArgumentV1::new_upper_hex(&riid),
+                                                   ::core::fmt::ArgumentV1::new_display(&"Foo"),
+                                                   ::core::fmt::ArgumentV1::new_display(&"Raw"),
+                                                   ::core::fmt::ArgumentV1::new_pointer(&ptr)],
+                                       &[::core::fmt::rt::v1::Argument {
+                                                       position: 0usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 1usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 2usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 2u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 3usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 4usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 5usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   }], unsafe { ::core::fmt::UnsafeArg::new() })));
+                       ptr
+                   } else {
+                       intercom::logging::trace(|l|
+                               l("testcrate",
+                                   ::core::fmt::Arguments::new_v1_formatted(&["[", "] ",
+                                                   "::query_interface(", ") -> E_NOINTERFACE"],
+                                       &[::core::fmt::ArgumentV1::new_pointer(&vtables),
+                                                   ::core::fmt::ArgumentV1::new_display(&"Foo"),
+                                                   ::core::fmt::ArgumentV1::new_upper_hex(&riid)],
+                                       &[::core::fmt::rt::v1::Argument {
+                                                       position: 0usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 1usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 0u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   },
+                                                   ::core::fmt::rt::v1::Argument {
+                                                       position: 2usize,
+                                                       format: ::core::fmt::rt::v1::FormatSpec {
+                                                           fill: ' ',
+                                                           align: ::core::fmt::rt::v1::Alignment::Unknown,
+                                                           flags: 2u32,
+                                                           precision: ::core::fmt::rt::v1::Count::Implied,
+                                                           width: ::core::fmt::rt::v1::Count::Implied,
+                                                       },
+                                                   }], unsafe { ::core::fmt::UnsafeArg::new() })));
+                       return Err(intercom::raw::E_NOINTERFACE)
+                   })
         }
     }
     fn interface_supports_error_info(riid: intercom::REFIID) -> bool {
@@ -724,17 +537,16 @@ impl intercom::attributes::ComClass for Foo {
         unsafe {
             let riid = &*riid;
             if riid ==
-                   <<Foo as intercom::attributes::ComInterface>::TSelf as
-                       intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid()
-               {
-                true
-            } else if riid ==
-                          <<Foo as intercom::attributes::ComInterface>::TSelf
-                              as
-                              intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::iid()
-             {
-                true
-            } else { false }
+                        <<Foo as intercom::attributes::ComInterface>::TSelf as
+                                intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid()
+                    {
+                    true
+                } else if riid ==
+                       <<Foo as intercom::attributes::ComInterface>::TSelf as
+                               intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::iid()
+                   {
+                   true
+               } else { false }
         }
     }
 }
@@ -755,38 +567,22 @@ impl intercom::attributes::ComClassTypeInfo for Foo {
 
             // Should be VARIANT_BOOL in Automation interface.
 
-            <[_]>::into_vec(box
-                                [intercom::typelib::TypeInfo::Class(intercom::ComBox::new(intercom::typelib::CoClass::__new("Foo".into(),
-                                                                                                                            intercom::GUID{data1:
-                                                                                                                                               0u32,
-                                                                                                                                           data2:
-                                                                                                                                               0u16,
-                                                                                                                                           data3:
-                                                                                                                                               0u16,
-                                                                                                                                           data4:
-                                                                                                                                               [0u8,
-                                                                                                                                                0u8,
-                                                                                                                                                0u8,
-                                                                                                                                                0u8,
-                                                                                                                                                0u8,
-                                                                                                                                                0u8,
-                                                                                                                                                0u8,
-                                                                                                                                                0u8],},
-                                                                                                                            <[_]>::into_vec(box
-                                                                                                                                                [intercom::typelib::InterfaceRef{name:
-                                                                                                                                                                                     "Foo".into(),
-                                                                                                                                                                                 iid_automation:
-                                                                                                                                                                                     <<Foo
-                                                                                                                                                                                      as
-                                                                                                                                                                                      intercom::attributes::ComInterface>::TSelf
-                                                                                                                                                                                         as
-                                                                                                                                                                                         intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid().clone(),
-                                                                                                                                                                                 iid_raw:
-                                                                                                                                                                                     <<Foo
-                                                                                                                                                                                      as
-                                                                                                                                                                                      intercom::attributes::ComInterface>::TSelf
-                                                                                                                                                                                         as
-                                                                                                                                                                                         intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::iid().clone(),}]))))]);
+            <[_]>::into_vec(#[rustc_box] ::alloc::boxed::Box::new([intercom::typelib::TypeInfo::Class(intercom::ComBox::new(intercom::typelib::CoClass::__new("Foo".into(),
+                                        intercom::GUID {
+                                            data1: 0u32,
+                                            data2: 0u16,
+                                            data3: 0u16,
+                                            data4: [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8],
+                                        },
+                                        <[_]>::into_vec(#[rustc_box] ::alloc::boxed::Box::new([intercom::typelib::InterfaceRef {
+                                                            name: "Foo".into(),
+                                                            iid_automation: <<Foo as
+                                                                        intercom::attributes::ComInterface>::TSelf as
+                                                                        intercom::attributes::ComInterfaceVariant<intercom::type_system::AutomationTypeSystem>>::iid().clone(),
+                                                            iid_raw: <<Foo as intercom::attributes::ComInterface>::TSelf
+                                                                        as
+                                                                        intercom::attributes::ComInterfaceVariant<intercom::type_system::RawTypeSystem>>::iid().clone(),
+                                                        }])))))]));
         r.extend(<Foo as intercom::attributes::ComInterfaceTypeInfo>::gather_type_info());
         r
     }
