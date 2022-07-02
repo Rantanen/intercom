@@ -5,7 +5,7 @@ use syn::*;
 use super::*;
 use proc_macro2::Span;
 
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum InterfaceType
 {
     Trait,
@@ -68,7 +68,7 @@ fn get_impl_data_raw<'a>(
     let trait_path = trait_ref.as_ref().map(|(_, path, _)| path.clone());
 
     let methods_opt: Option<Vec<&Signature>> = items.iter().map(get_impl_method).collect();
-    let methods = methods_opt.unwrap_or_else(Vec::new);
+    let methods = methods_opt.unwrap_or_default();
 
     (trait_path, struct_path, methods)
 }
@@ -165,8 +165,8 @@ pub fn ty_to_string(ty: &syn::Type) -> String
 {
     quote!( #ty )
         .to_string()
-        .replace(" ", "")
-        .replace(",", ", ")
+        .replace(' ', "")
+        .replace(',', ", ")
 }
 
 pub fn is_unit(tk: &Type) -> bool

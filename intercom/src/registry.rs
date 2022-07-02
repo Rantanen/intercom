@@ -184,7 +184,7 @@ fn register_or_unregister(dll: HANDLE, lib: TypeLib, do_register: bool) -> Resul
 {
     // Format the typelib name and version according to usual COM convention.
     let lib_name = pascal_case(&lib.name);
-    let lib_version = lib.version.replace(".", "_");
+    let lib_version = lib.version.replace('.', "_");
     let path = get_module_path(dll)?;
 
     register_typelib(&path, &lib, &lib_name, do_register)?;

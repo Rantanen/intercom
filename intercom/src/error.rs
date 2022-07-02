@@ -499,6 +499,7 @@ pub fn get_last_error() -> Option<ErrorInfo>
     };
 
     // FIXME ComRc Deref
+    #[allow(clippy::explicit_auto_deref)]
     let ierr: &dyn IErrorInfo = &*ierrorinfo;
     ErrorInfo::try_from(ierr).ok()
 }
@@ -564,7 +565,7 @@ impl IErrorStore for ErrorStore
     {
         let info = ComBox::<ErrorInfo>::new(ErrorInfo::new(msg.to_string()));
         let itf = ComRc::<dyn IErrorInfo>::from(&info);
-        self.set_error_info(&*itf)
+        self.set_error_info(&itf)
     }
 }
 

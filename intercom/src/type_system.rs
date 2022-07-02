@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::ComItf;
 
-#[derive(Debug, Clone, Copy, Hash, PartialOrd, PartialEq)]
+#[derive(Debug, Clone, Copy, Hash, PartialOrd, PartialEq, Eq)]
 #[repr(C)]
 pub enum TypeSystemName
 {

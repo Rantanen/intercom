@@ -110,7 +110,7 @@ impl ComItf<dyn IUnknown>
         };
 
         // Try to query interface using the iid.
-        let iunk: &dyn RawIUnknown = &*self.as_raw_iunknown();
+        let iunk: &dyn RawIUnknown = self.as_raw_iunknown();
         match iunk.query_interface(iid) {
             Ok(ptr) => {
                 // Interface was available. Convert the raw pointer into

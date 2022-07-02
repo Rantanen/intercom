@@ -37,7 +37,7 @@ intercom_attribute!(
 );
 
 /// COM library details derived from the `com_library` attribute.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct ComLibrary
 {
     pub name: String,

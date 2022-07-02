@@ -16,7 +16,7 @@ use intercom::typelib::{
 use handlebars::Handlebars;
 use serde_derive::Serialize;
 
-#[derive(PartialEq, Serialize, Debug)]
+#[derive(PartialEq, Eq, Serialize, Debug)]
 pub struct CppLibrary
 {
     pub lib_name: String,
@@ -25,7 +25,7 @@ pub struct CppLibrary
     pub coclasses: Vec<CppClass>,
 }
 
-#[derive(PartialEq, Serialize, Debug)]
+#[derive(PartialEq, Eq, Serialize, Debug)]
 pub struct CppInterface
 {
     pub name: String,
@@ -34,7 +34,7 @@ pub struct CppInterface
     pub methods: Vec<CppMethod>,
 }
 
-#[derive(PartialEq, Serialize, Debug)]
+#[derive(PartialEq, Eq, Serialize, Debug)]
 pub struct CppMethod
 {
     pub name: String,
@@ -42,14 +42,14 @@ pub struct CppMethod
     pub args: Vec<CppArg>,
 }
 
-#[derive(PartialEq, Serialize, Debug)]
+#[derive(PartialEq, Eq, Serialize, Debug)]
 pub struct CppArg
 {
     pub name: String,
     pub arg_type: String,
 }
 
-#[derive(PartialEq, Serialize, Debug)]
+#[derive(PartialEq, Eq, Serialize, Debug)]
 pub struct CppClass
 {
     pub name: String,

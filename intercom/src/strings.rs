@@ -22,7 +22,7 @@ use crate::type_system::{
 pub struct FormatError;
 
 /// Represents a borrowed BSTR string.
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub struct BStr(
     // Invariant 1: .0.as_ptr() must be a valid BSTR pointer _or_ 0x1 if len == 0.
     //              This includes having u32 alignment.
@@ -660,12 +660,12 @@ unsafe impl<'a> ExternInput<RawTypeSystem> for &'a str
 }
 
 // BString
-impl<'a> ExternType<AutomationTypeSystem> for BString
+impl ExternType<AutomationTypeSystem> for BString
 {
     type ForeignType = BSTR;
 }
 
-impl<'a> ExternType<RawTypeSystem> for BString
+impl ExternType<RawTypeSystem> for BString
 {
     type ForeignType = *mut c_char;
 }
