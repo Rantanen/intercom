@@ -33,6 +33,8 @@ intercom_attribute!(
     ComLibraryAttr< ComLibraryAttrParam, LibraryItemType > {
         libid : LitStr,
         on_load : Path,
+        on_register : Path,
+        on_unregister : Path,
     }
 );
 
@@ -43,6 +45,8 @@ pub struct ComLibrary
     pub name: String,
     pub libid: GUID,
     pub on_load: Option<Path>,
+    pub on_register: Option<Path>,
+    pub on_unregister: Option<Path>,
     pub coclasses: Vec<Path>,
     pub interfaces: Vec<Path>,
     pub submodules: Vec<Path>,
@@ -63,6 +67,11 @@ impl ComLibrary
         };
 
         let on_load = attr.on_load().map_err(ParseError::ComLibrary)?.cloned();
+        let on_register = attr.on_register().map_err(ParseError::ComLibrary)?.cloned();
+        let on_unregister = attr
+            .on_unregister()
+            .map_err(ParseError::ComLibrary)?
+            .cloned();
 
         let mut coclasses = vec![];
         let mut interfaces = vec![];
@@ -78,6 +87,8 @@ impl ComLibrary
         Ok(ComLibrary {
             name: crate_name.to_owned(),
             on_load,
+            on_register,
+            on_unregister,
             coclasses,
             interfaces,
             submodules,
