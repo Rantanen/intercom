@@ -110,7 +110,7 @@ impl ComItf<dyn IUnknown>
         };
 
         // Try to query interface using the iid.
-        let iunk: &dyn RawIUnknown = &*self.as_raw_iunknown();
+        let iunk: &dyn RawIUnknown = self.as_raw_iunknown();
         match iunk.query_interface(iid) {
             Ok(ptr) => {
                 // Interface was available. Convert the raw pointer into
@@ -198,15 +198,14 @@ impl<T: ComInterface + ?Sized> std::ops::Deref for ComItf<T>
     }
 }
 
-unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS> for &'a crate::ComItf<I>
+impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS> for &'a crate::ComItf<I>
 where
     I: ForeignType,
 {
     type ForeignType = Option<crate::raw::InterfacePtr<TS, I>>;
 }
 
-unsafe impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS>
-    for Option<&'a crate::ComItf<I>>
+impl<'a, TS: TypeSystem, I: ComInterface + ?Sized> ExternType<TS> for Option<&'a crate::ComItf<I>>
 where
     I: ForeignType,
 {

@@ -120,7 +120,7 @@ impl Default for Variant
     }
 }
 
-unsafe impl<TS: TypeSystem> ExternType<TS> for Variant
+impl<TS: TypeSystem> ExternType<TS> for Variant
 {
     type ForeignType = raw::Variant<TS>;
 }

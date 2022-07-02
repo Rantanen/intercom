@@ -14,9 +14,7 @@ use crate::type_system::{AutomationTypeSystem, RawTypeSystem};
     raw_iid = "11111111-0000-0000-C000-000000000046",
     base = NO_BASE,
     vtable_of = RawIUnknown )]
-pub trait IUnknown
-{
-}
+pub trait IUnknown {}
 
 #[com_interface(
     com_iid = "00000000-0000-0000-C000-000000000046",

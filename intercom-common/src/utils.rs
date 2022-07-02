@@ -5,7 +5,7 @@ use syn::*;
 use super::*;
 use proc_macro2::Span;
 
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum InterfaceType
 {
     Trait,
@@ -38,14 +38,10 @@ pub fn get_ident_and_fns(item: &Item) -> Option<InterfaceData>
             ref items,
             ..
         }) => {
-            let methods: Option<Vec<&Signature>> =
-                items.iter().map(|i| get_trait_method(i)).collect();
+            let methods: Option<Vec<&Signature>> = items.iter().map(get_trait_method).collect();
             let path = syn::Path::from(ident.clone());
 
-            match methods {
-                Some(m) => Some((path, m, InterfaceType::Trait, unsafety)),
-                None => None,
-            }
+            methods.map(|m| (path, m, InterfaceType::Trait, unsafety))
         }
         _ => None,
     }
@@ -71,8 +67,8 @@ fn get_impl_data_raw<'a>(
 
     let trait_path = trait_ref.as_ref().map(|(_, path, _)| path.clone());
 
-    let methods_opt: Option<Vec<&Signature>> = items.iter().map(|i| get_impl_method(i)).collect();
-    let methods = methods_opt.unwrap_or_else(Vec::new);
+    let methods_opt: Option<Vec<&Signature>> = items.iter().map(get_impl_method).collect();
+    let methods = methods_opt.unwrap_or_default();
 
     (trait_path, struct_path, methods)
 }
@@ -169,8 +165,8 @@ pub fn ty_to_string(ty: &syn::Type) -> String
 {
     quote!( #ty )
         .to_string()
-        .replace(" ", "")
-        .replace(",", ", ")
+        .replace(' ', "")
+        .replace(',', ", ")
 }
 
 pub fn is_unit(tk: &Type) -> bool

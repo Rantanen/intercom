@@ -14,9 +14,7 @@ trait IInterface
 }
 
 #[intercom::com_interface]
-trait IAnotherInterface
-{
-}
+trait IAnotherInterface {}
 
 impl IInterface for S
 {

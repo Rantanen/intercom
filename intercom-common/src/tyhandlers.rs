@@ -3,7 +3,7 @@ use proc_macro2::Span;
 use std::rc::Rc;
 use syn::*;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Direction
 {
     In,

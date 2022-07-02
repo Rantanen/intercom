@@ -188,7 +188,7 @@ pub fn expand_com_class(
 
     // Mark the struct as having IUnknown.
     output.push(quote!(
-        impl #impl_generics intercom::attributes::HasInterface< intercom::IUnknown > for #cls_ident #ty_generics #where_clause {}
+        impl #impl_generics intercom::attributes::HasInterface< dyn intercom::IUnknown > for #cls_ident #ty_generics #where_clause {}
     ));
 
     // The ComClass implementation.
@@ -301,7 +301,7 @@ fn create_get_typeinfo_function(cls: &model::ComClass) -> TokenStream
             )
         }
     };
-    let clsid_tokens = utils::get_guid_tokens(&clsid, Span::call_site());
+    let clsid_tokens = utils::get_guid_tokens(clsid, Span::call_site());
     let (impl_generics, ty_generics, where_clause) = cls.generics.split_for_impl();
     let (interfaces, interface_info): (Vec<_>, Vec<_>) = cls
         .interfaces

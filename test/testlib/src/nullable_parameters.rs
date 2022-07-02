@@ -61,7 +61,7 @@ impl NullableTests
     {
         let rc = ComRc::from(ComBox::new(DoCallback(v)));
 
-        if itf.nonnull_parameter(&*rc)? != v {
+        if itf.nonnull_parameter(&rc)? != v {
             Err(ComError::E_FAIL)
         } else {
             Ok(())

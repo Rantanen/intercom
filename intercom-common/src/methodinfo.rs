@@ -8,7 +8,7 @@ use crate::returnhandlers::{get_return_handler, ReturnHandler};
 use crate::tyhandlers::{get_ty_handler, Direction, ModelTypeSystem, TypeContext, TypeHandler};
 use crate::utils;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ComMethodInfoError
 {
     TooFewArguments,

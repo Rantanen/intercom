@@ -74,7 +74,7 @@ impl IOutputMemoryTests for OutputMemoryTests
 
 /// A type that fails all conversions.
 pub struct FailingType;
-unsafe impl<TS: TypeSystem> ExternType<TS> for FailingType
+impl<TS: TypeSystem> ExternType<TS> for FailingType
 {
     type ForeignType = *mut c_void;
 }

@@ -17,7 +17,9 @@ Rust COM server:
 ```rust
 pub use intercom::*;
 
-#[com_library(Calculator)]
+com_library! {
+    class Calculator
+}
 
 #[com_class(Calculator)]
 struct Calculator {
@@ -26,9 +28,7 @@ struct Calculator {
 
 #[com_interface]
 impl Calculator {
-    pub fn new() -> Calculator { Calculator { value: 0 } }
-
-    pb fn add(&mut self, value: i32) -> ComResult<i32> {
+    pub fn add(&mut self, value: i32) -> ComResult<i32> {
         self.value += value;
         Ok(self.value)
     }

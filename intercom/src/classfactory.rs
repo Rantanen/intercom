@@ -15,7 +15,10 @@ use crate::raw::RawComPtr;
 )]
 pub trait IClassFactory
 {
-    fn create_instance(&self, outer: RawComPtr, riid: REFIID) -> ComResult<RawComPtr>;
+    /// # Safety
+    ///
+    /// The REFIID must be a valid IID pointer.
+    unsafe fn create_instance(&self, outer: RawComPtr, riid: REFIID) -> ComResult<RawComPtr>;
 
     fn lock_server(&self, lock: bool) -> ComResult<()>;
 }
@@ -29,17 +32,15 @@ pub struct ClassFactory<T: Default + intercom::attributes::ComClass>
 
 impl<T: Default + attributes::ComClass> IClassFactory for ClassFactory<T>
 {
-    fn create_instance(&self, _outer: RawComPtr, riid: REFIID) -> ComResult<RawComPtr>
+    unsafe fn create_instance(&self, _outer: RawComPtr, riid: REFIID) -> ComResult<RawComPtr>
     {
-        unsafe {
-            let instance = ComBox::new(T::default());
-            let mut out = std::ptr::null_mut();
-            let hr = ComBoxData::query_interface(instance.as_ref(), riid, &mut out);
-            if hr == raw::S_OK {
-                Ok(out)
-            } else {
-                Err(ComError::from(hr))
-            }
+        let instance = ComBox::new(T::default());
+        let mut out = std::ptr::null_mut();
+        let hr = ComBoxData::query_interface(instance.as_ref(), riid, &mut out);
+        if hr == raw::S_OK {
+            Ok(out)
+        } else {
+            Err(ComError::from(hr))
         }
     }
 

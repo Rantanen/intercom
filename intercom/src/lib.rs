@@ -108,6 +108,7 @@ pub mod registry
     use crate::raw::HRESULT;
     use crate::typelib::TypeLib;
 
+    #[allow(clippy::upper_case_acronyms)]
     type HANDLE = *mut std::os::raw::c_void;
 
     /// Registers a type library.

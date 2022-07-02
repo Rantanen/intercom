@@ -16,7 +16,7 @@ use intercom::typelib::{
 use handlebars::Handlebars;
 use serde_derive::Serialize;
 
-#[derive(PartialEq, Serialize, Debug)]
+#[derive(PartialEq, Eq, Serialize, Debug)]
 pub struct CppLibrary
 {
     pub lib_name: String,
@@ -25,7 +25,7 @@ pub struct CppLibrary
     pub coclasses: Vec<CppClass>,
 }
 
-#[derive(PartialEq, Serialize, Debug)]
+#[derive(PartialEq, Eq, Serialize, Debug)]
 pub struct CppInterface
 {
     pub name: String,
@@ -34,7 +34,7 @@ pub struct CppInterface
     pub methods: Vec<CppMethod>,
 }
 
-#[derive(PartialEq, Serialize, Debug)]
+#[derive(PartialEq, Eq, Serialize, Debug)]
 pub struct CppMethod
 {
     pub name: String,
@@ -42,14 +42,14 @@ pub struct CppMethod
     pub args: Vec<CppArg>,
 }
 
-#[derive(PartialEq, Serialize, Debug)]
+#[derive(PartialEq, Eq, Serialize, Debug)]
 pub struct CppArg
 {
     pub name: String,
     pub arg_type: String,
 }
 
-#[derive(PartialEq, Serialize, Debug)]
+#[derive(PartialEq, Eq, Serialize, Debug)]
 pub struct CppClass
 {
     pub name: String,
@@ -98,13 +98,12 @@ impl CppInterface
     {
         opts.type_systems
             .iter()
-            .map(
-                |ts_opts| match itf.variants.iter().find(|v| v.as_ref().ts == ts_opts.ts) {
-                    Some(v) => Some(CppInterface::try_from(&itf, v.as_ref(), ts_opts, ctx)),
-                    None => None,
-                },
-            )
-            .filter_map(|i| i)
+            .filter_map(|ts_opts| {
+                itf.variants
+                    .iter()
+                    .find(|v| v.as_ref().ts == ts_opts.ts)
+                    .map(|v| CppInterface::try_from(itf, v.as_ref(), ts_opts, ctx))
+            })
             .collect::<Result<Vec<_>, _>>()
     }
 
@@ -116,7 +115,7 @@ impl CppInterface
     ) -> Result<Self, GeneratorError>
     {
         Ok(Self {
-            name: Self::final_name(&itf, ts_opts),
+            name: Self::final_name(itf, ts_opts),
             iid_struct: guid_as_struct(&itf_variant.iid),
             base: Some("IUnknown".to_string()),
             methods: itf_variant

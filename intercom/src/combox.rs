@@ -51,7 +51,7 @@ impl<T: ComClass> ComBox<T>
             let vtbl = &self.as_ref().vtable_list;
 
             let automation_ptr = match I::iid(TypeSystemName::Automation) {
-                Some(iid) => match <T as ComClass>::query_interface(&vtbl, iid) {
+                Some(iid) => match <T as ComClass>::query_interface(vtbl, iid) {
                     Ok(itf) => itf,
                     Err(_) => ::std::ptr::null_mut(),
                 },
@@ -59,7 +59,7 @@ impl<T: ComClass> ComBox<T>
             };
 
             let raw_ptr = match I::iid(TypeSystemName::Raw) {
-                Some(iid) => match <T as ComClass>::query_interface(&vtbl, iid) {
+                Some(iid) => match <T as ComClass>::query_interface(vtbl, iid) {
                     Ok(itf) => itf,
                     Err(_) => ::std::ptr::null_mut(),
                 },

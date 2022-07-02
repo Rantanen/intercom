@@ -12,7 +12,7 @@ intercom_attribute!(
 );
 
 /// Details of a struct marked with `#[com_class]` attribute.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct ComClass
 {
     pub name: Ident,

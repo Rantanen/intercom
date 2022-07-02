@@ -14,11 +14,11 @@ note: for a trait to be "object safe" it needs to allow building a vtable to all
 help: consider turning `arg_type` into a method by giving it a `&self` argument
    |
 10 |     fn arg_type(&self);
-   |                 ^^^^^
+   |                 +++++
 help: alternatively, consider constraining `arg_type` so it does not apply to trait objects
    |
 10 |     fn arg_type() where Self: Sized;
-   |                   ^^^^^^^^^^^^^^^^^
+   |                   +++++++++++++++++
 
 error: aborting due to previous error
 

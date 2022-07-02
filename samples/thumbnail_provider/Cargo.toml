@@ -2,7 +2,7 @@
 name = "thumbnail_provider"
 version = "0.1.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
-edition = "2018"
+edition = "2021"
 
 [lib]
 crate-type = [ "cdylib" ]

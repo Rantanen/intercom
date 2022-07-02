@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::ComItf;
 
-#[derive(Debug, Clone, Copy, Hash, PartialOrd, PartialEq)]
+#[derive(Debug, Clone, Copy, Hash, PartialOrd, PartialEq, Eq)]
 #[repr(C)]
 pub enum TypeSystemName
 {
@@ -105,7 +105,8 @@ pub trait ForeignType
     }
 }
 
-pub unsafe trait ExternType<TS: TypeSystem>
+/// Specifies the raw COM type to use for the specific Rust type.
+pub trait ExternType<TS: TypeSystem>
 {
     type ForeignType: ForeignType;
 }
@@ -289,7 +290,7 @@ macro_rules! self_extern {
             }
         }
 
-        unsafe impl<TS: TypeSystem> ExternType<TS> for $t
+        impl<TS: TypeSystem> ExternType<TS> for $t
         {
             type ForeignType = $t;
         }
@@ -380,7 +381,7 @@ self_extern!(std::ffi::c_void);
 
 macro_rules! extern_ptr {
     ( $mut:tt ) => {
-        unsafe impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternType<TS> for *$mut TPtr
+        impl<TS: TypeSystem, TPtr: ForeignType + ?Sized> ExternType<TS> for *$mut TPtr
         {
             type ForeignType = Self;
         }

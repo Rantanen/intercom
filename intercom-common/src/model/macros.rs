@@ -40,7 +40,7 @@ impl Parse for StrOption
 
 /// Defines intercom attribute parameter parsing.
 ///
-/// ```
+/// ```ignore
 /// intercom_attribute!(
 ///     SomeAttr< SomeAttrParam, Ident > {
 ///         param1: Ident,
@@ -52,7 +52,7 @@ impl Parse for StrOption
 ///
 /// Will define structures to parse attribute params such as:
 ///
-/// ```
+/// ```ignore
 /// #[some_attr( Ident1, Ident2, Ident3 )]
 /// #[some_attr( param1 = SomeIdent, List, Idents )]
 /// #[some_attr( param2 = "literal", param3 = expression() + 1 )]
@@ -143,6 +143,12 @@ macro_rules! intercom_attribute {
         impl ::syn::parse::Parse for $attr {
             fn parse( input : ::syn::parse::ParseStream ) -> ::syn::parse::Result<Self> {
 
+                fn parse_parens(input: ::syn::parse::ParseStream) -> ::syn::Result<::syn::parse::ParseBuffer> {
+                    let content;
+                    ::syn::parenthesized!(content in input);
+                    Ok(content)
+                }
+
                 // When parsing #[foo(bar)] attributes with syn, syn will include
                 // the parenthess in the tts:
                 // > ( bar )
@@ -151,10 +157,10 @@ macro_rules! intercom_attribute {
                 // are presented to us by rustc proc macros.
                 //
                 // As a result we'll need to support both.
-                let params = match ::syn::group::parse_parens( &input ) {
+                let params = match parse_parens( &input ) {
 
                     // If the parens existed, call the parse for the paren content.
-                    Ok( parens ) => parens.content.call(
+                    Ok( content ) => content.call(
                         ::syn::punctuated::Punctuated::<$attr_param, ::syn::token::Comma>::parse_terminated )?,
 
                     // If the parens were not present, call the parse for the whole input.

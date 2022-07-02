@@ -4,7 +4,17 @@ error[E0277]: the trait bound `(dyn NotComInterface + 'static): ComInterface` is
 8 | #[com_class(NotComInterface)]
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ComInterface` is not implemented for `(dyn NotComInterface + 'static)`
   |
-  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+  = help: the following other types implement trait `ComInterface`:
+            (dyn IAllocator + 'static)
+            (dyn IClassFactory + 'static)
+            (dyn IErrorInfo + 'static)
+            (dyn IErrorStore + 'static)
+            (dyn IIntercomCoClass + 'static)
+            (dyn IIntercomInterface + 'static)
+            (dyn IIntercomInterfaceVariant + 'static)
+            (dyn IIntercomMethod + 'static)
+          and 5 others
+  = note: this error originates in the attribute macro `com_class` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: aborting due to previous error
 

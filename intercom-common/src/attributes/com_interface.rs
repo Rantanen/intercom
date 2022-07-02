@@ -164,7 +164,7 @@ pub fn expand_com_interface(
         (
             quote_spanned!(itf.span =>
                 let some_iunk : &intercom::ComItf<dyn intercom::interfaces::RawIUnknown> = com_itf.as_raw_iunknown();
-                let iunknown_iid = intercom::IUnknown::iid(
+                let iunknown_iid = <dyn intercom::IUnknown>::iid(
                         intercom::type_system::TypeSystemName::Automation )
                             .expect( "IUnknown must have Automation IID" );
                 let primary_iunk = some_iunk.query_interface( iunknown_iid )
@@ -302,7 +302,7 @@ fn process_itf_variant(
             .expect("We just ensured this exists three lines up... ;_;");
         method_impl.impls.insert(
             itf_variant.type_system,
-            rust_to_com_delegate(itf, itf_variant, &method_info),
+            rust_to_com_delegate(itf, itf_variant, method_info),
         );
 
         output.push(create_virtual_method(itf, method_info, ts));
@@ -627,7 +627,7 @@ fn create_get_typeinfo_function(itf: &model::ComInterface) -> TokenStream
     let itf_ref = &itf.itf_ref;
     let mut variant_tokens = vec![];
     for (ts, variant) in &itf.variants {
-        variant_tokens.push(create_typeinfo_for_variant(itf, *ts, &variant));
+        variant_tokens.push(create_typeinfo_for_variant(itf, *ts, variant));
     }
     let is_impl_interface = itf.item_type == utils::InterfaceType::Struct;
 

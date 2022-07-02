@@ -19,6 +19,7 @@ const CLSID_SetupConfiguration: GUID = GUID {
 
 #[repr(C)]
 #[derive(Default, ForeignType, ExternType, ExternOutput, ExternInput, Debug)]
+#[allow(clippy::upper_case_acronyms)]
 pub struct FILETIME
 {
     low_part: u32,
@@ -103,12 +104,9 @@ fn find_path(roots: &[&PathBuf], path: &str) -> Option<PathBuf>
         let root_str = root.to_string_lossy();
         let pattern = format!("{}/**/{}", root_str, path);
 
-        // Go through all entries.
-        for entry in glob::glob_with(&pattern, options).unwrap() {
-            if let Ok(entry_path) = entry {
-                // The first entry we find, we'll return.
-                return Some(entry_path);
-            }
+        // Return the first entry that exists.
+        if let Some(first) = glob::glob_with(&pattern, options).unwrap().flatten().next() {
+            return Some(first);
         }
     }
 
@@ -333,7 +331,7 @@ mod test
         // First attempt to get the property without the "BuildTools" product.
         // If we don't get a result then try "BuildTools" explicitly.
         // We do this in two steps to avoid issues when the developer has both the Visual Studio and the BuildTools installed.
-        let v = Some("[15, 16)");
+        let v = Some("[15, 99)");
         match get_vswhere_property_for_products(property, &[], v) {
             Ok(value) => value,
             Err(_) => get_vswhere_property_for_products(property, &["BuildTools"], v).unwrap(),

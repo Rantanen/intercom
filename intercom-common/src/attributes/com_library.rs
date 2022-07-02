@@ -90,7 +90,7 @@ pub fn expand_com_module(
             #[allow(non_camel_case_types)]
             #[deprecated]
             #[doc(hidden)]
-            pub extern "stdcall" fn DllMain(
+            pub extern "system" fn DllMain(
                 dll_instance: *mut std::os::raw::c_void,
                 reason: u32,
                 _reserved: *mut std::os::raw::c_void,
