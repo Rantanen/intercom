@@ -1,6 +1,6 @@
 [package]
 name = "intercom"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Mikko Rantanen <jubjub@jubjubnest.net>"]
 license = "MIT"
 edition = "2018"
@@ -16,7 +16,7 @@ codecov = { repository = "Rantanen/intercom", branch = "master", service = "gith
 name = "intercom"
 
 [dependencies]
-intercom-attributes = { version = "0.3", path = "../intercom-attributes" }
+intercom-attributes = { version = "0.4", path = "../intercom-attributes" }
 failure = "0.1"
 serde = { version = "1.0", optional = true }
 serde_derive = { version = "1.0", optional = true }
