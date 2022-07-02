@@ -145,14 +145,12 @@ mod os
         CoTaskMemFree(ptr)
     }
 
-    #[doc(hidden)]
     #[link(name = "oleaut32")]
     extern "system" {
         pub fn SysAllocStringLen(psz: *const u16, len: u32) -> *mut u16;
         pub fn SysFreeString(bstr: *mut u16);
     }
 
-    #[doc(hidden)]
     #[link(name = "ole32")]
     extern "system" {
         pub fn CoTaskMemAlloc(len: usize) -> *mut raw::c_void;
