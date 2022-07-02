@@ -7,11 +7,6 @@ edition = "2018"
 repository = "https://github.com/Rantanen/intercom"
 description = "Utilities for writing COM visible Rust components."
 
-[badges]
-appveyor = { repository = "Rantanen/intercom", branch = "master", service = "github" }
-travis = { repository = "Rantanen/intercom", branch = "master" }
-codecov = { repository = "Rantanen/intercom", branch = "master", service = "github" }
-
 [lib]
 name = "intercom"
 
